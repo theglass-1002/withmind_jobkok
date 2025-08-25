@@ -1,0 +1,16 @@
+/* hard reset */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body, #root { height: 100%; }
+/* 링크는 검정  */
+a, a:visited, a:hover, a:active { color: #000; text-decoration: inherit; }
+ul, ol {
+    list-style: none;
+    margin: 0;
+    padding: 0; /* 브라우저 기본 왼쪽 패딩 제거 */
+}
+main{
+  background-color: #f8f8f9;
+}  
+
+.container { max-width: 1080px; margin: 0 auto; } /* 가로 가운데 */
+.center    { display:flex; flex-direction:column; align-items:center; text-align:center; } /* 내용 가운데 */
