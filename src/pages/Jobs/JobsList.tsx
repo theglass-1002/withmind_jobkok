@@ -27,7 +27,7 @@ export default function JobsList() {
   }, []);
   return (
    <>
-   <div className="container center">
+   <div className="center">
     <div className="jobs-head">
         <h1 className="jobs-title">채용 공고</h1>
         <p className="jobs-sub-title">이력서를 등록하고 나에게 맞는 공고만 골라주는 AI추천 시작해보세요!!</p>

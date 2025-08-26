@@ -1,6 +1,10 @@
 import { Link, NavLink } from "react-router-dom";
 import { useState } from "react";
 import "./Navbar.css";
+import jobkokLogo from '@/assets/icons/jobkok_logo.png';
+import searchIcon from '@/assets/icons/search.png';
+import bookmarkIcon from '@/assets/icons/bookmark.png';
+import accountIcon from '@/assets/icons/account_circle.png';
 
 export default function Navbar() {
 
@@ -10,16 +14,17 @@ export default function Navbar() {
     <header className="masthead">
       <div className="masthead__inner">
         <h1 className="masthead__brand">
-          <Link to="/">jobkok</Link>
+        <Link to="/" aria-label="">
+            <img src={jobkokLogo}  />
+          </Link>
         </h1>
-
         <nav className="masthead__nav" >
           <ul className="masthead__menu">
             <li>
               <NavLink to="/jobs"  className={({isActive}) => isActive ? "on" : undefined}>채용공고</NavLink>
             </li>
             <li>
-              <NavLink to="/resume"  className={({isActive}) => isActive ? "on" : undefined}>MY이력서</NavLink>
+              <NavLink to="/resume"  className={({isActive}) => isActive ? "on" : undefined}>이력서</NavLink>
             </li>
             <li>
               <NavLink to="/mock-interview"  className={({isActive}) => isActive ? "on" : undefined}>모의면접</NavLink>
@@ -30,23 +35,11 @@ export default function Navbar() {
           
           </ul>
         </nav>
-
         <div className="login_on">
-          <button
-            type="button"
-            className="user-btn"
-            aria-haspopup="menu"
-            aria-expanded={open}
-            onClick={() => setOpen(v => !v)}
-          >
-            <span className="user-name">홍길동</span>
-          </button>
-
-          <ul className={`user-menu${open ? " is-open" : ""}`} role="menu">
-            <li role="menuitem"><Link to="/profile">프로필</Link></li>
-            <li role="menuitem"><button type="button">로그아웃</button></li>
-          </ul>
-        </div>
+        <NavLink to="/"><img src={searchIcon}  /></NavLink>
+        <NavLink to="/"><img src={bookmarkIcon}  /></NavLink>
+        <NavLink to="/mypage"><img src={accountIcon}/></NavLink>
+      </div>
       </div>
     </header>
   );

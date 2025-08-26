@@ -1,20 +1,22 @@
 import { createBrowserRouter } from "react-router-dom";
-import Layout from "./Layout";
-import Home from "../pages/Home/Home";
-import JobsList from "../pages/Jobs/JobsList";
-import JobDetail from "../pages/Jobs/JobDetail";
-import CompaniesList from "../pages/Companies/CompaniesList";
-import CompanyDetail from "../pages/Companies/CompanyDetail";
-import Login from "../pages/Auth/Login";
-import Signup from "../pages/Auth/Signup";
-import NotFound from "../pages/NotFound";
+import Layout from "./Layout";       // ← 실제 위치에 맞게
+import Home from "@/pages/Home/Home";
+import JobsList from "@/pages/Jobs/JobsList";
+import JobDetail from "@/pages/Jobs/JobDetail";
+import CompaniesList from "@/pages/Companies/CompaniesList";
+import CompanyDetail from "@/pages/Companies/CompanyDetail";
+import Mypage from "@/pages/Mypage/Mypage";
+
+import Login from "@/pages/Auth/Login";
+import Signup from "@/pages/Auth/Signup";
+import NotFound from "@/pages/NotFound";
 
 export const router = createBrowserRouter([
   { path: "/", element: <Layout><Home /></Layout>, errorElement: <Layout><NotFound /></Layout> },
   { path: "/jobs", element: <Layout><JobsList /></Layout>,
     children:[
       {index:true,element:<>전체공고내용</>},
-      {path:"all",element:<>전체공고내용</>},
+      {path:"all",element:<>전체공고내용2ß</>},
       {path:"bookmarks",element:<>북마크공고</>}
     ]
 
@@ -24,4 +26,6 @@ export const router = createBrowserRouter([
   { path: "/companies/:companyId", element: <Layout><CompanyDetail /></Layout> },
   { path: "/login", element: <Layout><Login /></Layout> },
   { path: "/signup", element: <Layout><Signup /></Layout> },
+  { path: "/mypage", element: <Layout><Mypage /></Layout> },
+
 ]);

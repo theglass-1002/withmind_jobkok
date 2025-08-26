@@ -1,0 +1,104 @@
+.mypage .mypage__container{
+    display: flex;
+    padding: 52px 360px 100px 360px;
+    flex-direction: column;
+    gap: 40px;
+    align-self: stretch;
+}
+
+.mypage .mypage__header .mypage__title{
+    color: var(---gray-900, #2A2D2F);
+
+    font-size: 28px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 34px; /* 121.429% */
+}
+
+.mypage .mypage__body{
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+    align-self: stretch;
+}
+
+.mypage__body .mypage__sidebar{
+display: flex;
+width: 300px;
+flex-direction: column;
+align-items: flex-start;
+border-radius: 6px;
+border: 1px solid var(---gray-300, #E0E2E4);
+background: var(--white-100, #FFF);
+}
+
+.mypage__body .mypage__content{
+    display: flex;
+    width: 876px;
+    flex-direction: column;
+    align-items: flex-start;
+    border-radius: 6px;
+    border: 1px solid var(---gray-300, #E0E2E4);
+    background: var(--white-100, #FFF);
+}
+
+.mypage__body .sidemenu .user_info{
+    display: flex;
+    padding: 28px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    align-self: stretch;
+}
+
+.mypage__body .sidemenu .user_info{
+    display: flex;
+    padding: 28px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    align-self: stretch;
+}
+
+
+.mypage__body .sidemenu .user_info .user_name{
+    color: var(---gray-900, #2A2D2F);
+    font-family: Pretendard;
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 30px; /* 125% */
+}
+
+.mypage__body .sidemenu .user_info .user_contact{
+    display: flex;
+    width: 180px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.mypage__body .sidemenu .user_info .user_contact span{
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    align-self: stretch;
+    overflow: hidden;
+    color: var(---gray-700, #6F767E);
+    text-overflow: ellipsis;
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; /* 125% */
+}
+
+.mypage__body .sidemenu .user_info .usercard__plan{
+    overflow: hidden;
+    color: var(--green-100, #1EC280);
+    text-overflow: ellipsis;
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 20px; /* 125% */
+}
