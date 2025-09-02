@@ -42,4 +42,5 @@ export const router = createBrowserRouter([
       ]
    },
    { path: "/purchase", element: <Layout><PurchaseLayout /></Layout> },
+
 ]);

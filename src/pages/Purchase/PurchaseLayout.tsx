@@ -1,5 +1,7 @@
 
-import { Outlet } from "react-router-dom";
+import { useState } from "react";
+import PlanCard from "./PlanCard";
+import PaymentCard from "./PaymentCard";
 import "./Purchase.css";
 import credit_card from '@/assets/icons/credit_card.png';
 import mobile from '@/assets/icons/mobile_2.png';
@@ -8,12 +10,60 @@ import redeem from '@/assets/icons/redeem.png';
 import naver_pay from '@/assets/icons/naver_pay.png';
 import kakao_pay from '@/assets/icons/kakao_pay2.png';
 import payco from '@/assets/icons/payco.png';
-import snmsung_pay from '@/assets/icons/snmsung_pay.png';
+import samsung_pay from '@/assets/icons/samsung_pay.png';
+
+type Plan = {
+  id: string;
+  name: string;
+  price: number;      
+  features: string[];
+};
+
+const PLANS: Plan[] = [
+  { id: "p7",  name: "7일 이용권",  price: 2900, features:["공고 무제한 매칭","AI 모의면접","무제한 이용"] },
+  { id: "p15", name: "15일 이용권", price: 5900, features:["공고 무제한 매칭","AI 모의면접","무제한 이용"] },
+  { id: "p3",  name: "3회 이용권",  price: 2900, features:["공고 무제한 매칭","AI 모의면접","무제한 이용"] },
+];
+
+const METHODS = [
+  { id: "card",    label: "신용/체크카드", icon: credit_card },
+  { id: "mobile",  label: "휴대폰 결제",   icon: mobile },
+  { id: "transfer",label: "계좌이체",     icon: money_range },
+  { id: "gift",    label: "상품권",        icon: redeem },
+  { id: "naver",   label: "네이버페이",    icon: naver_pay },
+  { id: "kakao",   label: "카카오페이",    icon: kakao_pay },
+  { id: "payco",   label: "페이코",        icon: payco },
+  { id: "samsung", label: "삼성페이",      icon: samsung_pay },
+] as const;
+
+// 2) 단일 아이템 타입
+export type Method = typeof METHODS[number];
 
 
 export default function PurchaseLayout() {
+  const [selectedPlan, setSelectedPlan] = useState<Plan>(PLANS[0]);
+  const [selectedMethod, setSelectedMethod] = useState<Method>(METHODS[0]);
+  const [agreed, setAgreed] = useState(false);
+  const [errorAgreed, setErrorAgreed] = useState(true);
+  const [submit, setSubmit] = useState(false);
+  
+
+  const onSelectMethod = (m: Method) => setSelectedMethod(m);
+  
+  
+  const  handlePaySubmit = async () => {
+    setErrorAgreed(agreed);
+    console.log(agreed);
+    if(agreed){
+      console.log('api실행');
+    }
+  
+  };
+
+  
+
+
   return (
- 
       <div className="purchase purchase__container">
         <header className="header">
           <h1 className="title">이용권 구매</h1>
@@ -23,98 +73,37 @@ export default function PurchaseLayout() {
             <section className="box plans" aria-labelledby="plans-title">
               <h1 id="plans-title" className="title">이용권 선택</h1>
               <ul className="plans__grid" role="list">
-                <li className="plans__item on" role="listitem">
-                   <div className="plans__item__title">
-                   <span className="plans__item__title__name">7일 이용권</span>
-                   <span className="plans__item__title__price">2,900원</span>
-                   </div>
-                   <div className="plans__item__desc">
-                   <span>공고 무제한 매칭</span>
-                   <span>AI 모의면접</span>
-                   <span>무제한 이용</span>
-                   </div>
-                </li>
-                <li className="plans__item" role="listitem">
-                   <div className="plans__item__title">
-                   <span className="plans__item__title__name">15일 이용권</span>
-                   <span className="plans__item__title__price">5,900원</span>
-                   </div>
-                   <div className="plans__item__desc">
-                   <span>공고 무제한 매칭</span>
-                   <span>AI 모의면접</span>
-                   <span>무제한 이용</span>
-                   </div>
-                </li>
-                <li className="plans__item" role="listitem">
-                   <div className="plans__item__title">
-                   <span className="plans__item__title__name">3회 이용권</span>
-                   <span className="plans__item__title__price">2,900원</span>
-                   </div>
-                   <div className="plans__item__desc">
-                   <span>공고 무제한 매칭</span>
-                   <span>AI 모의면접</span>
-                   <span>무제한 이용</span>
-                   </div>
-                </li>
+              {PLANS.map(p => (
+                <PlanCard
+                  key={p.id}
+                  plan={p}
+                  active={selectedPlan.id === p.id}
+                  onSelect={setSelectedPlan}
+                />
+              ))}
               </ul>
             </section>
             <section className="box payment" aria-labelledby="payment-title">
               <h1 id="payment-title" className="title">결제 수단</h1>
               <ul className="payment__methods" role="list">
-                <li className="payment__item on">
-                  <span className="paymethod__icon">
-                    <img src={credit_card}/>
-                  </span>
-                  <span className="paymethod__label">신용/체크카드</span>
-                </li>
-                <li className="payment__item">
-                  <span className="paymethod__icon">
-                  <img src={mobile}/>
-                   </span>
-                  <span className="paymethod__label">휴대폰 결제</span>
-                </li>
-                <li className="payment__item">
-                  <span className="paymethod__icon">
-                  <img src={money_range}/>
-                  </span>
-                  <span className="paymethod__label">계좌이체</span>
-                </li>
-                <li className="payment__item">
-                  <span className="paymethod__icon">
-                  <img src={redeem}/>
-                  </span>
-                  <span className="paymethod__label">상품권</span>
-                </li>
-                <li className="payment__item">
-                  <span className="paymethod__icon">
-                  <img src={naver_pay}/>
-                  </span>
-                  <span className="paymethod__label">네이버페이</span>
-                </li>
-                <li className="payment__item">
-                  <span className="paymethod__icon">
-                  <img src={kakao_pay}/>
-                  </span>
-                  <span className="paymethod__label">카카오페이</span>
-                </li>
-                <li className="payment__item">
-                  <span className="paymethod__icon">
-                  <img src={payco}/>
-                  </span>
-                  <span className="paymethod__label">페이코</span>
-                </li>
-                <li className="payment__item">
-                  <span className="paymethod__icon">
-                  <img src={snmsung_pay}/>
-                  </span>
-                  <span className="paymethod__label">삼성페이</span>
-                </li>
+              {METHODS.map((m) => (
+                <PaymentCard
+                  key={m.id}
+                  method={m}
+                  active={selectedMethod.id === m.id}
+                  onSelect={onSelectMethod}
+                />
+              ))}
               </ul>
             </section>
             <section className="box notice" aria-labelledby="notice-title">
               <h1 id="notice-title" className="title">구매 전 반드시 확인해 주세요.</h1>
-              <div className="notice__agree">
-                <input className="check-box"  id="agree-check" name="agree" type="checkbox" required />
+              <div className={`notice__agree ${errorAgreed}`}>
+                <input className="check-box" checked={agreed} type="checkbox"onChange={(e)=> {
+                  setAgreed(e.target.checked)
+                  setErrorAgreed(e.target.checked)
+                }}
+                required />
                 <span className="notice__agree-text">
                   <em className="badge badge--required">(필수)</em>
                   아래 유의사항 및 결제 진행에 동의합니다.
@@ -138,20 +127,19 @@ export default function PurchaseLayout() {
             <h1 id="pay-summary-title" className="title">결제 정보</h1>
               <div className="summary__row">
                 <span className="summary__label">선택 이용권</span>
-                <span className="summary__value">7일 이용권</span>
+                <span className="summary__value">{selectedPlan.name}</span>
               </div>
               <div className="summary__row">
                   <span className="summary__label">이용권 금액</span>
-                  <span className="summary__value">2,900원</span>
+                  <span className="summary__value">{selectedPlan.price.toLocaleString("ko-KR")}원</span>
                 </div>
             </div>
-
           <div className="summary__total">
             <div className="summary__row">
             <span className="summary__total-label">최종 결제 금액</span>
-            <span className="summary__total-value">2,900원</span>
+            <span className="summary__total-value">{selectedPlan.price.toLocaleString("ko-KR")}원</span>
             </div>
-            <button type="button" className="summary__submit btn btn--primary">결제하기</button>
+            <button type="button" className="summary__submit btn btn--primary" onClick={handlePaySubmit}>결제하기</button>
             </div>
           </aside>
         </div>

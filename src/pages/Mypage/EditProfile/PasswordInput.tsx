@@ -13,7 +13,7 @@ type Props = {
     placeholder?: string;
     autoComplete?: string;    // "current-password" | "new-password"
     required?: boolean;
-    className?: string;       // 필요하면 추가 클래스
+    className?: string;       
     message?: string;
     tone?: Tone; // "error" | "success" | "help"
   };

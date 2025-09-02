@@ -73,6 +73,14 @@ line-height: 34px; /* 121.429% */
     background: var(--white-100, #FFF);
 }
 
+
+.plans .plans__grid .plans__item:hover{
+    border: 1px solid var(--primary-primary, #816BFE);
+    background: var(--primary-8, rgba(129, 107, 254, 0.08));
+    cursor: pointer;
+}
+
+
 .plans .plans__grid .plans__item.on{
     display: flex;
     flex:1;
@@ -134,7 +142,7 @@ line-height: 34px; /* 121.429% */
     align-self: stretch;
 }
 
-.plans__item .plans__item__desc span{
+.plans__item .plans__item__desc li{
     flex: 1 0 0;
     color: var(--gray-700, #6F767E);
     font-family: Pretendard;
@@ -144,12 +152,12 @@ line-height: 34px; /* 121.429% */
     line-height: 20px; /* 125% */
 }
 
-.plans__item.on .plans__item__desc span{
+.plans__item.on .plans__item__desc li{
     flex: 1 0 0;
     color: var(--gray-900, #2A2D2F);
 }
 
-.plans__item .plans__item__desc span::before{
+.plans__item .plans__item__desc li::before{
     content: "";
     position: relative;
     display: inline-block;
@@ -184,6 +192,13 @@ line-height: 34px; /* 121.429% */
     border: 1px solid var(--gray-300, #E0E2E4);
     background: var(--white-100, #FFF);
 }
+
+.payment .payment__methods .payment__item:hover{
+    border: 1px solid var(--primary-primary, #816BFE);
+    background: var(--primary-8, rgba(129, 107, 254, 0.08));
+    cursor: pointer;
+}
+
 
 
 .payment .payment__methods .payment__item.on{
@@ -234,7 +249,12 @@ line-height: 34px; /* 121.429% */
     border-radius: 4px;
     border: 1px solid var(--gray-300, #E0E2E4);
     background: var(--white-100, #FFF);
+}
+.notice .notice__agree.false{
+    border: 1px solid var(--red-100, #FF524C);
  }
+
+
 
  .notice .notice__agree .check-box{
     width: 14px;
