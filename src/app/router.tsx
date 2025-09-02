@@ -5,11 +5,17 @@ import JobsList from "@/pages/Jobs/JobsList";
 import JobDetail from "@/pages/Jobs/JobDetail";
 import CompaniesList from "@/pages/Companies/CompaniesList";
 import CompanyDetail from "@/pages/Companies/CompanyDetail";
+
 import Mypage from "@/pages/Mypage/Mypage";
+import EditProfile from "@/pages/Mypage/EditProfile/EditProfile";
+import PlanHistory from "@/pages/Mypage/Plan/PlanHistory";
+
+import PurchaseLayout from "@/pages/Purchase/PurchaseLayout";
 
 import Login from "@/pages/Auth/Login";
 import Signup from "@/pages/Auth/Signup";
 import NotFound from "@/pages/NotFound";
+import MyPageLayout from "@/pages/Mypage/MyPageLayout";
 
 export const router = createBrowserRouter([
   { path: "/", element: <Layout><Home /></Layout>, errorElement: <Layout><NotFound /></Layout> },
@@ -26,6 +32,14 @@ export const router = createBrowserRouter([
   { path: "/companies/:companyId", element: <Layout><CompanyDetail /></Layout> },
   { path: "/login", element: <Layout><Login /></Layout> },
   { path: "/signup", element: <Layout><Signup /></Layout> },
-  { path: "/mypage", element: <Layout><Mypage /></Layout> },
-
+  { path: "/mypage", 
+    element: <Layout><MyPageLayout/></Layout>,
+      children:[
+        {index:true,element:<Mypage/>},
+        {path:"edit-profile",element:<EditProfile/>},
+        {path:"plan/history",element:<PlanHistory/>},
+        
+      ]
+   },
+   { path: "/purchase", element: <Layout><PurchaseLayout /></Layout> },
 ]);

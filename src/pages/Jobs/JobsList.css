@@ -8,12 +8,14 @@
   margin: 0;
   font-size: 24px;        
   font-weight: 600;
+  font-family: Pretendard;
 }
 
 .jobs-sub-title {
   padding-top: 18px;
   font-size: 20px;          
   font-weight: 600;
+  font-family: Pretendard;
   color: #6F767E;           
 }
 
@@ -33,7 +35,7 @@
     line-height: 1;
     padding: 10px 0px;
 }
-.toggle__text{ font-size:15px; color:#2A2D2F;}
+.toggle__text{ font-size:15px; color:#2A2D2F; font-family: Pretendard;}
 .sw__input{ position:absolute; opacity:0; width:1px; height:1px; }
 .sw__trk{
     position:relative; display:inline-block; width:48px; height:28px;
@@ -68,6 +70,7 @@
   border-radius: 10px;
   background: #fff;
   font-size: 18px;
+  font-family: Pretendard;
   color: #111;
   outline: none;
 }
@@ -113,6 +116,7 @@
     padding: 0px 18px;
     border: solid 1px black;
     background-color: white;
+    font-family: Pretendard;
     border-radius: 8px;
     gap:10px;
     cursor: pointer;

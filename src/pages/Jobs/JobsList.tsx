@@ -1,30 +1,17 @@
-import { Outlet,Link, NavLink } from "react-router-dom";
-
-import { useEffect, useState } from "react";
+import { NavLink } from "react-router-dom";
 import "./JobsList.css";
-import JobCard from "../../features/jobs/JobCard";
-import type { Job } from "../../features/jobs/JobCard"; //  타입 전용 import
 
 
 export default function JobsList() {
-  const [items, setItems] = useState<Job[]>([]);
-  const [tab, setTab] = useState<"all"|"bookmarks">("all");
-  type Job = { id: string; title: string };
+  type Category = { id: string; title: string };
 
-  const items2: Job[] = [
+  const items2: Category[] = [
     { id: "1", title: "개발" },
     { id: "2", title: "마케팅광고" },
     { id: "3", title: "경영 비즈니스 " },
     { id: "4", title: "디자인" },
   ];
   
-
-  useEffect(() => {
-    setItems([
-      { id: "1", title: "프론트엔드 엔지니어", companyName: "잡콕컴퍼니", location: "서울", postedAt: "2025-08-21" },
-      { id: "2", title: "백엔드 엔지니어", companyName: "코코테크", location: "부산", postedAt: "2025-08-21" },
-    ]);
-  }, []);
   return (
    <>
    <div className="center">

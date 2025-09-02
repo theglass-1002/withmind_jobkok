@@ -8,7 +8,7 @@
 
 .mypage .mypage__header .mypage__title{
     color: var(---gray-900, #2A2D2F);
-
+    font-family: Pretendard;
     font-size: 28px;
     font-style: normal;
     font-weight: 600;
@@ -35,6 +35,7 @@ background: var(--white-100, #FFF);
 .mypage__body .mypage__content{
     display: flex;
     width: 876px;
+ 
     flex-direction: column;
     align-items: flex-start;
     border-radius: 6px;
@@ -42,13 +43,10 @@ background: var(--white-100, #FFF);
     background: var(--white-100, #FFF);
 }
 
-.mypage__body .sidemenu .user_info{
+.mypage__body .sidemenu{
     display: flex;
-    padding: 28px;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 20px;
-    align-self: stretch;
+    width: 100%;
 }
 
 .mypage__body .sidemenu .user_info{
@@ -58,7 +56,9 @@ background: var(--white-100, #FFF);
     align-items: flex-start;
     gap: 20px;
     align-self: stretch;
+    border-bottom: 1px solid var(---gray-300, #E0E2E4);
 }
+
 
 
 .mypage__body .sidemenu .user_info .user_name{
@@ -89,10 +89,451 @@ background: var(--white-100, #FFF);
     font-size: 16px;
     font-style: normal;
     font-weight: 400;
-    line-height: 20px; /* 125% */
+    line-height: 20px; 
 }
 
+
+
 .mypage__body .sidemenu .user_info .usercard__plan{
+    margin: 0;                    
+    display: inline-flex;
+    align-items: center;       
+    gap: 8px;
+    color: var(--green-100, #1EC280);
+     font-size: 16px;
+    font-weight: 600;
+    line-height: 20px;         
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;  
+    font-family: Pretendard;
+  }
+  
+
+.mypage__body .sidemenu .user_info .usercard__plan::before{
+    content: "";
+    position: relative;
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;    
+    bottom: 1;        
+    background: url("/src/assets/icons/icon-plan.png") no-repeat center / contain; /* public/icons 사용 */
+}
+
+.mypage__body .sidemenu .user_info .user_info_edit{
+    width: 100%;  
+  }
+
+.mypage__body .sidemenu .user_info .user_info_edit .btn{
+  width: 100%;  
+}
+
+
+.sidemenu .sidemenu__list .sidemenu__group{
+    display: flex;
+padding: 28px 0px 28px 28px;
+flex-direction: column;
+justify-content: center;
+align-items: flex-start;
+gap: 16px;
+align-self: stretch;
+border-bottom: 1px solid var(---gray-300, #E0E2E4);
+}
+
+.sidemenu__group .sidemenu__group-label{
+color: var(---gray-900, #2A2D2F);
+font-family: Pretendard;
+font-size: 18px;
+font-style: normal;
+font-weight: 600;
+line-height: 22px; /* 122.222% */
+}
+
+.sidemenu__group .sidemenu__sublist{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 16px;
+    align-self: stretch;    
+}
+
+
+.sidemenu__group .sidemenu__sublist a{
+color: var(---gray-700, #6F767E);
+font-family: Pretendard;
+font-size: 16px;
+font-style: normal;
+font-weight: 400;
+line-height: 20px; /* 125% */
+    
+}
+
+.sidemenu .sidemenu__item--logout{
+    display: flex;
+    justify-content: start;
+     align-items: center;
+    height: 76px;
+     padding: 0 0px 0 28px;
+    gap: 8px;
+}
+
+.sidemenu .sidemenu__link.sidemenu_logout_btn {
+    display: flex;
+    border: none;
+    background: none;
+    color: var(---gray-700, #6F767E);
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 24px; /* 125% */
+    cursor: pointer;
+}
+
+.sidemenu .sidemenu__link.sidemenu_logout_btn::before {
+    content: "";
+    position: relative;
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;    
+    background: url("/src/assets/icons/logout.png") no-repeat center / contain; /* public/icons 사용 */
+    margin-right: 7px;
+}
+
+/* mypage__content */
+
+
+.mypage__content .mypage__content-header {
+display: flex;
+padding: 28px 28px 0 28px;
+flex-direction: column;
+align-items: flex-start;
+gap: 28px;
+align-self: stretch;
+border-bottom: 1px solid var(---gray-300, #E0E2E4);
+background: var(--white-100, #FFF);
+
+border-radius: 6px 6px 0 0;  
+}
+
+.mypage__content .mypage__content-header .title{
+    color: var(---gray-900, #2A2D2F);
+    font-family: Pretendard;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 24px; /* 120% */
+}
+
+.mypage__content .mypage__content-header .tabs__list{
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    align-self: stretch;
+}
+
+.mypage__content .mypage__content-header .tabs__list .tabs__item{
+    display: flex;
+    padding-bottom: 20px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.mypage__content .mypage__content-header .tabs__list .tabs__item-is-active{
+    display: flex;
+    padding-bottom: 20px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    color: var(---gray-900, #2A2D2F);
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 20px; /* 125% */
+    border-bottom: 2px solid var(---gray-900, #2A2D2F);
+}
+
+.mypage__content-main{
+    width: 100%;
+    height: 100%;
+}
+
+
+.mypage__content-main .account-main.password-tab{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 100%;
+    height: 790px;
+ 
+}
+
+
+.mypage__content-main .account-main .field{
+    display: flex;
+    padding: 28px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    align-self: stretch;
+    border-bottom: 1px solid var(---gray-300, #E0E2E4);
+    background: var(--white-100, #FFF);
+}
+
+
+.mypage__content-main .account-main.password-tab .field{
+    display: flex;
+    padding: 28px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    align-self: stretch;
+    border-bottom: 0px;
+    background: var(--white-100, #FFF);
+}
+
+.mypage__content-main .account-main .field{
+    display: flex;
+    padding: 28px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    align-self: stretch;
+    border-bottom: 1px solid var(---gray-300, #E0E2E4);
+    background: var(--white-100, #FFF);
+}
+
+.mypage__content-main .account-main .field:last-child{
+    border-radius: 0px 0px 6px 6px;  
+    border-bottom: none;
+
+   
+  }
+
+  .mypage__content-main .account-main.password-tab .field:last-child{
+    border-radius: 0px 0px 6px 6px;  
+    border-bottom: none;
+   
+  }
+
+
+.mypage__content-main .account-main .field .field__label{
+display: flex;
+align-items: center;
+gap: 4px;
+color: var(---gray-900, #2A2D2F);
+font-family: Pretendard;
+font-size: 14px;
+font-style: normal;
+font-weight: 600;
+line-height: 18px; /* 128.571% */
+}
+.mypage__content-main .account-main .field .number_field_value{
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    gap: 16px;
+}
+
+
+.mypage__content-main .account-main .field .field__value_gray{
+    display: flex;
+    width: 100%;
+    padding: 16px;
+    align-items: center;
+    flex: 1 0 0;
+    border-radius: 4px;
+    border: 1px solid var(---gray-300, #E0E2E4);
+    background: var(---gray-50, #F8F8F9);
+}
+
+.mypage__content-main .account-main .field .field__value_gray.birth{
+    display: flex;
+    height: 52px;
+    padding: 16px;
+    align-items: center;
+    gap: 8px;
+    align-self: stretch;
+    border-radius: 4px;
+    border: 1px solid var(--gray-300, #E0E2E4);
+    background: var(--gray-50, #F8F8F9);
+}
+
+.mypage__content-main .account-main .field .field__value_gray.birth img{
+  cursor: pointer;
+}
+
+
+.mypage__content-main .account-main .field .field__value_gray.birth .date{
+    color: var(--gray-700, #6F767E);
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px;
+}
+
+.mypage__content-main .account-main .field .field__value{
+    display: flex;
+    width: 100%;
+    padding: 16px;
+    justify-content: space-between;
+    align-items: center;
+    flex: 1 0 0;
+    border-radius: 4px;
+    border: 1px solid var(---gray-300, #E0E2E4);
+
+}
+
+.mypage__content-main .account-main .field .field__value-is-error{
+    display: flex;
+    width: 100%;
+    padding: 16px;
+    justify-content: space-between;
+    align-items: center;
+    flex: 1 0 0;
+    border-radius: 4px;
+    border: 1px solid var(--red-100, #FF524C);
+
+}
+
+.mypage__content-main .account-main .field .field__value-is-error input{
+    width: 100%;
+    border: none;
+
+}
+
+.mypage__content-main .account-main .field .field__value-is-error .icon_wrap{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+}
+
+.mypage__content-main .account-main .field .field__value.birth{
+    display: flex;
+    width: 100%;
+    padding: 16px;
+    justify-content: start;
+    align-items: center;
+    flex: 1 0 0;
+    border-radius: 4px;
+    border: 1px solid var(---gray-300, #E0E2E4);
+    gap: 8px;
+
+}
+
+
+.mypage__content-main .account-main .field .field__value.birth img{
+    cursor: pointer;
+  }
+  
+  
+  .mypage__content-main .account-main .field .field__value.birth .date{
+    color: var(---gray-900, #2A2D2F);
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; /* 125% */
+  }
+
+  
+  .mypage__content-main .account-main .field .field__value .icon_fit{
+    width: 20px;
+    height: 20px;
+  }
+  
+
+ 
+.mypage__content-main .account-main .field .field__value input{
+  width: 100%;
+  border: none;
+}
+
+.mypage__content-main .account-main .field .field__value input:focus{
+    outline: none; box-shadow: none;
+  }
+
+
+
+.mypage__content-main .account-main .field .hint{
+    color: var(--gray-700, #6F767E);
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; /* 125% */
+    border: none;
+}
+
+.mypage__content-main .account-main .field .btn_wrap {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.mypage__content-main .account-main .field .btn_wrap:last-child {
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.mypage__content-main .account-main .field .btn_wrap:last-child button {
+   width: 50%;
+}
+
+.mypage__content-main .account-main .field .btn_wrap button {width: 100px;}
+
+.mypage__content-main .account-main .field .btn_wrap button.on {
+    border-radius: 4px;
+    border: 1px solid var(--primary-30, rgba(129, 107, 254, 0.30));
+    background: var(--primary-8, rgba(129, 107, 254, 0.08));
+    color: var(--primary-primary, #816BFE);
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 20px; /* 125% */
+  }
+
+  .mypage__content-main .plan{
+    display: flex;
+    padding: 28px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 28px;
+    align-self: stretch;
+    border-bottom: 1px solid var(--gray-300, #E0E2E4);
+    background: var(--white-100, #FFF);
+  }
+  
+  .mypage__content-main .plan .plan-current--active {
+    display: flex;
+    padding: 20px;
+    justify-content: space-between;
+    align-items: center;
+    align-self: stretch;
+    border-radius: 4px;
+    background: var(--green-8, rgba(30, 194, 128, 0.08));
+  }
+
+  .plan .plan-current--active .plan-current__label{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
     overflow: hidden;
     color: var(--green-100, #1EC280);
     text-overflow: ellipsis;
@@ -101,4 +542,290 @@ background: var(--white-100, #FFF);
     font-style: normal;
     font-weight: 600;
     line-height: 20px; /* 125% */
+
+  }
+
+
+  .plan .plan-current--active .plan-current__label::before{
+    content: "";
+    position: relative;
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;    
+    top: 4px;
+    margin-right: 8px;
+    background: url("/src/assets/icons/icon-plan.png") no-repeat center / contain; /* public/icons 사용 */
+  }
+
+  .plan .plan-current--active .plan-current__until{
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    overflow: hidden;
+    color: var(--gray-900, #2A2D2F);
+    text-align: right;
+    text-overflow: ellipsis;
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; /* 125% */
+  }
+  .plan-history,
+  .plan-history__head,
+  .plan-history__body
+  { width: 100%; }
+
+  .plan .plan-history{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1px;
+    align-self: stretch;
+    border: 1px solid var(--gray-300, #E0E2E4);
+    border-radius: 6px;  
 }
+
+.plan-history__row {
+  display: grid;
+  grid-template-columns: 62px 119px 119px 116px 100px 119px 119px;
+  justify-content: space-evenly;
+  align-items: center;
+  text-align: center;
+  border-bottom:1px solid var(--gray-300, #E0E2E4);
+}
+
+.plan-history__row:last-child {
+    display: grid;
+    grid-template-columns: 62px 119px 119px 116px 100px 119px 119px;
+    justify-content: space-evenly;
+    align-items: center;
+    text-align: center;
+    border-bottom:none;
+    border-radius: 0 0 6px 6px;  
+}
+
+
+.plan-history__row.is-active{
+    background: linear-gradient(0deg, rgba(30, 194, 128, 0.04) 0%, rgba(30, 194, 128, 0.04) 100%), #FFF;
+}
+
+.plan-history__row.is-active .cell--status{
+    overflow: hidden;
+    color: var(--green-100, #1EC280);
+    text-align: center;
+    text-overflow: ellipsis;
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; /* 125% */  
+}
+
+
+.plan-history__row.is-done .cell--status{
+    overflow: hidden;
+    color: var(--gray-500, #9EA4AA);
+    text-align: center;
+    text-overflow: ellipsis;
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; /* 125% */
+}
+
+.plan-history__row.is-refunded .cell--status{
+    overflow: hidden;
+    color: var(--red-100, #FF524C);
+    text-align: center;
+    text-overflow: ellipsis;
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; /* 125% */
+}
+
+
+.plan-history__head {
+    overflow: hidden;
+    color: var(--gray-700, #6F767E);
+    text-align: center;
+    text-overflow: ellipsis;
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; /* 125% */
+    background: var(--gray-50, #F8F8F9);
+    border-bottom: 1px solid var(--gray-300, #E0E2E4);
+
+}
+
+
+.plan-history__body {
+    overflow: hidden;
+    color: var(--gray-900, #2A2D2F);
+    text-align: center;
+    text-overflow: ellipsis;
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; /* 125% */
+}
+
+.cell {
+  padding: 20px 8px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+  
+
+
+/* 
+  .plan .plan-history .plan-history-head{
+    display: flex;
+    align-items: center;
+    align-self: stretch;
+    background: var(--gray-50, #F8F8F9);
+  }
+
+  .plan .plan-history .plan-history-head span{
+    display: flex;
+    padding: 20px 8px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    flex: 2 0 0;
+    overflow: hidden;
+    color: var(--gray-700, #6F767E);
+    text-align: center;
+    text-overflow: ellipsis;
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; 
+  }
+  .plan .plan-history .plan-history-head span:first-child{
+    display: flex;
+    width: 62px;
+    padding: 20px 8px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+  }
+
+  .plan .plan-history .plan-history-head span:nth-child(5){
+    display: flex;
+    width: 100px;
+    padding: 20px 8px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+  }
+ */
+
+
+  
+  .mypage__content-main .plan--empty{
+    display: flex;
+    padding: 28px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 28px;
+    flex: 1 0 0;
+    align-self: stretch;
+    border-bottom: 1px solid var(--gray-300, #E0E2E4);
+    background: var(--white-100, #FFF);
+  }
+  
+  .mypage__content-main .plan-empty{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    align-self: stretch;
+    padding: 80px;
+    flex: 1 0 0;
+    gap: 12px;
+}
+
+
+.mypage__content-main .plan-empty .plan-empty__title{
+    color: var(--gray-900, #2A2D2F);
+    text-align: center;
+    font-family: Pretendard;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 22px; /* 122.222% */
+    align-self: stretch;
+}
+
+
+.mypage__content-main .plan-empty .plan-empty__desc{
+    color: var(--gray-700, #6F767E);
+    text-align: center;
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; /* 125% */
+}
+
+.mypage__content-main .plan .plan-info{
+    display: flex;
+    flex-direction: column;
+    height: 88px;
+    padding: 20px;
+    align-items: start;
+    gap: 10px;
+    align-self: stretch;
+    border-radius: 4px;
+    background: var(--gray-50, #F8F8F9);
+    color: var(--gray-700, #6F767E);
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; /* 125% */
+}
+
+.mypage__content-main.plan .btn_wrap{
+    display: flex;
+    padding: 28px;
+    align-items: center;
+    gap: 16px;
+    align-self: stretch;
+}
+
+
+.mypage__content-main.plan .btn_wrap .default_btn_black{
+ width: 100%;
+}
+
+.mypage__content-main.plan .btn_wrap .default_btn_black::before{
+    content: "";
+    position: relative;
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;    
+    bottom: 1;        
+    background: url("/src/assets/icons/arrow-up-right.png") no-repeat center / contain; /* public/icons 사용 */
+}
+   
+
+
+
+

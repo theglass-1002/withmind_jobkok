@@ -1,0 +1,94 @@
+/* src/shared/components/calendar/calendar.css */
+
+.cal {
+    width: 520px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.15);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  /* 헤더의 셀렉트 */
+  .cal__header { display: flex; gap: 16px; }
+  .select { position: relative; }
+  .select select {
+    appearance: none;
+    -webkit-appearance: none;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 12px 40px 12px 18px;
+    font-size: 16px;
+    background: #fff;
+  }
+  .select__arrow {
+    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+    pointer-events: none; color: #374151;
+  }
+  
+  /* 요일 헤더 */
+  .cal__week {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    padding: 0 4px;
+    color: #6b7280;
+    font-weight: 600;
+  }
+  .cal__weekcell { text-align: center; padding: 6px 0; }
+  
+  /* 일(day) 그리드 */
+  .cal__grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    padding: 4px;
+  }
+  .cal__cell {
+    height: 44px;
+    border-radius: 10px;
+    border: 0;
+    background: #fff;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  .cal__cell:hover { background: #f3f4f6; }
+  .cal__cell--empty { background: transparent; cursor: default; }
+  .cal__cell--empty:hover { background: transparent; }
+  .cal__cell.is-selected {
+    background: #ede9fe;
+    color: #4338ca;
+    font-weight: 700;
+  }
+  
+  /* 월(month) 그리드 */
+  .cal--month .cal__months {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    padding: 8px 4px 0;
+  }
+  .cal__month {
+    height: 56px;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    font-size: 16px; font-weight: 600;
+    cursor: pointer;
+  }
+  .cal__month:hover { background: #f3f4f6; }
+  .cal__month.is-selected {
+    background: #ede9fe; color: #4338ca; border-color: #ddd6fe; font-weight: 700;
+  }
+  .cal__month:disabled {
+    color: #cbd5e1; border-color: #e5e7eb; background: #fafafa; cursor: not-allowed;
+  }
+  
+  /* 푸터 */
+  .cal__footer { display: flex; justify-content: flex-end; padding-top: 8px; }
+  .btn { padding: 12px 18px; border-radius: 10px; border: 1px solid #e5e7eb; background: #fff; cursor: pointer; }
+  .btn--primary { background: #111827; color: #fff; border-color: #111827; }
+  .btn--primary:hover { opacity: .9; }
+  

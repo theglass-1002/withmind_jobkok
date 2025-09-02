@@ -1,0 +1,99 @@
+.default_btn_black{
+    display: flex;
+    height: 52px;
+    padding: 16px 20px;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    align-self: stretch;
+    border-radius: 4px;
+    background: var(---gray-900, #2A2D2F);
+    color: var(--white-100, #FFF) !important;
+    text-align: center;
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 20px; /* 125% */
+    cursor: pointer;
+
+}
+
+.default_btn_white{
+        display: flex;
+        height: 52px;
+        padding: 16px 20px;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        border-radius: 4px;
+        border: 1px solid var(--gray-300, #E0E2E4);
+        background: var(--white-100, #FFF);
+        color: var(--gray-900, #2A2D2F);
+        text-align: center;
+        font-family: Pretendard;
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 600;
+        line-height: 20px;
+        cursor: pointer;
+
+}
+
+.default_btn_red{
+display: inline-flex;
+height: 52px;
+padding: 16px 20px;
+justify-content: center;
+align-items: center;
+gap: 8px;
+flex-shrink: 0;
+border-radius: 6px;
+background: var(--red-100, #FF524C);
+color: var(--white-100, #FFF);
+text-align: center;
+font-family: Pretendard;
+font-size: 16px;
+font-style: normal;
+font-weight: 600;
+line-height: 20px; /* 125% */
+
+}
+
+
+
+.default_a_btn_line{
+border: none;
+background: none;
+color: var(--gray-500, #9EA4AA);
+font-family: Pretendard;
+font-size: 16px;
+font-style: normal;
+font-weight: 400;
+line-height: 20px; /* 125% */
+text-decoration-line: underline; 
+text-decoration-style: solid;
+text-decoration-skip-ink: auto;
+text-decoration-thickness: auto;
+text-underline-offset: auto;
+text-underline-position: from-font;
+cursor: pointer;
+}
+
+.field__label em{
+color: var(--red-100, #FF524C);
+font-family: Pretendard;
+font-size: 14px;
+font-style: normal;
+font-weight: 300;
+line-height: 18px; /* 128.571% */
+}
+
+.badge--required{
+color: var(--red-100, #FF524C);
+font-family: Pretendard;
+font-size: 16px;
+font-style: normal;
+font-weight: 400;
+line-height: 20px; /* 125% */
+}

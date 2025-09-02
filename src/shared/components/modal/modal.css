@@ -1,0 +1,102 @@
+/* 오버레이 */
+.modal-overlay{
+    position: fixed; inset: 0;
+    display: grid; place-items: center;
+    background: rgba(0,0,0,.4);
+    padding: 20px; /* 가장자리 여백 */
+    z-index: 1000;
+  }
+  
+  /* 본체 */
+  .modal{
+    display: flex;
+    width: 500px;
+    padding: 40px 20px 20px 20px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 40px;
+    border-radius: 6px;
+    background: var(--white-100, #FFF);
+  }
+  
+  /* 헤더 */
+  .modal__header{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    align-self: stretch;
+  }
+  .modal__title{
+    
+    align-self: stretch;
+    color: var(---gray-900, #2A2D2F);
+    text-align: center;
+    font-family: Pretendard;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 22px; /* 122.222% */
+  }
+  .modal__desc{
+    align-self: stretch;
+    color: var(---gray-700, #6F767E);
+    text-align: center;
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; /* 125% */
+  }
+  
+  /* 액션 영역 */
+  .modal__actions{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    align-self: stretch;
+  }
+  
+  /* 버튼 */
+  .btn{
+    display: flex;
+    height: 52px;
+    padding: 16px 20px;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    flex: 1 0 0;
+    border-radius: 4px;
+    border: 1px solid var(---gray-300, #E0E2E4);
+
+  }
+  .btn--secondary{
+    border-radius: 4px;
+    border: 1px solid var(---gray-300, #E0E2E4);
+    background: var(--white-100, #FFF);
+    color: var(---gray-900, #2A2D2F);
+    text-align: center;
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 20px; /* 125% */
+  }
+  .btn--primary{
+    border-radius: 4px;
+    background: var(---gray-900, #2A2D2F);
+    color: var(--white-100, #FFF);
+    text-align: center;
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 20px; /* 125% */
+  }
+  
+  /* 포커스 접근성 */
+  .btn:focus-visible{
+    outline: 2px solid #111;
+    outline-offset: 2px;
+  }
+  
