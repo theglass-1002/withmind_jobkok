@@ -9,8 +9,12 @@ import CompanyDetail from "@/pages/Companies/CompanyDetail";
 import Mypage from "@/pages/Mypage/Mypage";
 import EditProfile from "@/pages/Mypage/EditProfile/EditProfile";
 import PlanHistory from "@/pages/Mypage/Plan/PlanHistory";
+import Faq from "@/pages/Mypage/Support/Faq";
 
 import PurchaseLayout from "@/pages/Purchase/PurchaseLayout";
+import PurchaseSuccess from "@/pages/PurchaseResult/PurchaseSuccess";
+import PurchaseFail from "@/pages/PurchaseResult/PurchaseFail";
+
 
 import Login from "@/pages/Auth/Login";
 import Signup from "@/pages/Auth/Signup";
@@ -38,9 +42,17 @@ export const router = createBrowserRouter([
         {index:true,element:<Mypage/>},
         {path:"edit-profile",element:<EditProfile/>},
         {path:"plan/history",element:<PlanHistory/>},
+        {path:"support/faq",element:<Faq/>},
         
       ]
    },
    { path: "/purchase", element: <Layout><PurchaseLayout /></Layout> },
-
+   {
+    path: "/purchase/result/success",
+    element: <Layout><PurchaseSuccess /></Layout>,
+  },
+  {
+    path: "/purchase/result/fail",
+    element: <Layout><PurchaseFail /></Layout>,
+  }
 ]);

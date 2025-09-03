@@ -11,7 +11,7 @@ import naver_pay from '@/assets/icons/naver_pay.png';
 import kakao_pay from '@/assets/icons/kakao_pay2.png';
 import payco from '@/assets/icons/payco.png';
 import samsung_pay from '@/assets/icons/samsung_pay.png';
-
+import { useNavigate } from "react-router-dom";
 type Plan = {
   id: string;
   name: string;
@@ -41,6 +41,7 @@ export type Method = typeof METHODS[number];
 
 
 export default function PurchaseLayout() {
+  const navigate = useNavigate();
   const [selectedPlan, setSelectedPlan] = useState<Plan>(PLANS[0]);
   const [selectedMethod, setSelectedMethod] = useState<Method>(METHODS[0]);
   const [agreed, setAgreed] = useState(false);
@@ -52,12 +53,13 @@ export default function PurchaseLayout() {
   
   
   const  handlePaySubmit = async () => {
+    setSubmit(true);
     setErrorAgreed(agreed);
-    console.log(agreed);
-    if(agreed){
-      console.log('api실행');
-    }
-  
+    if(agreed&&submit){
+      console.log('동의랑 전송 모두 true');
+      console.log(`agr:${agreed} --sub:${submit}`);
+      navigate("/purchase/result/success", { replace: true })
+    } 
   };
 
   
@@ -102,6 +104,7 @@ export default function PurchaseLayout() {
                 <input className="check-box" checked={agreed} type="checkbox"onChange={(e)=> {
                   setAgreed(e.target.checked)
                   setErrorAgreed(e.target.checked)
+               
                 }}
                 required />
                 <span className="notice__agree-text">

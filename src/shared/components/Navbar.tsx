@@ -29,9 +29,7 @@ export default function Navbar() {
             <li>
               <NavLink to="/mock-interview"  className={({isActive}) => isActive ? "on" : undefined}>모의면접</NavLink>
             </li>
-            <li>
-              <NavLink to="/post-job"  className={({isActive}) => isActive ? "on" : undefined}>공고등록</NavLink>
-            </li>
+      
           
           </ul>
         </nav>

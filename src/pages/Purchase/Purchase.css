@@ -406,5 +406,6 @@ line-height: 34px; /* 121.429% */
 
 .purchase .summary__total .summary__submit{
     width: 100%;
+    cursor: pointer;
 }
 
