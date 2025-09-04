@@ -1,0 +1,77 @@
+.inquiry-history{
+display: flex;
+flex-direction: column;
+align-items: center;
+align-self: stretch;
+border-radius: 4px;
+border: 1px solid var(--gray-300, #E0E2E4);
+}
+
+
+.inquiry-history__head,
+.inquiry-history__body
+{
+display: flex;
+align-items: center;
+align-self: stretch;
+
+}
+
+.inquiry-history__head{
+    background: var(--gray-50, #F8F8F9);
+    overflow: hidden;
+    color: var(--gray-700, #6F767E);
+    text-align: center;
+    text-overflow: ellipsis;
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; /* 125% */
+    border-bottom: 1px solid var(--gray-300, #E0E2E4);
+}
+
+.inquiry-history__body{
+    overflow: hidden;
+    color: var(--gray-900, #2A2D2F);
+    text-align: center;
+    text-overflow: ellipsis;
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; /* 125% */
+}
+
+.inquiry-history__cell--title{
+    display: flex;
+    padding: 20px 28px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    flex: 1 0 0;
+}
+    
+.inquiry-history__cell--date{
+    display: flex;
+    width: 140px;
+    padding: 20px 28px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+    
+.inquiry-history__cell--status{
+    display: flex;
+    width: 140px;
+    padding: 20px 28px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+    
+      
+
+  
+
+

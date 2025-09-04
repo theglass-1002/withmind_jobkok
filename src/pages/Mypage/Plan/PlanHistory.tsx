@@ -12,11 +12,6 @@ export default function PlanHistory() {
          <>
          <header className="mypage__content-header">
               <h2 className="title">이용권 내역</h2>
-              <nav className="tabs" aria-label="계정 탭">
-                <ul className="tabs__list" role="tablist">
-                    
-                </ul>
-              </nav>
             </header> 
             <div className="mypage__content-main plan">
             {/* <PlanEmpty/>

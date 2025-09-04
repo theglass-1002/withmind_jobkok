@@ -42,6 +42,14 @@
     line-height: 20px; /* 125% */
   }
 
+  .faq-container .faq__list-container{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
+    align-self: stretch;
+  }
+
 .faq-container .faq__list{
     display: flex;
     flex-direction: column;

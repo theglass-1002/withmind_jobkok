@@ -219,17 +219,30 @@ line-height: 20px; /* 125% */
 
 
 .mypage__content .mypage__content-header {
-display: flex;
-padding: 28px 28px 0 28px;
-flex-direction: column;
-align-items: flex-start;
-gap: 28px;
-align-self: stretch;
-border-bottom: 1px solid var(---gray-300, #E0E2E4);
-background: var(--white-100, #FFF);
-
-border-radius: 6px 6px 0 0;  
+    display: flex;
+    padding: 28px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 28px;
+    align-self: stretch;
+    border-bottom: 1px solid var(--gray-300, #E0E2E4);
+    background: var(--white-100, #FFF);
 }
+
+
+
+
+.mypage__content .mypage__content-header.tabs {
+    display: flex;
+    padding: 28px 28px 0 28px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 28px;
+    align-self: stretch;
+    border-bottom: 1px solid var(---gray-300, #E0E2E4);
+    background: var(--white-100, #FFF);
+    border-radius: 6px 6px 0 0;  
+    }
 
 .mypage__content .mypage__content-header .title{
     color: var(---gray-900, #2A2D2F);
@@ -283,9 +296,12 @@ border-radius: 6px 6px 0 0;
 .mypage__content-main{
     width: 100%;
     height: 100%;
+    
 }
 
-.mypage__content-main.faq-container{
+.mypage__content-main.faq-container,
+.mypage__content-main.inquiry-container
+{
     display: flex;
     padding: 28px;
     flex-direction: column;
@@ -832,7 +848,9 @@ line-height: 18px; /* 128.571% */
     line-height: 20px; /* 125% */
 }
 
-.mypage__content-main.plan .btn_wrap{
+.mypage__content-main.plan .btn_wrap,
+.mypage__content-main.inquiry .btn_wrap
+{
     display: flex;
     padding: 28px;
     align-items: center;
@@ -841,7 +859,9 @@ line-height: 18px; /* 128.571% */
 }
 
 
-.mypage__content-main.plan .btn_wrap .default_btn_black{
+.mypage__content-main.plan .btn_wrap .default_btn_black,
+.mypage__content-main.inquiry .btn_wrap .default_btn_black
+{
  width: 100%;
 }
 

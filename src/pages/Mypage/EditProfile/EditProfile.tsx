@@ -64,7 +64,7 @@ export default function EditProfile() {
 
     return (
          <>
-         <header className="mypage__content-header">
+         <header className="mypage__content-header tabs">
               <h2 className="title">회원 정보 수정</h2>
               <nav className="tabs" aria-label="계정 탭">
                 <ul className="tabs__list" role="tablist">

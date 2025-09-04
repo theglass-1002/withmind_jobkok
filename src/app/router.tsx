@@ -10,6 +10,7 @@ import Mypage from "@/pages/Mypage/Mypage";
 import EditProfile from "@/pages/Mypage/EditProfile/EditProfile";
 import PlanHistory from "@/pages/Mypage/Plan/PlanHistory";
 import Faq from "@/pages/Mypage/Support/Faq";
+import Inquiry from "@/pages/Mypage/Support/Inquiry";
 
 import PurchaseLayout from "@/pages/Purchase/PurchaseLayout";
 import PurchaseSuccess from "@/pages/PurchaseResult/PurchaseSuccess";
@@ -43,6 +44,7 @@ export const router = createBrowserRouter([
         {path:"edit-profile",element:<EditProfile/>},
         {path:"plan/history",element:<PlanHistory/>},
         {path:"support/faq",element:<Faq/>},
+        {path:"support/inquiry",element:<Inquiry/>},
         
       ]
    },
