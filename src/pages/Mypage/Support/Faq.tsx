@@ -54,7 +54,7 @@ const ITEMS: FaqItem[] = [
 ];
 
 
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 10;
 
 export default function Faq() {
   const [tab, setTab] = useState<FaqTabKey>("all");
@@ -199,8 +199,4 @@ function labelOf(cat: Category) {
   }
 }
 
-        {/* {tab==="all" && <div>전체리스트</div>}
-              {tab==="howto" && <div>이용방법 리스트</div>}
-              {tab==="account" && <div>회원 정보 리스트 </div>}
-              {tab==="payment" && <div>결제 리스트 </div>}
-              {tab==="etc" && <div>기타 리스트 </div>} */}
+    

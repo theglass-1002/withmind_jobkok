@@ -1,6 +1,6 @@
 .mypage .mypage__container{
     display: flex;
-    padding: 52px 360px 100px 360px;
+    padding: 104px 360px 100px 360px;
     flex-direction: column;
     gap: 40px;
     align-self: stretch;
@@ -227,6 +227,7 @@ line-height: 20px; /* 125% */
     align-self: stretch;
     border-bottom: 1px solid var(--gray-300, #E0E2E4);
     background: var(--white-100, #FFF);
+    border-radius: 6px 6px 0 0; 
 }
 
 
@@ -299,12 +300,25 @@ line-height: 20px; /* 125% */
     
 }
 
-.mypage__content-main.faq-container,
+.mypage__content-main.faq-container{
+        display: flex;
+        height: 980px;
+        padding: 28px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 28px;
+        align-self: stretch;
+        background: var(--white-100, #FFF);
+        border-radius: 4px;
+}
+    
+
 .mypage__content-main.inquiry-container
 {
     display: flex;
     padding: 28px;
     flex-direction: column;
+    justify-content: space-between;
     align-items: flex-start;
     gap: 28px;
     align-self: stretch;
@@ -708,7 +722,7 @@ line-height: 18px; /* 128.571% */
     line-height: 20px; /* 125% */
     background: var(--gray-50, #F8F8F9);
     border-bottom: 1px solid var(--gray-300, #E0E2E4);
-
+    border-radius: 4px 4px 0px 0px;
 }
 
 
@@ -732,58 +746,6 @@ line-height: 18px; /* 128.571% */
   text-overflow: ellipsis;
 }
 
-
-  
-
-
-/* 
-  .plan .plan-history .plan-history-head{
-    display: flex;
-    align-items: center;
-    align-self: stretch;
-    background: var(--gray-50, #F8F8F9);
-  }
-
-  .plan .plan-history .plan-history-head span{
-    display: flex;
-    padding: 20px 8px;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    flex: 2 0 0;
-    overflow: hidden;
-    color: var(--gray-700, #6F767E);
-    text-align: center;
-    text-overflow: ellipsis;
-    font-family: Pretendard;
-    font-size: 16px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 20px; 
-  }
-  .plan .plan-history .plan-history-head span:first-child{
-    display: flex;
-    width: 62px;
-    padding: 20px 8px;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    flex: 1;
-  }
-
-  .plan .plan-history .plan-history-head span:nth-child(5){
-    display: flex;
-    width: 100px;
-    padding: 20px 8px;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    flex: 1;
-  }
- */
-
-
-  
   .mypage__content-main .plan--empty{
     display: flex;
     padding: 28px;
@@ -848,8 +810,7 @@ line-height: 18px; /* 128.571% */
     line-height: 20px; /* 125% */
 }
 
-.mypage__content-main.plan .btn_wrap,
-.mypage__content-main.inquiry .btn_wrap
+.mypage__content-main.plan .btn_wrap
 {
     display: flex;
     padding: 28px;
@@ -859,8 +820,7 @@ line-height: 18px; /* 128.571% */
 }
 
 
-.mypage__content-main.plan .btn_wrap .default_btn_black,
-.mypage__content-main.inquiry .btn_wrap .default_btn_black
+.mypage__content-main.plan .btn_wrap .default_btn_black
 {
  width: 100%;
 }
@@ -877,3 +837,17 @@ line-height: 18px; /* 128.571% */
 }
    
 
+
+.inquiry .btn_wrap{
+    display: flex;
+    padding: 28px;
+    align-items: center;
+    gap: 16px;
+    align-self: stretch;
+    border-top: 1px solid var(--gray-300, #E0E2E4);
+
+}
+
+.inquiry .btn_wrap .default_btn_black{
+    width: 100%;
+}

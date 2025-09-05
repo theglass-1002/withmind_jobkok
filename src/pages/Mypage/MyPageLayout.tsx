@@ -1,5 +1,3 @@
-import { Link, NavLink } from "react-router-dom";
-import calendar_today from '@/assets/icons/calendar_today.png';
 import { Outlet } from "react-router-dom";
 import "./MyPage.css";
 import MyPageSideMenu from "./MyPageSideMenu";
