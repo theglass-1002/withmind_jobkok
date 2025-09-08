@@ -12,6 +12,8 @@ import PlanHistory from "@/pages/Mypage/Plan/PlanHistory";
 import Faq from "@/pages/Mypage/Support/Faq";
 import Inquiry from "@/pages/Mypage/Support/Inquiry/Inquiry";
 import InquiryDetail from "@/pages/Mypage/Support/Inquiry/InquiryDetail";
+import InquiryCreate from "@/pages/Mypage/Support/Inquiry/InquiryCreate";
+import InquiryEdit from "@/pages/Mypage/Support/Inquiry/InquiryEdit";
 
 import PurchaseLayout from "@/pages/Purchase/PurchaseLayout";
 import PurchaseSuccess from "@/pages/PurchaseResult/PurchaseSuccess";
@@ -47,6 +49,8 @@ export const router = createBrowserRouter([
         {path:"support/faq",element:<Faq/>},
         {path:"support/inquiry",element:<Inquiry/>},
         {path:"support/inquiry/:id",element:<InquiryDetail/>},
+        {path:"support/inquiry/create",element:<InquiryCreate/>},
+        {path:"support/inquiry/edit",element:<InquiryEdit/>}
         
       ]
    },

@@ -9,6 +9,7 @@
   gap: 80px;
   border-bottom: 1px solid var(---gray-300, #E0E2E4);
   background: var(--white-100, #FFF);
+  z-index: 1;
 }
 .masthead__inner {
   display: flex;

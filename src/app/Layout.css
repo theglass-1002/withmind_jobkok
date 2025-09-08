@@ -40,6 +40,13 @@
 
 }
 
+.default_btn_white:hover{
+    border-radius: 6px;
+    border: 1px solid var(--gray-300, #E0E2E4);
+    background: var(--gray-50, #F8F8F9);
+   
+}
+
 .default_btn_red{
 display: inline-flex;
 height: 52px;

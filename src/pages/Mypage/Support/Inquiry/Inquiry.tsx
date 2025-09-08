@@ -31,14 +31,6 @@ const ITEMS: FaqItem[] = [
   { id: "9", cat: "howto",   title: "9모의면접을 다시 보거나 완료된 모의면접을 삭제할 수 있나요?", date: "2025.00.00",status:"hold" },
   { id: "10", cat: "payment", title: "10결제 영수증은 어디에서 확인하나요?",                    date: "2025.00.00",status:"hold" },
   { id: "11", cat: "etc",     title: "11문의는 어디로 하면 되나요?",                             date: "2025.00.00",status:"hold" },
-  { id: "12", cat: "account", title: "12이메일을 변경할 수 있나요?",                              date: "2025.00.00",status:"hold" },
-  { id: "13", cat: "howto",   title: "13모의면접을 다시 보거나 완료된 모의면접을 삭제할 수 있나요?", date: "2025.00.00",status:"answered" },
-  { id: "14", cat: "payment", title: "14결제 영수증은 어디에서 확인하나요?",          date: "2025.00.00",status:"answered" },
-  { id: "15", cat: "account", title: "15이메일을 변경할 수 있나요?",                             date: "2025.00.00",status:"answered" },
-  { id: "16", cat: "howto",   title: "16모의면접을 다시 보거나 완료된 모의면접을 삭제할 수 있나요?", date: "2025.00.00",status:"answered" },
-  { id: "17", cat: "payment", title: "17결제 영수증은 어디에서 확인하나요?",          date: "2025.00.00",status:"answered" },
-  { id: "18", cat: "howto",   title: "18모의면접을 다시 보거나 완료된 모의면접을 삭제할 수 있나요?", date: "2025.00.00",status:"answered" },
-  { id: "19", cat: "howto", title: "19결제 영수증은 어디에서 확인하나요?",        date: "2025.00.00",status:"answered" },
 
 ];
 
@@ -118,8 +110,11 @@ export default function Inquiry() {
             />
            </section>  
            <div className="btn_wrap">
-                <button className="default_btn_black"
-                >1:1 문의하기</button>
+              <NavLink  className="default_btn_black" to={'create'}>
+              1:1 문의하기
+              </NavLink>
+                {/* <button className="default_btn_black"
+                >1:1 문의하기</button> */}
             </div>
       
          </div>
