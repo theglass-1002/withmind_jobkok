@@ -175,3 +175,204 @@ line-height: 20px; /* 125% */
     border-radius: 4px;
     background: var(--gray-200, #EBECED);
 }
+
+.mypage__top_search_field{
+        display: flex;
+        width: 400px;
+        height: 52px;
+        padding: 10px 16px;
+        align-items: center;
+        gap: 8px;
+        border-radius: 4px;
+        border: 1px solid var(--gray-300, #E0E2E4);
+        background: var(--white-100, #FFF);
+}
+
+.mypage__top_search_field .icon-container {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    aspect-ratio: 1 / 1;
+}
+
+.mypage__top_search_field .icon-container img {
+    width: 16.657px;
+    height: 16.667px;
+    flex-shrink: 0;
+    aspect-ratio: 16.66 / 16.67;
+    fill: var(--gray-900, #2A2D2F);
+}
+
+.mypage__top_search_field input {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    border: none;
+    outline: none;
+    box-shadow: none;
+}
+
+.mypage__top_search_field input::placeholder {
+    color: var(--gray-500, #9EA4AA);
+    text-align: start;
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; /* 125% */
+}
+
+.mypage__table{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    align-self: stretch;
+    border-radius: 4px;
+    border: 1px solid var(--gray-300, #E0E2E4);
+}
+.mypage__table .head{
+    display: flex;
+    align-items: center;
+    align-self: stretch;
+    background: var(--gray-50, #F8F8F9);
+    overflow: hidden;
+    color: var(--gray-700, #6F767E);
+    text-align: center;
+    text-overflow: ellipsis;
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px;
+    border-radius: 6px 6px 0px 0px;
+    border-bottom: 1px solid var(--gray-300, #E0E2E4);
+    
+}
+
+.mypage__table .cell--title{
+    display: flex;
+    padding: 20px 28px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    flex: 1 0 0;
+}
+.mypage__table .cell--title.start{
+    justify-content: start;
+}
+
+.mypage__table .cell--date,
+.mypage__table .cell--num
+{
+    display: flex;
+    width: 140px;
+    padding: 20px 28px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.mypage__table .body{
+    display: flex;
+    align-items: center;
+    align-self: stretch;
+}
+
+.mypage__table .body .body-list{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.mypage__table .body .body-list .cell__item{
+    display: flex;
+    align-items: center;
+    width: 100%;
+    overflow: hidden;
+    color: var(--gray-900, #2A2D2F);
+    text-align: center;
+    text-overflow: ellipsis;
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px;
+    border-bottom: 1px solid var(--gray-300, #E0E2E4);
+}
+
+.mypage__table .body .body-list .cell__item li{
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.mypage__table .body .body-list :last-child{
+    border-bottom: none !important;
+}
+
+.mypage__detail-view{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 28px;
+    flex: 1 0 0;
+    align-self: stretch;
+    background: var(--white-100, #FFF);
+}
+
+.mypage__detail-view .card {
+    display: flex;
+    width: 100%;
+    padding: 28px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 28px;
+    flex: 1 0 0;
+}
+
+.mypage__detail-view .card .card__infos{
+    display: flex;
+    width: 476px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.card__infos .card__title{
+    align-self: stretch;
+    color: var(--gray-900, #2A2D2F);
+    font-family: Pretendard;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 24px;
+}
+
+.card__infos .card__meta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.card__meta.date, .card__meta.category {
+    color: var(--gray-700, #6F767E);
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px;
+}
+
+.card .card__content.scrollbox {
+    height: 200px;
+    overflow: auto;
+}
+
+.card .card__content {
+    color: var(--gray-900, #2A2D2F);
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 180%;
+}

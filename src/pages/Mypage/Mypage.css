@@ -313,7 +313,8 @@ line-height: 20px; /* 125% */
 }
     
 
-.mypage__content-main.inquiry-container
+.mypage__content-main.inquiry-container,
+.mypage__content-main.notice-container
 {
     display: flex;
     padding: 28px;
@@ -850,4 +851,12 @@ line-height: 18px; /* 128.571% */
 
 .inquiry .btn_wrap .default_btn_black{
     width: 100%;
+}
+
+.inquiry,
+.notice{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: auto;
 }

@@ -1,9 +1,4 @@
-.inquiry{
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    height: auto;
-}
+
 
 .inquiry .detail .title{
     display: flex;
@@ -459,7 +454,8 @@ align-self: stretch;
     border-radius: 4px;
     border: 1px solid var(--gray-300, #E0E2E4);
     background: var(--white-100, #FFF);
-  }
+    resize: none;  
+}
 
   .field textarea::placeholder{
     color: var(--gray-500, #9EA4AA);

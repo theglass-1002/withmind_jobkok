@@ -14,6 +14,10 @@ import Inquiry from "@/pages/Mypage/Support/Inquiry/Inquiry";
 import InquiryDetail from "@/pages/Mypage/Support/Inquiry/InquiryDetail";
 import InquiryCreate from "@/pages/Mypage/Support/Inquiry/InquiryCreate";
 import InquiryEdit from "@/pages/Mypage/Support/Inquiry/InquiryEdit";
+import NoticeList from "@/pages/Mypage/Support/Notices/NoticeList";
+import NoticeDetail from "@/pages/Mypage/Support/Notices/NoticeDetail";
+
+
 
 import PurchaseLayout from "@/pages/Purchase/PurchaseLayout";
 import PurchaseSuccess from "@/pages/PurchaseResult/PurchaseSuccess";
@@ -50,7 +54,9 @@ export const router = createBrowserRouter([
         {path:"support/inquiry",element:<Inquiry/>},
         {path:"support/inquiry/:id",element:<InquiryDetail/>},
         {path:"support/inquiry/create",element:<InquiryCreate/>},
-        {path:"support/inquiry/edit",element:<InquiryEdit/>}
+        {path:"support/inquiry/edit",element:<InquiryEdit/>},
+        {path: "support/notices", element: <NoticeList/>},
+        {path: "support/notices/:id", element: <NoticeDetail/>},
         
       ]
    },

@@ -1,5 +1,5 @@
 import React from 'react'
-import { useEffect ,useRef} from "react";
+import { useEffect ,useRef,useState} from "react";
 import { useParams } from "react-router-dom"
 import arrow_back_big from '@/assets/icons/arrow_back_big.png';
 import chevron_left from '@/assets/icons/chevron_left.png';
@@ -11,8 +11,16 @@ import Select from 'react-select'
 export default function InquiryCreate() {
 const {id} = useParams<{ id:string}>();  
 const ref = useRef<HTMLTextAreaElement>(null);
+const [editing, setEditing] = useState(false);
 
-
+const startEditing = (e?: React.KeyboardEvent | React.MouseEvent) => {
+    if (e && "key" in e) {
+      if (e.nativeEvent?.isComposing) return;
+      if (e.key !== "Enter" && e.key !== " ") return;
+      e.preventDefault();
+    }
+    setEditing(true);
+  };
 
 const options = [
     { value: 'chocolate', label: 'Chocolate' },
@@ -27,6 +35,7 @@ const options = [
 
 
 return (
+    console.log(editing),
     <div className="inquiry">
         <header className="mypage__content-header detail">
              <h2 className="title">
@@ -53,10 +62,8 @@ return (
         </div>   
         <div className='field'>
         <span className='label'>문의 내용 <em>*</em></span>   
-        <div className='content' onClick={()=>{
-            console.log('입력칸 클릭');
-        }}>
-        <div className='content-info'>
+        <div className='content' onClick={startEditing} onKeyDown={startEditing}>
+       {editing? (<textarea></textarea>):(<div className='content-info'>
         <span className='header'>문의 내용을 입력해 주세요.
         </span>
         <span className='body'>
@@ -78,7 +85,7 @@ return (
                 기타: 문의 시, 문의하고자 하는 서비스의 경로와 문의 내용을 상세히 작성해 주세요.     </li>
             </ul>
         </span>
-        </div>
+        </div>)}  
        
         {/* <textarea name="" id="" placeholder="" >
         </textarea>  */}

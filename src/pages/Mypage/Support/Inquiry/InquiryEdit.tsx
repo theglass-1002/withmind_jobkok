@@ -85,8 +85,7 @@ return (
        
             취소</button>
         <button className="btn default_btn_black">
-        
-            삭제</button>
+            저장</button>
         </div>
     </div>
     </div>
