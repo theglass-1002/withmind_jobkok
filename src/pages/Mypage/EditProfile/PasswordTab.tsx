@@ -53,10 +53,10 @@ export default function PasswordTab({onCancel}:PasswordTabProps) {
 
     const handleSave = async () => {
        console.log('비밀번호 변경 api 통신');
-      // setSubmitted(true);
-      // setNotice(null);
-      // const { data, errs } = validate(form);
-      // setErrors(errs);
+      setSubmitted(true);
+      setNotice(null);
+      const { data, errs } = validate(form);
+      setErrors(errs);
       
     };
 

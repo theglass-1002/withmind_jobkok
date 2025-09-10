@@ -16,6 +16,7 @@ import InquiryCreate from "@/pages/Mypage/Support/Inquiry/InquiryCreate";
 import InquiryEdit from "@/pages/Mypage/Support/Inquiry/InquiryEdit";
 import NoticeList from "@/pages/Mypage/Support/Notices/NoticeList";
 import NoticeDetail from "@/pages/Mypage/Support/Notices/NoticeDetail";
+import ReportJob from "@/pages/Mypage/Support/ReportJob/ReportJob";
 
 
 
@@ -30,7 +31,7 @@ import NotFound from "@/pages/NotFound";
 import MyPageLayout from "@/pages/Mypage/MyPageLayout";
 
 export const router = createBrowserRouter([
-  { path: "/", element: <Layout><Home /></Layout>, errorElement: <Layout><NotFound /></Layout> },
+  { path: "/", element: <Layout><Home/></Layout>, errorElement: <Layout><NotFound /></Layout> },
   { path: "/jobs", element: <Layout><JobsList /></Layout>,
     children:[
       {index:true,element:<>전체공고내용</>},
@@ -55,8 +56,9 @@ export const router = createBrowserRouter([
         {path:"support/inquiry/:id",element:<InquiryDetail/>},
         {path:"support/inquiry/create",element:<InquiryCreate/>},
         {path:"support/inquiry/edit",element:<InquiryEdit/>},
-        {path: "support/notices", element: <NoticeList/>},
-        {path: "support/notices/:id", element: <NoticeDetail/>},
+        {path:"support/notices", element: <NoticeList/>},
+        {path:"support/notices/:id", element: <NoticeDetail/>},
+        {path:"support/report-job", element: <ReportJob/>},
         
       ]
    },

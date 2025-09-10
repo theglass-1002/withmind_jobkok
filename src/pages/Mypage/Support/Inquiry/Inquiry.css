@@ -372,18 +372,7 @@ align-self: stretch;
 /* 
   input */
 
-  .field{
-    display: flex;
-
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-    align-self: stretch;
-  }
-
-  .field .content{
-    width: 100%;
-  }
+ 
   .content-info{
     display: flex;
     height: 280px;
@@ -422,98 +411,3 @@ align-self: stretch;
    font-weight: 600;
   }
 
-
-  .field .label{
-    color: var(--gray-900, #2A2D2F);
-    font-family: Pretendard;
-    font-size: 14px;
-    font-style: normal;
-    font-weight: 600;
-    line-height: 18px; /* 128.571% */
-  }
-
-  .field .label em{
-    color: var(--red-100, #FF524C);
-    font-family: Pretendard;
-    font-size: 14px;
-    font-style: normal;
-    font-weight: 600;
-    line-height: 18px; /* 128.571% */
-  }
-
-  .field textarea{
-    height: 100%;
-    width: 100%;
-    display: flex;
-    height: 280px;
-    padding: 12px 16px 16px 16px;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: flex-start;
-    align-self: stretch;
-    border-radius: 4px;
-    border: 1px solid var(--gray-300, #E0E2E4);
-    background: var(--white-100, #FFF);
-    resize: none;  
-}
-
-  .field textarea::placeholder{
-    color: var(--gray-500, #9EA4AA);
-font-family: Pretendard;
-font-size: 16px;
-font-style: normal;
-font-weight: 400;
-line-height: 180%; /* 28.8px */
-  }
-
- 
-  .field input{
-    display: flex;
-    width: 100%;
-    padding: 16px;
-    justify-content: space-between;
-    align-items: center;
-    flex: 1 0 0;
-    border-radius: 4px;
-    border: 1px solid var(--gray-300, #E0E2E4);
-    background: var(--white-100, #FFF);
-  }
-
-  .field input::placeholder {
-    display: flex;
-    color: var(--gray-500, #9EA4AA);
-    font-family: Pretendard;
-    font-size: 16px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 20px; /* 125% */
-    
-  }
-
-  .info_box{
-    display: flex;
-    padding: 20px;
-    align-items: center;
-    gap: 10px;
-    align-self: stretch;
-    border-radius: 4px;
-    background: var(--gray-50, #F8F8F9);
-  }
-
-  .info_box .info_box_items{
-    color: var(--gray-700, #6F767E);
-    font-family: Pretendard;
-    font-size: 16px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 30px; /* 125% */
-  }
-
-.btn_wrap.create{
-    display: flex;
-    flex-direction: row;
- }
-
- .btn_wrap.create .btn{
-  width: 100%;
- }

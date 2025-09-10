@@ -1,3 +1,8 @@
+
+.btn_w_full{
+    width: 100%;
+}
+
 .default_btn_black{
     display: flex;
     height: 52px;
@@ -96,7 +101,7 @@ font-weight: 300;
 line-height: 18px; /* 128.571% */
 }
 
-.badge--required{
+.notice__agree-text .badge--required{
 color: var(--red-100, #FF524C);
 font-family: Pretendard;
 font-size: 16px;
