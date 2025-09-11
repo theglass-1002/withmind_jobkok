@@ -1,6 +1,0 @@
-.section { display: grid; gap: 12px; max-width: 420px; }
-.title { margin: 0; }
-.form { display: grid; gap: 8px; }
-.input { padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 8px; }
-.btn { padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff; font-weight: 600; }
-.btn:hover { border-color: #2563eb; }

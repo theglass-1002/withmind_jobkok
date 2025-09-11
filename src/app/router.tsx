@@ -25,8 +25,8 @@ import PurchaseSuccess from "@/pages/PurchaseResult/PurchaseSuccess";
 import PurchaseFail from "@/pages/PurchaseResult/PurchaseFail";
 
 
-import Login from "@/pages/Auth/Login";
-import Signup from "@/pages/Auth/Signup";
+import Login from "@/pages/Auth/Login/Login";
+import Signup from "@/pages/Auth/Signup/Signup";
 import NotFound from "@/pages/NotFound";
 import MyPageLayout from "@/pages/Mypage/MyPageLayout";
 

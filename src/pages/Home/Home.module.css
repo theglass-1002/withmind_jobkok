@@ -1,5 +1,0 @@
-.section { display: grid; gap: 12px; }
-.title { margin: 0; }
-.links { display: flex; gap: 12px; }
-.linkBtn { padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 8px; text-decoration: none; color: #0f172a; font-weight: 600; }
-.linkBtn:hover { border-color: #2563eb; }
