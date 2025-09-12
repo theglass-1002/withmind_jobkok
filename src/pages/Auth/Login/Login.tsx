@@ -1,3 +1,12 @@
+import { Link, NavLink } from "react-router-dom";
+import visibility from '@/assets/icons/visibility.png';
+import visibility_off from '@/assets/icons/visibility_off.png';
+import kakao_login from '@/assets/icons/kakao_login_btn.png';
+import naver_login from '@/assets/icons/naver_login_btn.png';
+import google_login from '@/assets/icons/google_login_btn.png';
+import chevron_right from '@/assets/icons/chevron_right.png';
+import cancel from '@/assets/icons/cancel.png';
+import error_Item from '@/assets/icons/error_Item.png';
 
 import "./Login.css";
 
@@ -8,22 +17,31 @@ export default function Login() {
       <h1 className="login-title">로그인</h1>
 
       <form className="login-card">
-        <div className="field">
-          <label className="field-label" htmlFor="email">
-            아이디(이메일) <em>*</em>
+      <div className="field in_icon">
+          <label className="label" >
+            아이디(이메일)
           </label>
-          <input id="email" className="field-input" type="email" placeholder="" required />
+          <div className="input-group">
+            <input id="password" className="form-input" type="text" required />
+              <img src={error_Item} alt="" />
+          </div>
+          <p className="error_text_red">아이디를 입력해 주세요. / 입력한 아이디를 확인해 주세요.</p>
         </div>
 
-        <div className="field">
-          <label className="field-label" htmlFor="password">
-            비밀번호 <em>*</em>
+        <div className="field in_icon">
+          <label className="label" htmlFor="password">
+            비밀번호
           </label>
-          <input id="password" className="field-input" type="password" placeholder="" required />
+          <div className="input-group">
+            <input id="password" className="form-input" type="password" required />
+              <img src={cancel} alt="" />
+              <img src={visibility} alt="" />
+          </div>
+          <p className="error_text_red">비밀번호를 입력해 주세요. / 입력한 비밀번호를 확인해 주세요.</p>
         </div>
 
-        <div className="form-actions">
-          <button className="btn btn-primary" type="submit">로그인</button>
+        <div className="btn_w_full">
+          <button className="btn_w_full default_btn_black" type="submit">로그인</button>
         </div>
 
         <div className="form-meta">
@@ -31,20 +49,27 @@ export default function Login() {
             <input type="checkbox" /> 아이디 기억하기
           </label>
           <div className="links">
-            <a className="auth-link" href="/auth/find-id">아이디 찾기</a>
-            <span className="sep">·</span>
-            <a className="auth-link" href="/auth/reset-password">비밀번호 찾기</a>
-            <span className="sep">·</span>
-            <a className="auth-link" href="/auth/signup">회원가입</a>
+            <NavLink to="/jobs">아이디 찾기</NavLink>
+            <NavLink to="/jobs">비밀번호 찾기</NavLink>
           </div>
         </div>
       </form>
 
       <div className="oauth">
-        <button className="oauth-btn oauth-btn--kakao">카카오로 시작하기</button>
-        <button className="oauth-btn oauth-btn--naver">네이버로 시작하기</button>
-        <button className="oauth-btn oauth-btn--google">구글로 시작하기</button>
+        <img className="login_btn" src={kakao_login} alt="" />
+        <img className="login_btn" src={naver_login} alt="" />
+        <img className="login_btn" src={google_login} alt="" />
       </div>
+     
+    <div className="auth-signup">
+      <span className="auth-signup__text">아직 회원이 아니신가요?</span>
+      <div className="auth-signup__action" >
+        <span className="auth-signup__label">회원가입</span>
+        <span className="auth-signup__icon">
+        <img  src={chevron_right} alt="" />
+        </span>
+      </div>
+    </div>
     </div>
   );
 }

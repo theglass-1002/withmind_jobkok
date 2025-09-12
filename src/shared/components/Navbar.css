@@ -83,6 +83,11 @@ font-size: 14px;
 font-style: normal;
 font-weight: 600;
 line-height: 18px; /* 128.571% */
+cursor: pointer;
+}
+
+.login_off .auth-cta:hover{
+  background: var(--gray-50, #F8F8F9);
 }
 
 .login_on {

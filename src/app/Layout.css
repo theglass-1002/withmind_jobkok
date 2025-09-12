@@ -1,3 +1,9 @@
+input:focus{
+    outline: none; box-shadow: none;
+}
+
+
+
 
 .btn_w_full{
     width: 100%;
@@ -381,3 +387,84 @@ line-height: 20px; /* 125% */
     font-weight: 400;
     line-height: 180%;
 }
+
+
+.field.in_icon{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    align-self: stretch;
+}
+
+.in_icon .input-group{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    align-self: stretch;
+    padding-right: 16px;
+    border-radius: 4px;
+    border: 1px solid var(--gray-300, #E0E2E4);
+    background: var(--white-100, #FFF);
+}
+
+
+
+.in_icon .input-group{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    align-self: stretch;
+    padding-right: 16px;
+    background-color: white;
+}
+
+.in_icon .input-group img{
+  cursor: pointer;
+}
+
+.in_icon .input-group input{
+    border: none;
+}
+
+.in_icon .input-group input:focus{
+    outline: none; box-shadow: none;
+}
+
+.login-page .oauth{
+    display: flex;
+    width: 520px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+
+.form-error_text_red{
+    color: var(--red-100, #FF524C);
+    font-family: Pretendard;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 18px; /* 128.571% */
+}
+
+.form-tip_text_gray{
+    color: var(--gray-700, #6F767E);
+    font-family: Pretendard;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 18px;
+}
+
+.error_text_red{
+color: var(--red-100, #FF524C);
+font-family: Pretendard;
+font-size: 14px;
+font-style: normal;
+font-weight: 400;
+line-height: 18px; /* 128.571% */
+}
+
+

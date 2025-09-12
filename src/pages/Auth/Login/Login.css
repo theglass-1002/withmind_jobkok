@@ -1,10 +1,11 @@
 .login-page{
     display: flex;
-    padding: 100px 360px;
+    padding: 172px 360px;
     flex-direction: column;
     align-items: center;
     gap: 40px;
     align-self: stretch;
+    background-color: white;
 }
 
 .login-title{
@@ -32,3 +33,108 @@ line-height: 34px; /* 121.429% */
     align-items: flex-start;
     gap: 16px;
 }
+
+.oauth .login_btn{
+    cursor: pointer;
+}
+
+
+.form-meta{
+display: flex;
+justify-content: space-between;
+align-items: center;
+align-self: stretch;
+}
+
+.form-meta .remember{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+    
+.form-meta .remember input{
+    width: 20px;
+    height: 20px;
+    aspect-ratio: 1/1;
+    color: var(--gray-700, #6F767E);
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; /* 125% */
+}
+
+.form-meta .links{
+    display: flex;
+    align-items: center;
+
+}
+
+
+.form-meta .links a{
+    color: var(--gray-700, #6F767E);
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; /* 125% */
+
+}
+    
+
+.links a + a::before {
+    content: "";
+    display: inline-block;
+    width: 1px;
+    height: 12px;
+    background: #E0E2E4;
+    margin: 0px 12px;
+}
+
+.login-page .auth-signup{
+    display: flex;
+    width: 520px;
+    padding: 20px 16px 20px 20px;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--gray-50, #F8F8F9);
+    cursor: pointer;
+}
+
+.login-page .auth-signup .auth-signup__text{
+    color: var(--gray-900, #2A2D2F);
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; /* 125% */
+}
+
+.login-page .auth-signup .auth-signup__action{
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+
+
+.login-page .auth-signup .auth-signup__label{
+    color: var(--gray-900, #2A2D2F);
+    text-align: right;
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 20px; /* 125% */
+    
+}
+
+
+.login-page .auth-signup .auth-signup__icon{
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+
+
