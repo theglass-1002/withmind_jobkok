@@ -28,38 +28,27 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 72px;
-  gap: 64px;
+  gap: 52px;
   flex: 1 0 0;
 }
 
 .masthead__menu li{
-  height: 100%;
-  align-items: center;
   display: flex;
+  padding: 12px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  color: #2A2D2F;
+text-align: center;
+font-family: Pretendard;
+font-size: 16px;
+font-style: normal;
+font-weight: 600;
+line-height: 20px; /* 125% */
 }
 
-/* 기본 링크 스타일 (검정 + 밑줄) */
-.masthead__menu a {
-  color: var(---gray-900, #2A2D2F);
-  text-align: center;
-  font-size: 16px;
-  font-family: Pretendard;
-  font-style: normal;
-  font-weight: 600;
-  line-height: 20px; /* 125% */
-}
 
-/* 활성 메뉴 */
-.masthead__menu a.on {
-  font-weight: 800;
-  
-}
 
-/* li가 가진 a가 활성일 때만 li에 보더 */
-.masthead__menu li:has(> a[aria-current="page"]) {
-  border-bottom: 2px solid #000;
-}
 
 .login_off{
   display: flex;

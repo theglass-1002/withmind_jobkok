@@ -30,7 +30,7 @@ export default function Signup() {
               중복확인
             </button>
           </div>
-          <p id="email-error" className="form-error_text_red">
+          <p id="email-error" className="error_text_red">
             이메일을 입력해 주세요. / 이미 가입된 이메일입니다. 해당 이메일로 로그인해 주세요. / 중복 확인을 완료해 주세요.
           </p>
           </div>
@@ -70,7 +70,7 @@ export default function Signup() {
               본인 인증
             </button>
           </div>
-          <p id="email-error" className="form-error_text_red">
+          <p id="email-error" className="error_text_red">
              본인 인증을 완료해 주세요.
             </p>
           </div>
@@ -87,7 +87,7 @@ export default function Signup() {
           생년월일 <em>*</em>
           </label>
           <div className="input-row">
-            <div className="input-group">
+            <div className="date-group">
               <img src={calendar_today} alt="" />
               <input
                 className="form-input"
@@ -97,62 +97,99 @@ export default function Signup() {
               />
             </div>
           </div>
-          <p id="email-error" className="form-error_text_red">
-            이메일을 입력해 주세요. / 이미 가입된 이메일입니다. 해당 이메일로 로그인해 주세요. / 중복 확인을 완료해 주세요.
-          </p>
           </div>
 
+          <div className="toggle-group">
+          <label className="label" htmlFor="email">
+          성별 <em>*</em>
+          </label>
+           <div className="gender-btn_wrap">
+            <button className="default_btn_white on">남성</button>
+            <button className="default_btn_white">여성</button>
+           </div>
+          </div>
+
+        </div>
+        <div className="consent-card">
+          <div className="consent-item--all">
+            <span><input type="checkbox" /></span>
+            <span className="consent-label">전체 동의</span>
+          </div>
+
+          <div className="consent-item">
+            <label className="consent-item__control">
+              <input type="checkbox" />
+              <span className="consent-item__label">
+                <em className="consent-badge badge--required">(필수)</em>
+                만 14세 이상
+              </span>
+            </label>
+             <Link className="consent-item__view" to={""}>보기</Link>
+            </div>
+            <div className="consent-item">
+            <label className="consent-item__control">
+              <input type="checkbox" />
+              <span className="consent-item__label">
+                <em className="consent-badge badge--required">(필수)</em>
+                유료 서비스 이용약관 동의
+              </span>
+            </label>
+             <Link className="consent-item__view" to={""}>보기</Link>
+            </div>
+            <div className="consent-item">
+            <label className="consent-item__control">
+              <input type="checkbox" />
+              <span className="consent-item__label">
+                <em className="consent-badge badge--required">(필수)</em>
+                이용약관 동의
+              </span>
+            </label>
+             <Link className="consent-item__view" to={""}>보기</Link>
+            </div>
+            <div className="consent-item">
+            <label className="consent-item__control">
+              <input type="checkbox" />
+              <span className="consent-item__label">
+                <em className="consent-badge badge--required">(필수)</em>
+                개인정보 수집 및 이용 동의
+              </span>
+            </label>
+             <Link className="consent-item__view" to={""}>보기</Link>
+            </div>
+            <div className="consent-item--optional">
+              <div className="consent-item">
+                <label className="consent-item__control">
+                  <input type="checkbox" />
+                  <span className="consent-item__label">
+                    <em className="badge--optional">(선택)</em>
+                    이벤트 및 서비스 안내 수신 동의
+                  </span>
+                </label>
+                <Link className="consent-item__view" to="/terms/marketing">보기</Link>
+              </div>
+
+              <div className="consent-item__options">
+                <label className="consent-option">
+                  <input type="checkbox" /> 이메일
+                </label>
+                <label className="consent-option">
+                  <input type="checkbox" /> 앱 푸시 알림
+                </label>
+              </div>
+            </div>
+
+
+        </div>
+        <div className="form-actions">
+          <span className="btn_w_full">
+            <button className="btn_w_full default_btn_white">취소</button>
+          </span>
+          <span className="btn_w_full">
+            <button className="btn_w_full default_btn_black">가입하기</button>
+          </span>
         </div>
       </div>
 
-      {/* <form className="login-card">
-      <div className="field in_icon">
-          <label className="label" >
-            아이디(이메일)
-          </label>
-          <div className="input-group">
-            <input id="password" className="form-input" type="text" required />
-           
-          </div>
-          <p className="error_text_red">아이디를 입력해 주세요. / 입력한 아이디를 확인해 주세요.</p>
-        </div>
-
-        <div className="field in_icon">
-          <label className="label" htmlFor="password">
-            비밀번호
-          </label>
-          <div className="input-group">
-            <input id="password" className="form-input" type="password" required />
-             
-          </div>
-          <p className="error_text_red">비밀번호를 입력해 주세요. / 입력한 비밀번호를 확인해 주세요.</p>
-        </div>
-
-        <div className="btn_w_full">
-          <button className="btn_w_full default_btn_black" type="submit">로그인</button>
-        </div>
-
-        <div className="form-meta">
-          <label className="remember">
-            <input type="checkbox" /> 아이디 기억하기
-          </label>
-          <div className="links">
-            <NavLink to="/jobs">아이디 찾기</NavLink>
-            <NavLink to="/jobs">비밀번호 찾기</NavLink>
-          </div>
-        </div>
-      </form> */}
-
-     
-    <div className="auth-signup">
-      <span className="auth-signup__text">아직 회원이 아니신가요?</span>
-      <div className="auth-signup__action" >
-        <span className="auth-signup__label">회원가입</span>
-        <span className="auth-signup__icon">
-        {/* <img  src={chevron_right} alt="" /> */}
-        </span>
-      </div>
-    </div>
     </div>
   );
 }

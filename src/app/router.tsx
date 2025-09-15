@@ -27,6 +27,7 @@ import PurchaseFail from "@/pages/PurchaseResult/PurchaseFail";
 
 import Login from "@/pages/Auth/Login/Login";
 import Signup from "@/pages/Auth/Signup/Signup";
+import Recovery from "@/pages/Auth/Recovery/Recovery";
 import NotFound from "@/pages/NotFound";
 import MyPageLayout from "@/pages/Mypage/MyPageLayout";
 
@@ -45,6 +46,7 @@ export const router = createBrowserRouter([
   { path: "/companies/:companyId", element: <Layout><CompanyDetail /></Layout> },
   { path: "/login", element: <Layout><Login /></Layout> },
   { path: "/signup", element: <Layout><Signup /></Layout> },
+  { path: "/recovery", element: <Layout><Recovery/></Layout> },
   { path: "/mypage", 
     element: <Layout><MyPageLayout/></Layout>,
       children:[

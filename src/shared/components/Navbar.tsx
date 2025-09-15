@@ -41,14 +41,11 @@ export default function Navbar() {
             </Link>
           </h1>
 
-          <nav className="masthead__nav">
-            <ul className="masthead__menu">
+          <ul className="masthead__menu">
               <li><NavLink to="/jobs" className={({isActive}) => isActive ? "on" : undefined}>채용공고</NavLink></li>
               <li><NavLink to="/resume" className={({isActive}) => isActive ? "on" : undefined}>이력서</NavLink></li>
               <li><NavLink to="/mock-interview" className={({isActive}) => isActive ? "on" : undefined}>모의면접</NavLink></li>
             </ul>
-          </nav>
-
           <div className="login_on">
             <span
               className="icon-btn"

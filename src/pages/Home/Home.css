@@ -54,7 +54,7 @@
 /* 검색 박스 */
 .hero .hero-head .search {
   display: flex;
-  min-height: 80px;
+  height: 80px;
   padding: 10px 14px 10px 36px;
   align-items: center;
   gap: 36px;

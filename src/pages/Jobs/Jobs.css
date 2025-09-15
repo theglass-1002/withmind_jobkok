@@ -1,0 +1,63 @@
+.jobs-top-padding{
+    padding-top: 72px;
+}
+
+.resume-promo{
+    display: flex;
+    padding: 24px 360px;
+    justify-content: space-between;
+    align-items: center;
+    align-self: stretch;
+    border-bottom: 1px solid #E0E2E4;
+    background: #1EC280;
+}
+
+.resume-promo .resume-promo__action{
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+
+.resume-promo .resume-promo__text{
+    color: #FFF;
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; /* 125% */
+}
+
+.resume-promo .resume-promo__action .resume-promo__label{
+    color: #FFF;
+    text-align: right;
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 20px; /* 125% */
+}
+.resume-promo .resume-promo__action .resume-promo__icon{
+    width: 20px;
+    height: 20px;
+    aspect-ratio: 1/1;
+}
+
+.jobs-search-header{
+    display: flex;
+    padding: 52px 360px 0 360px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 52px;
+    align-self: stretch;
+    border-bottom: 1px solid #E0E2E4;
+    background: #FFF;
+}
+
+.jobs-search{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 24px;
+    align-self: stretch;
+}
