@@ -1,6 +1,6 @@
 import { Link, NavLink } from "react-router-dom";
-import bookmark_active from '@/assets/icons/mp_bookmark_active.png';
-import bookmark_inactive from '@/assets/icons/mp_bookmark_inactive.png';
+import bookmark_active from '@/assets/icons/bookmark_active_purple.png';
+import bookmark_inactive from '@/assets/icons/bookmark_inactive.png';
 import mp_banner from '@/assets/icons/mp_banner.png';
 import mp_test_logo from '@/assets/icons/mp_test_logo.png';
 import file from '@/assets/icons/file.png';

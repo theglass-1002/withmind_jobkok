@@ -1,3 +1,10 @@
+input{
+    width: 100%;
+    height: 100%;
+    border: none;
+    background-color: transparent;
+}
+
 input:focus{
     outline: none; box-shadow: none;
 }
@@ -169,6 +176,15 @@ font-weight: 400;
 line-height: 20px; /* 125% */
 }
 
+
+.point-text-black{
+    color: var(--gray-900, #2A2D2F);
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 20px; /* 125% */
+}
 
 .badge--optional{
     color: var(--gray-700, #6F767E);
