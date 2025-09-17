@@ -132,9 +132,12 @@ export default function Navbar() {
             >
               <img src={searchIcon} alt="" />
             </span>
+            <NavLink to="/login" >
             <div className="auth-cta">
               <span>로그인 / 회원가입</span>
-          </div>
+          </div>   
+            </NavLink>
+         
           </div>
         </div>
       </header>

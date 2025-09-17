@@ -1,0 +1,411 @@
+
+
+.job-posting .job-posting__list--row {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: var(--container-w);
+    max-width: 100%;
+  }
+  /* === Tokens & baseline (페이지/단독 공통) === */
+.job-posting,
+.job-posting__item--row {
+  --container-w: 1200px;
+  --gap-lg: 20px;
+  --gap-md: 16px;
+  --gap-sm: 12px;
+  --gap-xs: 8px;
+
+  --gray-100: #F2F3F4;
+  --gray-300: #E0E2E4;
+  --gray-700: #6F767E;
+  --white: #FFF;
+  --accent-green: #15D078;
+
+  --font-base: Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI",
+               Roboto, "Helvetica Neue", Arial, "Apple SD Gothic Neo", sans-serif;
+}
+.job-posting__item--row,
+.job-posting__item--row * { box-sizing: border-box; }
+
+/* (옵션) 리스트 래퍼 */
+.job-posting__list--row {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: var(--container-w);
+  max-width: 100%;
+}
+
+/* === Root: 카드 한 장 === */
+.job-posting__item--row {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    gap: var(--gap-lg);
+    border: 1px solid var(--gray-300, #E0E2E4);
+    background: var(--white);
+    background-clip: padding-box; /* 배경이 보더 영역 덮지 않도록 */
+  }
+  
+  /* 바로 뒤에 오는 아이템은 위로 1px 끌어올려 경계 라인을 겹치게 */
+  .job-posting__item--row + .job-posting__item--row {
+    margin-top: -1px;
+  }
+/* === Card === */
+.job-posting__item--row .job-posting__card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-lg);
+  width: 100%;
+  padding: 24px;
+    border-bottom: 1px solid var(--gray-300, #E0E2E4);
+}
+
+/* === Rows === */
+.job-posting__item--row .job-posting__row {
+  display: flex;
+  gap: var(--gap-lg);
+  width: 100%;
+}
+.job-posting__item--row .job-posting__row--top {
+  align-items: flex-start;
+}
+.job-posting__item--row .job-posting__row--bottom {
+  /* 로고(56) + 간격(20) */
+  padding-left: calc(56px + var(--gap-lg));
+  align-items: center;
+}
+
+/* === Left / Right === */
+.job-posting__item--row .job-posting__left {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--gap-lg);
+  flex: 1 0 0;
+}
+.job-posting__item--row .job-posting__right {
+  display: flex;
+  align-items: center;
+}
+.job-posting__item--row .job-posting__favorite { cursor: pointer; }
+
+/* === Logo === */
+.job-posting__item--row .job-posting__logo,
+.job-posting__list--grid .job-posting__logo 
+{
+  display: flex;
+  width: 56px;
+  height: 56px;
+  justify-content: center;
+  align-items: center;
+  aspect-ratio: 1 / 1;
+  border-radius: 4px;
+  border: 1px solid var(--gray-300);
+  background: var(--white);
+}
+
+/* === Details === */
+.job-posting__item--row .job-posting__details {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--gap-md);
+  flex: 1 0 0;
+}
+.job-posting__item--row .job-posting__title {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-xs);
+  width: 100%;
+}
+.job-posting__item--row .job-posting__company,
+.job-posting__list--grid .job-posting__company
+{
+  display: flex;
+  gap: var(--gap-xs);
+  font-family: var(--font-base);
+}
+
+.job-posting__item--row .job-posting__source-logo img,
+.job-posting__list--grid .job-posting__source-logo img
+{
+    display: flex;
+    width: 18px;
+    height: 18px;
+    justify-content: center;
+    align-items: center;
+    border-radius: 4px;
+    border: 1px solid var(--gray-300, #E0E2E4);
+    background: var(--white-100, #FFF);
+}
+
+.job-posting__item--row .job-posting__role,
+.job-posting__list--grid .job-posting__role
+{
+    overflow: hidden;
+    color: var(--gray-900, #2A2D2F);
+    text-overflow: ellipsis;
+    font-family: Pretendard;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 22px; /* 122.222% */
+}
+
+/* === Meta === */
+.job-posting__item--row .job-posting__meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-sm);
+  width: 100%;
+}
+.job-posting__item--row .job-posting__match,
+.job-posting__list--grid .job-posting__match--level{
+  font: 600 14px/18px var(--font-base);
+  color: var(--accent-green);
+}
+/* 점수 단계 모디파이어 */
+.job-posting__item--row .job-posting__match--high { color: var(--accent-green); }
+.job-posting__item--row .job-posting__match--mid  { color: #FFA928; }
+.job-posting__item--row .job-posting__match--low  { color: #FF5C5C; }
+
+.job-posting__item--row .job-posting__match--level,
+.job-posting__list--grid .job-posting__match--level{
+    display: flex;
+    align-items: flex-start;
+    gap: 4px;
+    color: var(--accent-green); 
+}
+
+.job-posting__item--row .job-posting__meta-items,
+.job-posting__list--grid .job-posting__meta-items{
+  display: flex;
+  align-items: center;
+  color: var(--gray-700);
+  font: 400 14px/18px var(--font-base);
+}
+
+.job-posting__list--grid .job-posting__meta-items{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  align-self: stretch;
+}
+
+.job-posting__item--row .job-posting__meta-items span + span::before {
+    content: "";
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    align-self: center;
+    width: 1px;
+    height: 10px;
+    background: #E0E2E4;
+    margin: 0px 12px;
+}
+
+
+.job-posting__list--grid .job-posting__meta-items .job-posting__meta-item + .job-posting__meta-item {
+  padding-left: 12px;
+  border-left: 1px solid #E0E2E4;
+}
+
+.job-posting__item--row .job-posting__meta-item { display: inline-flex; }
+
+/* === Badges & AI Pick === */
+.job-posting__item--row .job-posting__badges,
+.job-posting__list--grid .job-posting__badges
+{
+  display: flex;
+  align-items: center;
+  gap: var(--gap-xs);
+  flex: 1 0 0;
+}
+
+
+
+
+.job-posting__item--row .job-posting__badge,
+.job-posting__list--grid .job-posting__badge
+{
+  display: flex;
+  height: 28px;
+  padding: 4px 8px;
+  align-items: center;
+  gap: 6px;
+  border-radius: 4px;
+  background: var(--gray-100);
+  font: 500 12px/16px var(--font-base);
+  color: #333;
+}
+
+.job-posting__item--row .job-posting__ai-pick {
+  display: flex;
+  height: 28px;
+  padding: 4px 8px 4px 6px;
+  align-items: center;
+  gap: 2px;
+  font: 600 12px/16px var(--font-base);
+}
+
+.job-posting__list--grid{
+  display: flex;
+  width: 1200px;
+  align-items: flex-start;
+  align-content: flex-start;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.job-posting__list--grid .job-posting__card{
+  display: flex;
+  position: relative;
+  width: 384px;
+  padding: 20px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  border: 1px solid var(--ai-100, #15D078);
+  background: var(--white-100, #FFF);
+}
+
+
+.job-posting__list--grid .job-card__header{
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  align-self: stretch;
+}
+
+.job-posting__list--grid .job-posting__left{
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1 0 0;
+}
+
+.job-posting__list--grid .job-card__favorite{
+ cursor: pointer;
+}
+
+
+.job-posting__list--grid .job-card__logo{
+  display: flex;
+  width: 56px;
+  height: 56px;
+  justify-content: center;
+  align-items: center;
+  aspect-ratio: 1/1;
+  border-radius: 4px;
+  border: 1px solid var(--gray-300, #E0E2E4);
+  background: var(--white-100, #FFF);
+}
+
+.job-posting__list--grid .job-card__identity{
+  display: flex;
+  padding: 4px 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  flex: 1 0 0;
+}
+
+.job-posting__list--grid .job-card__byline{
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.job-posting__list--grid .job-card__divider{
+  width: 344px;
+  height: 1px;
+  background: #E0E2E4;
+}
+
+.job-posting__list--grid .job-card__body{
+  display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+      align-self: stretch;
+}
+
+.job-posting__list--grid .job-card__content{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  align-self: stretch;
+}
+
+.job-posting__list--grid .job-card__facts{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  align-self: stretch;
+  color: var(--gray-700, #6F767E);
+  font-family: Pretendard;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 18px; /* 128.571% */
+}
+.job-posting__list--grid .job-card__sticker{
+  display: flex;
+  height: 28px;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: 0 0 6px 0;
+  background: var(--ai-100, linear-gradient(90deg, #15D078 0%, #4BD1C8 100%));
+}
+
+
+.job-posting__list--row .job-card__control--radio,
+.job-posting__list--grid .job-card__control--radio{
+    display: flex;
+    width: 100%;
+    padding: 16px;
+    align-items: center;
+    gap: 12px;
+    align-self: stretch;
+    border-radius: 4px;
+    background: var(--gray-50, #F8F8F9);
+    color: var(--gray-900, #2A2D2F);
+    font-family: Pretendard;
+    font-size: 17px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; /* 125% */
+}
+
+.job-posting__list--row .job-card__control--radio.on,
+.job-posting__list--grid .job-card__control--radio.on{
+  border-radius: 4px;
+  background: var(--primary-8, rgba(129, 107, 254, 0.08));
+  cursor: pointer;
+}
+
+.job-posting__list--row .job-card__control--radio.on img,
+.job-posting__list--grid .job-card__control--radio.on img{
+  width: 20px;
+  height: 20px;
+}
+
+.radio_check_blank_gray{
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  border-radius: 50%;          
+  background: transparent;     
+  box-sizing: border-box;      
+  border: 2px solid #D9D9D9; 
+  cursor: pointer;    
+}
+
