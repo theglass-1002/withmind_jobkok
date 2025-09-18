@@ -16,6 +16,21 @@ import arrow_right from '@/assets/icons/keyboard_arrow_right.png';
 import JobPostingRow from "@/shared/components/job-posting-item/JobPostingRow";
 import JobPostingCard from "@/shared/components/job-posting-item/JobPostingCard";
 import Pagination from "@/shared/components/Pagination";
+
+import ModalJobRolePicker from "@/shared/components/job-role-picker/ModalJobRolePicker";
+
+
+
+import check_box_purple from '@/assets/icons/check_box_purple.png';
+import check_box_outline_blank_gray from '@/assets/icons/check_box_outline_blank_gray.png';
+
+import chevron_right from '@/assets/icons/chevron_right.png';
+import chevron_right_white from '@/assets/icons/chevron_right_white.png';
+import chevron_right_black from '@/assets/icons/chevron_right_black.png';
+import chevron_right_gray_light from '@/assets/icons/chevron_right_gray_light.png';
+import refresh_black from '@/assets/icons/refresh_black.png';
+import close_gray from '@/assets/icons/close_gray.png';
+
 import "./Jobs.css";
 
 
@@ -25,6 +40,13 @@ export default function JobsList() {
   const [page, setPage] = useState(1);
   const [resumeReco, setResumeReco] = useState(true); // 이력서 기반 추천 토글
   const [view, setView] = useState(0);
+  const [allChecked, setAllChecked] = useState(false);
+  const [checkedRoles, setCheckedRoles] = useState<Set<string>>(new Set());
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const isOn = (key: string) => activeCategory === key;
+
+  const toggleCategory = (key: string) =>
+    setActiveCategory(prev => (prev === key ? null : key));
   
 
   useEffect(() => {
@@ -34,7 +56,6 @@ export default function JobsList() {
     
     const onScroll = () => {
       const scrollTop = window.scrollY;
-      console.log(scrollTop);
       if (scrollTop > 50) {
         // 스크롤이 50px 이상이면 static으로 변경 (고정 해제)
         masthead.classList.add("masthead-static");
@@ -66,6 +87,31 @@ export default function JobsList() {
       }
     };
   }, []);
+
+
+const onClickAll = () => {
+  setAllChecked(prev => {
+    const next = !prev;
+    if (next) setCheckedRoles(new Set()); 
+    return next;
+  });
+};
+
+
+const onClickRole = (key: string) => {
+  setAllChecked(false);
+  setCheckedRoles(prev => {
+    const next = new Set(prev);
+    next.has(key) ? next.delete(key) : next.add(key);
+    return next;
+  });
+};
+
+const handleReset = () => {
+  setAllChecked(false);          
+  setCheckedRoles(new Set());    
+  setActiveCategory(null);
+};
 
   return (
     <>
@@ -115,13 +161,9 @@ export default function JobsList() {
                       <span className="job-search-filter-menu__icon">
                         <img src={arrow_drop_down} alt="" />
                       </span>
+                      {/* <ModalJobRolePicker/> */}
                   </li>
-                  <div className="voxs">
-                    <div>직군전체</div>
-                    <div>바디</div>
-                    <div>옵션</div>
-                    <div>버튼</div>
-                  </div>
+             
                   <li className="job-search-filter-menu__item">
                       <span className="job-search-filter-menu__label">경력</span>
                       <span className="job-search-filter-menu__icon">
