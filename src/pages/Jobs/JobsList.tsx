@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import 'rc-slider/assets/index.css';
+import Slider from 'rc-slider';
 import Switch from "react-switch";
 import { NavLink } from "react-router-dom";
 import keyboard_arrow_right from '@/assets/icons/chevron_right_white.png';
@@ -18,6 +20,9 @@ import JobPostingCard from "@/shared/components/job-posting-item/JobPostingCard"
 import Pagination from "@/shared/components/Pagination";
 
 import ModalJobRolePicker from "@/shared/components/job-role-picker/ModalJobRolePicker";
+import ModalCareerRangePicker from "@/shared/components/career-range-picker/ModalCareerRangePicker";
+import ModalEducationPicker from "@/shared/components/education-picker/ModalEducationPicker";
+
 
 
 
@@ -40,14 +45,8 @@ export default function JobsList() {
   const [page, setPage] = useState(1);
   const [resumeReco, setResumeReco] = useState(true); // 이력서 기반 추천 토글
   const [view, setView] = useState(0);
-  const [allChecked, setAllChecked] = useState(false);
-  const [checkedRoles, setCheckedRoles] = useState<Set<string>>(new Set());
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const isOn = (key: string) => activeCategory === key;
 
-  const toggleCategory = (key: string) =>
-    setActiveCategory(prev => (prev === key ? null : key));
-  
+
 
   useEffect(() => {
     const masthead = document.querySelector(".masthead");
@@ -89,29 +88,6 @@ export default function JobsList() {
   }, []);
 
 
-const onClickAll = () => {
-  setAllChecked(prev => {
-    const next = !prev;
-    if (next) setCheckedRoles(new Set()); 
-    return next;
-  });
-};
-
-
-const onClickRole = (key: string) => {
-  setAllChecked(false);
-  setCheckedRoles(prev => {
-    const next = new Set(prev);
-    next.has(key) ? next.delete(key) : next.add(key);
-    return next;
-  });
-};
-
-const handleReset = () => {
-  setAllChecked(false);          
-  setCheckedRoles(new Set());    
-  setActiveCategory(null);
-};
 
   return (
     <>
@@ -169,12 +145,14 @@ const handleReset = () => {
                       <span className="job-search-filter-menu__icon">
                         <img src={arrow_drop_down} alt="" />
                       </span>
+                      {/* <ModalCareerRangePicker/> */}
                   </li>
                   <li className="job-search-filter-menu__item">
                       <span className="job-search-filter-menu__label">학력</span>
                       <span className="job-search-filter-menu__icon">
                         <img src={arrow_drop_down} alt="" />
                       </span>
+                          <ModalEducationPicker/>
                   </li>
                   <li className="job-search-filter-menu__item">
                       <span className="job-search-filter-menu__label">지역</span>

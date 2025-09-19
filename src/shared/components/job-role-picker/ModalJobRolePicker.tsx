@@ -1,28 +1,10 @@
 import React, { useState, useEffect } from "react";
-import Switch from "react-switch";
-import { NavLink } from "react-router-dom";
-import keyboard_arrow_right from '@/assets/icons/chevron_right_white.png';
-import search from '@/assets/icons/search.png';
-import arrow_drop_down from '@/assets/icons/arrow_drop_down.png';
-import arrow_drop_down_gray from '@/assets/icons/arrow_drop_down_gray.png';
-import help from '@/assets/icons/help.png';
-import cancel from '@/assets/icons/cancel.png';
-import grid_gray from '@/assets/icons/grid_gray.png';
-import grid_black from '@/assets/icons/grid_black.png';
-import row_black from '@/assets/icons/row_black.png';
-import row_white from '@/assets/icons/row_gray.png';
-import arrow_left from '@/assets/icons/keyboard_arrow_left.png';
-import arrow_right from '@/assets/icons/keyboard_arrow_right.png';
-import JobPostingRow from "@/shared/components/job-posting-item/JobPostingRow";
-import JobPostingCard from "@/shared/components/job-posting-item/JobPostingCard";
-import Pagination from "@/shared/components/Pagination";
 
 
 import check_box_purple from '@/assets/icons/check_box_purple.png';
 import check_box_outline_blank_gray from '@/assets/icons/check_box_outline_blank_gray.png';
 
-import chevron_right from '@/assets/icons/chevron_right.png';
-import chevron_right_white from '@/assets/icons/chevron_right_white.png';
+
 import chevron_right_black from '@/assets/icons/chevron_right_black.png';
 import chevron_right_gray_light from '@/assets/icons/chevron_right_gray_light.png';
 import refresh_black from '@/assets/icons/refresh_black.png';
@@ -34,9 +16,6 @@ import "./ModalJobRolePicker.css";
 
 
 export default function ModalJobRolePicker() {
-  const [page, setPage] = useState(1);
-  const [resumeReco, setResumeReco] = useState(true); // 이력서 기반 추천 토글
-  const [view, setView] = useState(0);
   const [allChecked, setAllChecked] = useState(false);
   const [checkedRoles, setCheckedRoles] = useState<Set<string>>(new Set());
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -45,46 +24,6 @@ export default function ModalJobRolePicker() {
   const toggleCategory = (key: string) =>
     setActiveCategory(prev => (prev === key ? null : key));
   
-
-  useEffect(() => {
-    const masthead = document.querySelector(".masthead");
-    const searchToolbar = document.querySelector(".jobs-toolbar__search");
-    if (!masthead || !searchToolbar) return;
-    
-    const onScroll = () => {
-      const scrollTop = window.scrollY;
-      if (scrollTop > 50) {
-        // 스크롤이 50px 이상이면 static으로 변경 (고정 해제)
-        masthead.classList.add("masthead-static");
-        searchToolbar.classList.add("search-toolbar-fixed");
-      } else {
-        // 스크롤이 50px 미만이면 fixed 유지 (고정)
-        masthead.classList.remove("masthead-static");
-        searchToolbar.classList.remove("search-toolbar-fixed");
-      }
-
-      if (scrollTop > 165) {
-        searchToolbar.classList.add("search-toolbar-fixed");
-      } else {
-        searchToolbar.classList.remove("search-toolbar-fixed");
-      }
-    };
-    
-    // 스크롤 이벤트 등록
-    window.addEventListener("scroll", onScroll);
-    
-    // 컴포넌트 언마운트 시 정리
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      if (masthead) {
-        masthead.classList.remove("masthead-static");
-      }
-      if (searchToolbar) {
-        searchToolbar.classList.remove("search-toolbar-fixed");
-      }
-    };
-  }, []);
-
 
 const onClickAll = () => {
   setAllChecked(prev => {

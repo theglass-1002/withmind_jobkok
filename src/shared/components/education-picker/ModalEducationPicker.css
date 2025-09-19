@@ -1,7 +1,7 @@
 
-.job-role-picker--popup{
-    width: 670px;
-    height: 560px;
+.education-picker--popup{
+    width: 460px;
+    height: 400px;
     display: flex;
     top: 150%;
     position: absolute;
@@ -33,46 +33,38 @@
     align-self: stretch;
     background: var(--white-100, #FFF);
 }
-.job-role-picker__checkbox-wrap{
+.education-picker__checkbox-wrap{
     cursor: pointer;
 }
 
-.job-role-picker__header.on{
+.education-picker__body{
+    display: flex;
+    padding: 16px;
+    align-items: flex-start;
+
+}
+
+
+.education-picker__body.on{
     font-weight: 600; 
     color: var(--gray-900, #2A2D2F);
 }
 
-.job-role-picker__body{
-    height: 334px;
+
+.education-picker__column--left{
     display: flex;
+    flex-direction: column;
     align-items: flex-start;
-    align-self: stretch;
-    border-top: 1px solid var(--gray-300, #E0E2E4);
-    overflow: hidden;
-    color: var(--gray-900, #2A2D2F);
-    text-overflow: ellipsis;
-    font-family: Pretendard;
-    font-size: 16px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 20px; /* 125% */
 }
 
-.job-role-picker__column--left{
-display: flex;
-flex: 1;
-align-items: center;
-border-right: 1px solid var(--gray-300, #E0E2E4);
-}
-
-.job-role-picker__column--right{
+.education-picker__column--right{
     display: flex;
-    flex: 2;
+    flex-direction: column;
     align-items: flex-start;
 }
 
 
-.job-role-picker__category_group{
+.education-picker__category_group{
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -83,28 +75,28 @@ border-right: 1px solid var(--gray-300, #E0E2E4);
   }
   
  
-  .job-role-picker__category_group,
-  .job-role-picker__group
+  .education-picker__category_group,
+  .education-picker__group
   {
     scrollbar-width: thin;
     scrollbar-color: #9EA4AA #F8F8F9;
   }
   
 
-  .job-role-picker__category_group::-webkit-scrollbar,
-  .job-role-picker__group::-webkit-scrollbar
+  .education-picker__category_group::-webkit-scrollbar,
+  .education-picker__group::-webkit-scrollbar
   {
     width: 8px;                
     height: 8px;                
   }
-  .job-role-picker__category_group::-webkit-scrollbar-track,
-  .job-role-picker__group::-webkit-scrollbar-track
+  .education-picker__category_group::-webkit-scrollbar-track,
+  .education-picker__group::-webkit-scrollbar-track
   {
     background: #F8F8F9;        
     border-radius: 100px;
   }
-  .job-role-picker__category_group::-webkit-scrollbar-thumb,
-  .job-role-picker__column--right::-webkit-scrollbar-thumb
+  .education-picker__category_group::-webkit-scrollbar-thumb,
+  .education-picker__group::-webkit-scrollbar-thumb
   {
     background: #9EA4AA;     
     border-radius: 100px;
@@ -175,7 +167,7 @@ min-height: 0;
     font-weight: 600;
 }
 
-.job-role-picker__options{
+.education-picker__options{
     display: flex;
     padding: 20px;
     flex-direction: column;
@@ -186,7 +178,7 @@ min-height: 0;
     background: var(--gray-50, #F8F8F9);
 }
 
-.job-role-picker__options-note{
+.education-picker__options-note{
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 1;
@@ -201,7 +193,7 @@ min-height: 0;
     line-height: 20px; /* 125% */
 }
 
-.job-role-picker__selected{
+.education-picker__selected{
     display: flex;
     align-items: center;
     align-content: center;
@@ -210,7 +202,7 @@ min-height: 0;
     flex-wrap: wrap;
 }
 
-.job-role-picker__chip{
+.education-picker__chip{
     display: flex;
     padding: 8px 8px 8px 12px;
     justify-content: center;
@@ -221,7 +213,7 @@ min-height: 0;
     background: var(--white-100, #FFF);
 }
 
-.job-role-picker__actions{
+.education-picker__actions{
     display: flex;
     padding: 20px;
     justify-content: space-between;

@@ -1,0 +1,123 @@
+
+
+
+.career-range--popup{
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    position: absolute;
+    top: 150%;
+    border-radius: 6px;
+    border: 1px solid var(--gray-300, #E0E2E4);
+    background: var(--white-100, #FFF);
+    box-shadow: 0 0 24px 0 rgba(42, 45, 47, 0.16);
+    z-index: 10;
+  }
+
+  .career-range__content{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 480px;
+    height: 174px;
+  }
+
+  .career-range__header{
+    overflow: hidden;
+    color: var(--gray-900, #2A2D2F);
+    text-align: center;
+    text-overflow: ellipsis;
+    font-family: Pretendard;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 22px; /* 122.222% */
+  }
+
+  .career-range-wrap{
+    position: relative;
+    width: 400px;
+    padding-top: 5%;
+    padding-bottom: 10%;
+
+  }
+  
+  .career-range-slider{
+    width: 100%;
+    padding: 8px 0;     
+  }
+  
+
+  .career-range-slider .rc-slider-rail{
+    background: #E0E2E4;
+    height: 6px;
+  }
+  
+
+  .career-range-slider .rc-slider-track{
+    background: #816BFE;
+    height: 6px;
+  }
+  
+
+  .career-range-slider .rc-slider-handle,
+  .career-range-slider .rc-slider-handle:hover,
+  .career-range-slider .rc-slider-handle:active,
+  .career-range-slider .rc-slider-handle:focus,
+  .career-range-slider .rc-slider-handle:focus-visible,
+  .career-range-slider .rc-slider-handle-dragging{
+    width: 16px;
+    height: 16px;
+    border: 2px solid #816BFE;
+    background: #816BFE;
+    outline: none;
+    box-shadow: none; 
+    opacity: 1;
+  }
+  
+
+  .career-range-slider { -webkit-tap-highlight-color: transparent; }
+  
+
+  .career-range-follow{
+    position: absolute;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    pointer-events: none; 
+    font-size: 14px;
+    color: #2A2D2F;
+  }
+  
+
+  .career-range__label--min{ top: 65%;  }
+  .career-range__label--max{ top: 65%; }
+  
+
+  .career-range-follow > span{
+    display: -webkit-box;
+    width: 48px;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    overflow: hidden;
+    color: var(--gray-900, #2A2D2F);
+    text-align: center;
+    text-overflow: ellipsis;
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px;
+  }
+  
+
+  .career-range--popup .career-range__actions{
+    display: flex
+    ;
+        padding: 20px;
+        justify-content: space-between;
+        align-items: center;
+        align-self: stretch;
+        border-top: 1px solid var(--gray-300, #E0E2E4);
+  }
+  
