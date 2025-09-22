@@ -6,6 +6,7 @@ import { NavLink } from "react-router-dom";
 import keyboard_arrow_right from '@/assets/icons/chevron_right_white.png';
 import search from '@/assets/icons/search.png';
 import arrow_drop_down from '@/assets/icons/arrow_drop_down.png';
+import arrow_drop_up_black from '@/assets/icons/arrow_drop_up_black.png';
 import arrow_drop_down_gray from '@/assets/icons/arrow_drop_down_gray.png';
 import help from '@/assets/icons/help.png';
 import cancel from '@/assets/icons/cancel.png';
@@ -18,35 +19,26 @@ import arrow_right from '@/assets/icons/keyboard_arrow_right.png';
 import JobPostingRow from "@/shared/components/job-posting-item/JobPostingRow";
 import JobPostingCard from "@/shared/components/job-posting-item/JobPostingCard";
 import Pagination from "@/shared/components/Pagination";
+import refresh_gray from '@/assets/icons/refresh_gray.png';
 
 import ModalJobRolePicker from "@/shared/components/job-role-picker/ModalJobRolePicker";
 import ModalCareerRangePicker from "@/shared/components/career-range-picker/ModalCareerRangePicker";
 import ModalEducationPicker from "@/shared/components/education-picker/ModalEducationPicker";
-
-
-
-
-import check_box_purple from '@/assets/icons/check_box_purple.png';
-import check_box_outline_blank_gray from '@/assets/icons/check_box_outline_blank_gray.png';
-
-import chevron_right from '@/assets/icons/chevron_right.png';
-import chevron_right_white from '@/assets/icons/chevron_right_white.png';
-import chevron_right_black from '@/assets/icons/chevron_right_black.png';
-import chevron_right_gray_light from '@/assets/icons/chevron_right_gray_light.png';
-import refresh_black from '@/assets/icons/refresh_black.png';
-import close_gray from '@/assets/icons/close_gray.png';
-
+import ModalLocationPicker from "@/shared/components/location-picker/ModalLocationPicker";
+import ModalEmploymentTypePicker from "@/shared/components/employment-type-picker/ModalEmploymentTypePicker";
 import "./Jobs.css";
 
 
 
-
+type FilterKey = 'role' | 'career' | 'education' | 'location' | 'employment';
 export default function JobsList() {
   const [page, setPage] = useState(1);
   const [resumeReco, setResumeReco] = useState(true); // 이력서 기반 추천 토글
   const [view, setView] = useState(0);
+  const [openFilter, setOpenFilter] = useState<FilterKey | null>(null);
 
-
+  const toggleFilter = (key: FilterKey) =>
+    setOpenFilter(prev => (prev === key ? null : key));
 
   useEffect(() => {
     const masthead = document.querySelector(".masthead");
@@ -90,6 +82,7 @@ export default function JobsList() {
 
 
   return (
+    console.log(openFilter),
     <>
       <div className="jobs jobs-top-padding"> {/* 헤더(고정 72px) 아래 공간 확보 */}
           <div className="resume-promo">
@@ -109,8 +102,8 @@ export default function JobsList() {
                 <img src={search} alt="" />
                   <input type="text" placeholder="직무, 기업명, 지역등을 입력해주세요" />
                   <img src={cancel} alt="" />
-                </div>
-                <div className="job-search-filters">
+            </div>
+            <div className="job-search-filters">
                 <div className="job-search-filter job-search-filter--toggle">
                   <div className="job-search-filter__label">
                     <span className="job-search-filter__text">이력서 기반 추천</span>
@@ -132,42 +125,97 @@ export default function JobsList() {
                     />
                 </div>
                 <ul className="job-search-filter-menu">
-                  <li className="job-search-filter-menu__item">
+                      <li
+                        className={`job-search-filter-menu__item ${openFilter==='role' ? 'on' : ''}`}
+                        onClick={() => toggleFilter('role')}
+                      >
                       <span className="job-search-filter-menu__label">직군ㆍ직무</span>
                       <span className="job-search-filter-menu__icon">
-                        <img src={arrow_drop_down} alt="" />
+                        <img src={openFilter==='role'?arrow_drop_up_black:arrow_drop_down} alt="" />
                       </span>
-                      {/* <ModalJobRolePicker/> */}
-                  </li>
-             
-                  <li className="job-search-filter-menu__item">
+                      {openFilter==='role'?<div
+                          onMouseDown={(e) => e.stopPropagation()}  
+                          onClick={(e) => e.stopPropagation()}     
+                          onTouchStart={(e) => e.stopPropagation()} >
+                          <ModalJobRolePicker/>
+                          </div>
+                          :<></>}
+                  </li>       
+                  <li 
+                    className={`job-search-filter-menu__item ${openFilter==='career' ? 'on' : ''}`}
+                    onClick={() => toggleFilter('career')}>
                       <span className="job-search-filter-menu__label">경력</span>
                       <span className="job-search-filter-menu__icon">
-                        <img src={arrow_drop_down} alt="" />
+                      <img src={openFilter==='career'?arrow_drop_up_black:arrow_drop_down} alt="" />
                       </span>
-                      {/* <ModalCareerRangePicker/> */}
+                      {openFilter==='career'?<div
+                          onMouseDown={(e) => e.stopPropagation()}  
+                          onClick={(e) => e.stopPropagation()}     
+                          onTouchStart={(e) => e.stopPropagation()} >
+                          <ModalCareerRangePicker/>
+                          </div>
+                          :<></>}
                   </li>
-                  <li className="job-search-filter-menu__item">
+                  <li 
+                      className={`job-search-filter-menu__item ${openFilter==='education' ? 'on' : ''}`}
+                      onClick={() => toggleFilter('education')}
+                    >
                       <span className="job-search-filter-menu__label">학력</span>
                       <span className="job-search-filter-menu__icon">
-                        <img src={arrow_drop_down} alt="" />
+                      <img src={openFilter==='education'?arrow_drop_up_black:arrow_drop_down} alt="" />
                       </span>
+                      {openFilter==='education'?<div
+                          onMouseDown={(e) => e.stopPropagation()}  
+                          onClick={(e) => e.stopPropagation()}     
+                          onTouchStart={(e) => e.stopPropagation()} >
                           <ModalEducationPicker/>
+                          </div>
+                          :<></>}   
                   </li>
-                  <li className="job-search-filter-menu__item">
+                  <li
+                      className={`job-search-filter-menu__item ${openFilter==='location' ? 'on' : ''}`}
+                      onClick={() => toggleFilter('location')}
+                    >
                       <span className="job-search-filter-menu__label">지역</span>
                       <span className="job-search-filter-menu__icon">
-                        <img src={arrow_drop_down} alt="" />
+                      <img src={openFilter==='location'?arrow_drop_up_black:arrow_drop_down} alt="" />
                       </span>
+                      {openFilter==='location'?<div
+                          onMouseDown={(e) => e.stopPropagation()}  
+                          onClick={(e) => e.stopPropagation()}     
+                          onTouchStart={(e) => e.stopPropagation()} >
+                          <ModalLocationPicker/>
+                          </div>
+                          :<></>}   
                   </li>
-                  <li className="job-search-filter-menu__item">
+                  <li 
+                    className={`job-search-filter-menu__item ${openFilter==='employment' ? 'on' : ''}`}
+                    onClick={() => toggleFilter('employment')}
+                  >
                       <span className="job-search-filter-menu__label">채용 유형</span>
                       <span className="job-search-filter-menu__icon">
-                        <img src={arrow_drop_down} alt="" />
+                      <img src={openFilter==='employment'?arrow_drop_up_black:arrow_drop_down} alt="" />
                       </span>
+                      {openFilter==='employment'?<div
+                          onMouseDown={(e) => e.stopPropagation()}  
+                          onClick={(e) => e.stopPropagation()}     
+                          onTouchStart={(e) => e.stopPropagation()} >
+                          <ModalEmploymentTypePicker/>
+                          </div>
+                          :<></>}   
                   </li>
                 </ul>
+            </div>
+            <div className="jobs-toolbar__actions">
+              <div className="jobs-actions__reset">
+                <span><img src={refresh_gray} alt="" /></span>초기화</div>
+             <div className="jobs-chips">
+                <div className="jobs-chips__item">개발 ! 프론트엔드 개발자 닫기</div>
+                <div className="jobs-chips__item">개발 웹 개발자 닫기</div>
+                <div className="jobs-chips__item">학력 무관 닫기</div>
+                <div className="jobs-chips__item">서울 마포구 ! 마포구 닫기</div>
               </div>
+            </div>
             </div>
             <div className="jobs-tabs" role="tablist" aria-label="공고 탭">
               <span className="jobs-tab on">

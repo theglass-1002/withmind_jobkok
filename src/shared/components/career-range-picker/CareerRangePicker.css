@@ -2,10 +2,11 @@
 
 
 .career-range--popup{
-    display: inline-flex;
+    display: flex;
     flex-direction: column;
     align-items: flex-start;
     position: absolute;
+    left: 0px;
     top: 150%;
     border-radius: 6px;
     border: 1px solid var(--gray-300, #E0E2E4);
@@ -112,8 +113,7 @@
   
 
   .career-range--popup .career-range__actions{
-    display: flex
-    ;
+    display: flex;
         padding: 20px;
         justify-content: space-between;
         align-items: center;

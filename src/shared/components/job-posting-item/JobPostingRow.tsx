@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { toast } from 'react-toastify';
 import bookmark_active_purple from '@/assets/icons/bookmark_active_purple.png';
 import bookmark_inactive from '@/assets/icons/bookmark_inactive.png';
 import mp_test_logo from '@/assets/icons/mp_test_logo.png';
@@ -15,6 +16,18 @@ import "./JobPostingItem.css";
 export default function JobPostingRow() {
     const [bookMark, setBookMark] = useState(0);
     const [recordAsApplied, setRecordAsApplied] = useState(0);
+
+    const handleRecordAsApplied = (next: 0 | 1) => {
+      setRecordAsApplied(next);
+      console.log(next);
+      if (next === 1) {
+        toast.success('지원한 포지션으로 기록했어요.');
+      } else {
+        toast.info('기록을 해제했어요.');
+      }
+    };
+  
+
 
   return (
     <>
@@ -64,7 +77,7 @@ export default function JobPostingRow() {
                         </div>
                         {recordAsApplied===0?
                           <div className="job-card__control job-card__control--radio">
-                          <div className="radio_check_blank_gray" onClick={()=>setRecordAsApplied(1)}></div> 
+                          <div className="radio_check_blank_gray" onClick={()=>handleRecordAsApplied(1)}></div> 
                           지원한 포지션으로 기록하기</div>:
                           <div className="job-card__control job-card__control--radio on">
                             <img onClick={()=>setRecordAsApplied(0)} src={check_circle_purple} alt="" />
