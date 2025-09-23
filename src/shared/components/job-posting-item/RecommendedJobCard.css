@@ -1,0 +1,104 @@
+.job-list.recommend{
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 24px;           /* 카드 간격 */
+    padding: 0;
+    margin: 0;
+    list-style: none;
+ }
+
+
+.job-list.recommend .job-card{
+    display: flex;
+    width: 100%;
+    padding: 20px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    border-radius: 6px;
+    border: 1px solid var(--gray-300, #E0E2E4);
+    background: var(--white-100, #FFF);
+    cursor: pointer;
+
+ }
+
+ .job-list.recommend .job-card:hover{
+   border-radius: 6px;
+   border: 1px solid var(--gray-300, #E0E2E4);
+   background: var(--gray-50, #F8F8F9);
+ }
+
+ .job-list .job-card .job-head{
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    align-self: stretch;
+ }
+
+ .job-card .job-head .job-logo img{
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    aspect-ratio: 1 / 1;
+    border-radius: 4px;
+    border: 1px solid var(--gray-300, #E0E2E4);
+    background: var(--white-100, #FFF); 
+}
+
+ .job-card .job-head .job-bookmark img{
+    width: 18px;
+    height: 22px;
+    flex-shrink: 0;
+ }
+ 
+
+ .job-list .job-card .job-main{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    align-self: stretch;
+ }
+
+
+ .job-card .job-main .job-company{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    align-self: stretch;
+ }
+
+ .job-main .job-company .company-name{
+    color: var(--gray-700, #6F767E);
+    font-family: Pretendard;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 18px; /* 128.571% */
+ }
+
+ .job-main .job-company .job-role{
+    color: var(--gray-900, #2A2D2F);
+    font-family: Pretendard;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 22px; /* 122.222% */
+ }
+
+
+ .job-card .job-main .job-meta{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    align-self: stretch;
+    color: var(--gray-700, #6F767E);
+    font-family: Pretendard;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 18px; 
+ }

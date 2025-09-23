@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import bookmark_active_purple from '@/assets/icons/bookmark_active_purple.png';
 import bookmark_inactive from '@/assets/icons/bookmark_inactive.png';
@@ -7,7 +8,7 @@ import jobkorea from '@/assets/icons/company_logos/jobkorea.png';
 import fire from '@/assets/icons/fire.png';
 import seed from '@/assets/icons/seed.png';
 import ai_pick from '@/assets/icons/ai_pick.png';
-import green_star from '@/assets/icons/green_star.png';
+import green_star16x16 from '@/assets/icons/green_star16x16.png';
 import check_circle_purple from '@/assets/icons/check_circle_purple.png';
 import "./JobPostingItem.css";
 
@@ -33,6 +34,7 @@ export default function JobPostingRow() {
     <>
       <div className="job-posting__list job-posting__list--row">
         <div className="job-posting__item job-posting__item--row">
+        <Link to="/jobs/3">
           <div className="job-posting__card">
             <div className="job-posting__row job-posting__row--top">
              <div className="job-posting__left">
@@ -46,7 +48,7 @@ export default function JobPostingRow() {
                     </div>
                     <div className="job-posting__meta">
                      <div className="job-posting__match job-posting__match--level">
-                       <img src={green_star} alt="" />
+                       <img src={green_star16x16} alt="" />
                               AI 적합도 90%</div>
                             <div className="job-posting__meta-items">
                               <span className="job-posting__meta-item">서울 마포구ㆍ5~10년ㆍ학력 무관</span>
@@ -86,6 +88,7 @@ export default function JobPostingRow() {
                     }
                        
                 </div>
+                </Link>     
             </div>
           </div>
          </>

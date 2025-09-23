@@ -6,7 +6,7 @@ export default function ResetPwd() {
 
   return (
       <section className="recovery-panel">
-        {/* <div className="recovery-info result">
+        <div className="recovery-info result">
             <span className="recovery-info__head">
                 <span className="recovery-info__title">잡콕 회원가입 정보로
             <br/>비밀번호 찾기를 진행해 주세요</span>
@@ -25,8 +25,8 @@ export default function ResetPwd() {
         <div className="form-actions">
           <button type="button" className="btn_w_full default_btn_white">취소</button>
           <button type="submit" className="btn_w_full default_btn_black">본인 인증</button>
-        </div> */}
-           <div className="recovery-info result">
+        </div>
+           {/* <div className="recovery-info result">
            <span className="recovery-info__head">
                 <span className="recovery-info__title title__result">요청하신 임시 비밀번호는 다음과 같습니다.</span>
             <span className="form-tip_text_gray">개인정보 보호를 위해 로그인 후 비밀번호 변경을 권장합니다.</span>     
@@ -37,7 +37,7 @@ export default function ResetPwd() {
         </div>
         <div className="form-actions">
          <button className="btn_w_full default_btn_black">로그인</button>
-        </div> 
+        </div>  */}
       </section>
 
   );

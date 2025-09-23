@@ -59,8 +59,15 @@
   gap: var(--gap-lg);
   width: 100%;
   padding: 24px;
-    border-bottom: 1px solid var(--gray-300, #E0E2E4);
+  border-bottom: 1px solid var(--gray-300, #E0E2E4);
+  cursor: pointer;
 }
+
+.job-posting__item--row .job-posting__card:hover {
+  background: var(--gray-50, #F8F8F9);
+}
+
+
 
 /* === Rows === */
 .job-posting__item--row .job-posting__row {
@@ -270,8 +277,12 @@
   border-radius: 6px;
   border: 1px solid var(--ai-100, #15D078);
   background: var(--white-100, #FFF);
+  cursor: pointer;
 }
 
+.job-posting__list--grid .job-posting__card:hover{
+background: var(--gray-50, #F8F8F9);
+}
 
 .job-posting__list--grid .job-card__header{
   display: flex;

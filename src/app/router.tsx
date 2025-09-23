@@ -1,5 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
-import Layout from "./Layout";       // ← 실제 위치에 맞게
+import Layout from "./Layout";    
 import Home from "@/pages/Home/Home";
 import JobsList from "@/pages/Jobs/JobsList";
 import JobDetail from "@/pages/Jobs/JobDetail";
@@ -37,11 +37,11 @@ export const router = createBrowserRouter([
     children:[
       {index:true,element:<>전체공고내용</>},
       {path:"all",element:<>전체공고내용2ß</>},
-      {path:"bookmarks",element:<>북마크공고</>}
+      {path:"bookmarks",element:<>북마크공고</>},
     ]
 
    },
-  { path: "/jobs/:jobId", element: <Layout><JobDetail /></Layout> },
+  { path: "jobs/:jobId", element: <Layout><JobDetail /></Layout>  } ,
   { path: "/companies", element: <Layout><CompaniesList /></Layout> },
   { path: "/companies/:companyId", element: <Layout><CompanyDetail /></Layout> },
   { path: "/login", element: <Layout><Login /></Layout> },
