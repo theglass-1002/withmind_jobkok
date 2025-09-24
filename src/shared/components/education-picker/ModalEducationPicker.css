@@ -252,6 +252,13 @@ line-height: 20px; /* 125% */
     flex-shrink: 0;
 }
 
+.job-role-picker__category-toggle img{
+    width: 6px;
+height: 10px;
+flex-shrink: 0;
+aspect-ratio: 5.49/9.42;
+}
+
 .job-role-picker__chip-body{
     display: flex;
 align-items: center;
@@ -261,6 +268,14 @@ align-items: center;
     height: 20px;
     text-align: center;
 }
+
+.job-role-picker__chip-chevron img{
+    width: 5.485px;
+    height: 9.423px;
+    flex-shrink: 0;
+    aspect-ratio: 5.49/9.42;
+}
+
 
 .job-role-picker__chip-role{
     display: flex;
@@ -274,6 +289,13 @@ align-items: center;
      align-items: center;
     text-align: center;
     cursor: pointer;
+}
+
+.job-role-picker__chip-close img{
+    width: 10px;
+    height: 10px;
+    flex-shrink: 0;
+    aspect-ratio: 1/1;
 }
 
 .education-picker__chip-body{

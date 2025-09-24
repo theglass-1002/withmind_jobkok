@@ -24,7 +24,9 @@ export default function Signup() {
                 aria-invalid="true"
                 aria-describedby="email-error"
               />
+              <span>
               <img className="input-icon input-icon--error" src={error_Item} alt="" />
+              </span>
             </div>
             <button type="button" className="default_btn_white">
               중복확인
@@ -41,13 +43,21 @@ export default function Signup() {
           </label>
           <div className="input-group">
             <input id="password" className="form-input" type="password" required />
+             <span className="form-field__icon">
              <img src={error_Item} alt="" />
+             </span>
+             <span className="form-field__icon">
              <img src={visibility} alt="" />
+             </span>
           </div>
           <div className="input-group">
             <input id="password" className="form-input" type="password" required />
+            <span className="form-field__icon">
              <img src={error_Item} alt="" />
+             </span>
+             <span className="form-field__icon">
              <img src={visibility} alt="" />
+             </span>
           </div>
           <p className="error_text_red">비밀번호를 입력해 주세요. / 입력한 비밀번호를 확인해 주세요.</p>
           <p className="form-tip_text_gray">※ 영문, 숫자, 특수문자를 모두 포함한 8~16자로 입력해 주세요.</p>
@@ -64,8 +74,10 @@ export default function Signup() {
                 aria-invalid="true"
                 aria-describedby="email-error"
               />
+             <span className="form-field__icon">
               <img className="input-icon input-icon--error" src={error_Item} alt="" />
-            </div>
+              </span>
+                </div>
             <button type="button" className="default_btn_white">
               본인 인증
             </button>
@@ -79,7 +91,9 @@ export default function Signup() {
             이름 <em>*</em>
           </label>
           <div className="input-row">
+            <div className="date-group">
             <input id="password" className="form-input" type="text" readOnly required />
+            </div>
           </div>
         </div>
         <div className="email-group">
@@ -88,7 +102,9 @@ export default function Signup() {
           </label>
           <div className="input-row">
             <div className="date-group">
+            <span className="form-field__icon">
               <img src={calendar_today} alt="" />
+              </span>
               <input
                 className="form-input"
                 type="email"

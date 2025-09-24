@@ -280,3 +280,16 @@ align-items: center;
     text-align: center;
     cursor: pointer;
 }
+
+.job-role-picker__reset-icon{
+    width: 20px;
+height: 20px;
+aspect-ratio: 1/1;
+}
+
+.job-role-picker__reset-icon img{
+    width: 12px;
+height: 12px;
+flex-shrink: 0;
+aspect-ratio: 1/1;
+}

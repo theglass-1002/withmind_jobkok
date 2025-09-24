@@ -101,16 +101,22 @@ export default function JobsList() {
           <div className="jobs-toolbar">
             <div className="jobs-toolbar__search">
             <div className="panel-search">
-                <img src={search} alt="" />
+            <span className="jobs-search__icon">
+              <img src={search} alt="" />
+              </span>
                   <input type="text" placeholder="직무, 기업명, 지역등을 입력해주세요" />
-                  <img src={cancel} alt="" />
+               <span className="jobs-search__clear_icon">
+               <img src={cancel} alt="" />
+               </span>
             </div>
             <div className="job-search-filters">
                 <div className="job-search-filter job-search-filter--toggle">
                   <div className="job-search-filter__label">
                     <span className="job-search-filter__text">이력서 기반 추천</span>
+                    <span className="jobs-search_filter__help_icon">
                     <img className="job-search-filter__help" src={help} alt="" />
-                  </div>
+                    </span>
+                   </div>
                   <Switch
                       checked={resumeReco}
                       onChange={setResumeReco}

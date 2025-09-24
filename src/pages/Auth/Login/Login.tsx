@@ -4,7 +4,7 @@ import visibility_off from '@/assets/icons/visibility_off.png';
 import kakao_login from '@/assets/icons/kakao_login_btn.png';
 import naver_login from '@/assets/icons/naver_login_btn.png';
 import google_login from '@/assets/icons/google_login_btn.png';
-import chevron_right from '@/assets/icons/chevron_right.png';
+import chevron_forward_black8x12 from '@/assets/icons/chevron_forward_black8x12.png';
 import cancel from '@/assets/icons/cancel.png';
 import error_Item from '@/assets/icons/error_Item.png';
 
@@ -23,7 +23,9 @@ export default function Login() {
           </label>
           <div className="input-group">
             <input id="password" className="form-input" type="text" required />
+              <span>
               <img src={error_Item} alt="" />
+              </span>
           </div>
           <p className="error_text_red">아이디를 입력해 주세요. / 입력한 아이디를 확인해 주세요.</p>
         </div>
@@ -34,8 +36,11 @@ export default function Login() {
           </label>
           <div className="input-group">
             <input id="password" className="form-input" type="password" required />
+             <span>
               <img src={cancel} alt="" />
-              <img src={visibility} alt="" />
+             </span>
+             <span>
+             <img src={visibility} alt="" /></span>
           </div>
           <p className="error_text_red">비밀번호를 입력해 주세요. / 입력한 비밀번호를 확인해 주세요.</p>
         </div>
@@ -66,7 +71,7 @@ export default function Login() {
       <div className="auth-signup__action" >
         <span className="auth-signup__label">회원가입</span>
         <span className="auth-signup__icon">
-        <img  src={chevron_right} alt="" />
+        <img  src={chevron_forward_black8x12} alt="" />
         </span>
       </div>
     </div>

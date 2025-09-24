@@ -6,6 +6,12 @@ import JobDetail from "@/pages/Jobs/JobDetail";
 import CompaniesList from "@/pages/Companies/CompaniesList";
 import CompanyDetail from "@/pages/Companies/CompanyDetail";
 
+import ResumeList from "@/pages/Resume/ResumeList";
+import ResumeDetail from "@/pages/Resume/ResumeDetail";
+import ResumeEdit from "@/pages/Resume/ResumeEdit";
+import ResumeCreate from "@/pages/Resume/ResumeCreate";
+
+
 import Mypage from "@/pages/Mypage/Mypage";
 import EditProfile from "@/pages/Mypage/EditProfile/EditProfile";
 import PlanHistory from "@/pages/Mypage/Plan/PlanHistory";
@@ -41,6 +47,11 @@ export const router = createBrowserRouter([
     ]
 
    },
+  { path: "/resumes", element: <Layout><ResumeList/></Layout> },
+  { path: "/resumes/create", element: <Layout><ResumeCreate /></Layout> },
+  { path: "/resumes/:resumeId", element: <Layout><ResumeDetail /></Layout> },
+  { path: "/resumes/:resumeId/edit", element: <Layout><ResumeEdit /></Layout> },
+
   { path: "jobs/:jobId", element: <Layout><JobDetail /></Layout>  } ,
   { path: "/companies", element: <Layout><CompaniesList /></Layout> },
   { path: "/companies/:companyId", element: <Layout><CompanyDetail /></Layout> },

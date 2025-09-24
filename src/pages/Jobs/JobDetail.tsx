@@ -22,6 +22,8 @@ import icon_location_gray from '@/assets/icons/aside_item_logo/icon-location-gra
 import icon_role_gray from '@/assets/icons/aside_item_logo/icon-role-gray.png';
 
 import RecommendedJobCard from "@/shared/components/job-posting-item/RecommendedJobCard";
+import Modal from "@/shared/components/modal/Modal";
+
 
 import "./JobDetail.css";
 
@@ -203,8 +205,18 @@ export default function JobDetail() {
       <section className="job-recos">
         <div className="job-recos__title">추천 채용공고</div>
         <RecommendedJobCard/>
-       
       </section>
+      {/* <Modal
+              open={true}
+              title="이력서가 등록되어 있지 않습니다."
+              desc="모의면접을 진행하기 위해 먼저 이력서를 작성해 주세요."
+              confirmText="이력서 작성하기"
+              cancelText="취소"
+              cancelClassName ="btn_w_full default_btn_white"
+              confirmClassName="btn_w_full default_btn_black"
+              onConfirm={() => {}}
+              onClose={()=>{}}
+            /> */}
     </>
   );
 }

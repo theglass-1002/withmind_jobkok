@@ -957,7 +957,7 @@ line-height: 180%; /* 28.8px */
     align-items: center;
     flex: 1 0 0;
     border-radius: 4px;
-    border: 1px solid var(--gray-300, #E0E2E4);
+    /* border: 1px solid var(--gray-900, #2A2D2F); */
     background: var(--white-100, #FFF);
   }
 
@@ -1323,7 +1323,6 @@ line-height: 20px; /* 125% */
 .interview-item .item-content .content-left .description{
     display: flex;
     padding: 16px 16px 16px 12px;
-    align-items: center;
     gap: 8px;
     align-self: stretch;
     border-radius: 4px;

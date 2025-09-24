@@ -180,6 +180,12 @@
   border-radius: 100px;
   background: var(--white-100, #FFF);
 }
+.hero .categories .category .icon img{
+  width: 40px;
+height: 40px;
+flex-shrink: 0;
+}
+
 .hero .categories .category .name {
   align-self: stretch;
   color: var(--gray-900, #2A2D2F);

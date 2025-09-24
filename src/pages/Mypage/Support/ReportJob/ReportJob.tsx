@@ -21,7 +21,9 @@ return (
         </header> 
         <section className='create'>
         <div className='announce_field'>
-        <img src={loud_speaker} alt="" />
+        <span>
+          <img src={loud_speaker} alt="" />
+          </span>
         <div className='info_desc'>
         <span className='info_title'><h1>아직 등록되지 않은 공고가 있다면 알려주세요!</h1></span> 
         <span className='info_content'>잡콕은 현재 다양한 채용 공고를 자동으로 수집하고 있습니다.<br />
@@ -31,7 +33,10 @@ return (
         </div>     
         <div className='field'>
         <span className='label'>공고 링크(URL)<em>*</em></span>    
+        <div className='input-group'>
+
         <input className='' type="text" placeholder='https://'/>
+        </div>
         <span className='label'><em>공고 링크를 입력해 주세요.</em></span>    
         </div>   
         <div className='field'>
@@ -44,7 +49,9 @@ return (
         </div>      
         <div className='field'>
         <span className='label'>이메일</span>    
+        <div className='input-group'>
         <input className='' type="text" placeholder='이메일을 입력해 주세요.'/>
+        </div>
         <span className='explain'>등록이 완료된 경우,안내 메일을 보내드립니다.</span>  
         </div>     
         <div className='info_box'>

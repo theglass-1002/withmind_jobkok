@@ -169,7 +169,7 @@
 }
 .job-posting__item--row .job-posting__match,
 .job-posting__list--grid .job-posting__match--level{
-  font: 600 14px/18px var(--font-base);
+  font: 600 15px/18px var(--font-base);
   color: var(--accent-green);
 }
 /* 점수 단계 모디파이어 */
@@ -183,6 +183,13 @@
     align-items: flex-start;
     gap: 4px;
     color: var(--accent-green); 
+}
+
+.job-posting__match--level img{
+  width: 14.4px;
+  height: 14.4px;
+  flex-shrink: 0;
+  aspect-ratio: 14.40/14.40;
 }
 
 .job-posting__item--row .job-posting__meta-items,

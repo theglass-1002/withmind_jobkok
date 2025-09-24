@@ -6,7 +6,6 @@ import mp_test_logo from '@/assets/icons/mp_test_logo.png';
 import file from '@/assets/icons/file.png';
 import done_file from '@/assets/icons/done_file.png';
 import test_profile from '@/assets/icons/interview_test_profile.png';
-
 import arrow_up_black from '@/assets/icons/arrow-up-right_black.png';
 import "./MyPage.css";
 
@@ -220,7 +219,8 @@ export default function MyPage() {
                 </div>
               </div>
               <div className="description">
-                <img src={done_file} alt="" />
+                <span>  <img src={done_file} alt="" /></span>
+              
               성장하는 개발자, 준비된 홍길동입니다.
               </div>
             </div>
@@ -244,7 +244,8 @@ export default function MyPage() {
                 </div>
               </div>
               <div className="description">
-                <img src={done_file} alt="" />
+              <span>  <img src={done_file} alt="" /></span>
+             
                 성장하는 개발자, 준비된 홍길동입니다.성장하는 개발자, 준비된 홍길동입니다.
               </div>
             </div>
@@ -255,7 +256,10 @@ export default function MyPage() {
             </div>
           </div>
           <button className="btn_w_full default_btn_white">
+            <span>
+
             <img src={arrow_up_black} alt="" />
+            </span>
             이어서 진행하기</button>
         </div>
       </div>

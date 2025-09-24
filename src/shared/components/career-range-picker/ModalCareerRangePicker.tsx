@@ -71,9 +71,12 @@ export default function ModalCareerRangePicker() {
                       </div>
                     </div>
                     <div className="btn_wrap career-range__actions">
-                      <span className="default_btn_white" onClick={handleReset}>
-                        <img src={refresh_black} alt="" />
-                        초기화</span>
+                    <div className="default_btn_white" onClick={handleReset}>
+                        <span className="job-role-picker__reset-icon">
+                          <img src={refresh_black} alt="" />
+                        </span>
+                        <span className="job-role-picker__reset-text">초기화</span>
+                      </div>
                       <span className="default_btn_black">적용</span>
                     </div>
                   </div>

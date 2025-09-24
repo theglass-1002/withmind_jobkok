@@ -131,8 +131,18 @@ align-self: stretch;
 
 
 .login-page .auth-signup .auth-signup__icon{
+    display: flex;;
     width: 20px;
     height: 20px;
+    flex-shrink: 0;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-page .auth-signup .auth-signup__icon img{
+    width: 7px;
+    height: 11px;
     flex-shrink: 0;
 }
 

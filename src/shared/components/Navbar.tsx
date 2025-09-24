@@ -43,7 +43,7 @@ export default function Navbar() {
 
           <ul className="masthead__menu">
               <li><NavLink to="/jobs" className={({isActive}) => isActive ? "on" : undefined}>채용공고</NavLink></li>
-              <li><NavLink to="/resume" className={({isActive}) => isActive ? "on" : undefined}>이력서</NavLink></li>
+              <li><NavLink to="/resumes" className={({isActive}) => isActive ? "on" : undefined}>이력서</NavLink></li>
               <li><NavLink to="/mock-interview" className={({isActive}) => isActive ? "on" : undefined}>모의면접</NavLink></li>
             </ul>
           <div className="login_on">
@@ -150,9 +150,13 @@ export default function Navbar() {
       >
         <div className="panel-body">
           <div className="panel-search">
-          <img src={searchIcon} alt="" />
+          <span className="jobs-search__icon">
+              <img src={searchIcon} alt="" />
+              </span>
             <input type="text" placeholder="직무, 기업명, 지역등을 입력해주세요" />
-            <img src={cancel} alt="" />
+            <span className="jobs-search__clear_icon">
+               <img src={cancel} alt="" />
+               </span>
           </div>
 
           <section className="panel-section">

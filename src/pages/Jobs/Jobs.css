@@ -38,9 +38,20 @@
     line-height: 20px; /* 125% */
 }
 .resume-promo .resume-promo__action .resume-promo__icon{
+    display: flex;
+    justify-content: center;
+    align-items: center;
     width: 20px;
     height: 20px;
-    aspect-ratio: 1/1;
+    aspect-ratio: 1 / 1;
+}
+
+.resume-promo .resume-promo__action .resume-promo__icon img{
+    display: flex;
+    width: 7px;
+    height: 11px;
+    flex-shrink: 0;
+    aspect-ratio: 6.38 / 10.32;
 }
 
 .jobs-toolbar{
@@ -209,6 +220,14 @@ background: var(--gray-50, #F8F8F9);
     flex-shrink: 0;
 }
 
+.job-search-filter-menu .job-search-filter-menu__item .job-search-filter-menu__icon img{
+    width: 10px;
+    height: 5px;
+    flex-shrink: 0;
+    aspect-ratio: 2/1;
+  }
+
+
 .jobs-tabs{
     display: flex;
     width: 1200px;
@@ -349,8 +368,15 @@ background: var(--gray-50, #F8F8F9);
     width: 24px;
     height: 24px;
   }
+
+  .job-posting__header .job-posting__icon img{
+    width: 10px;
+    height: 5px;
+    flex-shrink: 0;
+    aspect-ratio: 2/1;
+  }
   
-  /* 보기 전환 */
+
   .job-posting__header .job-posting__view-toggle {
     display: flex;
     align-items: center;
