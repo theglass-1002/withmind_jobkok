@@ -1,0 +1,64 @@
+.resume-create-page__section--location{
+
+}
+
+.resume-create-page__location{
+    display: flex;
+    padding: 28px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    align-self: stretch;
+}
+
+
+.resume-create-page__location .location-picker{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    align-self: stretch;
+    border-radius: 4px;
+    border: 1px solid var(--gray-300, #E0E2E4);
+}
+
+.resume-create-page__location .location-picker__header{
+    display: flex;
+    padding: 20px;
+    align-items: flex-start;
+    gap: 20px;
+    align-self: stretch;
+    background: var(--white-100, #FFF);
+}
+
+
+.location-picker__select-all{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    align-self: stretch;
+}
+
+
+.resume-create-page__location .location-picker__body{
+    display: flex;
+    align-items: flex-start;
+    align-self: stretch;
+    border-top: 1px solid var(--gray-300, #E0E2E4);
+}
+
+.resume-create-page__location .location-picker__column{
+    width: 100%;
+    border-right: 0px;
+
+}
+
+.resume-create-page__location .location-picker__category-group{
+    height: 350px;
+    width: 100%;
+    overflow: auto;
+}
+
+.resume-create-page__location .location-picker__category {
+    width: 100%;
+}
+
