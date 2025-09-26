@@ -22,6 +22,15 @@
     z-index: 10;
 }
 
+.location-picker{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    align-self: stretch;
+    border-radius: 4px;
+    border: 1px solid var(--gray-300, #E0E2E4);
+}
+
 .location-picker__header{
     display: flex;
     align-items: center;

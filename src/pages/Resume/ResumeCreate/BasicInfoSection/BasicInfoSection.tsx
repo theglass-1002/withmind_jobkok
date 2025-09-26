@@ -6,6 +6,7 @@ import DateInline from '@/shared/components/form/DateInline';
 import GenderChoice from '@/shared/components/form/GenderChoice';
 
 import ic_error_red100_20 from '@/assets/icons/size20/ic_error_red100_20.png';
+import ic_calendar_gray900_20 from '@/assets/icons/size20/ic_calendar_gray900_20.png';
 import icon_calendar_red_20 from '@/assets/icons/size20/icon_calendar_red_20.png';
 import ic_add_btn_gray700_20 from '@/assets/icons/size20/ic_add_btn_gray700_20.png';
 import "./BasicInfoSection.css";
@@ -26,7 +27,7 @@ export default function BasicInfoSection({
   values,
   errors,
   onChange,
-  onFocusAny, // 선택: 입력 포커스 시 에러 초기화
+  onFocusAny, 
 }: {
   values: BasicInfo;
   errors?: BasicErrors;
@@ -34,7 +35,7 @@ export default function BasicInfoSection({
   onFocusAny?: () => void;
 }) {
   const { name, birth, gender, email, phone } = values;
-
+ 
   return (
     <div className="resume-create-page__section resume-create-page__section--basic">
       <div className="resume-create-page__section-title resume-create-page__section-title--simple">
@@ -54,20 +55,21 @@ export default function BasicInfoSection({
               onChange={(v) => onChange({ name: v })}
               onFocus={onFocusAny}
               invalid={!!errors?.name}
-          
               rightIconSrc={errors?.name ? ic_error_red100_20 : undefined}
             />
           </FormField>
 
           <div className="resume-create-page__field-row">
-            <FormField label={<>생년월일 <em>*</em></>} className="birth">
-              <DateInline
-                iconSrc={icon_calendar_red_20}
-                value={birth}
-                onClick={() => {/* date picker open */}}
-                rightIconSrc={errors?.birth ? ic_error_red100_20 : undefined}
-              />
-            </FormField>
+          <FormField label={<>생년월일 <em>*</em></>} className="birth">
+            <DateInline
+              id="birth"
+              iconSrc={errors?.birth ? icon_calendar_red_20 : ic_calendar_gray900_20}
+              value={birth}
+              onClick={() => {/* date picker open */}}
+              invalid={!!errors?.birth}
+              errorMessage={errors?.birth}
+            />
+          </FormField>
 
             <FormField label={<>성별 <em>*</em></>} className="gender">
               <GenderChoice

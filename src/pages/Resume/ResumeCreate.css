@@ -194,6 +194,7 @@ gap: 28px;
     font-style: normal;
     font-weight: 600;
     line-height: 21px; /* 125% */
+    cursor: pointer;
 }
 
 .resume-create-page__field-row{
@@ -258,15 +259,6 @@ line-height: 24px; /* 120% */
 
 
 
-
-.resume-create-page__section-body.career-section{
-    flex-direction: column;
-    justify-content: center;
-    align-items: flex-start;
-
-    align-self: stretch;
-    background: var(--gray-50, #F8F8F9);
-}
 
 
 
@@ -340,7 +332,9 @@ background: var(--gray-50, #F8F8F9);
     gap: 16px;
 }
 
-.resume-create-page .career-section__group--employment{
+
+.resume-create-page .career-section__group--employment,
+.resume-create-page .education-section__group--employment{
     display: flex;
     align-items: flex-end;
     gap: 16px;
@@ -371,7 +365,9 @@ background: var(--gray-50, #F8F8F9);
     background: var(--white-100, #FFF);
 }
 
-.career-section__period{
+.career-section__period,
+.education-section__period
+{
     display: flex;
     align-items: center;
     gap: 8px;
@@ -432,7 +428,7 @@ background: var(--gray-50, #F8F8F9);
     align-items: center;
     align-self: stretch;
     border-radius: 4px;
-    border: 1px solid var(--red-100, #FF524C);
+    border: 1px solid var(--gray-300, #E0E2E4);
     background: var(--white-100, #FFF);
     color: var(--gray-500, #9EA4AA);
     font-family: Pretendard;
@@ -440,6 +436,20 @@ background: var(--gray-50, #F8F8F9);
     font-style: normal;
     font-weight: 400;
     line-height: 20px; /* 125% */
+    cursor: pointer;
+}
+
+.section__date-inner.error{
+    border: 1px solid var(--red-100, #FF524C);
+}
+
+.section__date-inner.disabled{
+    display: flex;
+    justify-content: start;
+    gap: 8px;
+    align-self: stretch;
+    background: var(--gray-50, #F8F8F9);
+    cursor:auto;
 }
 
 .section__date-input{
@@ -447,20 +457,38 @@ background: var(--gray-50, #F8F8F9);
     align-items: center;
     gap: 8px;
 }
-.career-section__row{
+.career-section__row,
+.education-section__row
+{
     display: flex;
     align-items: center;
     gap: 28px;
     align-self: stretch;
 }
 
-.career-section__control{
+.career-section__control,
+.education-section__control
+{
     display: flex;
     width: 100%;
     flex-direction: column;
     align-items: flex-start;
     gap: 16px;
     flex: 1 0 0;
+}
+
+.field .career-section__summary-input{
+    height: 200px;
+}
+
+.field .career-section__summary-input textarea{
+    border: none;
+    color: var(--gray-900, #2A2D2F);
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 180%; /* 28.8px */
 }
 
 .career-section__summary-input{
@@ -483,9 +511,21 @@ background: var(--gray-50, #F8F8F9);
 }
 
 .career-section__char-count{
+    display: flex;
+    justify-content: end;
     align-self: stretch;
     color: var(--gray-900, #2A2D2F);
     text-align: right;
+    font-family: Pretendard;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    gap: 5px;
+    line-height: 18px; /* 128.571% */
+}
+
+.career-section__char-count .max{
+    color: var(--gray-500, #9EA4AA);
     font-family: Pretendard;
     font-size: 14px;
     font-style: normal;
@@ -534,8 +574,10 @@ background: var(--gray-50, #F8F8F9);
   .career-section__summary-ai-btn:hover{
    
   }
-  
-  .career-section__control_btn{
+
+  .career-section__control_btn,
+  .education-section__control_btn
+  {
     display: flex;
     padding: 12px;
     justify-content: center;
@@ -544,4 +586,5 @@ background: var(--gray-50, #F8F8F9);
     border-radius: 100px;
     border: 1px solid var(--gray-300, #E0E2E4);
     background: var(--gray-100, #F2F3F4);
+    cursor: pointer;
   }
