@@ -23,6 +23,10 @@ import BasicInfoSection from "./ResumeCreate/BasicInfoSection/BasicInfoSection";
 import LocationSection from "./ResumeCreate/LocationSection/LocationSection";
 import CareerSection from "./ResumeCreate/CareerSection/CareerSection";
 import EducationSection from "./ResumeCreate/EducationSection/EducationSection";
+import DesiredRoleSection from "./ResumeCreate/DesiredRoleSection/DesiredRoleSection";
+import HardSkillSection from "./ResumeCreate/HardSkillSection/HardSkillSection";
+
+
 
 
 
@@ -179,10 +183,9 @@ export default function ResumeCreate() {
                onChange={updateBasic}
                onFocusAny={resetBasicErrors}
             />
-
-        <div className="resume-create-page__section resume-create-page__section--education">학력 칸</div>
-          <div>희망직무 칸</div>
-          <div>하드스킬 칸</div>
+          <DesiredRoleSection/>
+          <HardSkillSection/>
+          <div>하드 스킬</div>
           <div>소프트스킬 칸</div>
           <div>활동경력 칸</div>
           <div>수상자격증 칸</div>

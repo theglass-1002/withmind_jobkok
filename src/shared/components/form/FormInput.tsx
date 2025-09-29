@@ -17,6 +17,8 @@ type Props = {
   rightIconSrc?: string;       // 에러 아이콘 등
   rightIconAlt?: string;
   inputClassName?: string;
+  leftIconSrc?: string;
+  leftIconAlt?: string;
 };
 
 export default function FormInput({
@@ -25,12 +27,17 @@ export default function FormInput({
   invalid, errorMessage,
   rightIconSrc, rightIconAlt = '',
   inputClassName,
+  leftIconSrc, leftIconAlt = '',
 }: Props) {
   const hasError = Boolean(invalid || errorMessage);  
   const describedBy = errorMessage ? `${id}-error` : undefined;
   return (
     <>
   <div className={`input-group ${hasError ? 'error' : ''}`}>
+  {leftIconSrc && (
+                   <img src={leftIconSrc} alt={leftIconAlt} />
+        )}
+
       <input
         id={id}
         className={`form-input ${inputClassName ?? ''}`}

@@ -1,0 +1,5 @@
+.search-field { position: relative; display: flex; align-items: center; gap: 8px; }
+.search-field__clear{
+    cursor: pointer;
+}
+

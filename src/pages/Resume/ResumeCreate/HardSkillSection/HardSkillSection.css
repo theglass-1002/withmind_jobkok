@@ -1,0 +1,214 @@
+.resume-create-page__section--hard-skills .resume-create-page__section-title--simple{
+
+}
+
+.resume-create-page__section--hard-skills .resume-create-page__section-title__heading {
+  position: relative;
+}
+
+.resume-create-page__section--hard-skills .resume-create-page__section-body{
+  flex-direction: column;
+}
+
+/* 컨테이너 */
+.tooltip {
+  position: relative;           /* 내용 포지셔닝 기준 */
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+}
+
+/* 트리거 아이콘 */
+.tooltip__trigger {
+  display: inline-block;
+  width: 20px;                  /* 아이콘 사이즈는 필요에 맞게 */
+  height: 20px;
+  cursor: pointer;
+}
+
+/* 내용 레이어 (기본 숨김) */
+.tooltip__content {
+  position: absolute;
+  z-index: 40;
+  width: 300px; 
+  display: flex;
+  padding: 20px 20px 16px 20px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  align-self: stretch;
+  border-radius: 4px;
+  background: var(--gray-900, #2A2D2F);
+
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(4px);
+  transition: opacity .15s ease, transform .15s ease, visibility .15s;
+  pointer-events: none;    /* 숨김 상태에서 클릭 막기 */
+}
+
+.tooltip--top .tooltip__content {
+  top: 170%;
+  left: -50px;
+}
+
+/* 꼬리 */
+.tooltip--top .tooltip__content::after {
+  content: "";
+  position: absolute;
+  top: -8px;        
+  left: 50px;          
+  border-style: solid;
+  border-width: 0 8px 10px 8px;                
+  border-color: transparent transparent #2A2D2F transparent; 
+}
+
+
+.tooltip:hover .tooltip__content,
+.tooltip:focus-within .tooltip__content {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+
+.tooltip__title {
+  color: var(--white-100, #FFF);
+  font-family: Pretendard;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 20px; 
+}
+
+.tooltip__desc {
+  color: var(--white-100, #FFF);
+  font-family: Pretendard;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 180%;
+}
+
+
+.resume-create-page__section--hard-skills .search-field{
+  display: flex;
+      height: 52px;
+      padding: 10px 16px;
+      align-items: center;
+      gap: 8px;
+      align-self: stretch;
+      border-radius: 4px;
+      border: 1px solid var(--gray-300, #E0E2E4);
+      background: var(--white-100, #FFF);
+}
+
+
+/* 공통 flex 정리 */
+.resume-create-page__section--desired-role .resume-create-page__section-body,
+.hard-skills__dropdown,
+.hard-skills__list,
+.hard-skills__menu-footer {
+  display: flex;
+  align-items: flex-start;
+}
+
+/* 공통 타이포(16/20, Pretendard) 정리 */
+.resume-search ::placeholder,
+.hard-skills__menu,
+.hard-skills__highlight,
+.hard-skills__menu-footer,
+.hard-skills__menu-footer .hard-skills__highlight {
+  font-family: Pretendard;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 20px; /* 125% */
+}
+
+/* 섹션 */
+.resume-create-page__section--desired-role {}
+
+/* 섹션 바디 */
+.resume-create-page__section--desired-role .resume-create-page__section-body{
+  padding: 28px;
+  flex-direction: column;
+  gap: 16px;
+  align-self: stretch;
+}
+
+/* 검색 인풋 래퍼 */
+.resume-create-page__section--desired-role .resume-search{
+  display: flex;
+  height: 52px;
+  padding: 10px 16px;
+  align-items: center;
+  gap: 8px;
+  align-self: stretch;
+  border-radius: 4px;
+  border: 1px solid var(--gray-300, #E0E2E4);
+  background: var(--white-100, #FFF);
+}
+
+/* placeholder 색상 */
+.resume-search ::placeholder{
+  color: var(--gray-500, #9EA4AA);
+}
+
+/* 드롭다운 래퍼 */
+.hard-skills__dropdown{
+  flex-direction: column;
+  flex: 1 0 0;
+  border-radius: 4px;
+  border: 1px solid var(--gray-300, #E0E2E4);
+  box-shadow: 0 0 24px 0 rgba(42, 45, 47, 0.16);
+}
+
+/* 리스트 박스(스크롤 영역) */
+.hard-skills__menu{
+  height: 250px;
+  width: 795px;
+  overflow: auto;
+  color: var(--gray-900, #2A2D2F);
+  border-radius: 4px;
+}
+
+/* 리스트 */
+.hard-skills__list{
+  padding: 16px;
+  width: 100%;
+  flex-direction: column;
+  gap: 16px;
+  align-self: stretch;
+}
+
+/* 아이템 */
+.hard-skills__option{
+  width: 100%;
+  cursor: pointer;
+}
+.hard-skills__option:hover{
+  background: var(--gray-50, #F8F8F9);
+}
+
+/* 키워드 하이라이트 */
+.hard-skills__highlight{
+  color: var(--primary-primary, #816BFE);
+}
+
+/* 푸터(직접 등록) */
+.hard-skills__menu-footer{
+  padding: 16px;
+  flex-direction: row;
+  border-radius: 4px;
+  align-self: stretch;
+  background: var(--gray-50, #F8F8F9);
+  color: var(--gray-700, #6F767E);
+  cursor: pointer;
+}
+
+/* 푸터 안의 강조 텍스트 색만 회색900로 재지정 */
+.hard-skills__menu-footer .hard-skills__highlight{
+  color: var(--gray-900, #2A2D2F);
+}
