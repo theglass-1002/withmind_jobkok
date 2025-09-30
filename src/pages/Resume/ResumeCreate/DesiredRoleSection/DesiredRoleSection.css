@@ -81,6 +81,7 @@
 .desired-role__option{
   width: 100%;
   cursor: pointer;
+  text-align: start;
 }
 .desired-role__option:hover{
   background: var(--gray-50, #F8F8F9);

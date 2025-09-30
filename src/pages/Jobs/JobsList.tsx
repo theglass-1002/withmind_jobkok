@@ -17,7 +17,7 @@ import row_white from '@/assets/icons/row_gray.png';
 import arrow_left from '@/assets/icons/keyboard_arrow_left.png';
 import arrow_right from '@/assets/icons/keyboard_arrow_right.png';
 import chevron_right_black from '@/assets/icons/chevron_right_black.png';
-import close_gray from '@/assets/icons/close_gray.png';
+import ic_close_gray500_20 from '@/assets/icons/size20/ic_close_gray500_20.png';
 import JobPostingRow from "@/shared/components/job-posting-item/JobPostingRow";
 import JobPostingCard from "@/shared/components/job-posting-item/JobPostingCard";
 import Pagination from "@/shared/components/Pagination";
@@ -223,23 +223,23 @@ export default function JobsList() {
                   <span className="job-role-picker__chip-role">
                     <span className="job-role-picker__chip-chevron"><img src={chevron_right_black} alt="" /></span> 
                      프론트엔드 개발자</span>
-                    <span className="job-role-picker__chip-close"><img src={close_gray} alt="" /></span>
+                    <span className="job-role-picker__chip-close"><img src={ic_close_gray500_20} alt="" /></span>
                 </div>       
                 <div className="jobs-chips__item">
                 <span className="job-role-picker__chip-group">개발</span>
                   <span className="job-role-picker__chip-role">
                     <span className="job-role-picker__chip-chevron"><img src={chevron_right_black} alt="" /></span> 
                      웹 개발자</span>
-                    <span className="job-role-picker__chip-close"><img src={close_gray} alt="" /></span>
+                    <span className="job-role-picker__chip-close"><img src={ic_close_gray500_20} alt="" /></span>
                 </div>  
                 <div className="jobs-chips__item">
                 <span className="job-role-picker__chip-group">1~3년</span>
                   
-                    <span className="job-role-picker__chip-close"><img src={close_gray} alt="" /></span>
+                    <span className="job-role-picker__chip-close"><img src={ic_close_gray500_20} alt="" /></span>
                 </div>  
                 <div className="jobs-chips__item">
                 <span className="job-role-picker__chip-group">정규직</span>
-                    <span className="job-role-picker__chip-close"><img src={close_gray} alt="" /></span>
+                    <span className="job-role-picker__chip-close"><img src={ic_close_gray500_20} alt="" /></span>
                 </div>  
               </div>
             </div>

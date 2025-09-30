@@ -6,7 +6,7 @@ import check_box_outline_blank_gray from '@/assets/icons/check_box_outline_blank
 import chevron_right_black from '@/assets/icons/chevron_right_black.png';
 import chevron_right_gray_light from '@/assets/icons/chevron_right_gray_light.png';
 import refresh_black from '@/assets/icons/refresh_black.png';
-import close_gray from '@/assets/icons/close_gray.png';
+import ic_close_gray500_20 from '@/assets/icons/size20/ic_close_gray500_20.png';
 import "./ModalEmploymentTypePicker.css";
 
 

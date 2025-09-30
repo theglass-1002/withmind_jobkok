@@ -2,75 +2,19 @@ import React,{useState}from 'react'
 import { Link, NavLink } from "react-router-dom";
 import "./ResumeCreate.css";
 
-import Switch from "react-switch";
-
-import resume_banner1200x218 from '@/assets/icons/resume_banner1200x218.png';
-import add_btn_white20x20 from '@/assets/icons/add_btn_white20x20.png';
-import ic_more_dot_gray24x24 from '@/assets/icons/ic_more_dot_gray24x24.png';
-import icon_career from '@/assets/icons/icon_career_gray700_20.png';
-import icon_education from '@/assets/icons/icon_education_gray700_20.png';
-import icon_role from '@/assets/icons/icon_role_gray700_20.png';
-import icon_copy from '@/assets/icons/icon_content_copy_gray900_20.png';
-import icon_download from '@/assets/icons/icon_download_gray900_20.png';
-import icon_trash from '@/assets/icons/icon_trash_red_20.png';
-import icon_btn_black from '@/assets/icons/ic_add_btn_gray900_20.png';
-
-import arrow_left from '@/assets/icons/keyboard_arrow_left.png';
-import arrow_right from '@/assets/icons/keyboard_arrow_right.png';
-
-
 import BasicInfoSection from "./ResumeCreate/BasicInfoSection/BasicInfoSection";
 import LocationSection from "./ResumeCreate/LocationSection/LocationSection";
 import CareerSection from "./ResumeCreate/CareerSection/CareerSection";
 import EducationSection from "./ResumeCreate/EducationSection/EducationSection";
 import DesiredRoleSection from "./ResumeCreate/DesiredRoleSection/DesiredRoleSection";
 import HardSkillSection from "./ResumeCreate/HardSkillSection/HardSkillSection";
+import SoftSkillsSection from "./ResumeCreate/SoftSkillsSection/SoftSkillsSection";
+import ActivitiesSection from "./ResumeCreate/ActivitiesSection/ActivitiesSection";
 
 
 
 
-
-
-
-
-import Pagination from "@/shared/components/Pagination";
-
-
-import ModalLocationPicker from "@/shared/components/location-picker/ModalLocationPicker";
-
-import check_box_purple from '@/assets/icons/check_box_purple.png';
-import check_box_outline_blank_gray from '@/assets/icons/check_box_outline_blank_gray.png';
-
-
-import chevron_right_black from '@/assets/icons/chevron_right_black.png';
-import chevron_right_gray_light from '@/assets/icons/chevron_right_gray_light.png';
-
-
-import ic_arrow_drop_down from '@/assets/icons/size24/ic_arrow_drop_down_gray900_24.png';
-import ic_calendar_gray900_20 from '@/assets/icons/size20/ic_calendar_gray900_20.png';
-import ic_error_red100_20 from '@/assets/icons/size20/ic_error_red100_20.png';
 import ic_star_gray700_20 from '@/assets/icons/size20/ic_star_gray700_20.png';
-import ic_trash_gray500_20 from '@/assets/icons/size20/ic_trash_gray500_20.png';
-import icon_calendar_red_20 from '@/assets/icons/size20/icon_calendar_red_20.png';
-
-import ic_add_purple_20 from '@/assets/icons/size20/ic_add_purple_20.png';
-import ic_add_btn_gray700_20 from '@/assets/icons/size20/ic_add_btn_gray700_20.png';
-
-
-import ic_key_arrow_down_gray500_20 from '@/assets/icons/size20/ic_key_arrow_down_gray500_20.png';
-import ic_key_arrow_up_gray500_20 from '@/assets/icons/size20/ic_key_arrow_up_gray500_20.png';
-
-
-
-
-
-
-
-
-
-
-import refresh_black from '@/assets/icons/refresh_black.png';
-import close_gray from '@/assets/icons/close_gray.png';
 
 
 type FormState = { basic: BasicInfo };
@@ -185,6 +129,8 @@ export default function ResumeCreate() {
             />
           <DesiredRoleSection/>
           <HardSkillSection/>
+          <SoftSkillsSection/>
+          <ActivitiesSection/>
           <div>하드 스킬</div>
           <div>소프트스킬 칸</div>
           <div>활동경력 칸</div>

@@ -693,7 +693,7 @@ line-height: 18px; /* 128.571% */
     display: flex;
     width: 100%;
     position: absolute;
-    top: 52px;
+    top: 110%;
     left: 0;
     flex-direction: column;
     align-items: flex-start;

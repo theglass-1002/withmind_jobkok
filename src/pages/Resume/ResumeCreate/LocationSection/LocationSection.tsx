@@ -7,7 +7,7 @@ import check_box_purple from '@/assets/icons/size24/ic_check_box_purple24.png';
 import check_box_outline_blank_gray from '@/assets/icons/size24/ic_check_box_blank_gray400_24.png';
 import chevron_right_black from '@/assets/icons/chevron_right_black.png';
 import chevron_right_gray_light from '@/assets/icons/chevron_right_gray_light.png';
-import close_gray from '@/assets/icons/close_gray.png';
+import ic_close_gray500_20 from '@/assets/icons/size20/ic_close_gray500_20.png';
 
 type District = { id?: string; name: string };
 type Region = {
@@ -222,7 +222,7 @@ export default function LocationSection() {
               role="button"
               aria-label="선택 해제"
             >
-              <img src={close_gray} alt="" />
+              <img src={ic_close_gray500_20} alt="" />
             </span>
           </div>
         ))}

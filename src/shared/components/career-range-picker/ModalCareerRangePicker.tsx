@@ -4,7 +4,7 @@ import Slider from 'rc-slider';
 import Switch from "react-switch";
 import { NavLink } from "react-router-dom";
 import refresh_black from '@/assets/icons/refresh_black.png';
-import close_gray from '@/assets/icons/close_gray.png';
+import ic_close_gray500_20 from '@/assets/icons/size20/ic_close_gray500_20.png';
 import "./CareerRangePicker.css";
 
 

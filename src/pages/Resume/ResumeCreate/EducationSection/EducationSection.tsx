@@ -9,7 +9,6 @@ import Switch from "react-switch";
 
 import ic_error_red100_20 from '@/assets/icons/size20/ic_error_red100_20.png';
 import ic_star_gray700_20 from '@/assets/icons/size20/ic_star_gray700_20.png';
-import ic_trash_gray500_20 from '@/assets/icons/size20/ic_trash_gray500_20.png';
 import icon_calendar_red_20 from '@/assets/icons/size20/icon_calendar_red_20.png';
 import ic_calendar_gray900_20 from '@/assets/icons/size20/ic_calendar_gray900_20.png';
 import ic_add_btn_gray700_20 from '@/assets/icons/size20/ic_calendar_gray700_20.png';
@@ -23,6 +22,7 @@ import ic_add_purple_20 from '@/assets/icons/size20/ic_add_purple_20.png';
 
 import ic_key_arrow_down_gray500_20 from '@/assets/icons/size20/ic_key_arrow_down_gray500_20.png';
 import ic_key_arrow_up_gray500_20 from '@/assets/icons/size20/ic_key_arrow_up_gray500_20.png';
+import ic_trash_gray500_20 from '@/assets/icons/size20/ic_trash_gray500_20.png';
 
 import "./EducationSection.css";
 
@@ -177,7 +177,7 @@ export type CareerInfo = {
             
               
 
-                    </div>
+             </div>
               <div className="education-section__controls">
                 <span className="education-section__control_btn education-section__control--up">
                   <img src={ic_key_arrow_up_gray500_20} alt="" />

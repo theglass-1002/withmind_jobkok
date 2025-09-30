@@ -3,7 +3,7 @@ import './DesiredRoleSection.css';
 import roles from '@/data/desired_roles.json';
 import { toast } from 'react-toastify';
 import chevron_right_black from '@/assets/icons/chevron_right_black.png';
-import close_gray from '@/assets/icons/close_gray.png';
+import ic_close_gray500_20 from '@/assets/icons/size20/ic_close_gray500_20.png';
 import ic_search_gray900_20 from '@/assets/icons/size20/ic_search_gray900_20.png';
 import ic_clear_btn_gray400_20 from '@/assets/icons/size20/ic_clear_btn_gray400_20.png';
 import SearchField from '@/shared/components/search/SearchField';
@@ -134,7 +134,7 @@ export default function DesiredRoleSection() {
                     className="location-picker__chip-close"
                     onClick={() => removeRole(chip.key)}
                 >
-                    <img src={close_gray} alt="" />
+                    <img src={ic_close_gray500_20} alt="" />
                 </span>
                 </div>
             ))}
@@ -190,7 +190,7 @@ export default function DesiredRoleSection() {
         )}
         <AiSuggestChips
             title="경력 및 학력 기반의 AI 추천 직무입니다."
-            tags={['pm', '풀스택 개발자']}
+            tags={['PM', '풀스택 개발자']}
             onTagClick={(tag) => addRole(tag)}
             />
         </div>

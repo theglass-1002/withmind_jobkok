@@ -8,7 +8,7 @@ import check_box_outline_blank_gray from '@/assets/icons/check_box_outline_blank
 import chevron_right_black from '@/assets/icons/chevron_right_black.png';
 import chevron_right_gray_light from '@/assets/icons/chevron_right_gray_light.png';
 import refresh_black from '@/assets/icons/refresh_black.png';
-import close_gray from '@/assets/icons/close_gray.png';
+import ic_close_gray500_20 from '@/assets/icons/size20/ic_close_gray500_20.png';
 
 import "./ModalJobRolePicker.css";
 
@@ -220,7 +220,7 @@ const handleReset = () => {
                              <span className="job-role-picker__chip-chevron"><img src={chevron_right_black} alt="" /></span> 
                               프론트엔드 개발자</span>
                           </div>
-                          <span className="job-role-picker__chip-close"><img src={close_gray} alt="" /></span>
+                          <span className="job-role-picker__chip-close"><img src={ic_close_gray500_20} alt="" /></span>
                         </div>
                         <div className="job-role-picker__chip">
                           <div className="job-role-picker__chip-body">
@@ -230,7 +230,7 @@ const handleReset = () => {
                              <span className="job-role-picker__chip-chevron"><img src={chevron_right_black} alt="" /></span> 
                               웹 개발자</span>
                           </div>
-                          <span className="job-role-picker__chip-close"><img src={close_gray} alt="" /></span>
+                          <span className="job-role-picker__chip-close"><img src={ic_close_gray500_20} alt="" /></span>
                         </div>
                         <div className="job-role-picker__chip">
                           <div className="job-role-picker__chip-body">
@@ -240,13 +240,13 @@ const handleReset = () => {
                              <span className="job-role-picker__chip-chevron"><img src={chevron_right_black} alt="" /></span> 
                               안드로이드 개발자</span>
                           </div>
-                          <span className="job-role-picker__chip-close"><img src={close_gray} alt="" /></span>
+                          <span className="job-role-picker__chip-close"><img src={ic_close_gray500_20} alt="" /></span>
                         </div>
                         <div className="job-role-picker__chip">
                           <div className="job-role-picker__chip-body">
                             <span className="job-role-picker__chip-group">마케팅ㆍ광고 전체</span>
                           </div>
-                          <span className="job-role-picker__chip-close"><img src={close_gray} alt="" /></span>
+                          <span className="job-role-picker__chip-close"><img src={ic_close_gray500_20} alt="" /></span>
                         </div>
                         <div className="job-role-picker__chip">
                           <div className="job-role-picker__chip-body">
@@ -256,7 +256,7 @@ const handleReset = () => {
                              <span className="job-role-picker__chip-chevron"><img src={chevron_right_black} alt="" /></span> 
                               UX 디자이너</span>
                           </div>
-                          <span className="job-role-picker__chip-close"><img src={close_gray} alt="" /></span>
+                          <span className="job-role-picker__chip-close"><img src={ic_close_gray500_20} alt="" /></span>
                         </div>
                       </div>
                     </div>

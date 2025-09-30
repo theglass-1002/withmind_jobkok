@@ -58,6 +58,13 @@ padding: 28px;
 gap: 28px;
 }
 
+.section-title__row{
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+}
+
 .resume-create-page__field{
     display: flex;
     flex-direction: column;
@@ -193,7 +200,7 @@ gap: 28px;
     font-size: 16px;
     font-style: normal;
     font-weight: 600;
-    line-height: 21px; /* 125% */
+    line-height: 19px; /* 125% */
     cursor: pointer;
 }
 
@@ -334,7 +341,9 @@ background: var(--gray-50, #F8F8F9);
 
 
 .resume-create-page .career-section__group--employment,
-.resume-create-page .education-section__group--employment{
+.resume-create-page .education-section__group--employment,
+.resume-create-page .activities-section__group
+{
     display: flex;
     align-items: flex-end;
     gap: 16px;
@@ -477,7 +486,9 @@ background: var(--gray-50, #F8F8F9);
     flex: 1 0 0;
 }
 
-.field .career-section__summary-input{
+.field .career-section__summary-input,
+.field .activities-section__summary-input
+{
     height: 200px;
 }
 
@@ -491,7 +502,19 @@ background: var(--gray-50, #F8F8F9);
     line-height: 180%; /* 28.8px */
 }
 
-.career-section__summary-input{
+.field .activities-section__summary-input textarea{
+    border: none;
+    color: var(--gray-900, #2A2D2F);
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 180%; /* 28.8px */
+}
+
+.career-section__summary-input,
+.activities-section__summary-input
+{
     display: flex;
     height: 200px;
     padding: 12px 16px 16px 16px;
@@ -510,7 +533,9 @@ background: var(--gray-50, #F8F8F9);
     line-height: 180%; /* 28.8px */
 }
 
-.career-section__char-count{
+.career-section__char-count,
+.activities-section__char-count
+{
     display: flex;
     justify-content: end;
     align-self: stretch;
@@ -524,7 +549,9 @@ background: var(--gray-50, #F8F8F9);
     line-height: 18px; /* 128.571% */
 }
 
-.career-section__char-count .max{
+.career-section__char-count .max,
+.activities-section__char-count .max
+{
     color: var(--gray-500, #9EA4AA);
     font-family: Pretendard;
     font-size: 14px;
@@ -576,7 +603,8 @@ background: var(--gray-50, #F8F8F9);
   }
 
   .career-section__control_btn,
-  .education-section__control_btn
+  .education-section__control_btn,
+  .activities-section__control_btn
   {
     display: flex;
     padding: 12px;

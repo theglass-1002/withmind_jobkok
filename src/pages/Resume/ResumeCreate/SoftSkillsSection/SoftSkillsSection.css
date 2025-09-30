@@ -1,15 +1,15 @@
-.resume-create-page__section--hard-skills .resume-create-page__section-title--simple{
+.resume-create-page__section--soft-skills .resume-create-page__section-title--simple{
 
 }
 
-.resume-create-page__section--hard-skills .resume-create-page__section-title__heading {
+.resume-create-page__section--soft-skills .resume-create-page__section-title__heading {
   position: relative;
 }
 
 
 
 
-.resume-create-page__section--hard-skills .resume-create-page__section-body{
+.resume-create-page__section--soft-skills .resume-create-page__section-body{
   display: flex;
   padding: 28px;
   flex-direction: column;
@@ -18,7 +18,7 @@
   align-self: stretch;
 }
 
-.resume-create-page__section--hard-skills .resume-create-page__section-body.empty{
+.resume-create-page__section--soft-skills .resume-create-page__section-body.empty{
   display: flex;
   padding: 40px;
   justify-content: center;
@@ -51,10 +51,10 @@ line-height: 20px; /* 125% */
 }
 
 /* 내용 레이어 (기본 숨김) */
-.tooltip__content {
+.resume-create-page__section--soft-skills .tooltip__content {
   position: absolute;
   z-index: 2;
-  width: 300px; 
+  width: 390px; 
   display: flex;
   padding: 20px 20px 16px 20px;
   flex-direction: column;
@@ -116,7 +116,7 @@ line-height: 20px; /* 125% */
 }
 
 
-.resume-create-page__section--hard-skills .search-field{
+.resume-create-page__section--soft-skills .search-field{
   display: flex;
       height: 52px;
       padding: 10px 16px;
@@ -131,19 +131,19 @@ line-height: 20px; /* 125% */
 
 /* 공통 flex 정리 */
 .resume-create-page__section--desired-role .resume-create-page__section-body,
-.hard-skills__dropdown,
-.hard-skills__list,
-.hard-skills__menu-footer {
+.soft-skills__dropdown,
+.soft-skills__list,
+.soft-skills__menu-footer {
   display: flex;
   align-items: flex-start;
 }
 
 /* 공통 타이포(16/20, Pretendard) 정리 */
 .resume-search ::placeholder,
-.hard-skills__menu,
-.hard-skills__highlight,
-.hard-skills__menu-footer,
-.hard-skills__menu-footer .hard-skills__highlight {
+.soft-skills__menu,
+.soft-skills__highlight,
+.soft-skills__menu-footer,
+.soft-skills__menu-footer .soft-skills__highlight {
   font-family: Pretendard;
   font-size: 16px;
   font-style: normal;
@@ -181,7 +181,7 @@ line-height: 20px; /* 125% */
 }
 
 /* 드롭다운 래퍼 */
-.hard-skills__dropdown{
+.soft-skills__dropdown{
   flex-direction: column;
   flex: 1 0 0;
   border-radius: 4px;
@@ -190,7 +190,7 @@ line-height: 20px; /* 125% */
 }
 
 /* 리스트 박스(스크롤 영역) */
-.hard-skills__menu{
+.soft-skills__menu{
   height: 250px;
   width: 795px;
   overflow: auto;
@@ -199,7 +199,7 @@ line-height: 20px; /* 125% */
 }
 
 /* 리스트 */
-.hard-skills__list{
+.soft-skills__list{
   padding: 16px;
   width: 100%;
   flex-direction: column;
@@ -208,22 +208,22 @@ line-height: 20px; /* 125% */
 }
 
 /* 아이템 */
-.hard-skills__option{
+.soft-skills__option{
   width: 100%;
   cursor: pointer;
   text-align: start;
 }
-.hard-skills__option:hover{
+.soft-skills__option:hover{
   background: var(--gray-50, #F8F8F9);
 }
 
 /* 키워드 하이라이트 */
-.hard-skills__highlight{
+.soft-skills__highlight{
   color: var(--primary-primary, #816BFE);
 }
 
 /* 푸터(직접 등록) */
-.hard-skills__menu-footer{
+.soft-skills__menu-footer{
   padding: 16px;
   flex-direction: row;
   border-radius: 4px;
@@ -234,6 +234,6 @@ line-height: 20px; /* 125% */
 }
 
 /* 푸터 안의 강조 텍스트 색만 회색900로 재지정 */
-.hard-skills__menu-footer .hard-skills__highlight{
+.soft-skills__menu-footer .soft-skills__highlight{
   color: var(--gray-900, #2A2D2F);
 }

@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useRef, useEffect } from 'react';
-import './HardSkillSection.css';
+import './SoftSkillsSection.css';
 import roles from '@/data/desired_roles.json';
 import { toast } from 'react-toastify';
 
@@ -15,7 +15,7 @@ import AiSuggestChips from '@/shared/components/ai/AiSuggestChips';
 type RoleItem = { group: string; role: string };
 const MAX_SELECTED = 30;
 
-export default function HardSkillSection() {
+export default function SoftSkillsSection() {
   const [isAdding, setIsAdding] = useState(false);
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState('');
@@ -75,7 +75,7 @@ export default function HardSkillSection() {
     const re = new RegExp(`(${k.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\$&')})`, 'ig');
     return text.split(re).map((part, i) =>
       re.test(part)
-        ? <span className="hard-skills__highlight" key={i}>{part}</span>
+        ? <span className="soft-skills__highlight" key={i}>{part}</span>
         : <span key={i}>{part}</span>
     );
   };
@@ -118,17 +118,17 @@ export default function HardSkillSection() {
   };
 
   return (
-    <div className="resume-create-page__section resume-create-page__section--hard-skills">
+    <div className="resume-create-page__section resume-create-page__section--soft-skills">
       <div className="resume-create-page__section-title resume-create-page__section-title--simple">
         <div className="section-title__row">
           <div className="section-title__left">
             <div className="resume-create-page__section-title__heading">
-              하드 스킬
+              소프트 스킬
               <span className="tooltip tooltip--top">
                 <img className="tooltip__trigger" src={ic_error_gray500_20} alt="툴팁" />
                 <div className="tooltip__content" role="tooltip">
-                  <span className="tooltip__title">하드 스킬이란?</span>
-                  <span className="tooltip__desc">직무 수행에 필요한 전문 기술이나 지식을 의미합니다.</span>
+                  <span className="tooltip__title">소프트 스킬이란?</span>
+                  <span className="tooltip__desc">업무를 효과적으로 수행하고 다른 사람들과 협력하는 데 필요한 개인의 역량, 특성, 태도 등을 의미합니다.</span>
                 </div>
               </span>
             </div>
@@ -183,7 +183,7 @@ export default function HardSkillSection() {
               className="resume-search"
               id="desired-role-search"
               value={q}
-              placeholder="보유 하드 스킬을 입력해 주세요. (ex. Java, React)"
+              placeholder="보유 소프트 스킬을 입력해 주세요. (ex. 팀워크, 리더십)"
               onChange={setQ}
               onSubmit={() => {}}
               onFocus={() => setOpen(true)}
@@ -193,17 +193,17 @@ export default function HardSkillSection() {
             />
 
             {open && (
-              <div className="hard-skills__dropdown" ref={menuRef}>
-                <div className="hard-skills__menu" role="listbox">
-                  <ul className="hard-skills__list">
+              <div className="soft-skills__dropdown" ref={menuRef}>
+                <div className="soft-skills__menu" role="listbox">
+                  <ul className="soft-skills__list">
                     {filtered.map((item, idx) => (
                       <li
                         key={`${item.group}-${item.role}-${idx}`}
-                        className="hard-skills__option"
+                        className="soft-skills__option"
                         role="option"
                         onClick={() => addRole(item)}
                       >
-                        <span className="hard-skills__option-role">
+                        <span className="soft-skills__option-role">
                           {highlight(item.role, q)}
                         </span>
                       </li>
@@ -213,13 +213,13 @@ export default function HardSkillSection() {
 
                 {q && (
                   <div
-                    className="hard-skills__menu-footer"
+                    className="soft-skills__menu-footer"
                     onClick={() => addRole(q)}
                     role="button"
                     tabIndex={0}
                   >
-                    <span className="hard-skills__highlight">“{q}”</span>
-                    <span className="hard-skills__create-suffix">(으)로 직접 등록하기</span>
+                    <span className="soft-skills__highlight">“{q}”</span>
+                    <span className="soft-skills__create-suffix">(으)로 직접 등록하기</span>
                   </div>
                 )}
               </div>
@@ -227,12 +227,12 @@ export default function HardSkillSection() {
 
             <AiSuggestChips
               title="경력 및 학력 기반의 AI 추천 직무입니다."
-              tags={['CSS', 'JavaScript']}
+              tags={['리더십', '적응력']}
               onTagClick={(tag) => addRole(tag)}
             />
           </>
         ) : (
-          <>하드 스킬을 추가해 주세요.</>
+          <>소프트 스킬을 추가해 주세요.</>
         )}
       </div>
     </div>
