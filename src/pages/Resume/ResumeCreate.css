@@ -143,6 +143,8 @@ gap: 28px;
     font-style: normal;
     font-weight: 600;
     line-height: 24px; /* 120% */
+    border-radius: 6px 6px 0px 0px;
+
 }
 
 .resume-section-title{
@@ -241,6 +243,7 @@ line-height: 24px; /* 120% */
     align-items: flex-start;
     gap: 28px;
     align-self: stretch;
+    border-radius: 0px 0px 6px 6px;
 }
 
 
@@ -342,7 +345,8 @@ background: var(--gray-50, #F8F8F9);
 
 .resume-create-page .career-section__group--employment,
 .resume-create-page .education-section__group--employment,
-.resume-create-page .activities-section__group
+.resume-create-page .activities-section__group,
+.awards-certifications-section__group
 {
     display: flex;
     align-items: flex-end;
@@ -487,7 +491,8 @@ background: var(--gray-50, #F8F8F9);
 }
 
 .field .career-section__summary-input,
-.field .activities-section__summary-input
+.field .activities-section__summary-input,
+.field .personal-section__summary-input
 {
     height: 200px;
 }
@@ -512,8 +517,19 @@ background: var(--gray-50, #F8F8F9);
     line-height: 180%; /* 28.8px */
 }
 
+.field .personal-section__summary-input textarea{
+    border: none;
+    color: var(--gray-900, #2A2D2F);
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 180%; /* 28.8px */
+}
+
 .career-section__summary-input,
-.activities-section__summary-input
+.activities-section__summary-input,
+.personal-section__summary-input
 {
     display: flex;
     height: 200px;
@@ -534,7 +550,8 @@ background: var(--gray-50, #F8F8F9);
 }
 
 .career-section__char-count,
-.activities-section__char-count
+.activities-section__char-count,
+.personal-section__char-count
 {
     display: flex;
     justify-content: end;
@@ -550,7 +567,8 @@ background: var(--gray-50, #F8F8F9);
 }
 
 .career-section__char-count .max,
-.activities-section__char-count .max
+.activities-section__char-count .max,
+.personal-section__char-count .max
 {
     color: var(--gray-500, #9EA4AA);
     font-family: Pretendard;
@@ -604,7 +622,8 @@ background: var(--gray-50, #F8F8F9);
 
   .career-section__control_btn,
   .education-section__control_btn,
-  .activities-section__control_btn
+  .activities-section__control_btn,
+  .awards-certifications-section__control_btn
   {
     display: flex;
     padding: 12px;
@@ -614,5 +633,20 @@ background: var(--gray-50, #F8F8F9);
     border-radius: 100px;
     border: 1px solid var(--gray-300, #E0E2E4);
     background: var(--gray-100, #F2F3F4);
+    cursor: pointer;
+  }
+
+  .activities-section__control_btn,
+  .awards-certifications-section__control_btn
+  {
+    display: flex;
+    padding: 12px;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    border-radius: 100px;
+    border: 1px solid var(--gray-300, #E0E2E4);
+    border-bottom: 1px solid var(--gray-300, #E0E2E4);
+    background: var(--white-100, #FFF); 
     cursor: pointer;
   }

@@ -1,10 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
-import "./ActivitiesSection.css";
-// import roles from "@/data/desired_roles.json"; // 필요 시 사용
-// import { toast } from "react-toastify";
+import "./AwardsCertificationsSection.css";
+
 
 import FormInput from "@/shared/components/form/FormInput";
-// import FormField from "@/shared/components/form/FormField";
+
 import DateInline from "@/shared/components/form/DateInline";
 import icon_calendar_red_20 from '@/assets/icons/size20/icon_calendar_red_20.png';
 import ic_add_btn_gray900_20 from "@/assets/icons/size20/ic_add_btn_gray900_20.png";
@@ -14,25 +13,28 @@ import ic_close_gray500_20 from "@/assets/icons/size20/ic_close_gray500_20.png";
 import ic_arrow_drop_down_gray900_24 from "@/assets/icons/size24/ic_arrow_drop_down_gray900_24.png";
 import ic_key_arrow_down_gray500_20 from "@/assets/icons/size20/ic_key_arrow_down_gray500_20.png";
 import ic_key_arrow_up_gray500_20 from "@/assets/icons/size20/ic_key_arrow_up_gray500_20.png";
-import ic_trash_gray500_20 from "@/assets/icons/size20/ic_trash_gray500_20.png";
+import ic_trash_gray900_20 from "@/assets/icons/size20/ic_trash_gray900_20.png";
 import ic_star_gray700_20 from '@/assets/icons/size20/ic_star_gray700_20.png';
 
-type ActivityItem = {
-  id: string;
-  activityType: string | null;
-  activityName: string;
-};
-
+export type AwardsCertItem = {
+    id: string;
+    kind: "Award" | "Certification" | "License" | null; // 구분
+    title: string;             // 수상ㆍ자격증명
+    dateValue?: string;        // YYYY.MM
+    score?: string;            // 성적/점수
+    issuer?: string;           // 발행처/기관
+    credentialId?: string;     // (선택) 자격번호
+    expiresOn?: string;        // (선택) 만료일 YYYY.MM
+    noExpiry?: boolean;        // (선택) 만료없음
+  };
 const makeId = () => Math.random().toString(36).slice(2, 10);
 
-export default function ActivitiesSection() {
-    const MAX_SUMMARY = 2000;
+export default function AwardsCertificationsSection() {
+   
   const [isAdding, setIsAdding] = useState(false);
-  const [items, setItems] = useState<ActivityItem[]>([]);
+  const [items, setItems] = useState<AwardsCertItem[]>([]);
   const [openDropdownIndex, setOpenDropdownIndex] = useState<number | null>(null);
-  const [summary, setSummary] = useState('');
-  const [editing, setEditing] = useState(false);
-  
+
   // 드롭다운 바깥 클릭 감지용 refs
   const selectRefs = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -98,24 +100,7 @@ export default function ActivitiesSection() {
     });
   };
 
-  const startEditing = (e?: React.KeyboardEvent | React.MouseEvent) => {
-    console.log('클릭');
-    console.log(editing);
-    if (e && "key" in e) {
-      if (e.nativeEvent?.isComposing) return;
-      if (e.key !== "Enter" && e.key !== " ") return;
-      e.preventDefault();
-    }
-    setEditing(true);
-  };
 
-  const onChangeSummary = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    // 브라우저가 maxLength로도 막아주지만, 안전하게 한 번 더 잘라줌
-    const v = e.target.value.slice(0, MAX_SUMMARY);
-    setSummary(v);
-  };
-  const count = summary.length;
-  
 
   // 바깥 클릭 시 열려있는 드롭다운 닫기
   useEffect(() => {
@@ -137,11 +122,11 @@ export default function ActivitiesSection() {
   }, [items.length, isAdding]);
 
   return (
-    <div className="resume-create-page__section resume-create-page__section--activities">
+    <div className="resume-create-page__section resume-create-page__section--awards-certifications">
       <div className="resume-create-page__section-title resume-create-page__section-title--simple">
         <div className="section-title__row">
           <div className="section-title__left">
-            <div className="resume-create-page__section-title__heading">활동ㆍ경험</div>
+            <div className="resume-create-page__section-title__heading">수상ㆍ자격증</div>
           </div>
           <div className="section-title__right">
             {isAdding ? (
@@ -158,18 +143,18 @@ export default function ActivitiesSection() {
 
       <div
         className={`resume-create-page__section-body ${
-          isAdding ? "activities-section" : "empty"
+          isAdding ? "awards-certifications-section" : "empty"
         }`}
       >
         {isAdding ? (
           <>
             {items.map((item, index) => (
-              <div className="activities-section__item" key={item.id}>
-                <div className="activities-section__fields">
-                  <div className="activities-section__group">
-                    <div className="activities-section__control">
+              <div className="awards-certifications-section__item" key={item.id}>
+                <div className="awards-certifications-section__fields">
+                  <div className="awards-certifications-section__group">
+                    <div className="awards-certifications-section__control">
                       <label className="small_labe_black-14">
-                        활동ㆍ경험명 <em className="error_text_red">*</em>
+                        수상ㆍ자격증명 <em className="error_text_red">*</em>
                       </label>
 
                       {/* 드롭다운 */}
@@ -199,15 +184,15 @@ export default function ActivitiesSection() {
                           <div
                             className="ui-select__menu"
                             role="listbox"
-                            onClick={e => e.stopPropagation()} // ✅ 부모 토글로 버블링 방지
+                            onClick={e => e.stopPropagation()}
                           >
-                            {["교내활동", "인턴", "자원봉사", "동아리"].map(opt => (
+                            {["교내활동", "인턴", "자원봉사", "동아리","사회활동","수행과제","해외연수","교육이수내역"].map(opt => (
                               <div
                                 key={opt}
                                 className="ui-select__option"
                                 role="option"
                                 onClick={e => {
-                                  e.stopPropagation(); // ✅ 더블 안전
+                                  e.stopPropagation(); 
                                   selectType(index, opt);
                                 }}
                                 onKeyDown={e => {
@@ -229,22 +214,22 @@ export default function ActivitiesSection() {
 
                     {/* 활동명 입력 */}
                     <FormInput
-                      placeholder="활동ㆍ경험명을 입력해 주세요."
-                      inputClassName="activity_name"
-                      id={`activity_name_${item.id}`}
-                      value={item.activityName}
+                      placeholder="수상ㆍ자격증명을 입력해 주세요."
+                      inputClassName="awards-certifications_name"
+                      id={`awards-certifications_name${item.id}`}
+                      value={item.credentialId??""}
                       onChange={(v: any) => changeName(index, v)}
                     />
                   </div>
-                  <div className="activities-period">
-                    <label className="activities-period__label small_labe_black-14">
-                        활동ㆍ경험 기간 <em className="error_text_red">*</em>
+                  <div className="awards-certifications-period">
+                    <label className="awards-certifications-period__label small_labe_black-14">
+                        수상ㆍ취득 정보 
                     </label>
 
-                    <div className="activities-period__fields">
-                        <div className="activities-period__field activities-period__field--start">
+                    <div className="awards-certifications-period__fields">
+                        <div className="awards-certifications-period__field">
                             <DateInline
-                            id="activities"
+                            id="awards-certifications"
                             iconSrc={ic_calendar_gray900_20}
                             value={"YYYY.MM"}
                             onClick={() => {/* date picker open */}}
@@ -253,56 +238,44 @@ export default function ActivitiesSection() {
         
                             />
                         </div>
-                        <div className="activities-period__divider">~</div>
-                        <div className="activities-period__field activities-period__field--end">
-                        <DateInline
-                            id="activities"
-                            iconSrc={ic_calendar_gray900_20}
-                            value={"YYYY.MM"}
-                            onClick={() => {/* date picker open */}}
-                            invalid={false}
-                        
-        
+                        <FormInput
+                            placeholder="성적을 입력해 주세요."
+                            inputClassName="awards-certifications__score"
+                            id={`awards_score_${item.id}`}
+                            value={item.score ?? ""}
+                            onChange={(v: any) => {
+                                const val = typeof v === "string" ? v : v?.target?.value ?? "";
+                                setItems(prev => {
+                                const next = [...prev];
+                                next[index] = { ...next[index], score: val };
+                                return next;
+                                });
+                            }}
                             />
-                        </div>
+                      <FormInput
+                        placeholder="발행처ㆍ기관을 입력해 주세요."
+                        inputClassName="awards-certifications__issuer"
+                        id={`awards_issuer_${item.id}`}
+                        value={item.issuer ?? ""}
+                        onChange={(v: any) => {
+                            const val = typeof v === "string" ? v : v?.target?.value ?? "";
+                            setItems(prev => {
+                            const next = [...prev];
+                            next[index] = { ...next[index], issuer: val };
+                            return next;
+                            });
+                        }}
+                        />
                     </div>
+                    
                     </div>
-                    <div className="field activities-section__control--summary">
-                <div className="small_labe_black-14">세부 내용</div>
-                {editing?
-                <div className='activities-section__summary-input'>
-                    <textarea className=''
-                      value={summary}
-                      onChange={onChangeSummary}
-                      maxLength={MAX_SUMMARY}
-                    ></textarea>
-                    <span className="activities-section__char-count">
-                       <span>{count}</span>
-                       <span className="max"> / {MAX_SUMMARY}</span>
-                   </span>
-                </div>
-                :
-                   <div className={`activities-section__summary-input`} onClick={startEditing} onKeyDown={startEditing}>
-                   <ul className="activities-section__summary-tips">
-                     <li className="activities-section__summary-tip">
-                      세부 내용을 입력해 주세요.
-                     </li>
-                     
-                   </ul>
-                   <span className="activities-section__char-count">
-                       <span>{count}</span>
-                       <span className="max"> / {MAX_SUMMARY}</span>
-                   </span>
-                 </div>
-                
-                }
-                    </div>
+                    
                 </div>
 
                 {/* 아이템 컨트롤 */}
-                <div className="activities-section__controls">
+                <div className="awards-certifications-section__controls">
                   <span
-                    className="activities-section__control_btn activities-section__control--up"
+                    className="awards-certifications-section__control_btn awards-certifications-section__control--up"
                     onClick={() => moveUp(index)}
                     aria-label="위로"
                     role="button"
@@ -311,7 +284,7 @@ export default function ActivitiesSection() {
                     <img src={ic_key_arrow_up_gray500_20} alt="" />
                   </span>
                   <span
-                    className="activities-section__control_btn activities-section__control--down"
+                    className="awards-certifications-section__control_btn awards-certifications-section__control--down"
                     onClick={() => moveDown(index)}
                     aria-label="아래로"
                     role="button"
@@ -320,13 +293,13 @@ export default function ActivitiesSection() {
                     <img src={ic_key_arrow_down_gray500_20} alt="" />
                   </span>
                   <span
-                    className="activities-section__control_btn activities-section__control--remove"
+                    className="awards-certifications-section__control_btn awards-certifications-section__control--remove"
                     onClick={() => removeItem(index)}
                     aria-label="삭제"
                     role="button"
                     tabIndex={0}
                   >
-                    <img src={ic_trash_gray500_20} alt="" />
+                    <img src={ic_trash_gray900_20} alt="" />
                   </span>
                 </div>
               </div>
@@ -338,7 +311,7 @@ export default function ActivitiesSection() {
             </span>
           </>
         ) : (
-          <>활동ㆍ경험을 추가해 주세요.</>
+          <>수상ㆍ자격증을 추가해 주세요..</>
         )}
       </div>
     </div>

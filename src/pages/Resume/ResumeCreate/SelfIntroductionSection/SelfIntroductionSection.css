@@ -1,9 +1,9 @@
-.resume-create-page__section--activities .resume-create-page__section-title--simple{
+.resume-create-page__section--personal-statement .resume-create-page__section-title--simple{
 
 }
 
 
-.resume-create-page__section--activities .resume-create-page__section-body.empty{
+.resume-create-page__section--personal-statement .resume-create-page__section-body.empty{
   display: flex;
   padding: 40px;
   justify-content: center;
@@ -17,21 +17,20 @@ font-size: 16px;
 font-style: normal;
 font-weight: 400;
 line-height: 20px; /* 125% */
-background-color: white;
 }
 
-.resume-create-page__section--activities .resume-create-page__section-body{
+.resume-create-page__section--personal-statement .resume-create-page__section-body{
     display: flex;
     padding: 28px;
     flex-direction: column;
     align-items: flex-start;
-    gap: 28px;
+    gap: 16px;
     align-self: stretch;
-    background: var(--gray-50, #F8F8F9);
+    background: var(--white-100, #FFF);
 }
 
 
-.resume-create-page__section--activities .activities-section__fields{
+.resume-create-page__section--personal-statement .activities-section__fields{
     display: flex;
     width: 740px;
     padding: 28px;

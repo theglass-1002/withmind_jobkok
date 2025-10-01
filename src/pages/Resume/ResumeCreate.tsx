@@ -10,6 +10,10 @@ import DesiredRoleSection from "./ResumeCreate/DesiredRoleSection/DesiredRoleSec
 import HardSkillSection from "./ResumeCreate/HardSkillSection/HardSkillSection";
 import SoftSkillsSection from "./ResumeCreate/SoftSkillsSection/SoftSkillsSection";
 import ActivitiesSection from "./ResumeCreate/ActivitiesSection/ActivitiesSection";
+import AwardsCertificationsSection from "./ResumeCreate/AwardsCertificationsSection/AwardsCertificationsSection";
+import PortfolioDocumentsSection from "./ResumeCreate/PortfolioDocumentsSection/PortfolioDocumentsSection";
+import SelfIntroductionSection from "./ResumeCreate/SelfIntroductionSection/SelfIntroductionSection";
+import MockInterviewAnalysisSection from "./ResumeCreate/MockInterviewAnalysisSection/MockInterviewAnalysisSection";
 
 
 
@@ -131,13 +135,11 @@ export default function ResumeCreate() {
           <HardSkillSection/>
           <SoftSkillsSection/>
           <ActivitiesSection/>
-          <div>하드 스킬</div>
-          <div>소프트스킬 칸</div>
-          <div>활동경력 칸</div>
-          <div>수상자격증 칸</div>
-          <div>포트폴리오 기타문서 칸</div>
-          <div>자기소개서 칸</div>
-          <div>모의면접 분석 결과 칸</div>
+          <AwardsCertificationsSection/>
+          <PortfolioDocumentsSection/>
+          <SelfIntroductionSection/>
+          <MockInterviewAnalysisSection/>
+      
         </div>
         <div className="resume-create-page__aside">왼쪽: 이력서 관리 사이드바</div>
       </div>

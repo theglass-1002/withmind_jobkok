@@ -1,9 +1,9 @@
-.resume-create-page__section--activities .resume-create-page__section-title--simple{
+.resume-create-page__section--awards-certifications .resume-create-page__section-title--simple{
 
 }
 
 
-.resume-create-page__section--activities .resume-create-page__section-body.empty{
+.resume-create-page__section--awards-certifications .resume-create-page__section-body.empty{
   display: flex;
   padding: 40px;
   justify-content: center;
@@ -17,10 +17,10 @@ font-size: 16px;
 font-style: normal;
 font-weight: 400;
 line-height: 20px; /* 125% */
-background-color: white;
+background: white;
 }
 
-.resume-create-page__section--activities .resume-create-page__section-body{
+.resume-create-page__section--awards-certifications .resume-create-page__section-body{
     display: flex;
     padding: 28px;
     flex-direction: column;
@@ -31,7 +31,7 @@ background-color: white;
 }
 
 
-.resume-create-page__section--activities .activities-section__fields{
+.resume-create-page__section--awards-certifications .awards-certifications-section__fields{
     display: flex;
     width: 740px;
     padding: 28px;
@@ -44,14 +44,14 @@ background-color: white;
     background: var(--white-100, #FFF);
 }
 
-.activities-section__item{
+.awards-certifications-section__item{
     display: flex;
     align-items: flex-start;
     gap: 16px;
     align-self: stretch;
 }
 
-.activities-section__controls{
+.awards-certifications-section__controls{
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -60,7 +60,7 @@ background-color: white;
 }
 
 
-.activities-section__control{
+.awards-certifications-section__control{
     display: flex;
     width: 126px;
     flex-direction: column;
@@ -68,9 +68,24 @@ background-color: white;
     gap: 16px;
 }
 
-.activity_name{
+.awards-certifications_name{
+    height: 56px;
+    padding: 16px;
+    justify-content: space-between;
+    align-items: center;
+    flex: 1 0 0;
+    color: var(--gray-500, #9EA4AA);
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; /* 125% */
+}
+.awards-certifications__score,
+.awards-certifications__issuer
+{
     display: flex;
-    height: 58px;
+    height: 52px;
     padding: 16px;
     justify-content: space-between;
     align-items: center;
@@ -83,7 +98,7 @@ background-color: white;
     line-height: 20px; /* 125% */
 }
 
-.activities-period{
+.awards-certifications-period{
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -91,14 +106,14 @@ background-color: white;
     align-self: stretch;
 }
 
-.activities-period__fields{
+.awards-certifications-period__fields{
     display: flex;
     align-items: center;
     gap: 8px;
     flex: 1 0 0;
     align-self: stretch;
 }
-.activities-period__field{
+.awards-certifications-period__field{
     display: flex;
 flex-direction: column;
 align-items: flex-start;
