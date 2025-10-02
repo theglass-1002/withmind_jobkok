@@ -71,7 +71,7 @@ export default function MockInterviewAnalysisSection() {
                  <div className="portfolio-documents__file">
                    <div className={`portfolio-documents__file-name`}>
                      <img src={ic_content_paste_gray900_20} alt="" />
-                     <>선택된 파일이 없습니다</>
+                     <>선택된 모의면접 분석 결과가 없습니다.</>
                    </div>
 
                    <span
