@@ -68,3 +68,18 @@
 }
 
 
+.resume-create-page__section--career .career-section__period{
+ position: relative;
+}
+
+.career-section__control--up.first{
+    border-radius: 100px;
+    border: 1px solid var(--gray-300, #E0E2E4);
+    background: var(--gray-100, #F2F3F4);
+}
+
+.career-section__control--up{
+    border-radius: 100px;
+    border: 1px solid var(--gray-300, #E0E2E4);
+    background: var(--white-100, #FFF);
+}
