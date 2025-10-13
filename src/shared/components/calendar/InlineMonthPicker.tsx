@@ -2,17 +2,35 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import "./calendar.css";
 import ic_arrow_drop_down_gray900_24 from "@/assets/icons/size24/ic_arrow_drop_down_gray900_24.png";
+import ic_check_box_blank_gray400_24 from "@/assets/icons/size24/ic_check_box_blank_gray400_24.png";
+import ic_check_box_purple24 from "@/assets/icons/size24/ic_check_box_purple24.png";
 
 type MonthValue = { year: number; month: number }; // month: 0~11
+
+export type PickerType =
+  | "employmentStart"
+  | "employmentEnd"
+  | "educationStart"
+  | "educationEnd";
 
 type Props = {
   value?: MonthValue | null;
   defaultValue?: MonthValue;
-  onChange?: (v: MonthValue) => void;           // 월 클릭 시(미리보기 등)
-  onApply?: (v: MonthValue) => void;            // 적용 버튼
-  minYear?: number;                             // 시작 연도 (기본 2000)
+  onChange?: (v: MonthValue) => void; // 월 클릭 시(미리보기 등)
+  onApply?: (v: MonthValue) => void;  // 적용 버튼 (기존 호환)
+  // ✅ 확장: 적용 시 isCurrent 같은 부가 정보도 함께 올려보내고 싶을 때
+  onApplyEx?: (v: MonthValue, isCurrent: boolean, meta?: { pickerType?: PickerType }) => void;
+
+  minYear?: number; // 시작 연도 (기본 2000)
   isDisabledMonth?: (year: number, month: number) => boolean;
   className?: string;
+  pickerType?: PickerType;
+
+  // ✅ (선택) employmentEnd 외에도 토글을 보여주고 싶은 경우
+  showCurrentToggle?: boolean;
+  // ✅ (선택) 토글을 부모 상태와 동기화하고 싶을 때
+  currentChecked?: boolean;
+  onCurrentChange?: (checked: boolean) => void;
 };
 
 const MONTH_LABELS = [
@@ -27,9 +45,14 @@ export default function InlineMonthPicker({
   defaultValue,
   onChange,
   onApply,
+  onApplyEx,
   minYear,
   isDisabledMonth,
-  className = "",
+  pickerType,
+  className,
+  showCurrentToggle,
+  currentChecked,
+  onCurrentChange,
 }: Props) {
   const now = new Date();
   const nowYear = now.getFullYear();
@@ -40,6 +63,9 @@ export default function InlineMonthPicker({
 
   const [viewYear, setViewYear] = useState(initial.year);
   const [selected, setSelected] = useState<MonthValue>(initial);
+
+  // "재직중" 토글 상태 (employmentEnd 등에서 사용)
+  const [isCurrent, setIsCurrent] = useState<boolean>(!!currentChecked);
 
   // 커스텀 연도 드롭다운
   const [yearOpen, setYearOpen] = useState(false);
@@ -52,6 +78,13 @@ export default function InlineMonthPicker({
       setViewYear(value.year);
     }
   }, [value]);
+
+  // 외부 currentChecked 동기화
+  useEffect(() => {
+    if (typeof currentChecked === "boolean") {
+      setIsCurrent(currentChecked);
+    }
+  }, [currentChecked]);
 
   // 연도 리스트: minYear ~ 올해 (최신 연도 위로)
   const years = useMemo(() => {
@@ -92,12 +125,22 @@ export default function InlineMonthPicker({
     setYearOpen(false);
   };
 
-  const handleApply = () => {
-    onApply?.(selected);
+  const toggleCurrent = () => {
+    const next = !isCurrent;
+    setIsCurrent(next);
+    onCurrentChange?.(next); // (선택) 부모에 즉시 반영하고 싶을 때
   };
 
+  const handleApply = () => {
+    onApply?.(selected); // 기존 콜백 유지 (하위 호환)
+    onApplyEx?.(selected, isCurrent, { pickerType }); // 확장 콜백으로 isCurrent 전달
+  };
+
+  // employmentEnd 이거나 showCurrentToggle이 true면 토글 표시
+  const showToggle = pickerType === "employmentEnd" || !!showCurrentToggle;
+
   return (
-    <div className={`cal cal--month ${className}`}>
+    <div className={`cal cal--month ${className || ""}`}>
       <div className="cal_body">
         <div className="cal__header">
           <div
@@ -170,16 +213,38 @@ export default function InlineMonthPicker({
           })}
         </div>
       </div>
-      <div className="cal_bottom">
-        <span
-          className="default_btn_black"
-          role="button"
-          tabIndex={0}
-          onClick={handleApply}
-        >
-          적용
-        </span>
-      </div>
+
+      {showToggle ? (
+        <div className="cal_bottom_items">
+          <span
+            className="cal_bottom_items__option"
+            onClick={toggleCurrent}>
+            <img
+              src={isCurrent ? ic_check_box_purple24 : ic_check_box_blank_gray400_24}
+              alt=""/>
+            재직중
+          </span>
+          <span
+            className="default_btn_black"
+            role="button"
+            tabIndex={0}
+            onClick={handleApply}
+          >
+            적용
+          </span>
+        </div>
+      ) : (
+        <div className="cal_bottom">
+          <span
+            className="default_btn_black"
+            role="button"
+            tabIndex={0}
+            onClick={handleApply}
+          >
+            적용
+          </span>
+        </div>
+      )}
     </div>
   );
 }

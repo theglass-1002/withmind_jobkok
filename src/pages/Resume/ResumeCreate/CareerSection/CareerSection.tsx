@@ -345,6 +345,7 @@ function CareerItem({
                 <div className="calendar-popover">
                   <div className="calendar-popover__panel">
                     <InlineMonthPicker
+                      pickerType="employmentStart"
                       value={parseMonth(startDate) ?? undefined}
                       minYear={1970}
                       onChange={() => {}}
@@ -391,22 +392,44 @@ function CareerItem({
                 </FormField>
 
                 {openEndCal && (
-                  <div className="calendar-popover">
-                    <div className="calendar-popover__panel">
-                      <InlineMonthPicker
-                        value={parseMonth(endDate) ?? undefined}
-                        defaultValue={startMV ?? undefined}
-                        minYear={startMV?.year ?? 1970}
-                        isDisabledMonth={disableEndMonth}
-                        onChange={() => {}}
-                        onApply={(d) => {
-                          onChange({ endDate: fmtMonth(d) });
-                          setOpenEndCal(false);
-                        }}
-                      />
-                    </div>
-                  </div>
-                )}
+  <div className="calendar-popover">
+    <div className="calendar-popover__panel">
+      <InlineMonthPicker
+        pickerType="employmentEnd"
+        value={parseMonth(endDate) ?? undefined}
+        defaultValue={startMV ?? undefined}
+        minYear={startMV?.year ?? 1970}
+        isDisabledMonth={disableEndMonth}
+
+        // ✅ 토글(재직중) 노출 & 부모 상태와 동기화
+        showCurrentToggle
+        currentChecked={!!isCurrent}
+        onCurrentChange={(next) => {
+          // 토글만 눌렀을 때도 부모 상태 갱신하고 싶으면 사용
+          onChange({ isCurrent: next, ...(next ? { endDate: "" } : {}) });
+        }}
+
+        // ✅ 적용(Apply) 눌렀을 때 month + isCurrent 둘 다 받기
+        onApplyEx={(pickedMonth, current) => {
+          if (current) {
+            // 재직중이면 종료일 비우고 재직중 true
+            onChange({ isCurrent: true, endDate: "" });
+          } else {
+            // 재직중이 아니면 종료일 저장, 재직중 false
+            onChange({ isCurrent: false, endDate: fmtMonth(pickedMonth) });
+          }
+          setOpenEndCal(false);
+        }}
+
+        // (선택) 기존 onChange 미리보기 안쓰면 지워도 됨
+        onChange={() => {}}
+        // (선택) onApply는 하위호환용. onApplyEx 쓰면 생략 가능
+        // onApply={(d) => {...}}
+      />
+    </div>
+  </div>
+)}
+
               </div>
             )}
           </div>
