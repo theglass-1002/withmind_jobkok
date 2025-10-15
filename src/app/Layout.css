@@ -710,6 +710,7 @@ line-height: 18px; /* 128.571% */
     font-weight: 400;
     line-height: 20px; 
     overflow: auto;
+    z-index: 1;
 }
 
 .ui-select-none-default{

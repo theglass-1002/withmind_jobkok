@@ -7,7 +7,7 @@ import ic_search_gray900_20 from '@/assets/icons/size20/ic_search_gray900_20.png
 import ic_clear_btn_gray400_20 from '@/assets/icons/size20/ic_clear_btn_gray400_20.png';
 import ic_error_gray500_20 from '@/assets/icons/size20/ic_error_gray500_20.png';
 import ic_add_purple_20 from '@/assets/icons/size20/ic_add_purple_20.png';
-import ic_close_gray500_20 from '@/assets/icons/size20/ic_close_gray500_20.png';
+import ic_close_gray500_24 from '@/assets/icons/size24/ic_close_gray500_24.png';
 
 import SearchField from '@/shared/components/search/SearchField';
 import AiSuggestChips from '@/shared/components/ai/AiSuggestChips';
@@ -133,10 +133,9 @@ export default function HardSkillSection() {
               </span>
             </div>
           </div>
-          <div className="section-title__right">
-            {isAdding ? (
+          {isAdding ? (
               <img
-                src={ic_close_gray500_20}
+                src={ic_close_gray500_24}
                 alt="닫기"
                 onClick={stopAdd}
               />
@@ -149,7 +148,6 @@ export default function HardSkillSection() {
                 추가
               </span>
             )}
-          </div>
         </div>
         {isAdding && (
           <span className="resume-create-page__hint">

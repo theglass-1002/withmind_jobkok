@@ -1,199 +1,391 @@
-import React,{useRef,useState,useEffect}from 'react'
-import { Link, NavLink } from "react-router-dom";
+import React, { useRef, useState, useEffect } from 'react';
 import FormField from '@/shared/components/form/FormField';
 import FormInput from '@/shared/components/form/FormInput';
 import DateInline from '@/shared/components/form/DateInline';
-import GenderChoice from '@/shared/components/form/GenderChoice';
-
-import Switch from "react-switch";
 
 import ic_error_red100_20 from '@/assets/icons/size20/ic_error_red100_20.png';
-import ic_star_gray700_20 from '@/assets/icons/size20/ic_star_gray700_20.png';
 import icon_calendar_red_20 from '@/assets/icons/size20/icon_calendar_red_20.png';
 import ic_calendar_gray900_20 from '@/assets/icons/size20/ic_calendar_gray900_20.png';
 import ic_add_btn_gray700_20 from '@/assets/icons/size20/ic_calendar_gray700_20.png';
 import ic_add_btn_gray900_20 from '@/assets/icons/size20/ic_add_btn_gray900_20.png';
 import ic_arrow_drop_down_gray900_24 from '@/assets/icons/size24/ic_arrow_drop_down_gray900_24.png';
-import ic_arrow_drop_down_up_gray900_24 from '@/assets/icons/size24/ic_arrow_drop_down_up_gray900_24.png';
-
-
-
-import ic_add_purple_20 from '@/assets/icons/size20/ic_add_purple_20.png';
 
 import ic_key_arrow_down_gray500_20 from '@/assets/icons/size20/ic_key_arrow_down_gray500_20.png';
 import ic_key_arrow_up_gray500_20 from '@/assets/icons/size20/ic_key_arrow_up_gray500_20.png';
 import ic_trash_gray500_20 from '@/assets/icons/size20/ic_trash_gray500_20.png';
 
-import "./EducationSection.css";
+import ic_key_arrow_up_gray900_20 from '@/assets/icons/size20/ic_key_arrow_up_gray900_20.png';
+import ic_key_arrow_down_gray900_20 from '@/assets/icons/size20/ic_key_arrow_down_gray900_20.png';
+import ic_trash_gray900_20 from '@/assets/icons/size20/ic_trash_gray900_20.png';
 
+import './EducationSection.css';
 
-export type CareerInfo = {
-    company_name: string;
-    birth: string;
+import InlineMonthPicker from '@/shared/components/calendar/InlineMonthPicker';
+import { parseMonth, fmtMonth } from '@/shared/utils/util';
+
+export type Education = {
+  school_name: string;
+  major_degree: string;
+  startDate: string;
+  endDate: string;
+};
+export type CareerErrors = Partial<Record<keyof Education, string>>;
+
+const blankItem = (): Education => ({
+  school_name: '',
+  major_degree: '',
+  startDate: '',
+  endDate: '',
+});
+
+export default function EducationSection({
+  values,
+  errors,
+  onChange,
+  onFocusAny,
+}: {
+  values: Education;
+  errors?: CareerErrors;
+  onChange: (patch: Partial<Education>) => void;
+  onFocusAny?: () => void;
+}) {
+  const [items, setItems] = useState<Education[]>([values ?? blankItem()]);
+  const [itemErrors] = useState<CareerErrors[]>([errors ?? {}]);
+
+  const [openedSelectIdx, setOpenedSelectIdx] = useState<number | null>(null);
+  const [gradType, setGradType] = useState<(string | null)[]>([null]);
+
+  const addItem = () => {
+    setItems((prev) => [blankItem(), ...prev]);
+    setGradType((prev) => [null, ...prev]);
   };
-  export type CareerErrors = Partial<Record<keyof CareerInfo, string>>;
-  
 
+  const removeItem = (idx: number) => {
+    setItems((prev) => (prev.length <= 1 ? prev : prev.filter((_, i) => i !== idx)));
+    setGradType((prev) => (prev.length <= 1 ? prev : prev.filter((_, i) => i !== idx)));
+  };
 
-  export default function EducationSection({
-    values,
-    errors,
-    onChange,
-    onFocusAny, 
-  }: {
-    values: CareerInfo;
-    errors?: CareerErrors;
-    onChange: (patch: Partial<CareerInfo>) => void;
-    onFocusAny?: () => void;
-  }) {
-    const MAX_SUMMARY = 2000;
-    const {company_name,birth} = values;
-    const [resumeReco, setResumeReco] = useState(false); // 이력서 기반 추천 토글
-    const [open, setOpen] = useState(false);
-    const [employmentType, setEmploymentType] = useState<string | null>(null)
-    const [summary, setSummary] = useState('');
-    const [editing, setEditing] = useState(false);
-  
-    const select = (val: string) => {
-    setEmploymentType(val); // ← 선택값 저장
-    setOpen(false);         // 메뉴 닫기
-    };
+  const swap = <T,>(arr: T[], i: number, j: number) => {
+    const next = arr.slice();
+    [next[i], next[j]] = [next[j], next[i]];
+    return next;
+  };
 
-    const startEditing = (e?: React.KeyboardEvent | React.MouseEvent) => {
-        console.log('클릭');
-        console.log(editing);
-        if (e && "key" in e) {
-          if (e.nativeEvent?.isComposing) return;
-          if (e.key !== "Enter" && e.key !== " ") return;
-          e.preventDefault();
-        }
-        setEditing(true);
-      };
+  const moveUp = (idx: number) => {
+    if (idx <= 0) return;
+    setItems((prev) => swap(prev, idx, idx - 1));
+    setGradType((prev) => swap(prev, idx, idx - 1));
+  };
 
-      const onChangeSummary = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        // 브라우저가 maxLength로도 막아주지만, 안전하게 한 번 더 잘라줌
-        const v = e.target.value.slice(0, MAX_SUMMARY);
-        setSummary(v);
-      };
-      const count = summary.length;
-      
-    return (
-        <div className="resume-create-page__section resume-create-page__section--education">
-         <div className="resume-create-page__section-title resume-create-page__section-title--simple">
+  const moveDown = (idx: number) => {
+    if (idx >= items.length - 1) return;
+    setItems((prev) => swap(prev, idx, idx + 1));
+    setGradType((prev) => swap(prev, idx, idx + 1));
+  };
+
+  const patchItem = (idx: number, patch: Partial<Education>) => {
+    setItems((prev) => prev.map((it, i) => (i === idx ? { ...it, ...patch } : it)));
+    if (idx === 0 && onChange) onChange(patch);
+  };
+
+  return (
+    <div className="resume-create-page__section resume-create-page__section--education">
+      <div className="resume-create-page__section-title resume-create-page__section-title--simple">
         <div className="resume-create-page__section-title__heading">
           학력 <em className="resume-create-page__required">*</em>
         </div>
-        
       </div>
-          <div className="resume-create-page__section-body education-section">
-            <div className="education-section__item">
-            <div className="education-section__fields">
-            <div className="education-section__row">
-                  <div className="education-section__control education-section__control--role">
-                  <FormField label={<>학교명 <em>*</em></>} className="in_icon">
-                  <FormInput
-                    id="company_name"
-                    required
-                    value={company_name}
-                    onChange={(v) => onChange({ company_name: v })}
-                    onFocus={onFocusAny}
-                    invalid={!!errors?.company_name}
-                    rightIconSrc={errors?.company_name ? ic_error_red100_20 : undefined}
-                    />
-                </FormField>
-                  </div>
-                  <div className="education-section__control education-section__control--position">
-                  <FormField label={<>전공 및 학위</>} className="in_icon">
-                  <FormInput
-                    id="company_name"
-                    required
-                    value={company_name}
-                    onChange={(v) => onChange({ company_name: v })}
-                    onFocus={onFocusAny}
-                    invalid={!!errors?.company_name}
-                    rightIconSrc={errors?.company_name ? ic_error_red100_20 : undefined}
-                    />
-                </FormField>
-                    </div>
-                </div>
-                <div className="education-section__group education-section__group--employment"> 
-                  <div className="education-section__period">
-                  <FormField label={""} className="education-section date education-section__date--start">
-                        <DateInline
-                        id="education"
-                        iconSrc={errors?.birth ? icon_calendar_red_20 : ic_calendar_gray900_20}
-                        value={birth}
-                        onClick={() => {/* date picker open */}}
-                        invalid={false}
-                        errorMessage={errors?.birth}
-                        rightIconSrc={errors?.company_name ? ic_error_red100_20 : ic_error_red100_20}
-                        />
-                    </FormField>
-                    <span className="education-section__tilde">~</span>
-                    {resumeReco?<>
-                    <div className="field education-section date education-section__date--end">
-                    <label className="label">{}</label>
-                        <div className='date-section'>
-                            <div className='section__date-inner disabled'>
-                                <img src={ic_add_btn_gray700_20} alt="" />
-                                재직 중
-                            </div>
-                        </div>
-                    </div>
-                    </>:
-                      <FormField label={""} className="education-section date education-section__date--end">
-                         <DateInline
-                           id="education"
-                             iconSrc={errors?.birth ? icon_calendar_red_20 : icon_calendar_red_20}
-                             value={birth}
-                             onClick={() => {/* date picker open */}}
-                              invalid={true}
-                             errorMessage={errors?.birth}
-                             rightIconSrc={errors?.company_name ? ic_error_red100_20 : ic_error_red100_20}
-                             />
-                           </FormField>
-                    }
 
-                  </div>
-                  <div className="education-section__control education-section__control--employment">
-               
-                  <div className="ui-select" onClick={()=>{setOpen(!open)}}>
-                  {employmentType??<span className='ui-select-none-default'>졸업 여부</span>}
-                    <img src={ic_arrow_drop_down_gray900_24} alt="" />
-                    {open && (
-                    <div className="ui-select__menu" role="listbox">
-                        <div className="ui-select__option" role="option" onClick={() =>select('졸업')}>졸업</div>
-                        <div className="ui-select__option" role="option" onClick={() => select('졸업 예정')}>졸업 예정</div>
-                        <div className="ui-select__option" role="option" onClick={() => select('재학중')}>재학중</div>
-                        <div className="ui-select__option" role="option" onClick={() => select('중퇴')}>중퇴</div>
-                        <div className="ui-select__option" role="option" onClick={() => select('수료')}>수료</div>
-                        <div className="ui-select__option" role="option" onClick={() => select('휴학')}>휴학</div>
-                    </div>
-                    )}
-                  </div>
-                   </div>
-                </div>
+      <div className="resume-create-page__section-body education-section">
+        {items.map((it, idx) => (
+          <EducationItem
+            key={idx}
+            index={idx}
+            total={items.length}
+            value={it}
+            errors={itemErrors[idx]}
+            gradLabel={gradType[idx]}
+            selectOpen={openedSelectIdx === idx}
+            onToggleSelect={() =>
+              setOpenedSelectIdx((o) => (o === idx ? null : idx))
+            }
+            onSelectGrad={(label) => {
+              setGradType((prev) => prev.map((v, i) => (i === idx ? label : v)));
+              setOpenedSelectIdx(null);
+            }}
+            onChange={(patch) => patchItem(idx, patch)}
+            onMoveUp={() => moveUp(idx)}
+            onMoveDown={() => moveDown(idx)}
+            onRemove={() => removeItem(idx)}
+            onFocusAny={onFocusAny}
+          />
+        ))}
 
-            
-              
+        <span className="default_btn_white" role="button" tabIndex={0} onClick={addItem}>
+          <img src={ic_add_btn_gray900_20} alt="" />
+          추가
+        </span>
+      </div>
+    </div>
+  );
+}
 
-             </div>
-              <div className="education-section__controls">
-                <span className="education-section__control_btn education-section__control--up">
-                  <img src={ic_key_arrow_up_gray500_20} alt="" />
-                </span>
-                <span  className="education-section__control_btn education-section__control--down">
-                <img src={ic_key_arrow_down_gray500_20} alt="" /></span>
-                <span  className="education-section__control_btn education-section__control--remove">
-                  <img src={ic_trash_gray500_20} alt="" />
-                </span>
-              </div>
-            </div>
+function EducationItem({
+  index,
+  total,
+  value,
+  errors,
+  gradLabel,
+  selectOpen,
+  onToggleSelect,
+  onSelectGrad,
+  onChange,
+  onMoveUp,
+  onMoveDown,
+  onRemove,
+  onFocusAny,
+}: {
+  index: number;
+  total: number;
+  value: Education;
+  errors?: CareerErrors;
+  gradLabel: string | null;
+  selectOpen: boolean;
+  onToggleSelect: () => void;
+  onSelectGrad: (label: string) => void;
+  onChange: (patch: Partial<Education>) => void;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
+  onRemove: () => void;
+  onFocusAny?: () => void;
+}) {
+  const { school_name, major_degree, startDate, endDate } = value;
 
-            <span className="default_btn_white">
-                <img src={ic_add_btn_gray900_20} alt="" />
-                추가</span>
+  const [openStartCal, setOpenStartCal] = useState(false);
+  const [openEndCal, setOpenEndCal] = useState(false);
+  const startCalRef = useRef<HTMLDivElement | null>(null);
+  const endCalRef = useRef<HTMLDivElement | null>(null);
+
+  const startMV = parseMonth(startDate) ?? null;
+  const disableEndMonth = (y: number, m: number) => {
+    const now = new Date();
+    const afterToday = y > now.getFullYear() || (y === now.getFullYear() && m > now.getMonth());
+    const beforeStart =
+      !!startMV && (y < startMV.year || (y === startMV.year && m < startMV.month));
+    return beforeStart || afterToday;
+  };
+
+  useEffect(() => {
+    if (!openStartCal && !openEndCal) return;
+    const onOutside = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as Node;
+      if (openStartCal) {
+        const root = startCalRef.current;
+        if (root && !root.contains(target)) setOpenStartCal(false);
+      }
+      if (openEndCal) {
+        const root = endCalRef.current;
+        if (root && !root.contains(target)) setOpenEndCal(false);
+      }
+    };
+    document.addEventListener('mousedown', onOutside, true);
+    document.addEventListener('touchstart', onOutside, true);
+    return () => {
+      document.removeEventListener('mousedown', onOutside, true);
+      document.removeEventListener('touchstart', onOutside, true);
+    };
+  }, [openStartCal, openEndCal]);
+
+  const canMoveUp = total > 1 && index > 0;
+  const canMoveDown = total > 1 && index < total - 1;
+  const canRemove = total > 1;
+
+  return (
+    <div className="education-section__item">
+      <div className="education-section__fields">
+        <div className="education-section__row">
+          <div className="education-section__control education-section__control--role">
+            <FormField label={<>학교명 <em>*</em></>} className="in_icon">
+              <FormInput
+                id={`school_name_${index}`}
+                required
+                value={school_name}
+                onChange={(v) => onChange({ school_name: v })}
+                onFocus={onFocusAny}
+                invalid={!!errors?.school_name}
+                rightIconSrc={errors?.school_name ? ic_error_red100_20 : undefined}
+                placeholder="학교명을 입력해 주세요."
+              />
+            </FormField>
+          </div>
+
+          <div className="education-section__control education-section__control--position">
+            <FormField label={<>전공 및 학위</>} className="in_icon">
+              <FormInput
+                id={`major_degree_${index}`}
+                value={major_degree}
+                onChange={(v) => onChange({ major_degree: v })}
+                onFocus={onFocusAny}
+                invalid={!!errors?.major_degree}
+                rightIconSrc={errors?.major_degree ? ic_error_red100_20 : undefined}
+                placeholder="전공 및 학위를 입력해 주세요."
+              />
+            </FormField>
           </div>
         </div>
-    );
+
+        <div className="education-section__group education-section__group--employment">
+          <div className="education-section__period">
+            <div className="section-period__start-wrap" ref={startCalRef}>
+              <FormField label="" className="education-section date education-section__date--start">
+                <DateInline
+                  id={`education-start_${index}`}
+                  iconSrc={errors?.startDate ? icon_calendar_red_20 : ic_calendar_gray900_20}
+                  value={startDate}
+                  onClick={() => setOpenStartCal(true)}
+                  invalid={!!errors?.startDate}
+                  errorMessage={errors?.startDate}
+                  rightIconSrc={errors?.startDate ? ic_error_red100_20 : undefined}
+                />
+              </FormField>
+
+              {openStartCal && (
+                <div className="calendar-popover">
+                  <div className="calendar-popover__panel">
+                    <InlineMonthPicker
+                      pickerType="educationStart"
+                      value={parseMonth(startDate) ?? undefined}
+                      minYear={1970}
+                      onChange={() => {}}
+                      onApply={(d) => {
+                        onChange({ startDate: fmtMonth(d) });
+                        const endMV = parseMonth(endDate);
+                        if (endMV && (endMV.year < d.year || (endMV.year === d.year && endMV.month < d.month))) {
+                          onChange({ endDate: fmtMonth(d) });
+                        }
+                        setOpenStartCal(false);
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <span className="education-section__tilde">~</span>
+
+            <div className="section-period__end-wrap" ref={endCalRef}>
+              <FormField label="" className="education-section date education-section__date--end">
+                <DateInline
+                  id={`education-end_${index}`}
+                  iconSrc={errors?.endDate ? icon_calendar_red_20 : ic_calendar_gray900_20}
+                  value={endDate}
+                  onClick={() => setOpenEndCal(true)}
+                  invalid={!!errors?.endDate}
+                  errorMessage={errors?.endDate}
+                  rightIconSrc={errors?.endDate ? ic_error_red100_20 : undefined}
+                />
+              </FormField>
+
+              {openEndCal && (
+                <div className="calendar-popover">
+                  <div className="calendar-popover__panel">
+                    <InlineMonthPicker
+                      pickerType="educationEnd"
+                      value={parseMonth(endDate) ?? undefined}
+                      defaultValue={parseMonth(startDate) ?? undefined}
+                      minYear={parseMonth(startDate)?.year ?? 1970}
+                      isDisabledMonth={disableEndMonth}
+                      onApplyEx={(pickedMonth) => {
+                        onChange({ endDate: fmtMonth(pickedMonth) });
+                        setOpenEndCal(false);
+                      }}
+                      onChange={() => {}}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="education-section__control education-section__control--employment">
+            <div
+              className="ui-select"
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleSelect();
+              }}
+            >
+              {gradLabel ?? <span className="ui-select-none-default">졸업 여부</span>}
+              <img src={ic_arrow_drop_down_gray900_24} alt="" />
+              {selectOpen && (
+                <div className="ui-select__menu" role="listbox" onClick={(e) => e.stopPropagation()}>
+                  <div className="ui-select__option" role="option" onClick={() => onSelectGrad('졸업')}>졸업</div>
+                  <div className="ui-select__option" role="option" onClick={() => onSelectGrad('졸업 예정')}>졸업 예정</div>
+                  <div className="ui-select__option" role="option" onClick={() => onSelectGrad('재학중')}>재학중</div>
+                  <div className="ui-select__option" role="option" onClick={() => onSelectGrad('중퇴')}>중퇴</div>
+                  <div className="ui-select__option" role="option" onClick={() => onSelectGrad('수료')}>수료</div>
+                  <div className="ui-select__option" role="option" onClick={() => onSelectGrad('휴학')}>휴학</div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="education-section__controls">
+        <span
+          className={[
+            "education-section__control_btn",
+            "education-section__control--up",
+            !canMoveUp ? "is-disabled" : "",
+            !canMoveUp ? "first" : "",
+          ].join(" ").trim()}
+          role="button"
+          tabIndex={canMoveUp ? 0 : -1}
+          onClick={() => canMoveUp && onMoveUp()}
+          aria-disabled={!canMoveUp}
+        >
+          <img
+            src={canMoveUp ? ic_key_arrow_up_gray900_20 : ic_key_arrow_up_gray500_20}
+            alt=""
+          />
+        </span>
+
+        <span
+          className={[
+            "education-section__control_btn",
+            "education-section__control--down",
+            !canMoveDown ? "is-disabled" : "",
+            !canMoveDown ? "last" : "",
+          ].join(" ").trim()}
+          role="button"
+          tabIndex={canMoveDown ? 0 : -1}
+          onClick={() => canMoveDown && onMoveDown()}
+          aria-disabled={!canMoveDown}
+        >
+          <img
+            src={canMoveDown ? ic_key_arrow_down_gray900_20 : ic_key_arrow_down_gray500_20}
+            alt=""
+          />
+        </span>
+
+        <span
+          className={[
+            "education-section__control_btn",
+            "education-section__control--remove",
+            !canRemove ? "is-disabled" : "",
+          ].join(" ").trim()}
+          role="button"
+          tabIndex={canRemove ? 0 : -1}
+          onClick={() => canRemove && onRemove()}
+          aria-disabled={!canRemove}
+        >
+          <img
+            src={canRemove ? ic_trash_gray900_20 : ic_trash_gray500_20}
+            alt=""
+          />
+        </span>
+      </div>
+    </div>
+  );
 }

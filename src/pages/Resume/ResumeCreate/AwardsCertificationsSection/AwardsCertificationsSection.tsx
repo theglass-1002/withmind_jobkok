@@ -1,72 +1,78 @@
+// AwardsCertificationsSection.tsx
 import React, { useEffect, useRef, useState } from "react";
 import "./AwardsCertificationsSection.css";
 
-
 import FormInput from "@/shared/components/form/FormInput";
-
 import DateInline from "@/shared/components/form/DateInline";
-import icon_calendar_red_20 from '@/assets/icons/size20/icon_calendar_red_20.png';
+import InlineMonthPicker from "@/shared/components/calendar/InlineMonthPicker";
+import { parseMonth, fmtMonth } from "@/shared/utils/util";
+
 import ic_add_btn_gray900_20 from "@/assets/icons/size20/ic_add_btn_gray900_20.png";
-import ic_calendar_gray900_20 from '@/assets/icons/size20/ic_calendar_gray900_20.png';
+import ic_calendar_gray900_20 from "@/assets/icons/size20/ic_calendar_gray900_20.png";
 import ic_add_purple_20 from "@/assets/icons/size20/ic_add_purple_20.png";
 import ic_close_gray500_20 from "@/assets/icons/size20/ic_close_gray500_20.png";
 import ic_arrow_drop_down_gray900_24 from "@/assets/icons/size24/ic_arrow_drop_down_gray900_24.png";
 import ic_key_arrow_down_gray500_20 from "@/assets/icons/size20/ic_key_arrow_down_gray500_20.png";
 import ic_key_arrow_up_gray500_20 from "@/assets/icons/size20/ic_key_arrow_up_gray500_20.png";
 import ic_trash_gray900_20 from "@/assets/icons/size20/ic_trash_gray900_20.png";
-import ic_star_gray700_20 from '@/assets/icons/size20/ic_star_gray700_20.png';
 
 export type AwardsCertItem = {
-    id: string;
-    kind: "Award" | "Certification" | "License" | null; // 구분
-    title: string;             // 수상ㆍ자격증명
-    dateValue?: string;        // YYYY.MM
-    score?: string;            // 성적/점수
-    issuer?: string;           // 발행처/기관
-    credentialId?: string;     // (선택) 자격번호
-    expiresOn?: string;        // (선택) 만료일 YYYY.MM
-    noExpiry?: boolean;        // (선택) 만료없음
-  };
+  id: string;
+  kind: "Award" | "Certification" | "License" | null; // 구분
+  title: string;      // 수상ㆍ자격증명
+  dateValue?: string; // YYYY.MM
+  score?: string;     // 성적/점수
+  issuer?: string;    // 발행처/기관
+};
+
 const makeId = () => Math.random().toString(36).slice(2, 10);
+const blankItem = (): AwardsCertItem => ({
+  id: makeId(),
+  kind: null,
+  title: "",
+  dateValue: "",
+  score: "",
+  issuer: "",
+});
 
 export default function AwardsCertificationsSection() {
-   
   const [isAdding, setIsAdding] = useState(false);
   const [items, setItems] = useState<AwardsCertItem[]>([]);
   const [openDropdownIndex, setOpenDropdownIndex] = useState<number | null>(null);
+  const [openDateIdx, setOpenDateIdx] = useState<number | null>(null);
 
-  // 드롭다운 바깥 클릭 감지용 refs
+  // 드롭다운/달력 바깥 클릭 감지용 refs
   const selectRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const dateRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const startAdd = () => {
     setIsAdding(true);
-    if (items.length === 0) {
-      setItems([{ id: makeId(), activityType: null, activityName: "" }]);
-    }
+    if (items.length === 0) setItems([blankItem()]);
   };
 
   const stopAdd = () => {
     setIsAdding(false);
     setItems([]);
     setOpenDropdownIndex(null);
+    setOpenDateIdx(null);
   };
 
-  const addItem = () => {
-    setItems(prev => [...prev, { id: makeId(), activityType: null, activityName: "" }]);
-  };
+  // 새 아이템을 "아래"에 추가 (원래 로직 유지)
+  const addItem = () => setItems((prev) => [...prev, blankItem()]);
 
   const removeItem = (index: number) => {
-    setItems(prev => {
+    setItems((prev) => {
       const next = [...prev];
       next.splice(index, 1);
       return next;
     });
-    setOpenDropdownIndex(cur => (cur === index ? null : cur));
+    setOpenDropdownIndex((cur) => (cur === index ? null : cur));
+    if (openDateIdx === index) setOpenDateIdx(null);
   };
 
   const moveUp = (index: number) => {
     if (index <= 0) return;
-    setItems(prev => {
+    setItems((prev) => {
       const next = [...prev];
       [next[index - 1], next[index]] = [next[index], next[index - 1]];
       return next;
@@ -75,51 +81,73 @@ export default function AwardsCertificationsSection() {
 
   const moveDown = (index: number) => {
     if (index >= items.length - 1) return;
-    setItems(prev => {
+    setItems((prev) => {
       const next = [...prev];
       [next[index + 1], next[index]] = [next[index], next[index + 1]];
       return next;
     });
   };
 
-  const selectType = (index: number, val: string) => {
-    setItems(prev => {
+  // kind 선택
+  const selectKind = (index: number, val: AwardsCertItem["kind"]) => {
+    setItems((prev) => {
       const next = [...prev];
-      next[index] = { ...next[index], activityType: val };
+      next[index] = { ...next[index], kind: val };
       return next;
     });
     setOpenDropdownIndex(null);
   };
 
-  const changeName = (index: number, v: any) => {
+  // 제목 변경
+  const changeTitle = (index: number, v: any) => {
     const value = typeof v === "string" ? v : v?.target ? v.target.value : "";
-    setItems(prev => {
+    setItems((prev) => {
       const next = [...prev];
-      next[index] = { ...next[index], activityName: value };
+      next[index] = { ...next[index], title: value };
       return next;
     });
   };
 
+  // 성적/발행처 변경
+  const patch = (index: number, patch: Partial<AwardsCertItem>) => {
+    setItems((prev) => {
+      const next = [...prev];
+      next[index] = { ...next[index], ...patch };
+      return next;
+    });
+  };
 
-
-  // 바깥 클릭 시 열려있는 드롭다운 닫기
+  // 바깥 클릭 시 열려있는 드롭다운/달력 닫기
   useEffect(() => {
-    if (openDropdownIndex === null) return;
-
-    const onDocClick = (e: MouseEvent) => {
-      const ref = selectRefs.current[openDropdownIndex];
-      if (!ref) return;
-      if (!ref.contains(e.target as Node)) setOpenDropdownIndex(null);
+    const onDocClick = (e: MouseEvent | TouchEvent) => {
+      const t = e.target as Node;
+      if (openDropdownIndex !== null) {
+        const ref = selectRefs.current[openDropdownIndex];
+        if (ref && !ref.contains(t)) setOpenDropdownIndex(null);
+      }
+      if (openDateIdx !== null) {
+        const ref = dateRefs.current[openDateIdx];
+        if (ref && !ref.contains(t)) setOpenDateIdx(null);
+      }
     };
-
-    document.addEventListener("mousedown", onDocClick);
-    return () => document.removeEventListener("mousedown", onDocClick);
-  }, [openDropdownIndex]);
+    document.addEventListener("mousedown", onDocClick, true);
+    document.addEventListener("touchstart", onDocClick, true);
+    return () => {
+      document.removeEventListener("mousedown", onDocClick, true);
+      document.removeEventListener("touchstart", onDocClick, true);
+    };
+  }, [openDropdownIndex, openDateIdx]);
 
   // 모든 아이템 제거되면 섹션 닫기
   useEffect(() => {
     if (isAdding && items.length === 0) setIsAdding(false);
   }, [items.length, isAdding]);
+
+  // 미래 월 비활성화 (수상/취득일은 미래 X)
+  const disableFutureMonth = (y: number, m: number) => {
+    const now = new Date();
+    return y > now.getFullYear() || (y === now.getFullYear() && m > now.getMonth());
+  };
 
   return (
     <div className="resume-create-page__section resume-create-page__section--awards-certifications">
@@ -148,162 +176,191 @@ export default function AwardsCertificationsSection() {
       >
         {isAdding ? (
           <>
-            {items.map((item, index) => (
-              <div className="awards-certifications-section__item" key={item.id}>
-                <div className="awards-certifications-section__fields">
-                  <div className="awards-certifications-section__group">
-                    <div className="awards-certifications-section__control">
-                      <label className="small_labe_black-14">
-                        수상ㆍ자격증명 <em className="error_text_red">*</em>
-                      </label>
+            {items.map((item, index) => {
+              const canMoveUp = items.length > 1 && index > 0;
+              const canMoveDown = items.length > 1 && index < items.length - 1;
 
-                      {/* 드롭다운 */}
-                      <div
-                        className="ui-select"
-                        ref={el => (selectRefs.current[index] = el)}
-                        role="combobox"
-                        aria-expanded={openDropdownIndex === index}
-                        tabIndex={0}
-                        onClick={() =>
-                          setOpenDropdownIndex(cur => (cur === index ? null : index))
-                        }
-                        onKeyDown={e => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
-                            setOpenDropdownIndex(cur => (cur === index ? null : index));
+              return (
+                <div className="awards-certifications-section__item" key={item.id}>
+                  <div className="awards-certifications-section__fields">
+                    {/* 구분 + 제목 */}
+                    <div className="awards-certifications-section__group">
+                      <div className="awards-certifications-section__control">
+                        <label className="small_labe_black-14">
+                          수상ㆍ자격증명 <em className="error_text_red">*</em>
+                        </label>
+
+                        {/* 드롭다운 */}
+                        <div
+                          className="ui-select"
+                          ref={(el) => (selectRefs.current[index] = el)}
+                          role="combobox"
+                          aria-expanded={openDropdownIndex === index}
+                          tabIndex={0}
+                          onClick={() =>
+                            setOpenDropdownIndex((cur) => (cur === index ? null : index))
                           }
-                          if (e.key === "Escape") setOpenDropdownIndex(null);
-                        }}
-                      >
-                        {item.activityType ?? (
-                          <span className="ui-select-none-default">구분</span>
-                        )}
-                        <img src={ic_arrow_drop_down_gray900_24} alt="" />
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              setOpenDropdownIndex((cur) => (cur === index ? null : index));
+                            }
+                            if (e.key === "Escape") setOpenDropdownIndex(null);
+                          }}
+                        >
+                          {/* kind 표시 */}
+                          {item.kind
+                            ? (item.kind === "Award"
+                                ? "수상"
+                                : item.kind === "Certification"
+                                ? "자격증"
+                                : "면허")
+                            : <span className="ui-select-none-default">구분</span>}
+                          <img src={ic_arrow_drop_down_gray900_24} alt="" />
 
-                        {openDropdownIndex === index && (
-                          <div
-                            className="ui-select__menu"
-                            role="listbox"
-                            onClick={e => e.stopPropagation()}
-                          >
-                            {["교내활동", "인턴", "자원봉사", "동아리","사회활동","수행과제","해외연수","교육이수내역"].map(opt => (
+                          {openDropdownIndex === index && (
+                            <div
+                              className="ui-select__menu"
+                              role="listbox"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              {/* 라벨-값 매핑 */}
                               <div
-                                key={opt}
                                 className="ui-select__option"
                                 role="option"
-                                onClick={e => {
-                                  e.stopPropagation(); 
-                                  selectType(index, opt);
-                                }}
-                                onKeyDown={e => {
-                                  if (e.key === "Enter" || e.key === " ") {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    selectType(index, opt);
-                                  }
-                                }}
                                 tabIndex={0}
+                                onClick={() => selectKind(index, "Award")}
                               >
-                                {opt}
+                                수상
                               </div>
-                            ))}
-                          </div>
-                        )}
+                              <div
+                                className="ui-select__option"
+                                role="option"
+                                tabIndex={0}
+                                onClick={() => selectKind(index, "Certification")}
+                              >
+                                자격증
+                              </div>
+                              <div
+                                className="ui-select__option"
+                                role="option"
+                                tabIndex={0}
+                                onClick={() => selectKind(index, "License")}
+                              >
+                                면허
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* 제목 입력 */}
+                      <FormInput
+                        placeholder="수상ㆍ자격증명을 입력해 주세요."
+                        inputClassName="awards-certifications_name"
+                        id={`awards-certifications_name_${item.id}`}
+                        value={item.title}
+                        onChange={(v: any) => changeTitle(index, v)}
+                      />
+                    </div>
+
+                    {/* 수상ㆍ취득 정보 */}
+                    <div className="awards-certifications-period">
+                      <label className="awards-certifications-period__label small_labe_black-14">
+                        수상ㆍ취득 정보
+                      </label>
+
+                      <div className="awards-certifications-period__fields">
+                        {/* 날짜 */}
+                        <div
+                          className="awards-certifications-period__field"
+                          ref={(el) => (dateRefs.current[index] = el)}
+                        >
+                          <DateInline
+                            id={`awards-certifications_${index}`}
+                            iconSrc={ic_calendar_gray900_20}
+                            value={item.dateValue || "YYYY.MM"}
+                            onClick={() => setOpenDateIdx(index)}
+                            invalid={false}
+                          />
+                          {openDateIdx === index && (
+                            <div className="calendar-popover">
+                              <div className="calendar-popover__panel">
+                                <InlineMonthPicker
+                                  value={parseMonth(item.dateValue || "") || undefined}
+                                  minYear={1970}
+                                  isDisabledMonth={disableFutureMonth}
+                                  onChange={() => {}}
+                                  onApply={(d) => {
+                                    patch(index, { dateValue: fmtMonth(d) });
+                                    setOpenDateIdx(null);
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* 성적 */}
+                        <FormInput
+                          placeholder="성적을 입력해 주세요."
+                          inputClassName="awards-certifications__score"
+                          id={`awards_score_${item.id}`}
+                          value={item.score ?? ""}
+                          onChange={(v: any) => {
+                            const val = typeof v === "string" ? v : v?.target?.value ?? "";
+                            patch(index, { score: val });
+                          }}
+                        />
+
+                        {/* 발행처 */}
+                        <FormInput
+                          placeholder="발행처ㆍ기관을 입력해 주세요."
+                          inputClassName="awards-certifications__issuer"
+                          id={`awards_issuer_${item.id}`}
+                          value={item.issuer ?? ""}
+                          onChange={(v: any) => {
+                            const val = typeof v === "string" ? v : v?.target?.value ?? "";
+                            patch(index, { issuer: val });
+                          }}
+                        />
                       </div>
                     </div>
-
-                    {/* 활동명 입력 */}
-                    <FormInput
-                      placeholder="수상ㆍ자격증명을 입력해 주세요."
-                      inputClassName="awards-certifications_name"
-                      id={`awards-certifications_name${item.id}`}
-                      value={item.credentialId??""}
-                      onChange={(v: any) => changeName(index, v)}
-                    />
                   </div>
-                  <div className="awards-certifications-period">
-                    <label className="awards-certifications-period__label small_labe_black-14">
-                        수상ㆍ취득 정보 
-                    </label>
 
-                    <div className="awards-certifications-period__fields">
-                        <div className="awards-certifications-period__field">
-                            <DateInline
-                            id="awards-certifications"
-                            iconSrc={ic_calendar_gray900_20}
-                            value={"YYYY.MM"}
-                            onClick={() => {/* date picker open */}}
-                            invalid={false}
-                        
-        
-                            />
-                        </div>
-                        <FormInput
-                            placeholder="성적을 입력해 주세요."
-                            inputClassName="awards-certifications__score"
-                            id={`awards_score_${item.id}`}
-                            value={item.score ?? ""}
-                            onChange={(v: any) => {
-                                const val = typeof v === "string" ? v : v?.target?.value ?? "";
-                                setItems(prev => {
-                                const next = [...prev];
-                                next[index] = { ...next[index], score: val };
-                                return next;
-                                });
-                            }}
-                            />
-                      <FormInput
-                        placeholder="발행처ㆍ기관을 입력해 주세요."
-                        inputClassName="awards-certifications__issuer"
-                        id={`awards_issuer_${item.id}`}
-                        value={item.issuer ?? ""}
-                        onChange={(v: any) => {
-                            const val = typeof v === "string" ? v : v?.target?.value ?? "";
-                            setItems(prev => {
-                            const next = [...prev];
-                            next[index] = { ...next[index], issuer: val };
-                            return next;
-                            });
-                        }}
-                        />
-                    </div>
-                    
-                    </div>
-                    
+                  {/* 아이템 컨트롤 */}
+                  <div className="awards-certifications-section__controls">
+                    <span
+                      className="awards-certifications-section__control_btn awards-certifications-section__control--up"
+                      onClick={() => moveUp(index)}
+                      aria-label="위로"
+                      role="button"
+                      tabIndex={0}
+                    >
+                      <img src={ic_key_arrow_up_gray500_20} alt="" />
+                    </span>
+                    <span
+                      className="awards-certifications-section__control_btn awards-certifications-section__control--down"
+                      onClick={() => moveDown(index)}
+                      aria-label="아래로"
+                      role="button"
+                      tabIndex={0}
+                    >
+                      <img src={ic_key_arrow_down_gray500_20} alt="" />
+                    </span>
+                    <span
+                      className="awards-certifications-section__control_btn awards-certifications-section__control--remove"
+                      onClick={() => removeItem(index)}
+                      aria-label="삭제"
+                      role="button"
+                      tabIndex={0}
+                    >
+                      <img src={ic_trash_gray900_20} alt="" />
+                    </span>
+                  </div>
                 </div>
-
-                {/* 아이템 컨트롤 */}
-                <div className="awards-certifications-section__controls">
-                  <span
-                    className="awards-certifications-section__control_btn awards-certifications-section__control--up"
-                    onClick={() => moveUp(index)}
-                    aria-label="위로"
-                    role="button"
-                    tabIndex={0}
-                  >
-                    <img src={ic_key_arrow_up_gray500_20} alt="" />
-                  </span>
-                  <span
-                    className="awards-certifications-section__control_btn awards-certifications-section__control--down"
-                    onClick={() => moveDown(index)}
-                    aria-label="아래로"
-                    role="button"
-                    tabIndex={0}
-                  >
-                    <img src={ic_key_arrow_down_gray500_20} alt="" />
-                  </span>
-                  <span
-                    className="awards-certifications-section__control_btn awards-certifications-section__control--remove"
-                    onClick={() => removeItem(index)}
-                    aria-label="삭제"
-                    role="button"
-                    tabIndex={0}
-                  >
-                    <img src={ic_trash_gray900_20} alt="" />
-                  </span>
-                </div>
-              </div>
-            ))}
+              );
+            })}
 
             <span className="default_btn_white" onClick={addItem} role="button" tabIndex={0}>
               <img src={ic_add_btn_gray900_20} alt="" />

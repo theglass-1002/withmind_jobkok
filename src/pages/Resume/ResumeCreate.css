@@ -65,6 +65,10 @@ gap: 28px;
     align-items: center;
 }
 
+.section-title__row img{
+    cursor: pointer;
+}
+
 .resume-create-page__field{
     display: flex;
     flex-direction: column;
@@ -385,6 +389,12 @@ background: var(--gray-50, #F8F8F9);
 
 }
 
+.section-period__start-wrap,
+.section-period__end-wrap
+{
+    position: relative;
+}
+
 .career-section__toggle--current{
     display: flex;
     padding: 15px;
@@ -616,34 +626,44 @@ background: var(--gray-50, #F8F8F9);
   .career-section__summary-ai-btn:hover{
    
   }
+/* 공통 스타일: 네 섹션 버튼 모두 */
+.career-section__control_btn,
+.education-section__control_btn,
+.activities-section__control_btn,
+.awards-certifications-section__control_btn {
+  display: flex;
+  padding: 12px;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  border-radius: 100px;
+  border: 1px solid var(--gray-300, #E0E2E4);
+  background: var(--gray-100, #F2F3F4);
+  cursor: pointer;
+}
 
-  .career-section__control_btn,
-  .education-section__control_btn,
-  .activities-section__control_btn,
-  .awards-certifications-section__control_btn
-  {
-    display: flex;
-    padding: 12px;
-    justify-content: center;
-    align-items: center;
-    gap: 4px;
-    border-radius: 100px;
-    border: 1px solid var(--gray-300, #E0E2E4);
-    background: var(--gray-100, #F2F3F4);
-    cursor: pointer;
-  }
+/* 예외(activities/awards만 배경을 흰색으로): 차이 나는 부분만 override */
+.activities-section__control_btn,
+.awards-certifications-section__control_btn {
+  background: var(--white-100, #FFF);
+}
 
-  .activities-section__control_btn,
-  .awards-certifications-section__control_btn
-  {
-    display: flex;
-    padding: 12px;
-    justify-content: center;
-    align-items: center;
-    gap: 4px;
-    border-radius: 100px;
-    border: 1px solid var(--gray-300, #E0E2E4);
-    border-bottom: 1px solid var(--gray-300, #E0E2E4);
-    background: var(--white-100, #FFF); 
-    cursor: pointer;
-  }
+/* 활성화(비활성 클래스가 없을 때) 공통 스타일 */
+.career-section__control_btn:not(.is-disabled),
+.education-section__control_btn:not(.is-disabled),
+.activities-section__control_btn:not(.is-disabled),
+.awards-certifications-section__control_btn:not(.is-disabled) {
+  border-radius: 100px;
+  border: 1px solid var(--gray-300, #E0E2E4);
+  background: var(--white-100, #FFF);
+}
+
+/* 비활성 공통 (이미 쓰고 있으면 유지) */
+.career-section__control_btn.is-disabled,
+.education-section__control_btn.is-disabled,
+.activities-section__control_btn.is-disabled,
+.awards-certifications-section__control_btn.is-disabled {
+  opacity: 0.4;
+  pointer-events: none;
+  cursor: default;
+}

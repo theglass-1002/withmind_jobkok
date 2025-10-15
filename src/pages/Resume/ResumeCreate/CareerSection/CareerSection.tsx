@@ -15,14 +15,21 @@ import ic_arrow_drop_down_gray900_24 from "@/assets/icons/size24/ic_arrow_drop_d
 import ic_add_purple_20 from "@/assets/icons/size20/ic_add_purple_20.png";
 import ic_key_arrow_down_gray500_20 from "@/assets/icons/size20/ic_key_arrow_down_gray500_20.png";
 import ic_key_arrow_up_gray500_20 from "@/assets/icons/size20/ic_key_arrow_up_gray500_20.png";
+import ic_key_arrow_up_gray900_20 from '@/assets/icons/size20/ic_key_arrow_up_gray900_20.png';
+import ic_key_arrow_down_gray900_20 from '@/assets/icons/size20/ic_key_arrow_down_gray900_20.png';
+import ic_trash_gray900_20 from '@/assets/icons/size20/ic_trash_gray900_20.png';
 
 import "./CareerSection.css";
 
 import InlineMonthPicker from "@/shared/components/calendar/InlineMonthPicker";
 import { parseMonth, fmtMonth } from "@/shared/utils/util";
 
+// 유틸: 고유 id 생성
+const makeId = () => Math.random().toString(36).slice(2, 10);
+
 // ===== 타입 =====
 export type CareerInfo = {
+  id: string;               // ⬅ 고유 id 추가
   company_name: string;
   role: string;
   position: string;
@@ -36,6 +43,7 @@ type CareerErrors = Partial<Record<keyof CareerInfo, string>>;
 
 // 공백 아이템
 const blankItem = (): CareerInfo => ({
+  id: makeId(),            // ⬅ 생성 시 id 부여
   company_name: "",
   role: "",
   position: "",
@@ -54,13 +62,11 @@ const swap = <T,>(arr: T[], i: number, j: number) => {
 };
 
 export default function CareerSection() {
-  // 리스트(내부 상태에서 전부 관리)
   const [items, setItems] = useState<CareerInfo[]>([blankItem()]);
-  const [itemErrors] = useState<CareerErrors[]>([]); // 필요 시 유효성 바인딩
+  const [itemErrors] = useState<CareerErrors[]>([]);
 
-  // “경력 불러오기” (예시: 실제로는 API 연동)
   const importCareers = async () => {
-    const fetched: CareerInfo[] = [
+    const fetched: Omit<CareerInfo, "id">[] = [
       {
         company_name: "위드마인드",
         role: "",
@@ -82,11 +88,11 @@ export default function CareerSection() {
         endDate: "2024.11",
       },
     ];
-    setItems(fetched.length ? fetched : [blankItem()]);
+    // ⬅ 불러온 항목에도 id를 부여
+    setItems((fetched.length ? fetched : [blankItem()]).map(it => ({ id: makeId(), ...it })));
   };
 
-  // CRUD & 이동
-  // 새 아이템을 "맨 위"에 추가 (prepend)
+  // 새 아이템을 "맨 위"에 추가
   const addItem = () => setItems((prev) => [blankItem(), ...prev]);
 
   const removeItem = (idx: number) =>
@@ -127,7 +133,7 @@ export default function CareerSection() {
       <div className="resume-create-page__section-body career-section">
         {items.map((it, idx) => (
           <CareerItem
-            key={idx}
+            key={it.id}                    // ⬅ 인덱스 대신 고유 id 사용
             index={idx}
             total={items.length}
             value={it}
@@ -179,19 +185,19 @@ function CareerItem({
     endDate,
   } = value;
 
-  // 재직 형태 드롭다운(열림 상태만 로컬)
+  // 재직 형태 드롭다운
   const [openEmp, setOpenEmp] = useState(false);
+  const empRef = useRef<HTMLDivElement | null>(null);
 
-  // 달력(아이템별)
+  // 달력
   const [openStartCal, setOpenStartCal] = useState(false);
   const [openEndCal, setOpenEndCal] = useState(false);
   const startCalRef = useRef<HTMLDivElement | null>(null);
   const endCalRef = useRef<HTMLDivElement | null>(null);
 
-  // "담당 업무" 편집 토글(아이템별)
+  // 담당 업무 편집 토글
   const MAX_SUMMARY = 2000;
   const [editing, setEditing] = useState(false);
-  const count = (summary ?? "").length;
   const startEditing = (e?: React.KeyboardEvent | React.MouseEvent) => {
     if (e && "key" in e) {
       // 한글 조합 중 키이벤트 무시
@@ -204,11 +210,11 @@ function CareerItem({
     setEditing(true);
   };
 
-  // 팝오버 바깥 클릭 닫기
+  // 팝오버 바깥 클릭 닫기 (달력 + 재직 형태)
   useEffect(() => {
-    if (!openStartCal && !openEndCal) return;
     const onOutside = (e: MouseEvent | TouchEvent) => {
       const target = e.target as Node;
+
       if (openStartCal) {
         const root = startCalRef.current;
         if (root && !root.contains(target)) setOpenStartCal(false);
@@ -217,14 +223,21 @@ function CareerItem({
         const root = endCalRef.current;
         if (root && !root.contains(target)) setOpenEndCal(false);
       }
+      if (openEmp) {
+        const root = empRef.current;
+        if (root && !root.contains(target)) setOpenEmp(false);
+      }
     };
-    document.addEventListener("mousedown", onOutside, true);
-    document.addEventListener("touchstart", onOutside, true);
-    return () => {
-      document.removeEventListener("mousedown", onOutside, true);
-      document.removeEventListener("touchstart", onOutside, true);
-    };
-  }, [openStartCal, openEndCal]);
+
+    if (openStartCal || openEndCal || openEmp) {
+      document.addEventListener("mousedown", onOutside, true);
+      document.addEventListener("touchstart", onOutside, true);
+      return () => {
+        document.removeEventListener("mousedown", onOutside, true);
+        document.removeEventListener("touchstart", onOutside, true);
+      };
+    }
+  }, [openStartCal, openEndCal, openEmp]);
 
   // end 달력 비활성 규칙: start 이전 + 오늘 이후
   const startMV = parseMonth(startDate) ?? null;
@@ -243,7 +256,6 @@ function CareerItem({
   const canRemove = total > 1;
 
   return (
-
     <div className="career-section__item">
       <div className="career-section__fields">
         {/* 회사명 */}
@@ -255,6 +267,7 @@ function CareerItem({
             onChange={(v) => onChange({ company_name: v })}
             invalid={!!errors?.company_name}
             rightIconSrc={errors?.company_name ? ic_error_red100_20 : undefined}
+            placeholder="회사명을 입력해 주세요."
           />
         </FormField>
 
@@ -265,61 +278,22 @@ function CareerItem({
             <label className="small_labe_black-14">
               재직 기간 <em className="error_text_red">*</em>
             </label>
-            <div className="ui-select" 
+            <div
+              className="ui-select"
+              ref={empRef}
               onClick={(e) => {
                 e.stopPropagation();
                 setOpenEmp((o) => !o);
               }}
             >
-            
               {employmentType ?? <span className="ui-select-none-default">재직 형태</span>}
               <img src={ic_arrow_drop_down_gray900_24} alt="" />
               {openEmp && (
                 <div className="ui-select__menu" role="listbox">
-                  <div
-                    className="ui-select__option"
-                    role="option"
-                    onClick={(e) => {
-                      e.stopPropagation();         
-                      onChange({ employmentType: "정규직" });
-                      setOpenEmp(false);
-                    }}
-                  >
-                    정규직
-                  </div>
-                  <div
-                    className="ui-select__option"
-                    role="option"
-                    onClick={(e) => {
-                      e.stopPropagation();   
-                      onChange({ employmentType: "계약직" });
-                      setOpenEmp(false);
-                    }}
-                  >
-                    계약직
-                  </div>
-                  <div
-                    className="ui-select__option"
-                    role="option"
-                    onClick={(e) => {
-                      e.stopPropagation();   
-                      onChange({ employmentType: "인턴" });
-                      setOpenEmp(false);
-                    }}
-                  >
-                    인턴
-                  </div>
-                  <div
-                    className="ui-select__option"
-                    role="option"
-                    onClick={(e) => {
-                      e.stopPropagation();   
-                      onChange({ employmentType: "프리랜서" });
-                      setOpenEmp(false);
-                    }}
-                  >
-                    프리랜서
-                  </div>
+                  <div className="ui-select__option" role="option" onClick={(e) => { e.stopPropagation(); onChange({ employmentType: "정규직" }); setOpenEmp(false); }}>정규직</div>
+                  <div className="ui-select__option" role="option" onClick={(e) => { e.stopPropagation(); onChange({ employmentType: "계약직" }); setOpenEmp(false); }}>계약직</div>
+                  <div className="ui-select__option" role="option" onClick={(e) => { e.stopPropagation(); onChange({ employmentType: "인턴" }); setOpenEmp(false); }}>인턴</div>
+                  <div className="ui-select__option" role="option" onClick={(e) => { e.stopPropagation(); onChange({ employmentType: "프리랜서" }); setOpenEmp(false); }}>프리랜서</div>
                 </div>
               )}
             </div>
@@ -351,7 +325,6 @@ function CareerItem({
                       onChange={() => {}}
                       onApply={(d) => {
                         onChange({ startDate: fmtMonth(d) });
-                        // 시작이 변경되면 종료가 시작 이전인 경우 보정
                         const endMV = parseMonth(endDate);
                         if (endMV && (endMV.year < d.year || (endMV.year === d.year && endMV.month < d.month))) {
                           onChange({ endDate: fmtMonth(d) });
@@ -392,44 +365,32 @@ function CareerItem({
                 </FormField>
 
                 {openEndCal && (
-  <div className="calendar-popover">
-    <div className="calendar-popover__panel">
-      <InlineMonthPicker
-        pickerType="employmentEnd"
-        value={parseMonth(endDate) ?? undefined}
-        defaultValue={startMV ?? undefined}
-        minYear={startMV?.year ?? 1970}
-        isDisabledMonth={disableEndMonth}
-
-        // ✅ 토글(재직중) 노출 & 부모 상태와 동기화
-        showCurrentToggle
-        currentChecked={!!isCurrent}
-        onCurrentChange={(next) => {
-          // 토글만 눌렀을 때도 부모 상태 갱신하고 싶으면 사용
-          onChange({ isCurrent: next, ...(next ? { endDate: "" } : {}) });
-        }}
-
-        // ✅ 적용(Apply) 눌렀을 때 month + isCurrent 둘 다 받기
-        onApplyEx={(pickedMonth, current) => {
-          if (current) {
-            // 재직중이면 종료일 비우고 재직중 true
-            onChange({ isCurrent: true, endDate: "" });
-          } else {
-            // 재직중이 아니면 종료일 저장, 재직중 false
-            onChange({ isCurrent: false, endDate: fmtMonth(pickedMonth) });
-          }
-          setOpenEndCal(false);
-        }}
-
-        // (선택) 기존 onChange 미리보기 안쓰면 지워도 됨
-        onChange={() => {}}
-        // (선택) onApply는 하위호환용. onApplyEx 쓰면 생략 가능
-        // onApply={(d) => {...}}
-      />
-    </div>
-  </div>
-)}
-
+                  <div className="calendar-popover">
+                    <div className="calendar-popover__panel">
+                      <InlineMonthPicker
+                        pickerType="employmentEnd"
+                        value={parseMonth(endDate) ?? undefined}
+                        defaultValue={startMV ?? undefined}
+                        minYear={startMV?.year ?? 1970}
+                        isDisabledMonth={disableEndMonth}
+                        showCurrentToggle
+                        currentChecked={!!isCurrent}
+                        onCurrentChange={(next) => {
+                          onChange({ isCurrent: next, ...(next ? { endDate: "" } : {}) });
+                        }}
+                        onApplyEx={(pickedMonth, current) => {
+                          if (current) {
+                            onChange({ isCurrent: true, endDate: "" });
+                          } else {
+                            onChange({ isCurrent: false, endDate: fmtMonth(pickedMonth) });
+                          }
+                          setOpenEndCal(false);
+                        }}
+                        onChange={() => {}}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -465,6 +426,7 @@ function CareerItem({
                 onChange={(v) => onChange({ role: v })}
                 invalid={!!errors?.role}
                 rightIconSrc={errors?.role ? ic_error_red100_20 : undefined}
+                placeholder="직무를 입력해 주세요."
               />
             </FormField>
           </div>
@@ -477,12 +439,13 @@ function CareerItem({
                 onChange={(v) => onChange({ position: v })}
                 invalid={!!errors?.position}
                 rightIconSrc={errors?.position ? ic_error_red100_20 : undefined}
+                placeholder="직책을 입력해 주세요."
               />
             </FormField>
           </div>
         </div>
 
-        {/* 담당 업무 (토글형) */}
+        {/* 담당 업무 (읽기/편집 토글) */}
         <div className="field career-section__control career-section__control--summary">
           <div className="small_labe_black-14">담당 업무 및 주요 성과</div>
 
@@ -491,14 +454,12 @@ function CareerItem({
               <textarea
                 id={`summary_${index}`}
                 value={summary ?? ""}
-                onChange={(e) =>
-                  onChange({ summary: e.target.value.slice(0, MAX_SUMMARY) })
-                }
-                maxLength={MAX_SUMMARY}
+                onChange={(e) => onChange({ summary: e.target.value.slice(0, 2000) })}
+                maxLength={2000}
               />
               <span className="career-section__char-count">
-                <span>{count}</span>
-                <span className="max"> / {MAX_SUMMARY}</span>
+                <span>{(summary ?? "").length}</span>
+                <span className="max"> / 2000</span>
               </span>
             </div>
           ) : (
@@ -509,17 +470,19 @@ function CareerItem({
               role="button"
               tabIndex={0}
             >
-              <ul className="career-section__summary-tips">
-                <li className="career-section__summary-tip">
-                  - 프로젝트 경험은 역할ㆍ기여도ㆍ성과 중심으로 정리하면 좋습니다.
-                </li>
-                <li className="career-section__summary-tip">
-                  - 작성 후 [AI 문장 추천]을 눌러 추천 내용을 참고해 보세요.
-                </li>
-              </ul>
+              {(summary ?? "").trim().length > 0 ? (
+                <div className="career-section__summary-read">
+                  {summary}
+                </div>
+              ) : (
+                <ul className="career-section__summary-tips">
+                  <li className="career-section__summary-tip">세부 내용을 입력해 주세요.</li>
+                  <li className="career-section__summary-tip">프로젝트 경험은 역할ㆍ기여도ㆍ성과 중심으로 정리하면 좋습니다.</li>
+                </ul>
+              )}
               <span className="career-section__char-count">
-                <span>{count}</span>
-                <span className="max"> / {MAX_SUMMARY}</span>
+                <span>{(summary ?? "").length}</span>
+                <span className="max"> / 2000</span>
               </span>
             </div>
           )}
@@ -527,47 +490,42 @@ function CareerItem({
           <div className="resume-create-page__assist">
             <span className="resume-create-page__assist-text">
               <img src={ic_star_gray700_20} alt="" />
-              더 적합한 문장을 추천을 위해 아래 항목들을 먼저 채워주세요.
+              더 적합한 문장 추천을 위해 아래 항목들을 먼저 채워주세요.
             </span>
             <span className="career-section__summary-ai-btn">AI 문장 추천</span>
           </div>
         </div>
       </div>
 
-      {/* 아이템 컨트롤 */}
       <div className="career-section__controls">
         <span
-          className={`career-section__control_btn career-section__control--up ${
-            !canMoveUp ? "first" : ""
-          }`}
+          className={`career-section__control_btn career-section__control--up ${!canMoveUp ? 'is-disabled first' : ''}`}
           role="button"
           tabIndex={0}
           onClick={() => canMoveUp && onMoveUp()}
           aria-disabled={!canMoveUp}
         >
-          <img src={ic_key_arrow_up_gray500_20} alt="" />
+          <img src={canMoveUp ? ic_key_arrow_up_gray900_20 : ic_key_arrow_up_gray500_20} alt="" />
         </span>
+
         <span
-          className={`career-section__control_btn career-section__control--down ${
-            !canMoveDown ? "last" : ""
-          }`}
+          className={`career-section__control_btn career-section__control--down ${!canMoveDown ? 'is-disabled last' : ''}`}
           role="button"
           tabIndex={0}
           onClick={() => canMoveDown && onMoveDown()}
           aria-disabled={!canMoveDown}
         >
-          <img src={ic_key_arrow_down_gray500_20} alt="" />
+          <img src={canMoveDown ? ic_key_arrow_down_gray900_20 : ic_key_arrow_down_gray500_20} alt="" />
         </span>
+
         <span
-          className={`career-section__control_btn career-section__control--remove ${
-            !canRemove ? "is-disabled" : ""
-          }`}
+          className={`career-section__control_btn career-section__control--remove ${!canRemove ? 'is-disabled' : ''}`}
           role="button"
           tabIndex={0}
           onClick={() => canRemove && onRemove()}
           aria-disabled={!canRemove}
         >
-          <img src={ic_trash_gray500_20} alt="" />
+          <img src={canRemove ? ic_trash_gray900_20 : ic_trash_gray500_20} alt="" />
         </span>
       </div>
     </div>
