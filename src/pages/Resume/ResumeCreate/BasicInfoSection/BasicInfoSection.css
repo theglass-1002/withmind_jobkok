@@ -19,7 +19,9 @@
 }
 
 
-.resume-create-page__section--basic .birth{
+.resume-create-page__section--basic .birth,
+.resume-create-page__section--basic .gender
+{
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -27,22 +29,12 @@
     flex: 1 0 0;
 }
 
-.resume-create-page__section--basic .gender{
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-    flex: 1 0 0;
-}
-
-
+.resume-create-page__section--basic .birth,
+.resume-create-page__section--basic .phone,
 .resume-create-page__section--basic .email{
  flex: 1;
 }
 
-.resume-create-page__section--basic .phone{
-flex: 1; 
-}
 
 .resume-create-page__section--basic .resume-create-page__col--right{
     display: flex;

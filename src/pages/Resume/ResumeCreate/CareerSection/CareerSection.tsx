@@ -312,6 +312,7 @@ function CareerItem({
                   invalid={!!errors?.startDate}
                   errorMessage={errors?.startDate}
                   rightIconSrc={errors?.startDate ? ic_error_red100_20 : undefined}
+                  isOpen={openStartCal}    
                 />
               </FormField>
 
@@ -361,9 +362,9 @@ function CareerItem({
                     invalid={!!errors?.endDate}
                     errorMessage={errors?.endDate}
                     rightIconSrc={errors?.endDate ? ic_error_red100_20 : undefined}
+                    isOpen={openEndCal}    
                   />
                 </FormField>
-
                 {openEndCal && (
                   <div className="calendar-popover">
                     <div className="calendar-popover__panel">
@@ -492,7 +493,7 @@ function CareerItem({
               <img src={ic_star_gray700_20} alt="" />
               더 적합한 문장 추천을 위해 아래 항목들을 먼저 채워주세요.
             </span>
-            <span className="career-section__summary-ai-btn">AI 문장 추천</span>
+            <span className="ai-suggest-btn career-section__summary-ai-btn">AI 문장 추천</span>
           </div>
         </div>
       </div>

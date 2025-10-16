@@ -1,14 +1,14 @@
 /* =========================
    Popover
 ========================= */
-.calendar-popover { 
-  position: absolute; 
+.calendar-popover {
+  position: absolute;
   z-index: 1;
-  top:130%;
+  top: 130%;
 }
 
 /* =========================
-   Calendar container
+   Calendar container (공통)
 ========================= */
 .cal {
   display: flex;
@@ -22,7 +22,7 @@
 }
 
 /* 내부 패딩 래퍼 */
-.cal_body{
+.cal_body {
   display: flex;
   padding: 20px;
   flex-direction: column;
@@ -32,21 +32,20 @@
 }
 
 /* 헤더 */
-.cal__header { 
-  display:flex; 
-  align-items:center; 
-  justify-content:space-between; 
-  margin-bottom:8px; 
+.cal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
 }
 
 /* =========================
    (공용) 네이티브 select + 커스텀 화살표
-   - 현재 InlineMonthPicker는 커스텀 드롭다운을 쓰지만,
-     다른 캘린더(연/월 select)에서 재사용 가능하므로 유지
+   - 다른 캘린더(연/월 select)에서도 재사용
 ========================= */
-.select { 
-  position: relative; 
-  display: inline-block; 
+.select {
+  position: relative;
+  display: inline-block;
 }
 .select select {
   appearance: none;
@@ -59,23 +58,24 @@
   line-height: 20px;
   font: inherit;
 }
-.select select::-ms-expand { display: none; }
+.select select::-ms-expand {
+  display: none;
+}
 .select__arrow {
   position: absolute;
-  right: 10px; 
+  right: 10px;
   top: 50%;
   transform: translateY(-50%);
   pointer-events: none;
-  width: 24px; 
+  width: 24px;
   height: 24px;
-  display: inline-flex; 
-  align-items: center; 
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
 }
 
 /* =========================
-   (옵션) 주/일 그리드 (DateCalendar에서 사용)
-   - MonthPicker만 쓰면 아래 블록은 그대로 둬도 영향 없음
+   (옵션) 주/일 그리드 (기존 DateCalendar 호환)
 ========================= */
 .cal__week {
   display: grid;
@@ -85,9 +85,9 @@
   color: #6b7280;
   font-weight: 600;
 }
-.cal__weekcell { 
-  text-align: center; 
-  padding: 6px 0; 
+.cal__weekcell {
+  text-align: center;
+  padding: 6px 0;
 }
 .cal__grid {
   display: grid;
@@ -103,16 +103,20 @@
   cursor: pointer;
   font-size: 16px;
 }
-.cal__cell:hover { background: #f3f4f6; }
-.cal__cell--empty { 
-  background: transparent; 
-  cursor: default; 
+.cal__cell:hover {
+  background: #f3f4f6;
 }
-.cal__cell--empty:hover { background: transparent; }
-.cal__cell.is-selected { 
-  background: #ede9fe; 
-  color: #4338ca; 
-  font-weight: 700; 
+.cal__cell--empty {
+  background: transparent;
+  cursor: default;
+}
+.cal__cell--empty:hover {
+  background: transparent;
+}
+.cal__cell.is-selected {
+  background: #ede9fe;
+  color: #4338ca;
+  font-weight: 700;
 }
 
 /* =========================
@@ -127,7 +131,7 @@
   flex-wrap: wrap;
 }
 .cal__month {
-  width: 80px; 
+  width: 80px;
   height: 44px;
   padding: 0 12px;
   border-radius: 4px;
@@ -139,12 +143,13 @@
   font-size: 16px;
   line-height: 20px;
   cursor: pointer;
-  display: inline-flex; 
-  align-items: center; 
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
-  
 }
-.cal__month:hover { background: #f3f4f6; }
+.cal__month:hover {
+  background: #f3f4f6;
+}
 .cal__month.is-selected {
   background: var(--primary-8, rgba(129, 107, 254, 0.08));
   color: var(--primary-primary, #816BFE);
@@ -153,42 +158,41 @@
 }
 .cal__month:disabled {
   color: var(--gray-400, #C8CCCF);
-  text-align: center;
-  font-family: Pretendard;
   font-size: 16px;
-  font-style: normal;
   font-weight: 400;
   line-height: 20px; /* 125% */
   cursor: not-allowed;
 }
 
 /* =========================
-   Footer (사용 시 유지)
+   Footer (공통 버튼 영역)
 ========================= */
-.cal__footer { 
-  display: flex; 
-  justify-content: flex-end; 
-  padding-top: 8px; 
+.cal__footer {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 8px;
 }
-.btn { 
-  padding: 12px 18px; 
-  border-radius: 10px; 
-  border: 1px solid #e5e7eb; 
-  background: #fff; 
-  cursor: pointer; 
+.btn {
+  padding: 12px 18px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  cursor: pointer;
 }
-.btn--primary { 
-  background: #111827; 
-  color: #fff; 
-  border-color: #111827; 
+.btn--primary {
+  background: #111827;
+  color: #fff;
+  border-color: #111827;
 }
-.btn--primary:hover { opacity: .9; }
+.btn--primary:hover {
+  opacity: .9;
+}
 
 /* =========================
-   Custom Year Dropdown (InlineMonthPicker)
+   Custom Year Dropdown (InlineMonthPicker 공통)
 ========================= */
 .year-select {
-  position: relative;   /* 메뉴 absolute 기준 */
+  position: relative; /* 메뉴 absolute 기준 */
   display: inline-block;
 }
 .year-select__button {
@@ -201,6 +205,10 @@
   background: var(--white-100, #FFF);
   line-height: 20px;
   cursor: pointer;
+  color: var(--gray-900, #2A2D2F);
+  font-family: Pretendard;
+  font-size: 16px;
+  font-weight: 600;
 }
 .year-select__arrow {
   width: 24px;
@@ -217,21 +225,26 @@
   border: 1px solid var(--gray-300, #E0E2E4);
   background: #fff;
   border-radius: 6px;
-  box-shadow: 0 12px 32px rgba(0,0,0,.12);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .12);
 }
 .year-select__option {
   padding: 10px 12px;
   cursor: pointer;
   white-space: nowrap;
 }
-.year-select__option:hover { background: #F8F8F9; }
+.year-select__option:hover {
+  background: #F8F8F9;
+}
 .year-select__option.is-active {
-  background: rgba(129,107,254,.08);
+  background: rgba(129, 107, 254, .08);
   color: #816BFE;
   font-weight: 600;
 }
 
-.cal_bottom{
+/* =========================
+   Bottom bars (공통/옵션)
+========================= */
+.cal_bottom {
   display: flex;
   padding: 20px;
   justify-content: flex-end;
@@ -240,8 +253,7 @@
   align-self: stretch;
   border-top: 1px solid var(--gray-300, #E0E2E4);
 }
-
-.cal_bottom_items{
+.cal_bottom_items {
   display: flex;
   padding: 20px;
   justify-content: space-between;
@@ -250,8 +262,7 @@
   align-self: stretch;
   border-top: 1px solid var(--gray-300, #E0E2E4);
 }
-
-.cal_bottom_items__option{
+.cal_bottom_items__option {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -260,8 +271,150 @@
   text-overflow: ellipsis;
   font-family: Pretendard;
   font-size: 16px;
-  font-style: normal;
   font-weight: 400;
   line-height: 20px;
   cursor: pointer;
+}
+
+/* =========================================================
+   DayPicker 전용 (InlineDayPicker)
+   - MonthPicker와 클래스 충돌 없도록 .cal--day 스코프
+========================================================= */
+.cal.cal--day {
+  width: 372px; /* 7열(44px*7) + gap/padding 고려한 너비 */
+}
+
+/* 헤더: 연/월 드롭다운 한 줄 */
+.cal--day .cal__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+/* 월 드롭다운 (연도 드롭다운과 유사) */
+.cal--day .month-select {
+  position: relative;
+  display: inline-block;
+}
+.cal--day .month-select__button {
+  display: inline-flex;
+  justify-content: space-between;
+  width: 120px;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 4px;
+  border: 1px solid var(--gray-300, #E0E2E4);
+  background: var(--white-100, #FFF);
+  line-height: 20px;
+  cursor: pointer;
+  color: var(--gray-900, #2A2D2F);
+  font-family: Pretendard;
+  font-size: 16px;
+  font-weight: 600;
+}
+.cal--day .month-select__arrow {
+  width: 24px;
+  height: 24px;
+}
+.cal--day .month-select__menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 1000;
+  min-width: 120px;
+  max-height: 240px;
+  overflow: auto;
+  border: 1px solid var(--gray-300, #E0E2E4);
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .12);
+}
+.cal--day .month-select__option {
+  padding: 10px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.cal--day .month-select__option:hover {
+  background: #F8F8F9;
+}
+.cal--day .month-select__option.is-active {
+  background: rgba(129, 107, 254, .08);
+  color: #816BFE;
+  font-weight: 600;
+}
+
+/* 요일 헤더 */
+.cal--day .daypicker__weekdays {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.cal--day .daypicker__weekday {
+  display: flex;
+  width: 44px;
+  height: 44px;
+  padding: 16px;
+  justify-content: center;
+  align-items: center;
+  border-radius: 4px;
+  color: var(--gray-700, #6F767E);
+  text-align: center;
+  font-family: Pretendard;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 20px; /* 125% */
+}
+
+/* 날짜 그리드 */
+.cal--day .daypicker__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  padding: 4px;
+}
+.cal--day .daypicker__cell {
+  display: flex;
+  width: 44px;
+  height: 44px;
+  padding: 16px;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 4px;
+  background: var(--white-100, #FFF);
+  color: var(--gray-900, #2A2D2F);
+  text-align: center;
+  font-family: Pretendard;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 20px;
+  cursor: pointer;
+}
+.cal--day .daypicker__cell:hover {
+  background: #f3f4f6;
+}
+.cal--day .daypicker__cell--empty {
+  display: flex;
+  width: 44px;
+  height: 44px;
+  padding: 16px;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+}
+.cal--day .daypicker__cell--empty:hover {
+  background: transparent;
+}
+.cal--day .daypicker__cell.is-selected {
+  background: var(--primary-8, rgba(129, 107, 254, 0.08));
+  color: var(--primary-primary, #816BFE);
+  font-weight: 700;
+  border-color: var(--primary-primary, #816BFE);
+}
+.cal--day .daypicker__cell.is-disabled {
+  opacity: .4;
+  pointer-events: none;
+  cursor: default;
 }

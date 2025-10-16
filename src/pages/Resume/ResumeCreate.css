@@ -459,6 +459,13 @@ background: var(--gray-50, #F8F8F9);
     cursor: pointer;
 }
 
+
+.section__date-inner.on{
+    border-radius: 4px;
+    border: 1px solid var(--gray-900, #2A2D2F);
+    background: var(--white-100, #FFF);
+}
+
 .section__date-inner.error{
     border: 1px solid var(--red-100, #FF524C);
 }
@@ -603,34 +610,40 @@ background: var(--gray-50, #F8F8F9);
     line-height: 20px; /* 125% */
 }
 
-.career-section__summary-ai-btn{
-    overflow: hidden;
-    text-align: right;
-    text-overflow: ellipsis;
-    font-family: Pretendard;
-    font-size: 16px;
-    font-style: normal;
-    font-weight: 600;
-    line-height: 20px; /* 125% */
-    text-decoration-line: underline;
-    text-decoration-style: solid;
-    text-decoration-skip-ink: none;
-    text-decoration-thickness: auto;
-    text-underline-offset: auto;
-    text-underline-position: from-font;
-    color: #15D078;
-    cursor: pointer;
+/* 공용: AI 문장 추천 버튼 */
+.ai-suggest-btn,
+.career-section__summary-ai-btn,
+.personal-section__summary-ai-btn {
+  overflow: hidden;
+  text-align: right;
+  text-overflow: ellipsis;
+  font-family: Pretendard;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 20px; /* 125% */
+  text-decoration-line: underline;
+  text-decoration-style: solid;
+  text-decoration-skip-ink: none;
+  text-decoration-thickness: auto;
+  text-underline-offset: auto;
+  text-underline-position: from-font;
+  color: #15D078;
+  cursor: pointer;
 }
-  
+
   /* (선택) 호버 시 살짝 강조 */
   .career-section__summary-ai-btn:hover{
    
   }
-/* 공통 스타일: 네 섹션 버튼 모두 */
+
+
+  /* 1) 공통 스타일에 포트폴리오 버튼 추가 */
 .career-section__control_btn,
 .education-section__control_btn,
 .activities-section__control_btn,
-.awards-certifications-section__control_btn {
+.awards-certifications-section__control_btn,
+.portfolio-documents__control-btn {
   display: flex;
   padding: 12px;
   justify-content: center;
@@ -642,28 +655,32 @@ background: var(--gray-50, #F8F8F9);
   cursor: pointer;
 }
 
-/* 예외(activities/awards만 배경을 흰색으로): 차이 나는 부분만 override */
+/* 2) 예외(activities/awards와 동일하게, 포트폴리오도 기본 배경을 흰색으로) */
 .activities-section__control_btn,
-.awards-certifications-section__control_btn {
+.awards-certifications-section__control_btn,
+.portfolio-documents__control-btn {
   background: var(--white-100, #FFF);
 }
 
-/* 활성화(비활성 클래스가 없을 때) 공통 스타일 */
+/* 3) 활성/비활성 공통 규칙에도 포함 */
 .career-section__control_btn:not(.is-disabled),
 .education-section__control_btn:not(.is-disabled),
 .activities-section__control_btn:not(.is-disabled),
-.awards-certifications-section__control_btn:not(.is-disabled) {
+.awards-certifications-section__control_btn:not(.is-disabled),
+.portfolio-documents__control-btn:not(.is-disabled) {
   border-radius: 100px;
   border: 1px solid var(--gray-300, #E0E2E4);
   background: var(--white-100, #FFF);
 }
 
-/* 비활성 공통 (이미 쓰고 있으면 유지) */
+/* 비활성 공통 */
 .career-section__control_btn.is-disabled,
 .education-section__control_btn.is-disabled,
 .activities-section__control_btn.is-disabled,
-.awards-certifications-section__control_btn.is-disabled {
+.awards-certifications-section__control_btn.is-disabled,
+.portfolio-documents__control-btn.is-disabled {
   opacity: 0.4;
   pointer-events: none;
   cursor: default;
 }
+

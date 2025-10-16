@@ -108,7 +108,7 @@ export default function ResumeCreate() {
             <span className="resume-create-page__assist-text">
               <img src={ic_star_gray700_20} alt="" />
                 더 적합한 문장을 추천을 위해 아래 항목들을 먼저 채워주세요.</span>
-                <span className="career-section__summary-ai-btn">
+                <span className="ai-suggest-btn career-section__summary-ai-btn">
                 AI 문장 추천</span>
             </div>
           </div>

@@ -6,23 +6,28 @@ import FormInput from "@/shared/components/form/FormInput";
 import DateInline from "@/shared/components/form/DateInline";
 import InlineMonthPicker from "@/shared/components/calendar/InlineMonthPicker";
 import { parseMonth, fmtMonth } from "@/shared/utils/util";
+import Modal from "@/shared/components/modal/Modal";
 
 import ic_add_btn_gray900_20 from "@/assets/icons/size20/ic_add_btn_gray900_20.png";
 import ic_calendar_gray900_20 from "@/assets/icons/size20/ic_calendar_gray900_20.png";
 import ic_add_purple_20 from "@/assets/icons/size20/ic_add_purple_20.png";
-import ic_close_gray500_20 from "@/assets/icons/size20/ic_close_gray500_20.png";
+import ic_close_gray500_24 from "@/assets/icons/size24/ic_close_gray500_24.png";
 import ic_arrow_drop_down_gray900_24 from "@/assets/icons/size24/ic_arrow_drop_down_gray900_24.png";
 import ic_key_arrow_down_gray500_20 from "@/assets/icons/size20/ic_key_arrow_down_gray500_20.png";
 import ic_key_arrow_up_gray500_20 from "@/assets/icons/size20/ic_key_arrow_up_gray500_20.png";
 import ic_trash_gray900_20 from "@/assets/icons/size20/ic_trash_gray900_20.png";
 
+// ★ 추가: 활성(진한) 아이콘
+import ic_key_arrow_up_gray900_20 from "@/assets/icons/size20/ic_key_arrow_up_gray900_20.png";
+import ic_key_arrow_down_gray900_20 from "@/assets/icons/size20/ic_key_arrow_down_gray900_20.png";
+
 export type AwardsCertItem = {
   id: string;
-  kind: "Award" | "Certification" | "License" | null; // 구분
-  title: string;      // 수상ㆍ자격증명
+  kind: "Award" | "Certification" | "License" | null;
+  title: string;
   dateValue?: string; // YYYY.MM
-  score?: string;     // 성적/점수
-  issuer?: string;    // 발행처/기관
+  score?: string;
+  issuer?: string;
 };
 
 const makeId = () => Math.random().toString(36).slice(2, 10);
@@ -40,6 +45,7 @@ export default function AwardsCertificationsSection() {
   const [items, setItems] = useState<AwardsCertItem[]>([]);
   const [openDropdownIndex, setOpenDropdownIndex] = useState<number | null>(null);
   const [openDateIdx, setOpenDateIdx] = useState<number | null>(null);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   // 드롭다운/달력 바깥 클릭 감지용 refs
   const selectRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -50,6 +56,12 @@ export default function AwardsCertificationsSection() {
     if (items.length === 0) setItems([blankItem()]);
   };
 
+  // 상단 X: 아이템이 있으면 모달, 없으면 즉시 닫기
+  const handleClickClose = () => {
+    if (items.length > 0) setShowConfirm(true);
+    else stopAdd();
+  };
+
   const stopAdd = () => {
     setIsAdding(false);
     setItems([]);
@@ -57,22 +69,33 @@ export default function AwardsCertificationsSection() {
     setOpenDateIdx(null);
   };
 
-  // 새 아이템을 "아래"에 추가 (원래 로직 유지)
-  const addItem = () => setItems((prev) => [...prev, blankItem()]);
+  const handleConfirmDeleteAll = () => {
+    setShowConfirm(false);
+    stopAdd();
+  };
+  const handleCancelDelete = () => setShowConfirm(false);
 
+  // 새 아이템을 "위"에 추가 (최근 추가 항목 상단)
+  const addItem = () => setItems(prev => [blankItem(), ...prev]);
+
+  // 쓰레기통: 아이템 1개면 모달, 2개 이상이면 바로 삭제
   const removeItem = (index: number) => {
-    setItems((prev) => {
+    if (items.length === 1) {
+      setShowConfirm(true);
+      return;
+    }
+    setItems(prev => {
       const next = [...prev];
       next.splice(index, 1);
       return next;
     });
-    setOpenDropdownIndex((cur) => (cur === index ? null : cur));
+    setOpenDropdownIndex(cur => (cur === index ? null : cur));
     if (openDateIdx === index) setOpenDateIdx(null);
   };
 
   const moveUp = (index: number) => {
     if (index <= 0) return;
-    setItems((prev) => {
+    setItems(prev => {
       const next = [...prev];
       [next[index - 1], next[index]] = [next[index], next[index - 1]];
       return next;
@@ -81,16 +104,15 @@ export default function AwardsCertificationsSection() {
 
   const moveDown = (index: number) => {
     if (index >= items.length - 1) return;
-    setItems((prev) => {
+    setItems(prev => {
       const next = [...prev];
       [next[index + 1], next[index]] = [next[index], next[index + 1]];
       return next;
     });
   };
 
-  // kind 선택
   const selectKind = (index: number, val: AwardsCertItem["kind"]) => {
-    setItems((prev) => {
+    setItems(prev => {
       const next = [...prev];
       next[index] = { ...next[index], kind: val };
       return next;
@@ -98,21 +120,19 @@ export default function AwardsCertificationsSection() {
     setOpenDropdownIndex(null);
   };
 
-  // 제목 변경
   const changeTitle = (index: number, v: any) => {
     const value = typeof v === "string" ? v : v?.target ? v.target.value : "";
-    setItems((prev) => {
+    setItems(prev => {
       const next = [...prev];
       next[index] = { ...next[index], title: value };
       return next;
     });
   };
 
-  // 성적/발행처 변경
-  const patch = (index: number, patch: Partial<AwardsCertItem>) => {
-    setItems((prev) => {
+  const patch = (index: number, patchObj: Partial<AwardsCertItem>) => {
+    setItems(prev => {
       const next = [...prev];
-      next[index] = { ...next[index], ...patch };
+      next[index] = { ...next[index], ...patchObj };
       return next;
     });
   };
@@ -156,16 +176,14 @@ export default function AwardsCertificationsSection() {
           <div className="section-title__left">
             <div className="resume-create-page__section-title__heading">수상ㆍ자격증</div>
           </div>
-          <div className="section-title__right">
-            {isAdding ? (
-              <img src={ic_close_gray500_20} alt="닫기" onClick={stopAdd} />
-            ) : (
-              <span className="resume-section-title__action--import" onClick={startAdd}>
-                <img src={ic_add_purple_20} alt="" />
-                추가
-              </span>
-            )}
-          </div>
+          {isAdding ? (
+            <img src={ic_close_gray500_24} alt="닫기" onClick={handleClickClose} />
+          ) : (
+            <span className="resume-section-title__action--import" onClick={startAdd}>
+              <img src={ic_add_purple_20} alt="" />
+              추가
+            </span>
+          )}
         </div>
       </div>
 
@@ -193,28 +211,27 @@ export default function AwardsCertificationsSection() {
                         {/* 드롭다운 */}
                         <div
                           className="ui-select"
-                          ref={(el) => (selectRefs.current[index] = el)}
+                          ref={el => (selectRefs.current[index] = el)}
                           role="combobox"
                           aria-expanded={openDropdownIndex === index}
                           tabIndex={0}
                           onClick={() =>
-                            setOpenDropdownIndex((cur) => (cur === index ? null : index))
+                            setOpenDropdownIndex(cur => (cur === index ? null : index))
                           }
-                          onKeyDown={(e) => {
+                          onKeyDown={e => {
                             if (e.key === "Enter" || e.key === " ") {
                               e.preventDefault();
-                              setOpenDropdownIndex((cur) => (cur === index ? null : index));
+                              setOpenDropdownIndex(cur => (cur === index ? null : index));
                             }
                             if (e.key === "Escape") setOpenDropdownIndex(null);
                           }}
                         >
-                          {/* kind 표시 */}
                           {item.kind
-                            ? (item.kind === "Award"
-                                ? "수상"
-                                : item.kind === "Certification"
-                                ? "자격증"
-                                : "면허")
+                            ? item.kind === "Award"
+                              ? "수상"
+                              : item.kind === "Certification"
+                              ? "자격증"
+                              : "면허"
                             : <span className="ui-select-none-default">구분</span>}
                           <img src={ic_arrow_drop_down_gray900_24} alt="" />
 
@@ -222,31 +239,15 @@ export default function AwardsCertificationsSection() {
                             <div
                               className="ui-select__menu"
                               role="listbox"
-                              onClick={(e) => e.stopPropagation()}
+                              onClick={e => e.stopPropagation()}
                             >
-                              {/* 라벨-값 매핑 */}
-                              <div
-                                className="ui-select__option"
-                                role="option"
-                                tabIndex={0}
-                                onClick={() => selectKind(index, "Award")}
-                              >
+                              <div className="ui-select__option" role="option" tabIndex={0} onClick={() => selectKind(index, "Award")}>
                                 수상
                               </div>
-                              <div
-                                className="ui-select__option"
-                                role="option"
-                                tabIndex={0}
-                                onClick={() => selectKind(index, "Certification")}
-                              >
+                              <div className="ui-select__option" role="option" tabIndex={0} onClick={() => selectKind(index, "Certification")}>
                                 자격증
                               </div>
-                              <div
-                                className="ui-select__option"
-                                role="option"
-                                tabIndex={0}
-                                onClick={() => selectKind(index, "License")}
-                              >
+                              <div className="ui-select__option" role="option" tabIndex={0} onClick={() => selectKind(index, "License")}>
                                 면허
                               </div>
                             </div>
@@ -273,8 +274,8 @@ export default function AwardsCertificationsSection() {
                       <div className="awards-certifications-period__fields">
                         {/* 날짜 */}
                         <div
-                          className="awards-certifications-period__field"
-                          ref={(el) => (dateRefs.current[index] = el)}
+                          className="awards-certifications-period__field section-period__start-wrap"
+                          ref={el => (dateRefs.current[index] = el)}
                         >
                           <DateInline
                             id={`awards-certifications_${index}`}
@@ -282,16 +283,20 @@ export default function AwardsCertificationsSection() {
                             value={item.dateValue || "YYYY.MM"}
                             onClick={() => setOpenDateIdx(index)}
                             invalid={false}
+                            isOpen={openDateIdx === index} 
                           />
                           {openDateIdx === index && (
-                            <div className="calendar-popover">
+                            <div
+                              className="calendar-popover"
+                              onClick={e => e.stopPropagation()}
+                            >
                               <div className="calendar-popover__panel">
                                 <InlineMonthPicker
                                   value={parseMonth(item.dateValue || "") || undefined}
                                   minYear={1970}
                                   isDisabledMonth={disableFutureMonth}
                                   onChange={() => {}}
-                                  onApply={(d) => {
+                                  onApply={d => {
                                     patch(index, { dateValue: fmtMonth(d) });
                                     setOpenDateIdx(null);
                                   }}
@@ -330,24 +335,47 @@ export default function AwardsCertificationsSection() {
 
                   {/* 아이템 컨트롤 */}
                   <div className="awards-certifications-section__controls">
+                    {/* 위로 */}
                     <span
-                      className="awards-certifications-section__control_btn awards-certifications-section__control--up"
-                      onClick={() => moveUp(index)}
-                      aria-label="위로"
+                      className={[
+                        "awards-certifications-section__control_btn",
+                        "awards-certifications-section__control--up",
+                        !canMoveUp ? "is-disabled" : "",
+                      ].join(" ").trim()}
                       role="button"
-                      tabIndex={0}
+                      tabIndex={canMoveUp ? 0 : -1}
+                      onClick={() => canMoveUp && moveUp(index)}
+                      aria-disabled={!canMoveUp}
                     >
-                      <img src={ic_key_arrow_up_gray500_20} alt="" />
+                      <img
+                        src={canMoveUp ? ic_key_arrow_up_gray900_20 : ic_key_arrow_up_gray500_20}
+                        alt=""
+                      />
                     </span>
+
+                    {/* 아래로 */}
                     <span
-                      className="awards-certifications-section__control_btn awards-certifications-section__control--down"
-                      onClick={() => moveDown(index)}
-                      aria-label="아래로"
+                      className={[
+                        "awards-certifications-section__control_btn",
+                        "awards-certifications-section__control--down",
+                        !canMoveDown ? "is-disabled" : "",
+                      ].join(" ").trim()}
                       role="button"
-                      tabIndex={0}
+                      tabIndex={canMoveDown ? 0 : -1}
+                      onClick={() => canMoveDown && moveDown(index)}
+                      aria-disabled={!canMoveDown}
                     >
-                      <img src={ic_key_arrow_down_gray500_20} alt="" />
+                      <img
+                        src={
+                          canMoveDown
+                            ? ic_key_arrow_down_gray900_20
+                            : ic_key_arrow_down_gray500_20
+                        }
+                        alt=""
+                      />
                     </span>
+
+                    {/* 삭제 */}
                     <span
                       className="awards-certifications-section__control_btn awards-certifications-section__control--remove"
                       onClick={() => removeItem(index)}
@@ -371,6 +399,18 @@ export default function AwardsCertificationsSection() {
           <>수상ㆍ자격증을 추가해 주세요..</>
         )}
       </div>
+
+      {/* 전체 삭제 확인 모달 */}
+      <Modal
+        open={showConfirm}
+        title="입력된 내용을 전부 삭제하시겠습니까?"
+        confirmText="예"
+        confirmClassName="btn_w_full default_btn_black"
+        cancelText="계속 작성"
+        cancelClassName="btn_w_full default_btn_white"
+        onConfirm={handleConfirmDeleteAll}
+        onClose={handleCancelDelete}
+      />
     </div>
   );
 }

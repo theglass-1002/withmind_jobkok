@@ -78,8 +78,8 @@ export default function AnalysisResultModal({
         </div>
 
         <div className="analysis-result-modal__footer btn_wrap">
-          <span className="btn_w_full default_btn_black" role="button" tabIndex={0} onClick={onCancel}>취소</span>
-          <span className="btn_w_full default_btn_white" role="button" tabIndex={0} onClick={onApply}>적용</span>
+          <span className="btn_w_full default_btn_white" role="button" tabIndex={0} onClick={onCancel}>취소</span>
+          <span className="btn_w_full default_btn_black" role="button" tabIndex={0} onClick={onApply}>적용</span>
         </div>
       </div>
     </div>

@@ -246,7 +246,8 @@ function EducationItem({
                   invalid={!!errors?.startDate}
                   errorMessage={errors?.startDate}
                   rightIconSrc={errors?.startDate ? ic_error_red100_20 : undefined}
-                />
+                  isOpen={openStartCal}    
+               />
               </FormField>
 
               {openStartCal && (
@@ -283,9 +284,8 @@ function EducationItem({
                   invalid={!!errors?.endDate}
                   errorMessage={errors?.endDate}
                   rightIconSrc={errors?.endDate ? ic_error_red100_20 : undefined}
-                />
+                  isOpen={openEndCal}/>
               </FormField>
-
               {openEndCal && (
                 <div className="calendar-popover">
                   <div className="calendar-popover__panel">

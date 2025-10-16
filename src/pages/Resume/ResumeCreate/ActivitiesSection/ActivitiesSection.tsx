@@ -19,6 +19,7 @@ import ic_key_arrow_down_gray900_20 from "@/assets/icons/size20/ic_key_arrow_dow
 import ic_trash_gray900_20 from "@/assets/icons/size20/ic_trash_gray900_20.png";
 
 import InlineMonthPicker from "@/shared/components/calendar/InlineMonthPicker";
+import Modal from "@/shared/components/modal/Modal";
 import { parseMonth, fmtMonth } from "@/shared/utils/util";
 
 type ActivityItem = {
@@ -34,28 +35,35 @@ const makeId = () => Math.random().toString(36).slice(2, 10);
 
 export default function ActivitiesSection() {
   const MAX_SUMMARY = 2000;
-
+  const [showConfirm, setShowConfirm] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [items, setItems] = useState<ActivityItem[]>([]);
   const [openDropdownIndex, setOpenDropdownIndex] = useState<number | null>(null);
 
-  // 세부내용 편집 중인 아이템 인덱스
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
-  // 달력 팝오버: 아이템별 시작/종료 열림 인덱스
   const [openStartIdx, setOpenStartIdx] = useState<number | null>(null);
   const [openEndIdx, setOpenEndIdx] = useState<number | null>(null);
 
-  // 드롭다운/달력 바깥 클릭 감지
   const selectRefs = useRef<(HTMLDivElement | null)[]>([]);
   const startRefs  = useRef<(HTMLDivElement | null)[]>([]);
   const endRefs    = useRef<(HTMLDivElement | null)[]>([]);
 
-  const startAdd = () => {
-    setIsAdding(true);
-    if (items.length === 0) {
-      setItems([{ id: makeId(), activityType: null, activityName: "", summary: "" }]);
+  const handleClickClose = () => {
+    if (items.length > 0) {
+      setShowConfirm(true);
+    } else {
+      stopAdd();
     }
+  };
+
+  const handleConfirmDeleteAll = () => {
+    setShowConfirm(false);
+    stopAdd();
+  };
+
+  const handleCancelDelete = () => {
+    setShowConfirm(false);
   };
 
   const stopAdd = () => {
@@ -67,7 +75,13 @@ export default function ActivitiesSection() {
     setEditingIndex(null);
   };
 
-  // 새 아이템을 위에 추가하고 즉시 편집 상태로 설정
+  const startAdd = () => {
+    setIsAdding(true);
+    if (items.length === 0) {
+      setItems([{ id: makeId(), activityType: null, activityName: "", summary: "" }]);
+    }
+  };
+
   const addItem = () => {
     setItems((prev) => [
       { id: makeId(), activityType: null, activityName: "", summary: "" },
@@ -75,18 +89,24 @@ export default function ActivitiesSection() {
     ]);
     setEditingIndex((cur) => (cur === null ? null : cur + 1));
   };
-  
 
+  // ★ 여기 변경: 아이템 1개일 때는 모달만 띄우고, 2개 이상이면 바로 삭제
   const removeItem = (index: number) => {
+    if (items.length === 1) {
+      setShowConfirm(true);
+      return;
+    }
+
     setItems((prev) => {
-      if (prev.length <= 1) return prev; // 최소 1개 유지
       const next = [...prev];
       next.splice(index, 1);
       return next;
     });
+
     setOpenDropdownIndex((cur) => (cur === index ? null : cur));
     if (openStartIdx === index) setOpenStartIdx(null);
     if (openEndIdx === index) setOpenEndIdx(null);
+
     setEditingIndex((cur) => {
       if (cur === null) return null;
       if (cur === index) return null;
@@ -135,7 +155,6 @@ export default function ActivitiesSection() {
 
   const startEditing = (index: number, e?: React.KeyboardEvent | React.MouseEvent) => {
     if (e && "key" in e) {
-      // 한글 조합 중 키이벤트 무시
       // @ts-ignore
       if (e.nativeEvent?.isComposing) return;
       // @ts-ignore
@@ -154,7 +173,6 @@ export default function ActivitiesSection() {
     });
   };
 
-  // 바깥 클릭 시 열려있는 드롭다운/달력 닫기
   useEffect(() => {
     const onDocClick = (e: MouseEvent) => {
       const t = e.target as Node;
@@ -181,12 +199,10 @@ export default function ActivitiesSection() {
     };
   }, [openDropdownIndex, openStartIdx, openEndIdx]);
 
-  // 모든 아이템 제거되면 섹션 닫기
   useEffect(() => {
     if (isAdding && items.length === 0) setIsAdding(false);
   }, [items.length, isAdding]);
 
-  // 종료월 비활성 규칙: 시작 이전 + 오늘 이후
   const makeDisableEnd = (start?: string) => {
     const startMV = parseMonth(start || "") ?? null;
     return (y: number, m: number) => {
@@ -207,7 +223,11 @@ export default function ActivitiesSection() {
             <div className="resume-create-page__section-title__heading">활동ㆍ경험</div>
           </div>
           {isAdding ? (
-            <img src={ic_close_gray500_24} alt="닫기" onClick={stopAdd} />
+            <img
+              src={ic_close_gray500_24}
+              alt="닫기"
+              onClick={handleClickClose}
+            />
           ) : (
             <span className="resume-section-title__action--import" onClick={startAdd}>
               <img src={ic_add_purple_20} alt="" />
@@ -227,10 +247,8 @@ export default function ActivitiesSection() {
             {items.map((item, index) => {
               const startMV = parseMonth(item.startDate || "") ?? undefined;
 
-              // 컨트롤 버튼 활성도
               const canMoveUp = items.length > 1 && index > 0;
               const canMoveDown = items.length > 1 && index < items.length - 1;
-              const canRemove = items.length > 1;
 
               return (
                 <div className="activities-section__item" key={item.id}>
@@ -241,7 +259,6 @@ export default function ActivitiesSection() {
                           활동ㆍ경험명 <em className="error_text_red">*</em>
                         </label>
 
-                        {/* 드롭다운 */}
                         <div
                           className="ui-select"
                           ref={(el) => (selectRefs.current[index] = el)}
@@ -296,7 +313,6 @@ export default function ActivitiesSection() {
                         </div>
                       </div>
 
-                      {/* 활동명 입력 */}
                       <FormInput
                         placeholder="활동ㆍ경험명을 입력해 주세요."
                         inputClassName="activity_name"
@@ -306,14 +322,12 @@ export default function ActivitiesSection() {
                       />
                     </div>
 
-                    {/* 기간 */}
                     <div className="activities-period">
                       <label className="activities-period__label small_labe_black-14">
                         활동ㆍ경험 기간 <em className="error_text_red">*</em>
                       </label>
 
                       <div className="activities-period__fields">
-                        {/* 시작 */}
                         <div
                           className="activities-period__field activities-period__field--start"
                           ref={(el) => (startRefs.current[index] = el)}
@@ -324,6 +338,7 @@ export default function ActivitiesSection() {
                             value={item.startDate || "YYYY.MM"}
                             onClick={() => setOpenStartIdx(index)}
                             invalid={false}
+                            isOpen={openStartIdx === index} 
                           />
                           {openStartIdx === index && (
                             <div className="calendar-popover">
@@ -359,7 +374,6 @@ export default function ActivitiesSection() {
 
                         <div className="activities-period__divider">~</div>
 
-                        {/* 종료 */}
                         <div
                           className="activities-period__field activities-period__field--end"
                           ref={(el) => (endRefs.current[index] = el)}
@@ -370,6 +384,7 @@ export default function ActivitiesSection() {
                             value={item.endDate || "YYYY.MM"}
                             onClick={() => setOpenEndIdx(index)}
                             invalid={false}
+                            isOpen={openEndIdx === index}   
                           />
                           {openEndIdx === index && (
                             <div className="calendar-popover">
@@ -395,54 +410,49 @@ export default function ActivitiesSection() {
                         </div>
                       </div>
                     </div>
-                  <div className="field activities-section__control--summary">
-                    <div className="small_labe_black-14">세부 내용</div>
-                    {editingIndex === index ? (
-                      <div className="activities-section__summary-input">
-                        <textarea
-                          value={item.summary ?? ""}
-                          onChange={(e) => onChangeSummary(index, e)}
-                          maxLength={MAX_SUMMARY}
-                        />
-                        <span className="activities-section__char-count">
-                          <span>{(item.summary ?? "").length}</span>
-                          <span className="max"> / {MAX_SUMMARY}</span>
-                        </span>
-                      </div>
-                    ) : (
-                      // 읽기 모드: 내용이 있으면 내용 표시, 없으면 힌트 표시
-                      <div
-                        className="activities-section__summary-input"
-                        onClick={(e) => startEditing(index, e)}
-                        onKeyDown={(e) => startEditing(index, e)}
-                        role="button"
-                        tabIndex={0}
-                      >
-                        {(item.summary ?? "").trim().length > 0 ? (
-                          <div className="activities-section__summary-read">
-                            {/*
-                              줄바꿈 유지가 필요하면 CSS에서 white-space: pre-line; 사용
-                            */}
-                            {item.summary}
-                          </div>
-                        ) : (
-                          <ul className="activities-section__summary-tips">
-                            <li className="activities-section__summary-tip">
-                              세부 내용을 입력해 주세요.
-                            </li>
-                          </ul>
-                        )}
-                        <span className="activities-section__char-count">
-                          <span>{(item.summary ?? "").length}</span>
-                          <span className="max"> / {MAX_SUMMARY}</span>
-                        </span>
-                      </div>
-                    )}
+
+                    <div className="field activities-section__control--summary">
+                      <div className="small_labe_black-14">세부 내용</div>
+                      {editingIndex === index ? (
+                        <div className="activities-section__summary-input">
+                          <textarea
+                            value={item.summary ?? ""}
+                            onChange={(e) => onChangeSummary(index, e)}
+                            maxLength={MAX_SUMMARY}
+                          />
+                          <span className="activities-section__char-count">
+                            <span>{(item.summary ?? "").length}</span>
+                            <span className="max"> / {MAX_SUMMARY}</span>
+                          </span>
+                        </div>
+                      ) : (
+                        <div
+                          className="activities-section__summary-input"
+                          onClick={(e) => startEditing(index, e)}
+                          onKeyDown={(e) => startEditing(index, e)}
+                          role="button"
+                          tabIndex={0}
+                        >
+                          {(item.summary ?? "").trim().length > 0 ? (
+                            <div className="activities-section__summary-read">
+                              {item.summary}
+                            </div>
+                          ) : (
+                            <ul className="activities-section__summary-tips">
+                              <li className="activities-section__summary-tip">
+                                세부 내용을 입력해 주세요.
+                              </li>
+                            </ul>
+                          )}
+                          <span className="activities-section__char-count">
+                            <span>{(item.summary ?? "").length}</span>
+                            <span className="max"> / {MAX_SUMMARY}</span>
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
-                  </div>
-
-                  {/* 아이템 컨트롤 */}
                   <div className="activities-section__controls">
                     <span
                       className={[
@@ -484,19 +494,19 @@ export default function ActivitiesSection() {
                       />
                     </span>
 
+                    {/* ★ 삭제 버튼은 항상 클릭 가능: 1개일 때는 모달, 2개 이상은 즉시 삭제 */}
                     <span
                       className={[
                         "activities-section__control_btn",
                         "activities-section__control--remove",
-                        !canRemove ? "is-disabled" : "",
                       ].join(" ").trim()}
                       role="button"
-                      tabIndex={canRemove ? 0 : -1}
-                      onClick={() => canRemove && removeItem(index)}
-                      aria-disabled={!canRemove}
+                      tabIndex={0}
+                      onClick={() => removeItem(index)}
+                      aria-disabled={false}
                     >
                       <img
-                        src={canRemove ? ic_trash_gray900_20 : ic_trash_gray500_20}
+                        src={ic_trash_gray900_20}
                         alt=""
                       />
                     </span>
@@ -514,6 +524,17 @@ export default function ActivitiesSection() {
           <>활동ㆍ경험을 추가해 주세요.</>
         ) : null}
       </div>
+
+      <Modal
+        open={showConfirm}
+        title="입력된 내용을 전부 삭제하시겠습니까?"
+        confirmText="예"
+        confirmClassName="btn_w_full default_btn_black"
+        cancelText="계속 작성"
+        cancelClassName="btn_w_full default_btn_white"
+        onConfirm={handleConfirmDeleteAll}
+        onClose={handleCancelDelete}
+      />
     </div>
   );
 }

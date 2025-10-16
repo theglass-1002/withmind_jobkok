@@ -3,13 +3,15 @@ import React from 'react';
 
 type Props = {
   id?: string;
-  iconSrc: string;           // 캘린더 아이콘 (정상/에러에 따라 부모가 선택)
-  value?: string;            // 'YYYY.MM'
-  onClick?: () => void;      // date picker 열기
-  rightIconSrc?: string;     // 오른쪽 오류 아이콘 (선택)
-  invalid?: boolean;         // 에러 여부
-  errorMessage?: string;     // 에러 텍스트 (선택)
-  className?: string;        // 추가 클래스
+  iconSrc: string;
+  value?: string;
+  onClick?: () => void;
+  rightIconSrc?: string;
+  invalid?: boolean;
+  errorMessage?: string;
+  className?: string;
+  /** 달력 팝오버 열림 여부 → true면 .on 클래스 부여 */
+  isOpen?: boolean;
 };
 
 export default function DateInline({
@@ -21,19 +23,36 @@ export default function DateInline({
   invalid,
   errorMessage,
   className,
+  isOpen = false,
 }: Props) {
   const hasError = Boolean(invalid || errorMessage);
   const describedBy = errorMessage ? `${id ?? 'date'}-error` : undefined;
 
+  const innerClass = [
+    'section__date-inner',
+    hasError ? 'error' : '',
+    isOpen ? 'on' : '',
+  ].join(' ').trim();
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onClick?.();
+    }
+  };
+
   return (
     <div className={`date-section ${className ?? ''}`}>
       <div
-        className={`section__date-inner ${hasError ? 'error' : ''}`}
+        className={innerClass}
         onClick={onClick}
+        onKeyDown={handleKeyDown}
         role="button"
         tabIndex={0}
         aria-invalid={hasError || undefined}
         aria-describedby={describedBy}
+        aria-expanded={isOpen || undefined}
+        aria-controls={isOpen ? `${id}-popover` : undefined}
       >
         <span className="section__date-input">
           <img src={iconSrc} alt="" />
