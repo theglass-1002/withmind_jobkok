@@ -1,8 +1,10 @@
-import React,{useState}from 'react'
-import { Link, NavLink } from "react-router-dom";
+import React, { useState } from "react";
 import "./ResumeCreate.css";
 
-import BasicInfoSection from "./ResumeCreate/BasicInfoSection/BasicInfoSection";
+import BasicInfoSection, {
+  type BasicInfo,
+  type BasicErrors,
+} from "./ResumeCreate/BasicInfoSection/BasicInfoSection";
 import LocationSection from "./ResumeCreate/LocationSection/LocationSection";
 import CareerSection from "./ResumeCreate/CareerSection/CareerSection";
 import EducationSection from "./ResumeCreate/EducationSection/EducationSection";
@@ -14,135 +16,129 @@ import AwardsCertificationsSection from "./ResumeCreate/AwardsCertificationsSect
 import PortfolioDocumentsSection from "./ResumeCreate/PortfolioDocumentsSection/PortfolioDocumentsSection";
 import SelfIntroductionSection from "./ResumeCreate/SelfIntroductionSection/SelfIntroductionSection";
 import MockInterviewAnalysisSection from "./ResumeCreate/MockInterviewAnalysisSection/MockInterviewAnalysisSection";
+import ResumeSidebar, {
+  type SectionId,
+  type Status,
+} from "./ResumeSidebar/ResumeSidebar";
 
+import ic_star_gray700_20 from "@/assets/icons/size20/ic_star_gray700_20.png";
 
-
-
-import ic_star_gray700_20 from '@/assets/icons/size20/ic_star_gray700_20.png';
-
+import { toast} from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 type FormState = { basic: BasicInfo };
+
 const initial: FormState = {
-  basic: { name:'', birth:'', gender:null, email:'', phone:'', photoUrl:'' },
+  basic: { name: "", birth: "", gender: null, email: "", phone: "", photoUrl: "" },
 };
 
+const ALL_SECTIONS: SectionId[] = [
+  "title",
+  "basic",
+  "location",
+  "career",
+  "education",
+  "desiredRole",
+  "hardSkills",
+  "softSkills",
+  "activities",
+  "awards",
+  "portfolio",
+  "selfIntro",
+  "mockInterview",
+];
 
 export default function ResumeCreate() {
   const [form, setForm] = useState<FormState>(initial);
   const [errors, setErrors] = useState<{ basic: BasicErrors }>({ basic: {} });
+  const [isDefaultResume, setIsDefaultResume] = useState(false);
 
-    const [page, setPage] = useState(1);
-    const [activeTab, setActiveTab] = useState<0|1|2>(0);
-    const [resumeReco, setResumeReco] = useState(true); // 이력서 기반 추천 토글
-    const [allChecked, setAllChecked] = useState(false);
-    const [checkedRoles, setCheckedRoles] = useState<Set<string>>(new Set());
-    const [activeCategory, setActiveCategory] = useState<string | null>(null);
-    const isOn = (key: string) => activeCategory === key;
-  
+  const [sidebarStatus, setSidebarStatus] = useState<Partial<Record<SectionId, Status>>>({});
 
-    const updateBasic = (patch: Partial<BasicInfo>) =>
-      setForm(prev => ({ ...prev, basic: { ...prev.basic, ...patch } }));
-  
-    const resetBasicErrors = () => setErrors(prev => ({ ...prev, basic: {} }));
-  
-    const validateBasic = (b: BasicInfo): BasicErrors => {
-      const e: BasicErrors = {};
-      if (!b.name.trim()) e.name = '이름을 입력해 주세요.';
-      if (!b.birth.trim()) e.birth = '생년월일을 입력해 주세요.';
-      if (!b.gender) e.gender = '성별을 선택해 주세요.';
-      if (!b.email.trim()) e.email = '이메일을 입력해 주세요.';
-      if (!b.phone.trim()) e.phone = '연락처를 입력해 주세요.';
-      return e;
-    };
-  
+  const updateBasic = (patch: Partial<BasicInfo>) =>
+    setForm((prev) => ({ ...prev, basic: { ...prev.basic, ...patch } }));
 
-    const onSubmit = () => {
-      const be = validateBasic(form.basic);
-      setErrors({ basic: be });
-      if (Object.keys(be).length) return; // 에러 있으면 중단
-    };
+  const resetBasicErrors = () => setErrors((prev) => ({ ...prev, basic: {} }));
 
-    const toggleCategory = (key: string) =>
-      setActiveCategory(prev => (prev === key ? null : key));
-    
-  
-  const onClickAll = () => {
-    setAllChecked(prev => {
-      const next = !prev;
-      if (next) setCheckedRoles(new Set()); 
-      return next;
+  const handleTempSave = () => {
+    toast.success("임시 저장되었습니다.");
+  };
+
+  const handleSubmit = () => {
+    const next: Partial<Record<SectionId, Status>> = {};
+    ALL_SECTIONS.forEach((id) => {
+      next[id] = "completed";
     });
+    setSidebarStatus(next);
   };
-  
-  
-  const onClickRole = (key: string) => {
-    setAllChecked(false);
-    setCheckedRoles(prev => {
-      const next = new Set(prev);
-      next.has(key) ? next.delete(key) : next.add(key);
-      return next;
-    });
-  };
-  
-  const handleReset = () => {
-    setAllChecked(false);          
-    setCheckedRoles(new Set());    
-    setActiveCategory(null);
-  };
-    
-    return (
-      <div className="resume-create-page">
+
+  return (
+    <div className="resume-create-page">
       <div className="resume-create-page__status">
-        <span className="default_btn_white">임시저장</span>
-        <span className="default_btn_black">작성 완료</span>
+        <span className="default_btn_white" onClick={handleTempSave}>
+          임시저장
+        </span>
+        <span className="default_btn_black" onClick={handleSubmit}>
+          작성 완료
+        </span>
       </div>
-    
+
       <div className="resume-create-page__container">
         <div className="resume-create-page__main">
-        <div className="resume-create-page__section resume-create-page__section--title">
-        <div className="resume-create-page__field">
-            <span className="resume-create-page__label">이력서 제목을 입력해 주세요. *</span>
-            <span className="resume-create-page__error">이력서 제목을 입력해 주세요.</span>
+          <div className="resume-create-page__section resume-create-page__section--title">
+            <div className="resume-create-page__field">
+              <span className="resume-create-page__label">이력서 제목을 입력해 주세요. *</span>
+              <span className="resume-create-page__error">이력서 제목을 입력해 주세요.</span>
             </div>
             <div className="resume-create-page__assist">
-            <span className="resume-create-page__assist-text">
-              <img src={ic_star_gray700_20} alt="" />
-                더 적합한 문장을 추천을 위해 아래 항목들을 먼저 채워주세요.</span>
-                <span className="ai-suggest-btn career-section__summary-ai-btn">
-                AI 문장 추천</span>
+              <span className="resume-create-page__assist-text">
+                <img src={ic_star_gray700_20} alt="" />
+                더 적합한 문장을 추천을 위해 아래 항목들을 먼저 채워주세요.
+              </span>
+              <span className="ai-suggest-btn career-section__summary-ai-btn">AI 문장 추천</span>
             </div>
           </div>
+
           <BasicInfoSection
-              values={form.basic}
-              errors={errors.basic}
-              onChange={updateBasic}
-              onFocusAny={resetBasicErrors}
-           />
-            <LocationSection/>
-            <CareerSection
-               values={form.basic}
-               errors={errors.basic}
-               onChange={updateBasic}
-               onFocusAny={resetBasicErrors}
-            />
+            values={form.basic}
+            errors={errors.basic}
+            onChange={updateBasic}
+            onFocusAny={resetBasicErrors}
+          />
+
+          <LocationSection />
+
+          <CareerSection
+            values={form.basic}
+            errors={errors.basic}
+            onChange={updateBasic}
+            onFocusAny={resetBasicErrors}
+          />
+
           <EducationSection
-               values={form.basic}
-               errors={errors.basic}
-               onChange={updateBasic}
-               onFocusAny={resetBasicErrors}
-            />
-          <DesiredRoleSection/>
-          <HardSkillSection/>
-          <SoftSkillsSection/>
-          <ActivitiesSection/>
-          <AwardsCertificationsSection/>
-          <PortfolioDocumentsSection/>
-          <SelfIntroductionSection/>
-          <MockInterviewAnalysisSection/>
-      
+            values={form.basic}
+            errors={errors.basic}
+            onChange={updateBasic}
+            onFocusAny={resetBasicErrors}
+          />
+
+          <DesiredRoleSection />
+          <HardSkillSection />
+          <SoftSkillsSection />
+          <ActivitiesSection />
+          <AwardsCertificationsSection />
+          <PortfolioDocumentsSection />
+          <SelfIntroductionSection />
+          <MockInterviewAnalysisSection />
         </div>
-        <div className="resume-create-page__aside">왼쪽: 이력서 관리 사이드바</div>
+
+        <ResumeSidebar
+          statusMap={sidebarStatus}
+          isDefault={isDefaultResume}
+          onToggleDefault={setIsDefaultResume}
+        />
       </div>
-    </div>    
-    );
+
+       </div>
+  );
 }

@@ -1,0 +1,112 @@
+.photo-modal__overlay{
+    position: absolute;
+    display: flex;
+    top: 120%;
+    left: 0;
+    width: 500px;
+    flex-direction: column;
+    align-items: flex-start;
+    border-radius: 4px;
+    border: 1px solid var(--gray-300, #E0E2E4);
+    background: var(--white-100, #FFF);
+    box-shadow: 0 0 24px 0 rgba(42, 45, 47, 0.16);
+  }
+  
+  .photo-modal__body{
+    display: flex;
+    padding: 20px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    align-self: stretch;
+  }
+  
+  .photo-modal__picker{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    align-self: stretch;
+    color: var(--gray-500, #9EA4AA);
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; /* 125% */
+  }
+  
+  .photo-modal__picker.on{
+    color: var(--gray-900, #2A2D2F);
+  }
+  
+  .photo-modal__notes{
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    color: var(--gray-700, #6F767E);
+    font-family: Pretendard;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; /* 128.571% */
+  }
+  
+  .photo__inner{
+    display: flex;
+    padding: 16px;
+    align-items: center;
+    gap: 8px;
+    flex: 1 0 0;
+    border-radius: 4px;
+    border: 1px solid var(--gray-300, #E0E2E4);
+    background: var(--white-100, #FFF);
+  
+    /* 파일명 가로 스크롤 */
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .photo__inner img{
+    flex: 0 0 auto; /* 아이콘 고정 */
+  }
+  
+  .photo-modal__file-btn{
+    flex: 0 0 auto; /* 줄바꿈 방지 */
+    white-space: nowrap;
+  }
+  
+  .photo-modal__footer{
+    display: flex;
+    padding: 20px;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 16px;
+    align-self: stretch;
+    border-radius: 4px;
+    border: 1px solid var(--gray-300, #E0E2E4);
+    background: var(--white-100, #FFF);
+  }
+  
+  .photo__inner.error{
+    border: 1px solid var(--red-100, #FF524C);
+    background: var(--white-100, #FFF);
+    border-radius: 4px;
+  }
+  
+  .photo-modal__error{
+    color: var(--red-100, #FF524C);
+    font-family: Pretendard;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 18px;
+  }
+  
+  /* 에러 아이콘을 줄 끝으로 밀기 */
+  .photo__inner .photo__error-icon{
+    margin-left: auto;
+    flex: 0 0 auto;
+  }
+  

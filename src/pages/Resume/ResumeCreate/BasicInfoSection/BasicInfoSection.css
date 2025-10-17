@@ -1,42 +1,36 @@
-
-
-.resume-create-page__section--basic .resume-create-page__section-body{
+/* src/pages/.../BasicInfoSection.css — 값 변경 없이 정리만 */
+.resume-create-page__section--basic .resume-create-page__section-body {
     display: flex;
     padding: 28px;
     align-items: flex-start;
     gap: 28px;
     align-self: stretch;
-}
-
-
-
-.resume-create-page__section--basic .resume-create-page__col--left{
+  }
+  
+  .resume-create-page__section--basic .resume-create-page__col--left {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 28px;
     flex: 1 0 0;
-}
-
-
-.resume-create-page__section--basic .birth,
-.resume-create-page__section--basic .gender
-{
+  }
+  
+  .resume-create-page__section--basic .birth,
+  .resume-create-page__section--basic .gender {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 16px;
     flex: 1 0 0;
-}
-
-.resume-create-page__section--basic .birth,
-.resume-create-page__section--basic .phone,
-.resume-create-page__section--basic .email{
- flex: 1;
-}
-
-
-.resume-create-page__section--basic .resume-create-page__col--right{
+  }
+  
+  .resume-create-page__section--basic .birth,
+  .resume-create-page__section--basic .phone,
+  .resume-create-page__section--basic .email {
+    flex: 1;
+  }
+  
+  .resume-create-page__section--basic .resume-create-page__col--right {
     display: flex;
     width: 124px;
     flex-direction: column;
@@ -50,11 +44,11 @@
     font-style: normal;
     font-weight: 400;
     line-height: 20px; /* 125% */
-}
-
-
-.resume-create-page__photo{
+  }
+  
+  .resume-create-page__photo {
     display: flex;
+    position: relative;
     height: 166px;
     padding: 30px;
     flex-direction: column;
@@ -66,5 +60,44 @@
     border: 1px solid var(--gray-300, #E0E2E4);
     background: var(--white-100, #FFF);
     cursor: pointer;
-}
+  }
 
+ 
+  
+  .resume-create-page__photo-img {
+    width: 100%;
+  }
+  
+  .resume-create-page__photo-close{
+    position: absolute;
+    top: 0;
+    right: 0;
+    border-radius: 0 0 0 4px;
+    background: rgba(42, 45, 47, 0.40);
+    backdrop-filter: blur(10px);
+    display: inline-flex;
+    padding: 4px 4px 3px 3px;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .resume-create-page__photo-change-btn{
+    position: absolute;
+    bottom: 0;
+    display: flex;
+    width: 100%;
+    padding: 4px 16px 5px 16px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    background: rgba(42, 45, 47, 0.40);
+    backdrop-filter: blur(10px);
+    color: var(--white-100, #FFF);
+    text-align: center;
+    font-family: Pretendard;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 18px;    
+}
+  

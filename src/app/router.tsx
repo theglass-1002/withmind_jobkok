@@ -7,7 +7,7 @@ import CompaniesList from "@/pages/Companies/CompaniesList";
 import CompanyDetail from "@/pages/Companies/CompanyDetail";
 
 import ResumeList from "@/pages/Resume/ResumeList";
-import ResumeDetail from "@/pages/Resume/ResumeDetail";
+import ResumeDetail from "@/pages/Resume/ResumeDetail/ResumeDetail";
 import ResumeEdit from "@/pages/Resume/ResumeEdit";
 import ResumeCreate from "@/pages/Resume/ResumeCreate";
 

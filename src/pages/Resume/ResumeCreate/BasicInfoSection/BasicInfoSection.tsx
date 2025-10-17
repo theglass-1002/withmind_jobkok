@@ -1,24 +1,25 @@
-// BasicInfoSection.tsx
-import React, { useEffect, useRef, useState } from 'react';
-import FormField from '@/shared/components/form/FormField';
-import FormInput from '@/shared/components/form/FormInput';
-import DateInline from '@/shared/components/form/DateInline';
-import GenderChoice from '@/shared/components/form/GenderChoice';
+// src/pages/.../BasicInfoSection.tsx
+import React, { useEffect, useRef, useState } from "react";
+import FormField from "@/shared/components/form/FormField";
+import FormInput from "@/shared/components/form/FormInput";
+import DateInline from "@/shared/components/form/DateInline";
+import GenderChoice from "@/shared/components/form/GenderChoice";
+import InlineDayPicker from "@/shared/components/calendar/InlineDayPicker";
+import PhotoModal from "@/shared/components/photo/PhotoModal";
+import type { PhotoErrorState } from "@/shared/components/photo/PhotoModal";
 
-// ▼ 월 피커 대신 일 피커 사용
-import InlineDayPicker from '@/shared/components/calendar/InlineDayPicker';
-
-import ic_error_red100_20 from '@/assets/icons/size20/ic_error_red100_20.png';
-import ic_calendar_gray900_20 from '@/assets/icons/size20/ic_calendar_gray900_20.png';
-import icon_calendar_red_20 from '@/assets/icons/size20/icon_calendar_red_20.png';
-import ic_add_btn_gray700_20 from '@/assets/icons/size20/ic_add_btn_gray700_20.png';
+import ic_error_red100_20 from "@/assets/icons/size20/ic_error_red100_20.png";
+import ic_calendar_gray900_20 from "@/assets/icons/size20/ic_calendar_gray900_20.png";
+import icon_calendar_red_20 from "@/assets/icons/size20/icon_calendar_red_20.png";
+import ic_add_btn_gray700_20 from "@/assets/icons/size20/ic_add_btn_gray700_20.png";
+import ic_close_white_20 from "@/assets/icons/size20/ic_close_white_20.png";
 import "./BasicInfoSection.css";
 
-type Gender = 'male' | 'female' | null;
+type Gender = "male" | "female" | null;
 
 export type BasicInfo = {
   name: string;
-  birth: string;      // "YYYY.MM.DD"
+  birth: string;
   gender: Gender;
   email: string;
   phone: string;
@@ -26,21 +27,13 @@ export type BasicInfo = {
 };
 export type BasicErrors = Partial<Record<keyof BasicInfo, string>>;
 
-// YYYY.MM.DD ⇄ { year, month(0~11), day }
 const parseYMD = (s: string) => {
-  const m = /^(\d{4})\.(\d{2})\.(\d{2})$/.exec((s || '').trim());
+  const m = /^(\d{4})\.(\d{2})\.(\d{2})$/.exec((s || "").trim());
   if (!m) return null;
   return { year: +m[1], month: +m[2] - 1, day: +m[3] };
 };
 const fmtYMD = (d: { year: number; month: number; day: number }) =>
-  `${d.year}.${String(d.month + 1).padStart(2, '0')}.${String(d.day).padStart(2, '0')}`;
-
-// 미래 날짜 비활성화
-const disableFutureDay = (y: number, m: number, dd: number) => {
-  const now = new Date();
-  const cur = new Date(y, m, dd, 23, 59, 59, 999);
-  return cur.getTime() > now.getTime();
-};
+  `${d.year}.${String(d.month + 1).padStart(2, "0")}.${String(d.day).padStart(2, "0")}`;
 
 export default function BasicInfoSection({
   values,
@@ -53,13 +46,71 @@ export default function BasicInfoSection({
   onChange: (patch: Partial<BasicInfo>) => void;
   onFocusAny?: () => void;
 }) {
-  const { name, birth, gender, email, phone } = values;
+  const { name, birth, gender, email, phone, photoUrl } = values;
 
-  // 생년월일 달력 제어
   const [openBirth, setOpenBirth] = useState(false);
   const birthRef = useRef<HTMLDivElement | null>(null);
 
-  // 바깥 클릭 시 달력 닫기
+  const [showPhotoModal, setShowPhotoModal] = useState(false);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | undefined>();
+  const [photoFilename, setPhotoFilename] = useState<string | undefined>();
+  const [photoErrState, setPhotoErrState] = useState<PhotoErrorState>("none");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const openPhotoModal = () => {
+    setPhotoErrState("none");
+    setShowPhotoModal(true);
+  };
+  const closePhotoModal = () => setShowPhotoModal(false);
+  const onPickFile = () => fileInputRef.current?.click();
+
+  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+
+    if (!/\.(jpe?g|png|gif)$/i.test(f.name)) {
+      setPhotoFile(null);
+      setPhotoPreview(undefined);
+      setPhotoFilename(undefined);
+      setPhotoErrState("invalid");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+    if (f.size > 10 * 1024 * 1024) {
+      setPhotoFile(null);
+      setPhotoPreview(undefined);
+      setPhotoFilename(undefined);
+      setPhotoErrState("tooLarge");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    setPhotoErrState("none");
+    setPhotoFile(f);
+    setPhotoPreview(URL.createObjectURL(f));
+    setPhotoFilename(f.name);
+  };
+
+  const onApplyPhoto = () => {
+    if (!photoFile) {
+      setPhotoErrState("missing");
+      return;
+    }
+    onChange({ photoUrl: photoPreview || "" });
+    closePhotoModal();
+  };
+
+  const removePhoto = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setPhotoFile(null);
+    setPhotoPreview(undefined);
+    setPhotoFilename(undefined);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    onChange({ photoUrl: undefined });
+  };
+
   useEffect(() => {
     const onDocClick = (e: MouseEvent | TouchEvent) => {
       if (!openBirth) return;
@@ -68,13 +119,15 @@ export default function BasicInfoSection({
         setOpenBirth(false);
       }
     };
-    document.addEventListener('mousedown', onDocClick, true);
-    document.addEventListener('touchstart', onDocClick, true);
+    document.addEventListener("mousedown", onDocClick, true);
+    document.addEventListener("touchstart", onDocClick, true);
     return () => {
-      document.removeEventListener('mousedown', onDocClick, true);
-      document.removeEventListener('touchstart', onDocClick, true);
+      document.removeEventListener("mousedown", onDocClick, true);
+      document.removeEventListener("touchstart", onDocClick, true);
     };
   }, [openBirth]);
+
+  const hasPhoto = !!(photoUrl || photoFile);
 
   return (
     <div className="resume-create-page__section resume-create-page__section--basic">
@@ -86,7 +139,6 @@ export default function BasicInfoSection({
 
       <div className="resume-create-page__section-body">
         <div className="resume-create-page__col resume-create-page__col--left">
-
           <FormField label={<>이름 <em>*</em></>} className="in_icon">
             <FormInput
               id="name"
@@ -100,17 +152,16 @@ export default function BasicInfoSection({
           </FormField>
 
           <div className="resume-create-page__field-row">
-            {/* 생년월일 */}
             <div className="birth section-period__start-wrap" ref={birthRef}>
               <FormField label={<>생년월일 <em>*</em></>} className="">
                 <DateInline
                   id="birth"
                   iconSrc={errors?.birth ? icon_calendar_red_20 : ic_calendar_gray900_20}
-                  value={birth || 'YYYY.MM.DD'}
+                  value={birth || "YYYY.MM.DD"}
                   onClick={() => setOpenBirth(true)}
                   invalid={!!errors?.birth}
                   errorMessage={errors?.birth}
-                  isOpen={openBirth} 
+                  isOpen={openBirth}
                 />
               </FormField>
 
@@ -119,11 +170,11 @@ export default function BasicInfoSection({
                   <div className="calendar-popover__panel">
                     <InlineDayPicker
                       className="cal--day"
-                      value={parseYMD(birth || '') || undefined}
+                      value={parseYMD(birth || "") || undefined}
                       minYear={1950}
                       onChange={() => {}}
                       onApply={(d) => {
-                        onChange({ birth: fmtYMD(d) }); // YYYY.MM.DD 저장
+                        onChange({ birth: fmtYMD(d) });
                         setOpenBirth(false);
                       }}
                     />
@@ -132,12 +183,8 @@ export default function BasicInfoSection({
               )}
             </div>
 
-            {/* 성별 */}
             <FormField label={<>성별 <em>*</em></>} className="gender">
-              <GenderChoice
-                value={gender}
-                onChange={(g) => onChange({ gender: g })}
-              />
+              <GenderChoice value={gender} onChange={(g) => onChange({ gender: g })} />
             </FormField>
           </div>
 
@@ -172,9 +219,81 @@ export default function BasicInfoSection({
 
         <div className="resume-create-page__col resume-create-page__col--right">
           <span className="small_labe_black-14">사진</span>
-          <div className="resume-create-page__photo">
-            <img src={ic_add_btn_gray700_20} alt="" />
-            <span>사진 추가</span>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".jpg,.jpeg,.png,.gif"
+            style={{ display: "none" }}
+            onChange={onFileChange}
+          />
+
+          <div
+            className="resume-create-page__photo"
+            role="button"
+            tabIndex={0}
+            onClick={() => {
+              if (!photoUrl) openPhotoModal();
+            }}
+            onKeyDown={(e) => {
+              if ((e.key === "Enter" || e.key === " ") && !photoUrl) {
+                e.preventDefault();
+                openPhotoModal();
+              }
+            }}
+          >
+            {photoUrl ? (
+              <>
+                <img
+                  className="resume-create-page__photo-img"
+                  src={photoUrl}
+                  alt="증명사진 미리보기"
+                  draggable={false}
+                  onDragStart={(e) => e.preventDefault()}
+                  style={{ pointerEvents: "none" }}
+                />
+                <span
+                  className="resume-create-page__photo-close"
+                  onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                  onClick={removePhoto}
+                >
+                  <img src={ic_close_white_20} alt="" />
+                </span>
+                <span
+                  className="resume-create-page__photo-change-btn"
+                  onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openPhotoModal();
+                  }}
+                >
+                  사진 변경
+                </span>
+              </>
+            ) : (
+              <>
+                <img src={ic_add_btn_gray700_20} alt="" />
+                <span>{hasPhoto ? "사진 변경" : "사진 추가"}</span>
+              </>
+            )}
+
+            {showPhotoModal && (
+              <div
+                className="photo-modal__overlay"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (e.target === e.currentTarget) closePhotoModal();
+                }}
+              >
+                <PhotoModal
+                  hasFile={!!photoFile}
+                  filename={photoFilename}
+                  onPick={onPickFile}
+                  onApply={onApplyPhoto}
+                  errorState={photoErrState}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>

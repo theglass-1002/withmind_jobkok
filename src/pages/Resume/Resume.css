@@ -1,0 +1,87 @@
+.resume-page {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    align-self: stretch;
+  }
+  
+  .resume-page__status {
+    display: flex;
+    padding: 96px 360px 24px 360px;
+    justify-content: space-between;
+    align-items: center;
+    align-self: stretch;
+    border-bottom: 1px solid var(--gray-300, #E0E2E4);
+background: var(--white-100, #FFF);
+  }
+  
+  .resume-detail__actions-left,
+  .resume-detail__actions-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  
+  .default_btn_white,
+  .default_btn_black {
+   
+  }
+  
+  .default_btn_white {
+
+  }
+  .default_btn_white:hover {
+
+  }
+  
+  .default_btn_black {
+
+  }
+  .default_btn_black:hover {
+
+  }
+  
+  .default_btn_white:active,
+  .default_btn_black:active {
+
+  }
+  
+  .default_btn_white.is-disabled,
+  .default_btn_black.is-disabled {
+
+  }
+  
+  .resume-page__container {
+    display: flex;
+    padding: 52px 360px 100px 360px;
+    align-items: flex-start;
+    gap: 24px;
+    align-self: stretch;
+  }
+  
+  .resume-page__main {
+    display: flex;
+    width: 856px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 24px;
+  }
+
+  
+  .resume-page__section {
+
+  }
+  
+  .resume-page__section-title {
+
+  }
+  
+  .resume-page__section-body {
+
+  }
+  
+  .resume-page__section--title .resume-page__section-title,
+  .resume-page__section--basic .resume-page__section-title {
+
+  }
+  
