@@ -1,0 +1,59 @@
+.mock-interview-page{
+    display: flex;
+    padding-top: 74px;
+    flex-direction: column;
+    align-items: flex-start;
+    align-self: stretch;
+}
+
+.mock-interview-page__hero{
+    display: flex;
+    height: 442px;
+    padding: 100px 360px;
+    flex-direction: column;
+    align-items: center;
+    gap: 52px;
+    align-self: stretch;
+    background: url('/src/assets/backgrounds/mock_banner.png') center/cover no-repeat;
+    border-bottom: 1px solid var(--gray-300, #E0E2E4);
+}
+
+.mock-interview-page__hero-headings{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
+    align-self: stretch;
+}
+
+.mock-interview-page__hero-title{
+    text-align: center;
+    font-family: Pretendard;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 24px; /* 120% */
+    background: var(--ai-100, linear-gradient(90deg, #15D078 0%, #4BD1C8 100%));
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.mock-interview-page__hero-subtitle{
+    color: var(--gray-900, #2A2D2F);
+    text-align: center;
+    font-family: Pretendard;
+    font-size: 32px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 34px; /* 106.25% */
+}
+.mock-interview-page__hero-cta{
+    
+}
+
+/* .mock-interview-page__hero-cta{
+    display: flex;
+    gap: 8px;
+
+} */

@@ -8,9 +8,10 @@ import CompanyDetail from "@/pages/Companies/CompanyDetail";
 
 import ResumeList from "@/pages/Resume/ResumeList";
 import ResumeDetail from "@/pages/Resume/ResumeDetail/ResumeDetail";
-import ResumeEdit from "@/pages/Resume/ResumeEdit";
+import ResumeEdit from "@/pages/Resume/ResumeEdit/ResumeEdit";
 import ResumeCreate from "@/pages/Resume/ResumeCreate";
 
+import MockInterview from "@/pages/MockInterview/MockInterview"; //
 
 import Mypage from "@/pages/Mypage/Mypage";
 import EditProfile from "@/pages/Mypage/EditProfile/EditProfile";
@@ -51,6 +52,9 @@ export const router = createBrowserRouter([
   { path: "/resumes/create", element: <Layout><ResumeCreate /></Layout> },
   { path: "/resumes/:resumeId", element: <Layout><ResumeDetail /></Layout> },
   { path: "/resumes/:resumeId/edit", element: <Layout><ResumeEdit /></Layout> },
+
+  { path: "/mock-interview", element: <Layout><MockInterview /></Layout> },
+
 
   { path: "jobs/:jobId", element: <Layout><JobDetail /></Layout>  } ,
   { path: "/companies", element: <Layout><CompaniesList /></Layout> },

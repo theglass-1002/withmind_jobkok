@@ -6,6 +6,7 @@ import Switch from "react-switch";
 
 import ic_error_red100_20 from "@/assets/icons/size20/ic_error_red100_20.png";
 import ic_star_gray700_20 from "@/assets/icons/size20/ic_star_gray700_20.png";
+import ic_star_green_20 from "@/assets/icons/size20/ic_star_green_20.png";
 import ic_trash_gray500_20 from "@/assets/icons/size20/ic_trash_gray500_20.png";
 import icon_calendar_red_20 from "@/assets/icons/size20/icon_calendar_red_20.png";
 import ic_calendar_gray900_20 from "@/assets/icons/size20/ic_calendar_gray900_20.png";
@@ -15,21 +16,22 @@ import ic_arrow_drop_down_gray900_24 from "@/assets/icons/size24/ic_arrow_drop_d
 import ic_add_purple_20 from "@/assets/icons/size20/ic_add_purple_20.png";
 import ic_key_arrow_down_gray500_20 from "@/assets/icons/size20/ic_key_arrow_down_gray500_20.png";
 import ic_key_arrow_up_gray500_20 from "@/assets/icons/size20/ic_key_arrow_up_gray500_20.png";
-import ic_key_arrow_up_gray900_20 from '@/assets/icons/size20/ic_key_arrow_up_gray900_20.png';
-import ic_key_arrow_down_gray900_20 from '@/assets/icons/size20/ic_key_arrow_down_gray900_20.png';
-import ic_trash_gray900_20 from '@/assets/icons/size20/ic_trash_gray900_20.png';
+import ic_key_arrow_up_gray900_20 from "@/assets/icons/size20/ic_key_arrow_up_gray900_20.png";
+import ic_key_arrow_down_gray900_20 from "@/assets/icons/size20/ic_key_arrow_down_gray900_20.png";
+import ic_trash_gray900_20 from "@/assets/icons/size20/ic_trash_gray900_20.png";
+import ic_close_gray500_20 from "@/assets/icons/size20/ic_close_gray500_20.png";
 
 import "./CareerSection.css";
 
 import InlineMonthPicker from "@/shared/components/calendar/InlineMonthPicker";
 import { parseMonth, fmtMonth } from "@/shared/utils/util";
 
-// 유틸: 고유 id 생성
+import AISuggestArea from "@/pages/Resume/ResumeAISuggest";
+
 const makeId = () => Math.random().toString(36).slice(2, 10);
 
-// ===== 타입 =====
 export type CareerInfo = {
-  id: string;               // ⬅ 고유 id 추가
+  id: string;
   company_name: string;
   role: string;
   position: string;
@@ -41,9 +43,8 @@ export type CareerInfo = {
 };
 type CareerErrors = Partial<Record<keyof CareerInfo, string>>;
 
-// 공백 아이템
 const blankItem = (): CareerInfo => ({
-  id: makeId(),            // ⬅ 생성 시 id 부여
+  id: makeId(),
   company_name: "",
   role: "",
   position: "",
@@ -54,7 +55,6 @@ const blankItem = (): CareerInfo => ({
   endDate: "",
 });
 
-// 배열 swap
 const swap = <T,>(arr: T[], i: number, j: number) => {
   const next = arr.slice();
   [next[i], next[j]] = [next[j], next[i]];
@@ -88,11 +88,9 @@ export default function CareerSection() {
         endDate: "2024.11",
       },
     ];
-    // ⬅ 불러온 항목에도 id를 부여
     setItems((fetched.length ? fetched : [blankItem()]).map(it => ({ id: makeId(), ...it })));
   };
 
-  // 새 아이템을 "맨 위"에 추가
   const addItem = () => setItems((prev) => [blankItem(), ...prev]);
 
   const removeItem = (idx: number) =>
@@ -133,7 +131,7 @@ export default function CareerSection() {
       <div className="resume-create-page__section-body career-section">
         {items.map((it, idx) => (
           <CareerItem
-            key={it.id}                    // ⬅ 인덱스 대신 고유 id 사용
+            key={it.id}
             index={idx}
             total={items.length}
             value={it}
@@ -154,7 +152,6 @@ export default function CareerSection() {
   );
 }
 
-// ===== 단일 아이템 =====
 function CareerItem({
   index,
   total,
@@ -185,22 +182,18 @@ function CareerItem({
     endDate,
   } = value;
 
-  // 재직 형태 드롭다운
   const [openEmp, setOpenEmp] = useState(false);
   const empRef = useRef<HTMLDivElement | null>(null);
 
-  // 달력
   const [openStartCal, setOpenStartCal] = useState(false);
   const [openEndCal, setOpenEndCal] = useState(false);
   const startCalRef = useRef<HTMLDivElement | null>(null);
   const endCalRef = useRef<HTMLDivElement | null>(null);
 
-  // 담당 업무 편집 토글
   const MAX_SUMMARY = 2000;
   const [editing, setEditing] = useState(false);
   const startEditing = (e?: React.KeyboardEvent | React.MouseEvent) => {
     if (e && "key" in e) {
-      // 한글 조합 중 키이벤트 무시
       // @ts-ignore
       if (e.nativeEvent?.isComposing) return;
       // @ts-ignore
@@ -210,7 +203,6 @@ function CareerItem({
     setEditing(true);
   };
 
-  // 팝오버 바깥 클릭 닫기 (달력 + 재직 형태)
   useEffect(() => {
     const onOutside = (e: MouseEvent | TouchEvent) => {
       const target = e.target as Node;
@@ -239,7 +231,6 @@ function CareerItem({
     }
   }, [openStartCal, openEndCal, openEmp]);
 
-  // end 달력 비활성 규칙: start 이전 + 오늘 이후
   const startMV = parseMonth(startDate) ?? null;
   const disableEndMonth = (y: number, m: number) => {
     const now = new Date();
@@ -250,15 +241,34 @@ function CareerItem({
     return beforeStart || afterToday;
   };
 
-  // 이동/삭제 버튼 활성도
   const canMoveUp = total > 1 && index > 0;
   const canMoveDown = total > 1 && index < total - 1;
   const canRemove = total > 1;
 
+  // ===== AI 문장 추천 (요약용) =====
+  const [showAISuggest, setShowAISuggest] = useState(false);
+  const [aiSuggestions, setAISuggestions] = useState<string[]>([]);
+
+  const handleClickAISuggest = () => {
+    setAISuggestions([
+      "면접 분석 서비스 API 설계 및 FastAPI 기반 서버 구축",
+      "RabbitMQ, Redis 기반 비동기 영상 처리 파이프라인 설계",
+      "GCP Cloud Run + Cloud Tasks 구조 전환으로 처리 시간 35% 개선",
+      "서비스 응답 속도 1.2s → 0.6s 단축",
+      "GPU 서버 병목 제거로 모델 동시 실행 성능 2배 향상",
+    ]);
+    setShowAISuggest(true);
+  };
+  const handleCloseAISuggest = () => setShowAISuggest(false);
+  const handlePickSuggestion = (text: string) => {
+    const prefix = (summary ?? "").trim().length > 0 ? "\n" : "";
+    const next = `${summary ?? ""}${prefix}• ${text}`;
+    onChange({ summary: next.slice(0, MAX_SUMMARY) });
+  };
+
   return (
     <div className="career-section__item">
       <div className="career-section__fields">
-        {/* 회사명 */}
         <FormField label={<>회사명 <em>*</em></>} className="in_icon">
           <FormInput
             id={`company_name_${index}`}
@@ -271,9 +281,7 @@ function CareerItem({
           />
         </FormField>
 
-        {/* 재직 형태 + 기간 */}
         <div className="career-section__group career-section__group--employment">
-          {/* 재직 형태 */}
           <div className="career-section__control career-section__control--employment">
             <label className="small_labe_black-14">
               재직 기간 <em className="error_text_red">*</em>
@@ -299,9 +307,7 @@ function CareerItem({
             </div>
           </div>
 
-          {/* 시작/종료 기간 */}
           <div className="career-section__period">
-            {/* 시작 */}
             <div className="career-section__date-wrapper" ref={startCalRef}>
               <FormField label="" className="career-section date career-section__date--start">
                 <DateInline
@@ -312,7 +318,7 @@ function CareerItem({
                   invalid={!!errors?.startDate}
                   errorMessage={errors?.startDate}
                   rightIconSrc={errors?.startDate ? ic_error_red100_20 : undefined}
-                  isOpen={openStartCal}    
+                  isOpen={openStartCal}
                 />
               </FormField>
 
@@ -340,7 +346,6 @@ function CareerItem({
 
             <span className="career-section__tilde">~</span>
 
-            {/* 종료 */}
             {isCurrent ? (
               <div className="field career-section date career-section__date--end">
                 <label className="label">{}</label>
@@ -362,7 +367,7 @@ function CareerItem({
                     invalid={!!errors?.endDate}
                     errorMessage={errors?.endDate}
                     rightIconSrc={errors?.endDate ? ic_error_red100_20 : undefined}
-                    isOpen={openEndCal}    
+                    isOpen={openEndCal}
                   />
                 </FormField>
                 {openEndCal && (
@@ -396,7 +401,6 @@ function CareerItem({
             )}
           </div>
 
-          {/* 재직중 토글 */}
           <div className="career-section__toggle career-section__toggle--current error_box">
             <span className="career-section__toggle-label">재직중</span>
             <Switch
@@ -416,7 +420,6 @@ function CareerItem({
           </div>
         </div>
 
-        {/* 직무/직책 */}
         <div className="career-section__row">
           <div className="career-section__control career-section__control--role">
             <FormField label={<>직무 <em>*</em></>} className="in_icon">
@@ -446,7 +449,6 @@ function CareerItem({
           </div>
         </div>
 
-        {/* 담당 업무 (읽기/편집 토글) */}
         <div className="field career-section__control career-section__control--summary">
           <div className="small_labe_black-14">담당 업무 및 주요 성과</div>
 
@@ -488,13 +490,16 @@ function CareerItem({
             </div>
           )}
 
-          <div className="resume-create-page__assist">
-            <span className="resume-create-page__assist-text">
-              <img src={ic_star_gray700_20} alt="" />
-              더 적합한 문장 추천을 위해 아래 항목들을 먼저 채워주세요.
-            </span>
-            <span className="ai-suggest-btn career-section__summary-ai-btn">AI 문장 추천</span>
-          </div>
+<AISuggestArea
+            show={showAISuggest}
+            items={aiSuggestions}
+            onOpen={handleClickAISuggest}
+            onClose={handleCloseAISuggest}
+            onPick={handlePickSuggestion}
+            starIconGray={ic_star_gray700_20}
+            starIconGreen={ic_star_green_20}
+            closeIcon={ic_close_gray500_20}
+          />
         </div>
       </div>
 

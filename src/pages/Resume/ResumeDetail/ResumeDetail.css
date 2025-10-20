@@ -32,6 +32,10 @@
   .resume-field{
     border-bottom: 1px solid var(--gray-300, #E0E2E4);
   }
+
+  .resume-field.last-item{
+    border-bottom: none;
+  }
   
   .resume-basic{
     display: flex;
@@ -145,6 +149,24 @@
     align-self: stretch;
   }
 
+  .resume-item-chip{
+    display: flex;
+    height: 52px;
+    padding: 16px 20px;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    border-radius: 4px;
+    border: 1px solid var(--gray-300, #E0E2E4);
+    background: var(--gray-50, #F8F8F9);
+    color: var(--gray-900, #2A2D2F);
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; /* 125% */
+  }
+
   .resume-location{
     display: flex;
     height: 52px;
@@ -171,5 +193,189 @@
     font-size: 16px;
     font-style: normal;
     font-weight: 400;
-    line-height: 20px; /* 125% */
-  }
+    line-height: 20px; 
+}
+
+/* resume-career */
+ 
+/* 공통 플렉스 컬럼 묶음 */
+.resume-career-list,
+.resume-career-item,
+.resume-career-item__header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* 리스트/아이템 베이스 */
+.resume-career-list {
+  gap: 16px;
+  align-self: stretch;
+}
+
+.resume-career-item {
+  padding: 28px;
+  gap: 20px;
+  align-self: stretch;
+  border-radius: 4px;
+  border: 1px solid var(--gray-300, #E0E2E4);
+  background: var(--white-100, #FFF);
+  /* 폰트는 여기에서 한 번만 지정 */
+  font-family: Pretendard;
+}
+
+/* 헤더 간격만 개별 지정 */
+.resume-career-item__header {
+  gap: 12px;
+}
+
+/* 기간 블록(기존 그대로) */
+.resume-career-item__period--stack {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* 회사명: 타이틀 스타일 유지 */
+.resume-career-item__company {
+  color: var(--gray-900, #2A2D2F);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 22px; /* 122.222% */
+}
+
+/* 메타 영역: 레이아웃 + 컬러만 남김(타이포는 아래 그룹 규칙에서) */
+.resume-career-item__meta {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  color: var(--gray-700, #6F767E);
+}
+
+/* 메타 내 구분선 유지 */
+.resume-career-item__meta > span + span::before {
+  content: "";
+  display: inline-block;
+  width: 1px;
+  height: 0.8em;
+  background: #E0E2E4;
+  vertical-align: middle;
+  margin: 0 16px;
+}
+
+/* 불릿 리스트: 타이포만 유지(폰트 패밀리는 상속) */
+.resume-career-item__bullets {
+  color: var(--gray-900, #2A2D2F);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+}
+
+/* 16/20 기본 텍스트 타이포 공통화 */
+.resume-career-item__meta,
+.resume-career-item__tenure,
+.resume-career-item__employment,
+.resume-career-item__role,
+.resume-career-item__level,
+.resume-career-item__period-start,
+.resume-career-item__period-sep,
+.resume-career-item__period-end {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 20px;
+  font-style: normal;
+}
+
+/* 현재 재직 강조색: 기존 .current + BEM 모디파이어 겸용 지원 */
+.resume-career-item__period-end.current,
+.resume-career-item__period-end--current {
+  color: var(--primary-primary, #816BFE);
+}
+
+/* resume-education */
+
+.resume-education{
+  display: flex;
+  padding: 24px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  align-self: stretch;
+  border-radius: 4px;
+  border: 1px solid var(--gray-300, #E0E2E4);
+  background: var(--white-100, #FFF);
+}
+
+.resume-education__school{
+  color: var(--gray-900, #2A2D2F);
+  font-family: Pretendard;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 22px; /* 122.222% */
+}
+/* 한 줄 배치 */
+.resume-education__meta {
+  display: flex;
+  align-items: center;
+  /* 필요하면 줄바꿈 허용: flex-wrap: wrap; */
+}
+
+/* 기간 묶음도 한 줄로 */
+.resume-education__period {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px; /* 정확히 '2010.03 ~ 2015.07' 간격 제어 */
+}
+
+/* 첫 요소를 제외한 모든 형제 앞에 세로 구분선 */
+.resume-education__meta > * + * {
+  position: relative;
+  padding-left: 16px;
+  margin-left: 16px;
+}
+.resume-education__meta > * + *::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1px;
+  height: 0.8em;
+  background: #E0E2E4;
+}
+
+/* resume-portfolio */
+
+
+.resume-portfolio-item{
+  display: flex;
+  padding: 28px;
+  align-items: center;
+  gap: 12px;
+  align-self: stretch;
+  border-radius: 4px;
+  border: 1px solid var(--gray-300, #E0E2E4);
+  background: var(--white-100, #FFF);
+}
+
+
+.resume-self-intro{
+  color: var(--gray-900, #2A2D2F);
+  font-family: Pretendard;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 180%; /* 28.8px */
+}
+
+/* resume-mock-interview */
+
+.resume-mock-report-item{
+ display: flex;
+ flex-direction: row;
+  padding: 28px;
+  align-items: center;
+  gap: 12px;
+  align-self: stretch;
+}

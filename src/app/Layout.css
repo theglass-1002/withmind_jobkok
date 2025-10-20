@@ -51,6 +51,11 @@ textarea:focus {
 
 }
 
+.default_btn_black.radius{
+    border-radius: 100px;
+
+}
+
 .default_btn_white{
         display: flex;
         height: 52px;
