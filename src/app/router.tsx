@@ -11,7 +11,10 @@ import ResumeDetail from "@/pages/Resume/ResumeDetail/ResumeDetail";
 import ResumeEdit from "@/pages/Resume/ResumeEdit/ResumeEdit";
 import ResumeCreate from "@/pages/Resume/ResumeCreate";
 
-import MockInterview from "@/pages/MockInterview/MockInterview"; //
+import MockInterview from "@/pages/MockInterview/MockInterview";
+
+
+
 
 import Mypage from "@/pages/Mypage/Mypage";
 import EditProfile from "@/pages/Mypage/EditProfile/EditProfile";

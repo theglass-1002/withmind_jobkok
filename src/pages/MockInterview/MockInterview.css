@@ -1,6 +1,6 @@
 .mock-interview-page{
     display: flex;
-    padding-top: 74px;
+    padding-top: 70px;
     flex-direction: column;
     align-items: flex-start;
     align-self: stretch;
@@ -46,14 +46,340 @@
     font-size: 32px;
     font-style: normal;
     font-weight: 700;
-    line-height: 34px; /* 106.25% */
+    line-height: 50px; /* 106.25% */
 }
-.mock-interview-page__hero-cta{
-    
-}
+.mock-interview-page .mock-interview-page__hero .mock-interview-page__hero-cta.default_btn_black {
+    display: inline-flex;
+    align-self: center;       /* 혹시 상위에서 stretch 걸렸을 때 대비 */
+    white-space: nowrap;      /* 줄바꿈 방지(선택) */
+    gap: 8px;                 /* 아이콘-텍스트 간격 */
+    padding: 16px 20px;       /* 버튼 내부 여백 */
+  }
 
-/* .mock-interview-page__hero-cta{
+  .mock-interview-tabs{
     display: flex;
-    gap: 8px;
+    padding: 52px 360px 0 360px;
+    align-items: center;
+    gap: 28px;
+    align-self: stretch;
+    border-bottom: 1px solid var(--gray-300, #E0E2E4);
+    background: var(--white-100, #FFF);
+  }
+  
+  .tabs__item{
+    display: flex;
+    padding-bottom: 24px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    color: var(--gray-500, #9EA4AA);
+    text-align: center;
+    font-family: Pretendard;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 22px; /* 122.222% */
+    cursor: pointer;
+  }
 
-} */
+  .tabs__item.on{
+    color: var(--gray-900, #2A2D2F);
+    text-align: center;
+    font-family: Pretendard;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 22px; /* 122.222% */
+    border-bottom: 2px solid var(--gray-900, #2A2D2F);
+  }
+
+  .mock-interview-page__section{
+    display: flex;
+    padding: 40px 360px 100px 360px;
+    flex-direction: column;
+    justify-content: center;
+    gap: 24px;
+    align-self: stretch;
+  }
+
+  /* MY 리포트 공백 상태: 기존 mock-interview-empty 스타일 재사용 */
+.mock-interview-empty,
+.my-report-empty {
+  display: flex;
+  padding: 80px;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  border-radius: 6px;
+  border: 1px solid var(--gray-300, #E0E2E4);
+  background: var(--gray-100, #F2F3F4);
+}
+
+.mock-interview-empty--centered,
+.my-report-empty--centered {
+  /* 필요 시 별도 차이 없으면 비워둬도 됨 */
+}
+
+.mock-interview-empty__texts,
+.my-report-empty__texts {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  align-self: stretch;
+}
+
+.mock-interview-empty__title,
+.my-report-empty__title {
+  color: var(--gray-900, #2A2D2F);
+  text-align: center;
+  font-family: Pretendard;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 22px;
+}
+
+.mock-interview-empty__subtitle,
+.my-report-empty__subtitle {
+  color: var(--gray-700, #6F767E);
+  text-align: center;
+  font-family: Pretendard;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+
+  .mock-interview-empty{
+    display: flex;
+    padding: 80px;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    border-radius: 6px;
+    border: 1px solid var(--gray-300, #E0E2E4);
+    background: var(--gray-100, #F2F3F4);
+  }
+
+  .mock-interview-empty__texts{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    align-self: stretch;
+  }
+
+  .mock-interview-empty__title{
+    color: var(--gray-900, #2A2D2F);
+    text-align: center;
+    font-family: Pretendard;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 22px; /* 122.222% */
+  }
+
+  .mock-interview-empty__subtitle{
+    color: var(--gray-700, #6F767E);
+    text-align: center;
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; /* 125% */
+  }
+
+/* 
+interview_result */
+
+/* Header */
+.mock-interview-summary__header{
+    display:flex;
+    height:20px;
+    justify-content:space-between;
+    align-items:center;
+    align-self:stretch;
+  }
+  .mock-interview-summary__header-left{display:flex;align-items:center;gap:8px;}
+  .mock-interview-summary__header-right{display:flex;align-items:center;gap:4px;}
+  
+  /* Content */
+  .mock-interview-summary__content{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:24px;
+    align-self:stretch;
+  }
+  
+  /* Rows */
+  .mock-interview-summary__kpis,
+  .mock-interview-summary__charts{
+    display:flex;
+    gap:24px;
+    align-self:stretch;
+  }
+  
+  /* Stacks */
+  .mock-interview-summary__kpi,
+  .mock-interview-summary__chart-left,
+  .mock-interview-summary__chart-scorebox,
+  .mock-interview-summary__chart-right{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    align-self:stretch;
+  }
+  
+  /* KPI */
+  .mock-interview-summary__kpi{
+    flex:1;
+    padding:28px;
+    gap:16px;
+    border-radius:6px;
+    border:1px solid var(--gray-300, #E0E2E4);
+    background:var(--white-100, #FFF);
+  }
+  .mock-interview-summary__kpi-label{
+    color:var(--gray-700, #6F767E);
+    font-family:Pretendard;
+    font-size:16px;
+    font-weight:400;
+    line-height:20px;
+  }
+  .mock-interview-summary__kpi-value,
+  .mock-interview-summary__kpi-pair{
+    color:var(--gray-900, #2A2D2F);
+    font-family:Pretendard;
+    font-size:20px;
+    font-weight:600;
+    line-height:24px;
+  }
+  .mock-interview-summary__kpi-pair span + span::before{
+    content:"";
+    display:inline-block;
+    width:1px;height:16px;
+    background:#E0E2E4;
+    margin:0 12px;
+  }
+  .mock-interview-summary__kpi-score{
+    background:var(--ai-100, linear-gradient(90deg, #15D078 0%, #4BD1C8 100%));
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+  
+  /* Chart Card */
+  .mock-interview-summary__chart{
+    display:flex;
+    flex:1;
+    flex-direction:column;
+    align-items:flex-start;
+    border-radius:6px;
+    border:1px solid var(--gray-300, #E0E2E4);
+    background:var(--white-100, #FFF);
+  }
+  .mock-interview-summary__chart--brand{
+    background:var(--primary-gradient, linear-gradient(90deg, #816BFE 0%, rgba(129,107,254,0.60) 100%), #FFF);
+ 
+}
+  
+  /* Chart header/title */
+  .mock-interview-summary__chart-left{padding:28px;gap:24px;}
+  .mock-interview-summary__chart-header{
+    display:flex;justify-content:space-between;align-items:flex-start;align-self:stretch;
+  }
+  .mock-interview-summary__chart-title{
+    display:flex;align-items:center;gap:12px;align-self:stretch;
+    font-family:Pretendard;font-size:20px;font-weight:600;line-height:24px;
+  }
+  .mock-interview-summary__chart-title--brand{color:#FFF;}
+  .mock-interview-summary__chart-title--surface{
+    padding:28px 28px 24px; color:var(--gray-900, #2A2D2F);
+  }
+  
+  /* Chart body (left) */
+  .mock-interview-summary__chart-scorebox{gap:12px;}
+  .mock-interview-summary__chart-score{
+    display:flex;align-items:center;gap:20px;
+    color:#FFF;font-family:Pretendard;font-size:48px;font-weight:700;line-height:58px;
+  }
+  .mock-interview-summary__chart-badge{
+    display:flex;padding:8px 12px;justify-content:center;align-items:center;gap:10px;
+    border-radius:4px;background:linear-gradient(90deg,#FFF 0%,rgba(255,255,255,0.80) 100%);
+    color:var(--primary-primary,#816BFE);
+    font-family:Pretendard;font-size:18px;font-weight:600;line-height:22px;
+  }
+  .mock-interview-summary__chart-desc{
+    color:#FFF;font-family:Pretendard;font-size:16px;font-weight:400;line-height:180%;
+  }
+  
+  /* Tags */
+  .mock-interview-summary__chart-tags{display:flex;flex-direction:column;align-items:flex-start;gap:20px;}
+  .mock-interview-summary__chart-tag{
+    display:flex;align-items:center;gap:8px;overflow:hidden;
+    color:#FFF;text-overflow:ellipsis;
+    font-family:Pretendard;font-size:16px;font-weight:600;line-height:20px;
+  }
+  .mock-interview-summary__chart-tags--secondary{display:flex;flex-direction:row;align-items:center;gap:20px;}
+  .mock-interview-summary__chart-tag--accent{color:#F9FF41;}
+  
+  /* Right side (average bar) */
+  .mock-interview-summary__chart-right{padding:28px;gap:20px;background:rgba(42,45,47,0.08);}
+  .mock-interview-summary__chart-metric{
+    display:flex;justify-content:space-between;align-items:center;align-self:stretch;
+    color:#FFF;font-family:Pretendard;font-size:16px;font-weight:600;line-height:20px;
+  }
+  .mock-interview-summary__chart-graph{
+    position:relative;display:flex;height:24px;align-self:stretch;
+    border-radius:2px;background:var(--white-20, rgba(255,255,255,0.20));overflow:hidden;
+  }
+  .mock-interview-summary__chart-graph canvas{border-radius:2px;}
+  
+  .mock-interview-summary__chart-axis{
+    color:#FFF;font-family:Pretendard;font-size:16px;font-weight:400;line-height:20px;
+    position:relative;width:100%;margin-top:8px;
+  }
+  .mock-interview-summary__chart-axis-range{
+    position:relative;display:flex;justify-content:space-between;align-items:center;
+    color:#FFF;font-family:Pretendard;font-size:16px;font-weight:400;line-height:20px;width:100%;
+  }
+  .mock-interview-summary__chart-axis-avg{
+
+    position:absolute;top:0;transform:translateX(-50%);white-space:nowrap;
+  
+}
+  
+  /* Surface chart: summary + trend graph */
+  .mock-interview-summary__chart-summary{
+    display:flex;padding:28px;flex-direction:column;align-items:flex-start;gap:10px;align-self:stretch;
+    border-top:1px solid var(--gray-300,#E0E2E4);
+    border-bottom:1px solid var(--gray-300,#E0E2E4);
+    background:var(--gray-50,#F8F8F9);
+  }
+  .mock-interview-summary__chart-summary-item{display:flex;align-items:center;gap:12px;align-self:stretch;}
+  .mock-interview-summary__chart-summary-label{display:flex;align-items:center;gap:12px;color:var(--gray-700,#6F767E);}
+  .mock-interview-summary__chart-summary-icon-wrap{
+    display:flex;width:24px;height:24px;justify-content:center;align-items:center;border-radius:100px;
+    background:var(--report-yellow-100,#F9C804);
+  }
+  .mock-interview-summary__chart-summary-value{
+    font-family:Pretendard;font-size:20px;font-weight:600;line-height:24px;
+    background:var(--ai-100,linear-gradient(90deg,#15D078 0%,#4BD1C8 100%));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  }
+  
+  /* Trend graph (second chart) */
+  .mock-interview-summary__trend-graph{
+    display: flex;
+padding: 28px;
+flex-direction: column;
+align-items: flex-start;
+gap: 10px;
+align-self: stretch;
+    /* align-self:stretch;
+    padding:24px 28px;
+    background:#FFF;
+    border-radius:0 0 6px 6px; */
+  }
+  
