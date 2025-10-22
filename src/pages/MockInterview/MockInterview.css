@@ -287,8 +287,16 @@ interview_result */
   /* Chart header/title */
   .mock-interview-summary__chart-left{padding:28px;gap:24px;}
   .mock-interview-summary__chart-header{
-    display:flex;justify-content:space-between;align-items:flex-start;align-self:stretch;
+    position: relative;
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
   }
+
+  
+  
   .mock-interview-summary__chart-title{
     display:flex;align-items:center;gap:12px;align-self:stretch;
     font-family:Pretendard;font-size:20px;font-weight:600;line-height:24px;
@@ -297,7 +305,43 @@ interview_result */
   .mock-interview-summary__chart-title--surface{
     padding:28px 28px 24px; color:var(--gray-900, #2A2D2F);
   }
-  
+  .mock-interview-summary__chart-info-icon{
+    cursor: pointer;
+  }
+
+.mock-interview-summary__chart .tooltip__content{
+      display: flex;
+      top: 30px;
+      width: 500px;
+      padding: 20px 20px 16px 20px;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+      align-self: stretch;
+}
+
+/* 꼬리 */
+.tooltip--top .tooltip__content::after {
+  content: "";
+  position: absolute;
+  top: -8px;        
+  left: 50px;          
+  border-style: solid;
+  border-width: 0 8px 10px 8px;                
+  border-color: transparent transparent #2A2D2F transparent; 
+}
+
+
+.mock-interview-summary__chart-header .mock-interview__chart-info:hover .tooltip__content,
+.mock-interview-summary__chart-header .mock-interview__chart-info:focus-within .tooltip__content {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(-4px);
+}
+
+/* 기존 커서 모양 유지 */
+
   /* Chart body (left) */
   .mock-interview-summary__chart-scorebox{gap:12px;}
   .mock-interview-summary__chart-score{
@@ -372,14 +416,481 @@ interview_result */
   /* Trend graph (second chart) */
   .mock-interview-summary__trend-graph{
     display: flex;
-padding: 28px;
-flex-direction: column;
-align-items: flex-start;
-gap: 10px;
-align-self: stretch;
-    /* align-self:stretch;
-    padding:24px 28px;
-    background:#FFF;
-    border-radius:0 0 6px 6px; */
+    padding: 28px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    align-self: stretch;
   }
+
+
+  /* mock-interview-summary__panel */
+
+.mock-interview-summary__panel{
+  display: flex;
+  padding: 28px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+  align-self: stretch;
+  border-radius: 6px;
+  border: 1px solid var(--gray-300, #E0E2E4);
+  background: var(--white-100, #FFF);
+}
+
+
+.mock-interview__title{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--gray-900, #2A2D2F);
+  font-family: Pretendard;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 24px; /* 120% */
+}
+
+.mock-interview-category-trend__content{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+  align-self: stretch;
+}
+
+.mock-interview-category-trend__chart{
+  width: 100%;
+}
+
+.mock-trend__legend{
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  align-self: stretch;
+}
+.mock-trend__legend-item{
+  display: flex;
+  width: 271px;
+  padding: 20px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  border-radius: 4px;
+  border: 1px solid var(--gray-300, #E0E2E4);
+  background: var(--gray-50, #F8F8F9);
+  color: var(--gray-700, #6F767E);
+  font-family: Pretendard;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 180%; /* 28.8px */
+
+}  
+
+.mock-trend__name{
+  color: var(--gray-900, #2A2D2F);
+  font-family: Pretendard;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 22px;
+  /* dot와 텍스트 수평 정렬 */
+  display: inline-flex;
+  align-items: center;
+  gap: 8px; /* dot-텍스트 간격 */
+}
+
+/* 공통 dot */
+.mock-trend__name::before{
+  content: "";
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  background: #CCC; 
+}
+
+/* 카테고리별 색상 */
+.mock-trend__name.competency::before { background: #26A4FF; } 
+.mock-trend__name.attitude::before   { background: #AF8CFF; }
+.mock-trend__name.voice::before      { background: #15D078; } 
+.mock-trend__name.stress::before     { background: #F87884; } 
+
+
+.mock-trend__rating{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mock-trend__rating-icon{
+  display: flex;
+  padding: 8px;
+  align-items: center;
+  gap: 4px;
+  border-radius: 4px;
+  border: 1px solid var(--gray-300, #E0E2E4);
+  background: var(--white-100, #FFF);
+}
+
+.mock-trend__rating-text{
+  display: flex;
+  width: 36px;
+  padding: 8px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  border-radius: 4px;
+  border: 1px solid var(--gray-300, #E0E2E4);
+  background: var(--white-100, #FFF);
+  color: var(--gray-700, #6F767E);
+  text-align: center;
+  font-family: Pretendard;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 20px; /* 125% */
+}
+/* 부모가 아이템 높이를 꽉 채우도록 */
+.keywords-panel__content {
+  display: flex;
+  align-items: stretch; /* 중요 */
+  gap: 20px;
+  align-self: stretch;
+}
+
+.keywords-panel__chart {
+  display: flex;
+  flex: 4;
+  border-radius: 4px;
+  border: 1px solid var(--ai-30, #15D078);
+  background: var(--ai-10, linear-gradient(90deg, rgba(21, 208, 120, 0.10) 0%, rgba(75, 209, 200, 0.10) 100%));
+}
+
+.keywords-panel__chart canvas{
+  width: 100% !important;
+  height: 100% !important;
+ }
+
+.keywords-panel__rank{
+  display: flex;
+  flex: 1.5;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.keywords-panel__rank-item{
+  display: flex;
+  padding: 18px 20px;
+  justify-content: space-between;
+  align-items: center;
+  align-self: stretch;
+  border-radius: 4px;
+  border: 1px solid var(--gray-300, #E0E2E4);
+  background: var(--gray-50, #F8F8F9);
+  color: var(--gray-700, #6F767E);
+  text-align: right;
+  font-family: Pretendard;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 20px; /* 125% */
+}
+
+.keywords-panel__rank-item-head{
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: var(--gray-900, #2A2D2F);
+  font-family: Pretendard;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 22px; /* 122.222% */
+}
+
+.keywords-panel__rank-badge{
+  display: flex;
+  height: 28px;
+  padding: 4px 8px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+  font-family: Pretendard;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 22px; /* 137.5% */
+  border-radius: 100px;
+  background: var(--gray-500, #9EA4AA);
+  color: var(--white-100, #FFF);
+}
+
+.keywords-panel__rank > .keywords-panel__rank-item:nth-child(-n+3) .keywords-panel__rank-badge{
+  background: var(--ai-100, linear-gradient(90deg, #15D078 0%, #4BD1C8 100%));
+}
+
+.mock-interview__jobcard-list--grid{
+  display: flex;
+  align-items: flex-start;
+  align-content: flex-start;
+  gap: 20px;
+  align-self: stretch;
+  flex-wrap: wrap;
+  }
+
+  .mock-interview__jobcard-actions{
+    display: flex;
+    width: 360px;
+    height: 254px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    border-radius: 4px;
+    background: var(--gray-50, #F8F8F9);
+  }
+
+
   
+
+  /* history */
+
+
+  .mock-interview__stats{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .mock-interview__stats-total,.mock-interview__stats-done{
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--gray-700, #6F767E);
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; /* 125% */
+  }
+
+  .mock-interview__stats-count{
+    color: var(--gray-900, #2A2D2F);
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 20px; /* 125% */
+  }
+
+  .mock-interview__filters{
+    width: fit-content;
+}
+/* ===== 공용 리스트 레이아웃 ===== */
+.data-list__head,
+.data-list__row {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+}
+
+/* 공용 컬럼 */
+.data-list__col {
+  display: flex;
+  box-sizing: border-box;
+  padding: 20px 8px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* 고정 폭 유틸 */
+.u-col--w80  { flex: 0 0 80px;  width: 80px; }
+.u-col--w100 { flex: 0 0 100px; width: 100px; }
+.u-col--w120 { flex: 0 0 120px; width: 120px; }
+.u-col--w140 { flex: 0 0 140px; width: 140px; }
+.u-col--w160 { flex: 0 0 160px; width: 160px; }
+.u-col--w210 { flex: 0 0 210px; width: 210px; }
+.u-col--w220 { flex: 0 0 220px; width: 220px; }
+.u-col--w231 { flex: 0 0 231px; width: 231px; }
+
+/* 정렬 유틸(선택) */
+.u-align--left  { justify-content: flex-start; text-align: left; }
+.u-align--right { justify-content: flex-end;   text-align: right; }
+
+/* ===== 페이지 스코프(mock-history) ===== */
+.mock-history {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+}
+
+.mock-history__wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+  align-self: stretch;
+}
+
+/* 헤더 비주얼 — 레이아웃은 .data-list__head가 담당 */
+.mock-history__head {
+  width: fit-content;
+  border-radius: 6px;
+  border: 1px solid var(--gray-300, #E0E2E4);
+  background: var(--ai-100, linear-gradient(90deg, #15D078 0%, #4BD1C8 100%));
+}
+
+/* 헤더 타이포 스코프 */
+.mock-history__head .mock-history__col,
+.mock-history__head .mock-history__head-label {
+  color: var(--white-100, #FFF);
+  text-align: center;
+  font-family: Pretendard;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+/* 헤더 내부 정렬(라벨 + 정렬 아이콘) */
+.mock-history__head-in {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.mock-history__sort-icon {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.mock-history__body{
+  display: flex;
+  width: fit-content;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+  align-self: stretch;
+}
+
+/* 바디 타이포 스코프 */
+.mock-history__body,
+.mock-history__body .data-list__col,
+.mock-history__body .mock-history__cell {
+  color: var(--gray-900, #2A2D2F);
+  text-align: center;
+  font-family: Pretendard;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+/* 행 컨테이너(상단 라인 + 추가 정보) */
+.mock-history__row {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  align-self: stretch;
+  border-radius: 6px;
+  border: 1px solid var(--gray-300, #E0E2E4);
+  background: var(--white-100, #FFF);
+  overflow: hidden;
+}
+
+/* 상단 라인(헤더와 열 줄맞춤) */
+.mock-history__row-line {}
+
+/* 하단 추가 정보 */
+.mock-history__row-extra {
+  display: flex;
+  padding: 20px;
+  align-items: center;
+  gap: 16px;
+  align-self: stretch;
+  border-top: 1px solid var(--gray-300, #E0E2E4);
+  background: var(--gray-50, #F8F8F9);
+  overflow: hidden;
+  color: var(--gray-700, #6F767E);
+  text-align: right;
+  text-overflow: ellipsis;
+  font-family: Pretendard;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+.mock-history__extra-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+  color: var(--primary-primary, #816BFE);
+  text-overflow: ellipsis;
+  font-family: Pretendard;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 20px;
+}
+.mock-history__extra-text {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  flex: 1 0 0;
+  text-align: start;
+  overflow: hidden;
+  color: var(--gray-900, #2A2D2F);
+  text-overflow: ellipsis;
+  font-family: Pretendard;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 20px;
+}
+.mock-history__extra-date {}
+
+.mock-history__pager.data-list__pager {}
+
+/* 아바타 */
+.mock-history__avatar {
+  width: 100%;
+  max-width: 91px;
+  height: 58px;
+  border-radius: 5px;
+  overflow: hidden;
+  margin-left: auto;
+  display: flex;
+}
+.mock-history__avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.mock-history__cell--status {
+  display: inline-flex;      /* 점 + 텍스트 수평정렬(레이아웃 안깨짐) */
+  align-items: center;
+  gap: 8px;                  /* 점과 텍스트 간격 */
+}
+
+
+.mock-history__cell--status::before{
+  content: "";
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--ai-green-100, #15D078); /* fill 대신 background */
+}
+
+.mock-history__cell--status.is-done::before    { background: #15D078; }
+.mock-history__cell--status.is-doing::before { background: #C8CCCF; }

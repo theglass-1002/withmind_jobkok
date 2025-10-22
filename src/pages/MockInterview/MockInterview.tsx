@@ -4,16 +4,22 @@ import ic_star_white_20 from "@/assets/icons/size20/ic_star_white_20.png";
 import ic_star_gray900_20 from "@/assets/icons/size20/ic_star_gray900_20.png";
 import MyReportEmpty from "@/pages/MockInterview/my-report/MyReportEmpty";
 import MyReportResult from "@/pages/MockInterview/my-report/MyReportResult";
+import UiFilter, { type UiFilterOption } from "@/shared/components/ui-filter/UiFilter";
+import MockInterviewHistory from "@/pages/MockInterview/history/MockInterviewHistory";
 
 
-
-
-
+const FILTERS: UiFilterOption[] = [
+  { label: "전체", value: "all" },
+  { label: "진행 완료", value: "done" },
+  { label: "진행 중", value: "ongoing" },
+];
 
 
 export default function MockInterview() {
   const [activeTab, setActiveTab] = useState("report");
+  const [filter, setFilter] = useState("all");
 
+  
   const handleStart = () => {
     console.log("start mock interview");
   };
@@ -67,22 +73,16 @@ export default function MockInterview() {
           // <MyReportEmpty/>
           <MyReportResult/>
         )}
-
-
-        {activeTab === "history" && (
-          <div className="mock-interview-empty mock-interview-empty--centered">
-            <div className="mock-interview-empty__texts">
-              <span className="mock-interview-empty__title">모의면접 내역이 없습니다</span>
-              <span className="mock-interview-empty__subtitle">
-                진행 이력이 여기 표시됩니다. 지금 바로 모의면접을 시작해보세요.
-              </span>
-            </div>
-            <button type="button" className="default_btn_white" onClick={handleStart}>
-              <img src={ic_star_gray900_20} alt="" aria-hidden="true" />
-              모의면접 시작
-            </button>
-          </div>
-        )}
+          {activeTab === "history" && (
+            <MockInterviewHistory
+              totalCount={0}
+              doneCount={0}
+              filter={filter}
+              onChangeFilter={setFilter}
+              onStart={handleStart}
+              emptyIconSrc={ic_star_gray900_20}
+            />
+          )}
       </section>
     </div>
   );

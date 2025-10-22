@@ -84,6 +84,10 @@ textarea:focus {
    
 }
 
+.default_btn_white.radius{
+    border-radius: 100px;
+}
+
 .default_btn_red{
 display: inline-flex;
 height: 52px;
@@ -278,12 +282,7 @@ line-height: 20px; /* 125% */
     background: var(--gray-200, #EBECED);
 }
 
-.pagination__btn img{
-    width: 7px;
-    height: 10px;
-    flex-shrink: 0;
-   
-}
+
 
 .mypage__top_search_field{
         display: flex;
