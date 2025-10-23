@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import "./MockInterview.css";
 import ic_star_white_20 from "@/assets/icons/size20/ic_star_white_20.png";
 import ic_star_gray900_20 from "@/assets/icons/size20/ic_star_gray900_20.png";
@@ -6,7 +7,7 @@ import MyReportEmpty from "@/pages/MockInterview/my-report/MyReportEmpty";
 import MyReportResult from "@/pages/MockInterview/my-report/MyReportResult";
 import UiFilter, { type UiFilterOption } from "@/shared/components/ui-filter/UiFilter";
 import MockInterviewHistory from "@/pages/MockInterview/history/MockInterviewHistory";
-
+import Modal from "@/shared/components/modal/Modal";
 
 const FILTERS: UiFilterOption[] = [
   { label: "전체", value: "all" },
@@ -16,12 +17,20 @@ const FILTERS: UiFilterOption[] = [
 
 
 export default function MockInterview() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("report");
   const [filter, setFilter] = useState("all");
-
+  const [showConfirm, setShowConfirm] = useState(true);
   
   const handleStart = () => {
     console.log("start mock interview");
+  };
+
+  const handleCloseConfirm = () => setShowConfirm(false);
+
+  const handleConfirmCancel = () => {
+    setShowConfirm(false);
+    navigate(`/resumes/${resumeId}`);
   };
 
   return (
@@ -84,6 +93,17 @@ export default function MockInterview() {
             />
           )}
       </section>
+      <Modal
+        open={showConfirm}
+        title="이력서가 등록되어 있지 않습니다."
+        desc="모의면접을 진행하기 위해 먼저 이력서를 작성해 주세요."
+        confirmText="이력서 작성하기"
+        confirmClassName="btn_w_full default_btn_black"
+        cancelText="취소"
+        cancelClassName="btn_w_full default_btn_white"
+        onConfirm={handleConfirmCancel}
+        onClose={handleCloseConfirm}
+      />
     </div>
   );
 }

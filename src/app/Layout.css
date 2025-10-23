@@ -119,7 +119,6 @@ line-height: 20px; /* 125% */
 
 .default_tabs .tab{
     display: flex;
-    width: 120px;
     height: 44px;
     padding: 12px;
     justify-content: center;
@@ -143,9 +142,6 @@ line-height: 20px; /* 125% */
     justify-content: center;
     align-items: center;
     gap: 10px;
-    border-radius: 4px;
-    background: var(--white-100, #FFF);
-    box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.08);
     color: var(--gray-900, #2A2D2F);
     text-align: center;
     font-family: Pretendard;
@@ -153,6 +149,7 @@ line-height: 20px; /* 125% */
     font-style: normal;
     font-weight: 600;
     line-height: 20px; /* 125% */
+    border-bottom: 2px solid var(--gray-900, #2A2D2F);
 }
 
 .default_a_btn_line{

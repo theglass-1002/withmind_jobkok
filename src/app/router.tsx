@@ -12,6 +12,7 @@ import ResumeEdit from "@/pages/Resume/ResumeEdit/ResumeEdit";
 import ResumeCreate from "@/pages/Resume/ResumeCreate";
 
 import MockInterview from "@/pages/MockInterview/MockInterview";
+import MockAnalysisPage from "@/pages/MockInterview/analysis/MockAnalysisPage";
 
 
 
@@ -57,8 +58,7 @@ export const router = createBrowserRouter([
   { path: "/resumes/:resumeId/edit", element: <Layout><ResumeEdit /></Layout> },
 
   { path: "/mock-interview", element: <Layout><MockInterview /></Layout> },
-
-
+  { path: "/mock-interview/analysis/:interviewId", element: <Layout><MockAnalysisPage /></Layout> } ,
   { path: "jobs/:jobId", element: <Layout><JobDetail /></Layout>  } ,
   { path: "/companies", element: <Layout><CompaniesList /></Layout> },
   { path: "/companies/:companyId", element: <Layout><CompanyDetail /></Layout> },
