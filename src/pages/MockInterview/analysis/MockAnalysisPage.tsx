@@ -14,6 +14,11 @@ import ic_clipboard_24 from "@/assets/icons/size24/ic_clipboard_24.png";
 import ic_flag_green_24 from "@/assets/icons/size24/ic_flag_green_24.png";
 import KpiOverview from "./part/KpiOverview";
 import MockAnalysisKpiFit from "./part/MockAnalysisKpiFit";
+import ScoreDistributionSection from "./part/ScoreDistributionSection";
+import KpiRadarChart from "./part/KpiRadarChart";
+
+
+
 import "./mock-analysis.css";
 
 
@@ -24,6 +29,17 @@ export default function MockAnalysisPage() {
   const percentile = 10;
   const fit = 80;
 
+  const bucketLabels: (string | string[])[] = [
+    ["0", "~9"],
+    ["10", "~19"],
+    ["20", "~35"],
+    ["36", "~45"],
+    ["46", "~59"],
+    ["60", "~75"],
+    ["76", "~85"],
+    ["86", "~93"],
+    ["94", "~100"],
+  ];
 
   return (
     <div className="mock-analysis">
@@ -99,47 +115,93 @@ export default function MockAnalysisPage() {
                     noteIconSrc={ic_error_gray500_20}
                     description="응답은 직무 핵심 키워드와 역할을 잘 반영해 이력서와 높은 일치도를 보였습니다. 이력서에서 강조한 프로젝트 경험과 협업 역량도 답변에 드러났으나, 정량적 성과와 최신 기술 활용 사례는 충분히 연결되지 않아 구체성과 최신성이 다소 부족했습니다."
                     />  
-            </div>
-            <div className="analysis-section mock-analysis-overview__score-distribution">
-                <span className="analysis-section__title">
-                    <img src={ic_bar_chart_24} alt="" />
-                    종합 점수 분포 </span>
-                    <div className="analysis-section__body">
-                    <div className="analysis-section__left">
-                 <div className="analysis-section__stat">
-                    <div className="analysis-section__stat-head">
-                    <span className="analysis-section__stat-role">개발직군</span>
-                    <span className="analysis-section__stat-rank">응시자 2,851명 중 7위</span>
-                    </div>
+                 </div>
+            <ScoreDistributionSection
+                title="종합 점수 분포"
+                titleIconSrc={ic_bar_chart_24}
+                labels={bucketLabels}
+                max={100}
+                badgeIconSrc={ic_flag_green_24}
+                left={{
+                  role: "개발직군",
+                  rankText: "응시자 2,851명 중 7위",
+                  badgeText: "상위 10%",
+                  values: [50, 30, 20, 60, 92, 80, 70, 100, 50],
+                  highlightScore: 38,
+                }}
+                right={{
+                  role: "프론트엔드 직무",
+                  rankText: "응시자 267명 중 17위",
+                  badgeText: "상위 10%",
+                  values: [50, 30, 20, 60, 92, 80, 70, 100, 50],
+                  highlightScore: 48,
+                }}
+              />
 
-                    <div className="analysis-badge analysis-badge--up">
-                    <img className="analysis-badge__icon" src={ic_flag_green_24} alt="" />
-                    <span className="analysis-badge__text">상위 10%</span>
-                    </div>
-                </div>
-
-                <div className="analysis-section__chart">그래프 영역</div>
-                </div>
-             <div className="analysis-section__right">
-             <div className="analysis-section__stat">
-                    <div className="analysis-section__stat-head">
-                    <span className="analysis-section__stat-role">프론트엔드 직무</span>
-                    <span className="analysis-section__stat-rank">응시자 267명 중 17위</span>
-                    </div>
-
-                    <div className="analysis-badge analysis-badge--up">
-                    <img className="analysis-badge__icon" src={ic_flag_green_24} alt="" />
-                    <span className="analysis-badge__text">상위 10%</span>
-                    </div>
-                </div>
-                <div className="analysis-section__chart">그래프 영역</div>
-                </div> 
-            </div>
-            </div>
             <div className="analysis-section mock-analysis-overview__category-summary">
             <span className="analysis-section__title">
-            <img src={ic_clipboard_24} alt="" />
-                항목별 종합 평가 섹션 </span>
+            <img src={ic_clipboard_24} alt="" /> 항목별 종합 평가 섹션 </span>
+             <div className="analysis-section__body">
+                <div className="analysis-section__left">
+                  <span>홍길동님의 점수(수정필요)</span>  
+                    <KpiRadarChart
+                        attitude={50} //태도:100
+                        voice={20}  //목소리50
+                        tension={30}  //긴장도30
+                        competence={40}  // 왼 여량40
+                        />
+                    </div>
+                    <div className="analysis-section__right">
+                    <div className="analysis-eval-item">
+                        <div className="analysis-eval-item__header">
+                        <span className="analysis-eval-item__label">역량</span>
+                        <span className="analysis-eval-item__grade excellent">최우수</span>
+                        </div>
+                        <p className="analysis-eval-item__description">
+                        면접 과정에서 보인 의사소통능력과 문제해결능력은 매우 우수한 것으로 평가됩니다.
+                        잘 이해하고 뛰어난 의사소통 기술을 보였으며, 문제의 핵심을 파악하고 해결책을
+                        제시하는 등 전화 상담원으로서의 역량이 뛰어나다고 판단됩니다.
+                        </p>
+                    </div>
+
+                    <div className="analysis-eval-item">
+                        <div className="analysis-eval-item__header">
+                        <span className="analysis-eval-item__label">태도</span>
+                        <span className="analysis-eval-item__grade good">우수</span>
+                        </div>
+                        <p className="analysis-eval-item__description">
+                        면접 과정에서 보인 의사소통능력과 문제해결능력은 매우 우수한 것으로 평가됩니다.
+                        잘 이해하고 뛰어난 의사소통 기술을 보였으며, 문제의 핵심을 파악하고 해결책을
+                        제시하는 등 전화 상담원으로서의 역량이 뛰어나다고 판단됩니다.
+                        </p>
+                    </div>
+
+                    <div className="analysis-eval-item">
+                        <div className="analysis-eval-item__header">
+                        <span className="analysis-eval-item__label">목소리</span>
+                        <span className="analysis-eval-item__grade fair">보통</span>
+                        </div>
+                        <p className="analysis-eval-item__description">
+                        면접 과정에서 보인 의사소통능력과 문제해결능력은 매우 우수한 것으로 평가됩니다.
+                        잘 이해하고 뛰어난 의사소통 기술을 보였으며, 문제의 핵심을 파악하고 해결책을
+                        제시하는 등 전화 상담원으로서의 역량이 뛰어나다고 판단됩니다.
+                        </p>
+                    </div>
+
+                    <div className="analysis-eval-item">
+                        <div className="analysis-eval-item__header">
+                        <span className="analysis-eval-item__label">긴장도</span>
+                        <span className="analysis-eval-item__grade improvement">보통</span>
+                        </div>
+                        <p className="analysis-eval-item__description">
+                        면접 과정에서 보인 의사소통능력과 문제해결능력은 매우 우수한 것으로 평가됩니다.
+                        잘 이해하고 뛰어난 의사소통 기술을 보였으며, 문제의 핵심을 파악하고 해결책을
+                        제시하는 등 전화 상담원으로서의 역량이 뛰어나다고 판단됩니다.
+                        </p>
+                    </div>
+                    </div>
+
+             </div>   
              </div>
             <div className="analysis-section mock-analysis-overview__ai-summary">
             <span className="analysis-section__title">

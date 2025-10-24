@@ -25,7 +25,13 @@ type Props = {
 
   valueLabel?: string;
   valueBg?: string;
-  valueColor?: string;
+  /** 기본: 라벨에 따라 자동 색상 적용. 비활성화하려면 false */
+  valueColorAuto?: boolean;
+  /** 라벨별 배지 텍스트 색 커스텀 (없으면 기본 매핑 사용) */
+  valueColorMap?: Record<string, string>;
+  /** 자동 매핑에 실패하면 사용할 폴백 색상 */
+  valueColorFallback?: string;
+
   valueFontSize?: number;
   valueFontWeight?: number | string;
   valuePaddingX?: number;
@@ -46,7 +52,7 @@ function clamp01(v: number) {
 }
 
 function resolveColor(input: string): string {
-  if (!input) return input;
+  if (!input) return input as unknown as string;
   const VAR_REGEX = /^var\(\s*--([a-zA-Z0-9-_]+)\s*(?:,\s*([^)]+)\s*)?\)$/;
   const m = input.trim().match(VAR_REGEX);
   if (!m) return input;
@@ -75,6 +81,14 @@ function roundRect(
   ctx.closePath();
 }
 
+const DEFAULT_VALUE_COLOR_MAP: Record<string, string> = {
+  "매우 미흡": "#FF524C",
+  "미흡": "#FF972F",
+  "보통": "#15D078",
+  "우수": "#26A4FF",
+  "최우수": "#816BFE",
+};
+
 export default function KpiGaugeChart({
   segments = [1, 1, 1, 0.8, 0],
   labels = ["매우 미흡", "미흡", "보통", "우수", "최우수"],
@@ -94,7 +108,9 @@ export default function KpiGaugeChart({
 
   valueLabel,
   valueBg = "var(--white-100, #FFF)",
-  valueColor = "var(--report-blue-100, #26A4FF)",
+  valueColorAuto = true,
+  valueColorMap,
+  valueColorFallback = "var(--report-blue-100, #26A4FF)",
   valueFontSize = 16,
   valueFontWeight = 600,
   valuePaddingX = 8,
@@ -110,7 +126,9 @@ export default function KpiGaugeChart({
   const data = useMemo(
     () => ({
       labels: [""],
-      datasets: [{ label: "gauge", data: [1], backgroundColor: "transparent", borderWidth: 0 }],
+      datasets: [
+        { label: "gauge", data: [1], backgroundColor: "transparent", borderWidth: 0 },
+      ],
     }),
     []
   );
@@ -144,13 +162,13 @@ export default function KpiGaugeChart({
         const base = resolveColor(baseColor);
         const fill = resolveColor(fillColor);
         const badgeBg = resolveColor(valueBg);
-        const badgeColor = resolveColor(valueColor);
 
         ctx.save();
 
         let activeIndex = -1;
         let activeRatio = 0;
 
+        // 바 + 채움
         for (let i = 0; i < n; i++) {
           const x = left + i * (segW + gap);
           ctx.fillStyle = base;
@@ -165,6 +183,7 @@ export default function KpiGaugeChart({
           }
         }
 
+        // 라벨
         const normalFont = `${labelFontWeight} ${labelFontSize}px ${labelFontFamily}`;
         const activeFont = `${labelActiveFontWeight} ${labelFontSize}px ${labelFontFamily}`;
         const labelY = barY + barHeight + labelTopMargin;
@@ -183,7 +202,16 @@ export default function KpiGaugeChart({
           ctx.fillText(labels[i] ?? "", xCenter, labelY);
         }
 
+        // 배지
         if (valueLabel && activeIndex >= 0) {
+          const activeLabel = labels[activeIndex] ?? "";
+          const colorTable = { ...DEFAULT_VALUE_COLOR_MAP, ...(valueColorMap || {}) };
+          const resolvedTextColor = valueColorAuto
+            ? (colorTable[activeLabel] || valueColorFallback)
+            : valueColorFallback;
+
+          const badgeColor = resolveColor(resolvedTextColor);
+
           const xStart = left + activeIndex * (segW + gap);
           const filledW = segW * (activeRatio || 1);
           const rawAnchorX = xStart + Math.min(segW, Math.max(0, filledW));
@@ -232,7 +260,9 @@ export default function KpiGaugeChart({
       labelColor, labelFontSize, labelTopMargin, labelFontFamily, labelFontWeight,
       labelActiveColor, labelActiveFontWeight,
       labels,
-      valueLabel, valueBg, valueColor, valueFontSize, valueFontWeight, valueFontFamily,
+      valueLabel, valueBg,
+      valueColorAuto, valueColorMap, valueColorFallback,
+      valueFontSize, valueFontWeight, valueFontFamily,
       valuePaddingX, valuePaddingY, valueOffsetY, valueRadius,
       valueTail, valueTailSize
     ]
