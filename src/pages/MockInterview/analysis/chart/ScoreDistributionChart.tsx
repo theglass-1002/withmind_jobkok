@@ -164,6 +164,7 @@ export default function ScoreDistributionChart({
 
   const options = useMemo(
     () => ({
+      animation: false, 
       maintainAspectRatio: false,
       responsive: true,
       elements: { bar: { borderWidth: 0 } },
@@ -225,7 +226,7 @@ export default function ScoreDistributionChart({
           fontFamily: tickFontFamily,
         },
       } as any,
-      animation: { duration: 400, easing: "easeOutQuad" },
+ 
     }),
     [max, tickColor, gridColor, tickFontFamily, tickFontSize, labelItems, highlightIndex, highlightScore, series, highlightTextFormatter]
   );

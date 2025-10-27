@@ -1,235 +1,303 @@
 import React, { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import Modal from "@/shared/components/modal/Modal";
+
+import test_company_logo from "@/assets/testImg/company_logo/test_company_logo.png";
+import ic_saramin_18 from "@/assets/icons/size18/ic_saramin_18.png";
+import ic_star_green_18 from "@/assets/icons/size18/ic_star_green_18.png";
+import ic_fire_16 from "@/assets/icons/size16/ic_fire_16.png";
+import ic_seed_16 from "@/assets/icons/size16/ic_seed_16.png";
+
 import ic_print_gray900_24 from "@/assets/icons/size24/ic_print_gray900_24.png";
 import ic_arrow_left_gray900_20 from "@/assets/icons/size20/ic_arrow_left_gray900_20.png";
 import ic_star_white_20 from "@/assets/icons/size20/ic_star_white_20.png";
-import ic_magnifier_24 from "@/assets/icons/size24/ic_magnifier_24.png";
+import ic_weakness_circle_24 from "@/assets/icons/size24/ic_weakness_circle_24.png";
+import ic_strength_circle_24 from "@/assets/icons/size24/ic_strength_circle_24.png";
 
-import ic_error_gray500_20 from "@/assets/icons/size20/ic_error_gray500_20.png";
-import ic_bar_chart_24 from "@/assets/icons/size24/ic_bar_chart_24.png";
-import ic_laptop_24 from "@/assets/icons/size24/ic_laptop_24.png";
-import ic_rocket_24 from "@/assets/icons/size24/ic_rocket_24.png";
-import ic_clipboard_24 from "@/assets/icons/size24/ic_clipboard_24.png";
-import ic_flag_green_24 from "@/assets/icons/size24/ic_flag_green_24.png";
-import KpiOverview from "./part/KpiOverview";
-import MockAnalysisKpiFit from "./part/MockAnalysisKpiFit";
-import ScoreDistributionSection from "./part/ScoreDistributionSection";
-import KpiRadarChart from "./part/KpiRadarChart";
+import MockAnalysisHeader from "./MockAnalysisHeader";
+import OverviewPage from "./overview/OverviewPage";
+import DetailPage from "./detail/DetailPage";
 
-
+import KpiRadarChart from "@/pages/MockInterview/analysis/chart/KpiRadarChart";
 
 import "./mock-analysis.css";
 
+const mockJobs = [
+  {
+    id: 101,
+    logoSrc: test_company_logo,
+    company: "위드마인드",
+    sourceLogoSrc: ic_saramin_18,
+    role: "프론트엔드 개발자",
+    isBookmarked: true,
+    matchPercent: 70,
+    matchIconSrc: ic_star_green_18,
+    locationMeta: "서울 마포구ㆍ신입 이상ㆍ대졸 이상",
+    employmentMeta: "정규직ㆍ계약직",
+    deadline: "~2025.08.31(일)",
+    badges: [
+      { text: "재택근무ㆍ유연근무제", iconSrc: ic_seed_16 },
+      { text: "인기있는ㆍ마감임박", iconSrc: ic_fire_16 },
+    ],
+  },
+  {
+    id: 102,
+    logoSrc: test_company_logo,
+    company: "에이프로소프트",
+    sourceLogoSrc: ic_saramin_18,
+    role: "프론트엔드 엔지니어",
+    isBookmarked: false,
+    matchPercent: 84,
+    matchIconSrc: ic_star_green_18,
+    locationMeta: "서울 서초구ㆍ1~3년ㆍ학력무관",
+    employmentMeta: "정규직",
+    deadline: "~2025.09.10(수)",
+    badges: [
+      { text: "재택 선택 가능", iconSrc: ic_seed_16 },
+      { text: "마감임박", iconSrc: ic_fire_16 },
+    ],
+  },
+  {
+    id: 103,
+    logoSrc: test_company_logo,
+    company: "넥스트랩",
+    sourceLogoSrc: ic_saramin_18,
+    role: "웹 프론트엔드",
+    isBookmarked: false,
+    matchPercent: 77,
+    matchIconSrc: ic_star_green_18,
+    locationMeta: "경기 성남시ㆍ신입~3년ㆍ대졸",
+    employmentMeta: "정규직",
+    deadline: "~2025.09.25(목)",
+    badges: [{ text: "리액트ㆍ타입스크립트", iconSrc: ic_seed_16 }],
+  },
+  {
+    id: 104,
+    logoSrc: test_company_logo,
+    company: "브라이트테크",
+    sourceLogoSrc: ic_saramin_18,
+    role: "UI 개발자",
+    isBookmarked: true,
+    matchPercent: 81,
+    matchIconSrc: ic_star_green_18,
+    locationMeta: "서울 강남구ㆍ3~5년ㆍ학력무관",
+    employmentMeta: "정규직",
+    deadline: "~2025.10.02(목)",
+    badges: [{ text: "디자인 협업 우대", iconSrc: ic_seed_16 }],
+  },
+  {
+    id: 105,
+    logoSrc: test_company_logo,
+    company: "에버소스",
+    sourceLogoSrc: ic_saramin_18,
+    role: "프론트엔드(React)",
+    isBookmarked: false,
+    matchPercent: 73,
+    matchIconSrc: ic_star_green_18,
+    locationMeta: "부산 해운대구ㆍ신입~2년ㆍ학력무관",
+    employmentMeta: "계약직",
+    deadline: "~2025.10.15(수)",
+    badges: [{ text: "원격 근무 가능", iconSrc: ic_seed_16 }],
+  },
+];
+
+type TabKey = "overview" | "detail" | "match";
 
 export default function MockAnalysisPage() {
-  // 하드코딩 데이터
-  const score = 10;
-  const totalCandidates = 171;
-  const percentile = 10;
-  const fit = 80;
+  const [activeTab, setActiveTab] = useState<TabKey>("overview");
+  const [jobs, setJobs] = useState(mockJobs);
 
-  const bucketLabels: (string | string[])[] = [
-    ["0", "~9"],
-    ["10", "~19"],
-    ["20", "~35"],
-    ["36", "~45"],
-    ["46", "~59"],
-    ["60", "~75"],
-    ["76", "~85"],
-    ["86", "~93"],
-    ["94", "~100"],
-  ];
+  const handleTabClick = (key: TabKey) => setActiveTab(key);
+
+  const handleToggleFavorite = (id: number | string, nextValue?: boolean) => {
+    setJobs(prev =>
+      prev.map(j =>
+        j.id === id ? { ...j, isBookmarked: nextValue ?? !j.isBookmarked } : j
+      )
+    );
+  };
 
   return (
     <div className="mock-analysis">
-     <div className="mock-analysis__inner">
-        <div className="mock-analysis__header">
-        <div className="mock-analysis__title">분석결과
-        <div className="mock-analysis__title-meta">
-            <span className="mock-analysis__title-date">2025.01.01 00:00</span>
-            <span className="mock-analysis__title-status mock-analysis__title-status--done">진행 완료</span>
+      <div className="mock-analysis__inner">
+        <MockAnalysisHeader
+          title="분석결과"
+          date="2025.01.01 00:00"
+          status="진행 완료"
+          metaRows={[
+            [
+              { key: "이름", value: "홍길동" },
+              { key: "아이디", value: "abc" },
+            ],
+            [
+              { key: "희망직무", value: "개발자" },
+              { key: "선택 이력서", value: "성장하는 개발자" },
+            ],
+            [
+              { key: "신뢰도", value: "중" },
+              { key: "면접시간", value: "12분" },
+            ],
+          ]}
+        />
+
+        <div className="mock-analysis-tabs default_tabs">
+          <span
+            className={`mock-analysis-tabs__item tab ${activeTab === "overview" ? "on" : ""}`}
+            role="button"
+            tabIndex={0}
+            onClick={() => handleTabClick("overview")}
+          >
+            종합분석탭
+          </span>
+          <span
+            className={`mock-analysis-tabs__item tab ${activeTab === "detail" ? "on" : ""}`}
+            role="button"
+            tabIndex={0}
+            onClick={() => handleTabClick("detail")}
+          >
+            상세분석 탭
+          </span>
+          <span
+            className={`mock-analysis-tabs__item tab ${activeTab === "match" ? "on" : ""}`}
+            role="button"
+            tabIndex={0}
+            onClick={() => handleTabClick("match")}
+          >
+            이력서−면접 일치도 분석
+          </span>
         </div>
-        </div>
-        <div className="mock-analysis__meta">
-            <div className="mock-analysis__meta-row">
-                <div className="mock-analysis__meta-item">
-                <span className="mock-analysis__meta-key">이름</span>
-                <span className="mock-analysis__meta-value">홍길동</span>
-                </div>
-                <div className="mock-analysis__meta-item">
-                <span className="mock-analysis__meta-key">아이디</span>
-                <span className="mock-analysis__meta-value">abc</span>
-                </div>
-            </div>
-
-            <div className="mock-analysis__meta-row">
-                <div className="mock-analysis__meta-item">
-                <span className="mock-analysis__meta-key">희망직무</span>
-                <span className="mock-analysis__meta-value">개발자</span>
-                </div>
-                <div className="mock-analysis__meta-item">
-                <span className="mock-analysis__meta-key">선택 이력서</span>
-                <span className="mock-analysis__meta-value">성장하는 개발자</span>
-                </div>
-            </div>
-
-            <div className="mock-analysis__meta-row">
-                <div className="mock-analysis__meta-item">
-                <span className="mock-analysis__meta-key">신뢰도</span>
-                <span className="mock-analysis__meta-value">중</span>
-                </div>
-                <div className="mock-analysis__meta-item">
-                <span className="mock-analysis__meta-key">면접시간</span>
-                <span className="mock-analysis__meta-value">12분</span>
-                </div>
-            </div>
-            </div>
-
-
       </div>
 
-      <div className="mock-analysis-tabs default_tabs">
-        <span className="mock-analysis-tabs__item tab on">종합분석탭</span>
-        <span className="mock-analysis-tabs__item tab">상세분석 탭</span>
-        <span className="mock-analysis-tabs__item tab">이력서−면접 일치도 분석</span>
-      </div>
-        </div>
-    
-         <div className="mock-analysis-panel mock-analysis-report">
+      <div className="mock-analysis-panel mock-analysis-report">
         <div className="mock-analysis-report__container">
-            <div className="mock-analysis-report__inner">
+          <div className="mock-analysis-report__inner">
             <span className="mock-analysis-report__icon-btn" role="button" aria-label="리포트 인쇄">
-                <img className="mock-analysis-report__icon" src={ic_print_gray900_24} alt="" />
-                </span>
-            <div className="mock-analysis-report__content">
-                <div className="mock-analysis-overview__kpi">
-                <KpiOverview
-                    score={score}
-                    totalCandidates={totalCandidates}
-                    percentile={percentile}
-                />
-                <MockAnalysisKpiFit
-                    value={fit}
-                    headIconSrc={ic_magnifier_24}
-                    noteIconSrc={ic_error_gray500_20}
-                    description="응답은 직무 핵심 키워드와 역할을 잘 반영해 이력서와 높은 일치도를 보였습니다. 이력서에서 강조한 프로젝트 경험과 협업 역량도 답변에 드러났으나, 정량적 성과와 최신 기술 활용 사례는 충분히 연결되지 않아 구체성과 최신성이 다소 부족했습니다."
-                    />  
-                 </div>
-            <ScoreDistributionSection
-                title="종합 점수 분포"
-                titleIconSrc={ic_bar_chart_24}
-                labels={bucketLabels}
-                max={100}
-                badgeIconSrc={ic_flag_green_24}
-                left={{
-                  role: "개발직군",
-                  rankText: "응시자 2,851명 중 7위",
-                  badgeText: "상위 10%",
-                  values: [50, 30, 20, 60, 92, 80, 70, 100, 50],
-                  highlightScore: 38,
+              <img className="mock-analysis-report__icon" src={ic_print_gray900_24} alt="" />
+            </span>
+
+            {activeTab === "overview" && (
+              <OverviewPage
+                score={10}
+                totalCandidates={171}
+                percentile={10}
+                fit={80}
+                jobs={jobs}
+                onToggleFavorite={handleToggleFavorite}
+                scoreSection={{
+                  labels: [
+                    ["0", "~9"],
+                    ["10", "~19"],
+                    ["20", "~35"],
+                    ["36", "~45"],
+                    ["46", "~59"],
+                    ["60", "~75"],
+                    ["76", "~85"],
+                    ["86", "~93"],
+                    ["94", "~100"],
+                  ],
+                  max: 100,
+                  left: {
+                    role: "개발직군",
+                    rankText: "응시자 2,851명 중 7위",
+                    badgeText: "상위 10%",
+                    values: [50, 30, 20, 60, 92, 80, 70, 100, 50],
+                    highlightScore: 38,
+                  },
+                  right: {
+                    role: "프론트엔드 직무",
+                    rankText: "응시자 267명 중 17위",
+                    badgeText: "상위 10%",
+                    values: [50, 30, 20, 60, 92, 80, 70, 100, 50],
+                    highlightScore: 48,
+                  },
                 }}
-                right={{
-                  role: "프론트엔드 직무",
-                  rankText: "응시자 267명 중 17위",
-                  badgeText: "상위 10%",
-                  values: [50, 30, 20, 60, 92, 80, 70, 100, 50],
-                  highlightScore: 48,
+                categorySummary={{
+                  left: {
+                    scoreTitle: "홍길동님의 점수(차트 수정필요)",
+                    scores: { attitude: 50, voice: 20, tension: 30, competence: 40 },
+                    RadarChartComponent: KpiRadarChart,
+                  },
+                  right: {
+                    items: [
+                      {
+                        label: "역량",
+                        gradeText: "최우수",
+                        gradeTone: "excellent",
+                        description:
+                          "면접 과정에서 보인 의사소통능력과 문제해결능력은 매우 우수한 것으로 평가됩니다. 잘 이해하고 뛰어난 의사소통 기술을 보였으며, 문제의 핵심을 파악하고 해결책을 제시하는 등 전화 상담원으로서의 역량이 뛰어나다고 판단됩니다.",
+                      },
+                      {
+                        label: "태도",
+                        gradeText: "우수",
+                        gradeTone: "good",
+                        description:
+                          "면접 과정에서 보인 의사소통능력과 문제해결능력은 매우 우수한 것으로 평가됩니다. 잘 이해하고 뛰어난 의사소통 기술을 보였으며, 문제의 핵심을 파악하고 해결책을 제시하는 등 전화 상담원으로서의 역량이 뛰어나다고 판단됩니다.",
+                      },
+                      {
+                        label: "목소리",
+                        gradeText: "보통",
+                        gradeTone: "fair",
+                        description:
+                          "면접 과정에서 보인 의사소통능력과 문제해결능력은 매우 우수한 것으로 평가됩니다. 잘 이해하고 뛰어난 의사소통 기술을 보였으며, 문제의 핵심을 파악하고 해결책을 제시하는 등 전화 상담원으로서의 역량이 뛰어나다고 판단됩니다.",
+                      },
+                      {
+                        label: "긴장도",
+                        gradeText: "보통",
+                        gradeTone: "improvement",
+                        description:
+                          "면접 과정에서 보인 의사소통능력과 문제해결능력은 매우 우수한 것으로 평가됩니다. 잘 이해하고 뛰어난 의사소통 기술을 보였으며, 문제의 핵심을 파악하고 해결책을 제시하는 등 전화 상담원으로서의 역량이 뛰어나다고 판단됩니다.",
+                      },
+                    ],
+                  },
+                }}
+                aiSummary={{
+                  strength: {
+                    iconSrc: ic_strength_circle_24,
+                    label: "강점",
+                    tags: ["효과적 의견 교환", "타인에 대한 신뢰"],
+                    description:
+                      "홍길동님의 강점으로 두드러지는 점은 효과적인 의견 교환과 타인에 대한 신뢰입니다.",
+                  },
+                  weakness: {
+                    iconSrc: ic_weakness_circle_24,
+                    label: "약점",
+                    tags: ["의사소통 기술 활용", "타인 이해"],
+                    description:
+                      "홍길동님은 효과적 의견교환 및 타인에 대한 신뢰가 다소 부족합니다.",
+                  },
                 }}
               />
+            )}
 
-            <div className="analysis-section mock-analysis-overview__category-summary">
-            <span className="analysis-section__title">
-            <img src={ic_clipboard_24} alt="" /> 항목별 종합 평가 섹션 </span>
-             <div className="analysis-section__body">
-                <div className="analysis-section__left">
-                  <span>홍길동님의 점수(수정필요)</span>  
-                    <KpiRadarChart
-                        attitude={50} //태도:100
-                        voice={20}  //목소리50
-                        tension={30}  //긴장도30
-                        competence={40}  // 왼 여량40
-                        />
-                    </div>
-                    <div className="analysis-section__right">
-                    <div className="analysis-eval-item">
-                        <div className="analysis-eval-item__header">
-                        <span className="analysis-eval-item__label">역량</span>
-                        <span className="analysis-eval-item__grade excellent">최우수</span>
-                        </div>
-                        <p className="analysis-eval-item__description">
-                        면접 과정에서 보인 의사소통능력과 문제해결능력은 매우 우수한 것으로 평가됩니다.
-                        잘 이해하고 뛰어난 의사소통 기술을 보였으며, 문제의 핵심을 파악하고 해결책을
-                        제시하는 등 전화 상담원으로서의 역량이 뛰어나다고 판단됩니다.
-                        </p>
-                    </div>
+            {activeTab === "detail" && (
+              <DetailPage
+              score={10}
+              />
+            )}
 
-                    <div className="analysis-eval-item">
-                        <div className="analysis-eval-item__header">
-                        <span className="analysis-eval-item__label">태도</span>
-                        <span className="analysis-eval-item__grade good">우수</span>
-                        </div>
-                        <p className="analysis-eval-item__description">
-                        면접 과정에서 보인 의사소통능력과 문제해결능력은 매우 우수한 것으로 평가됩니다.
-                        잘 이해하고 뛰어난 의사소통 기술을 보였으며, 문제의 핵심을 파악하고 해결책을
-                        제시하는 등 전화 상담원으로서의 역량이 뛰어나다고 판단됩니다.
-                        </p>
-                    </div>
-
-                    <div className="analysis-eval-item">
-                        <div className="analysis-eval-item__header">
-                        <span className="analysis-eval-item__label">목소리</span>
-                        <span className="analysis-eval-item__grade fair">보통</span>
-                        </div>
-                        <p className="analysis-eval-item__description">
-                        면접 과정에서 보인 의사소통능력과 문제해결능력은 매우 우수한 것으로 평가됩니다.
-                        잘 이해하고 뛰어난 의사소통 기술을 보였으며, 문제의 핵심을 파악하고 해결책을
-                        제시하는 등 전화 상담원으로서의 역량이 뛰어나다고 판단됩니다.
-                        </p>
-                    </div>
-
-                    <div className="analysis-eval-item">
-                        <div className="analysis-eval-item__header">
-                        <span className="analysis-eval-item__label">긴장도</span>
-                        <span className="analysis-eval-item__grade improvement">보통</span>
-                        </div>
-                        <p className="analysis-eval-item__description">
-                        면접 과정에서 보인 의사소통능력과 문제해결능력은 매우 우수한 것으로 평가됩니다.
-                        잘 이해하고 뛰어난 의사소통 기술을 보였으며, 문제의 핵심을 파악하고 해결책을
-                        제시하는 등 전화 상담원으로서의 역량이 뛰어나다고 판단됩니다.
-                        </p>
-                    </div>
-                    </div>
-
-             </div>   
-             </div>
-            <div className="analysis-section mock-analysis-overview__ai-summary">
-            <span className="analysis-section__title">
-            <img src={ic_laptop_24} alt="" />
-                AI 분석 요약 섹션 </span>
-           </div>
-            <div className="analysis-section mock-analysis-overview__recommended-jobs">
-            <span className="analysis-section__title">
-            <img src={ic_rocket_24} alt="" />
-                가장 잘 맞는 공고 섹션 </span>
+            {activeTab === "match" && (
+              <div className="mock-analysis-report__content">
+                <div className="analysis-section">
+                  <span className="analysis-section__title">이력서·면접 일치도 탭</span>
+                  <div className="analysis-section__body">
+                    <div className="analysis-section__left">키워드 매칭</div>
+                    <div className="analysis-section__right">개선 제안</div>
+                  </div>
+                </div>
               </div>
+            )}
 
-            </div>
-            </div>
-            <div className="bottom_btn_wrap mock-analysis-report__actions">
-            <span className="default_btn_white mock-analysis-report__btn mock-analysis-report__btn--list">
+            <div className="btn_wrap mock-analysis-report__actions">
+              <span className="default_btn_white">
                 <img className="mock-analysis-report__btn-icon" src={ic_arrow_left_gray900_20} alt="" />
                 목록으로
-            </span>
-            <span className="default_btn_black mock-analysis-report__btn mock-analysis-report__btn--redo">
+              </span>
+              <span className="default_btn_black">
                 <img className="mock-analysis-report__btn-icon" src={ic_star_white_20} alt="" />
                 모의면접 다시 보기
-            </span>
+              </span>
             </div>
+          </div>
         </div>
-        </div>
-
-
+      </div>
     </div>
   );
 }

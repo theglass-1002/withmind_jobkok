@@ -135,6 +135,7 @@ export default function KpiGaugeChart({
 
   const options = useMemo(
     () => ({
+      animation: false, 
       responsive: true,
       maintainAspectRatio: false,
       indexAxis: "y" as const,

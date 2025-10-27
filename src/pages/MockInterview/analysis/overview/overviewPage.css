@@ -1,0 +1,684 @@
+
+
+.mock-analysis-overview__kpi{
+    display: flex;
+    gap: 24px;
+    align-self: stretch;
+}
+.mock-analysis-overview__kpi-title{
+    display: flex;
+    flex: 2;
+    padding: 28px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 24px;
+    border-radius: 6px;
+}
+
+.mock-analysis-overview__kpi-fit{
+    display: flex;
+    flex: 1;
+    padding: 28px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 24px;
+    border-radius: 6px;
+    border: 1px solid var(--gray-300, #E0E2E4);
+    background: var(--white-100, #FFF);
+}
+
+
+.mock-analysis-overview__kpi-title.excellent { background: var(--primary-primary, #816BFE); }
+.mock-analysis-overview__kpi-title.good { background: var(--report-blue-100, #26A4FF); }
+.mock-analysis-overview__kpi-title.fair { background: var(--report-amber-100, #15D078); }
+.mock-analysis-overview__kpi-title.improvement { background: var(--report-orange-100, #FF972F); }
+.mock-analysis-overview__kpi-title.poor { background: var(--report-red-100, #FF524C); }
+
+.mock-analysis-overview__kpi-head{
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    align-self: stretch;
+    overflow: visible;
+}
+
+.mock-analysis-overview__kpi-headline{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--white-100, #FFF);
+    font-family: Pretendard;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 24px; /* 120% */
+}
+
+
+/* 기존 코드 유지 */
+.mock-analysis .mock-analysis-overview__kpi-help {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+  }
+  
+  /* 툴팁 상자 기본 스타일(공통 CSS 안 건드리고 여기서만) */
+  .mock-analysis .mock-analysis-overview__kpi-help .tooltip__content {
+    display: flex;
+    width: 500px;
+    flex-direction: column;
+    align-items: flex-start;
+    position: absolute;
+    z-index: 2;
+    top: 30px;
+    left: -50px; 
+    padding: 20px 20px 16px 20px;
+    gap: 8px;
+    align-self: stretch;
+    border-radius: 4px;
+    background: var(--gray-900, #2A2D2F);
+    opacity: 0;
+    visibility: visible;
+    transform: translateY(4px);
+    transition: opacity .15s ease, transform .15s ease, visibility .15s;
+    pointer-events: none;   
+  
+  }
+  
+  /* 호버/포커스 시 보이기 */
+  .mock-analysis .mock-analysis-overview__kpi-help:hover .tooltip__content,
+  .mock-analysis .mock-analysis-overview__kpi-help:focus-within .tooltip__content {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+  
+  /* ── 방향/꼬리: 트리거에 tooltip--top 이 있을 때만 적용 */
+  .mock-analysis .mock-analysis-overview__kpi-help.tooltip--top > .tooltip__content {
+    top: calc(100% + 8px);
+    right: 0;
+  }
+  
+  /* 꼬리(삼각형) */
+  .mock-analysis .tooltip__content::after {
+    content: "";
+    position: absolute;
+    top: -8px;        
+    left: 50px;          
+    border-style: solid;
+    border-width: 0 8px 10px 8px;                
+    border-color: transparent transparent #2A2D2F transparent; 
+  }
+  
+
+  
+  .mock-analysis-overview__kpi-desc{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    align-self: stretch;
+    color: var(--white-100, #FFF);
+    font-family: Pretendard;
+    font-size: 44px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 54px; /* 122.727% */
+  }
+
+  .mock-analysis-overview__kpi-desc-lead{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--white-100, #FFF);
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 180%; /* 28.8px */
+  }
+
+  .mock-analysis-overview__percent{
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    overflow: hidden;
+    color: #F9FF41;
+    text-overflow: ellipsis;
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 180%; /* 28.8px */
+  }
+
+  .mock-analysis-overview__kpi-desc-text{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    align-self: stretch;
+    color: var(--white-100, #FFF);
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 180%; /* 28.8px */
+  }
+
+  .mock-analysis-overview__kpi-chart{
+    display: flex;
+    padding: 24px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    align-self: stretch;
+    border-radius: 4px;
+background: var(--white-12, rgba(255, 255, 255, 0.12));
+  }
+
+  .kpi-chart__score{
+    display: flex;
+    padding: 0 136px 0 443px;
+    justify-content: flex-end;
+    align-items: center;
+    align-self: stretch;
+  }
+
+  .kpi-chart__score-value{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 100px;
+    display: flex;
+    padding: 4px 8px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    background: var(--white-100, #FFF);
+  }
+
+  .kpi-chart__gauge{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    align-self: stretch;
+  }
+
+  .kpi-chart__bars{
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    align-self: stretch;
+  }
+
+  .kpi-chart__bar{
+    width: 124px;
+    height: 24px;
+    background-color: var(--white-40, rgba(255, 255, 255, 0.40));
+  }
+
+  .kpi-chart__bar-cap{
+    display: flex;
+    width: 124px;
+    height: 24px;
+    flex-shrink: 0;
+    background-color: var(--white-80, rgba(255, 255, 255, 0.80));
+  }
+
+  .kpi-chart__bar-cap--half{
+    width: 90px;
+    height: 24px;
+    flex-shrink: 0;
+    background-color: var(--white-80, rgba(255, 255, 255, 0.80));
+    
+  }
+
+  .kpi-chart__scale{
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    align-self: stretch;
+  }
+
+  .kpi-chart__scale-item{
+    display: flex;
+    flex: 1;
+    justify-content: center;
+    color: var(--white-80, rgba(255, 255, 255, 0.80));
+    text-align: center;
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; /* 125% */
+  }
+
+  .kpi-fit__head{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .kpi-fit__head-title{
+    color: var(--gray-900, #2A2D2F);
+    font-family: Pretendard;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 24px; /* 120% */
+  }
+
+  .kpi-fit__content{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    align-self: stretch;
+  }
+
+  .kpi-fit__note{
+    display: flex;
+    padding: 16px;
+    align-items: flex-start;
+    gap: 8px;
+    align-self: stretch;
+    border-radius: 4px;
+    background: var(--gray-50, #F8F8F9);
+    color: var(--gray-700, #6F767E);
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; /* 125% */  
+}
+
+  .kpi-fit__meter{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    align-self: stretch;
+  }
+
+  .kpi-fit__percent{
+    color: var(--gray-900, #2A2D2F);
+    font-family: Pretendard;
+    font-size: 44px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 54px; /* 122.727% */
+  }
+
+  .kpi-fit__desc{
+    color: var(--gray-900, #2A2D2F);
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 180%; /* 28.8px */
+  }
+
+  .kpi-fit__bar {
+    display: block;
+    height: 34px;
+    width: 100%;
+
+  }
+  
+  .kpi-fit__bar canvas {
+    height: 100% !important;
+    width: 100% !important;
+    display: block;
+  }
+
+  .kpi-fit__meta{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    align-self: stretch;
+    color: var(--gray-700, #6F767E);
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; /* 125% */
+  }
+
+  /* mock-analysis-overview__score-distribution */
+
+
+  .analysis-section{
+    display: flex;
+    padding: 28px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 24px;
+    align-self: stretch;
+    border-radius: 6px;
+    border: 1px solid var(--gray-300, #E0E2E4);
+    background: var(--white-100, #FFF);
+  }
+
+  .analysis-section__title{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--gray-900, #2A2D2F);
+    font-family: Pretendard;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 24px; /* 120% */
+  }
+
+  .analysis-section__body{
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    align-self: stretch;
+    height: 100%;
+    gap: 24px;
+  }
+
+  .analysis-section__left,
+  .analysis-section__right
+  {
+    display: flex;
+    flex: 1;
+    height: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    border-radius: 4px;
+    border: 1px solid var(--gray-300, #E0E2E4);
+    background: var(--white-100, #FFF);
+  }
+  
+  .mock-analysis-overview__score-distribution .analysis-section__left,
+  .mock-analysis-overview__score-distribution .analysis-section__right{
+  padding: 28px;
+  }
+
+  .mock-analysis-overview__category-summary .analysis-section__left,
+  .mock-analysis-overview__category-summary .analysis-section__right{
+    padding: 0px;
+    border: none;;
+    width: 100%;
+    height: 100%;
+    justify-content: space-between;
+  }
+
+  .mock-analysis-overview__category-summary .analysis-section__body{
+    height: 780px;
+  }
+
+
+  .mock-analysis-overview__category-summary .analysis-section__left{
+    border-radius: 4px;
+    border: 1px solid var(--gray-300, #E0E2E4);
+    background: var(--white-100, #FFF);
+  }
+
+  
+
+ .analysis-section__stat{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+ }
+
+  .analysis-section__stat-head{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    align-self: stretch;
+  }
+
+  .analysis-section__stat-role{
+    color: var(--gray-900, #2A2D2F);
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 20px; /* 125% */
+  }
+
+  .analysis-section__stat-rank{
+    color: var(--gray-700, #6F767E);
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; /* 125% */
+  }
+
+  .analysis-badge{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: Pretendard;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 24px; /* 120% */
+    background: var(--ai-100, linear-gradient(90deg, #15D078 0%, #4BD1C8 100%));
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  
+  
+.analysis-eval-item{
+  display: flex;
+  padding: 28px 28px 24px 28px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  align-self: stretch;
+  border-radius: 4px;
+  border: 1px solid var(--gray-300, #E0E2E4);
+  background: var(--white-100, #FFF);
+}
+
+.analysis-eval-item__header{
+  display: flex;
+  height: 24px;
+  align-items: center;
+  gap: 12px;
+}
+
+.analysis-eval-item__label{
+  color: var(--gray-900, #2A2D2F);
+  font-family: Pretendard;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 24px; /* 120% */
+}
+  
+.analysis-eval-item__grade{
+  display: flex;
+  padding: 4px 8px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  border-radius: 4px;
+  text-align: right;
+  font-family: Pretendard;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 20px; /* 125% */
+}
+
+.analysis-eval-item__grade.excellent
+{
+  color: var(--primary-primary, #816BFE);
+  border-radius: 4px;
+background: var(--primary-12, rgba(129, 107, 254, 0.12));
+}
+.analysis-eval-item__grade.good{ 
+  color: var(--report-blue-100, #26A4FF);
+  background: var(--report-blue-12, rgba(38, 164, 255, 0.12));
+}
+.analysis-eval-item__grade.fair{ 
+  color: var(--report-green-100, #15D078);
+  background: var(--report-green-12, rgba(21, 208, 120, 0.12));
+}
+.analysis-eval-item__grade.improvement{
+  color: var(--report-orange-100, #FF972F);
+  background: var(--report-orange-12, #FF972F);
+ }
+.analysis-eval-item__grade.poor{
+  color: var(--report-red-100, #FF524C);
+  background: var(--report-red-12, rgba(255, 82, 76, 0.12));
+ }
+
+ .analysis-eval-item__description{
+  color: var(--gray-700, #6F767E);
+  font-family: Pretendard;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 170%; /* 28.8px */
+ }
+ 
+ .analysis-score-title{
+  color: var(--gray-900, #2A2D2F);
+  font-family: Pretendard;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 24px;
+  padding-left: 28px;
+  padding-top: 28px;
+ }
+
+ .kpi-radar{
+  width: 100%;
+  height: 100%;
+ }
+
+ .kpi-radar canvas{
+  width: 500px;
+  height: 520px;
+  flex-shrink: 0;
+ }
+
+ /* mock-analysis-overview__ai-summary */
+
+/* 공통 헤드 */
+
+.mock-analysis-overview__ai-summary .analysis-section__left,
+.mock-analysis-overview__ai-summary .analysis-section__right
+{height: 400px;
+}
+
+.analysis-strength__head,
+.analysis-weakness__head {
+  display: flex;
+  padding: 28px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+  align-self: stretch;
+}
+
+/* 라벨 */
+.analysis-strength__label,
+.analysis-weakness__label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--gray-900, #2A2D2F);
+  font-family: Pretendard;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 24px; /* 120% */
+}
+
+/* 태그 컨테이너 */
+.analysis-strength__tags,
+.analysis-weakness__tags {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  align-self: stretch;
+}
+
+/* 태그(공통) */
+.analysis-tag {
+  display: flex;
+  padding: 8px 12px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  border-radius: 4px;
+}
+
+/* 태그(변형) */
+.analysis-tag--strength {
+  background: var(--report-blue-gradient, linear-gradient(90deg, #26A4FF 0%, rgba(38, 164, 255, 0.60) 100%));
+}
+.analysis-tag--weakness {
+  background: var(--report-red-gradient, linear-gradient(90deg, #FF524C 0%, rgba(255, 82, 76, 0.60) 100%));
+}
+
+/* 설명 */
+.analysis-strength__description,
+.analysis-weakness__description {
+  display: flex;
+  padding: 28px;
+  height: 100%;
+  align-items: flex-start;
+  gap: 10px;
+  align-self: stretch;
+  border-top: 1px solid var(--gray-300, #E0E2E4);
+  border-radius: 0px 0px 4px 4px;
+  background: var(--gray-50, #F8F8F9);
+  color: var(--gray-900, #2A2D2F);
+  font-family: Pretendard;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 180%; /* 28.8px */
+  
+}
+
+/* 
+mock-analysis-overview__recommended-jobs */
+
+.mock-analysis-overview__recommended-jobs .analysis-section__body{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  align-self: stretch;
+}
+
+.analysis-resume-recommended-jobs{
+  display: flex;
+  align-items: flex-start;
+  align-content: flex-start;
+  gap: 20px;
+  align-self: stretch;
+  flex-wrap: wrap;
+}
+
+.analysis-resume-recommended-jobs__item{
+  /* display: flex;
+  flex: 1;
+  padding: 20px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+  border-radius: 4px;
+  border: 1px solid var(--gray-300, #E0E2E4);
+  background: var(--white-100, #FFF); */
+}
+

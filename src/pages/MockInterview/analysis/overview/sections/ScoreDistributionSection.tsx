@@ -1,6 +1,6 @@
 // src/pages/MockInterview/my-report/part/ScoreDistributionSection.tsx
 import React from "react";
-import ScoreDistributionChart from "./ScoreDistributionChart";
+import ScoreDistributionChart from "@/pages/MockInterview/analysis/chart/ScoreDistributionChart";
 
 type SideProps = {
   role: string;

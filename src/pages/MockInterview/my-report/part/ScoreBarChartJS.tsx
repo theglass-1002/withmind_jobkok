@@ -133,6 +133,7 @@ export default function ScoreBarChartJS({
 
   const options = useMemo(
     () => ({
+      animation: false, 
       responsive: true,
       maintainAspectRatio: false,
       indexAxis: "y" as const,
@@ -147,7 +148,6 @@ export default function ScoreBarChartJS({
         y: { display: false, offset: false, grid: { display: false, drawBorder: false }, ticks: { display: false } },
         x: { min: 0, max, grid: { display: false, drawBorder: false }, ticks: { display: false }, display: false },
       },
-      animation: false,
     }),
     [score, average, max, opacity, radius, lineWidth]
   );

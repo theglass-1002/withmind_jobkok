@@ -194,6 +194,7 @@ export default function ScoreTrendBarChart({
 
   const options = useMemo(
     () => ({
+      animation: false, 
       maintainAspectRatio: false,
       responsive: true,
       elements: { bar: { borderWidth: 0 } },
@@ -232,7 +233,6 @@ export default function ScoreTrendBarChart({
           },
         }),
       } as any,
-      animation: { duration: 400, easing: "easeOutQuad" },
     }),
     [
       max,

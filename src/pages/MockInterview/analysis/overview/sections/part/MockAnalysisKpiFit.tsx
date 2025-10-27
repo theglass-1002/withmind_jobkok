@@ -1,6 +1,6 @@
 // src/pages/MockInterview/analysis/components/MockAnalysisKpiFit.tsx
 import React, { useMemo } from "react";
-import KpiFitBar from "./KpiFitBar";
+import KpiFitBar from "@/pages/MockInterview/analysis/chart/KpiFitBar";
 
 type Props = {
   /** 0~100 */

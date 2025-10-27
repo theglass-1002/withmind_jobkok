@@ -73,6 +73,7 @@ export default function KpiFitBar({ value, className, style }: Props) {
 
   const options = useMemo(
     () => ({
+      animation: false, 
       indexAxis: "y" as const,
       responsive: true,
       maintainAspectRatio: false,
@@ -95,7 +96,7 @@ export default function KpiFitBar({ value, className, style }: Props) {
           border: { display: false },
         },
       },
-      animation: { duration: 0, easing: "easeOutCubic" },
+    
     }),
     []
   );

@@ -42,7 +42,7 @@ const radarVertexLabels: Plugin<"radar"> = {
 //    const values: number[] = [...((chart.data.datasets?.[0]?.data as number[]) ?? [])].reverse();
 
     const values: number[] = (chart.data.datasets?.[0]?.data as number[]) ?? [];
-    console.log(values);
+   
     if (!scale || !labels?.length) return;
 
     const ctx = chart.ctx as CanvasRenderingContext2D;
@@ -153,9 +153,10 @@ export default function KpiRadarChart({
 
   const options = useMemo(
     () => ({
+      animation: false, 
       responsive: true,
       maintainAspectRatio: false,
-      layout: { padding: { top: 0, right: 70, bottom: 0, left: 60 } },
+      layout: { padding: { top: 0, right: 80, bottom: 0, left: 80 } },
       plugins: {
         legend: { display: false },
         tooltip: { callbacks: { label: (ctx: any) => ` ${ctx.formattedValue}점` } },
@@ -180,13 +181,15 @@ export default function KpiRadarChart({
         },
       },
       elements: { line: { tension: 0 } },
-      animation: { duration: 0, easing: "easeOutQuad" },
+    
     }),
     []
   );
 
   return (
-    <div className={`kpi-radar ${className ?? ""}`}>
+    <div className={`kpi-radar${className ?? ""}`}
+    style={{ height: "100%" }}
+    >
       <Radar data={data} options={options} plugins={[radarVertexLabels]} />
     </div>
   );

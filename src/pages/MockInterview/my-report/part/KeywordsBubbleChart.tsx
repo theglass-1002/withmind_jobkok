@@ -123,6 +123,7 @@ export default function KeywordsBubbleChart({
 
   const options = useMemo(
     () => ({
+      animation: false, 
       responsive: true,
       maintainAspectRatio: false,
       elements: {

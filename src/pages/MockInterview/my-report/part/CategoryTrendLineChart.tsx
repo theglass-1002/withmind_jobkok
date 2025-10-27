@@ -140,6 +140,7 @@ export default function CategoryTrendLineChart({
 
   const options = useMemo(
     () => ({
+      animation: false, 
       maintainAspectRatio: false,
       responsive: true,
       layout: {
@@ -178,7 +179,7 @@ export default function CategoryTrendLineChart({
         },
       },
       elements: { line: { tension } },
-      animation: { duration: 300, easing: "easeOutQuad" },
+
     }),
     [tickColor, gridColor, tension]
   );
