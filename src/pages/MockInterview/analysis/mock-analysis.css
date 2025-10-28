@@ -132,6 +132,8 @@ gap: 40px;
 
 .mock-analysis-tabs .mock-analysis-tabs__item{
     display: flex;
+    width: auto;
+    font-size: 18px;
     padding-bottom: 24px;
     justify-content: center;
     align-items: center;
@@ -140,6 +142,8 @@ gap: 40px;
 
 .mock-analysis-tabs .mock-analysis-tabs__item.on{
     display: flex;
+    width: auto;
+    font-size: 18px;
     padding-bottom: 24px;
     justify-content: center;
     align-items: center;

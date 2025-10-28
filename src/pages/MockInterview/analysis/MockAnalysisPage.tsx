@@ -104,7 +104,7 @@ type TabKey = "overview" | "detail" | "match";
 export default function MockAnalysisPage() {
   const [activeTab, setActiveTab] = useState<TabKey>("overview");
   const [jobs, setJobs] = useState(mockJobs);
-
+  const score = 40;
   const handleTabClick = (key: TabKey) => setActiveTab(key);
 
   const handleToggleFavorite = (id: number | string, nextValue?: boolean) => {
@@ -145,7 +145,7 @@ export default function MockAnalysisPage() {
             tabIndex={0}
             onClick={() => handleTabClick("overview")}
           >
-            종합분석탭
+            종합 분석
           </span>
           <span
             className={`mock-analysis-tabs__item tab ${activeTab === "detail" ? "on" : ""}`}
@@ -153,7 +153,7 @@ export default function MockAnalysisPage() {
             tabIndex={0}
             onClick={() => handleTabClick("detail")}
           >
-            상세분석 탭
+            상세 분석
           </span>
           <span
             className={`mock-analysis-tabs__item tab ${activeTab === "match" ? "on" : ""}`}
@@ -161,7 +161,7 @@ export default function MockAnalysisPage() {
             tabIndex={0}
             onClick={() => handleTabClick("match")}
           >
-            이력서−면접 일치도 분석
+           이력서−면접 일치도 분석
           </span>
         </div>
       </div>
@@ -175,7 +175,7 @@ export default function MockAnalysisPage() {
 
             {activeTab === "overview" && (
               <OverviewPage
-                score={10}
+                score={score}
                 totalCandidates={171}
                 percentile={10}
                 fit={80}
@@ -269,7 +269,7 @@ export default function MockAnalysisPage() {
 
             {activeTab === "detail" && (
               <DetailPage
-              score={10}
+              score={score}
               />
             )}
 

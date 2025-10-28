@@ -531,7 +531,7 @@ background: var(--primary-12, rgba(129, 107, 254, 0.12));
 }
 .analysis-eval-item__grade.improvement{
   color: var(--report-orange-100, #FF972F);
-  background: var(--report-orange-12, #FF972F);
+  background: var(--report-orange-12, #ff972f22);
  }
 .analysis-eval-item__grade.poor{
   color: var(--report-red-100, #FF524C);
