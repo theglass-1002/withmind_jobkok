@@ -122,39 +122,42 @@ export default function KpiOverview({
         <div className="mock-analysis-overview__kpi-chart">
           <div className="kpi-chart__gauge">
           <KpiGaugeChart
-              segments={segments}
-              labels={labels}
-              baseColor={baseColor}
-              fillColor={fillColor}
-              gap={gap}
-              barHeight={barHeight}
-              labelFontSize={labelFontSize}
-              height={chartHeight}
+            // 필수 데이터/레이아웃 props
+            segments={segments}
+            labels={labels}
+            valueLabel={`${score}점`}
+            height={chartHeight}
 
-              // 배지 표시 텍스트
-              valueLabel={`${score}점`}
+            // Theme props (색상/텍스트 관련)
+            theme={{
+                base: baseColor,       // baseColor 대신 theme.base
+                fill: fillColor,       // fillColor 대신 theme.fill
+                valueBg: "var(--white-100, #FFF)",
+                valueColorMap: {
+                    "매우 미흡": "#FF524C",
+                    "미흡": "#FF972F",
+                    "보통": "#15D078",
+                    "우수": "#26A4FF",
+                    "최우수": "#816BFE",
+                },
+                valueColorFallback: "#26A4FF",
+            }}
 
-              // 색 자동 매핑 사용 (라벨에 따라)
-              valueColorAuto
-              valueColorMap={{
-                "매우 미흡": "#FF524C",
-                "미흡": "#FF972F",
-                "보통": "#15D078",
-                "우수": "#26A4FF",
-                "최우수": "#816BFE",
-              }}
-              valueColorFallback="#26A4FF"   // 라벨 매칭 안 되면 이 색
-
-              valueBg="var(--white-100, #FFF)"
-              valueFontSize={16}
-              valueFontWeight={600}
-              valuePaddingX={8}
-              valuePaddingY={4}
-              valueOffsetY={16}
-              valueRadius={100}
-              valueTail
-              valueTailSize={6}
-            />
+            // Layout props (간격/크기 관련)
+            layout={{
+                gap: gap,
+                barHeight: barHeight,
+                labelFontSize: labelFontSize,
+                valueFontSize: 16,
+                valueFontWeight: 600,
+                valuePaddingX: 8,
+                valuePaddingY: 4,
+                valueOffsetY: 16,
+                valueRadius: 100,
+                valueTail: true,
+                valueTailSize: 6,
+            }}
+        />
           </div>
         </div>
       </div>

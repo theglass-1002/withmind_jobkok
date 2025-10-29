@@ -153,7 +153,10 @@ export default function KpiRadarChart({
 
   const options = useMemo(
     () => ({
-      animation: false, 
+      animation: {
+        duration: 1200,
+        easing: 'easeOutCubic' as const,
+      },
       responsive: true,
       maintainAspectRatio: false,
       layout: { padding: { top: 0, right: 80, bottom: 0, left: 80 } },

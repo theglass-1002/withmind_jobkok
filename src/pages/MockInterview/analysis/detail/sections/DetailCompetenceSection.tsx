@@ -1,7 +1,7 @@
 // src/pages/MockInterview/my-report/detail/sections/DetailCompetenceSection.tsx
-import React, { useMemo, useState } from "react";
-import KpiGaugeChart from "@/pages/MockInterview/analysis/chart/KpiGaugeChart";
+import React, { useState } from "react";
 import UiFilter, { type UiFilterOption } from "@/shared/components/ui-filter/UiFilter";
+import LevelGraph from "@/pages/MockInterview/analysis/chart/LevelGraph";
 
 import ic_stars_gray600_20 from "@/assets/icons/size20/ic_stars_gray600_20.png";
 import ic_emergency_gray600_20 from "@/assets/icons/size20/ic_emergency_gray600_20.png";
@@ -11,100 +11,21 @@ import ic_play_arrow_white_48 from "@/assets/icons/size48/ic_play_arrow_white_48
 import ic_info_white_20 from "@/assets/icons/size20/ic_info_white_20.png";
 import ic_download_white_20 from "@/assets/icons/size20/ic_download_white_20.png";
 
-
 import test_profile_img from "@/assets/testImg/test_profile_img.jpg";
-
-
 
 type Props = {
   score: number;
   title?: string;
   titleIconSrc?: string;
   description?: string;
-  labels?: string[];
-  breaks?: number[];
-  baseColor?: string;
-  fillColor?: string;
-  gap?: number;
-  barHeight?: number;
-  labelFontSize?: number;
-  chartHeight?: number;
-  kpiTitleModifierClass?: string;
-  valueLabel?: string;
-  valueColorMap?: Record<string, string>;
-  valueColorFallback?: string;
-  valueTail?: boolean;
-  valueTailSize?: number;
 };
-
-const DEFAULT_BREAKS = [20, 40, 60, 80, 100] as const;
-const DEFAULT_LABELS = ["매우 미흡", "미흡", "보통", "우수", "최우수"] as const;
-
-function clamp01(v: number) {
-  return Math.max(0, Math.min(1, v));
-}
-
-function segmentsFromScore(score: number, breaks = DEFAULT_BREAKS as readonly number[]) {
-  const segs = Array(breaks.length).fill(0) as number[];
-  let prev = 0;
-  for (let i = 0; i < breaks.length; i++) {
-    const end = breaks[i];
-    const filled = (score - prev) / (end - prev);
-    segs[i] = score >= end ? 1 : clamp01(filled);
-    if (score <= end) break;
-    prev = end;
-  }
-  return segs.map((v) => clamp01(v));
-}
-
-function bucketOf(
-  score: number,
-  breaks = DEFAULT_BREAKS as readonly number[],
-  labels = DEFAULT_LABELS as readonly string[]
-) {
-  for (let i = 0; i < breaks.length; i++) {
-    if (score <= breaks[i]) return { index: i, label: labels[i] };
-  }
-  return { index: breaks.length - 1, label: labels[breaks.length - 1] };
-}
-
-function modifierByBucket(i: number) {
-  return ["poor", "improvement", "fair", "good", "excellent"][i] ?? "fair";
-}
 
 export default function DetailCompetenceSection({
   score,
   title,
   titleIconSrc,
   description = "면접 과정에서 보인 의사소통 능력과 문제해결 능력은 우수하다고 평가됩니다.",
-  labels = Array.from(DEFAULT_LABELS),
-  breaks = Array.from(DEFAULT_BREAKS),
-  baseColor = "rgba(255, 255, 255, 0.40)",
-  fillColor = "rgba(255, 255, 255, 0.80)",
-  gap = 2,
-  barHeight = 24,
-  labelFontSize = 14,
-  chartHeight = 108,
-  valueLabel,
-  valueColorMap = {
-    "매우 미흡": "#FF524C",
-    "미흡": "#FF972F",
-    "보통": "#15D078",
-    "우수": "#26A4FF",
-    "최우수": "#816BFE",
-  },
-  kpiTitleModifierClass,
-  valueColorFallback = "#26A4FF",
-  valueTail = true,
-  valueTailSize = 6,
 }: Props) {
-  const segments = useMemo(() => segmentsFromScore(score, breaks), [score, breaks]);
-  const { index: bucketIndex, label: bucketLabel } = useMemo(
-    () => bucketOf(score, breaks, labels),
-    [score, breaks, labels]
-  );
-  const modifier = kpiTitleModifierClass ?? modifierByBucket(bucketIndex);
-
   const DEFAULT_FILTERS: UiFilterOption[] = [
     { label: "질문 1", value: "q1" },
     { label: "질문 2", value: "q2" },
@@ -123,9 +44,24 @@ export default function DetailCompetenceSection({
     string,
     { title: string; grade: "상" | "중" | "하"; keywords: string[]; analysis: string }
   > = {
-    q1: { title: "1분동안 자신을 소개해주세요", grade: "상", keywords: ["우선순위", "MVP 설정", "협업 구조설계"], analysis: "핵심 메시지가 명확하고 사례 제시가 적절합니다." },
-    q2: { title: "최근 프로젝트에서 본인의 역할은?", grade: "중", keywords: ["리팩토링", "성능 최적화"], analysis: "역할 서술은 구체적이나 임팩트 지표가 부족합니다." },
-    q3: { title: "가장 어려웠던 문제와 해결 방법은?", grade: "하", keywords: ["문제 정의", "원인 분석"], analysis: "해결 과정의 근거가 약하므로 수치/지표 보완이 필요합니다." },
+    q1: {
+      title: "1분동안 자신을 소개해주세요",
+      grade: "상",
+      keywords: ["우선순위", "MVP 설정", "협업 구조설계"],
+      analysis: "핵심 메시지가 명확하고 사례 제시가 적절합니다.",
+    },
+    q2: {
+      title: "최근 프로젝트에서 본인의 역할은?",
+      grade: "중",
+      keywords: ["리팩토링", "성능 최적화"],
+      analysis: "역할 서술은 구체적이나 임팩트 지표가 부족합니다.",
+    },
+    q3: {
+      title: "가장 어려웠던 문제와 해결 방법은?",
+      grade: "하",
+      keywords: ["문제 정의", "원인 분석"],
+      analysis: "해결 과정의 근거가 약하므로 수치/지표 보완이 필요합니다.",
+    },
   };
 
   const WORDS: Record<string, { common: string[]; habit: string[] }> = {
@@ -151,40 +87,7 @@ export default function DetailCompetenceSection({
       </span>
 
       <div className="analysis-section__body">
-        <div className={`detail-analysis__level-graph ${modifier}`}>
-          <div className="detail-analysis__level-info">
-            <span className="detail-analysis__level-label">{bucketLabel}</span>
-            <span className="detail-analysis__level-desc">{description}</span>
-          </div>
-
-          <div className="detail-analysis__level-chart">
-            <div className="detail-analysis__chart-gauge">
-              <KpiGaugeChart
-                segments={segments}
-                labels={labels}
-                baseColor={baseColor}
-                fillColor={fillColor}
-                gap={gap}
-                barHeight={barHeight}
-                labelFontSize={labelFontSize}
-                height={chartHeight}
-                valueLabel={valueLabel ?? `${score}점`}
-                valueColorAuto
-                valueColorMap={valueColorMap}
-                valueColorFallback={valueColorFallback}
-                valueBg="var(--white-100, #FFF)"
-                valueFontSize={16}
-                valueFontWeight={600}
-                valuePaddingX={8}
-                valuePaddingY={4}
-                valueOffsetY={16}
-                valueRadius={100}
-                valueTail={valueTail}
-                valueTailSize={valueTailSize}
-              />
-            </div>
-          </div>
-        </div>
+        <LevelGraph score={score} description={description} />
 
         <div className="detail-analysis__content">
           <div className="detail-analysis__qa-section">
@@ -197,22 +100,21 @@ export default function DetailCompetenceSection({
 
             <div className="detail-analysis__question-detail">
               <div className="detail-analysis__question-main">
-              <div className="detail-analysis__video">
-                <img className="detail-analysis__video-thumbnail" src={test_profile_img} alt="" />
+                <div className="detail-analysis__video">
+                  <img className="detail-analysis__video-thumbnail" src={test_profile_img} alt="" />
 
-                <div className="detail-analysis__video-info">
-                  <span className="detail-analysis__video-notice">
-                    <img src={ic_info_white_20} alt="" />
-                    면접 영상은 분석 리포트 생성일로부터 90일간 제공됩니다.
-                  </span>
-                  <span className="detail-analysis__video-download">영상 다운로드
-                  <img src={ic_download_white_20} alt="" />
-                  </span>
+                  <div className="detail-analysis__video-info">
+                    <span className="detail-analysis__video-notice">
+                      <img src={ic_info_white_20} alt="" />
+                      면접 영상은 분석 리포트 생성일로부터 90일간 제공됩니다.
+                    </span>
+                    <span className="detail-analysis__video-download">
+                      영상 다운로드 <img src={ic_download_white_20} alt="" />
+                    </span>
+                  </div>
+
+                  <img className="detail-analysis__video-play" src={ic_play_arrow_white_48} alt="" />
                 </div>
-
-                <img className="detail-analysis__video-play" src={ic_play_arrow_white_48} alt="" />
-              </div>
-
 
                 <div className="detail-analysis__question-info">
                   <div className="detail-analysis__question-text">
@@ -226,9 +128,15 @@ export default function DetailCompetenceSection({
                       답변 등급
                     </div>
                     <div className="detail-analysis__answer-grade-options">
-                      <span className={`detail-analysis__grade-option ${current.grade === "상" ? "on" : ""}`}>상</span>
-                      <span className={`detail-analysis__grade-option ${current.grade === "중" ? "on" : ""}`}>중</span>
-                      <span className={`detail-analysis__grade-option ${current.grade === "하" ? "on" : ""}`}>하</span>
+                      <span className={`detail-analysis__grade-option ${current.grade === "상" ? "on" : ""}`}>
+                        상
+                      </span>
+                      <span className={`detail-analysis__grade-option ${current.grade === "중" ? "on" : ""}`}>
+                        중
+                      </span>
+                      <span className={`detail-analysis__grade-option ${current.grade === "하" ? "on" : ""}`}>
+                        하
+                      </span>
                     </div>
                   </div>
 

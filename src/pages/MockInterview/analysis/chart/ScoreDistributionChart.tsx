@@ -14,33 +14,28 @@ import {
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
 export interface ScoreDistributionChartProps {
-  /** 구간 라벨: "0~9" 같은 문자열 또는 ["0","~9"] 형식 */
   labels: (string | string[])[];
-  /** 각 구간 값(빈도/점수 등) */
   values: number[];
-  /** y축 최대값 */
   max?: number;
-  /** px */
   height?: number;
-  /** px */
   barThickness?: number;
 
-  /** 강조할 점수(예: 98 → "94~100" 구간 강조) */
   highlightScore?: number;
-  /** 강조 텍스트 포맷(기본: "{score}점") */
   highlightTextFormatter?: (score: number) => string;
 
-  /** 강조 그라디언트 / 비강조 색 */
   highlightGradientFrom?: string;
   highlightGradientTo?: string;
   barColorMuted?: string;
 
-  /** 폰트 옵션 */
   tickFontFamily?: string;
   tickFontSize?: number;
+
+  animate?: boolean;
+  durationMs?: number;
+  staggerMs?: number;
+  easing?: "linear" | "easeOutCubic" | "easeInOutCubic";
 }
 
-/** "0~9", "0 ~ 9", "94-100" 등에서 [0,9] 추출 */
 function parseRange(label: string | string[]): [number, number] | null {
   const raw = Array.isArray(label) ? label.join("") : String(label);
   const nums = raw.match(/-?\d+(\.\d+)?/g);
@@ -55,7 +50,6 @@ function parseRange(label: string | string[]): [number, number] | null {
   return a <= b ? [a, b] : [b, a];
 }
 
-/** 강조 점수 텍스트 플러그인 */
 const scoreTextLabelPlugin: Plugin<"bar", any> = {
   id: "scoreTextLabel",
   afterDatasetsDraw(chart, _args, opts) {
@@ -99,12 +93,16 @@ export default function ScoreDistributionChart({
 
   tickFontFamily = "Pretendard",
   tickFontSize = 16,
+
+  animate = true,
+  durationMs = 800,
+  staggerMs = 35,
+  easing = "easeOutCubic",
 }: ScoreDistributionChartProps) {
   const len = Math.min(labels.length, values.length);
   const labelItems = useMemo(() => labels.slice(0, len), [labels, len]);
   const series = useMemo(() => values.slice(0, len), [values, len]);
 
-  // 강조할 구간 인덱스 계산
   const highlightIndex = useMemo(() => {
     if (highlightScore == null) {
       const maxVal = Math.max(...series);
@@ -121,10 +119,12 @@ export default function ScoreDistributionChart({
   }, [highlightScore, labelItems, series]);
 
   const tickColor = useMemo(() => {
+    if (typeof window === 'undefined') return "#848B93";
     const css = getComputedStyle(document.documentElement);
     return (css.getPropertyValue("--gray-600") || "#848B93").trim();
   }, []);
   const gridColor = useMemo(() => {
+    if (typeof window === 'undefined') return "#EEEEEE";
     const css = getComputedStyle(document.documentElement);
     return (css.getPropertyValue("--gray-200") || "#EEEEEE").trim();
   }, []);
@@ -164,13 +164,10 @@ export default function ScoreDistributionChart({
 
   const options = useMemo(
     () => ({
-      animation: false, 
       maintainAspectRatio: false,
       responsive: true,
       elements: { bar: { borderWidth: 0 } },
-      // 2줄 라벨 여백 확보
-      layout: { padding: {
-        top: 30 } },
+      layout: { padding: { top: 30 } },
       scales: {
         y: {
           min: 0,
@@ -195,9 +192,8 @@ export default function ScoreDistributionChart({
             minRotation: 0,
             callback: (val: any, idx: number) => {
               const raw = labelItems[idx];
-              if (Array.isArray(raw)) return raw;                // ["0","~9"] → 2줄
+              if (Array.isArray(raw)) return raw;
               if (typeof raw === "string" && raw.includes("\n")) return raw.split("\n");
-              // "0~9"처럼 들어오면 보기 좋게 두 줄로 쪼개기
               const m = raw.match(/^(\s*\d+)\s*([~\-])\s*(\d+\s*)$/);
               if (m) return [m[1].trim(), `${m[2]}${m[3].trim()}`];
               return raw;
@@ -212,7 +208,6 @@ export default function ScoreDistributionChart({
           enabled: true,
           callbacks: { label: (ctx: any) => ` ${ctx.parsed.y ?? ctx.parsed}점` },
         },
-        // 강조 텍스트(예: "98점")
         scoreTextLabel: {
           index: highlightIndex,
           text:
@@ -226,14 +221,75 @@ export default function ScoreDistributionChart({
           fontFamily: tickFontFamily,
         },
       } as any,
- 
+
+      animation: animate
+        ? {
+            duration: durationMs,
+            easing:
+              easing === "linear"
+                ? "linear"
+                : easing === "easeInOutCubic"
+                ? "easeInOutCubic"
+                : "easeOutCubic",
+            delay: (ctx: any) => {
+              if (ctx.type !== "data" || ctx.mode !== "default") return 0;
+              return ctx.dataIndex * staggerMs;
+            },
+            datasets: {
+                y: {
+                    duration: 0,
+                }
+            }
+          }
+        : false,
+
+      animations: animate
+        ? {
+            y: {
+              from: 0,
+              duration: durationMs,
+              easing:
+                easing === "linear"
+                  ? "linear"
+                  : easing === "easeInOutCubic"
+                  ? "easeInOutCubic"
+                  : "easeOutCubic",
+            },
+            base: {
+              from: 0,
+              duration: 0, 
+            }
+          }
+        : undefined,
     }),
-    [max, tickColor, gridColor, tickFontFamily, tickFontSize, labelItems, highlightIndex, highlightScore, series, highlightTextFormatter]
+    [
+      max,
+      tickColor,
+      gridColor,
+      tickFontFamily,
+      tickFontSize,
+      labelItems,
+      highlightIndex,
+      highlightScore,
+      series,
+      highlightTextFormatter,
+      animate,
+      durationMs,
+      staggerMs,
+      easing,
+    ]
   );
+
+  const chartKey = useMemo(() => JSON.stringify({ labels, values, animate }), [labels, values, animate]);
 
   return (
     <div style={{ height, width: "100%" }}>
-      <Bar data={data} options={options} plugins={[scoreTextLabelPlugin]} />
+      <Bar 
+        key={chartKey} 
+        data={data} 
+        options={options} 
+        plugins={[scoreTextLabelPlugin]} 
+      />
     </div>
   );
 }

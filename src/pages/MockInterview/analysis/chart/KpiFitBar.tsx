@@ -27,6 +27,8 @@ export default function KpiFitBar({ value, className, style }: Props) {
 
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const [wrapH, setWrapH] = useState<number>(24);
+  const [animatedValue, setAnimatedValue] = useState<number>(0);
+  const animationRef = useRef<number>();
 
   useEffect(() => {
     if (!wrapRef.current) return;
@@ -37,6 +39,37 @@ export default function KpiFitBar({ value, className, style }: Props) {
     update();
     return () => ro.disconnect();
   }, []);
+
+  // 애니메이션 효과
+  useEffect(() => {
+    const startTime = Date.now();
+    const duration = 1200;
+    const startValue = animatedValue;
+    const targetValue = v;
+
+    const animate = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // easeOutCubic
+      const easeProgress = 1 - Math.pow(1 - progress, 3);
+      
+      const currentValue = startValue + (targetValue - startValue) * easeProgress;
+      setAnimatedValue(currentValue);
+
+      if (progress < 1) {
+        animationRef.current = requestAnimationFrame(animate);
+      }
+    };
+
+    animationRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [v]);
 
   const gradientCacheRef = useRef<{ key: string; gradient: CanvasGradient } | null>(null);
   function getGradient(chart: any) {
@@ -66,14 +99,14 @@ export default function KpiFitBar({ value, className, style }: Props) {
       labels: [""],
       datasets: [
         { label: "track", data: [100], backgroundColor: TRACK_COLOR, order: 1, ...common },
-        { label: "value", data: [v], backgroundColor: (c: any) => getGradient(c.chart), order: 0, ...common },
+        { label: "value", data: [animatedValue], backgroundColor: (c: any) => getGradient(c.chart), order: 0, ...common },
       ],
     };
-  }, [v, wrapH]);
+  }, [animatedValue, wrapH]);
 
   const options = useMemo(
     () => ({
-      animation: false, 
+      animation: false, // Chart.js 기본 애니메이션 끄기
       indexAxis: "y" as const,
       responsive: true,
       maintainAspectRatio: false,
@@ -96,7 +129,6 @@ export default function KpiFitBar({ value, className, style }: Props) {
           border: { display: false },
         },
       },
-    
     }),
     []
   );

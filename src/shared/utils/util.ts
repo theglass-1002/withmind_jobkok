@@ -63,3 +63,39 @@ export const parseDate = (s?: string | null): DateValue | null => {
   }
   return d;
 };
+
+
+export const DEFAULT_BREAKS = [20, 40, 60, 80, 100] as const;
+export const DEFAULT_LABELS = ["매우 미흡", "미흡", "보통", "우수", "최우수"] as const;
+
+export function clamp01(v: number) {
+  return Math.max(0, Math.min(1, v));
+}
+
+export function segmentsFromScore(score: number, breaks = DEFAULT_BREAKS as readonly number[]) {
+  const segs = Array(breaks.length).fill(0) as number[];
+  let prev = 0;
+  for (let i = 0; i < breaks.length; i++) {
+    const end = breaks[i];
+    const filled = (score - prev) / (end - prev);
+    segs[i] = score >= end ? 1 : clamp01(filled);
+    if (score <= end) break;
+    prev = end;
+  }
+  return segs.map(clamp01);
+}
+
+export function bucketOf(
+  score: number,
+  breaks = DEFAULT_BREAKS as readonly number[],
+  labels = DEFAULT_LABELS as readonly string[]
+) {
+  for (let i = 0; i < breaks.length; i++) {
+    if (score <= breaks[i]) return { index: i, label: labels[i] };
+  }
+  return { index: breaks.length - 1, label: labels[breaks.length - 1] };
+}
+
+export function modifierByBucket(i: number) {
+  return ["poor", "improvement", "fair", "good", "excellent"][i] ?? "fair";
+}
