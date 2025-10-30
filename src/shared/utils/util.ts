@@ -68,6 +68,12 @@ export const parseDate = (s?: string | null): DateValue | null => {
 export const DEFAULT_BREAKS = [20, 40, 60, 80, 100] as const;
 export const DEFAULT_LABELS = ["매우 미흡", "미흡", "보통", "우수", "최우수"] as const;
 
+// 긴장도 등급 (3단계)
+export const TENSION_BREAKS = [33, 67, 100] as const;
+export const TENSION_LABELS = ["높음", "보통", "낮음"] as const;
+
+
+
 export function clamp01(v: number) {
   return Math.max(0, Math.min(1, v));
 }
@@ -98,4 +104,9 @@ export function bucketOf(
 
 export function modifierByBucket(i: number) {
   return ["poor", "improvement", "fair", "good", "excellent"][i] ?? "fair";
+}
+
+// 긴장도 전용 함수들
+export function tensionModifierByBucket(i: number) {
+  return ["low", "medium", "high"][i] ?? "medium";
 }

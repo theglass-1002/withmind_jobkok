@@ -88,29 +88,43 @@ export default function LevelGraph({
 
       <div className="detail-analysis__level-chart">
         <div className="detail-analysis__chart-gauge">
-          <KpiGaugeChart
+        <KpiGaugeChart
+            // 필수 데이터/레이아웃 props
             segments={segments}
-            labels={Array.from(labels)}           // ← 캐스팅 대신 복사
-            baseColor={baseColor}
-            fillColor={fillColor}
-            gap={gap}
-            barHeight={barHeight}
-            labelFontSize={labelFontSize}
+            labels={labels}
+            valueLabel={`${score}점`}
             height={chartHeight}
-            valueLabel={valueLabel ?? `${safeScore}점`}
-            valueColorAuto
-            valueColorMap={valueColorMap}
-            valueColorFallback={valueColorFallback}
-            valueBg="var(--white-100, #FFF)"
-            valueFontSize={16}
-            valueFontWeight={600}
-            valuePaddingX={8}
-            valuePaddingY={4}
-            valueOffsetY={16}
-            valueRadius={100}
-            valueTail={valueTail}
-            valueTailSize={valueTailSize}
-          />
+
+            // Theme props (색상/텍스트 관련)
+            theme={{
+                base: baseColor,       // baseColor 대신 theme.base
+                fill: fillColor,       // fillColor 대신 theme.fill
+                valueBg: "var(--white-100, #FFF)",
+                valueColorMap: {
+                    "매우 미흡": "#FF524C",
+                    "미흡": "#FF972F",
+                    "보통": "#15D078",
+                    "우수": "#26A4FF",
+                    "최우수": "#816BFE",
+                },
+                valueColorFallback: "#26A4FF",
+            }}
+
+            // Layout props (간격/크기 관련)
+            layout={{
+                gap: gap,
+                barHeight: barHeight,
+                labelFontSize: labelFontSize,
+                valueFontSize: 16,
+                valueFontWeight: 600,
+                valuePaddingX: 8,
+                valuePaddingY: 4,
+                valueOffsetY: 16,
+                valueRadius: 100,
+                valueTail: true,
+                valueTailSize: 6,
+            }}
+        />
         </div>
       </div>
     </div>

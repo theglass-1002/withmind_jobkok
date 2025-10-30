@@ -25,6 +25,13 @@
 .detail-analysis__level-graph.improvement { background: var(--report-orange-100, #FF972F); }
 .detail-analysis__level-graph.poor { background: var(--report-red-100, #FF524C); }
 
+
+.detail-analysis__level-graph.low { background: var(--report-amber-100, #FF524C); }
+.detail-analysis__level-graph.medium { background: var(--report-orange-100, #15D078); }
+.detail-analysis__level-graph.high { background: var(--report-red-100, #816BFE); }
+
+
+
 .detail-analysis__level-info{
   display: flex;
   flex: 1;
@@ -707,16 +714,6 @@ background: var(--white-100, #FFF);
   background: var(--gray-300, #E0E2E4);
 }
 
-.detail-analysis__metric-table{
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  align-items: flex-start;
-  align-self: stretch;
-  padding: 1px;
-  border-radius: 4px;
-  background: var(--gray-300, #E0E2E4);
-}
 
 .detail-analysis__metric-table-header,
 .detail-analysis__metric-table-row{
@@ -871,4 +868,95 @@ expressiontab */
   align-items: center;
   justify-content: center;
   /* width와 height가 0이 아닌지 확인 */
+}
+
+/* 
+VoiceTabContent */
+
+.voice_tone .detail-analysis__attitude-left{
+  padding: 20px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+
+.detail-analysis__metric-table.voice_tone .detail-analysis__metric-table-cell:first-child {
+  flex: 2;
+}
+
+.detail-analysis__metric-table.voice_tone .detail-analysis__metric-table-cell--label:first-child {
+  background: var(--white-100, #FFF);
+}
+
+/* 줄바꿈 스타일 추가 */
+.detail-analysis__metric-table.voice_tone .detail-analysis__metric-table-cell {
+  white-space: pre-line; /* 줄바꿈 문자(\n)를 실제 줄바꿈으로 표시 */
+  text-align: center;
+  line-height: 1.4; /* 줄 간격 조정 */
+}
+
+/* 
+speechSpeed */
+
+
+.speech_speed .detail-analysis__attitude-left{
+  padding: 20px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+
+
+.speech_speed .detail-analysis__attitude-left{
+  padding: 20px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+
+.detail-analysis__metric-table.speech_speed .detail-analysis__metric-table-cell:first-child {
+  flex: 2;
+}
+
+.detail-analysis__metric-table.speech_speed .detail-analysis__metric-table-cell--label:first-child {
+  background: var(--white-100, #FFF);
+}
+
+/* 줄바꿈 스타일 추가 */
+.detail-analysis__metric-table.speech_speed .detail-analysis__metric-table-cell {
+  white-space: pre-line; /* 줄바꿈 문자(\n)를 실제 줄바꿈으로 표시 */
+  text-align: center;
+  line-height: 1.4; /* 줄 간격 조정 */
+}
+
+/* 
+DetailTensionSection */
+
+.detail-analysis__attitude.tension .tooltip{
+  margin: 0px;
+}
+
+.tooltip-icon{
+  cursor: pointer;
+}
+
+.detail-analysis__attitude.tension .tooltip__content{
+ width: 440px;
+ 
+}
+
+
+.analysis-section.tension .detail-analysis__level-chart{
+  flex: 0.8;
+}
+
+.analysis-section.tension .detail-analysis__attitude-left{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  align-self: stretch;
 }

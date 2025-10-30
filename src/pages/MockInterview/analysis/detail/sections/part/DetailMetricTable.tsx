@@ -23,7 +23,7 @@ export default function DetailMetricTable({
   type = "attitude",
   className,
 }: Props) {
-  const rootClass = `detail-analysis__metric-table ${type} ${
+  const rootClass = `detail-analysis__metric-table ${
     className ?? ""
   }`;
 
