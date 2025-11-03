@@ -1,14 +1,16 @@
 // src/pages/MockInterview/analysis/detail/sections/part/TensionContent.tsx
 import React from "react";
-import DetailMetric from "@/pages/MockInterview/analysis/detail/sections/part/DetailMetric";
-import DetailMetricTable from "@/pages/MockInterview/analysis/detail/sections/part/DetailMetricTable";
-import VoicePitchChart from "@/pages/MockInterview/analysis/chart/VoicePitchChart";
+import TensionAnalysisChart from "@/pages/MockInterview/analysis/chart/TensionAnalysisChart";
 
 
-
-import ic_stars_gray600_20 from "@/assets/icons/size20/ic_stars_gray600_20.png";
-import ic_conditions_gray600_20 from "@/assets/icons/size20/ic_conditions_gray600_20.png";
+import ic_error_gray500_20 from "@/assets/icons/size20/ic_error_gray500_20.png";
 import ic_timeline_gray600_20 from "@/assets/icons/size20/ic_timeline_gray600_20.png";
+import ic_cardiology_gray600_20 from "@/assets/icons/size20/ic_cardiology_gray600_20.png";
+import ic_favorite_green_20 from "@/assets/icons/size20/ic_favorite_green_20.png";
+import ic_favorite_blue_20 from "@/assets/icons/size20/ic_favorite_blue_20.png";
+import ic_favorite_red_20 from "@/assets/icons/size20/ic_favorite_red_20.png";
+
+
 
 type TableRow = { label: string; values: (string | number)[] };
 
@@ -39,39 +41,93 @@ export default function TensionContent({
   return (
     <>
   
-    <div className=    {`detail-analysis__attitude ${className ?? ""}`}>
-   
+  
+      <div className={`detail-analysis__attitude-content ${className ?? ""}`}>
         <div className="detail-analysis__attitude-left">
-          <span className="detail-analysis__metric-grade-label">
+         <div className="detail-analysis__tension-content">
+         <div className="detail-analysis__tension-header">
+         <span className="detail-analysis__metric-grade-label">
             <img src={ic_timeline_gray600_20} alt="" />
-            홍길동님의 응답 긴장도
-          </span>
-          {/* <VoicePitchChart
-            values={[220, 195, 210, 180, 195, 170, 180, 170, 195, 145, 180]}
-            averageLine={200}
-            averageLabel="평균"
-            min={0}
-            max={300}
-          /> */}
+              홍길동님의 응답 긴장도
+            </span>
+            <span className="detail-analysis__tension-summary">
+            질문 5에서 가장 긴장하였고, 질문 2에서 가장 긴장도가 낮았던 것으로 확인됩니다.</span>
+            </div>
+           
+              <TensionAnalysisChart
+                userValues={[45, 78, 52, 65, 48, 72, 82, 68, 65, 63, 58]}
+                averageValues={[20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20]}
+                userLineColor="#FF524C"
+                averageLineColor="#26A4FF"
+                min={0}
+                max={100}
+              />
+            
+            </div>   
+            <div className="detail-analysis__tension-description">
+              <img src={ic_error_gray500_20} alt="" />
+          면접 질문당 평균 심박수와 표준편차를 계산하여 응시자의 질문별 긴장도와 답변 도중 동요한 정도를
+            파악합니다. 표준편차란 지원자의 심박수가 1분의 답변 시간 동안 평균 심박수에서 얼마나 멀어지며
+            요동쳤는지에 대한 수치입니다. 푸른색 그래프는 해당 질문에 대한 지원자의 평균 심박을, 붉은색
+            그래프는 평균에서 표준 편차가 더해진 심박 수치를 나타냅니다. 푸른색과 붉은색 그래프 사이의 폭이
+            넓을수록 표준편차가 큰 것이며, 해당 지원자의 긴장도와 동요도가 높았다고 해석할 수 있습니다.
+            </div>    
         </div>
 
         <div className="detail-analysis__attitude-right">
-          <DetailMetric
-            type={className}
-            gradeLabel={gradeLabel}
-            gradeIconSrc={ic_stars_gray600_20}
-            gradeOptions={["우수", "보통", "미흡"]}
-            selectedGrade={selectedGrade}
-            className={className}
-            analysisTitle={analysisTitle}
-            analysisIconSrc={ic_conditions_gray600_20}
-            analysisText={analysisText}
-            highlight={highlight}
-          />
+        <div className="detail-analysis__tension-stat-item average">
+            <span className="detail-analysis__tension-stat-label">
+              <img src={ic_cardiology_gray600_20} alt="" />
+              평균 심박 수치</span>
+            <div className="detail-analysis__tension-stat-content">
+              <div className="detail-analysis__tension-stat-value-wrapper">
+                <span className="detail-analysis__tension-stat-value">100</span>
+                <div className="detail-analysis__tension-stat-unit">
+                  <span className="detail-analysis__tension-stat-icon">
+                  <img src={ic_favorite_green_20} alt="" />
+                  </span>
+                  <span className="detail-analysis__tension-stat-unit-text">BPM</span>
+                </div>
+              </div>
+              <span className="detail-analysis__tension-stat-level">높음</span>
+            </div>
+          </div>
+          <div className="detail-analysis__tension-stat-item min">
+            <span className="detail-analysis__tension-stat-label">
+            <img src={ic_cardiology_gray600_20} alt="" />
+              최저 심박 수치</span>
+            <div className="detail-analysis__tension-stat-content">
+              <div className="detail-analysis__tension-stat-value-wrapper">
+                <span className="detail-analysis__tension-stat-value">60</span>
+                <div className="detail-analysis__tension-stat-unit">
+                  <span className="detail-analysis__tension-stat-icon">
+                    <img src={ic_favorite_blue_20} alt="" />
+                 </span>
+                  <span className="detail-analysis__tension-stat-unit-text">BPM</span>
+                </div>
+              </div>
+              <span className="detail-analysis__tension-stat-level">높음</span>
+            </div>
+          </div>
+          <div className="detail-analysis__tension-stat-item max">
+            <span className="detail-analysis__tension-stat-label">
+            <img src={ic_cardiology_gray600_20} alt="" />
+              최고 심박 수치</span>
+            <div className="detail-analysis__tension-stat-content">
+              <div className="detail-analysis__tension-stat-value-wrapper">
+                <span className="detail-analysis__tension-stat-value">100</span>
+                <div className="detail-analysis__tension-stat-unit">
+                  <span className="detail-analysis__tension-stat-icon">
+                  <img src={ic_favorite_red_20} alt="" />
+                  </span>
+                  <span className="detail-analysis__tension-stat-unit-text">BPM</span>
+                </div>
+              </div>
+              <span className="detail-analysis__tension-stat-level">낮음</span>
+            </div>
+          </div>
         </div>
-     
       </div>
-     
     </>
   );
 }

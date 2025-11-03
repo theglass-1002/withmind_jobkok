@@ -15,6 +15,8 @@ import ic_strength_circle_24 from "@/assets/icons/size24/ic_strength_circle_24.p
 import MockAnalysisHeader from "./MockAnalysisHeader";
 import OverviewPage from "./overview/OverviewPage";
 import DetailPage from "./detail/DetailPage";
+import ResumeInterviewMatchPage from "./match/ResumeInterviewMatchPage";
+
 
 import KpiRadarChart from "@/pages/MockInterview/analysis/chart/KpiRadarChart";
 
@@ -269,20 +271,15 @@ export default function MockAnalysisPage() {
 
             {activeTab === "detail" && (
               <DetailPage
-              score={score}
+              competence_score={80}
+              attitude_score={10}
+              voice_score={45}
+              tension_score={20}
               />
             )}
 
             {activeTab === "match" && (
-              <div className="mock-analysis-report__content">
-                <div className="analysis-section">
-                  <span className="analysis-section__title">이력서·면접 일치도 탭</span>
-                  <div className="analysis-section__body">
-                    <div className="analysis-section__left">키워드 매칭</div>
-                    <div className="analysis-section__right">개선 제안</div>
-                  </div>
-                </div>
-              </div>
+              <ResumeInterviewMatchPage/>
             )}
 
             <div className="btn_wrap mock-analysis-report__actions">
