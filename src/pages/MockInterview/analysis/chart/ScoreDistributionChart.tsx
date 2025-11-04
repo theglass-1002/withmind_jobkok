@@ -9,7 +9,10 @@ import {
   Tooltip,
   Legend,
   type Plugin,
+  type ChartOptions,
+  type FontSpec,
 } from "chart.js";
+import { useLocation } from 'react-router-dom';
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
@@ -99,6 +102,17 @@ export default function ScoreDistributionChart({
   staggerMs = 35,
   easing = "easeOutCubic",
 }: ScoreDistributionChartProps) {
+  const location = useLocation(); 
+
+  // URL에서 printViewr 쿼리 파라미터 존재 여부를 확인
+  const isPrintMode = useMemo(() => {
+    const query = new URLSearchParams(location.search);
+    return query.has('printViewr');
+  }, [location.search]);
+  
+  // 최종 애니메이션 활성화 여부 결정: animate prop이 true이고 인쇄 모드가 아닐 때만 활성화
+  const enableAnimation = animate && !isPrintMode;
+
   const len = Math.min(labels.length, values.length);
   const labelItems = useMemo(() => labels.slice(0, len), [labels, len]);
   const series = useMemo(() => values.slice(0, len), [values, len]);
@@ -152,7 +166,8 @@ export default function ScoreDistributionChart({
           borderWidth: 0,
           hoverBorderWidth: 0,
           borderRadius: { topLeft: 2, topRight: 2, bottomLeft: 0, bottomRight: 0 },
-          borderSkipped: "bottom",
+          // borderSkipped 타입 에러 수정
+          borderSkipped: "bottom" as const,
           barThickness,
           maxBarThickness: barThickness,
           order: 1,
@@ -162,7 +177,7 @@ export default function ScoreDistributionChart({
     [labelItems, series, barThickness, highlightIndex, barColorMuted, highlightGradientFrom, highlightGradientTo]
   );
 
-  const options = useMemo(
+  const options: ChartOptions<"bar"> = useMemo(
     () => ({
       maintainAspectRatio: false,
       responsive: true,
@@ -174,7 +189,12 @@ export default function ScoreDistributionChart({
           max,
           ticks: {
             color: tickColor,
-            font: { family: tickFontFamily, size: tickFontSize, weight: "400" },
+            font: { 
+              family: tickFontFamily, 
+              size: tickFontSize, 
+              //  font.weight 타입 에러 수정
+              weight: "400" as "400" | "normal", 
+            } as Partial<FontSpec>, // FontSpec으로 명시하여 타입 오류를 좁힘
             stepSize: Math.ceil(max / 5),
             callback: (v: any) => `${v}`,
             padding: 6,
@@ -186,7 +206,12 @@ export default function ScoreDistributionChart({
           grid: { display: false, drawBorder: false, drawTicks: false },
           ticks: {
             color: tickColor,
-            font: { family: tickFontFamily, size: tickFontSize, weight: "400" },
+            font: { 
+              family: tickFontFamily, 
+              size: tickFontSize, 
+              // 🚨 font.weight 타입 에러 수정
+              weight: "400" as "400" | "normal",
+            } as Partial<FontSpec>, // FontSpec으로 명시하여 타입 오류를 좁힘
             padding: 8,
             maxRotation: 0,
             minRotation: 0,
@@ -222,42 +247,41 @@ export default function ScoreDistributionChart({
         },
       } as any,
 
-      animation: animate
+      // 애니메이션 일반 속성 (duration, delay, easing)
+      animation: enableAnimation
         ? {
             duration: durationMs,
+            // 🚨 Easing 값 타입 에러 수정
             easing:
-              easing === "linear"
+              (easing === "linear"
                 ? "linear"
                 : easing === "easeInOutCubic"
                 ? "easeInOutCubic"
-                : "easeOutCubic",
+                : "easeOutCubic") as "linear" | "easeOutCubic" | "easeInOutCubic",
             delay: (ctx: any) => {
               if (ctx.type !== "data" || ctx.mode !== "default") return 0;
               return ctx.dataIndex * staggerMs;
             },
-            datasets: {
-                y: {
-                    duration: 0,
-                }
-            }
           }
-        : false,
+        : { duration: 0 },
 
-      animations: animate
+      // 속성별 애니메이션 설정 (솟아오르는 효과)
+      animations: enableAnimation
         ? {
-            y: {
-              from: 0,
+            y: { // y축 애니메이션은 0에서 시작하여 값으로 증가
+              from: 0, 
               duration: durationMs,
+              //  Easing 값 타입 에러 수정
               easing:
-                easing === "linear"
+                (easing === "linear"
                   ? "linear"
                   : easing === "easeInOutCubic"
                   ? "easeInOutCubic"
-                  : "easeOutCubic",
+                  : "easeOutCubic") as "linear" | "easeOutCubic" | "easeInOutCubic",
             },
             base: {
               from: 0,
-              duration: 0, 
+              duration: 0, // 막대 바닥은 0에 즉시 고정
             }
           }
         : undefined,
@@ -273,17 +297,18 @@ export default function ScoreDistributionChart({
       highlightScore,
       series,
       highlightTextFormatter,
-      animate,
+      enableAnimation,
       durationMs,
       staggerMs,
       easing,
     ]
   );
 
-  const chartKey = useMemo(() => JSON.stringify({ labels, values, animate }), [labels, values, animate]);
+  // 차트 Key에 max 값을 추가하여 애니메이션이 0에서 확실히 시작되도록 강제 리셋 (솟아오르는 문제 해결)
+  const chartKey = useMemo(() => JSON.stringify({ labels, values, animate: enableAnimation, max }), [labels, values, enableAnimation, max]);
 
   return (
-    <div style={{ height, width: "100%" }}>
+    <div className="score_distribuiton_chart" style={{ height, width: "100%" }}>
       <Bar 
         key={chartKey} 
         data={data} 

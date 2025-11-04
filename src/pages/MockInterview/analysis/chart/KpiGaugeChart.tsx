@@ -132,7 +132,12 @@ export default function KpiGaugeChart({
         x: { display: false, min: 0, max: 1, grid: { display: false }, ticks: { display: false }, border: { display: false } },
         y: { display: false, grid: { display: false }, ticks: { display: false }, border: { display: false } },
       },
-      layout: { padding: 0 },
+      layout: { padding: 0,
+        autoPadding: false,
+
+      },
+      // 애니메이션 명시적 비활성화 추가
+      animation: false as const,
     }),
     []
   );

@@ -793,3 +793,51 @@ line-height: 20px; /* 125% */
     height: 1px;
     background: #E0E2E4;
 }
+
+
+
+body.mock-analysis-print-mode .masthead,
+body.mock-analysis-print-mode .btn_wrap,
+body.mock-analysis-print-mode .site-footer,
+body.mock-analysis-print-mode .mock-analysis-overview__recommended-jobs,
+body.mock-analysis-print-mode .mock-analysis-report__icon-btn
+{
+    display: none ;
+}
+
+body.mock-analysis-print-mode .mock-analysis__header{
+    border-bottom: none;
+}
+
+
+
+body.mock-analysis-print-mode .mock-analysis {
+    padding-top: 0px;
+    background: var(--white-100, #FFF);
+}
+
+
+.print-page-break {
+    page-break-after: always;
+    break-after: page;
+}
+
+
+
+@media print {
+
+    body, .chart-container, .chart-canvas, .bar, * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+
+        
+    }
+    
+
+    .print-page-break {
+      
+        page-break-after: always;
+        break-after: page;
+    }
+
+}

@@ -1,5 +1,4 @@
-import React, { useEffect, useRef } from "react";
-import { useLocation } from 'react-router-dom';
+import React from "react";
 
 import ic_bar_chart_24 from "@/assets/icons/size24/ic_bar_chart_24.png";
 import ic_laptop_24 from "@/assets/icons/size24/ic_laptop_24.png";
@@ -15,10 +14,6 @@ import ScoreDistributionSection from "./sections/ScoreDistributionSection";
 import CategorySummarySection, { type EvalItem } from "./sections/CategorySummarySection";
 import ResumeRecommendedJobsSection, { type JobCardV2Item } from "./sections/ResumeRecommendedJobsSection";
 import "./overviewPage.css";
-
-// --------------------------------------------------
-// Type Definitions
-// --------------------------------------------------
 type ScoreSectionSide = {
   role: string;
   rankText: string;
@@ -70,9 +65,6 @@ type Props = {
   };
 };
 
-// --------------------------------------------------
-// Main Component
-// --------------------------------------------------
 export default function OverviewPage({
   score,
   totalCandidates,
@@ -84,32 +76,8 @@ export default function OverviewPage({
   jobs,
   onToggleFavorite,
 }: Props) {
-  
-  // 1. 최상위 div 요소에 접근하기 위한 Ref 생성
-  const contentRef = useRef<HTMLDivElement>(null); 
-  const location = useLocation();
-
-  useEffect(() => {
-    // URL의 쿼리 파라미터를 분석합니다.
-    const query = new URLSearchParams(location.search);
-    
-    // 'printViewr' 플래그가 URL에 존재하는지 확인합니다.
-    const isPrintMode = query.has('printViewr');
-
-    // 2. Ref와 클래스 리스트를 사용하여 클래스 적용
-    if (contentRef.current) {
-        if (isPrintMode) {
-            // Ref가 연결된 mock-analysis-report__content div에 클래스 추가
-            document.body.classList.add('mock-analysis-print-mode');
-        } else {
-            // Ref가 연결된 div에서 클래스 제거
-            contentRef.current.classList.remove('mock-analysis-print-mode');
-        }
-    }
-  }, [location.search]);
-
   return (
-    <div className="mock-analysis-report__content" ref={contentRef}>
+    <div className="mock-analysis-report__content">
       <KpiOverviewSection
         score={score}
         totalCandidates={totalCandidates}
@@ -126,7 +94,7 @@ export default function OverviewPage({
         left={scoreSection.left}
         right={scoreSection.right}
       />
-   
+
       <CategorySummarySection
         title="항목별 종합 평가 섹션"
         titleIconSrc={ic_clipboard_24}

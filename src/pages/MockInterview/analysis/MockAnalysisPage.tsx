@@ -107,6 +107,24 @@ export default function MockAnalysisPage() {
   const [activeTab, setActiveTab] = useState<TabKey>("overview");
   const [jobs, setJobs] = useState(mockJobs);
   const score = 40;
+ 
+  const handleOpenPrintPage = () => {
+    console.log('현재 URL을 새 창에 띄우고 인쇄 플래그를 추가합니다.');
+    
+    // 1. 현재 URL을 가져옵니다.
+    const currentUrl = window.location.href; 
+    
+    // 2. URL에 ?isPrint=true 쿼리 파라미터를 추가합니다.
+    const separator = currentUrl.includes('?') ? '&' : '?';
+    const printUrl = `${currentUrl}${separator}printViewr`;
+
+    // 3. 새 창 띄우기
+    window.open(
+        printUrl, 
+        '_blank', 
+        'scrollbars=yes,resizable=yes' 
+    );
+};
   const handleTabClick = (key: TabKey) => setActiveTab(key);
 
   const handleToggleFavorite = (id: number | string, nextValue?: boolean) => {
@@ -171,7 +189,9 @@ export default function MockAnalysisPage() {
       <div className="mock-analysis-panel mock-analysis-report">
         <div className="mock-analysis-report__container">
           <div className="mock-analysis-report__inner">
-            <span className="mock-analysis-report__icon-btn" role="button" aria-label="리포트 인쇄">
+            <span className="mock-analysis-report__icon-btn" 
+            onClick={handleOpenPrintPage}
+            role="button" aria-label="리포트 인쇄">
               <img className="mock-analysis-report__icon" src={ic_print_gray900_24} alt="" />
             </span>
 
@@ -279,7 +299,10 @@ export default function MockAnalysisPage() {
             )}
 
             {activeTab === "match" && (
-              <ResumeInterviewMatchPage/>
+              <ResumeInterviewMatchPage
+              onToggleFavorite={handleToggleFavorite}
+              jobs={jobs}
+              />
             )}
 
             <div className="btn_wrap mock-analysis-report__actions">

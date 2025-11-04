@@ -54,7 +54,7 @@ export default function CategorySummarySection({
   const { scoreTitle, scores, RadarChartComponent } = left;
 
   return (
-    <div className="analysis-section mock-analysis-overview__category-summary">
+    <div className="analysis-section mock-analysis-overview__category-summary page-break-start">
       <span className="analysis-section__title">
         {titleIconSrc && <img src={titleIconSrc} alt="" />} {title}
       </span>

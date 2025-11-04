@@ -670,15 +670,68 @@ mock-analysis-overview__recommended-jobs */
   flex-wrap: wrap;
 }
 
-.analysis-resume-recommended-jobs__item{
-  /* display: flex;
-  flex: 1;
-  padding: 20px;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 20px;
-  border-radius: 4px;
-  border: 1px solid var(--gray-300, #E0E2E4);
-  background: var(--white-100, #FFF); */
+.page-break-start {
+  page-break-before: always !important;
 }
 
+@media print {
+  /* 1. 용지 및 전역 설정 */
+  @page {
+    size: A4 portrait;
+    margin: 0mm; /* 0mm은 프린터가 무시할 수 있음 */
+  }
+
+
+  nav, 
+  header, 
+  footer, 
+  .print-page-break, 
+  .tooltip__content, 
+  .mock-analysis-header,
+  .masthead {
+    display: none !important;
+  }
+
+  .mock-analysis {
+    display: flex;
+    width: 100%;
+    padding-top: 0 !important;
+ 
+    /* transform: scale(calc(210mm / 1320px));
+  */
+    transform-origin: top left;
+  }
+  
+  .mock-analysis-tabs{
+    height:46px !important;
+    padding: 0 60px !important;
+  }
+
+  .mock-analysis__header{
+    padding: 40px !important;
+  }
+
+  .mock-analysis-panel{
+    display: flex;
+    padding: 50px !important;
+ }
+
+ .mock-analysis-report__content{
+    gap:20px;
+ }
+
+ .mock-analysis-overview__score-distribution{
+  page-break-inside: avoid !important;
+ }
+
+ .analysis-section__left, .analysis-section__right{
+  background-color: rgb(255, 150, 13);
+  width: 50% !important;
+ }
+
+ .analysis-section__right .score_distribuiton_chart{
+  /* width: 100%; */
+  background-color: antiquewhite;
+ }
+
+}

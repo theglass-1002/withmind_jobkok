@@ -8,6 +8,7 @@ import {
   Tooltip,
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
+import { useLocation } from 'react-router-dom';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip);
 
@@ -23,8 +24,8 @@ type Props = {
 };
 
 export default function KpiFitBar({ value, className, style }: Props) {
+  const location = useLocation(); 
   const v = Math.max(0, Math.min(100, value));
-
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const [wrapH, setWrapH] = useState<number>(24);
   const [animatedValue, setAnimatedValue] = useState<number>(0);
@@ -40,8 +41,17 @@ export default function KpiFitBar({ value, className, style }: Props) {
     return () => ro.disconnect();
   }, []);
 
-  // 애니메이션 효과
   useEffect(() => {
+    const query = new URLSearchParams(location.search);
+    const isPrintMode = query.has('printViewr');
+
+    // 인쇄 모드일 경우: 최종 값으로 즉시 설정하고 종료
+    if (isPrintMode) {
+      setAnimatedValue(v); 
+      return; 
+    }
+    
+    // 일반 모드일 경우: 애니메이션 로직 실행
     const startTime = Date.now();
     const duration = 1200;
     const startValue = animatedValue;
@@ -51,7 +61,6 @@ export default function KpiFitBar({ value, className, style }: Props) {
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / duration, 1);
       
-      // easeOutCubic
       const easeProgress = 1 - Math.pow(1 - progress, 3);
       
       const currentValue = startValue + (targetValue - startValue) * easeProgress;
@@ -69,7 +78,7 @@ export default function KpiFitBar({ value, className, style }: Props) {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [v]);
+  }, [v, location.search]);
 
   const gradientCacheRef = useRef<{ key: string; gradient: CanvasGradient } | null>(null);
   function getGradient(chart: any) {
@@ -106,7 +115,9 @@ export default function KpiFitBar({ value, className, style }: Props) {
 
   const options = useMemo(
     () => ({
-      animation: false, // Chart.js 기본 애니메이션 끄기
+      animation: {
+        duration: 0, 
+      },
       indexAxis: "y" as const,
       responsive: true,
       maintainAspectRatio: false,

@@ -14,28 +14,65 @@ export default function MatchAnalysisSection() {
           <div className="match-analysis__container">
             
        
-            <div className="analysis-table__header">
-                <span className="analysis-table__col-title analysis-table__col-title--empty"></span> {/* 공백 / 메인 레이블 */}
-                <span className="analysis-table__col-title">일치도</span>
-                <span className="analysis-table__col-title">평가</span>
-                <span className="analysis-table__col-title">세부 분석</span>
-            </div>
+          <div className="analysis-table__header">
+            <span className="analysis-table__col-title analysis-table__col-title--empty"></span>
+            <span className="analysis-table__col-title">일치도</span>
+            <span className="analysis-table__col-title">평가</span>
+            <span className="analysis-table__col-title analysis-table__col-title--detail">세부 분석</span>
+         </div>
 
-
-            <div className="analysis-table__row">
-                <div className="table-row__main-label">
-                    <span>전체 응답 대비 일치도</span>
-                    <span className="table-row__sub-text">응답 내용이 이력서 기반 직무 설명과 일치하는 정도</span>
+         <div className="analysis-table__row">
+              <div className="analysis-table__cell analysis-table__cell--label">
+                  <span className="analysis-table__cell-title">전체 응답 대비 일치도</span>
+                  <span className="analysis-table__cell-subtitle">응답 내용이 이력서 기반 직무 설명과 일치하는 정도</span>
+              </div>
+              <div className="analysis-table__cell analysis-table__cell--data">88%</div>
+              <div className="analysis-table__cell analysis-table__cell--grade">
+               <span className="analysis-table__cell--grade-excellent">
+               우수
+               </span>
                 </div>
-                <div className="table-row__data">88%</div>
-                <div className="table-row__grade">우수</div>
-                <div className="table-row__detail">응답의 대부분이 이력서에서 주장한 역량과 밀접하게 연결되어 있어 신뢰도를 높입니다.</div>
-            </div>
+              <div className="analysis-table__cell analysis-table__cell--detail">응답의 대부분이 이력서에서 주장한 역량과 밀접하게 연결되어 있어 신뢰도를 높입니다.</div>
+          </div>
 
-            {/* 3. 기타 분석 목록 (필요시 별도 스타일링) */}
-            <div className="match-analysis__item">직무 역량 키워드 일치도</div>
-            <div className="match-analysis__item">경험 기반 일치도</div>
-            <div className="match-analysis__item">시술 일관성 및 논리 흐름</div>
+          <div className="analysis-table__row">
+              <div className="analysis-table__cell analysis-table__cell--label">
+                  <span className="analysis-table__cell-title">직무 역량 키워드 일치도</span>
+                  <span className="analysis-table__cell-subtitle">응답 내용이 이력서 기반 직무 설명과 일치하는 정도</span>
+              </div>
+              <div className="analysis-table__cell analysis-table__cell--data">82%</div>
+              <div className="analysis-table__cell analysis-table__cell--grade">
+                <span className="analysis-table__cell--grade-average">보통</span>
+                </div>
+              <div className="analysis-table__cell analysis-table__cell--detail">응답의 대부분이 이력서에서 주장한 역량과 밀접하게 연결되어 있어 신뢰도를 높입니다.</div>
+          </div>
+
+          <div className="analysis-table__row">
+              <div className="analysis-table__cell analysis-table__cell--label">
+                  <span className="analysis-table__cell-title">경험 기반 일치도</span>
+                  <span className="analysis-table__cell-subtitle">이력서의 에피소드가 실제 응답에 재현되거나
+                  연계 설명된 비율</span>
+              </div>
+              <div className="analysis-table__cell analysis-table__cell--data">82%</div>
+              <div className="analysis-table__cell analysis-table__cell--grade">
+                <span className="analysis-table__cell--grade-average">보통</span>
+                </div>
+              <div className="analysis-table__cell analysis-table__cell--detail">응답의 대부분이 이력서에서 주장한 역량과 밀접하게 연결되어 있어 신뢰도를 높입니다.</div>
+          </div>
+
+          <div className="analysis-table__row">
+              <div className="analysis-table__cell analysis-table__cell--label">
+                  <span className="analysis-table__cell-title">서술 일관성 및 논리 흐름</span>
+                  <span className="analysis-table__cell-subtitle">응답 내용이 이력서에 기반하여 자연스럽고
+                  논리적인 흐름으로 이어졌는지 여부</span>
+              </div>
+              <div className="analysis-table__cell analysis-table__cell--data">82%</div>
+              <div className="analysis-table__cell analysis-table__cell--grade">
+                <span className="analysis-table__cell--grade-average">보통</span>
+                </div>
+              <div className="analysis-table__cell analysis-table__cell--detail">응답의 대부분이 이력서에서 주장한 역량과 밀접하게 연결되어 있어 신뢰도를 높입니다.</div>
+          </div>
+
 
           </div>
           
