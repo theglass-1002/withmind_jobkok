@@ -30,7 +30,7 @@ export default function ScoreDistributionSection({
   badgeIconSrc,
 }: Props) {
   return (
-    <div className="analysis-section mock-analysis-overview__score-distribution">
+    <div className="analysis-section mock-analysis-overview__score-distribution page-summary">
       <span className="analysis-section__title">
         <img src={titleIconSrc} alt="" />
         {title}

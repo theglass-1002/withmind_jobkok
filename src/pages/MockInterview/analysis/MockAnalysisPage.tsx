@@ -117,13 +117,14 @@ export default function MockAnalysisPage() {
     // 2. URL에 ?isPrint=true 쿼리 파라미터를 추가합니다.
     const separator = currentUrl.includes('?') ? '&' : '?';
     const printUrl = `${currentUrl}${separator}printViewr`;
-
+    const A4_WIDTH = 794; 
+    const A4_HEIGHT = 1123;
     // 3. 새 창 띄우기
     window.open(
-        printUrl, 
-        '_blank', 
-        'scrollbars=yes,resizable=yes' 
-    );
+      printUrl, 
+      '_blank', 
+      `width=${A4_WIDTH},height=${A4_HEIGHT},scrollbars=yes,resizable=yes` 
+  );
 };
   const handleTabClick = (key: TabKey) => setActiveTab(key);
 
@@ -137,7 +138,7 @@ export default function MockAnalysisPage() {
 
   return (
     <div className="mock-analysis">
-      <div className="mock-analysis__inner">
+      <div className="mock-analysis__inner page-summary">
         <MockAnalysisHeader
           title="분석결과"
           date="2025.01.01 00:00"
@@ -158,7 +159,7 @@ export default function MockAnalysisPage() {
           ]}
         />
 
-        <div className="mock-analysis-tabs default_tabs">
+        <div className="mock-analysis-tabs default_tabs ">
           <span
             className={`mock-analysis-tabs__item tab ${activeTab === "overview" ? "on" : ""}`}
             role="button"
@@ -234,7 +235,7 @@ export default function MockAnalysisPage() {
                 categorySummary={{
                   left: {
                     scoreTitle: "홍길동님의 점수(차트 수정필요)",
-                    scores: { attitude: 50, voice: 20, tension: 30, competence: 40 },
+                    scores: { attitude: 10, voice: 100, tension: 50, competence: 60 },
                     RadarChartComponent: KpiRadarChart,
                   },
                   right: {

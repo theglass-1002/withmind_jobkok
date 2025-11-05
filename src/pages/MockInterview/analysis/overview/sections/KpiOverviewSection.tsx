@@ -18,7 +18,7 @@ export default function KpiOverviewSection({
   fit,
 }: Props) {
   return (
-    <div className="mock-analysis-overview__kpi">
+    <div className="mock-analysis-overview__kpi ">
       <KpiOverview
         score={score}
         totalCandidates={totalCandidates}
