@@ -683,69 +683,124 @@ mock-analysis-overview__recommended-jobs */
 }
 
 
+
+
 @media print {
-  /* 1. 용지 및 전역 설정 */
+  /* =================================
+  1. 페이지 기본 설정 및 전역 스타일
+  =================================
+  */
   @page {
     size: A4 portrait;
-    margin: 1mm !important; 
-  }  
+    margin: 1mm !important;
+  }
+
   * {
+    /* 줌 및 변형 초기화 */
     zoom: 1 !important;
     -moz-transform: scale(1) !important;
+    transform: none !important;
+    /* 기타 전역 설정 */
     line-height: 150%;
   }
 
   body {
     margin: auto;
     padding: 0 !important;
-    width: 210mm !important; /* A4 절대 너비 */
+    width: 210mm !important;
     max-width: 210mm !important;
-    transform: none !important;
     zoom: 1 !important;
   }
-  /* 2. 숨겨야 할 요소들 (탭 메뉴, 헤더, 푸터 등) */
-  nav, 
-  header, 
-  footer, 
-  .print-page-break, 
-  .tooltip__content, 
+
+  /* =================================
+  2. 인쇄 시 제외 요소 (display: none)
+  =================================
+  */
+  nav,
+  header,
+  footer,
+  .tooltip__content,
   .mock-analysis-header,
   .masthead,
-  .mock-analysis-overview__kpi-help
+  .mock-analysis-overview__kpi-help,
+  .mock-analysis-tabs
   {
     display: none !important;
   }
 
+  /* =================================
+  3. 폰트 크기 그룹화
+  =================================
+  */
 
-
-  .mock-analysis__header {
-    padding: 20px !important; 
-    gap: 10px !important;
-  }
-  .mock-analysis-tabs {
-    height: 36px !important;
-    padding: 0 60px !important;
-  }
-
-  .mock-analysis-tabs .mock-analysis-tabs__item.on{
-    height: 36px !important;
+  /* font-size: 20px 그룹 */
+  .mock-analysis-overview__kpi-desc,
+  .kpi-fit__percent
+  {
+   font-size: 20px !important;
   }
 
-  .mock-analysis-panel{
+  /* font-size: 15px 그룹 */
+  .mock-analysis__title,
+  .mock-analysis__title-meta,
+  .mock-analysis__title-status--done,
+  .analysis-score-title
+  {
+    font-size: 15px !important;
+  }
+
+  /* font-size: 14px 그룹 */
+  .mock-analysis-tabs__item,
+  .mock-analysis-overview__kpi-headline,
+  .kpi-fit__head-title,
+  .analysis-section__title,
+  .analysis-badge,
+  .analysis-eval-item__label,
+  .analysis-strength__description,
+  .analysis-weakness__description
+  {
+    font-size: 14px !important;
+  }
+
+  /* font-size: 10px 그룹 */
+  .mock-analysis-overview__kpi-desc-lead,
+  .mock-analysis__meta-key,
+  .mock-analysis__meta-value,
+  .mock-analysis-overview__kpi-desc-text,
+  .mock-analysis-overview__percent,
+  .kpi-fit__meta,
+  .kpi-fit__desc,
+  .kpi-fit__note,
+  .analysis-eval-item__description,
+  .analysis-eval-item__grade
+  {
+    font-size: 10px !important;
+  }
+
+  /* =================================
+  4. 크기 및 간격 (Sizing & Spacing)
+  =================================
+  */
+
+  /* 패널 및 전역 스타일 */
+  .mock-analysis-panel,
+  .mock-analysis-panel * {
+    line-height: 150%;
+  }
+  .mock-analysis-panel {
     padding: 27px !important;
   }
 
-  .mock-analysis-panel,
-  .mock-analysis-panel * {
-   
-    line-height: 150%;
+  /* 헤더 및 메타 정보 */
+  .mock-analysis__header {
+    padding: 20px !important;
+    gap: 10px !important;
   }
-
-  .mock-analysis__title{
-    font-size: 15px !important;
+  .mock-analysis__title,
+  .mock-analysis__title-meta,
+  .mock-analysis__title-status--done {
     gap: 5px !important;
   }
- 
   .mock-analysis__meta-row,
   .mock-analysis-overview__kpi-title,
   .mock-analysis-overview__kpi-fit,
@@ -754,37 +809,16 @@ mock-analysis-overview__recommended-jobs */
     padding: 10px !important;
     gap: 0px !important;
   }
-
-  .mock-analysis-tabs__item,
-  .mock-analysis-overview__kpi-headline,
-  .kpi-fit__head-title,
-  .analysis-section__title
-  
-  {
-    font-size: 15px !important;
+  .kpi-fit__meter{
+    gap: 0px !important;
   }
 
-  .mock-analysis-overview__kpi-desc,
-  .kpi-fit__percent
-  {
-   font-size: 20px !important;
-  }
- 
-  .mock-analysis-overview__kpi-desc-lead,
-  .mock-analysis__meta-key,
-  .mock-analysis__meta-value,
-  .mock-analysis-overview__kpi-desc-text,
-  .mock-analysis-overview__percent,
-  .kpi-fit__meta,
-  .kpi-fit__desc,
-  .kpi-fit__note
-  {
-    font-size: 10px !important;
-  }
-
+  /* 아이콘 크기 통일 */
   .mock-analysis-overview__kpi-icon,
   .kpi-fit__head-icon,
-  .analysis-section__title img
+  .analysis-section__title img,
+  .analysis-strength__label img,
+  .analysis-weakness__label img
   {
     width: 18px !important;
     height: 18px !important;
@@ -794,97 +828,55 @@ mock-analysis-overview__recommended-jobs */
     height: 15px !important;
   }
 
-  .mock-analysis-overview__kpi-chart{
+  /* =================================
+  5. 차트 및 분석 섹션 (Chart & Section)
+  =================================
+  */
+
+  /* KPI 차트 */
+  .mock-analysis-overview__kpi-chart {
     padding: 12px !important;
     transform: scale(0.9) !important;
   }
-  .kpi-chart__gauge div{
+  .kpi-chart__gauge div {
     display: flex;
-        justify-content: center;
+    justify-content: center;
   }
-  .kpi-chart__gauge canvas{
+  .kpi-chart__gauge canvas {
     height: 90% !important;
     width: 90% !important;
   }
-
-  .kpi-fit__meter{
-    gap: 0px !important;
+  .kpi-radar canvas {
+    transform: scale(0.8) !important;
   }
-  
-  .analysis-section{
+
+  /* 분석 섹션 */
+  .analysis-section {
     padding: 15px !important;
     gap: 12px !important;
   }
-
-/* 
- 
-
-  .analysis-section{
-    padding: 14px !important;
+  .analysis-section__body {
+    gap: 14px !important;
   }
-  .mock-analysis {
-    display: flex !important; 
-    width: 100% !important;
-    padding-top: 0 !important;
-
-  
-  }
-  
-
-
-  .mock-analysis__header {
-    padding: 20px !important; 
-  }
- 
-
-  .mock-analysis-overview__kpi-desc{
-    line-height: 10px !important;
-  }
-  
-  .mock-analysis-overview__kpi-title{
-    flex: 1;
- 
-  }
-
-  .mock-analysis-overview__kpi-fit{
-    flex: 2;
-    width: 100% !important;
-  }
-  
-  
-  .mock-analysis-overview__kpi-fit{
-    padding: 16px !important;
-  }
-
-  
-  .kpi-fit__note{
-    padding: 10px !important;
-  }
-  
-  .kpi-fit__content,
-  .kpi-fit__meter,
-  .kpi-fit__desc
-  {
-    gap: 10px !important;
-    line-height: 140% !important;
-  }
- .analysis-section__left{
+  .analysis-section__left,
+  .analysis-section__right {
     transform: scale(0.9) !important;
-    transform-origin: left center !important;
-    margin-right: -2% !important;
+    transform-origin: left center;
+  }
+  .analysis-score-title {
+    padding: 12px 10px !important;
+  }
 
-  } 
-  .analysis-section__right{
-    transform: scale(0.9) !important;
-    transform-origin: right center !important; 
-    margin-left: -10% !important; 
-
-    
-  }    */
-
-
- 
-
+  /* 카테고리 요약 및 평가 항목 */
+  .mock-analysis-overview__category-summary {
+    height: 500px !important;
+  }
+  .mock-analysis-overview__category-summary .analysis-section__body {
+    height: 100% !important;
+  }
+  .analysis-eval-item {
+    padding: 5px !important;
+    gap: 5px !important;
+  }
 }
 
- 

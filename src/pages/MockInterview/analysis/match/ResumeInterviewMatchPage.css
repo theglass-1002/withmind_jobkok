@@ -395,3 +395,118 @@ QuestionSection */
 .question-analysis__container .analysis-table__row:last-child{
     border-bottom: none;
 }
+
+
+
+@media print {
+    /* =================================
+    1. 페이지 기본 설정 및 전역 스타일
+    =================================
+    */
+    @page {
+      size: A4 portrait;
+      margin: 1mm !important;
+    }
+  
+    * {
+      /* 줌 및 변형 초기화 */
+      zoom: 1 !important;
+      -moz-transform: scale(1) !important;
+      transform: none !important;
+      /* 기타 전역 설정 */
+      line-height: 150%;
+    }
+  
+    body {
+      margin: auto;
+      padding: 0 !important;
+      width: 210mm !important;
+      max-width: 210mm !important;
+      zoom: 1 !important;
+    }
+  
+    .mock-analysis-report__content{
+        gap: 5px !important;
+    }
+    .report-section__title{
+        font-size: 14px !important;
+    }
+    .report-section__title img{
+        width: 18px;
+        height: 18px;
+
+    }
+    .summary__detail-container{
+        padding: 11px 28px 8px 28px;
+        gap: 10px;
+    }
+
+    .summary__key-takeaway{
+        padding: 10px;
+        font-size: 12px !important;
+    }
+    .summary__detail-text{
+        font-size: 12px;
+    }
+
+    /*  report-section--match */
+    .report-section{
+        gap: 14px;
+        padding: 10px;
+    }
+    
+    .analysis-table__cell{
+      padding: 10px;
+    }
+    .analysis-table__col-title,
+    .analysis-table__cell-title,
+    .analysis-table__cell--grade,
+    .analysis__note,
+    .analysis-table__cell--data
+    {
+        font-size: 11px;
+    }
+    .analysis-table__col-title{
+        height: 30px;
+    }
+
+    .analysis-table__cell-subtitle,
+    .analysis-table__cell--detail
+    {
+        font-size: 13px;
+    }
+
+    .analysis-table__cell--detail{
+        height: auto !important;
+        min-height: auto !important;
+    }
+/* 
+    report-section--suggest */
+
+    .suggest-analysis__container .analysis-table__row .analysis-table__cell{
+        padding: 8px 4px 0px 4px;
+        justify-content: center;
+        font-size: 12px; 
+    }
+    .guide__description{
+        font-size: 13px;
+    }
+    .guide__example,
+    .analysis-table__cell
+    {
+        font-size: 11px; 
+    }
+  
+    .note__icon{
+        width: 10px;
+        height: 10px;
+    }
+
+/* 
+    report-section--question */
+
+    .question-analysis__container .analysis-table__cell--label{
+        padding: 14px;
+    }
+  }
+  

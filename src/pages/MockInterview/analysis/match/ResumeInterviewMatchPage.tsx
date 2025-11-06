@@ -28,7 +28,9 @@ export default function ResumeInterviewMatchPage({
       <div className="mock-analysis-report__content">
        <ResumeSummarySection />
        <MatchAnalysisSection />
+       <span className="print-page-break"></span>
        <SuggestionSection />
+       <span className="print-page-break"></span>
        <QuestionSection />
        <ResumeRecommendedJobsSection
         title="이 이력서와 가장 잘 맞는 공고"

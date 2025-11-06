@@ -818,6 +818,7 @@ body.mock-analysis-print-mode .mock-analysis {
 
 
 .print-page-break {
+    
     page-break-after: always;
     break-after: page;
 }
@@ -835,9 +836,8 @@ body.mock-analysis-print-mode .mock-analysis {
     
 
     .print-page-break {
-      
         page-break-after: always;
-        break-after: page;
+     
     }
 
 }

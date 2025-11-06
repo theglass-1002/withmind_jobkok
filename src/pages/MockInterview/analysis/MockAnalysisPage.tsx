@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 
 import test_company_logo from "@/assets/testImg/company_logo/test_company_logo.png";
 import ic_saramin_18 from "@/assets/icons/size18/ic_saramin_18.png";
@@ -16,7 +17,6 @@ import MockAnalysisHeader from "./MockAnalysisHeader";
 import OverviewPage from "./overview/OverviewPage";
 import DetailPage from "./detail/DetailPage";
 import ResumeInterviewMatchPage from "./match/ResumeInterviewMatchPage";
-
 
 import KpiRadarChart from "@/pages/MockInterview/analysis/chart/KpiRadarChart";
 
@@ -106,26 +106,37 @@ type TabKey = "overview" | "detail" | "match";
 export default function MockAnalysisPage() {
   const [activeTab, setActiveTab] = useState<TabKey>("overview");
   const [jobs, setJobs] = useState(mockJobs);
+  const location = useLocation();
   const score = 40;
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tabParam = params.get('tab') as TabKey;
+    
+    if (tabParam && ['overview', 'detail', 'match'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [location.search]);
  
   const handleOpenPrintPage = () => {
     console.log('현재 URL을 새 창에 띄우고 인쇄 플래그를 추가합니다.');
+    console.log('현재 탭:', activeTab);
     
-    // 1. 현재 URL을 가져옵니다.
     const currentUrl = window.location.href; 
-    
-    // 2. URL에 ?isPrint=true 쿼리 파라미터를 추가합니다.
     const separator = currentUrl.includes('?') ? '&' : '?';
-    const printUrl = `${currentUrl}${separator}printViewr`;
+    
+    const printUrl = `${currentUrl}${separator}printViewr&tab=${activeTab}`;
+    
     const A4_WIDTH = 794; 
     const A4_HEIGHT = 1123;
-    // 3. 새 창 띄우기
+    
     window.open(
       printUrl, 
       '_blank', 
       `width=${A4_WIDTH},height=${A4_HEIGHT},scrollbars=yes,resizable=yes` 
-  );
-};
+    );
+  };
+
   const handleTabClick = (key: TabKey) => setActiveTab(key);
 
   const handleToggleFavorite = (id: number | string, nextValue?: boolean) => {
@@ -143,6 +154,7 @@ export default function MockAnalysisPage() {
           title="분석결과"
           date="2025.01.01 00:00"
           status="진행 완료"
+          activeTab={activeTab} 
           metaRows={[
             [
               { key: "이름", value: "홍길동" },
@@ -234,8 +246,8 @@ export default function MockAnalysisPage() {
                 }}
                 categorySummary={{
                   left: {
-                    scoreTitle: "홍길동님의 점수(차트 수정필요)",
-                    scores: { attitude: 10, voice: 100, tension: 50, competence: 60 },
+                    scoreTitle: "홍길동님의 점수",
+                    scores: { attitude: 92, voice: 80, tension: 10, competence: 30 },
                     RadarChartComponent: KpiRadarChart,
                   },
                   right: {

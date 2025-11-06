@@ -1119,3 +1119,220 @@ font-style: normal;
 font-weight: 600;
 line-height: 24px; /* 120% */
 }
+
+
+
+@media print {
+  /* =================================
+  1. 페이지 기본 설정 및 전역 스타일
+  =================================
+  */
+  @page {
+    size: A4 portrait;
+    margin: 1mm !important;
+  }
+
+  * {
+    /* 줌 및 변형 초기화 */
+    zoom: 1 !important;
+    -moz-transform: scale(1) !important;
+    transform: none !important;
+    /* 기타 전역 설정 */
+    line-height: 150%;
+  }
+
+  body {
+    margin: auto;
+    padding: 0 !important;
+    width: 210mm !important;
+    max-width: 210mm !important;
+    zoom: 1 !important;
+  }
+
+  /* =================================
+  2. 인쇄 시 제외 요소 (display: none)
+  =================================
+  */
+  nav,
+  header,
+  footer,
+  .tooltip__content,
+  .mock-analysis-header,
+  .masthead,
+  .mock-analysis-overview__kpi-help,
+  .tooltip
+  {
+    display: none !important;
+  }
+
+  /* =================================
+  3. 폰트 사이즈 및 패딩 그룹화
+  =================================
+  */
+
+  /* font-size: 12px 그룹 */
+  .detail-analysis__answer-analysis-title,
+  .detail-analysis__grade-option,
+  .detail-analysis__answer-grade-label,
+  .detail-analysis__answer-keywords-label,
+  .detail-analysis__level-desc,
+  .detail-analysis__metric-grade-label,
+  .detail-analysis__metric-analysis-title,
+  .detail-analysis__attitude-filters .ui-filter__item,
+  .detail-analysis__tension-summary,
+  .detail-analysis__tension-description
+  {
+    font-size: 12px !important;
+  }
+
+  /* font-size: 10px 그룹 */
+  .detail-analysis__answer-analysis-text,
+  .detail-analysis__metric-analysis-text,
+  .detail-analysis__metric-highlight,
+  .detail-analysis__metric-table .detail-analysis__metric-table-cell,
+  .detail-analysis__keyword,
+  .voice_tone .detail-analysis__metric-grade-option,
+  .speech_speed .detail-analysis__metric-grade-option
+  {
+    font-size: 10px !important;
+  }
+
+  /* font-size: 18px 그룹 */
+  .detail-analysis__tension-stat-value,
+  .detail-analysis__tension-stat-level
+  {
+    font-size: 18px;
+  }
+
+  /* =================================
+  4. 상세 분석 (Detail Analysis) 스타일
+  =================================
+  */
+
+  /* 페이지 분할 설정 */
+  .detail-analysis__competence {
+    page-break-after: always;
+  }
+  .detail-analysis__print-item {
+    page-break-inside: avoid;
+    break-inside: avoid;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    align-self: stretch;
+  }
+
+  /* 레벨 그래프 관련 */
+  .detail-analysis__level-graph {
+    padding: 12px !important;
+    gap: 10px !important;
+  }
+  .detail-analysis__chart-gauge {
+    transform: scale(0.8) !important;
+  }
+  .detail-analysis__level-label {
+    font-size: 20px !important;
+    line-height: 40px !important;
+  }
+  .detail-analysis__grade-option {
+    height: 25px !important;
+  }
+
+  /* 답변 분석 영역 - 높이 및 Flexbox */
+  .detail-analysis__answer-analysis {
+    height: 100% !important;
+  }
+  .detail-analysis__question-main {
+    display: flex;
+    height: auto !important;
+    gap: 20px;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  /* 기타 답변/질문 요소 */
+  .detail-analysis__question-text {
+    padding: 10px !important;
+  }
+  .detail-analysis__question-info,
+  .detail-analysis__answer-grade {
+    height: auto !important;
+    padding: 10px !important;
+    gap: 8px;
+  }
+
+  /* 키워드 */
+  .detail-analysis__answer-keyword-list {
+    flex-wrap: wrap;
+  }
+  .detail-analysis__answer-keywords {
+    padding: 10px !important;
+    gap: 8px !important;
+    justify-content: space-evenly;
+  }
+  .detail-analysis__keyword {
+    padding: 5px 6px;
+    flex-shrink: 0;
+  }
+
+  /* =================================
+  5. 태도 분석 (Attitude Analysis) 스타일
+  =================================
+  */
+
+  /* 음성/속도 (Voice/Speed) */
+  .voice_tone .detail-analysis__attitude-content,
+  .speech_speed .detail-analysis__attitude-content {
+    gap: 10px !important;
+  }
+  .voice_tone .detail-analysis__attitude-left canvas,
+  .speech_speed .detail-analysis__attitude-left canvas {
+    width: 400px !important;
+  }
+  .voice_tone .detail-analysis__metric-grade,
+  .speech_speed .detail-analysis__metric-grade {
+    padding: 10px;
+  }
+  .detail-analysis__metric-grade-option.normal.on::before,
+  .detail-analysis__metric-grade-option.excellent.on::before,
+  .detail-analysis__metric-grade-option.poor.on::before {
+    width: 10px;
+    height: 10px;
+  }
+
+  /* 긴장도 (Tension) */
+  .detail-analysis__tension-header {
+    width: auto;
+  }
+  .detail-analysis__attitude-content.tension {
+    height: auto !important;
+    padding: 10px;
+    align-items: stretch;
+  }
+  .detail-analysis__attitude-content.tension .detail-analysis__attitude-left {
+    width: auto;
+    transform-origin: left;
+  }
+  .detail-analysis__attitude.tension .detail-analysis__attitude-right {
+    display: flex;
+    height: auto !important;
+    gap: 20px;
+    align-items: stretch;
+    width: 100%;
+  }
+  .detail-analysis__tension-stat-item {
+    height: 100% !important;
+    padding: 10px;
+    justify-content: space-evenly;
+  }
+  .detail-analysis__tension-stat-value-wrapper,
+  .detail-analysis__tension-stat-level {
+    width: 100px;
+    height: 80px;
+    padding: 0px !important;
+  }
+  .detail-analysis__tension-chart-wrapper canvas {
+    width: 100% !important;
+  }
+}

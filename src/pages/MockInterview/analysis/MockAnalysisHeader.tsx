@@ -1,28 +1,45 @@
+// MockAnalysisHeader.tsx
 import React from "react";
+import { useLocation } from "react-router-dom";
 
 type MetaItem = { key: string; value: string };
 type MetaRow = MetaItem[];
+type TabKey = "overview" | "detail" | "match";
 
-/**
- * MockAnalysisHeader
- * 분석 결과 상단 영역 (제목, 상태, 메타 정보)
- */
 interface MockAnalysisHeaderProps {
-  /** 상단 타이틀 (ex: "분석결과") */
   title: string;
-  /** 날짜 텍스트 */
   date: string;
-  /** 상태 텍스트 (ex: "진행 완료") */
   status: string;
-  /** 메타 정보 행 배열 (각 행은 2개의 key-value 쌍) */
   metaRows: MetaRow[];
+  activeTab?: TabKey;
 }
 
-export default function MockAnalysisHeader({ title, date, status, metaRows }: MockAnalysisHeaderProps) {
+const TAB_LABELS: Record<TabKey, string> = {
+  overview: "종합 분석",
+  detail: "상세 분석",
+  match: "이력서−면접 일치도 분석",
+};
+
+export default function MockAnalysisHeader({ 
+  title, 
+  date, 
+  status, 
+  metaRows,
+  activeTab = "overview"
+}: MockAnalysisHeaderProps) {
+  const location = useLocation();
+  
+  // URL에 printViewr가 있는지 확인
+  const isPrintMode = new URLSearchParams(location.search).has('printViewr');
+  
+  // printViewr가 있으면 activeTab 라벨만, 없으면 title 표시
+  const displayTitle = isPrintMode ? TAB_LABELS[activeTab] : title;
+
   return (
     <div className="mock-analysis__header">
       <div className="mock-analysis__title">
-        {title}
+        {isPrintMode?TAB_LABELS[activeTab]:displayTitle}
+        
         <div className="mock-analysis__title-meta">
           <span className="mock-analysis__title-date">{date}</span>
           <span className="mock-analysis__title-status mock-analysis__title-status--done">

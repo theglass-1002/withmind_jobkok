@@ -1,5 +1,6 @@
 // src/pages/MockInterview/analysis/components/TensionAnalysisChart.tsx
 import React, { useMemo, useEffect, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -46,8 +47,11 @@ export default function TensionAnalysisChart({
   min = 0,
   max = 100,
 }: Props) {
+  const location = useLocation();
+  const isPrintMode = new URLSearchParams(location.search).has('printViewr');
+
   const defaultLabels = useMemo(
-    () => userValues.map((_, i) => `질문 ${i + 1}`), // 배열 대신 문자열
+    () => userValues.map((_, i) => `질문 ${i + 1}`),
     [userValues]
   );
   const chartLabels = labels || defaultLabels;
@@ -60,7 +64,6 @@ export default function TensionAnalysisChart({
   );
   const animationRef = useRef<number>();
 
-  // 애니메이션 효과
   useEffect(() => {
     const startTime = Date.now();
     const duration = 1200;
@@ -71,7 +74,6 @@ export default function TensionAnalysisChart({
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / duration, 1);
 
-      // easeOutCubic
       const easeProgress = 1 - Math.pow(1 - progress, 3);
 
       const currentUserValues = userValues.map((target, i) => {
@@ -99,7 +101,7 @@ export default function TensionAnalysisChart({
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [userValues, averageValues, min]);
+  }, [userValues, averageValues, min, animatedUserValues, animatedAverageValues]);
 
   const data = useMemo(() => {
     return {
@@ -138,6 +140,8 @@ export default function TensionAnalysisChart({
   }, [chartLabels, animatedUserValues, animatedAverageValues, userLineColor, averageLineColor]);
 
   const options = useMemo(() => {
+    const fontSize = isPrintMode ? 10 : 12;
+
     return {
       animation: false,
       responsive: true,
@@ -167,15 +171,17 @@ export default function TensionAnalysisChart({
         },
         x: {
           ticks: {
-            font: { size: 14, family: "Pretendard" },
+            font: { size: fontSize, family: "Pretendard" },
             color: "#848B93",
+            maxRotation: 0, 
+            minRotation: 0,
           },
           grid: { display: false, drawBorder: false },
           border: { display: false },
         },
       },
     };
-  }, [min, max]);
+  }, [min, max, isPrintMode]);
 
   return (
     <div className="detail-analysis__tension-chart-wrapper" style={{ width: "100%", height: "100%", padding: "0px" }}>

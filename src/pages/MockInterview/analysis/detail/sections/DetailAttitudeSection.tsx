@@ -53,7 +53,7 @@ export default function DetailAttitudeSection({
   ];
 
   return (
-    <div className="analysis-section detail-analysis__attitude">
+    <div className="analysis-section detail-analysis__attitude ">
       <span className="analysis-section__title">
         {titleIconSrc && <img src={titleIconSrc} alt="" />} {title}
       </span>

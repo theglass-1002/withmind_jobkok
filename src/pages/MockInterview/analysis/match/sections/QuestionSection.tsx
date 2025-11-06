@@ -96,6 +96,7 @@ export default function QuestionSection() {
                     </div>  
                 </div>
             </div>
+           
             <div className="analysis-table__row">
                 <div className="analysis-table__cell analysis-table__cell--label">
                     학력ㆍ전공

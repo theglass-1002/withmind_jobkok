@@ -1,5 +1,6 @@
 // src/pages/MockInterview/my-report/detail/sections/DetailCompetenceSection.tsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import UiFilter, { type UiFilterOption } from "@/shared/components/ui-filter/UiFilter";
 import LevelGraph from "@/pages/MockInterview/analysis/chart/LevelGraph";
 
@@ -26,6 +27,14 @@ export default function DetailCompetenceSection({
   titleIconSrc,
   description = "면접 과정에서 보인 의사소통 능력과 문제해결 능력은 우수하다고 평가됩니다.",
 }: Props) {
+  const location = useLocation();
+  const isPrintMode = new URLSearchParams(location.search).has('printViewr');
+
+  useEffect(() => {
+    console.log('DetailCompetenceSection - 프린트 모드:', isPrintMode);
+  }, [isPrintMode]);
+
+
   const DEFAULT_FILTERS: UiFilterOption[] = [
     { label: "질문 1", value: "q1" },
     { label: "질문 2", value: "q2" },
@@ -42,23 +51,76 @@ export default function DetailCompetenceSection({
 
   const QUESTIONS: Record<
     string,
-    { title: string; grade: "상" | "중" | "하"; keywords: string[]; analysis: string }
+    { title: string; grade: "상" | "중" | "하"; keywords: string[]; analysis: string; category:string; }
   > = {
     q1: {
       title: "1분동안 자신을 소개해주세요",
       grade: "상",
-      keywords: ["우선순위", "MVP 설정", "협업 구조설계"],
+      category:"질문 1",
+      keywords: ["우선순위", "MVP 설정", "협업 구조설계", "협업 구조설계", "협업 구조설계", "협업 구조설계"],
       analysis: "핵심 메시지가 명확하고 사례 제시가 적절합니다.",
+      
     },
     q2: {
       title: "최근 프로젝트에서 본인의 역할은?",
       grade: "중",
+      category:"질문 2",
       keywords: ["리팩토링", "성능 최적화"],
       analysis: "역할 서술은 구체적이나 임팩트 지표가 부족합니다.",
     },
     q3: {
       title: "가장 어려웠던 문제와 해결 방법은?",
       grade: "하",
+      category:"질문 3",
+      keywords: ["문제 정의", "원인 분석"],
+      analysis: "해결 과정의 근거가 약하므로 수치/지표 보완이 필요합니다.",
+    },
+    q4: {
+      title: "가장 어려웠던 문제와 해결 방법은?",
+      grade: "하",
+      category:"질문 4",
+      keywords: ["문제 정의", "원인 분석"],
+      analysis: "해결 과정의 근거가 약하므로 수치/지표 보완이 필요합니다.",
+    },
+    q5: {
+      title: "가장 어려웠던 문제와 해결 방법은?",
+      grade: "하",
+      category:"질문 5",
+      keywords: ["문제 정의", "원인 분석"],
+      analysis: "해결 과정의 근거가 약하므로 수치/지표 보완이 필요합니다.",
+    },
+    q6: {
+      title: "가장 어려웠던 문제와 해결 방법은?",
+      grade: "하",
+      category:"질문 4",
+      keywords: ["문제 정의", "원인 분석"],
+      analysis: "해결 과정의 근거가 약하므로 수치/지표 보완이 필요합니다.",
+    },
+    q7: {
+      title: "가장 어려웠던 문제와 해결 방법은?",
+      grade: "하",
+      category:"질문 5",
+      keywords: ["문제 정의", "원인 분석"],
+      analysis: "해결 과정의 근거가 약하므로 수치/지표 보완이 필요합니다.",
+    },
+    q8: {
+      title: "가장 어려웠던 문제와 해결 방법은?",
+      grade: "하",
+      category:"질문 4",
+      keywords: ["문제 정의", "원인 분석"],
+      analysis: "해결 과정의 근거가 약하므로 수치/지표 보완이 필요합니다.",
+    },
+    q9: {
+      title: "가장 어려웠던 문제와 해결 방법은?",
+      grade: "하",
+      category:"질문 5",
+      keywords: ["문제 정의", "원인 분석"],
+      analysis: "해결 과정의 근거가 약하므로 수치/지표 보완이 필요합니다.",
+    },
+    q10: {
+      title: "가장 어려웠던 문제와 해결 방법은?",
+      grade: "하",
+      category:"질문 5",
       keywords: ["문제 정의", "원인 분석"],
       analysis: "해결 과정의 근거가 약하므로 수치/지표 보완이 필요합니다.",
     },
@@ -75,8 +137,10 @@ export default function DetailCompetenceSection({
   const current = QUESTIONS[selectedQuestion] ?? {
     title: "질문을 선택해주세요",
     grade: "중" as const,
+    category:"질문 5",
     keywords: [],
     analysis: "",
+    
   };
   const words = WORDS[selectedQuestion] ?? WORDS.default;
 
@@ -85,11 +149,78 @@ export default function DetailCompetenceSection({
       <span className="analysis-section__title">
         {titleIconSrc && <img src={titleIconSrc} alt="" />} {title}
       </span>
-
+       
       <div className="analysis-section__body">
         <LevelGraph score={score} description={description} />
+        {isPrintMode?
+         <div className="detail-analysis__content">
+    {/* 맵핑 로직 수정: i, arr 인자를 사용하여 페이지 나누기 로직 구현 */}
+    {Object.entries(QUESTIONS).map(([key, q], i, arr) => {
+      const totalItems = arr.length;
+      const isPageBreakNeeded = (i + 1) % 3 === 0 && i < totalItems - 1;
+      
+      return (
+        <React.Fragment key={key}>
+          <div className="detail-analysis__print-item">
+            <div className="detail-analysis__question-text">
+              <span className="detail-analysis__question-label">{q.category}</span>
+              <span className="detail-analysis__question-title">{q.title}</span>
+            </div>
 
-        <div className="detail-analysis__content">
+            <div className="detail-analysis__question-detail">
+              <div className="detail-analysis__question-main">
+                <div className="detail-analysis__question-info">
+                  <div className="detail-analysis__answer-grade">
+                    <div className="detail-analysis__answer-grade-label">
+                      <img src={ic_stars_gray600_20} alt="" />
+                      답변 등급
+                    </div>
+                    <div className="detail-analysis__answer-grade-options">
+                      <span className={`detail-analysis__grade-option ${q.grade === "상" ? "on" : ""}`}>상</span>
+                      <span className={`detail-analysis__grade-option ${q.grade === "중" ? "on" : ""}`}>중</span>
+                      <span className={`detail-analysis__grade-option ${q.grade === "하" ? "on" : ""}`}>하</span>
+                    </div>
+                  </div>
+
+                  <div className="detail-analysis__answer-keywords">
+                    <span className="detail-analysis__answer-keywords-label">
+                      <img src={ic_emergency_gray600_20} alt="" />
+                      답변 핵심 표현
+                    </span>
+                    <div className="detail-analysis__answer-keyword-list">
+                      {q.keywords.length > 0 ? (
+                        q.keywords.map((k, index) => (
+                          <span key={`${key}-kw-${index}`} className="detail-analysis__keyword">{k}</span>
+                        ))
+                      ) : (
+                        <span className="detail-analysis__keyword">키워드 없음</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="detail-analysis__question-info">
+                  <div className="detail-analysis__answer-analysis">
+                    <div className="detail-analysis__answer-analysis-title">
+                      <img src={ic_forum_gray600_20} alt="" />
+                      답변 분석
+                    </div>
+                    <span className="detail-analysis__answer-analysis-text">
+                      {q.analysis || "분석 없음"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+        
+        </React.Fragment>
+      );
+    })}
+  </div>
+          
+        :<div className="detail-analysis__content">
           <div className="detail-analysis__qa-section">
             <UiFilter
               options={DEFAULT_FILTERS}
@@ -212,6 +343,8 @@ export default function DetailCompetenceSection({
             </div>
           </div>
         </div>
+        }
+      
       </div>
     </div>
   );
