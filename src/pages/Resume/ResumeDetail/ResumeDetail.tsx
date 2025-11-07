@@ -32,7 +32,6 @@ import ResumeSelfIntroSection from "./parts/ResumeSelfIntroSection";
 import ResumeMockInterviewSection from "./parts/ResumeMockInterviewSection";
 
 
-
 const ALL_SECTIONS: SectionId[] = [
   "title",
   "basic",

@@ -11,11 +11,11 @@ import ResumeDetail from "@/pages/Resume/ResumeDetail/ResumeDetail";
 import ResumeEdit from "@/pages/Resume/ResumeEdit/ResumeEdit";
 import ResumeCreate from "@/pages/Resume/ResumeCreate";
 
-import MockInterview from "@/pages/MockInterview/MockInterview";
-import MockAnalysisPage from "@/pages/MockInterview/analysis/MockAnalysisPage";
-import OverviewPage from "@/pages/MockInterview/analysis/overview/OverviewPage";
+import InterviewReport from "@/pages/InterviewReport/InterviewReport";
+import MockAnalysisPage from "@/pages/InterviewReport/analysis/MockAnalysisPage";
 
-
+import MockInterviewGuide from "@/pages/MockInterview/MockInterviewGuide/MockInterviewGuide";
+import MockInstructions from "@/pages/MockInterview/MockInstructions/MockInstructions";
 
 
 
@@ -59,10 +59,9 @@ export const router = createBrowserRouter([
   { path: "/resumes/:resumeId", element: <Layout><ResumeDetail /></Layout> },
   { path: "/resumes/:resumeId/edit", element: <Layout><ResumeEdit /></Layout> },
 
-  { path: "/mock-interview", element: <Layout><MockInterview /></Layout> },
+  { path: "/mock-interview-report", element: <Layout><InterviewReport /></Layout> },
   { path: "/mock-interview/analysis/:interviewId", element: <Layout><MockAnalysisPage /></Layout> } ,
-  // { path: "/mock-interview/analysis/print/overview/:interviewId", element: <Layout><OverviewPage /></Layout> } ,
-
+ 
   { path: "jobs/:jobId", element: <Layout><JobDetail /></Layout>  } ,
   { path: "/companies", element: <Layout><CompaniesList /></Layout> },
   { path: "/companies/:companyId", element: <Layout><CompanyDetail /></Layout> },
@@ -94,5 +93,7 @@ export const router = createBrowserRouter([
   {
     path: "/purchase/result/fail",
     element: <Layout><PurchaseFail /></Layout>,
-  }
+  },
+  { path: "/mock-interview/guide", element:<MockInterviewGuide/> },
+  { path: "/mock-interview/instructions/step-one", element:<MockInstructions/> }
 ]);

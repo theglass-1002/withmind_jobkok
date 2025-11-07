@@ -44,7 +44,7 @@ export default function Navbar() {
           <ul className="masthead__menu">
               <li><NavLink to="/jobs" className={({isActive}) => isActive ? "on" : undefined}>채용공고</NavLink></li>
               <li><NavLink to="/resumes" className={({isActive}) => isActive ? "on" : undefined}>이력서</NavLink></li>
-              <li><NavLink to="/mock-interview" className={({isActive}) => isActive ? "on" : undefined}>모의면접</NavLink></li>
+              <li><NavLink to="/mock-interview-report" className={({isActive}) => isActive ? "on" : undefined}>모의면접</NavLink></li>
             </ul>
           <div className="login_on">
             <span

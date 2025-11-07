@@ -19,6 +19,8 @@ import PortfolioDocumentsSection from "@/pages/Resume/ResumeCreate/PortfolioDocu
 import SelfIntroductionSection from "@/pages/Resume/ResumeCreate/SelfIntroductionSection/SelfIntroductionSection";
 import MockInterviewAnalysisSection from "@/pages/Resume/ResumeCreate/MockInterviewAnalysisSection/MockInterviewAnalysisSection";
 
+
+
 import AISuggestArea from "@/pages/Resume/ResumeAISuggest";
 import Modal from "@/shared/components/modal/Modal";
 

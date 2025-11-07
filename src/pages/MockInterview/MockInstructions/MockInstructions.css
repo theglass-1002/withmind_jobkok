@@ -1,0 +1,158 @@
+.mock-instructions-page{
+    display: flex;
+    width: 1920px;
+    height: 940px;
+    padding: 120px 360px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 52px;
+    background: var(--gray-900, #2A2D2F);
+}
+
+.mock-instructions__progress-bar{
+    display: flex;
+    height: 8px;
+    padding-right: 600px;
+    align-items: center;
+    flex-shrink: 0;
+    border-radius: 2px;
+    background: var(--gray-800, #3A3E42);
+}
+
+.mock-instructions__progress-bar span{
+    width: 600px;
+    height: 8px;
+    background: var(--ai-100, linear-gradient(90deg, #15D078 0%, #4BD1C8 100%));
+}
+
+.mock-instructions__content{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 44px;
+}
+
+.mock-instructions__header{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    align-self: stretch;
+}
+
+.mock-instructions__step-label{
+    color: var(--ai-green-100, #15D078);
+    font-family: Pretendard;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 24px; /* 120% */
+}
+
+.mock-instructions__title{
+    color: var(--white-100, #FFF);
+    font-family: Pretendard;
+    font-size: 28px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 34px; /* 121.429% */
+}
+
+.mock-instructions__cards{
+    display: flex;
+    width: 1200px;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.mock-instructions__card{
+    display: flex;
+    width: 586px;
+    padding: 28px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 28px;
+    flex-shrink: 0;
+    border-radius: 8px;
+    background: var(--gray-800, #3A3E42);
+}
+
+.mock-instructions__card-text{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.mock-instructions__card-title{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    align-self: stretch;
+    color: var(--white-100, #FFF);
+    font-family: Pretendard;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 30px; /* 125% */
+}
+
+.mock-instructions__card-description{
+    overflow: hidden;
+    color: var(--gray-500, #9EA4AA);
+    text-overflow: ellipsis;
+    font-family: Pretendard;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 22px; /* 122.222% */
+}
+
+
+.mock-instructions__card-image {
+    height: 354px;
+    align-self: stretch;
+    position: relative;
+    border-radius: 4px;
+background: var(--gray-700, #6F767E);
+}
+
+.mock-instructions__card-badge {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    width: 147px;
+    height: 52px;
+    flex-shrink: 0;
+}
+
+.mock-instructions__card-badge-text{
+    display: inline-flex;
+    padding: 8px 16px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    border-radius: 100px;
+    background: var(--ai-green-100, #15D078);
+    color: var(--gray-900, #2A2D2F);
+    text-align: center;
+    font-family: Pretendard;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 24px;
+    position: relative;
+}
+
+.mock-instructions__card-badge-text::after {
+    content: '';
+    position: absolute;
+    top: -20px;
+    right: 30px;
+    width: 0;
+    height: 0;
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+    border-bottom: 20px solid var(--ai-green-100, #15D078);
+}

@@ -1,0 +1,113 @@
+.mock-interview-guide-page {
+    width: 100%;
+    height: 100vh;
+    background: var(--gray-900, #2A2D2F);
+    color: #FFFFFF;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.guide-background-deco {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+.guide-background-deco__pattern {
+    display: block;
+    position: absolute;
+    width: 1500px;
+    height: 1500px;
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+    background: radial-gradient(50% 50% at 50% 50%, rgba(21, 208, 120, 0.40) 20%, rgba(21, 208, 120, 0.00) 100%);
+    opacity: 0.3;
+    filter: blur(100px);
+}
+
+.guide-background-deco__pattern:nth-child(1) {
+    top: -500px;
+    left: -800px;
+}
+
+.guide-background-deco__pattern:nth-child(2) {
+    bottom: -600px;
+    right: -700px;
+}
+
+.guide-background-deco__center-align {
+    display: none;
+}
+
+.guide-content-area {
+    display: flex;
+    padding: 120px 360px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 100px;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+}
+
+.guide-content-area__header-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
+    align-self: stretch;
+}
+
+.guide-content-area__title {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    align-self: stretch;
+    color: var(--white-100, #FFF);
+    text-align: center;
+    font-family: Pretendard;
+    font-size: 40px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 48px;
+}
+
+.guide-content-area__subtitle {
+    color: var(--gray-500, #9EA4AA);
+    text-align: center;
+    font-family: Pretendard;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 24px;
+}
+
+.guide-content-area__start-btn {
+    display: flex;
+    height: 64px;
+    padding: 20px 24px 20px 28px;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    color: var(--white-100, #FFF);
+    text-align: center;
+    font-family: Pretendard;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 24px;
+    border-radius: 100px;
+    background: #444749;
+    border: none;
+    outline: none;
+    cursor: pointer;
+}
