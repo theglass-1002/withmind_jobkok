@@ -16,6 +16,7 @@ import MockAnalysisPage from "@/pages/InterviewReport/analysis/MockAnalysisPage"
 
 import MockInterviewGuide from "@/pages/MockInterview/MockInterviewGuide/MockInterviewGuide";
 import MockInstructions from "@/pages/MockInterview/MockInstructions/MockInstructions";
+import MockSettings from "@/pages/MockInterview/MockSettings/MockSettings";
 
 
 
@@ -95,5 +96,6 @@ export const router = createBrowserRouter([
     element: <Layout><PurchaseFail /></Layout>,
   },
   { path: "/mock-interview/guide", element:<MockInterviewGuide/> },
-  { path: "/mock-interview/instructions/step-one", element:<MockInstructions/> }
+  { path: "/mock-interview/instructions", element:<MockInstructions/> },
+  { path: "/mock-interview/settings", element:<MockSettings/> }
 ]);

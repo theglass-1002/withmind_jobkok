@@ -1,11 +1,16 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom';
 import "./MockInterviewGuide.css";
 import ic_star_white_40 from "@/assets/icons/size40/ic_star_white_40.png";
 import ic_arrow_right_white_24 from "@/assets/icons/size24/ic_arrow_right_white_24.png";
 
-
-
 export default function MockInterviewGuide() {
+    const navigate = useNavigate();
+
+    const handleStartClick = () => {
+        navigate('/mock-interview/instructions');
+    };
+
     return (
         <div className="mock-interview-guide-page">
             <div className="guide-background-deco">
@@ -20,10 +25,11 @@ export default function MockInterviewGuide() {
                         모의면접</span>
                     <span className="guide-content-area__subtitle">이력서 기반의 맞춤형 질문으로 더욱 실전처럼!</span>
                 </div>
-                <button className="guide-content-area__start-btn">시작하기
+                <button className="guide-content-area__start-btn" onClick={handleStartClick}>
+                    시작하기
                     <img src={ic_arrow_right_white_24} alt="" />
                 </button>
             </div>
         </div>
-      );
+    );
 }

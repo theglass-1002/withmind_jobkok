@@ -63,6 +63,30 @@ textarea:focus {
 
 }
 
+.default_btn_white_08{
+    display: flex;
+    height: 64px;
+    padding: 20px 28px;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    background: var(--white-8, rgba(255, 255, 255, 0.08));
+    border: none;
+    color: var(--white-100, #FFF);
+    text-align: center;
+    font-family: Pretendard;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 24px; /* 133.333% */
+}
+
+.default_btn_white_08.radius{
+    border-radius: 100px;
+}
+
+
 .default_btn_white{
         display: flex;
         height: 52px;
@@ -193,6 +217,15 @@ font-size: 16px;
 font-style: normal;
 font-weight: 400;
 line-height: 20px; /* 125% */
+}
+
+.badge--required_20{
+    color: var(--red-100, #FF524C);
+    font-family: Pretendard;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 24px; /* 120% */
 }
 
 
