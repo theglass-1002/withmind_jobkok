@@ -5,8 +5,8 @@ import "./modal.css";
 
 type ModalProps = {
   open: boolean;
-  onClose: () => void;
-
+  onClose?: () => void;
+  className?: string;
   // 헤더
   title?: React.ReactNode;      // 없으면 헤더 생략
   desc?: React.ReactNode;
@@ -35,6 +35,7 @@ type ModalProps = {
 export default function Modal({
   open,
   onClose,
+  className = "",
   title,
   desc,
   children,
@@ -63,7 +64,7 @@ export default function Modal({
   const onOverlayClick = () => { if (closeOnOverlay) onClose(); };
   // 패널 클릭은 전파 막기
   const stop = (e: React.MouseEvent) => e.stopPropagation();
-
+  const modalClassNames = `modal ${className}`.trim();
   return createPortal(
     <div
       className="modal-overlay"
@@ -73,17 +74,16 @@ export default function Modal({
       aria-labelledby={title ? "modal-title" : undefined}
       onClick={onOverlayClick}
     >
-      <div className="modal" role="document" onClick={stop}>
+      <div className={modalClassNames} role="document" onClick={stop}>
         {/* Header */}
         {(title || desc) && (
           <header className="modal__header">
             {title && <h3 id="modal-title" className="modal__title">{title}</h3>}
             {desc && <p className="modal__desc">{desc}</p>}
+            {children && <div className="modal__body">{children}</div>}
+
           </header>
         )}
-
-        {/* Body */}
-        {children && <div className="modal__body">{children}</div>}
 
         {/* Actions: 커스텀 우선, 없으면 기본 버튼 */}
         <div className="modal__actions">

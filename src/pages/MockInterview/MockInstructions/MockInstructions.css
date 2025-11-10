@@ -354,13 +354,14 @@ background: var(--gray-700, #6F767E);
     justify-content: center;
     align-items: center;
     gap: 4px;
+    border: none;
     border-radius: 100px;
     color: var(--white-100, #FFF);
-text-align: center;
-font-family: Pretendard;
-font-size: 18px;
-font-style: normal;
-font-weight: 700;
-line-height: 24px; /* 133.333% */
-background: var(--ai-100, linear-gradient(90deg, #15D078 0%, #4BD1C8 100%));
+    text-align: center;
+    font-family: Pretendard;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 24px; /* 133.333% */
+    background: var(--ai-100, linear-gradient(90deg, #15D078 0%, #4BD1C8 100%));
 }
