@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import "./MockSettings.css";
 
 // 공통 컴포넌트 (./components/common/으로 폴더 구조를 가정하여 수정)
@@ -10,7 +11,6 @@ import InterviewInfoSection from './step-setup/InterviewInfoSection';
 import QuestionSettingsSection from './step-setup/QuestionSettingsSection';
 
 // Step 2 컴포넌트 (./components/step-test/ 으로 폴더 구조를 가정하여 수정)
-import MockEnvironment from './step-test/MockEnvironment'; // 파일명을 MockEnvironmentPage로 통일
 
 // 아이콘 및 모달
 import ic_chevron_right_gray700_24 from "@/assets/icons/size24/ic_chevron_right_gray700_24.png";
@@ -18,6 +18,7 @@ import Modal from "@/shared/components/modal/Modal";
 
 
 export default function MockSettings() {
+    const navigate = useNavigate();
     const [activeStep, setActiveStep] = useState(1);
     const [desiredJob, setDesiredJob] = useState('');
     const [jobPostingUrl, setJobPostingUrl] = useState('');
@@ -34,16 +35,15 @@ export default function MockSettings() {
 
     // 다음 단계로 이동하거나 면접을 시작하는 함수
     const handleNextStep = () => {
-        if (activeStep < 3) {
-            // 다음 단계 (1 -> 2, 2 -> 3)
-            setActiveStep(activeStep + 1);
-        } else {
-            // Step 3 (실전) 이후: 실제 면접 페이지로 이동하는 로직 구현
-            console.log("실전 모의면접을 시작합니다. 라우팅 로직 실행 필요.");
-            // navigate('/mock-interview'); 와 같은 라우팅 코드가 들어갈 위치
-        }
+        navigate('/mock-interview/environment-test');
     };
 
+    const step1Props = {
+        selectedResume, onResumeChange: setSelectedResume,
+        desiredJob, onDesiredJobChange: setDesiredJob,
+        jobPostingUrl, onJobPostingUrlChange: setJobPostingUrl,
+        questions, onQuestionsChange: setQuestions,
+    };
 
 // MockSettings 함수 내부 (renderStepContent 함수 다음에 추가)
 const renderSubmitButton = () => {
@@ -120,7 +120,7 @@ const renderSubmitButton = () => {
             case 2:
                 // Step 2: 환경 테스트
                 // MockEnvironmentPage는 자체 상태를 가질 가능성이 높아 props를 따로 전달하지 않습니다.
-                return <MockEnvironment />;
+                return <></>
             case 3:
                 // Step 3: 면접 시작 최종 확인 화면
                 return (
@@ -141,12 +141,20 @@ const renderSubmitButton = () => {
             <SettingsSidebar activeStep={activeStep} onStepChange={setActiveStep} />
             <div className={`mock-settings__content mock-settings--step-${activeStep}`}>
                 <div className="mock-settings__content-inner">
-                    {renderStepContent()} {/* 단계별 UI가 여기 렌더링됨 */}
+                    <InterviewInfoSection {...step1Props} />
+                    <QuestionSettingsSection {...step1Props} />
                 </div>
                 
                 
                 <div className={`mock-settings__submit-btn-container step-${activeStep}`}>
-                {renderSubmitButton()}
+                <button 
+                    className="mock-settings__submit-btn"
+                    onClick={handleNextStep}
+                >
+                    다음 단계
+                    <img src={ic_chevron_right_gray700_24} alt="" />
+                </button>
+                {/* {renderSubmitButton()} */}
                 </div>
             </div>
             <SettingsPanel activeStep={activeStep} />

@@ -1,0 +1,274 @@
+.mock-settings-page.environment .mock-settings__content-inner{
+    background: var(--gray-800, #3A3E42);
+    padding: 0px;
+}
+
+.mock-settings-page.environment .mock-settings__submit-btn-container{
+   display: flex;
+   height: 120px;
+   flex-direction: row;
+   justify-content: space-between;
+}
+
+.camera-test-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.camera-test{
+    display: flex;
+}
+
+
+.camera-test__video-feed {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1);
+    z-index: 5;
+}
+
+.camera-test__overlay-text{
+    position: absolute;
+    display: flex;
+    width: 100%;
+    padding: 32px 28px;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    z-index: 5;
+    background: rgba(42, 45, 47, 0.40);
+    backdrop-filter: blur(16px);
+}
+
+.camera-test__main-instruction{
+    color: var(--white-100, #FFF);
+    text-align: center;
+    font-family: Pretendard;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 30px;
+}
+
+.camera-test__sub-instruction{
+    color: var(--gray-400, #C8CCCF);
+    text-align: center;
+    font-family: Pretendard;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 22px;
+}
+
+.camera-test__guide-icon{
+    position: absolute;
+    display: flex;
+    top: 25%;
+    left: 40%;
+    height: 50%;
+    z-index: 10;
+}
+
+.camera-test__controls-wrapper{
+    position: absolute;
+    z-index: 5;
+    display: flex;
+    width: 100%;
+    padding: 52px 360px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    bottom: 0px;
+}
+
+.camera-test__mic-prompt{
+    display: flex;
+    padding: 20px;
+    justify-content: space-between;
+    align-items: center;
+    align-self: stretch;
+    border-radius: 100px;
+    background: var(--white-100, #FFF);
+    box-shadow: 0 0 28px 0 rgba(42, 45, 47, 0.40);
+}
+
+.camera-test__prompt-text{
+    display: flex;
+    padding: 15px 0 15px 64px;
+    justify-content: center;
+    align-items: center;
+    gap: 0;
+    flex: 1 0 0;
+    text-align: center;
+    font-family: Pretendard;
+    font-size: 28px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 34px;
+}
+
+.camera-test__prompt-text .char {
+    color: var(--gray-500, #9EA4AA);
+    transition: color 0.3s ease-in-out;
+    display: inline-block;
+}
+
+.camera-test__prompt-text .char.filled {
+    color: var(--gray-900, #2A2D2F);
+    animation: char-fill 0.3s ease-in-out;
+}
+
+@keyframes char-fill-smooth {
+    0% {
+        color: var(--gray-500, #9EA4AA);
+        opacity: 0.7;
+    }
+    100% {
+        color: var(--gray-900, #2A2D2F);
+        opacity: 1;
+    }
+}
+
+.camera-test__mic-button-wrapper {
+    display: flex;
+    width: 64px;
+    height: 64px;
+    padding: 20px;
+    justify-content: center;
+    align-items: center;
+    border-radius: 100px;
+    background: var(--ai-100, linear-gradient(90deg, #15D078 0%, #4BD1C8 100%));
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.camera-test__mic-button-wrapper.recording {
+    background: var(--gray-900, #2A2D2F);
+}
+
+.mic-counter {
+    color: var(--white-100, #FFF);
+    font-size: 28px;
+    font-weight: 600;
+}
+
+.camera-test__prompt-text .char {
+    position: relative;
+    z-index: 2;
+}
+
+.camera-test__mic-button-wrapper {
+    position: relative;
+    z-index: 2;
+}
+
+.env-test-result{
+    position: absolute;
+    display: none;
+    width: 100%;
+    height: 100%;
+    padding: 120px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    flex-shrink: 0;
+    background: rgba(42, 45, 47, 0.80);
+    backdrop-filter: blur(16px);
+    z-index: 10;
+}
+
+.env-test-result--error{
+    gap: 60px;
+}
+
+.env-test-result__content{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    align-self: stretch;
+}
+
+.env-test-result__title{
+    color: var(--white-100, #FFF);
+    text-align: center;
+    font-family: Pretendard;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 30px; /* 125% */
+}
+
+.env-test-result__description{
+    color: var(--gray-400, #C8CCCF);
+    text-align: center;
+    font-family: Pretendard;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 22px; /* 122.222% */
+}
+
+.env-test-result--error .env-test-result__description{
+    cursor: pointer;
+}
+
+.env-test-result--error .env-test-result__description em{
+    color: var(--gray-400, #C8CCCF);
+    font-family: Pretendard;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 22px;
+    text-decoration-line: underline;
+    text-decoration-style: solid;
+    text-decoration-skip-ink: none;
+    text-decoration-thickness: auto;
+    text-underline-offset: auto;
+    text-underline-position: from-font; 
+}
+
+.env-test-result__icon{
+    display: flex;
+    width: 80px;
+    height: 80px;
+    padding: 20px;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    aspect-ratio: 1/1;
+    border-radius: 100px;
+    background: var(--ai-green-100, #15D078);
+}
+
+.env-test-result--error .env-test-result__icon{
+    background: var(--red-100, #FF524C);
+}
+
+.env-test-result__details{
+    display: flex;
+    flex-direction: column;
+    padding: 28px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    border-radius: 8px;
+    background: var(--white-8, rgba(255, 255, 255, 0.08));
+}
+
+.env-test-result__detail{
+    color: var(--white-100, #FFF);
+    text-align: center;
+    font-family: Pretendard;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 22px; /* 122.222% */
+}

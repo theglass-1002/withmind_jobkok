@@ -365,3 +365,36 @@ background: var(--gray-700, #6F767E);
     line-height: 24px; /* 133.333% */
     background: var(--ai-100, linear-gradient(90deg, #15D078 0%, #4BD1C8 100%));
 }
+
+.env-test-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+}
+
+.env-test-dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    overflow-y: auto;
+    background: var(--white-100, #FFF);
+    border-radius: 16px;
+    padding: 40px;
+    z-index: 1001;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);   
+}
+
+.env-guide{
+    display: flex;
+    width: 920px;
+    padding: 40px 28px 28px 28px;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    flex-shrink: 0;
+}
