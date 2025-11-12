@@ -16,7 +16,7 @@ export default function MockInterviewGuide() {
             <div className="guide-background-deco">
                 <span className="guide-background-deco__pattern"></span>  
                 <span className="guide-background-deco__pattern"></span>  
-                <span className="guide-background-deco__center-align">가운대정렬</span>
+                <span className="guide-background-deco__center-align"></span>
             </div>
             <div className="guide-content-area">
                 <div className="guide-content-area__header-group">

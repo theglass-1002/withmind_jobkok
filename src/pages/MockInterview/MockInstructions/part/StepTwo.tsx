@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import arrow_curve_down from "@/assets/testImg/arrow_curve_down.png";
 import video_interview from "@/assets/testImg/video_interview.png";
 import video_interview_time from "@/assets/testImg/video_interview_time.png";
@@ -10,11 +11,15 @@ type StepTwoProps = {
 };
 
 export default function StepTwo({ onPrev }: StepTwoProps) {
+  const navigate = useNavigate();
+
     return (
-      <div className="step_two">
+      <>
         <div className="mock-instructions__progress-bar step_two">
             <span></span>
         </div>
+      <div className="step_two">
+     
         <div className="mock-instructions__content">
           <div className="mock-instructions__header">
               <span className="mock-instructions__step-label">안내사항 2/2</span>
@@ -70,16 +75,18 @@ export default function StepTwo({ onPrev }: StepTwoProps) {
               </div>
           </div>
         </div>
-        <div className="btn_wrap">
-          <button className="default_btn_white radius" onClick={onPrev}>
-            <img src={ic_keyboard_arrow_left_gray900_24} alt="" />
-            이전으로
-          </button>
-          <button className="mock-instructions__btn--primary radius">
-            시작하기
-            <img src={ic_chevron_right_white_24} alt="" />
-          </button>
-        </div>
       </div>
+             <div className="btn_wrap">
+             <button className="default_btn_white radius" onClick={onPrev}>
+               <img src={ic_keyboard_arrow_left_gray900_24} alt="" />
+               이전으로
+             </button>
+             <button className="mock-instructions__btn--primary radius"
+               onClick={() => navigate('/mock-interview/settings')}>
+               시작하기
+               <img src={ic_chevron_right_white_24} alt="" />
+             </button>
+           </div>
+           </>
     );
 }

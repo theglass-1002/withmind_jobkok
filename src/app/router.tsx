@@ -18,8 +18,8 @@ import MockInterviewGuide from "@/pages/MockInterview/MockInterviewGuide/MockInt
 import MockInstructions from "@/pages/MockInterview/MockInstructions/MockInstructions";
 import MockSettings from "@/pages/MockInterview/MockSettings/MockSettings";
 import EnvironmentTestView from "@/pages/MockInterview/MockSettings/step-test/EnvironmentTestView";
-import TestComplete from "@/pages/MockInterview/MockSettings/step-test/components/TestComplete";
-import TestFailed from "@/pages/MockInterview/MockSettings/step-test/components/TestFailed";
+import MockInterviewLive from "@/pages/MockInterview/MockInterviewLive/MockInterviewLive";
+
 
 
 
@@ -102,6 +102,5 @@ export const router = createBrowserRouter([
   { path: "/mock-interview/instructions", element:<MockInstructions/> },
   { path: "/mock-interview/settings", element:<MockSettings/> },
   { path: "/mock-interview/environment-test", element: <EnvironmentTestView/> },
-  { path: "/mock-interview/environment-test/complete", element: <TestComplete/> },
-  { path: "/mock-interview/environment-test/failed", element: <TestFailed/> }
+  { path: "/mock-interview/mock-interview-live", element: <MockInterviewLive/> },
 ]);

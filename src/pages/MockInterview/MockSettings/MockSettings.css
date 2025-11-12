@@ -366,6 +366,12 @@
     /* pointer-events: none; */
 }
 
+.mock-settings--step-1 .mock-settings__submit-btn-container{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+}
+
 .mock-settings__submit-btn.on{
     border-radius: 100px;
     background: var(--ai-100, linear-gradient(90deg, #15D078 0%, #4BD1C8 100%));

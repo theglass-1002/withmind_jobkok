@@ -5,10 +5,13 @@ import ic_logout_white_24 from "@/assets/icons/size24/ic_logout_white_24.png";
 
 
 type SettingsPanelProps = {
-    activeStep: number;
-};
+    activeStep?: number;
+    onExit?: () => void; 
+  };
+  
+export default function SettingsPanel({ activeStep,onExit}: SettingsPanelProps) {
 
-export default function SettingsPanel({ activeStep }: SettingsPanelProps) {
+
     const getPanelContent = () => {
         switch (activeStep) {
             case 1:
@@ -51,7 +54,7 @@ export default function SettingsPanel({ activeStep }: SettingsPanelProps) {
                 </div>
             </div>
             <span className='mock-settings__submit-btn-container'>
-                <button className="mock-settings__exit-btn">
+            <button className="mock-settings__exit-btn" onClick={onExit}>
                 <img src={ic_logout_white_24} alt="" />
                    나가기             
                     </button>

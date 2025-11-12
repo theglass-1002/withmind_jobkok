@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import test_profile_img_530 from "@/assets/testImg/test_profile_img_530.png";
 import mock_interview_screen from "@/assets/testImg/mock_interview_screen.png";
 import ic_logout_white_24 from "@/assets/icons/size24/ic_logout_white_24.png";
@@ -9,6 +10,8 @@ type StepOneProps = {
 };
 
 export default function StepOne({ onNext }: StepOneProps) {
+  const navigate = useNavigate();
+
     return (
         <>
         <div className="mock-instructions__progress-bar">
@@ -47,7 +50,8 @@ export default function StepOne({ onNext }: StepOneProps) {
           </div>
         </div>
         <div className="btn_wrap">
-          <button className="default_btn_white_08 radius">
+          <button className="default_btn_white_08 radius"
+          onClick={() => navigate('/')}>
             <img src={ic_logout_white_24} alt="" />
             나가기
           </button>
