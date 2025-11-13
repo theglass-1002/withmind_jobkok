@@ -140,7 +140,7 @@ export default function Home() {
               components={{ Option, IndicatorSeparator: () => null }}
               placeholder="직무,기업명,지역 등을 검색해 보세요."
               menuPortalTarget={document.body}
-              menuIsOpen={true}
+              menuIsOpen={false}
               menuPosition="fixed"
               inputValue={inputValue}
               onInputChange={onInputChange}

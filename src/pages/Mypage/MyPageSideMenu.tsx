@@ -39,7 +39,7 @@ export default function MyPageSideMenu() {
                     </div>
                     <p className="usercard__plan">7일 이용권</p>
                     <span className="user_info_edit">
-                    <NavLink to="edit-profile"className="btn default_btn_black">회원 정보 수정</NavLink>         
+                    <NavLink to="edit-profile"className="default_btn_black">회원 정보 수정</NavLink>         
                 </span>
                 </div>
                 <ul className="sidemenu__list">

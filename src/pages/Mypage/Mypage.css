@@ -135,6 +135,10 @@ background: var(--white-100, #FFF);
   width: 100%;  
 }
 
+.user_info_edit .default_btn_black{
+    width: 244px;
+}
+
 
 .sidemenu .sidemenu__list .sidemenu__group{
     display: flex;

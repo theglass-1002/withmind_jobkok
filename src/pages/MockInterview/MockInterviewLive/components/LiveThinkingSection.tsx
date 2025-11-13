@@ -50,7 +50,7 @@ export default function LiveThinkingSection({
 
             <div className="mock-interview-live__timer-info">
               <span className="mock-interview-live__timer-label">생각시간</span>
-              <span className="mock-interview-live__timer-value">{timeLeft}초</span>
+              <span className="mock-interview-live__timer-value">{timeLeft}</span>
             </div>
           </div>
         </div>

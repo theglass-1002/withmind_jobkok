@@ -85,7 +85,6 @@ export default function MockInterviewLive() {
 
       {phase === "answering" && (
         <LiveAnswerSection
-        
         />
       )}
 

@@ -53,7 +53,7 @@ line-height: 20px; /* 125% */
 
 
 .login_off{
-  display: flex;
+  display: none;
   align-items: center;
   gap: 24px;
 }
@@ -82,7 +82,7 @@ cursor: pointer;
 }
 
 .login_on {
-  display: none;
+  display: flex;
   align-items: center;
   gap: 24px;
 }
