@@ -43,6 +43,15 @@ export type CareerInfo = {
 };
 type CareerErrors = Partial<Record<keyof CareerInfo, string>>;
 
+// 상위 컴포넌트(ResumeCreate)에서 전달하는 Props 타입을 정의합니다.
+// 이 타입은 ResumeCreate의 BasicInfo 타입과 일치해야 합니다. (여기서는 any로 처리)
+interface CareerSectionProps {
+  values: any;
+  errors: any;
+  onChange: (patch: any) => void;
+  onFocusAny: () => void;
+}
+
 const blankItem = (): CareerInfo => ({
   id: makeId(),
   company_name: "",
@@ -61,7 +70,7 @@ const swap = <T,>(arr: T[], i: number, j: number) => {
   return next;
 };
 
-export default function CareerSection() {
+export default function CareerSection(props: CareerSectionProps) {
   const [items, setItems] = useState<CareerInfo[]>([blankItem()]);
   const [itemErrors] = useState<CareerErrors[]>([]);
 
@@ -194,9 +203,7 @@ function CareerItem({
   const [editing, setEditing] = useState(false);
   const startEditing = (e?: React.KeyboardEvent | React.MouseEvent) => {
     if (e && "key" in e) {
-      // @ts-ignore
-      if (e.nativeEvent?.isComposing) return;
-      // @ts-ignore
+      if ((e as React.KeyboardEvent).nativeEvent?.isComposing) return;
       if (e.key && e.key !== "Enter" && e.key !== " ") return;
       e.preventDefault?.();
     }
@@ -245,7 +252,6 @@ function CareerItem({
   const canMoveDown = total > 1 && index < total - 1;
   const canRemove = total > 1;
 
-  // ===== AI 문장 추천 (요약용) =====
   const [showAISuggest, setShowAISuggest] = useState(false);
   const [aiSuggestions, setAISuggestions] = useState<string[]>([]);
 

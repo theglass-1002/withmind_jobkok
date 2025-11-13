@@ -9,7 +9,10 @@ import LocationSection, {
   type LocationValue, // ← 추가: Location 섹션 값 타입
 } from "./ResumeCreate/LocationSection/LocationSection";
 import CareerSection from "./ResumeCreate/CareerSection/CareerSection";
-import EducationSection from "./ResumeCreate/EducationSection/EducationSection";
+import EducationSection,{
+  type Education,
+  type EducationErrors
+} from "./ResumeCreate/EducationSection/EducationSection";
 import DesiredRoleSection from "./ResumeCreate/DesiredRoleSection/DesiredRoleSection";
 import HardSkillSection from "./ResumeCreate/HardSkillSection/HardSkillSection";
 import SoftSkillsSection from "./ResumeCreate/SoftSkillsSection/SoftSkillsSection";
@@ -32,12 +35,14 @@ type FormState = {
   title: string;
   basic: BasicInfo;
   location: LocationValue;
+  education: Education[];
 };
 
 const initial: FormState = {
   title: "",
   basic: { name: "", birth: "", gender: null, email: "", phone: "", photoUrl: "" },
   location: { nationwide: false, selectedKeys: [] },
+  education:[]
 };
 
 const ALL_SECTIONS: SectionId[] = [
@@ -58,8 +63,12 @@ const ALL_SECTIONS: SectionId[] = [
 
 export default function ResumeCreate() {
   const [form, setForm] = useState<FormState>(initial);
-  const [errors, setErrors] = useState<{ basic: BasicErrors; title?: string; location?: string }>({
+  const [errors, setErrors] = useState<{ 
+    education? :EducationErrors;
+    basic: BasicErrors; title?: string; location?: string }>({
     basic: {},
+    education:{},
+    
   });
   const [isDefaultResume, setIsDefaultResume] = useState(false);
   const [sidebarStatus, setSidebarStatus] = useState<Partial<Record<SectionId, Status>>>({});
@@ -67,6 +76,9 @@ export default function ResumeCreate() {
   const updateBasic = (patch: Partial<BasicInfo>) =>
     setForm((prev) => ({ ...prev, basic: { ...prev.basic, ...patch } }));
 
+  const updateEducation = (newList: Education[]) =>
+    setForm((prev) => ({ ...prev, education: newList }));
+  
   const resetBasicErrors = () => setErrors((prev) => ({ ...prev, basic: {} }));
 
   const handleTempSave = () => {
@@ -187,9 +199,9 @@ export default function ResumeCreate() {
             onFocusAny={resetBasicErrors}
           />
           <EducationSection
-            values={form.basic}
-            errors={errors.basic}
-            onChange={updateBasic}
+            values={form.education}
+            errors={errors.education}
+            onChange={updateEducation}
             onFocusAny={resetBasicErrors}
           />
           <DesiredRoleSection />

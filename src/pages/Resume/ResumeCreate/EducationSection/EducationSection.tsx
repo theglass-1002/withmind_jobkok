@@ -6,7 +6,6 @@ import DateInline from '@/shared/components/form/DateInline';
 import ic_error_red100_20 from '@/assets/icons/size20/ic_error_red100_20.png';
 import icon_calendar_red_20 from '@/assets/icons/size20/icon_calendar_red_20.png';
 import ic_calendar_gray900_20 from '@/assets/icons/size20/ic_calendar_gray900_20.png';
-import ic_add_btn_gray700_20 from '@/assets/icons/size20/ic_calendar_gray700_20.png';
 import ic_add_btn_gray900_20 from '@/assets/icons/size20/ic_add_btn_gray900_20.png';
 import ic_arrow_drop_down_gray900_24 from '@/assets/icons/size24/ic_arrow_drop_down_gray900_24.png';
 
@@ -24,12 +23,13 @@ import InlineMonthPicker from '@/shared/components/calendar/InlineMonthPicker';
 import { parseMonth, fmtMonth } from '@/shared/utils/util';
 
 export type Education = {
-  school_name: string;
-  major_degree: string;
-  startDate: string;
-  endDate: string;
+  school_name?: string;
+  major_degree?: string;
+  startDate?: string;
+  endDate?: string;
 };
-export type CareerErrors = Partial<Record<keyof Education, string>>;
+// CareerErrors 이름을 EducationErrors로 변경했습니다.
+export type EducationErrors = Partial<Record<keyof Education, string>>;
 
 const blankItem = (): Education => ({
   school_name: '',
@@ -38,32 +38,36 @@ const blankItem = (): Education => ({
   endDate: '',
 });
 
+// Helper: 항목이 없을 경우 최소 1개의 빈 항목을 반환
+const initialItems = (values: Education[]): Education[] =>
+  values.length > 0 ? values : [blankItem()];
+
 export default function EducationSection({
   values,
-  errors,
   onChange,
   onFocusAny,
 }: {
-  values: Education;
-  errors?: CareerErrors;
-  onChange: (patch: Partial<Education>) => void;
+  values: Education[];
+  onChange: (list: Education[]) => void;
   onFocusAny?: () => void;
+  errors: EducationErrors;
 }) {
-  const [items, setItems] = useState<Education[]>([values ?? blankItem()]);
-  const [itemErrors] = useState<CareerErrors[]>([errors ?? {}]);
-
+  // prop values를 초기 상태로 사용
+  const [items, setItems] = useState<Education[]>(initialItems(values));
+  const [gradType, setGradType] = useState<(string | null)[]>(
+    values.map(() => null).length > 0 ? values.map(() => null) : [null]
+  );
   const [openedSelectIdx, setOpenedSelectIdx] = useState<number | null>(null);
-  const [gradType, setGradType] = useState<(string | null)[]>([null]);
 
-  const addItem = () => {
-    setItems((prev) => [blankItem(), ...prev]);
-    setGradType((prev) => [null, ...prev]);
-  };
+  // prop values가 외부에서 변경될 경우 내부 상태 동기화
+  useEffect(() => {
+    if (values !== items) {
+      setItems(initialItems(values));
+      setGradType(initialItems(values).map(() => null));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [values]);
 
-  const removeItem = (idx: number) => {
-    setItems((prev) => (prev.length <= 1 ? prev : prev.filter((_, i) => i !== idx)));
-    setGradType((prev) => (prev.length <= 1 ? prev : prev.filter((_, i) => i !== idx)));
-  };
 
   const swap = <T,>(arr: T[], i: number, j: number) => {
     const next = arr.slice();
@@ -71,21 +75,50 @@ export default function EducationSection({
     return next;
   };
 
+  const addItem = () => {
+    setItems((prev) => {
+      const next = [blankItem(), ...prev];
+      onChange(next); // 부모에게 전체 배열 전달
+      return next;
+    });
+    setGradType((prev) => [null, ...prev]);
+  };
+
+  const removeItem = (idx: number) => {
+    setItems((prev) => {
+      const next = prev.length <= 1 ? prev.filter((_, i) => i !== idx) : prev.filter((_, i) => i !== idx);
+      onChange(next.length === 0 ? [blankItem()] : next); // 부모에게 전체 배열 전달
+      return next.length === 0 ? [blankItem()] : next;
+    });
+    setGradType((prev) => prev.length <= 1 ? prev : prev.filter((_, i) => i !== idx));
+  };
+
   const moveUp = (idx: number) => {
     if (idx <= 0) return;
-    setItems((prev) => swap(prev, idx, idx - 1));
+    setItems((prev) => {
+      const next = swap(prev, idx, idx - 1);
+      onChange(next); // 부모에게 전체 배열 전달
+      return next;
+    });
     setGradType((prev) => swap(prev, idx, idx - 1));
   };
 
   const moveDown = (idx: number) => {
     if (idx >= items.length - 1) return;
-    setItems((prev) => swap(prev, idx, idx + 1));
+    setItems((prev) => {
+      const next = swap(prev, idx, idx + 1);
+      onChange(next); // 부모에게 전체 배열 전달
+      return next;
+    });
     setGradType((prev) => swap(prev, idx, idx + 1));
   };
 
   const patchItem = (idx: number, patch: Partial<Education>) => {
-    setItems((prev) => prev.map((it, i) => (i === idx ? { ...it, ...patch } : it)));
-    if (idx === 0 && onChange) onChange(patch);
+    setItems((prev) => {
+      const next = prev.map((it, i) => (i === idx ? { ...it, ...patch } : it));
+      onChange(next); // 부모에게 전체 배열 전달
+      return next;
+    });
   };
 
   return (
@@ -103,7 +136,7 @@ export default function EducationSection({
             index={idx}
             total={items.length}
             value={it}
-            errors={itemErrors[idx]}
+            errors={undefined} 
             gradLabel={gradType[idx]}
             selectOpen={openedSelectIdx === idx}
             onToggleSelect={() =>
@@ -148,7 +181,7 @@ function EducationItem({
   index: number;
   total: number;
   value: Education;
-  errors?: CareerErrors;
+  errors?: EducationErrors; // 타입 변경
   gradLabel: string | null;
   selectOpen: boolean;
   onToggleSelect: () => void;

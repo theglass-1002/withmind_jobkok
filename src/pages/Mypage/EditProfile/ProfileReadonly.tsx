@@ -1,8 +1,7 @@
-import { useState, useRef, UseEffect } from "react";
-import { Link, NavLink } from "react-router-dom";
-import calendar_today from '@/assets/icons/calendar_today.png';
-import PasswordTab from "./PasswordTab";
 
+import calendar_today from '@/assets/icons/calendar_today.png';
+
+import { UserProfile } from '@/shared/api/user';
 
 export default function ProfileReadonly({ userInfo }: { userInfo: UserProfile }) {
     //성별 확인

@@ -9,7 +9,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import type { Plugin } from "chart.js";
+import type { ChartOptions, Plugin } from "chart.js";
 import ic_crown_white_20 from "@/assets/icons/size20/ic_crown_white_20.png";
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
@@ -182,7 +182,7 @@ export default function ScoreTrendBarChart({
           borderWidth: 0,
           hoverBorderWidth: 0,
           borderRadius: { topLeft: 2, topRight: 2, bottomLeft: 0, bottomRight: 0 },
-          borderSkipped: "bottom",
+          borderSkipped: "bottom" as const,
           barThickness,
           maxBarThickness: barThickness,
           order: 1,
@@ -192,7 +192,7 @@ export default function ScoreTrendBarChart({
     [labelItems, values, barThickness, maxIndex]
   );
 
-  const options = useMemo(
+  const options = useMemo<ChartOptions<'bar'>>(
     () => ({
       animation: false, 
       maintainAspectRatio: false,
@@ -204,7 +204,7 @@ export default function ScoreTrendBarChart({
           max,
           ticks: {
             color: tickColor,
-            font: { family: "Pretendard", size: 16, weight: "400" },
+            font: { family: "Pretendard", size: 16, weight: "normal" },
             stepSize: 20,
             callback: (v: any) => `${v}점`,
             padding: 6,
@@ -214,7 +214,7 @@ export default function ScoreTrendBarChart({
         },
         x: {
           grid: { display: false, drawBorder: false, drawTicks: false },
-          ticks: { color: tickColor, font: { family: "Pretendard", size: 16, weight: "400" }, padding: 8 },
+          ticks: { color: tickColor, font: { family: "Pretendard", size: 16, fontW: "normal" }, padding: 8 },
           border: { display: false },
         },
       },

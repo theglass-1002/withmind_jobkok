@@ -7,9 +7,15 @@ import Modal from '@/shared/components/modal/Modal';
 export default function ReportJob() {
 const {id} = useParams<{ id:string}>();  
 const ref = useRef<HTMLTextAreaElement>(null);
+const [isModalOpen, setIsModalOpen] = useState(true);
+
+const closeModal = () => {
+  setIsModalOpen(false);
+};
 
   useEffect(() => {
-  console.log('실행');
+    console.log(isModalOpen);
+
 }, [])
 
 
@@ -68,14 +74,13 @@ return (
             제출</button>
     </div>
     <Modal
-              open={true}
+              open={isModalOpen}
               title="공고 제보가 완료되었습니다."
               desc="제보해 주신 공고는 확인 후 빠르게 반영하겠습니다. 감사합니다."
               confirmText="확인"
               showCancel = {false}
               confirmClassName="btn_w_full default_btn_black"
-              onConfirm={() => {}}
-              onClose={()=>{}}
+              onConfirm={closeModal}
             />
     </div>
   )

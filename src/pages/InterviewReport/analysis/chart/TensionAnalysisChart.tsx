@@ -62,7 +62,7 @@ export default function TensionAnalysisChart({
   const [animatedAverageValues, setAnimatedAverageValues] = useState<number[]>(
     averageValues.map(() => min)
   );
-  const animationRef = useRef<number>();
+  const animationRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     const startTime = Date.now();
@@ -143,7 +143,7 @@ export default function TensionAnalysisChart({
     const fontSize = isPrintMode ? 10 : 12;
 
     return {
-      animation: false,
+      animation: false as const,
       responsive: true,
       maintainAspectRatio: false,
       plugins: {

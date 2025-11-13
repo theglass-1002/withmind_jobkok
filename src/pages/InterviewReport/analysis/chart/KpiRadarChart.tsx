@@ -11,6 +11,7 @@ import {
   Legend,
   type ScriptableContext,
   type Plugin,
+  type ChartOptions, // ChartOptions 타입을 import
 } from "chart.js";
 
 ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend);
@@ -149,7 +150,7 @@ export default function KpiRadarChart({
     [labels, values]
   );
 
-  const options = useMemo(
+  const options = useMemo<ChartOptions<'radar'>>( 
     () => ({
       animation: isPrintMode ? false : {
         duration: 1200,

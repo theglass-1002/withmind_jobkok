@@ -9,6 +9,7 @@ import ic_error_gray500_20 from '@/assets/icons/size20/ic_error_gray500_20.png';
 import ic_add_purple_20 from '@/assets/icons/size20/ic_add_purple_20.png';
 import ic_close_gray500_24 from '@/assets/icons/size24/ic_close_gray500_24.png';
 
+
 import SearchField from '@/shared/components/search/SearchField';
 import AiSuggestChips from '@/shared/components/ai/AiSuggestChips';
 
@@ -167,7 +168,7 @@ export default function SoftSkillsSection() {
                 className="location-picker__chip-close"
                 onClick={() => removeRole(chip.key)}
               >
-                <img src={ic_close_gray500_20} alt="" />
+                <img src={ic_close_gray500_24} alt="" />
               </span>
             </div>
           ))}

@@ -9,7 +9,7 @@ import {
   Legend,
   type ChartArea,
 } from "chart.js";
-import type { Plugin, Chart } from "chart.js";
+import type { Plugin, Chart, ChartOptions } from "chart.js";
 
 ChartJS.register(LinearScale, PointElement, Tooltip, Legend);
 
@@ -121,7 +121,7 @@ export default function KeywordsBubbleChart({
     [data]
   );
 
-  const options = useMemo(
+  const options = useMemo<ChartOptions<'bubble'>>( 
     () => ({
       animation: false, 
       responsive: true,

@@ -30,7 +30,8 @@ export default function InterviewReport() {
 
   const handleConfirmCancel = () => {
     setShowConfirm(false);
-    navigate(`/resumes/${resumeId}`);
+    // navigate(`/resumes/${resumeId}`);
+    navigate(`/resumes/13`);
   };
 
   return (

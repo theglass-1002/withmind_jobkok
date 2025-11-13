@@ -303,6 +303,7 @@ background: var(--gray-50, #F8F8F9);
     align-items: center;
     gap: 40px;
     align-self: stretch;
+    margin-bottom: 50px;
 }
 
 .job-posting__content{

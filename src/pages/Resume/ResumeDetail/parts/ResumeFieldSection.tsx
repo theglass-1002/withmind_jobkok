@@ -3,9 +3,9 @@ import React, { ReactNode } from "react";
 type Props = {
   label: ReactNode;
   children: ReactNode;
-  className?: string;         // 예: "resume-field--location"
+  className?: string;         
   valueAs?: "div" | "span";
-  valueClassName?: string;    // 예: "resume-location-list"
+  valueClassName?: string;    
 };
 
 export default function ResumeFieldSection({
@@ -15,7 +15,8 @@ export default function ResumeFieldSection({
   valueAs = "div",
   valueClassName,
 }: Props) {
-  const ValueTag = valueAs as keyof JSX.IntrinsicElements;
+
+  const ValueTag = valueAs as React.ElementType; 
 
   return (
     <div className={`resume-field ${className ?? ""}`.trim()}>

@@ -11,22 +11,20 @@ import ic_keyboard_arrow_right_gray700_20 from "@/assets/icons/size20/ic_keyboar
 
 
 
+
 const DEFAULT_FILTERS: UiFilterOption[] = [
   { label: "전체", value: "all" },
   { label: "진행 완료", value: "done" },
   { label: "진행 중", value: "ongoing" },
 ];
 
-const items: InterviewReportHistoryItemData[] = [
-    { id: 1, title: "프론트엔드 1차", date: "2025.01.20", duration: "8분 24초", tryCount: 1, score: 82, done: true },
-    { id: 2, title: "CS 기본",       date: "2025.01.18", duration: "6분 10초", tryCount: 2, score: 76, done: true },
-    { id: 3, title: "React 실전",    date: "2025.01.17", duration: "9분 05초", tryCount: 1, done: false },
-  ];
+
   
 
   const HISTORY_ITEMS: InterviewReportHistoryItemData[] = [
     {
       id: 1,
+      title:"",
       no: 1,
       avatarSrc: test_profile_img2,
       scoreText: "82점",
@@ -41,6 +39,7 @@ const items: InterviewReportHistoryItemData[] = [
     },
     {
       id: 2,
+      title:"",
       no: 2,
       avatarSrc: test_profile_img2,
       scoreText: "82점",
@@ -55,6 +54,7 @@ const items: InterviewReportHistoryItemData[] = [
     },
     {
       id: 3,
+      title:"",
       no: 3,
       avatarSrc: test_profile_img2,
       scoreText: "82점",
@@ -69,6 +69,7 @@ const items: InterviewReportHistoryItemData[] = [
     },
     {
         id: 3,
+        title:"",
         no: 3,
         avatarSrc: test_profile_img2,
         scoreText: "82점",

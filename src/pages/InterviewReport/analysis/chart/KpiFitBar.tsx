@@ -29,7 +29,8 @@ export default function KpiFitBar({ value, className, style }: Props) {
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const [wrapH, setWrapH] = useState<number>(24);
   const [animatedValue, setAnimatedValue] = useState<number>(0);
-  const animationRef = useRef<number>();
+  const animationRef = useRef<number | undefined>(undefined); 
+
 
   useEffect(() => {
     if (!wrapRef.current) return;

@@ -133,7 +133,7 @@ export default function ScoreBarChartJS({
 
   const options = useMemo(
     () => ({
-      animation: false, 
+      animation: false as const, 
       responsive: true,
       maintainAspectRatio: false,
       indexAxis: "y" as const,

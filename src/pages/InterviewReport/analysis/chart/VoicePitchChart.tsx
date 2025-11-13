@@ -69,7 +69,7 @@ export default function VoicePitchChart({
   const [animatedValues, setAnimatedValues] = useState<number[]>(
     values.map(() => min)
   );
-  const animationRef = useRef<number>();
+  const animationRef = useRef<number | undefined>(undefined);
 
   // 애니메이션 효과
   useEffect(() => {
@@ -141,7 +141,7 @@ export default function VoicePitchChart({
 
   const options = useMemo(() => {
     return {
-      animation: false,
+      animation: false as const,
       responsive: true,
       maintainAspectRatio: false,
       plugins: {

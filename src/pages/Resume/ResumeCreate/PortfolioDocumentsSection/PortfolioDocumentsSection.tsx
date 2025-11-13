@@ -222,7 +222,9 @@ export default function PortfolioDocumentsSection() {
                         {/* 숨김 파일 input (아이템별 ref) */}
                         <input
                           type="file"
-                          ref={(el) => (fileInputRefs.current[item.id] = el)}
+                          ref={(el) => {
+                            fileInputRefs.current[item.id] = el; 
+                          }}
                           style={{ display: "none" }}
                           accept=".pdf,.doc,.docx,.ppt,.pptx,.zip,.png,.jpg,.jpeg,.gif"
                           onChange={(e) => onFileChange(index, e)}

@@ -42,7 +42,9 @@ export default function DetailPage({
          titleIconSrc={ic_technologist_24}
          score={attitude_score}
          description="홍길동님은 답변 과정에서 눈 맞춤과 고른 발성으로 자신감과 안정감을 전달하였습니다. 불필요한 군더더기 표현이 적어, 면접관에게 집중력 있는 인상을 주었습니다. 이러한 태도는 직무 적합성과 더불어 조직 내 협업에서도 긍정적으로 작용할 수 있습니다."
-      />
+
+    
+    />
     <span className="print-page-break"></span>
       <DetailVoiceSection
             title="목소리 분석"

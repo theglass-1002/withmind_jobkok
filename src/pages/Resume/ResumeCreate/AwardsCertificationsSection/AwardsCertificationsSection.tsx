@@ -211,7 +211,9 @@ export default function AwardsCertificationsSection() {
                         {/* 드롭다운 */}
                         <div
                           className="ui-select"
-                          ref={el => (selectRefs.current[index] = el)}
+                          ref={el => {
+                            selectRefs.current[index] = el;
+                          }}
                           role="combobox"
                           aria-expanded={openDropdownIndex === index}
                           tabIndex={0}
@@ -275,7 +277,9 @@ export default function AwardsCertificationsSection() {
                         {/* 날짜 */}
                         <div
                           className="awards-certifications-period__field section-period__start-wrap"
-                          ref={el => (dateRefs.current[index] = el)}
+                          ref={el => {
+                            dateRefs.current[index] = el;
+                          }}
                         >
                           <DateInline
                             id={`awards-certifications_${index}`}

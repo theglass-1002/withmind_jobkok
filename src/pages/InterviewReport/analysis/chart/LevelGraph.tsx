@@ -91,7 +91,7 @@ export default function LevelGraph({
         <KpiGaugeChart
             // 필수 데이터/레이아웃 props
             segments={segments}
-            labels={labels}
+            labels={Array.from(labels)}
             valueLabel={`${score}점`}
             height={chartHeight}
 

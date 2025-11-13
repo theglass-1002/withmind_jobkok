@@ -1,6 +1,8 @@
 .site-footer{
 height: 264px;
+width: 100%;
 background: var(---gray-800, #3A3E42);
+
 }
 
 .site-footer__inner{

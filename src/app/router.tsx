@@ -26,6 +26,7 @@ import MockInterviewLive from "@/pages/MockInterview/MockInterviewLive/MockInter
 import Mypage from "@/pages/Mypage/Mypage";
 import EditProfile from "@/pages/Mypage/EditProfile/EditProfile";
 import PlanHistory from "@/pages/Mypage/Plan/PlanHistory";
+import SavedPostings from "@/pages/Mypage/Postings/SavedPostings";
 import Faq from "@/pages/Mypage/Support/Faq";
 import Inquiry from "@/pages/Mypage/Support/Inquiry/Inquiry";
 import InquiryDetail from "@/pages/Mypage/Support/Inquiry/InquiryDetail";
@@ -89,6 +90,7 @@ export const router = createBrowserRouter([
         
       ]
    },
+   {path:"/saved-jobs",element:<Layout><SavedPostings/></Layout>},
    { path: "/purchase", element: <Layout><PurchaseLayout /></Layout> },
    {
     path: "/purchase/result/success",

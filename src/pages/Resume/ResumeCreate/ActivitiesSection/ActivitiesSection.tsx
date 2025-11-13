@@ -261,7 +261,8 @@ export default function ActivitiesSection() {
 
                         <div
                           className="ui-select"
-                          ref={(el) => (selectRefs.current[index] = el)}
+                          ref={el=>{selectRefs.current[index]=el}}
+                          // ref={(el) => (selectRefs.current[index] = el)}
                           role="combobox"
                           aria-expanded={openDropdownIndex === index}
                           tabIndex={0}
@@ -330,7 +331,7 @@ export default function ActivitiesSection() {
                       <div className="activities-period__fields">
                         <div
                           className="activities-period__field activities-period__field--start"
-                          ref={(el) => (startRefs.current[index] = el)}
+                          ref={el=>{startRefs.current[index]=el}}
                         >
                           <DateInline
                             id={`activities-start_${index}`}
@@ -376,8 +377,9 @@ export default function ActivitiesSection() {
 
                         <div
                           className="activities-period__field activities-period__field--end"
-                          ref={(el) => (endRefs.current[index] = el)}
+                          ref={el => {endRefs.current[index] = el;}}
                         >
+                          
                           <DateInline
                             id={`activities-end_${index}`}
                             iconSrc={ic_calendar_gray900_20}

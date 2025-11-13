@@ -1,15 +1,14 @@
-import { useState, useRef, UseEffect } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { useState, useRef, useEffect } from "react";
+// Link, NavLink, PasswordTab는 현재 컴포넌트에서 사용되지 않으므로 제거
 import calendar_today from '@/assets/icons/calendar_today.png';
-import PasswordTab from "./PasswordTab";
-
+import { UserProfile } from '@/shared/api/user';
 
 export default function ProfileTab({ userInfo }: { userInfo: UserProfile }) {
     //성별 확인
     
     if (!userInfo || !userInfo.email) return <div>불러오는 중…</div>;
     
-
+    // Note: userInfo?.gender 대신 userInfo.gender 사용 (이미 상단에서 userInfo 유효성 검사 완료)
 
     return (
          <>
@@ -33,7 +32,7 @@ export default function ProfileTab({ userInfo }: { userInfo: UserProfile }) {
                 </div>
                 <span className="field__label">생년월일 <em>*</em></span>
                 <div className="field__value_gray birth">
-                  <span> <img src={calendar_today}  /></span>
+                  <span> <img src={calendar_today} alt="달력 아이콘" /></span>
                   <span className="date">{userInfo.birth}</span>
            
                 </div>
@@ -42,12 +41,12 @@ export default function ProfileTab({ userInfo }: { userInfo: UserProfile }) {
                   <span>
                   
                   <button 
-                     className={`default_btn_white ${userInfo?.gender === 'm' ? 'on' : ''}`}>
+                     className={`default_btn_white ${userInfo.gender === 'm' ? 'on' : ''}`}>
                   남성</button>
                   </span>
                   <span>
                   <button 
-                  className={`default_btn_white ${userInfo?.gender === 'f' ? 'on' : ''}`}>
+                  className={`default_btn_white ${userInfo.gender === 'f' ? 'on' : ''}`}>
                     여성</button>
                   </span>
                   

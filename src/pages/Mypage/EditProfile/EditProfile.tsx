@@ -1,17 +1,18 @@
-import { useState, useRef, UseEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PasswordTab from "./PasswordTab";
 import ProfileReadonly from "./ProfileReadonly";
 import ProfileEditForm from "./ProfileEditForm";
 import Modal from '@/shared/components/modal/Modal';
+import { UserProfile } from '@/shared/api/user';
 
 const initialProfile: UserProfile = {
-  email:"hong1234@withmind.net",
-  number:"010-1234-5678",
-  name:"홍길동",
-  birth:"2000.01.01",
-  gender:"m",
-  certified:true
+  email: "hong1234@withmind.net",
+  number: "010-1234-5678",
+  name: "홍길동",
+  birth: "2000.01.01",
+  gender: "m",
+  certified: true,
 };
 
 
@@ -25,7 +26,7 @@ export default function EditProfile() {
     const [userData, setUserData] = useState<UserProfile>(initialProfile);
     const profileMode: "view" | "edit" = userData.certified ? "edit" : "view";
     const [tab, setTab] = useState<TabKey>("profile");
-    const [dialog, setDialog] = useState<DialogKind>("");
+    const [dialog, setDialog] = useState<DialogKind>("deleteAccount");
 
     const closeDialog = () => setDialog(null);
     const handleTabSelect = (key: TabKey) => {

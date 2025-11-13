@@ -56,7 +56,7 @@ export default function Navbar() {
             >
               <img src={searchIcon} alt="" />
             </span>
-            <NavLink to="/"><img src={bookmarkIcon} alt="" /></NavLink>
+            <NavLink to="/saved-jobs"><img src={bookmarkIcon} alt="" /></NavLink>
             <div className="mypage" >
               <span
                 className="icon-btn"

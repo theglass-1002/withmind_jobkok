@@ -167,7 +167,7 @@ export default function HardSkillSection() {
                 className="location-picker__chip-close"
                 onClick={() => removeRole(chip.key)}
               >
-                <img src={ic_close_gray500_20} alt="" />
+                <img src={ic_close_gray500_24} alt="" />
               </span>
             </div>
           ))}

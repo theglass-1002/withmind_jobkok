@@ -1,0 +1,156 @@
+.saved-jobs-page{
+    display: flex;
+    padding: 100px 360px 100px 360px;
+    flex-direction: column;
+    gap: 40px;
+    align-self: stretch;
+}
+
+.saved-jobs-page_title{
+    color: var(--gray-900, #2A2D2F);
+    font-family: Pretendard;
+    font-size: 28px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 34px; /* 121.429% */  
+}
+
+.saved-jobs__main-container{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 24px;
+    align-self: stretch;
+}
+
+.saved-jobs__toolbar{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    align-self: stretch; 
+}
+
+.toolbar__stats{
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.toolbar__controls{
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 16px;
+}
+
+.control__sort-by,
+.control__page-size
+{
+    display: flex;
+    height: 20px;
+    align-items: center;
+    gap: 4px;
+}
+
+.control__view-toggle{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.stats__label{
+    color: var(--gray-700, #6F767E);
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; /* 125% */
+}
+.stats__count-wrap{
+    display: flex;
+    align-items: center;
+}
+
+.stats__count{
+    color: var(--gray-900, #2A2D2F);
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 20px; /* 125% */
+}
+
+.stats__unit{
+    color: var(--gray-700, #6F767E);
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; /* 125% */
+}
+
+.saved-jobs__content-empty-area{
+    display: flex;
+    padding: 80px;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    align-self: stretch;
+    border-radius: 6px;
+    border: 1px solid var(--gray-300, #E0E2E4);
+    background: var(--gray-100, #F2F3F4);
+}
+
+.jobs-empty-state{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    align-self: stretch;
+}
+
+.empty-state__title{
+    color: var(--gray-900, #2A2D2F);
+    text-align: center;
+    font-family: Pretendard;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 22px; /* 122.222% */
+}
+
+.empty-state__desc{
+    color: var(--gray-700, #6F767E);
+    text-align: center;
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; /* 125% */
+}
+
+.control__icon,
+.toggle__icon{
+ cursor: pointer;
+}
+
+/* 
+saved-jobs__content-area */
+
+.saved-jobs__content-area.card{
+    display: flex;
+    align-items: flex-start;
+    align-content: flex-start;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.saved-jobs__content-area.card .job-posting__card{
+    border-radius: 6px;
+border: 1px solid var(--gray-300, #E0E2E4);
+background: var(--white-100, #FFF);
+}
+
+.saved-jobs__content-area.row{
+  
+}

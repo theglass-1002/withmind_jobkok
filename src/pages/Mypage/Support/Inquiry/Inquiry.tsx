@@ -122,15 +122,3 @@ export default function Inquiry() {
   }
 
 
-function labelOf(cat: Category) {
-  switch (cat) {
-    case "howto":
-      return "이용 방법";
-    case "account":
-      return "회원 정보";
-    case "payment":
-      return "결제";
-    case "etc":
-      return "기타";
-  }
-}

@@ -140,7 +140,7 @@ export default function CategoryTrendLineChart({
 
   const options = useMemo(
     () => ({
-      animation: false, 
+      animation: false as const,
       maintainAspectRatio: false,
       responsive: true,
       layout: {
@@ -153,7 +153,7 @@ export default function CategoryTrendLineChart({
           ticks: {
             stepSize: 20,
             color: tickColor,
-            font: { family: "Pretendard", size: 14, weight: "400" },
+            font: { family: "Pretendard", size: 14,   weight: 'normal' as const },
           },
           grid: { color: gridColor, drawBorder: false },
           border: { display: false },
@@ -163,7 +163,7 @@ export default function CategoryTrendLineChart({
           grid: { display: false, drawBorder: false },
           ticks: {
             color: tickColor,
-            font: { family: "Pretendard", size: 14, weight: "400" },
+            font: { family: "Pretendard", size: 14, weight: 'normal' as const },
             autoSkip: false,
           },
           border: { display: false },

@@ -14,8 +14,8 @@ type Props = {
   title?: string;
   titleIconSrc?: string;
   description?: string;
-  faceAngle: number;
-  bodyAngle: number;
+  faceAngle?: number;
+  bodyAngle?: number;
 };
 
 export default function DetailAttitudeSection({

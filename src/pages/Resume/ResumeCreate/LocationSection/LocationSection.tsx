@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import './LocationSection.css';
 import data from '@/data/locations.json';
 import { toast } from 'react-toastify';
@@ -17,22 +17,37 @@ type Region = {
   districts: (string | District)[];
 };
 
+export type LocationValue = {
+  nationwide: boolean;
+  selectedKeys: string[]; // "RegionName|DistrictName" or "RegionName|ALL"
+};
+
+interface LocationSectionProps {
+  defaultValue: LocationValue;
+  onChange: (v: LocationValue) => void;
+}
+
 const regionKeyOf = (r: Region) => r.id ?? r.name;
 const districtKeyOf = (r: Region, d: District) => d.id ?? `${r.name}|${d.name}`;
 const regionAllKeyOf = (r: Region) => `${regionKeyOf(r)}|ALL`;
 
-export default function LocationSection() {
+export default function LocationSection({ defaultValue, onChange }: LocationSectionProps) {
   const { regions } = data as unknown as { regions: Region[] };
   const NATIONWIDE_LABEL =
     (data as unknown as { nationwide?: { label: string } }).nationwide?.label ?? '지역 전체';
   const MAX_SELECTED = 5;
 
-  const [globalAllOnly, setGlobalAllOnly] = useState(false); // 전국 모드
+  const [globalAllOnly, setGlobalAllOnly] = useState(defaultValue.nationwide);
+  const [selected, setSelected] = useState<Set<string>>(() => new Set(defaultValue.selectedKeys));
+
   const [activeRegionKey, setActiveRegionKey] = useState<string>(() => {
     const seoul = regions.find(r => r.name === '서울') ?? regions[0];
     return seoul ? regionKeyOf(seoul) : '';
   });
-  const [selected, setSelected] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    onChange({ nationwide: globalAllOnly, selectedKeys: Array.from(selected) });
+  }, [globalAllOnly, selected, onChange]);
 
   const activeRegion = useMemo(
     () => regions.find(r => regionKeyOf(r) === activeRegionKey),
@@ -47,7 +62,7 @@ export default function LocationSection() {
   const isRegionAllSelected = useMemo(() => {
     if (globalAllOnly || !activeRegion) return false;
     const allKey = regionAllKeyOf(activeRegion);
-    if (selected.has(allKey)) return true; // |ALL 직접 선택된 경우 우선
+    if (selected.has(allKey)) return true;
     const dKeys = currentDistricts.map(d => districtKeyOf(activeRegion, d));
     return dKeys.length > 0 && dKeys.every(k => selected.has(k));
   }, [globalAllOnly, activeRegion, currentDistricts, selected]);
@@ -60,89 +75,77 @@ export default function LocationSection() {
   const districtKeysOfRegion = (r: Region) =>
     (r.districts ?? []).map(d => districtKeyOf(r, typeof d === 'string' ? { name: d } : d));
 
-  // 좌측 리스트에 표시할 “지역별 선택 개수” 집계
   const selectedCountByRegion = useMemo(() => {
     const m = new Map<string, number>();
-    if (globalAllOnly) return m; // 전국 모드면 개별 카운트는 0으로
+    if (globalAllOnly) return m;
     selected.forEach(k => {
-      const [rName] = k.split('|'); // "서울|강남구" or "서울|ALL"
+      const [rName] = k.split('|');
       m.set(rName, (m.get(rName) ?? 0) + 1);
     });
     return m;
   }, [selected, globalAllOnly]);
 
-  // 좌측 지역 전환
   const toggleCategory = (key: string) => {
     setActiveRegionKey(key);
   };
 
-  // 현재 지역 '전체' 클릭
-  const toggleRegionAllSelection = () => {
+  const toggleRegionAllSelection = useCallback(() => {
     if (!activeRegion) return;
     const allKey = regionAllKeyOf(activeRegion);
 
-    // 전국 모드였다면 전국 해제하고 현재 지역 전체만 선택
     if (globalAllOnly) {
       setGlobalAllOnly(false);
       setSelected(new Set([allKey]));
       return;
     }
-    // 다른 지역의 ALL이 켜져 있으면 전부 해제하고 현재 지역 ALL만 선택
     if (anyRegionAllOn && !selected.has(allKey)) {
       setSelected(new Set([allKey]));
       return;
     }
-    // 일반 토글
     setSelected(prev => {
       const next = new Set(prev);
       if (next.has(allKey)) {
         next.delete(allKey);
         return next;
       }
-      // 개별 선택 제거 + ALL 1개로 대체 (5개 제한 체크)
       const rDKeys = districtKeysOfRegion(activeRegion);
       const removed = rDKeys.filter(k => next.has(k)).length;
       const newSize = next.size - removed + 1;
       if (newSize > MAX_SELECTED) {
-        toast.success('최대 5개까지 선택가능합니다.', { toastId: 'limit' });
+        toast.success(`최대 ${MAX_SELECTED}개까지 선택가능합니다.`, { toastId: 'limit' });
         return prev;
       }
       rDKeys.forEach(k => next.delete(k));
       next.add(allKey);
       return next;
     });
-  };
+  }, [activeRegion, globalAllOnly, anyRegionAllOn, selected, MAX_SELECTED]);
 
-  // 개별 시/군/구 클릭
-  const toggleDistrictSelection = (dKey: string) => {
+  const toggleDistrictSelection = useCallback((dKey: string) => {
     const [rName] = dKey.split('|');
     const region = regions.find(r => r.name === rName || regionKeyOf(r) === rName);
     if (!region) return;
 
-    // 전국 모드였다면 전국 해제 + 지금 클릭한 것만 선택
     if (globalAllOnly) {
       setGlobalAllOnly(false);
       setSelected(new Set([dKey]));
       return;
     }
-    // 어떤 지역-전체가 켜져 있으면 전부 해제하고 지금 것만 선택
     if (anyRegionAllOn) {
       setSelected(new Set([dKey]));
       return;
     }
-    // 일반 토글 (+ 5개 제한)
     setSelected(prev => {
       const next = new Set(prev);
       if (next.has(dKey)) {
         next.delete(dKey);
       } else {
         if (next.size + 1 > MAX_SELECTED) {
-          toast.success('최대 5개까지 선택가능합니다.', { toastId: 'limit' });
+          toast.success(`최대 ${MAX_SELECTED}개까지 선택가능합니다.`, { toastId: 'limit' });
           return prev;
         }
         next.add(dKey);
       }
-      // 이 지역의 시군구가 모두 선택되면 자동으로 “지역 전체”로 압축
       const rDKeys = districtKeysOfRegion(region);
       const allSelected = rDKeys.length > 0 && rDKeys.every(k => next.has(k));
       if (allSelected) {
@@ -151,18 +154,16 @@ export default function LocationSection() {
       }
       return next;
     });
-  };
+  }, [regions, globalAllOnly, anyRegionAllOn, MAX_SELECTED]);
 
-  // 전국 토글
-  const toggleNationwideSelection = () => {
+  const toggleNationwideSelection = useCallback(() => {
     setGlobalAllOnly(prev => {
       const next = !prev;
-      if (next) setSelected(new Set()); // 전국 켜질 때는 모두 해제
+      if (next) setSelected(new Set());
       return next;
     });
-  };
+  }, []);
 
-  // 칩 표시
   const chips = useMemo(() => {
     if (globalAllOnly) {
       return [
@@ -200,33 +201,34 @@ export default function LocationSection() {
         <span className="resume-create-page__hint">
           최대 {MAX_SELECTED}개까지 추가 가능합니다.
         </span>
-        {selected.size>0?<></>: <span className="resume-create-page__error">1개 이상 추가해 주세요.</span>}
+        {selected.size === 0 && !globalAllOnly ? <span className="resume-create-page__error">1개 이상 추가해 주세요.</span> : <></>}
       </div>
 
-      {/* 선택 칩 */}
-      {selected.size>0?<div className="resume-create-page__selected">
-        {chips.map(chip => (
-          <div key={chip.key} className="location-picker__chip">
-            <div className="location-picker__chip-body">
-              <span className="location-picker__chip-group">{chip.regionName}</span>
-              <span className="location-picker__chip-role">
-                <span className="location-picker__chip-chevron">
-                  <img src={chevron_right_black} alt="" />
+      {selected.size > 0 || globalAllOnly ? (
+        <div className="resume-create-page__selected">
+          {chips.map(chip => (
+            <div key={chip.key} className="location-picker__chip">
+              <div className="location-picker__chip-body">
+                <span className="location-picker__chip-group">{chip.regionName}</span>
+                <span className="location-picker__chip-role">
+                  <span className="location-picker__chip-chevron">
+                    <img src={chevron_right_black} alt="" />
+                  </span>
+                  {chip.label}
                 </span>
-                {chip.label}
+              </div>
+              <span
+                className="location-picker__chip-close"
+                onClick={chip.remove}
+                role="button"
+                aria-label="선택 해제"
+              >
+                <img src={ic_close_gray500_20} alt="" />
               </span>
             </div>
-            <span
-              className="location-picker__chip-close"
-              onClick={chip.remove}
-              role="button"
-              aria-label="선택 해제"
-            >
-              <img src={ic_close_gray500_20} alt="" />
-            </span>
-          </div>
-        ))}
-      </div>:<></>} 
+          ))}
+        </div>
+      ) : <></>}
 
       <div className="resume-create-page__location">
         <div className="location-picker">
@@ -245,13 +247,12 @@ export default function LocationSection() {
           </div>
 
           <div className="location-picker__body">
-            {/* 왼쪽: 지역 목록 */}
             <div className={`location-picker__column location-picker__column--left ${globalAllOnly ? 'disabled' : ''}`}>
               <div className="location-picker__category-group">
                 {regions.map(r => {
                   const key = regionKeyOf(r);
                   const on = activeRegionKey === key;
-                  const count = selectedCountByRegion.get(r.name) ?? 0; // ★ 선택 개수 표시
+                  const count = selectedCountByRegion.get(r.name) ?? 0;
 
                   return (
                     <div
@@ -277,7 +278,6 @@ export default function LocationSection() {
               </div>
             </div>
 
-            {/* 오른쪽: 현재 지역의 전체/시군구 */}
             <div className={`location-picker__column location-picker__column--right ${globalAllOnly ? 'disabled' : ''}`}>
               <div className="location-picker__category-group location-picker__group--right">
                 {activeRegion?.all && (

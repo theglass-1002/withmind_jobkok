@@ -5,6 +5,7 @@ import MockInterviewHistoryRow from "./MockInterviewHistoryRow";
 export type InterviewReportHistoryItemData = {
   id: string | number;
   no: string | number;
+  title: string;
   avatarSrc: string;
   scoreText: string;
   roleText: string;
@@ -21,7 +22,6 @@ interface InterviewReportHistoryListProps {
   sortIconSrc: string;
   viewIconSrc: string;
   items: InterviewReportHistoryItemData[];
-
   page: number;
   totalPages: number;
   onChangePage: (p: number) => void;

@@ -2,7 +2,7 @@
 import React from 'react';
 
 type Props = {
-  id: string;
+  id?: string;
   type?: 'text' | 'email' | 'tel' | 'password';
   required?: boolean;
   value: string;
