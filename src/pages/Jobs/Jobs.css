@@ -237,10 +237,17 @@ background: var(--gray-50, #F8F8F9);
 
 
 .jobs-tabs{
-    display: flex;
+    /* display: flex;
     width: 1200px;
     align-items: center;
+    gap: 28px; */
+    display: flex;
+    padding: 52px 360px 0 360px;
+    align-items: flex-start;
     gap: 28px;
+    align-self: stretch;
+    border-bottom: 1px solid var(--gray-300, #E0E2E4);
+    background: var(--white-100, #FFF);
 } 
 
 

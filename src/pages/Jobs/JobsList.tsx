@@ -99,11 +99,19 @@ export default function JobsList() {
               </span>
            </a>
           </div>
+          <div className="jobs-tabs" role="tablist" aria-label="공고 탭">
+              <span className="jobs-tab on">
+              전체공고
+              </span>
+              <span className="jobs-tab">
+                저장공고
+              </span>
+            </div>
           <div className="jobs-toolbar">
             <div className="jobs-toolbar__search">
             <div className="panel-search">
             <img className="jobs-search__icon" src={search} alt="" />
-            <input type="text" placeholder="직무, 기업명, 지역등을 입력해주세요" />
+                  <input type="text" placeholder="직무, 기업명, 지역등을 입력해주세요" />
                <span className="jobs-search__clear_icon">
                <img src={cancel} alt="" />
                </span>
@@ -123,7 +131,7 @@ export default function JobsList() {
                       <div className="tooltip__content" role="tooltip">
                         <span className="tooltip__title">이력서 기반 추천이란?</span>
                         <span className="tooltip__desc">
-                        등록된 기본 이력서를 기반으로, 적합한 채용 공고를 찾아주는 잡콕만의 AI 추천 서비스입니다. 적합도가 높은 공고에는 [AI Pick] 태그가 표시됩니다.
+                          긴장도는 심박 분석 결과에 따라 3단계(높음, 보통, 낮음)로 나누어져 있습니다. 긴장도 상태를 직관적으로 확인할 수 있습니다.
                         </span>
                       </div>
                    </span>
@@ -256,14 +264,14 @@ export default function JobsList() {
               </div>
             </div>
             </div>
-            <div className="jobs-tabs" role="tablist" aria-label="공고 탭">
+            {/* <div className="jobs-tabs" role="tablist" aria-label="공고 탭">
               <span className="jobs-tab on">
               전체공고
               </span>
               <span className="jobs-tab">
                 저장공고
               </span>
-            </div>
+            </div> */}
               </div>
               <div className="job-posting">
               <div className="job-posting__ai-recommend">이력서를 기반으로 AI가 103개의 추천 공고를 찾았어요!</div>
