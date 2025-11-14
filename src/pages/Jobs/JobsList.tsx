@@ -8,7 +8,8 @@ import search from '@/assets/icons/search.png';
 import arrow_drop_down from '@/assets/icons/arrow_drop_down.png';
 import arrow_drop_up_black from '@/assets/icons/arrow_drop_up_black.png';
 import arrow_drop_down_gray from '@/assets/icons/arrow_drop_down_gray.png';
-import help from '@/assets/icons/help.png';
+import ic_error_gray500_20 from "@/assets/icons/size20/ic_error_gray500_20.png";
+
 import cancel from '@/assets/icons/cancel.png';
 import grid_gray from '@/assets/icons/grid_gray.png';
 import grid_black from '@/assets/icons/grid_black.png';
@@ -101,10 +102,8 @@ export default function JobsList() {
           <div className="jobs-toolbar">
             <div className="jobs-toolbar__search">
             <div className="panel-search">
-            <span className="jobs-search__icon">
-              <img src={search} alt="" />
-              </span>
-                  <input type="text" placeholder="직무, 기업명, 지역등을 입력해주세요" />
+            <img className="jobs-search__icon" src={search} alt="" />
+            <input type="text" placeholder="직무, 기업명, 지역등을 입력해주세요" />
                <span className="jobs-search__clear_icon">
                <img src={cancel} alt="" />
                </span>
@@ -113,9 +112,22 @@ export default function JobsList() {
                 <div className="job-search-filter job-search-filter--toggle">
                   <div className="job-search-filter__label">
                     <span className="job-search-filter__text">이력서 기반 추천</span>
-                    <span className="jobs-search_filter__help_icon">
-                    <img className="job-search-filter__help" src={help} alt="" />
-                    </span>
+                    <span className="tooltip tooltip--top">
+                      <img
+                        className="tooltip-icon"
+                        src={ic_error_gray500_20}
+                        alt=""
+                        aria-hidden="true"
+                        tabIndex={0}
+                      />
+                      <div className="tooltip__content" role="tooltip">
+                        <span className="tooltip__title">이력서 기반 추천이란?</span>
+                        <span className="tooltip__desc">
+                        등록된 기본 이력서를 기반으로, 적합한 채용 공고를 찾아주는 잡콕만의 AI 추천 서비스입니다. 적합도가 높은 공고에는 [AI Pick] 태그가 표시됩니다.
+                        </span>
+                      </div>
+                   </span>
+
                    </div>
                   <Switch
                       checked={resumeReco}

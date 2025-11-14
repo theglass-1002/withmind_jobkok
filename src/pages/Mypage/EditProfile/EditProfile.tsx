@@ -37,6 +37,7 @@ export default function EditProfile() {
 
 
   const handleConfirmDeleteAccount = async () => {
+    setDialog("deleteAccountSuccess");
     console.log('회원탈퇴 api 진행');;
     // try {
     //   await UserAPI.deleteAccount();
@@ -51,6 +52,7 @@ export default function EditProfile() {
 
   const handleConfirmEditAccount = async () => {
     console.log('회원정보수정api 진행');;
+    setDialog("editAccountSuccess");
     // try {
     //   await UserAPI.deleteAccount();
     //   // 로그아웃/리다이렉트 등 후처리
@@ -109,7 +111,8 @@ export default function EditProfile() {
               cancelText="취소"
               confirmText="탈퇴하기"
               showCancel = {true}
-              confirmClassName="btn default_btn_red"
+              cancelClassName="btn_w_full default_btn_white"
+              confirmClassName="btn_w_full default_btn_red"
               onClose={closeDialog}
               onConfirm={handleConfirmDeleteAccount}
             />
@@ -118,7 +121,8 @@ export default function EditProfile() {
               title="회원 정보 수정이 완료되었습니다."
               confirmText="확인"
               showCancel = {false}
-              confirmClassName="btn btn--primary"
+              confirmClassName="btn_w_full default_btn_black"
+              onConfirm={closeDialog}
               onClose={closeDialog}
             />
              <Modal
@@ -127,7 +131,7 @@ export default function EditProfile() {
               desc="잡콕을 이용해 주셔서 감사합니다."
               confirmText="확인"
               showCancel = {false}
-              confirmClassName="btn btn--primary"
+              confirmClassName="btn_w_full default_btn_black"
               onConfirm={() => navigate("/", { replace: true })}
               onClose={closeDialog}
             />

@@ -76,6 +76,10 @@ export default function ResumeCreate() {
   const updateBasic = (patch: Partial<BasicInfo>) =>
     setForm((prev) => ({ ...prev, basic: { ...prev.basic, ...patch } }));
 
+
+  const updateLocation = (patch: Partial<LocationValue>) =>
+    setForm((prev) => ({ ...prev, location: { ...prev.location, ...patch } }));
+
   const updateEducation = (newList: Education[]) =>
     setForm((prev) => ({ ...prev, education: newList }));
   
@@ -177,13 +181,7 @@ export default function ResumeCreate() {
           {/* 희망 근무 지역: defaultValue/onChange 바인딩 */}
           <LocationSection
             defaultValue={initial.location}
-            onChange={(v) => {
-              setForm((prev) => ({ ...prev, location: v }));
-              // 에러 클리어
-              if (v.nationwide || v.selectedKeys.length > 0) {
-                setErrors((prev) => ({ ...prev, location: undefined }));
-              }
-            }}
+            onChange={updateLocation}
           />
           {errors.location && (
             <div className="resume-create-page__error" style={{ marginTop: 8 }}>

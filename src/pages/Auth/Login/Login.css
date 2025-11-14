@@ -11,11 +11,11 @@
 .login-title{
     width: 520px;
     color: var(--gray-900, #2A2D2F);
-font-family: Pretendard;
-font-size: 28px;
-font-style: normal;
-font-weight: 600;
-line-height: 34px; /* 121.429% */
+    font-family: Pretendard;
+    font-size: 28px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 34px; /* 121.429% */
 }
 
 .login-card{

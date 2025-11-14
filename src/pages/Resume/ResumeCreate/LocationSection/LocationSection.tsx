@@ -45,9 +45,9 @@ export default function LocationSection({ defaultValue, onChange }: LocationSect
     return seoul ? regionKeyOf(seoul) : '';
   });
 
-  useEffect(() => {
-    onChange({ nationwide: globalAllOnly, selectedKeys: Array.from(selected) });
-  }, [globalAllOnly, selected, onChange]);
+  // useEffect(() => {
+  //   onChange({ nationwide: globalAllOnly, selectedKeys: Array.from(selected) });
+  // }, [globalAllOnly, selected, onChange]);
 
   const activeRegion = useMemo(
     () => regions.find(r => regionKeyOf(r) === activeRegionKey),

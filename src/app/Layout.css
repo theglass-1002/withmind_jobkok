@@ -644,6 +644,7 @@ line-height: 20px; /* 125% */
 
 .input-group.error,
 .date-group.error
+
 {
 
     border: 1px solid var(--red-100, #FF524C);

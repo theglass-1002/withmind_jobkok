@@ -1,5 +1,6 @@
 // src/pages/InterviewReport/history/InterviewReportHistory.tsx
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom"; 
 import UiFilter, { type UiFilterOption } from "@/shared/components/ui-filter/UiFilter";
 import MockInterviewHistoryList, { type InterviewReportHistoryItemData } from "./MockInterviewHistoryList";
 import ic_switch_right_white_20 from "@/assets/icons/size20/ic_switch_right_white_20.png";
@@ -18,72 +19,6 @@ const DEFAULT_FILTERS: UiFilterOption[] = [
   { label: "진행 중", value: "ongoing" },
 ];
 
-
-  
-
-  const HISTORY_ITEMS: InterviewReportHistoryItemData[] = [
-    {
-      id: 1,
-      title:"",
-      no: 1,
-      avatarSrc: test_profile_img2,
-      scoreText: "82점",
-      roleText: "프론트개발자",
-      dateText: "2025.01.01",
-      statusText: "진행완료",
-      statusState: "done",
-      resumeLabelIconSrc: ic_selected_file_purple_20,
-      resumeText: "개발자 준비된 홍길동입니다.",
-      resumeDate: "2025.01.01",
-      onClickView: () => {},
-    },
-    {
-      id: 2,
-      title:"",
-      no: 2,
-      avatarSrc: test_profile_img2,
-      scoreText: "82점",
-      roleText: "프론트개발자",
-      dateText: "2025.01.01",
-      statusText: "진행 중",
-      statusState: "doing",
-      resumeLabelIconSrc: ic_selected_file_purple_20,
-      resumeText: "개발자 준비된 홍길동입니다.",
-      resumeDate: "2025.01.01",
-      onClickView: () => {},
-    },
-    {
-      id: 3,
-      title:"",
-      no: 3,
-      avatarSrc: test_profile_img2,
-      scoreText: "82점",
-      roleText: "프론트개발자",
-      dateText: "2025.01.01",
-      statusText: "진행완료",
-      statusState: "done",
-      resumeLabelIconSrc: ic_selected_file_purple_20,
-      resumeText: "개발자 준비된 홍길동입니다.",
-      resumeDate: "2025.01.01",
-      onClickView: () => {},
-    },
-    {
-        id: 3,
-        title:"",
-        no: 3,
-        avatarSrc: test_profile_img2,
-        scoreText: "82점",
-        roleText: "프론트개발자",
-        dateText: "2025.01.01",
-        statusText: "진행 중",
-        statusState: "doing",
-        resumeLabelIconSrc: ic_selected_file_purple_20,
-        resumeText: "성장하는 개발자, 준비된 홍길동입니다..",
-        resumeDate: "2025.01.01",
-        onClickView: () => {},
-      },
-  ];
-  
 
 interface InterviewReportHistoryProps {
   totalCount: number;
@@ -104,8 +39,82 @@ export default function InterviewReportHistory({
   filters = DEFAULT_FILTERS,
   emptyIconSrc,
 }: InterviewReportHistoryProps) {
+  const navigate = useNavigate();
   const isEmpty = totalCount === 0;
   const [page, setPage] = useState(1);
+
+
+  const HISTORY_ITEMS: InterviewReportHistoryItemData[] = [
+    {
+      id: 1,
+      title:"",
+      no: 1,
+      avatarSrc: test_profile_img2,
+      scoreText: "82점",
+      roleText: "프론트개발자",
+      dateText: "2025.01.01",
+      statusText: "진행완료",
+      statusState: "done",
+      resumeLabelIconSrc: ic_selected_file_purple_20,
+      resumeText: "개발자 준비된 홍길동입니다.",
+      resumeDate: "2025.01.01",
+      onClickView: () => {
+        navigate(`/mock-interview/analysis/${1}`);
+      },
+    },
+    {
+      id: 2,
+      title:"",
+      no: 2,
+      avatarSrc: test_profile_img2,
+      scoreText: "82점",
+      roleText: "프론트개발자",
+      dateText: "2025.01.01",
+      statusText: "진행 중",
+      statusState: "doing",
+      resumeLabelIconSrc: ic_selected_file_purple_20,
+      resumeText: "개발자 준비된 홍길동입니다.",
+      resumeDate: "2025.01.01",
+      onClickView: () => {
+        navigate(`/mock-interview/analysis/${2}`);
+      },
+    },
+    {
+      id: 3,
+      title:"",
+      no: 3,
+      avatarSrc: test_profile_img2,
+      scoreText: "82점",
+      roleText: "프론트개발자",
+      dateText: "2025.01.01",
+      statusText: "진행완료",
+      statusState: "done",
+      resumeLabelIconSrc: ic_selected_file_purple_20,
+      resumeText: "개발자 준비된 홍길동입니다.",
+      resumeDate: "2025.01.01",
+      onClickView: () => {
+        navigate(`/mock-interview/analysis/${3}`);
+      },
+    },
+    {
+        id: 4,
+        title:"",
+        no: 3,
+        avatarSrc: test_profile_img2,
+        scoreText: "82점",
+        roleText: "프론트개발자",
+        dateText: "2025.01.01",
+        statusText: "진행 중",
+        statusState: "doing",
+        resumeLabelIconSrc: ic_selected_file_purple_20,
+        resumeText: "성장하는 개발자, 준비된 홍길동입니다..",
+        resumeDate: "2025.01.01",
+        onClickView: () => {
+          navigate(`/mock-interview/analysis/${4}`);
+        },
+      },
+  ];
+  
   return (
     <>
       <div className="mock-interview__stats">

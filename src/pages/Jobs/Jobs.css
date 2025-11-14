@@ -188,6 +188,14 @@ background: var(--gray-50, #F8F8F9);
     gap: 4px;
 }
 
+.job-search-filter__label .tooltip{
+    margin: 0px;
+}
+
+.job-search-filter__label .tooltip__content{
+  width: 530px;
+}
+
 .job-search-filter-menu{
     display: flex;
     align-items: center;

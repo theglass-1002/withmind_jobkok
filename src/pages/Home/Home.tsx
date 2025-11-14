@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import Select, { components, type OptionProps } from "react-select";
-
+import {useNavigate } from "react-router-dom";
 import code_icon from "@/assets/icons/category_icons/code_icon.png";
 import palette_icon from "@/assets/icons/category_icons/palette_icon.png";
 import megaphone_icon from "@/assets/icons/category_icons/megaphone_icon.png";
@@ -21,7 +21,6 @@ import chef_hat_icon from "@/assets/icons/category_icons/chef_hat_icon.png";
 import heart_icon from "@/assets/icons/category_icons/heart_icon.png";
 import headphones_icon from "@/assets/icons/category_icons/headphones_icon.png";
 import shield_icon from "@/assets/icons/category_icons/shield_icon.png";
-import home_banner from "@/assets/icons/home_banner.png";
 
 import "./Home.css";
 
@@ -57,11 +56,22 @@ const Option = (props: OptionProps<Opt, false>) => {
 };
 
 export default function Home() {
+  const navigate = useNavigate();
   const [inputValue, setInputValue] = useState("");
 
   const onInputChange = (val: string) => {
     setInputValue(val);
     return val;
+  };
+
+  const handleMovePage = (type: string) => {
+   if(type=="resume"){
+    navigate(`/resumes/create`);
+  } 
+   else if(type=="interview"){
+    navigate(`/mock-interview-report`);
+ 
+   }
   };
 
   const CATEGORIES = [
@@ -163,9 +173,24 @@ export default function Home() {
           ))}
         </div>
       </div>
+      <div className="banner-slider-container">
+        <div className="banner-slider-track">
+          <div className="home-cta-banner resume">
+            <div className="banner-content">
+              <span className="banner-title">이력서 작성하고 잡콕의 모든 서비스를 경험해 보세요.</span>
+              <span className="banner-desc">AI 기반의 문장 및 키워드 추천 기능으로 간편하게 작성하세요.</span>
+            </div>
+            <button className="default_btn_white" onClick={()=>{handleMovePage('resume')}}>이력서 작성 바로하기</button>
+          </div>
 
-      <div className="banner">
-        <img src={home_banner} alt="" />
+          <div className="home-cta-banner interview">
+            <div className="banner-content">
+              <span className="banner-title">실전보다 더 실전같은 AI 모의면접으로 면접 준비 끝!</span>
+              <span className="banner-desc">면접 시뮬레이션ㆍ이력서 및 직무 기반 맞춤 질문ㆍ분석 리포트ㆍ결과 기반 피드백까지 전부 모았어요.</span>
+            </div>
+            <button className="default_btn_white" onClick={()=>{handleMovePage('interview')}}>AI 모의면접 바로하기</button>
+          </div>
+        </div>
       </div>
     </div>
   );

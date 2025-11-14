@@ -34,13 +34,6 @@ font-weight: 400;
 line-height: 20px; /* 125% */
 }
 
-/* 컨테이너 */
-.tooltip {
-  position: relative;           /* 내용 포지셔닝 기준 */
-  display: inline-flex;
-  align-items: center;
-  margin-left: 8px;
-}
 
 /* 트리거 아이콘 */
 .tooltip__trigger {

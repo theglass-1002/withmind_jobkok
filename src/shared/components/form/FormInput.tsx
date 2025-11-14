@@ -37,7 +37,6 @@ export default function FormInput({
   {leftIconSrc && (
                    <img src={leftIconSrc} alt={leftIconAlt} />
         )}
-
       <input
         id={id}
         className={`form-input ${inputClassName ?? ''}`}

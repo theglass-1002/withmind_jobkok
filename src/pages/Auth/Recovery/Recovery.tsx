@@ -1,21 +1,30 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import "./Recovery.css";
 import FindId from "./FindId";
 import ResetPwd from "./ResetPwd";
+import UiFilter, { type UiFilterOption } from "@/shared/components/ui-filter/UiFilter";
 
 
 export default function Recovery() {
   type TabKey = 'id' | 'password';
-  const [tab, setTab] = useState<TabKey>('id'); // ← 기본값 'id'
+  const [tab, setTab] = useState<TabKey>('id'); 
+  const recoveryOptions: UiFilterOption[] = [
+    { label: '아이디 찾기', value: 'id' },
+    { label: '비밀번호 찾기', value: 'password' },
+  ];
 
-
+  const onChangeFilter = useCallback((value: string) => {
+    setTab(value as TabKey);
+  }, []);
 
   return (
     <div className="recovery-page">
-      <div className="default_tabs recovery-tabs">
-        <span className={`tab ${tab==='id'?'on':''}`} onClick={()=>setTab('id')}>아이디 찾기</span>
-        <span className={`tab ${tab==='password'?'on':''}`} onClick={()=>setTab('password')}>비밀번호 찾기</span>
-      </div>
+    <UiFilter
+        options={recoveryOptions}
+        value={tab}
+        onChange={onChangeFilter}
+        className="recovery-tabs"
+      />
         {tab==='id'?<FindId/>:<ResetPwd/>}
     </div>
   );

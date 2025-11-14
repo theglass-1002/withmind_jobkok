@@ -2,7 +2,9 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'; // useNavigate 훅 import
 import JobPostingItemCardNoAiPick from "@/shared/components/jobPosting-v3/JobPostingItemCardNoAiPick";
 import JobPostingItemRowNoAiPick from "@/shared/components/jobPosting-v3/JobPostingItemRowNoAiPick";
-
+import Pagination from "@/shared/components/Pagination";
+import ic_keyboard_arrow_left_gray700_20 from '@/assets/icons/size20/ic_keyboard_arrow_left_gray700_20.png';
+import ic_keyboard_arrow_right_gray700_20 from '@/assets/icons/size20/ic_keyboard_arrow_right_gray700_20.png';
 
 interface AllSavedJobsListProps {
     viewType: 'row' | 'card';
@@ -25,12 +27,32 @@ const handleGoToJobs = () => {
         <JobPostingItemCardNoAiPick
         appliedSuccessMessage='지원 정보가 반영되었습니다.'
         />
+           <JobPostingItemCardNoAiPick
+        appliedSuccessMessage='지원 정보가 반영되었습니다.'
+        />
+           <JobPostingItemCardNoAiPick
+        appliedSuccessMessage='지원 정보가 반영되었습니다.'
+        />
+           <JobPostingItemCardNoAiPick
+        appliedSuccessMessage='지원 정보가 반영되었습니다.'
+        />
+           <JobPostingItemCardNoAiPick
+        appliedSuccessMessage='지원 정보가 반영되었습니다.'
+        />
     </div>
     :<div className= {`saved-jobs__content-area ${viewType} job-posting__item job-posting__item--row`}>
      <JobPostingItemRowNoAiPick
         appliedSuccessMessage='지원 정보가 반영되었습니다.'
      />
     </div>}
+    <Pagination
+        current={1}
+        total={30}
+        onChange={()=>{}}
+        pageWindow={5}
+        prevIcon={<img src={ic_keyboard_arrow_left_gray700_20} alt="" aria-hidden="true" />}
+        nextIcon={<img src={ic_keyboard_arrow_right_gray700_20} alt="" aria-hidden="true" />}
+      />
     </>
   )
 }
