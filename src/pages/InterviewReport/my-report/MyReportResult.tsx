@@ -21,6 +21,9 @@ import { type KeywordPoint } from "@/pages/InterviewReport/my-report/part/Keywor
 import MockInterviewKeywordsPanel from "@/pages/InterviewReport/my-report/part/MockInterviewKeywordsPanel";
 import JobMatchHistoryPanel from "@/pages/InterviewReport/my-report/part/JobMatchHistoryPanel";
 import type { JobCardV2Item } from "@/pages/InterviewReport/my-report/part/JobCardV2List";
+import SortDropdown from "@/shared/components/sort-dropdown/SortDropdown";
+
+
 
 const mockJobs: JobCardV2Item[] = [
   {
@@ -112,12 +115,17 @@ const mockJobs: JobCardV2Item[] = [
 
 export default function MyReportResult() {
   const [jobs, setJobs] = useState<JobCardV2Item[]>(mockJobs);
+  const [sort, setSort] = useState("최근 10일");
 
   const handleToggleFavorite = (id: string | number) => {
     setJobs((prev) =>
       prev.map((j) => (j.id === id ? { ...j, isBookmarked: !j.isBookmarked } : j))
     );
   };
+
+
+  const sortOptions = ["최근 10일", "최근 한달", "최근1년"];
+
 
   const keywords: KeywordPoint[] = [
     { label: "기회", x: 30, y: 50, r: 90, group: "green" },
@@ -147,15 +155,20 @@ export default function MyReportResult() {
           />
           <span className="mock-interview-summary__daterange">2025.01.01~2025.01.10</span>
         </div>
-        <div className="mock-interview-summary__header-right">
-          <span className="mock-interview-summary__window">최근 10일 기준</span>
-          <img
-            className="mock-interview-summary__window-icon"
-            src={ic_arrow_drop_down_gray500_24}
-            alt=""
-            aria-hidden="true"
-          />
-        </div>
+        <SortDropdown
+                      value={sort}
+                      options={sortOptions}
+                      onChange={setSort}
+                      className="job-posting__sort"
+                    />
+        {/* <div className="mock-interview-summary__header-right sort-control">
+          <span className="mock-interview-summary__window sort-control__label">최근 10일</span>
+          <div className="sort-control__menu">
+              <span className="sort-control__option">최근 10일</span>
+               <span className="sort-control__option">최근 한달</span>
+               <span className="sort-control__option">최근 1년</span>
+              </div>
+        </div> */}
       </div>
 
       <div className="mock-interview-summary__content">

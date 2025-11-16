@@ -1,14 +1,19 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useParams } from "react-router-dom";
+import { useParams,useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import chevron_left from '@/assets/icons/chevron_left.png';
 import text_jobkorea_logo from '@/assets/icons/company_logos/text_jobkorea_logo.png';
 import arrow_up_right from '@/assets/icons/arrow-up-right.png';
 
 import withmind_logo80 from '@/assets/icons/company_logos/withmind_logo80.png';
-import blank_bookmark_black from '@/assets/icons/blank_bookmark_black.png';
-import bookmark_active_purple from '@/assets/icons/bookmark_active_purple24x24.png';
+import blank_bookmark_black from '@/assets/icons/size24/ic_bookmark_gray900_24.png';
+import bookmark_active_purple from '@/assets/icons/size24/ic_bookmark_active_purple24.png';
 import copy_icon_blck_24x24 from '@/assets/icons/copy_icon_blck_24x24.png';
 import green_star20x20 from '@/assets/icons/green_star20x20.png';
+import ic_document_search_purple_20 from '@/assets/icons/size20/ic_document_search_purple_20.png';
+
+import ic_chevron_forward_right_purple_20 from '@/assets/icons/size20/ic_chevron_forward_right_purple_20.png';
+
 
 
 
@@ -25,11 +30,37 @@ import RecommendedJobCard from "@/shared/components/job-posting-item/Recommended
 import Modal from "@/shared/components/modal/Modal";
 
 
+
 import "./JobDetail.css";
 
 export default function JobDetail() {
-  const [bookMark, setBookMark] = useState(true);
+  const navigate = useNavigate();
+  const [bookMark, setBookMark] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const { jobId } = useParams();
+
+  const handleBookmark = () => {
+    setBookMark(prev => !prev);
+  };
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href)
+      .then(() => {
+        toast.success("링크가 복사되었습니다.");
+      })
+      .catch(() => {
+        toast.error("링크 복사에 실패했습니다.");
+      });
+  };
+
+  const handleMockInterviewClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+  };
+
   return (
     <>
       <article className="job-detail">
@@ -45,13 +76,20 @@ export default function JobDetail() {
                 </div>
               </div>
               <div className="job-detail__header-actions">
-                <span className="job-detail__action job-detail__action--copy">
-                <span className="job-detail__action-icon">
+                <span 
+                  className="job-detail__action job-detail__action--copy"
+                  onClick={handleCopyLink}
+                  style={{cursor: 'pointer'}}
+                >
+                  <span className="job-detail__action-icon">
                     <img src={copy_icon_blck_24x24} alt="" />
                   </span>
                 </span>
                 <span
-                  className="job-detail__action job-detail__action--bookmark">
+                  className="job-detail__action job-detail__action--bookmark"
+                  onClick={handleBookmark}
+                  style={{cursor: 'pointer'}}
+                >
                   <span className="job-detail__action-icon">
                     <img src={bookMark ? bookmark_active_purple : blank_bookmark_black} alt="" />
                   </span>
@@ -86,14 +124,14 @@ export default function JobDetail() {
 
             <div className="job-detail__resume">
               <div className="job-detail__resume-info">
-                <span className="job-detail__resume-image">이미지</span>
+                <img src={ic_document_search_purple_20} alt="" />
                 <span className="job-detail__resume-text">
-                  이력서 작성하고 나에게 맞는 AI 공고 추천을 받아보세요.
+                이력서 작성하고 나에게 맞는 AI 공고 추천을 받아보세요.
                 </span>
               </div>
-              <div className="job-detail__resume-cta">
+              <div className="job-detail__resume-cta" onClick={()=>{navigate(`/resumes/create`);}}>
                 <span className="job-detail__resume-button">이력서 작성하기</span>
-                <span className="job-detail__resume-image">이미지</span>
+                <img src={ic_chevron_forward_right_purple_20} alt="" />
               </div>
             </div>
           </div>
@@ -129,7 +167,7 @@ export default function JobDetail() {
           </div>
 
           <div className="job-detail__divider"></div>
-            <div className="default_btn_white">
+            <div className="default_btn_white" onClick={()=>{navigate(`/jobs`);}}>
               <span><img src={chevron_left} alt="" /></span>
               목록으로</div>
          </section>
@@ -196,7 +234,7 @@ export default function JobDetail() {
             <span className="job-detail__mock-headline">면접 합격률을 높이고 싶다면?</span>
             <span className="job-detail__mock-subtext">잡콕만의 이력서 기반 AI 모의면접을 경험해 보세요.</span>
           </div>
-          <div className="job-detail__mock-cta">
+          <div className="job-detail__mock-cta" onClick={handleMockInterviewClick} style={{cursor: 'pointer'}}>
             <span><img src={arrow_up_right} alt="" /></span>
             해당공고로 모의면접 보기</div>
         </section>
@@ -206,17 +244,17 @@ export default function JobDetail() {
         <div className="job-recos__title">추천 채용공고</div>
         <RecommendedJobCard/>
       </section>
-      {/* <Modal
-              open={true}
+      <Modal
+              open={isModalOpen}
               title="이력서가 등록되어 있지 않습니다."
               desc="모의면접을 진행하기 위해 먼저 이력서를 작성해 주세요."
               confirmText="이력서 작성하기"
               cancelText="취소"
               cancelClassName ="btn_w_full default_btn_white"
               confirmClassName="btn_w_full default_btn_black"
-              onConfirm={() => {}}
-              onClose={()=>{}}
-            /> */}
+              onConfirm={()=>{navigate(`/resumes/create`);}}
+              onClose={handleModalClose}
+            />
     </>
   );
 }

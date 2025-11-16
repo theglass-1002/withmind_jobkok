@@ -419,3 +419,29 @@ line-height: 20px; /* 125% */
   font-weight: 600;
   line-height: 30px; /* 125% */
 }
+
+.job-detail__resume-info{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--primary-primary, #816BFE);
+font-family: Pretendard;
+font-size: 16px;
+font-style: normal;
+font-weight: 400;
+line-height: 20px; /* 125% */
+}
+
+.job-detail__resume-cta{
+  color: var(--primary-primary, #816BFE);
+  text-align: right;
+  font-family: Pretendard;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 20px; /* 125% */
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}

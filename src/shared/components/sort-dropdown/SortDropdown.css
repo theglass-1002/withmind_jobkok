@@ -1,0 +1,49 @@
+
+.sort-control{
+    position: relative;
+}
+
+.sort-control__menu{
+    position: absolute;
+    width: 100px;
+    top: 30px;
+    right: 5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: flex-start;
+    background: var(--white-100, #FFF);
+    border-radius: 4px;
+    border: 1px solid var(--gray-300, #E0E2E4);
+    box-shadow: 0 0 24px 0 rgba(42, 45, 47, 0.16);
+}
+
+.sort-control__label{
+    display: flex; 
+    align-items: center;
+}
+
+.sort-control__label::after{
+    content: ''; 
+    width: 24px;
+    height: 24px;
+    background-image: ('');
+    background: url("/src/assets/icons/size24/ic_arrow_drop_down_gray500_24.png") center / contain no-repeat;
+
+}
+.sort-control__option{
+    width: 100%;
+    text-align: start;
+    padding: 5px;
+    color: var(--gray-900, #2A2D2F);
+    font-family: Pretendard;
+    font-size: 15px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; /* 125% */
+    cursor: pointer;    
+}
+
+.sort-control__option:hover{
+    background: var(--gray-50, #F8F8F9);
+}

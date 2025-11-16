@@ -1109,9 +1109,9 @@ line-height: 180%; /* 28.8px */
 }
 
  .job-card .job-head .job-bookmark img{
-    width: 18px;
+    /* width: 18px;
     height: 22px;
-    flex-shrink: 0;
+    flex-shrink: 0; */
  }
  
 

@@ -19,7 +19,9 @@ export default function JobPostingCard() {
   const [bookMark, setBookMark] = useState(0);
   const [recordAsApplied, setRecordAsApplied] = useState(0);
 
-  const handleRecordAsApplied = (next: 0 | 1) => {
+  const handleRecordAsApplied = (e: React.MouseEvent, next: 0 | 1) => {
+    e.preventDefault();
+    e.stopPropagation();
     setRecordAsApplied(next);
     console.log(next);
     if (next === 1) {
@@ -27,6 +29,12 @@ export default function JobPostingCard() {
     } else {
       toast.info('기록을 해제했어요.');
     }
+  };
+
+  const handleBookmark = (e: React.MouseEvent, next: 0 | 1) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setBookMark(next);
   };
 
   return (
@@ -47,9 +55,9 @@ export default function JobPostingCard() {
                     </div>
                     <span className="job-card__favorite">  
                       {bookMark===0?<img src={bookmark_inactive}
-                      onClick={()=>setBookMark(1)}
+                      onClick={(e)=>handleBookmark(e, 1)}
                       />:<img src={bookmark_active_purple}
-                      onClick={()=>setBookMark(0)}
+                      onClick={(e)=>handleBookmark(e, 0)}
                        />}
                       </span>
                     </div>
@@ -74,11 +82,11 @@ export default function JobPostingCard() {
                           <img src={fire} alt="" />마감임박!</span>
                       </div>
                       {recordAsApplied===0?
-                          <div className="job-card__control job-card__control--radio">
-                          <div className="radio_check_blank_gray" onClick={()=> handleRecordAsApplied(1)}></div> 
+                          <div className="job-card__control job-card__control--radio" onClick={(e)=> handleRecordAsApplied(e, 1)}>
+                          <div className="radio_check_blank_gray"></div> 
                           지원한 포지션으로 기록하기</div>:
-                          <div className="job-card__control job-card__control--radio on">
-                            <img onClick={()=>setRecordAsApplied(0)} src={check_circle_purple} alt="" />
+                          <div className="job-card__control job-card__control--radio on" onClick={(e)=> handleRecordAsApplied(e, 0)}>
+                            <img src={check_circle_purple} alt="" />
                         지원한 포지션으로 기록하기
                       </div>    
                     }
@@ -102,9 +110,9 @@ export default function JobPostingCard() {
                     </div>
                     <span className="job-card__favorite">  
                       {bookMark===0?<img src={bookmark_inactive}
-                      onClick={()=>setBookMark(1)}
+                      onClick={(e)=>handleBookmark(e, 1)}
                       />:<img src={bookmark_active_purple}
-                      onClick={()=>setBookMark(0)}
+                      onClick={(e)=>handleBookmark(e, 0)}
                        />}
                       </span>
                     </div>
@@ -129,11 +137,11 @@ export default function JobPostingCard() {
                           <img src={fire} alt="" />마감임박!</span>
                       </div>
                       {recordAsApplied===0?
-                          <div className="job-card__control job-card__control--radio">
-                          <div className="radio_check_blank_gray" onClick={()=> handleRecordAsApplied(1)}></div> 
+                          <div className="job-card__control job-card__control--radio" onClick={(e)=> handleRecordAsApplied(e, 1)}>
+                          <div className="radio_check_blank_gray"></div> 
                           지원한 포지션으로 기록하기</div>:
-                          <div className="job-card__control job-card__control--radio on">
-                            <img onClick={()=>setRecordAsApplied(0)} src={check_circle_purple} alt="" />
+                          <div className="job-card__control job-card__control--radio on" onClick={(e)=> handleRecordAsApplied(e, 0)}>
+                            <img src={check_circle_purple} alt="" />
                         지원한 포지션으로 기록하기
                       </div>    
                     }
@@ -157,9 +165,9 @@ export default function JobPostingCard() {
                     </div>
                     <span className="job-card__favorite">  
                       {bookMark===0?<img src={bookmark_inactive}
-                      onClick={()=>setBookMark(1)}
+                      onClick={(e)=>handleBookmark(e, 1)}
                       />:<img src={bookmark_active_purple}
-                      onClick={()=>setBookMark(0)}
+                      onClick={(e)=>handleBookmark(e, 0)}
                        />}
                       </span>
                     </div>
@@ -184,11 +192,11 @@ export default function JobPostingCard() {
                           <img src={fire} alt="" />마감임박!</span>
                       </div>
                       {recordAsApplied===0?
-                          <div className="job-card__control job-card__control--radio">
-                          <div className="radio_check_blank_gray" onClick={()=> handleRecordAsApplied(1)}></div> 
+                          <div className="job-card__control job-card__control--radio" onClick={(e)=> handleRecordAsApplied(e, 1)}>
+                          <div className="radio_check_blank_gray"></div> 
                           지원한 포지션으로 기록하기</div>:
-                          <div className="job-card__control job-card__control--radio on">
-                            <img onClick={()=>setRecordAsApplied(0)} src={check_circle_purple} alt="" />
+                          <div className="job-card__control job-card__control--radio on" onClick={(e)=> handleRecordAsApplied(e, 0)}>
+                            <img src={check_circle_purple} alt="" />
                         지원한 포지션으로 기록하기
                       </div>    
                     }
@@ -212,9 +220,9 @@ export default function JobPostingCard() {
                     </div>
                     <span className="job-card__favorite">  
                       {bookMark===0?<img src={bookmark_inactive}
-                      onClick={()=>setBookMark(1)}
+                      onClick={(e)=>handleBookmark(e, 1)}
                       />:<img src={bookmark_active_purple}
-                      onClick={()=>setBookMark(0)}
+                      onClick={(e)=>handleBookmark(e, 0)}
                        />}
                       </span>
                     </div>
@@ -239,11 +247,11 @@ export default function JobPostingCard() {
                           <img src={fire} alt="" />마감임박!</span>
                       </div>
                       {recordAsApplied===0?
-                          <div className="job-card__control job-card__control--radio">
-                          <div className="radio_check_blank_gray" onClick={()=> handleRecordAsApplied(1)}></div> 
+                          <div className="job-card__control job-card__control--radio" onClick={(e)=> handleRecordAsApplied(e, 1)}>
+                          <div className="radio_check_blank_gray"></div> 
                           지원한 포지션으로 기록하기</div>:
-                          <div className="job-card__control job-card__control--radio on">
-                            <img onClick={()=>setRecordAsApplied(0)} src={check_circle_purple} alt="" />
+                          <div className="job-card__control job-card__control--radio on" onClick={(e)=> handleRecordAsApplied(e, 0)}>
+                            <img src={check_circle_purple} alt="" />
                         지원한 포지션으로 기록하기
                       </div>    
                     }
@@ -267,9 +275,9 @@ export default function JobPostingCard() {
                     </div>
                     <span className="job-card__favorite">  
                       {bookMark===0?<img src={bookmark_inactive}
-                      onClick={()=>setBookMark(1)}
+                      onClick={(e)=>handleBookmark(e, 1)}
                       />:<img src={bookmark_active_purple}
-                      onClick={()=>setBookMark(0)}
+                      onClick={(e)=>handleBookmark(e, 0)}
                        />}
                       </span>
                     </div>
@@ -294,11 +302,11 @@ export default function JobPostingCard() {
                           <img src={fire} alt="" />마감임박!</span>
                       </div>
                       {recordAsApplied===0?
-                          <div className="job-card__control job-card__control--radio">
-                          <div className="radio_check_blank_gray" onClick={()=> handleRecordAsApplied(1)}></div> 
+                          <div className="job-card__control job-card__control--radio" onClick={(e)=> handleRecordAsApplied(e, 1)}>
+                          <div className="radio_check_blank_gray"></div> 
                           지원한 포지션으로 기록하기</div>:
-                          <div className="job-card__control job-card__control--radio on">
-                            <img onClick={()=>setRecordAsApplied(0)} src={check_circle_purple} alt="" />
+                          <div className="job-card__control job-card__control--radio on" onClick={(e)=> handleRecordAsApplied(e, 0)}>
+                            <img src={check_circle_purple} alt="" />
                         지원한 포지션으로 기록하기
                       </div>    
                     }
@@ -322,9 +330,9 @@ export default function JobPostingCard() {
                     </div>
                     <span className="job-card__favorite">  
                       {bookMark===0?<img src={bookmark_inactive}
-                      onClick={()=>setBookMark(1)}
+                      onClick={(e)=>handleBookmark(e, 1)}
                       />:<img src={bookmark_active_purple}
-                      onClick={()=>setBookMark(0)}
+                      onClick={(e)=>handleBookmark(e, 0)}
                        />}
                       </span>
                     </div>
@@ -349,11 +357,11 @@ export default function JobPostingCard() {
                           <img src={fire} alt="" />마감임박!</span>
                       </div>
                       {recordAsApplied===0?
-                          <div className="job-card__control job-card__control--radio">
-                          <div className="radio_check_blank_gray" onClick={()=> handleRecordAsApplied(1)}></div> 
+                          <div className="job-card__control job-card__control--radio" onClick={(e)=> handleRecordAsApplied(e, 1)}>
+                          <div className="radio_check_blank_gray"></div> 
                           지원한 포지션으로 기록하기</div>:
-                          <div className="job-card__control job-card__control--radio on">
-                            <img onClick={()=>setRecordAsApplied(0)} src={check_circle_purple} alt="" />
+                          <div className="job-card__control job-card__control--radio on" onClick={(e)=> handleRecordAsApplied(e, 0)}>
+                            <img src={check_circle_purple} alt="" />
                         지원한 포지션으로 기록하기
                       </div>    
                     }
@@ -368,4 +376,3 @@ export default function JobPostingCard() {
             </>
             );
         }
-

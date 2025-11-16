@@ -29,19 +29,51 @@ import ModalCareerRangePicker from "@/shared/components/career-range-picker/Moda
 import ModalEducationPicker from "@/shared/components/education-picker/ModalEducationPicker";
 import ModalLocationPicker from "@/shared/components/location-picker/ModalLocationPicker";
 import ModalEmploymentTypePicker from "@/shared/components/employment-type-picker/ModalEmploymentTypePicker";
+import SortDropdown from "@/shared/components/sort-dropdown/SortDropdown";
+
 import "./Jobs.css";
 
-
+type Chip = {
+  id: string;
+  group: string;
+  role?: string;
+};
 
 type FilterKey = 'role' | 'career' | 'education' | 'location' | 'employment';
 export default function JobsList() {
   const [page, setPage] = useState(1);
+  const [sort, setSort] = useState("적합도순");
+  const [sizeSort, setSizeSort] = useState("15개씩");
   const [resumeReco, setResumeReco] = useState(true); // 이력서 기반 추천 토글
   const [view, setView] = useState(0);
   const [openFilter, setOpenFilter] = useState<FilterKey | null>(null);
+  const [activeTab, setActiveTab] = useState<'all' | 'saved'>('all'); // 탭 상태
+  
+  // 칩 상태 관리
+  const [chips, setChips] = useState<Chip[]>([
+    { id: '1', group: '개발', role: '프론트엔드 개발자' },
+    { id: '2', group: '개발', role: '웹 개발자' },
+    { id: '3', group: '1~3년' },
+    { id: '4', group: '정규직' }
+  ]);
+
+
+const sortOptions = ["적합도순", "최신순", "인기순", "마감임박순"];
+const sizeSortOptions = ["15개씩", "30개씩", "45개씩"];
+
 
   const toggleFilter = (key: FilterKey) =>
     setOpenFilter(prev => (prev === key ? null : key));
+
+  // 칩 삭제 함수
+  const removeChip = (id: string) => {
+    setChips(prev => prev.filter(chip => chip.id !== id));
+  };
+
+  // 초기화 함수
+  const resetFilters = () => {
+    setChips([]);
+  };
 
   useEffect(() => {
     const masthead = document.querySelector(".masthead");
@@ -85,7 +117,6 @@ export default function JobsList() {
 
 
   return (
-    console.log(openFilter),
     <>
       <div className="jobs jobs-top-padding"> {/* 헤더(고정 72px) 아래 공간 확보 */}
           <div className="resume-promo">
@@ -100,10 +131,20 @@ export default function JobsList() {
            </a>
           </div>
           <div className="jobs-tabs" role="tablist" aria-label="공고 탭">
-              <span className="jobs-tab on">
+              <span 
+                className={`jobs-tab ${activeTab === 'all' ? 'on' : ''}`}
+                onClick={() => setActiveTab('all')}
+                role="tab"
+                aria-selected={activeTab === 'all'}
+              >
               전체공고
               </span>
-              <span className="jobs-tab">
+              <span 
+                className={`jobs-tab ${activeTab === 'saved' ? 'on' : ''}`}
+                onClick={() => setActiveTab('saved')}
+                role="tab"
+                aria-selected={activeTab === 'saved'}
+              >
                 저장공고
               </span>
             </div>
@@ -235,43 +276,32 @@ export default function JobsList() {
                 </ul>
             </div>
             <div className="jobs-toolbar__actions">
-            <div className="jobs-actions__reset">
+            <div className="jobs-actions__reset" onClick={resetFilters} style={{cursor: 'pointer'}}>
              <span><img src={refresh_gray} alt="" /></span>초기화</div>
              <div className="jobs-chips">
-             <div className="jobs-chips__item">
-                <span className="job-role-picker__chip-group">개발</span>
-                  <span className="job-role-picker__chip-role">
-                    <span className="job-role-picker__chip-chevron"><img src={chevron_right_black} alt="" /></span> 
-                     프론트엔드 개발자</span>
-                    <span className="job-role-picker__chip-close"><img src={ic_close_gray500_20} alt="" /></span>
-                </div>       
-                <div className="jobs-chips__item">
-                <span className="job-role-picker__chip-group">개발</span>
-                  <span className="job-role-picker__chip-role">
-                    <span className="job-role-picker__chip-chevron"><img src={chevron_right_black} alt="" /></span> 
-                     웹 개발자</span>
-                    <span className="job-role-picker__chip-close"><img src={ic_close_gray500_20} alt="" /></span>
-                </div>  
-                <div className="jobs-chips__item">
-                <span className="job-role-picker__chip-group">1~3년</span>
-                  
-                    <span className="job-role-picker__chip-close"><img src={ic_close_gray500_20} alt="" /></span>
-                </div>  
-                <div className="jobs-chips__item">
-                <span className="job-role-picker__chip-group">정규직</span>
-                    <span className="job-role-picker__chip-close"><img src={ic_close_gray500_20} alt="" /></span>
-                </div>  
+              {chips.map((chip) => (
+                <div key={chip.id} className="jobs-chips__item">
+                  <span className="job-role-picker__chip-group">{chip.group}</span>
+                  {chip.role && (
+                    <span className="job-role-picker__chip-role">
+                      <span className="job-role-picker__chip-chevron">
+                        <img src={chevron_right_black} alt="" />
+                      </span> 
+                      {chip.role}
+                    </span>
+                  )}
+                  <span 
+                    className="job-role-picker__chip-close" 
+                    onClick={() => removeChip(chip.id)}
+                    style={{cursor: 'pointer'}}
+                  >
+                    <img src={ic_close_gray500_20} alt="" />
+                  </span>
+                </div>
+              ))}
               </div>
             </div>
             </div>
-            {/* <div className="jobs-tabs" role="tablist" aria-label="공고 탭">
-              <span className="jobs-tab on">
-              전체공고
-              </span>
-              <span className="jobs-tab">
-                저장공고
-              </span>
-            </div> */}
               </div>
               <div className="job-posting">
               <div className="job-posting__ai-recommend">이력서를 기반으로 AI가 103개의 추천 공고를 찾았어요!</div>
@@ -280,19 +310,38 @@ export default function JobsList() {
                 <div className="job-posting__header">
                   <span className="job-posting__count">총 <p className="point-text-black">365개</p>전체공고</span>
                   <div className="job-posting__controls">
-                    <div className="job-posting__select job-posting__sort">
-                      <span className="job-posting__select-label">적합도순</span>
-                      <span className="job-posting__icon">
-                        <img src={arrow_drop_down_gray} alt="" />
+                 
+                    <SortDropdown
+                      value={sort}
+                      options={sortOptions}
+                      onChange={setSort}
+                      className="job-posting__sort"
+                    />
+                    {/* <div className="job-posting__select job-posting__sort sort-control">
+                      <span className="job-posting__select-label sort-control__label">적합도순
                       </span>
-                    </div>
-                    <div className="job-posting__select job-posting__page-size">
-                      <span className="job-posting__select-label">15개씩</span>
-                      <span className="job-posting__icon">
-                        <img src={arrow_drop_down_gray} alt="" />
-                      </span>
-                    </div>
+                      <div className="sort-control__menu">
+                      <span className="sort-control__option">적합도순</span>
+                        <span className="sort-control__option">최신순</span>
+                        <span className="sort-control__option">인기순</span>
+                        <span className="sort-control__option">마감임박순</span>
+                      </div>
+                    </div> */}
+                    {/* <div className="job-posting__select job-posting__page-size sort-control">
+                      <span className="job-posting__select-label sort-control__label">15개씩</span>                   
+                      <div className="sort-control__menu">
+                      <span className="sort-control__option">15개씩</span>
+                        <span className="sort-control__option">30개씩</span>
+                        <span className="sort-control__option">45개씩</span>
+                      </div>
+                    </div> */}
 
+                  <SortDropdown
+                      value={sizeSort}
+                      options={sizeSortOptions}
+                      onChange={setSizeSort}
+                      className="job-posting__sort"
+                    />
                     <div className="job-posting__view-toggle" role="group" aria-label="보기 전환">
                     <span className="job-posting__view-btn job-posting__view-btn--card" onClick={()=>{setView(1)}} role="button" tabIndex={0}>
                        {view===1?(<img src={grid_black}/>):(<img src={grid_gray}/>)} 
@@ -321,4 +370,3 @@ export default function JobsList() {
     </>
   );
 }
-

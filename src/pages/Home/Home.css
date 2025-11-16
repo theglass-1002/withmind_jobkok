@@ -86,7 +86,7 @@ cursor: pointer;
   display: block;
   width: 24px;
   height: 24px;
-background: url("/src/assets/icons/search_white.png") center / contain no-repeat;
+  background: url("/src/assets/icons/search_white.png") center / contain no-repeat;
 }
 
 .select_box__menu-portal{

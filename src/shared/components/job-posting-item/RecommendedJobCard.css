@@ -47,9 +47,9 @@
 }
 
  .job-card .job-head .job-bookmark img{
-    width: 18px;
+    /* width: 18px;
     height: 22px;
-    flex-shrink: 0;
+    flex-shrink: 0; */
  }
  
 
@@ -101,4 +101,19 @@
     font-style: normal;
     font-weight: 400;
     line-height: 18px; 
+ }
+
+ .job-meta__tags {
+   display: flex;
+   align-items: center;
+ }
+ 
+ .job-tag::after {
+   content: "ㆍ";
+   margin: 0 4px; /* 점과 텍스트 사이 간격 조정 */
+ }
+ 
+ .job-tag:last-child::after {
+   content: "";
+   display: none;
  }
