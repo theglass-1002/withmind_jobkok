@@ -1,17 +1,19 @@
 import React from 'react'
 import { useEffect ,useRef,useState} from "react";
-import { useParams } from "react-router-dom"
+import { useParams,useNavigate } from "react-router-dom"
 import loud_speaker from '@/assets/icons/loud_speaker_purple.png';
+import ic_error_red100_20 from '@/assets/icons/size20/ic_error_red100_20.png';
 import Modal from '@/shared/components/modal/Modal';
 
 export default function ReportJob() {
+const navigate = useNavigate();
 const {id} = useParams<{ id:string}>();  
 const ref = useRef<HTMLTextAreaElement>(null);
-const [isModalOpen, setIsModalOpen] = useState(true);
+const [isModalOpen, setIsModalOpen] = useState(false);
 
-const closeModal = () => {
-  setIsModalOpen(false);
-};
+// const closeModal = () => {
+//   setIsModalOpen(false);
+// };
 
   useEffect(() => {
     console.log(isModalOpen);
@@ -20,8 +22,8 @@ const closeModal = () => {
 
 
 return (
-    <div className="inquiry">
-        <header className="mypage__content-header detail">
+    <div className="inquiry report">
+        <header className="mypage__content-header">
              <h2 className="title">
                 공고 제보하기</h2>
         </header> 
@@ -35,15 +37,14 @@ return (
         <span className='info_content'>잡콕은 현재 다양한 채용 공고를 자동으로 수집하고 있습니다.<br />
         아직 등록되지 않은 공고가 있다면 제보해 주세요. 확인 후 빠르게 반영하겠습니다.</span>
         </div>
-        
         </div>     
         <div className='field'>
         <span className='label'>공고 링크(URL)<em>*</em></span>    
-        <div className='input-group'>
-
+        <div className='input-group e'>
         <input className='' type="text" placeholder='https://'/>
+        {/* <img src={ic_error_red100_20} alt="" />  */}
         </div>
-        <span className='label'><em>공고 링크를 입력해 주세요.</em></span>    
+        <span className='label'><em>공고 링크를 입력해 주세요.</em></span>   
         </div>   
         <div className='field'>
         <span className='label'>세부 내용</span>   
@@ -70,17 +71,19 @@ return (
         </section>
 
     <div className="btn_wrap create">
-        <button className="btn default_btn_black">
+        <button className="default_btn_black" onClick={()=>setIsModalOpen(true)}>
             제출</button>
     </div>
-    <Modal
+           <Modal
               open={isModalOpen}
               title="공고 제보가 완료되었습니다."
               desc="제보해 주신 공고는 확인 후 빠르게 반영하겠습니다. 감사합니다."
               confirmText="확인"
               showCancel = {false}
               confirmClassName="btn_w_full default_btn_black"
-              onConfirm={closeModal}
+              onConfirm={()=>{navigate(`/mypage`);}}
+           
+              // onConfirm={closeModal}
             />
     </div>
   )

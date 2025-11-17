@@ -1,4 +1,4 @@
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink,useNavigate } from "react-router-dom";
 import bookmark_active from '@/assets/icons/bookmark_active_purple.png';
 import bookmark_inactive from '@/assets/icons/bookmark_inactive.png';
 import mp_banner from '@/assets/icons/mp_banner.png';
@@ -8,10 +8,13 @@ import done_file from '@/assets/icons/done_file.png';
 import test_profile from '@/assets/icons/interview_test_profile.png';
 import arrow_up_black from '@/assets/icons/arrow-up-right_black.png';
 import "./MyPage.css";
+import RecommendedJobCard from "@/shared/components/job-posting-item/RecommendedJobCard";
 
 
 
 export default function MyPage() {
+  const navigate = useNavigate();
+
     return (
     <div className="mypage_main no-bg-flag">
       <section className="mp-section">
@@ -19,12 +22,13 @@ export default function MyPage() {
         <span>
         <h1 className="title">저장한 공고</h1>
         </span>
-        <span className="mp-more">
+        <span onClick={()=>{navigate('/saved-jobs');}} className="mp-more">
           더보기
         </span>
       </header>
       <ul className="job-list saved">
-      
+      <RecommendedJobCard/>
+{/*       
       <li className="job-card">
         <div className="job-head">
           <span className="job-logo"><img src={mp_test_logo} alt="" /></span>
@@ -90,7 +94,7 @@ export default function MyPage() {
             <div className="job-type">정규직 · 계약직</div>
           </div>
         </div>
-      </li>
+      </li> */}
       </ul>
       </section>    
       <img src={mp_banner} alt="" />
@@ -104,7 +108,8 @@ export default function MyPage() {
         </span>
       </header>
       <ul className="job-list recent">
-      <li className="job-card">
+      <RecommendedJobCard/>
+      {/* <li className="job-card">
         <div className="job-head">
           <span className="job-logo"><img src={mp_test_logo} alt="" /></span>
           <span className="job-bookmark"><img src={bookmark_active} alt="" /></span>
@@ -169,7 +174,7 @@ export default function MyPage() {
             <div className="job-type">정규직 · 계약직</div>
           </div>
         </div>
-      </li>
+      </li> */}
       </ul>
       </section>  
       <section className="mp-section">
@@ -177,7 +182,9 @@ export default function MyPage() {
         <span>
         <h1 className="title">기본 이력서</h1>
         </span>
-        <span className="mp-more">
+        <span 
+        onClick={()=>{navigate('/resumes');}}
+        className="mp-more">
           더보기
         </span>
       </header>
@@ -202,7 +209,7 @@ export default function MyPage() {
         <span>
         <h1 className="title">최근 진행한 모의면접</h1>
         </span>
-        <span className="mp-more">
+        <span className="mp-more" onClick={()=>{navigate('/mock-interview-report?tab=history');}}>
           더보기
         </span>
       </header>

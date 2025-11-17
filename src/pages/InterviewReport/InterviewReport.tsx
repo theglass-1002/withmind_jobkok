@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import "./InterviewReport.css";
 import ic_star_white_20 from "@/assets/icons/size20/ic_star_white_20.png";
 import ic_star_gray900_20 from "@/assets/icons/size20/ic_star_gray900_20.png";
@@ -18,6 +18,7 @@ const FILTERS: UiFilterOption[] = [
 
 export default function InterviewReport() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState("report");
   const [filter, setFilter] = useState("all");
   const [showConfirm, setShowConfirm] = useState(true);
@@ -32,6 +33,14 @@ export default function InterviewReport() {
     setShowConfirm(false);
     navigate(`/resumes/create`);
   };
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'history') {
+      setActiveTab('history');
+    }
+  }, [searchParams]);
+
 
   return (
     <div className="mock-interview-page">

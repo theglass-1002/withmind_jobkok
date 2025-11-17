@@ -10,30 +10,30 @@
   border-bottom: 1px solid var(---gray-300, #E0E2E4);
   background: var(--white-100, #FFF);
   z-index: 3;
-  }
-  
-  .masthead.masthead-static {
+  box-sizing: border-box;
+}
+
+.masthead.masthead-static {
   position: absolute !important;
   z-index: initial;
-  }
-  
-  .masthead__inner {
+}
+
+.masthead__inner {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  
-  }
-  
-  .masthead__menu {
+}
+
+.masthead__menu {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 52px;
   flex: 1 0 0;
-  }
-  
-  .masthead__menu li{
+}
+
+.masthead__menu li {
   display: flex;
   padding: 12px;
   justify-content: center;
@@ -46,15 +46,15 @@
   font-style: normal;
   font-weight: 600;
   line-height: 20px; /* 125% */
-  }
-  
-  .login_off{
+}
+
+.login_off {
   display: none;
   align-items: center;
   gap: 24px;
-  }
-  
-  .login_off .auth-cta{
+}
+
+.login_off .auth-cta {
   display: flex;
   padding: 10px 16px;
   justify-content: center;
@@ -71,98 +71,92 @@
   font-weight: 600;
   line-height: 18px; /* 128.571% */
   cursor: pointer;
-  }
-  
-  .login_off .auth-cta:hover{
+}
+
+.login_off .auth-cta:hover {
   background: var(--gray-50, #F8F8F9);
-  }
-  
-  .login_on {
+}
+
+.login_on {
   display: flex;
   align-items: center;
   gap: 24px;
-  }
-  
-  .login_on a {
+}
+
+.login_on a {
   display: flex;
-  }
-  
-  /* 투명 상태 - 더 부드러운 효과 */
-  .masthead-transparent {
-  background:  #f8f8f9;
+}
+
+/* 투명 상태 - 더 부드러운 효과 */
+.masthead-transparent {
+  background: #f8f8f9;
   border-bottom: 1px solid rgba(224, 226, 228, 0) !important;
   backdrop-filter: none;
   border: none;
-  }
-  
-  /* 아이콘 버튼 리셋 */
-  .icon-btn {
+}
+
+/* 아이콘 버튼 리셋 */
+.icon-btn {
   background: none;
   border: 0;
   padding: 0;
   cursor: pointer;
   line-height: 0;
-  }
-  
+}
 
-  .backdrop {
+.backdrop {
   position: fixed;
-  top: 72px; 
+  top: 72px;
   left: 0;
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.4);
   opacity: 0;
   visibility: hidden;
-
   transition: opacity 0.3s ease, visibility 0.3s ease;
-  z-index: 1; 
-  }
-  
-  .backdrop.is-open {
+  z-index: 1;
+}
+
+.backdrop.is-open {
   opacity: 1;
   visibility: visible;
-  }
-  
-  /* ============ Search Panel(필터 패널) - 애니메이션 추가 ============ */
-  .search-panel {
+}
+
+/* ============ Search Panel(필터 패널) - 애니메이션 추가 ============ */
+.search-panel {
   position: fixed;
-  left: 0; right: 0;
+  left: 0;
+  right: 0;
   top: 72px;
   width: 100%;
   background: var(--white-100, #FFF);
   border-bottom: 1px solid var(--gray-300, #E0E2E4);
-  
-
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transform: translateY(-10px); 
-
+  transform: translateY(-10px);
   transition: opacity 0.3s ease-out, transform 0.3s ease-out, visibility 0.3s;
-  
   z-index: 2;
-  }
-  .search-panel.is-open {
+}
+
+.search-panel.is-open {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
   transform: translateY(0);
-  }
-  
-  /* 열렸을 때만 본문 보이기 (display: none을 제거하고 부모의 visibility로 제어합니다) */
-  .panel-body {
+}
+
+/* 열렸을 때만 본문 보이기 (display: none을 제거하고 부모의 visibility로 제어합니다) */
+.panel-body {
   display: flex;
   padding: 52px 360px;
   flex-direction: column;
   align-items: flex-start;
   gap: 52px;
   flex-shrink: 0;
-  }
-  
-  /* is-open일 때만 panel-body의 display: flex를 설정하는 로직은 제거합니다. */
-  
-  .panel-search{
+}
+
+.panel-search {
   display: flex;
   justify-content: center;
   width: 1200px;
@@ -173,73 +167,65 @@
   border-radius: 100px;
   border: 1px solid var(--gray-300, #E0E2E4);
   background: var(--gray-50, #F8F8F9);
-  }
-  
-  .jobs-search__icon,
-  .jobs-search__clear_icon{
+}
+
+.jobs-search__icon,
+.jobs-search__clear_icon {
   cursor: pointer;
-  }
-  
-  .job-search-filters{
+}
+
+.job-search-filters {
   width: 20px;
   height: 20px;
   aspect-ratio: 1/1;
-  }
-  
-  .jobs-search_filter__help_icon{
+}
+
+.jobs-search_filter__help_icon {
   width: 16px;
   height: 16px;
   flex-shrink: 0;
   aspect-ratio: 1/1;
-  }
-  
-  /* .panel-search {
-  display: flex;
-  width: 100%;
-  height: 60px;
-  padding: 20px 24px;
-  align-items: center;
-  gap: 12px;
-  align-self: stretch;
-  border-radius: 100px;
-  border: 1px solid var(--gray-300, #E0E2E4);
-  background: var(--gray-50, #F8F8F9);
-  } */
-  .search-panel .panel-search input {
+}
+
+.search-panel .panel-search input {
   display: flex;
   width: 100%;
   height: 100%;
   border: none;
   background-color: transparent;
-  }
-  
-  .search-panel .panel-search input:focus {
-  outline: none; box-shadow: none;
-  }
-  
-  /* 섹션 & 헤더 */
-  .panel-section {
+}
+
+.search-panel .panel-search input:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+/* 섹션 & 헤더 */
+.panel-section {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 24px;
   align-self: stretch;
-  }
-  .section-head {
+}
+
+.section-head {
   display: flex;
   justify-content: space-between;
   align-items: center;
   align-self: stretch;
-  }
-  .section-title {
+}
+
+.section-title {
   color: var(--gray-900, #2A2D2F);
   font-family: Pretendard;
   font-size: 20px;
   font-style: normal;
   font-weight: 600;
   line-height: 24px;
-  }
-  .section-action {
+}
+
+.section-action {
   color: var(--gray-500, #9EA4AA);
   text-align: right;
   font-family: Pretendard;
@@ -250,18 +236,19 @@
   background: none;
   border: 0;
   cursor: pointer;
-  }
-  
-  /* 칩 리스트 */
-  .chip-list {
+}
+
+/* 칩 리스트 */
+.chip-list {
   display: flex;
   align-items: center;
   align-content: center;
   gap: 16px;
   align-self: stretch;
   flex-wrap: wrap;
-  }
-  .chip {
+}
+
+.chip {
   display: flex;
   padding: 16px 20px;
   justify-content: center;
@@ -277,59 +264,51 @@
   font-style: normal;
   font-weight: 400;
   line-height: 20px;
-  }
-  
-  .chip:hover{
+}
+
+.chip:hover {
   background: var(--gray-50, #F8F8F9);
   color: var(--gray-500, #9EA4AA);
-  }
-  
-  /* 기준 부모: 아이콘 감싸는 래퍼 */
-  .mypage {
-  position: relative;
-  
-  align-items: center;
-  }
-  
+}
 
-  .mypage-menu {
+/* 기준 부모: 아이콘 감싸는 래퍼 */
+.mypage {
+  position: relative;
+  align-items: center;
+}
+
+.mypage-menu {
   position: absolute;
-  
   top: calc(100% + 15px);
-  
   right: 0;
-  
   width: 140px;
-  display: flex; 
+  display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 1px;
   border-radius: 8px;
   background: var(--white-100, #FFF);
-  box-shadow: 0 0 24px rgba(42,45,47,0.16);
+  box-shadow: 0 0 24px rgba(42, 45, 47, 0.16);
   border: 1px solid var(--gray-200, #EBEEF0);
   z-index: 3;
-  
   /* 애니메이션 기본 상태 */
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
   transform: translateY(-5px);
   transition: opacity 0.2s ease-out, transform 0.2s ease-out, visibility 0.2s;
-  
-  }
-  
-  /* 보임 상태 */
-  .mypage-menu.is-open {
+}
+
+/* 보임 상태 */
+.mypage-menu.is-open {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
   transform: translateY(0);
-  }
-  
+}
 
-  .mypage-menu a,
-  .mypage-menu button {
+.mypage-menu a,
+.mypage-menu button {
   display: flex;
   padding: 16px;
   align-items: center;
@@ -340,12 +319,43 @@
   font-size: 16px;
   font-style: normal;
   font-weight: 400;
-  line-height: 20px; 
+  line-height: 20px;
   border-bottom: 1px solid var(--gray-300, #E0E2E4);
-  
-  }
-  .mypage-menu a:hover,
-  .mypage-menu button:hover {
-  
+}
+
+.mypage-menu a:hover,
+.mypage-menu button:hover {
   background: var(--gray-50, #F8F8F9);
+}
+
+/* ========== 미디어 쿼리는 맨 마지막에 작성! ========== */
+
+/* 모바일: 450px 이하 */
+@media (max-width: 450px) {
+ body{
+    .masthead{
+      position: fixed;
+      width: 100%;
+      height: 64px;
+      padding: 20px;
+      box-sizing: border-box; /* ← 이게 핵심! */
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      top: 0;
+      left: 0; /* ← 추가하면 더 안전 */
+    } 
+    .masthead__menu{
+      display: none;
+    }
+    .mypage{
+      display: none;
+    }
   }
+}
+
+@media (min-width: 390px) {
+}
+
+@media (min-width: 420px) {
+}

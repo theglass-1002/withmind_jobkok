@@ -3,8 +3,7 @@ import Layout from "./Layout";
 import Home from "@/pages/Home/Home";
 import JobsList from "@/pages/Jobs/JobsList";
 import JobDetail from "@/pages/Jobs/JobDetail";
-import CompaniesList from "@/pages/Companies/CompaniesList";
-import CompanyDetail from "@/pages/Companies/CompanyDetail";
+
 
 import ResumeList from "@/pages/Resume/ResumeList";
 import ResumeDetail from "@/pages/Resume/ResumeDetail/ResumeDetail";
@@ -49,6 +48,20 @@ import Recovery from "@/pages/Auth/Recovery/Recovery";
 import NotFound from "@/pages/NotFound";
 import MyPageLayout from "@/pages/Mypage/MyPageLayout";
 
+
+// 잡콕_기업
+import CompanyLogin from "@/pages/Company/login/CompanyLogin";
+import CompanySignup from "@/pages/Company/signup/CompanySignup";
+import CompanyDashboard from "@/pages/Company/dashboard/CompanyDashboard";
+import Guide from "@/pages/Company/dashboard/Guide/Guide";
+import AIMatching from "@/pages/Company/dashboard/AIMatching/AIMatching";
+import MatchHistory from "@/pages/Company/dashboard/MatchHistory/MatchHistory";
+import Statistics from "@/pages/Company/dashboard/Statistics/Statistics";
+import Pricing from "@/pages/Company/dashboard/Pricing/Pricing";
+import AIReport from "@/pages/Company/dashboard/AIMatching/report/AIReport";
+
+
+
 export const router = createBrowserRouter([
   { path: "/", element: <Layout><Home/></Layout>, errorElement: <Layout><NotFound /></Layout> },
   { path: "/jobs", element: <Layout><JobsList /></Layout>,
@@ -68,8 +81,6 @@ export const router = createBrowserRouter([
   { path: "/mock-interview/analysis/:interviewId", element: <Layout><MockAnalysisPage /></Layout> } ,
  
   { path: "jobs/:jobId", element: <Layout><JobDetail /></Layout>  } ,
-  { path: "/companies", element: <Layout><CompaniesList /></Layout> },
-  { path: "/companies/:companyId", element: <Layout><CompanyDetail /></Layout> },
   { path: "/login", element: <Layout><Login /></Layout> },
   { path: "/signup", element: <Layout><Signup /></Layout> },
   { path: "/recovery", element: <Layout><Recovery/></Layout> },
@@ -105,4 +116,47 @@ export const router = createBrowserRouter([
   { path: "/mock-interview/settings", element:<MockSettings/> },
   { path: "/mock-interview/environment-test", element: <EnvironmentTestView/> },
   { path: "/mock-interview/mock-interview-live", element: <MockInterviewLive/> },
+
+  { path: "/company/login", element: <CompanyLogin/> },
+  { path: "/company/signup", element: <CompanySignup/> },
+  // { path: "/company", element: <CompanyDashboard />},
+  // { path: "/company/ai-match/report", element: <AIReport/> },
+  { 
+    path: "/company", 
+    element: <CompanyDashboard />, // 레이아웃
+    children: [
+      { 
+        // /company 경로의 기본 콘텐츠 (index: true)
+        index: true, 
+        element: <Guide /> 
+      },
+      // 탭 경로들
+      { 
+        path: "guide", 
+        element: <Guide /> 
+      },
+      { 
+        path: "ai-matching", 
+        element: <AIMatching /> 
+      },
+      { 
+        path: "history", 
+        element: <MatchHistory /> 
+      },
+      { 
+        path: "statistics", 
+        element: <Statistics /> 
+      },
+      { 
+        path: "pricing", 
+        element: <Pricing /> 
+      },
+      // AI 리포트 경로 (버튼 클릭 시 이동하는 곳)
+      { 
+        path: "ai-matching/report", 
+        element: <AIReport /> 
+      }
+    ] 
+  },
+
 ]);
