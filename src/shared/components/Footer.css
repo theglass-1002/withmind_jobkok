@@ -78,7 +78,7 @@ line-height: 18px; /* 128.571% */
 /* ========== 미디어 쿼리는 맨 마지막에 작성! ========== */
 
 /* 모바일: 450px 이하 */
-@media (max-width: 450px) {
+@media (max-width: 750px) {
     body{
         .site-footer.pc_version{
             display: none;
@@ -86,7 +86,6 @@ line-height: 18px; /* 128.571% */
         .site-footer.mobile_version{
             display: flex;
             width: 100%;
-            height: 100%;
             padding: 36px 20px;
             flex-direction: column;
             align-items: flex-start;

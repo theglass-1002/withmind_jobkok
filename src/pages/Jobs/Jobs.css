@@ -408,3 +408,25 @@ background: var(--gray-50, #F8F8F9);
   .job-posting__header .job-posting__view-btn img { width: 20px; height: 20px; display: block; }
 
 
+
+  /* 모바일: 450px 이하 */
+@media (max-width: 750px) {
+    body{
+     .resume-promo{
+        padding: 0px;
+     }
+     .jobs-tabs{
+        padding: 0px;
+     }
+     .job-search-filters{
+        width: 100%;
+        overflow: auto;
+     }
+     .job-posting__container{
+        padding: 100px 0px 100px 0px;
+     }
+     .jobs-toolbar__actions{
+        padding: 0px;
+     }
+   }
+}

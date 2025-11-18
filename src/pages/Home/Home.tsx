@@ -1,6 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Select, { components, type OptionProps } from "react-select";
 import {useNavigate } from "react-router-dom";
+
+import ic_search_white_24 from "@/assets/icons/size24/ic_search_white_24.png";
+
 import code_icon from "@/assets/icons/category_icons/code_icon.png";
 import palette_icon from "@/assets/icons/category_icons/palette_icon.png";
 import megaphone_icon from "@/assets/icons/category_icons/megaphone_icon.png";
@@ -58,7 +61,9 @@ const Option = (props: OptionProps<Opt, false>) => {
 export default function Home() {
   const navigate = useNavigate();
   const [inputValue, setInputValue] = useState("");
-
+  const [isSearchExecuted, setIsSearchExecuted] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
+  
   const onInputChange = (val: string) => {
     setInputValue(val);
     return val;
@@ -112,23 +117,55 @@ export default function Home() {
     { value: "vanilla2", label: "Vanilla" },
     { value: "strawberry3", label: "Strawberry" },
     { value: "vanilla3", label: "Vanilla" },
+    { value: "vanilla3", label: "Vanilla" },
+    { value: "vanilla3", label: "Vanilla" },
+    { value: "vanilla3", label: "Vanilla" },
   ];
+  const handleSearch = () => {
+    // inputValue가 공백을 제거한 후에도 값이 남아있는지 확인
+    if (inputValue.trim()) {
+      // 검색어가 있을 때: 검색 실행 상태를 true로 설정
+      setIsSearchExecuted(true); 
+      console.log(`검색 실행: ${inputValue}`);
+    } else {
+      // 검색어가 없을 때: 검색 실행 상태를 false로 설정하여 드롭다운 닫기
+      setIsSearchExecuted(false);
+      console.log('검색어가 없어 드롭다운을 닫습니다.');
+    }
+  };
 
   useEffect(() => {
+    // 1. 스크롤 로직
     const masthead = document.querySelector(".masthead");
-    if (!masthead) return;
-    const onScroll = () => {
-      const scrollTop = window.scrollY;
-      if (scrollTop > 50) masthead.classList.remove("masthead-transparent");
-      else masthead.classList.add("masthead-transparent");
-    };
-    masthead.classList.add("masthead-transparent");
-    window.addEventListener("scroll", onScroll);
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      masthead.classList.remove("masthead-transparent");
-    };
-  }, []);
+    if (masthead) {
+        const onScroll = () => {
+            const scrollTop = window.scrollY;
+            if (scrollTop > 50) masthead.classList.remove("masthead-transparent");
+            else masthead.classList.add("masthead-transparent");
+        };
+        masthead.classList.add("masthead-transparent");
+        window.addEventListener("scroll", onScroll);
+        
+        // 클린업 함수
+        const removeScrollListener = () => {
+            window.removeEventListener("scroll", onScroll);
+            masthead.classList.remove("masthead-transparent");
+        };
+
+        // 2. 외부 클릭 감지 로직
+        function handleClickOutside(event: MouseEvent) {
+          if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+            setIsSearchExecuted(false);
+          }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        
+        return () => {
+            removeScrollListener();
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }
+  }, [searchRef]);
 
   return (
     <div className="home">
@@ -141,24 +178,47 @@ export default function Home() {
             </span>
           </div>
 
-          <div className="search">
-            <Select
-              className="select_box"
-              classNamePrefix="select_box"
-              options={options}
-              noOptionsMessage={() => '검색 결과 없음'}
-              components={{ Option, IndicatorSeparator: () => null }}
-              placeholder="직무,기업명,지역 등을 검색해 보세요."
-              menuPortalTarget={document.body}
-              menuIsOpen={false}
-              menuPosition="fixed"
-              inputValue={inputValue}
-              onInputChange={onInputChange}
-              closeMenuOnSelect={false}
-              styles={{
-                menuPortal: (base) => ({ ...base, zIndex: 1 }),
-              }}
+          <div className="search" ref={searchRef}>
+          <input 
+          type="text"
+          placeholder="직무, 기업명, 지역 등을 검색해 보세요."
+          className="search-bar__input" // ✨ 클래스명 통일
+          value={inputValue} // 입력 값 바인딩
+          onChange={(e) => {
+            const value = e.target.value;
+            setInputValue(value);
+            if (value.trim() === "") {
+                setIsSearchExecuted(false);
+              }
+             }}
             />
+            <span className="search-icon-wrap"
+            onClick={handleSearch}
+            tabIndex={0}
+            onKeyDown={(e) => { 
+              if (e.key === 'Enter' || e.key === ' ') {
+                handleSearch();
+              }
+            }}
+            >
+            <img src={ic_search_white_24} alt="" />
+            </span>
+            {isSearchExecuted && ( 
+              <div className="search-results-dropdown">
+                <div className="search-results-dropdown__list">
+                  {options
+                    .filter(opt => opt.label.toLowerCase().includes(inputValue.toLowerCase()))
+                    .slice(0, 10) 
+                    .map((option, index) => (
+                      <span 
+                        key={index} 
+                        className="search-results-dropdown__item">
+                        {highlightSubstring(option.label, inputValue)}
+                      </span>
+                    ))}
+                </div>
+              </div>
+            )}
           </div>
         </header>
 

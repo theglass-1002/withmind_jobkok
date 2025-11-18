@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react'; // useEffect 임포트 추가
 import Navbar from '@/shared/components/Navbar';
 import Footer from '@/shared/components/Footer';
+import BottomNav from '@/shared/components/bottomNav/BottomNav';
 import { useLocation } from "react-router-dom"; // useLocation 임포트 추가
 import { ToastContainer } from 'react-toastify'; 
 import { SlideDown } from '@/shared/lib/toastConfig';
@@ -43,6 +44,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         draggable
         theme="light"
       />
+      <BottomNav/>
     </div>
   );
 }

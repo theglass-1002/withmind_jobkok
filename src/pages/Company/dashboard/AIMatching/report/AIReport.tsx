@@ -9,40 +9,37 @@ export default function AIReport() {
   return (
     <>
        <div className="ai-report-page">
-      <div className="app-header">
-        <div className="app-header__title-group">
-        <span className="page-title">AI 인재 매칭</span>
-        <span className="page-subtitle">AI 리포트</span>
+       <div className="company-dashboard-header">
+        <div className="company-dashboard-header__title company-dashboard-header__title-group">
+        <span className="page-header-title-group__main-title">AI 인재 매칭</span>
+        <span className="page-header-title-group__sub-title">AI 리포트</span>
         </div>
         
-        <div className="app-header__actions">
-          <div className="app-header__notification-area">
+        <div className="company-dashboard-header__actions">
+          <div className="company-dashboard-header__notification">
             <img 
               src={ic_bell_gray900_24} 
               alt="알림" 
-              className="app-header__icon" 
+              className="company-dashboard-header__icon" 
             />
           </div>
-          <div className="app-header__user-info">
-            <span className="app-header__company-name">위드마인드
+          <div className="company-dashboard-header__info">
+            <span className="company-dashboard-header__company-name">위드마인드
             </span>
-            <img src={ic_arrow_drop_down_gray900_24} alt="드롭다운" className="app-header__dropdown-icon" />
+            <img src={ic_arrow_drop_down_gray900_24} alt="" />
           </div>
         </div>       
       </div> 
       <div className='report-main'>
         
         {/* 1. 탭 메뉴 섹션 */}
-       <div className='report-tab-nav'>
-        <div className='report-tab-nav__title'>탭바</div>
-        <div className='report-tab-nav__item report-tab-nav__item--active'>
-            <span className='report-tab-nav__text'>이력서</span>
-        </div>
-        <div className='report-tab-nav__item'>
-        <span className='report-tab-nav__text'>AI분석</span>
-        </div>
-       </div>
-       
+        <div className='report-tab-nav'>
+          <div className='report-tab-nav__container'>
+              <span className='report-tab-nav__item on'>이력서</span>
+              <span className='report-tab-nav__item'>AI분석</span>
+          </div>
+      </div>
+            
         {/* 2. 리포트 콘텐츠 섹션 */}
         <div className='report-content'>
         
@@ -80,7 +77,7 @@ export default function AIReport() {
             
             {/* 기본 정보 섹션 */}
             <div className='report-info-section report-info-section--profile'>
-                <span className='report-info-section__name'>홍길동</span>
+                <span className='report-info-section__title report-info-section__name'>홍길동</span>
                 <span className='report-info-section__detail'>남, 1991(33세)</span>
                 <span className='report-info-section__detail'>hong1234@gmail.com</span>
                 <span className='report-info-section__detail'>010-1234-5678</span>
@@ -90,18 +87,34 @@ export default function AIReport() {
             {/* 자기소개 섹션 */}
             <div className='report-info-section report-info-section--intro'>
                 <span className='report-info-section__title'>자기소개</span>
-                <span className='report-info-section__divider driver'></span>
-                <span className='report-info-section__content'>안녕하세요. 5년 8개월차 JAVA 개발자 홍길동입니다.
-                안녕하세요. 5년 8개월차 JAVA 개발자 홍길동입니다.</span>
+                <span className='divider'></span>
+                <div className='report-info-section__content'>
+                  <span>안녕하세요. 5년 8개월차 JAVA 개발자 홍길동입니다.</span>
+                  <span> 안녕하세요. 5년 8개월차 JAVA 개발자 홍길동입니다.</span>
+                  </div>
             </div>
             
             {/* 경력 섹션 */}
             <div className='report-info-section report-info-section--career'>
                 <span className='report-info-section__title'>경력</span>
-                <span className='report-info-section__divider driver'></span>
-                <div className='report-info-section__career-item'>회사1</div>
-                <span className='report-info-section__divider driver'></span>
-                <div className='report-info-section__career-item'>회사2</div>
+                <div className='report-info-section__career-item career-item'>
+                    <span className='career-item__company-name'>(주)위드마인드</span>
+                    <div className='career-item__duration-group'>
+                        <span className='career-item__start-date'>2019.03 ~ </span>
+                        <span className='career-item__status'>재직 중</span>
+                    </div>
+                    <span className='career-item__role'>JAVA 개발자ㆍ매니저</span>
+                    <span className='career-item__description'>Spring Boot와 MySQL을 활용하여 안정적인 백엔드 시스템을 구축하고, API 응답 속도를 30% 향상시킴.
+                        모놀리식 구조의 시스템을 MSA로 전환하여 확장성과 유지보수성을 개선하고, 배포 속도를 50% 단축.
+                        CI/CD 파이프라인 자동화 구축.</span>
+                </div>
+                <div className='report-info-section__career-item career-item'>
+                    <span className='career-item__company-name'>(주)마인드위드</span>
+                    <div className='career-item__duration-group'>
+                        <span className='career-item__start-date'>2019.03 ~ 2019.05 </span>
+                    </div>
+                    <span className='career-item__role'>JAVA 개발자ㆍ인턴</span>
+                </div>
             </div>
         </div>
 

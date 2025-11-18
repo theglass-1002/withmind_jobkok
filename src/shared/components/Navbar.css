@@ -2,6 +2,7 @@
 .masthead {
   position: fixed;
   display: flex;
+  justify-content: center;
   width: 100%;
   height: 72px;
   padding: 14px 360px;
@@ -23,6 +24,7 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
+  max-width: 1200px;
 }
 
 .masthead__menu {
@@ -139,6 +141,23 @@
   z-index: 2;
 }
 
+.search-panel-mobile{
+  display: none;
+  height: 100%;
+  position: fixed;
+  left: 0;
+  right: 0;
+  width: 100%;
+  background: var(--white-100, #FFF);
+  border-bottom: 1px solid var(--gray-300, #E0E2E4);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-10px);
+  transition: opacity 0.3s ease-out, transform 0.3s ease-out, visibility 0.3s;
+  z-index: 3;
+}
+
 .search-panel.is-open {
   opacity: 1;
   visibility: visible;
@@ -146,7 +165,14 @@
   transform: translateY(0);
 }
 
-/* 열렸을 때만 본문 보이기 (display: none을 제거하고 부모의 visibility로 제어합니다) */
+.search-panel-mobile.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+
 .panel-body {
   display: flex;
   padding: 52px 360px;
@@ -167,6 +193,10 @@
   border-radius: 100px;
   border: 1px solid var(--gray-300, #E0E2E4);
   background: var(--gray-50, #F8F8F9);
+}
+
+.panel-search:focus-within {
+  border: 1px solid var(--gray-900, #2A2D2F);
 }
 
 .jobs-search__icon,
@@ -331,7 +361,7 @@
 /* ========== 미디어 쿼리는 맨 마지막에 작성! ========== */
 
 /* 모바일: 450px 이하 */
-@media (max-width: 450px) {
+@media (max-width: 750px) {
  body{
     .masthead{
       position: fixed;
@@ -351,6 +381,75 @@
     .mypage{
       display: none;
     }
+    .search-panel{
+      display: none;
+    }
+    .search-panel-mobile{
+      display: flex;
+    }
+    .panel-body{
+      width: 100%;
+      padding: 20px 20px;
+    }
+
+    .panel-search-header{
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      align-self: stretch;
+    }
+
+    .panel-search{
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      align-self: stretch;
+    }
+    .panel-section{
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+      align-self: stretch;
+    }
+    .section-title{
+      font-size: 16px;
+    }
+    .section-action{
+      font-size: 14px;
+    }
+    .section-head{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      align-self: stretch;
+    }
+  
+    .chip-list{
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      align-self: stretch;
+    }
+    .chip{
+      display: flex;
+      height: 36px;
+      padding: 8px 8px 8px 12px;
+      justify-content: center;
+      align-items: center;
+      gap: 4px;
+      color: var(--gray-900, #2A2D2F);
+      font-size: 14px;
+    }
+
+    .masthead.masthead-static{
+      display: none;
+    }
+    
+    
   }
 }
 

@@ -5,13 +5,15 @@ import arrow_back_big from '@/assets/icons/arrow_back_big.png';
 import chevron_left from '@/assets/icons/chevron_left.png';
 import edit from '@/assets/icons/edit.png';
 import deleteIcon from '@/assets/icons/delete.png';
-import Select from 'react-select'
+
+import SelectDropdown from "@/shared/components/select-dropdown/SelectDropdown";
 
 
 export default function InquiryCreate() {
 const {id} = useParams<{ id:string}>();  
 const ref = useRef<HTMLTextAreaElement>(null);
 const [editing, setEditing] = useState(false);
+const [inquiryType, setInquiryType] = useState<string>(''); //  문의 유형 상태 추가 및 초기화
 
 const startEditing = (e?: React.KeyboardEvent | React.MouseEvent) => {
     if (e && "key" in e) {
@@ -22,12 +24,12 @@ const startEditing = (e?: React.KeyboardEvent | React.MouseEvent) => {
     setEditing(true);
   };
 
-const options = [
-    { value: 'chocolate', label: 'Chocolate' },
-    { value: 'strawberry', label: 'Strawberry' },
-    { value: 'vanilla', label: 'Vanilla' },
-    { value: 'strawberry', label: 'Strawberry' },
-  ]
+  const inquiryOptions = [
+    { value: 'usage', label: '이용방법' },
+    { value: 'memberInfo', label: '회원정보' },
+    { value: 'payment', label: '결제' },
+    { value: 'etc', label: '기타' },
+];
  
   useEffect(() => {
   console.log('실행');
@@ -41,24 +43,23 @@ return (
              <h2 className="title">
                 <span className="icon_wrap">
                 <img src={arrow_back_big} alt="" />
-                </span>
-                1:1 문의 하기</h2>
+                </span>1:1 문의 하기</h2>
         </header> 
         <section className='create'>
-        <div className='select_box_wrap'>
-        <span className='label'>문의 유형 <em>*</em></span>          
-            <Select 
-            className='select_box'
-            options={options}
-            classNamePrefix="select_box"
-            placeholder="문의 유형을 선택해 주세요."
-            menuPortalTarget={document.body}   // 포털로 띄우면 z-index 충돌 예방
-            menuPosition="fixed"
-            />
+        <div className='select_box_wrap'>    
+        <SelectDropdown
+          label="문의 유형" 
+                    required
+                    placeholder="문의 유형을 선택해 주세요."
+                    options={inquiryOptions} //                         
+                    value={inquiryType} // 
+                    onChange={setInquiryType} // 
+                    className="inquiry-form__type-select"
+          />    
         </div> 
-        <div className='field'>
+        <div className='field inquiry_title'>
         <span className='label'>문의 제목 <em>*</em></span>    
-        <input className='' type="text" placeholder='문의 제목을 입력해 주세요.'/>
+         <input className='' type="text" placeholder='문의 제목을 입력해 주세요.'/>
         </div>   
         <div className='field'>
         <span className='label'>문의 내용 <em>*</em></span>   
@@ -114,9 +115,9 @@ return (
         </section>
 
     <div className="btn_wrap create">
-    <button className="btn default_btn_white">
+    <button className="btn_w_full default_btn_white">
         취소</button>
-        <button className="btn default_btn_black">
+        <button className="btn_w_full default_btn_black">
             등록</button>
     </div>
     </div>

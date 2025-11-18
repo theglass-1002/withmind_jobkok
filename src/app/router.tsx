@@ -119,18 +119,14 @@ export const router = createBrowserRouter([
 
   { path: "/company/login", element: <CompanyLogin/> },
   { path: "/company/signup", element: <CompanySignup/> },
-  // { path: "/company", element: <CompanyDashboard />},
-  // { path: "/company/ai-match/report", element: <AIReport/> },
   { 
     path: "/company", 
     element: <CompanyDashboard />, // 레이아웃
     children: [
       { 
-        // /company 경로의 기본 콘텐츠 (index: true)
         index: true, 
         element: <Guide /> 
       },
-      // 탭 경로들
       { 
         path: "guide", 
         element: <Guide /> 

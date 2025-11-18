@@ -1,23 +1,25 @@
 import React from 'react'
-import { useEffect } from "react";
+import { useEffect ,useRef,useState} from "react";
 import { useParams } from "react-router-dom"
 import arrow_back_big from '@/assets/icons/arrow_back_big.png';
 import chevron_left from '@/assets/icons/chevron_left.png';
 import edit from '@/assets/icons/edit.png';
 import deleteIcon from '@/assets/icons/delete.png';
-import Select from 'react-select'
+import SelectDropdown from "@/shared/components/select-dropdown/SelectDropdown";
+
+
 
 
 export default function InquiryEdit() {
 const {id} = useParams<{ id:string}>();  
+const [inquiryType, setInquiryType] = useState<string>(''); //  문의 유형 상태 추가 및 초기화
 
-const options = [
-    { value: 'chocolate', label: 'Chocolate' },
-    { value: 'strawberry', label: 'Strawberry' },
-    { value: 'vanilla', label: 'Vanilla' },
-    { value: 'strawberry', label: 'Strawberry' },
-  ]
- 
+const inquiryOptions = [
+    { value: 'usage', label: '이용방법' },
+    { value: 'memberInfo', label: '회원정보' },
+    { value: 'payment', label: '결제' },
+    { value: 'etc', label: '기타' },
+];
   useEffect(() => {
   console.log('실행');
 }, [])
@@ -34,17 +36,17 @@ return (
         </header> 
         <section className='create'>
         <div className='select_box_wrap'>
-        <span className='label'>문의 유형 <em>*</em></span>          
-            <Select 
-            className='select_box'
-            options={options}
-            classNamePrefix="select_box"
-            placeholder="값끌고오기"
-            menuPortalTarget={document.body}   // 포털로 띄우면 z-index 충돌 예방
-            menuPosition="fixed"
-            />
+        <SelectDropdown
+          label="문의 유형" 
+                    required
+                    placeholder="문의 유형을 선택해 주세요."
+                    options={inquiryOptions} //                         
+                    value={inquiryType} // 
+                    onChange={setInquiryType} // 
+                    className="inquiry-form__type-select"
+          /> 
         </div> 
-        <div className='field'>
+        <div className='field inquiry_title'>
         <span className='label'>문의 제목 <em>*</em></span>    
         <input className='' type="text" placeholder='값 끌고오기'/>
         </div>   
@@ -81,10 +83,10 @@ return (
             삭제</button>
         </div>
         <div className="inquiry-actions__right">
-        <button className="btn default_btn_white">
+        <button className="default_btn_white">
        
             취소</button>
-        <button className="btn default_btn_black">
+        <button className="default_btn_black">
             저장</button>
         </div>
     </div>

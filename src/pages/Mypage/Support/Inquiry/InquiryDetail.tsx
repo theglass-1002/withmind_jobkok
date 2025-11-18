@@ -21,7 +21,7 @@ return (
                 <span className="icon_wrap">
                 <img src={arrow_back_big} alt="" />
                 </span>
-                1:1 문의 상세</h2>
+                1:1 문의 </h2>
         </header> 
         <section className="mypage__content-main inquiry-detail-view__main">
         {/* 문의 카드 */}
