@@ -24,6 +24,14 @@ import JobPostingCard from "@/shared/components/job-posting-item/JobPostingCard"
 import Pagination from "@/shared/components/Pagination";
 import refresh_gray from '@/assets/icons/refresh_gray.png';
 
+
+import ic_refresh_gray900_16 from '@/assets/icons/size16/ic_refresh_gray900_16.png';
+
+import ic_filter_gray900_20 from '@/assets/icons/size20/ic_filter_gray900_20.png';
+
+
+
+
 import ModalJobRolePicker from "@/shared/components/job-role-picker/ModalJobRolePicker";
 import ModalCareerRangePicker from "@/shared/components/career-range-picker/ModalCareerRangePicker";
 import ModalEducationPicker from "@/shared/components/education-picker/ModalEducationPicker";
@@ -118,7 +126,7 @@ const sizeSortOptions = ["15개씩", "30개씩", "45개씩"];
 
   return (
     <>
-      <div className="jobs jobs-top-padding">
+      <div className="jobs">
           <div className="resume-promo">
             <span className="resume-promo__text">
               이력서 작성하고 나에게 맞는 AI 공고 추천을 받아보세요.
@@ -193,6 +201,206 @@ const sizeSortOptions = ["15개씩", "30개씩", "45개씩"];
                       aria-label="이력서 기반 추천"
                     />
                 </div>
+                <ul className="job-search-filter-menu">
+                      <li
+                        className={`job-search-filter-menu__item ${openFilter==='role' ? 'on' : ''}`}
+                        onClick={() => toggleFilter('role')}
+                      >
+                      <span className="job-search-filter-menu__label">직군ㆍ직무</span>
+                      <span className="job-search-filter-menu__icon">
+                        <img src={openFilter==='role'?arrow_drop_up_black:arrow_drop_down} alt="" />
+                      </span>
+                      {openFilter==='role'?<div
+                          onMouseDown={(e) => e.stopPropagation()}  
+                          onClick={(e) => e.stopPropagation()}     
+                          onTouchStart={(e) => e.stopPropagation()} >
+                          <ModalJobRolePicker/>
+                          </div>
+                          :<></>}
+                  </li>       
+                  <li 
+                    className={`job-search-filter-menu__item ${openFilter==='career' ? 'on' : ''}`}
+                    onClick={() => toggleFilter('career')}>
+                      <span className="job-search-filter-menu__label">경력</span>
+                      <span className="job-search-filter-menu__icon">
+                      <img src={openFilter==='career'?arrow_drop_up_black:arrow_drop_down} alt="" />
+                      </span>
+                      {openFilter==='career'?<div
+                          onMouseDown={(e) => e.stopPropagation()}  
+                          onClick={(e) => e.stopPropagation()}     
+                          onTouchStart={(e) => e.stopPropagation()} >
+                          <ModalCareerRangePicker/>
+                          </div>
+                          :<></>}
+                  </li>
+                  <li 
+                      className={`job-search-filter-menu__item ${openFilter==='education' ? 'on' : ''}`}
+                      onClick={() => toggleFilter('education')}
+                    >
+                      <span className="job-search-filter-menu__label">학력</span>
+                      <span className="job-search-filter-menu__icon">
+                      <img src={openFilter==='education'?arrow_drop_up_black:arrow_drop_down} alt="" />
+                      </span>
+                      {openFilter==='education'?<div
+                          onMouseDown={(e) => e.stopPropagation()}  
+                          onClick={(e) => e.stopPropagation()}     
+                          onTouchStart={(e) => e.stopPropagation()} >
+                          <ModalEducationPicker/>
+                          </div>
+                          :<></>}   
+                  </li>
+                  <li
+                      className={`job-search-filter-menu__item ${openFilter==='location' ? 'on' : ''}`}
+                      onClick={() => toggleFilter('location')}
+                    >
+                      <span className="job-search-filter-menu__label">지역</span>
+                      <span className="job-search-filter-menu__icon">
+                      <img src={openFilter==='location'?arrow_drop_up_black:arrow_drop_down} alt="" />
+                      </span>
+                      {openFilter==='location'?<div
+                          onMouseDown={(e) => e.stopPropagation()}  
+                          onClick={(e) => e.stopPropagation()}     
+                          onTouchStart={(e) => e.stopPropagation()} >
+                          <ModalLocationPicker/>
+                          </div>
+                          :<></>}   
+                  </li>
+                  <li 
+                    className={`job-search-filter-menu__item ${openFilter==='employment' ? 'on' : ''}`}
+                    onClick={() => toggleFilter('employment')}
+                  >
+                      <span className="job-search-filter-menu__label">채용 유형</span>
+                      <span className="job-search-filter-menu__icon">
+                      <img src={openFilter==='employment'?arrow_drop_up_black:arrow_drop_down} alt="" />
+                      </span>
+                      {openFilter==='employment'?<div
+                          onMouseDown={(e) => e.stopPropagation()}  
+                          onClick={(e) => e.stopPropagation()}     
+                          onTouchStart={(e) => e.stopPropagation()} >
+                          <ModalEmploymentTypePicker/>
+                          </div>
+                          :<></>}   
+                  </li>
+                </ul>
+            </div>
+            <div className="jobs-toolbar__actions">
+            <div className="jobs-actions__reset" onClick={resetFilters} style={{cursor: 'pointer'}}>
+             <span><img src={refresh_gray} alt="" /></span>초기화</div>
+             <div className="jobs-chips">
+              {chips.map((chip) => (
+                <div key={chip.id} className="jobs-chips__item">
+                  <span className="job-role-picker__chip-group">{chip.group}</span>
+                  {chip.role && (
+                    <span className="job-role-picker__chip-role">
+                      <span className="job-role-picker__chip-chevron">
+                        <img src={chevron_right_black} alt="" />
+                      </span> 
+                      {chip.role}
+                    </span>
+                  )}
+                  <span 
+                    className="job-role-picker__chip-close" 
+                    onClick={() => removeChip(chip.id)}
+                    style={{cursor: 'pointer'}}
+                  >
+                    <img src={ic_close_gray500_20} alt="" />
+                  </span>
+                </div>
+              ))}
+              </div>
+            </div>
+            </div>
+              </div>
+              <div className="job-posting">
+              <div className="job-posting__ai-recommend">이력서를 기반으로 AI가 103개의 추천 공고를 찾았어요!</div>
+              <div className="job-posting__container">
+              <div className="job-posting__content">
+                <div className="job-posting__header">
+                  <span className="job-posting__count">총 <p className="point-text-black">365개</p>전체공고</span>
+                  <div className="job-posting__controls">
+                 
+                    <SortDropdown
+                      value={sort}
+                      options={sortOptions}
+                      onChange={setSort}
+                      className="job-posting__sort"
+                    />
+               
+                  <SortDropdown
+                      value={sizeSort}
+                      options={sizeSortOptions}
+                      onChange={setSizeSort}
+                      className="job-posting__sort"
+                    />
+                    <div className="job-posting__view-toggle" role="group" aria-label="보기 전환">
+                    <span className="job-posting__view-btn job-posting__view-btn--card" onClick={()=>{setView(1)}} role="button" tabIndex={0}>
+                       {view===1?(<img src={grid_black}/>):(<img src={grid_gray}/>)} 
+                      </span>
+                      <span className="job-posting__view-btn job-posting__view-btn--list job-posting__view-btn--active" onClick={()=>{setView(0)}} role="button" tabIndex={0}>
+                      {view===0?(<img src={row_black}/>):(<img src={row_white}/>)} 
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                {view===1?<JobPostingCard/>:<JobPostingRow/>}
+              </div>
+              <div className="job-posting__pagination">
+                <Pagination 
+                current={1}
+                total={10}
+                onChange={setPage}
+                pageWindow={5}
+                prevIcon={<img src={arrow_left} alt="" aria-hidden="true" />}
+                nextIcon={<img src={arrow_right} alt="" aria-hidden="true" />}
+                />
+            </div>
+              </div>
+          </div>
+      </div>
+
+      <div className="jobs mobile">
+         
+          <div className="jobs-tabs" role="tablist" aria-label="공고 탭">
+              <span 
+                className={`jobs-tab ${activeTab === 'all' ? 'on' : ''}`}
+                onClick={() => setActiveTab('all')}
+                role="tab"
+                aria-selected={activeTab === 'all'}
+              >
+              전체공고
+              </span>
+              <span 
+                className={`jobs-tab ${activeTab === 'saved' ? 'on' : ''}`}
+                onClick={() => setActiveTab('saved')}
+                role="tab"
+                aria-selected={activeTab === 'saved'}
+              >
+                저장공고
+              </span>
+            </div>
+            <div className="resume-promo">
+            <span className="resume-promo__text">
+              이력서 작성하고 나에게 맞는 AI 공고 추천을 받아보세요.
+            </span>
+            <a className="resume-promo__action" href="/resumes/create">
+              <span className="resume-promo__label">이력서 작성하기</span>
+              <span className="resume-promo__icon">
+              <img  src={keyboard_arrow_right} alt="" />
+              </span>
+           </a>
+          </div>
+          <div className="jobs-toolbar">
+            <div className="jobs-toolbar__search">
+            <div className="panel-search">
+            <img className="jobs-search__icon" src={search} alt="" />
+                  <input type="text" placeholder="직무, 기업명, 지역등을 입력해주세요" />
+               <span className="jobs-search__clear_icon">
+               <img src={cancel} alt="" />
+               </span>
+            </div>
+            <div className="job-search-filters">
+            <span className="job-list-action__refresh"><img src={ic_refresh_gray900_16} alt="새로고침" /></span>
+            <span className="job-list-action__filter"><img src={ic_filter_gray900_20} alt="필터" /></span>
                 <ul className="job-search-filter-menu">
                       <li
                         className={`job-search-filter-menu__item ${openFilter==='role' ? 'on' : ''}`}

@@ -60,6 +60,7 @@ textarea:focus {
     font-weight: 600;
     line-height: 20px; /* 125% */
     cursor: pointer;
+    border: none;
 
 }
 
@@ -970,3 +971,11 @@ body.mock-analysis-print-mode .mock-analysis {
 
 }
 
+@media (max-width: 760px) {
+
+    body{
+        .badge--required{
+            font-size: 14px;
+        }
+    }
+}

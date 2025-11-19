@@ -171,7 +171,7 @@ export default function Login() {
         <img className="login_btn" src={m_google_login52} alt="" />
       </div>
 
-    <NavLink to="/signup">
+    <NavLink to="/signup" className="auth-signup-wrap">
     <div className="auth-signup">
       <span className="auth-signup__text">아직 회원이 아니신가요?</span>
       <div className="auth-signup__action" >

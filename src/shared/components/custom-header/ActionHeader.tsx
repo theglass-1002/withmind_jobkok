@@ -5,7 +5,9 @@ import './CustomHeader.css';
 interface ActionHeaderProps {
   leftElement?: React.ReactNode; // 텍스트나 닫기 버튼 (예: "취소", <X /> 아이콘)
   rightIcons?: React.ReactNode[]; // 오른쪽 아이콘 배열 (예: "저장" 버튼)
-  onLeftElementClick?: () => void; // 왼쪽 요소 클릭 시 실행할 함수
+  onFirstRightElementClick?: () => void; // 왼쪽 요소 클릭 시 실행할 함수
+  onSecondRightElementClick?: () => void; // 왼쪽 요소 클릭 시 실행할 함수
+
 }
 
 /**
@@ -15,28 +17,28 @@ interface ActionHeaderProps {
 export default function ActionHeader({
   leftElement,
   rightIcons = [],
-  onLeftElementClick,
+  onFirstRightElementClick,
+  onSecondRightElementClick,
 }: ActionHeaderProps) {
+
+  
   
   return (
     <header className="action-header">
-      
-      {/* 1. 왼쪽 영역 (텍스트 또는 닫기 버튼) */}
-      <div className="header-left-action">
-        {leftElement && (
-          <button 
-            onClick={onLeftElementClick} 
-            className="action-button"
-          >
-            {leftElement}
-          </button>
-        )}
+      <div className="header-title">
+       {leftElement}
       </div>
-
-      {/* 2. 오른쪽 영역 (아이콘 목록) */}
-      <div className="header-right-action">
+      <div className="header-right-actions">
         {rightIcons.map((icon, index) => (
-          <div key={index} className="icon-container">
+          <div key={index} onClick={
+          ()=>{
+            if(index==0){
+              onFirstRightElementClick()
+            }else{
+              onSecondRightElementClick()
+            }
+          }
+          } className="icon-container">
             {icon}
           </div>
         ))}

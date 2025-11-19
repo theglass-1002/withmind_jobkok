@@ -8,6 +8,8 @@ import ic_check_circle_green_20 from '@/assets/icons/size20/ic_check_circle_gree
 import ic_visibility_gray700_20 from '@/assets/icons/size20/ic_visibility_gray700_20.png';
 import ic_visibility_off_gray700_20 from '@/assets/icons/size20/ic_visibility_off_gray700_20.png';
 import calendar_today from '@/assets/icons/size20/ic_calendar_gray700_20.png';
+import ic_turn_right_gray400_22x21 from '@/assets/icons/ic_turn_right_gray400_22x21.png';
+
 import "./Signup.css";
 
 
@@ -500,19 +502,34 @@ const handleSignup = (e) => {
                   /> APP Push 알림
                 </label>
               </div>
+
+              <div className="consent-item__options mobile">
+                <img src={ic_turn_right_gray400_22x21} alt="" />
+                <label className="consent-option">
+                  <input type="checkbox"
+                   checked={isEmailConsent}
+                   onChange={handleMarketingChild(setIsEmailConsent)}
+                  /> 이메일
+                </label>
+                <label className="consent-option">
+                  <input type="checkbox"
+                  checked={isPushConsent}
+                  onChange={handleMarketingChild(setIsPushConsent)}
+                  /> APP Push 알림
+                </label>
+              </div>
             </div>
         </div>
         <div className="form-actions">
-          <span className="btn_w_full">
+       
             <button className="btn_w_full default_btn_white"
             onClick={()=>{navigate('/login')}}
             >취소</button>
-          </span>
-          <span className="btn_w_full">
+      
+         
             <button className="btn_w_full default_btn_black"
               onClick={handleSignup}
             >가입하기</button>
-          </span>
         </div>
       </div>
 

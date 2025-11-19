@@ -8,7 +8,7 @@ import BottomNav from '@/shared/components/bottomNav/BottomNav';
 import PageHeader from '@/shared/components/custom-header/PageHeader'; 
 import ActionHeader from '@/shared/components/custom-header/ActionHeader';
 
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { ToastContainer } from 'react-toastify'; 
 import { SlideDown } from '@/shared/lib/toastConfig';
 
@@ -44,8 +44,10 @@ export default function Layout({
   customHeader
 }: LayoutProps) {
   const location = useLocation();
+  const navigate = useNavigate();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 750);
-
+ 
+ 
   useEffect(() => {
     window.scrollTo({
       top: 0,
@@ -79,30 +81,75 @@ export default function Layout({
     return true;
   };
 
+  const getMobileHeader = () => {
+    const path = location.pathname;
+    console.log(path);
+    if (path === '/signup') {
+      return (
+        <PageHeader 
+          title="회원가입" 
+          leftElement={<img src={ic_close_gray900_24} alt="닫기" />}
+          onLeftElementClick={() => navigate('/login')}
+        />
+      );
+    }else if(path === '/recovery'){
+        return(
+          <PageHeader 
+          title="아이디/비밀번호 찾기" 
+          leftElement={<img src={ic_close_gray900_24} alt="닫기" />}
+          onLeftElementClick={() => navigate('/login')}
+        />
+        );
+    }else if(path === '/jobs'){
+      return(
+        <Navbar 
+        titleText='채용 공고'
+      />
+      );
+  }
+    
+    return null;
+  }
+
+
+  const getHeader = () => {
+
+    if (customHeader) return customHeader;
+    
+    console.log(isMobile);
+    if (isMobile) {
+      const mobileHeader = getMobileHeader();
+      if (mobileHeader) return mobileHeader;
+    }
+    
+    // 기본 Navbar
+    return <Navbar />;
+  };
+
   const shouldShowBottomNav = showBottomNav && isMobile;
 
   return (
-    <div>
-      {shouldShowHeader() && (customHeader || <Navbar />)}
-      
-      <main>{children}</main>
-      
-      {shouldShowFooter() && <Footer />}
-      {shouldShowFooter() && <BottomNav />}
-      
-      <ToastContainer
-        className="app-toast"
-        position="top-center"
-        transition={SlideDown}
-        autoClose={20}
-        newestOnTop
-        hideProgressBar
-        closeOnClick
-        pauseOnFocusLoss
-        pauseOnHover
-        draggable
-        theme="light"
-      />
-    </div>
+     <div>
+        {shouldShowHeader() && getHeader()}
+        
+        <main>{children}</main>
+        
+        {shouldShowFooter() && <Footer />}
+        {shouldShowBottomNav && <BottomNav />}
+        
+        <ToastContainer
+          className="app-toast"
+          position="top-center"
+          transition={SlideDown}
+          autoClose={20}
+          newestOnTop
+          hideProgressBar
+          closeOnClick
+          pauseOnFocusLoss
+          pauseOnHover
+          draggable
+          theme="light"
+        />
+      </div>
   );
 }

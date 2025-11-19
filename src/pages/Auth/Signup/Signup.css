@@ -146,6 +146,11 @@ gap: 16px;
     gap: 28px;
 }
 
+.consent-item--optional .consent-item__options.mobile{
+  display: none;
+  padding: 0px;
+}
+
 
 .signup-card .email-group .input-group{
     height: 52px;
@@ -223,8 +228,76 @@ gap: 16px;
 
     body{
         .signup-page{
-            padding:100px 10px 10px 10px;
+            display: flex;
+            padding: 36px 0px;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+            align-self: stretch;
+            background: var(--white-100, #FFF);
         }
+        .signup-title{
+            display: none;
+            width: auto;
+        }
+
+        .signup-card{
+            width: 100%;
+            border: none;
+            gap: 12px;
+        }
+        .signup-card .form-group{
+            padding: 0 20px 36px 20px;
+            background: var(--white-100, #FFF);
+        }
+        .signup-card .form-group .toggle-group{
+            width: 100%;
+        }
+
+        .consent-card{
+            display: flex;
+            padding: 36px 20px 20px 20px;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 24px;
+            align-self: stretch;
+            border: none;
+            border-top: solid 12px #F2F3F4;
+        }
+        .signup-page .form-actions{
+            padding: 14px 20px 20px 20px;
+            border: none;    
+        }
+        .signup-page .form-actions :first-child{
+          display: none;
+        }
+        .consent-item .consent-item__control .consent-item__label{
+            font-size: 14px;
+        }
+
+        .consent-item--optional .consent-item__options{
+            display: none;
+        }
+        
+        .consent-item--optional .consent-item__options.mobile{
+          display: flex;
+          gap: 16px;
+          padding: 0px;
+        }
+        .recovery-panel.mobile.pwd{
+            border: none;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 36px;
+            align-self: stretch;
+        }
+        .recovery-panel.mobile .field input {
+            border-radius: 4px;
+            border: 1px solid var(--gray-300, #E0E2E4);
+            background: var(--white-100, #FFF);
+        }
+
     }
 
 }

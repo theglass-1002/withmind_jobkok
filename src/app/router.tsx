@@ -72,7 +72,7 @@ export const router = createBrowserRouter([
   { path: "/", element: <Layout><Home/></Layout>, errorElement: <Layout><NotFound /></Layout>},
   {path:"/linkview",element:<Layout><Linkview/></Layout>},
  
-  { path: "/jobs", element: <Layout><JobsList /></Layout>,
+  { path: "/jobs", element: <Layout ><JobsList /></Layout>,
     children:[
       {index:true,element:<>전체공고내용</>},
       {path:"all",element:<>전체공고내용2ß</>},
@@ -91,10 +91,11 @@ export const router = createBrowserRouter([
   { path: "jobs/:jobId", element: <Layout><JobDetail/></Layout>  } ,
   { 
     path: "/login", 
-    element: <Layout showHeader="desktop-only" showFooter="desktop-only"><Login /></Layout> 
+    element: <Layout showHeader="desktop-only" showFooter="desktop-only" showBottomNav={false}><Login /></Layout> 
   },
-  { path: "/signup", element:<Layout showHeader="desktop-only" showFooter="desktop-only"> <Signup/></Layout> },
-  { path: "/recovery", element: <Layout><Recovery/></Layout> },
+
+  { path: "/signup", element:<Layout showFooter="desktop-only" showBottomNav={false}> <Signup/></Layout> },
+  { path: "/recovery", element: <Layout showFooter="desktop-only" showBottomNav={false}><Recovery/></Layout> },
   { path: "/mypage", 
     element: <Layout><MyPageLayout/></Layout>,
       children:[

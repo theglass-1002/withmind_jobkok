@@ -1,6 +1,12 @@
-.jobs-top-padding{
-    padding-top: 72px;
+.jobs{
+    padding-top: 70px;
 }
+
+.jobs.mobile{
+    display: none;
+}
+
+
 
 .resume-promo{
     display: flex;
@@ -412,7 +418,83 @@ background: var(--gray-50, #F8F8F9);
   /* 모바일: 450px 이하 */
 @media (max-width: 750px) {
     body{
+     .jobs{
+        display: none;
+     }
+     .jobs.mobile{
+        display: flex;
+        flex-direction: column;
+     }
      .resume-promo{
+        display: flex;
+        padding: 20px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        align-self: stretch;
+     }
+     .jobs-tabs{
+        padding: 8px 20px 0 20px;
+     }
+     .jobs-tabs .jobs-tab{
+        padding-bottom: 16px;
+     }
+
+     .job-posting__container{
+        padding: 0px;
+     }
+     
+     .jobs-toolbar{
+        padding: 0px;
+     }
+     .job-search-filters{
+        width: 375px;
+     }
+     .jobs-toolbar__actions{
+        padding: 0px;
+     }
+     .jobs-toolbar .jobs-toolbar__search{
+        
+     }
+     .job-search-filter-menu {
+        display: flex; 
+        overflow-x: auto; 
+        overflow-y: hidden;
+        list-style: none; /* 리스트 스타일 제거 */
+        padding: 0;
+        margin: 0;
+    }
+
+     .job-list-action__refresh,
+     .job-list-action__filter{
+        display: flex;
+        width: 36px;
+        height: 36px;
+        padding: 8px;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        aspect-ratio: 1/1;
+        border-radius: 100px;
+        border: 1px solid var(--gray-300, #E0E2E4);
+        background: var(--white-100, #FFF);
+     } 
+     
+     
+     .job-search-filter-menu .job-search-filter-menu__item,
+     .job-search-filter--toggle
+     {
+        display: flex;
+        height: 36px;
+        white-space: nowrap;
+        padding: 8px 8px 8px 16px;
+        align-items: center;
+        gap: 2px;
+     }
+     .job-search-filter-menu__item .job-search-filter-menu__label{
+        font-size: 14px;
+     }
+        /* .resume-promo{
         padding: 0px;
      }
      .jobs-tabs{
@@ -427,6 +509,6 @@ background: var(--gray-50, #F8F8F9);
      }
      .jobs-toolbar__actions{
         padding: 0px;
-     }
+     } */
    }
 }

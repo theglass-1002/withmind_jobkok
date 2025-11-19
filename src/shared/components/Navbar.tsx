@@ -54,8 +54,12 @@ const options: Opt[] = [
 ];
 // ===============================================
 
+interface NavbarProps {
+  titleText?: string; // 로고 대신 표시할 텍스트 (선택 사항)
+}
 
-export default function Navbar() {
+
+export default function Navbar({ titleText }: NavbarProps) {
   const [SearchOpen, setSearchOpen] = useState(false);
   const [mypageMenuOpen, setMypageMenuOpen] = useState(false);
   
@@ -124,13 +128,9 @@ export default function Navbar() {
             setMypageMenuOpen(false);
         }
       }
-
-      // 검색 패널 닫기 (searchPanelRef에 ref를 적용하여 사용)
       if (SearchOpen && searchPanelRef.current && !searchPanelRef.current.contains(target)) {
-        // 검색 버튼을 클릭해서 닫히는 경우는 제외
         if (!(target.closest('.icon-btn') && target.closest('.login_on'))) {
             setSearchOpen(false);
-            // 패널 닫을 때 검색 상태 초기화
             setInputValue(""); 
             setIsSearchExecuted(false);
         }
@@ -147,11 +147,12 @@ export default function Navbar() {
     <>
       <header className="masthead">
         <div className="masthead__inner">
-          <h1 className="masthead__brand">
-            <Link to="/">
+          <span className="masthead__brand">
+            {titleText?(<>{titleText}</>):(<Link to="/">
               <img src={jobkokLogo} alt="" />
-            </Link>
-          </h1>
+            </Link>)}
+         
+          </span>
 
           <ul className="masthead__menu">
             <li>
