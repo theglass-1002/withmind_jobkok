@@ -1,10 +1,12 @@
 .home { 
   display: flex;
-      padding: 120px 360px;
-      flex-direction: column;
-      align-items: center;
-      gap: 120px;
-      align-self: stretch;
+  margin: auto;
+  padding-top: 120px;
+  flex-direction: column;
+  align-items: center;
+  gap: 120px;
+  align-self: stretch;
+  background: var(--gray-50, #F8F8F9);
   }
 
 
@@ -316,22 +318,23 @@ background: linear-gradient(90deg, #15D078 50%, rgba(75, 209, 200, 0.80) 100%);
 @media (max-width: 750px) {
   body{
      .home{
-       display: flex;
-       padding: 0px 0px 0px 0px;
-       flex-direction: column;
-       align-items: flex-start;
-       gap: 56px;
-       align-self: stretch;
+        display: flex;
+        padding: 100px 0px 0px 0px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 56px;
+        align-self: stretch;
+        margin: auto;
+        background: var(--gray-50, #F8F8F9);
      }
  
      .home .hero{
        gap: 44px;
+       padding: 0px 20px 0px 20px;
      }
      .hero .hero-head{
        display: flex;
        width: 100%;
-       max-width: 100%;
-       padding: 100px 20px 0px 20px;
        flex-direction: column;
        align-items: center;
        gap: 36px;

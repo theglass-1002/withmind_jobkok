@@ -40,7 +40,6 @@
   }
   
   html, body {
-    height: 100%;
     font-family: "Pretendard", -apple-system, system-ui, "Noto Sans KR", sans-serif;
     color: var(--gray-900);
     -webkit-font-smoothing: antialiased;
@@ -50,15 +49,14 @@
   /* Reset / base */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   #root { 
-    height: 100%;
   }
   
   a, a:visited, a:hover, a:active { color: #000; text-decoration: inherit; }
   ul, ol { list-style: none; margin: 0; padding: 0; }
   
   main { 
-    min-height: calc(100vh - 290px);
-    background-color: var(--bg-body); 
+    /* min-height: calc(100vh - 290px);
+    background-color: var(--bg-body);  */
   
   }
   
@@ -66,3 +64,11 @@
   .center { display:flex; flex-direction:column; align-items:center; text-align:center; } /* 내용 가운데 */
   .vh { }
   
+  @media (max-width: 760px) {
+
+    #root{
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+  }

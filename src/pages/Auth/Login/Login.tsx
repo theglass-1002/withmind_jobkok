@@ -5,6 +5,11 @@ import ic_visibility_off_gray700_20 from '@/assets/icons/size20/ic_visibility_of
 import kakao_login from '@/assets/icons/kakao_login_btn.png';
 import naver_login from '@/assets/icons/naver_login_btn.png';
 import google_login from '@/assets/icons/google_login_btn.png';
+
+import m_kakao_login52 from '@/assets/icons/size52/m_kakao_login52.png';
+import m_naver_login52 from '@/assets/icons/size52/m_naver_login52.png';
+import m_google_login52 from '@/assets/icons/size52/m_google_login52.png';
+
 import chevron_forward_black8x12 from '@/assets/icons/chevron_forward_black8x12.png';
 import cancel from '@/assets/icons/size20/ic_clear_btn_gray400_20.png'
 import error_Item from '@/assets/icons/error_Item.png';
@@ -13,7 +18,6 @@ import "./Login.css";
 
 
 export default function Login() {
-
   const [email, setEmail] = useState('');
 
   const [password, setPassword] = useState('');
@@ -138,7 +142,7 @@ export default function Login() {
           </div>
           <p className="error_text_red">{passwordErrorMessage}</p>
         </div>}
-        
+
 
         <div className="btn_w_full">
           <button className="btn_w_full default_btn_black" type="submit" onClick={handleLogin}>로그인</button>
@@ -160,6 +164,13 @@ export default function Login() {
         <img className="login_btn" src={naver_login} alt="" />
         <img className="login_btn" src={google_login} alt="" />
       </div>
+
+      <div className="oauth mobile">
+        <img className="login_btn" src={m_kakao_login52} alt="" />
+        <img className="login_btn" src={m_naver_login52} alt="" />
+        <img className="login_btn" src={m_google_login52} alt="" />
+      </div>
+
     <NavLink to="/signup">
     <div className="auth-signup">
       <span className="auth-signup__text">아직 회원이 아니신가요?</span>

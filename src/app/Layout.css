@@ -724,13 +724,6 @@ line-height: 20px; /* 125% */
     outline: none; box-shadow: none;
 }
 
-.login-page .oauth{
-    display: flex;
-    width: 520px;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-}
 
 
 .form-tip_text_gray{

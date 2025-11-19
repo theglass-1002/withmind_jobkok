@@ -28,7 +28,7 @@ export type Education = {
   startDate?: string;
   endDate?: string;
 };
-// CareerErrors 이름을 EducationErrors로 변경했습니다.
+
 export type EducationErrors = Partial<Record<keyof Education, string>>;
 
 const blankItem = (): Education => ({
@@ -38,36 +38,25 @@ const blankItem = (): Education => ({
   endDate: '',
 });
 
-// Helper: 항목이 없을 경우 최소 1개의 빈 항목을 반환
-const initialItems = (values: Education[]): Education[] =>
-  values.length > 0 ? values : [blankItem()];
+const initialItems = (values?: Education[]): Education[] =>
+  values && values.length > 0 ? values : [blankItem()];
 
 export default function EducationSection({
-  values,
+  values = [],
   onChange,
   onFocusAny,
+  errors = {},
 }: {
-  values: Education[];
+  values?: Education[];
   onChange: (list: Education[]) => void;
   onFocusAny?: () => void;
-  errors: EducationErrors;
+  errors?: EducationErrors;
 }) {
-  // prop values를 초기 상태로 사용
-  const [items, setItems] = useState<Education[]>(initialItems(values));
-  const [gradType, setGradType] = useState<(string | null)[]>(
-    values.map(() => null).length > 0 ? values.map(() => null) : [null]
+  const [items, setItems] = useState<Education[]>(() => initialItems(values));
+  const [gradType, setGradType] = useState<(string | null)[]>(() =>
+    values && values.length > 0 ? values.map(() => null) : [null]
   );
   const [openedSelectIdx, setOpenedSelectIdx] = useState<number | null>(null);
-
-  // prop values가 외부에서 변경될 경우 내부 상태 동기화
-  useEffect(() => {
-    if (values !== items) {
-      setItems(initialItems(values));
-      setGradType(initialItems(values).map(() => null));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [values]);
-
 
   const swap = <T,>(arr: T[], i: number, j: number) => {
     const next = arr.slice();
@@ -78,7 +67,7 @@ export default function EducationSection({
   const addItem = () => {
     setItems((prev) => {
       const next = [blankItem(), ...prev];
-      onChange(next); // 부모에게 전체 배열 전달
+      onChange(next);
       return next;
     });
     setGradType((prev) => [null, ...prev]);
@@ -87,7 +76,7 @@ export default function EducationSection({
   const removeItem = (idx: number) => {
     setItems((prev) => {
       const next = prev.length <= 1 ? prev.filter((_, i) => i !== idx) : prev.filter((_, i) => i !== idx);
-      onChange(next.length === 0 ? [blankItem()] : next); // 부모에게 전체 배열 전달
+      onChange(next.length === 0 ? [blankItem()] : next);
       return next.length === 0 ? [blankItem()] : next;
     });
     setGradType((prev) => prev.length <= 1 ? prev : prev.filter((_, i) => i !== idx));
@@ -97,7 +86,7 @@ export default function EducationSection({
     if (idx <= 0) return;
     setItems((prev) => {
       const next = swap(prev, idx, idx - 1);
-      onChange(next); // 부모에게 전체 배열 전달
+      onChange(next);
       return next;
     });
     setGradType((prev) => swap(prev, idx, idx - 1));
@@ -107,7 +96,7 @@ export default function EducationSection({
     if (idx >= items.length - 1) return;
     setItems((prev) => {
       const next = swap(prev, idx, idx + 1);
-      onChange(next); // 부모에게 전체 배열 전달
+      onChange(next);
       return next;
     });
     setGradType((prev) => swap(prev, idx, idx + 1));
@@ -116,7 +105,7 @@ export default function EducationSection({
   const patchItem = (idx: number, patch: Partial<Education>) => {
     setItems((prev) => {
       const next = prev.map((it, i) => (i === idx ? { ...it, ...patch } : it));
-      onChange(next); // 부모에게 전체 배열 전달
+      onChange(next);
       return next;
     });
   };
@@ -136,7 +125,7 @@ export default function EducationSection({
             index={idx}
             total={items.length}
             value={it}
-            errors={undefined} 
+            errors={undefined}
             gradLabel={gradType[idx]}
             selectOpen={openedSelectIdx === idx}
             onToggleSelect={() =>
@@ -181,7 +170,7 @@ function EducationItem({
   index: number;
   total: number;
   value: Education;
-  errors?: EducationErrors; // 타입 변경
+  errors?: EducationErrors;
   gradLabel: string | null;
   selectOpen: boolean;
   onToggleSelect: () => void;
@@ -279,7 +268,7 @@ function EducationItem({
                   invalid={!!errors?.startDate}
                   errorMessage={errors?.startDate}
                   rightIconSrc={errors?.startDate ? ic_error_red100_20 : undefined}
-                  isOpen={openStartCal}    
+                  isOpen={openStartCal}
                />
               </FormField>
 

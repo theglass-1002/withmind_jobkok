@@ -322,7 +322,6 @@ AIReport */
 .report-content{
     display: flex;
     width: 100%;
-    height: 1437px;
     flex-direction: column;
     align-items: flex-start;
     gap: 28px;
@@ -518,4 +517,32 @@ AIReport */
     font-style: normal;
     font-weight: 400;
     line-height: normal;
+}
+
+
+.report-content .resume-page__main{
+    width: 100%;
+    align-self: center;
+}
+
+.report-main .mock-analysis{
+    padding:0px;
+
+}
+
+.report-main .mock-analysis__header{
+    padding: 52px 60px;
+}
+.report-main .mock-analysis-tabs{
+    padding: 52px 60px 0 60px;
+}
+
+.report-main .mock-analysis-panel{
+    padding: 40px 60px 100px 60px;
+}
+
+.report-main .mock-analysis-overview__recommended-jobs,
+.report-main .mock-analysis-report__actions
+ {
+   display:none;
 }

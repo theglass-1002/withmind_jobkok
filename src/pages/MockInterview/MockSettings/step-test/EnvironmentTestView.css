@@ -1,3 +1,7 @@
+.mock-settings-page.environment{
+    height: 1000px;
+}
+
 .mock-settings-page.environment .mock-settings__content-inner{
     height: 100%;
     background: var(--gray-800, #3A3E42);
@@ -78,7 +82,7 @@
 .camera-test__guide-icon{
     position: absolute;
     display: flex;
-    top: 20%;
+    top: 30%;
     left: 35%;
     height: 50%;
     z-index: 10;
@@ -89,7 +93,7 @@
     z-index: 5;
     display: flex;
     width: 100%;
-    padding: 52px 360px;
+    padding: 35px 360px;
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;

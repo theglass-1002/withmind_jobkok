@@ -118,7 +118,7 @@ const sizeSortOptions = ["15개씩", "30개씩", "45개씩"];
 
   return (
     <>
-      <div className="jobs jobs-top-padding"> {/* 헤더(고정 72px) 아래 공간 확보 */}
+      <div className="jobs jobs-top-padding">
           <div className="resume-promo">
             <span className="resume-promo__text">
               이력서 작성하고 나에게 맞는 AI 공고 추천을 받아보세요.

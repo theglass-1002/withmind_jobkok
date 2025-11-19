@@ -23,7 +23,7 @@ export type LocationValue = {
 };
 
 interface LocationSectionProps {
-  defaultValue: LocationValue;
+  defaultValue?: LocationValue;
   onChange: (v: LocationValue) => void;
 }
 
@@ -31,7 +31,10 @@ const regionKeyOf = (r: Region) => r.id ?? r.name;
 const districtKeyOf = (r: Region, d: District) => d.id ?? `${r.name}|${d.name}`;
 const regionAllKeyOf = (r: Region) => `${regionKeyOf(r)}|ALL`;
 
-export default function LocationSection({ defaultValue, onChange }: LocationSectionProps) {
+export default function LocationSection({ 
+  defaultValue = { nationwide: false, selectedKeys: [] }, // 기본값 설정
+  onChange 
+}: LocationSectionProps) {
   const { regions } = data as unknown as { regions: Region[] };
   const NATIONWIDE_LABEL =
     (data as unknown as { nationwide?: { label: string } }).nationwide?.label ?? '지역 전체';

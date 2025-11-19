@@ -361,14 +361,13 @@
 /* ========== 미디어 쿼리는 맨 마지막에 작성! ========== */
 
 /* 모바일: 450px 이하 */
-@media (max-width: 750px) {
+@media (max-width: 760px) {
  body{
     .masthead{
       position: fixed;
-      width: 100%;
       height: 64px;
       padding: 20px;
-      box-sizing: border-box; /* ← 이게 핵심! */
+      box-sizing: border-box; 
       display: flex;
       justify-content: space-between;
       align-items: center;

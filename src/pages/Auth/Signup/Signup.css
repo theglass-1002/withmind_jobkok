@@ -219,3 +219,12 @@ gap: 16px;
     accent-color: #816BFE;
 }
 
+@media (max-width: 760px) {
+
+    body{
+        .signup-page{
+            padding:100px 10px 10px 10px;
+        }
+    }
+
+}

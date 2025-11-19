@@ -1,5 +1,11 @@
+
+
+
 import { createBrowserRouter } from "react-router-dom";
 import Layout from "./Layout";    
+
+import Linkview from "@/pages/Linkview/Linkview";
+
 import Home from "@/pages/Home/Home";
 import JobsList from "@/pages/Jobs/JobsList";
 import JobDetail from "@/pages/Jobs/JobDetail";
@@ -63,7 +69,9 @@ import AIReport from "@/pages/Company/dashboard/AIMatching/report/AIReport";
 
 
 export const router = createBrowserRouter([
-  { path: "/", element: <Layout><Home/></Layout>, errorElement: <Layout><NotFound /></Layout> },
+  { path: "/", element: <Layout><Home/></Layout>, errorElement: <Layout><NotFound /></Layout>},
+  {path:"/linkview",element:<Layout><Linkview/></Layout>},
+ 
   { path: "/jobs", element: <Layout><JobsList /></Layout>,
     children:[
       {index:true,element:<>전체공고내용</>},
@@ -80,9 +88,12 @@ export const router = createBrowserRouter([
   { path: "/mock-interview-report", element: <Layout><InterviewReport /></Layout> },
   { path: "/mock-interview/analysis/:interviewId", element: <Layout><MockAnalysisPage /></Layout> } ,
  
-  { path: "jobs/:jobId", element: <Layout><JobDetail /></Layout>  } ,
-  { path: "/login", element: <Layout><Login /></Layout> },
-  { path: "/signup", element: <Layout><Signup /></Layout> },
+  { path: "jobs/:jobId", element: <Layout><JobDetail/></Layout>  } ,
+  { 
+    path: "/login", 
+    element: <Layout showHeader="desktop-only" showFooter="desktop-only"><Login /></Layout> 
+  },
+  { path: "/signup", element:<Layout showHeader="desktop-only" showFooter="desktop-only"> <Signup/></Layout> },
   { path: "/recovery", element: <Layout><Recovery/></Layout> },
   { path: "/mypage", 
     element: <Layout><MyPageLayout/></Layout>,
@@ -147,7 +158,6 @@ export const router = createBrowserRouter([
         path: "pricing", 
         element: <Pricing /> 
       },
-      // AI 리포트 경로 (버튼 클릭 시 이동하는 곳)
       { 
         path: "ai-matching/report", 
         element: <AIReport /> 

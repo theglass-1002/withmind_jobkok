@@ -1,36 +1,95 @@
-import React, { useEffect } from 'react'; // useEffect 임포트 추가
+// Layout.tsx
+import React, { useEffect, useState } from 'react';
+
 import Navbar from '@/shared/components/Navbar';
 import Footer from '@/shared/components/Footer';
 import BottomNav from '@/shared/components/bottomNav/BottomNav';
-import { useLocation } from "react-router-dom"; // useLocation 임포트 추가
+
+import PageHeader from '@/shared/components/custom-header/PageHeader'; 
+import ActionHeader from '@/shared/components/custom-header/ActionHeader';
+
+import { useLocation } from "react-router-dom";
 import { ToastContainer } from 'react-toastify'; 
 import { SlideDown } from '@/shared/lib/toastConfig';
+
 import 'react-toastify/dist/ReactToastify.css';
-import '@/shared/styles/toast.css'; // 방금 만든 CSS
+import '@/shared/styles/toast.css';
 import "./Layout.css";
 
 
+import ic_close_gray900_24 from "@/assets/icons/size24/ic_close_gray900_24.png";
+import ic_search_gray900_24 from "@/assets/icons/size24/ic_search_gray900_24.png";
+import ic_bookmark_gray900_24 from "@/assets/icons/size24/ic_bookmark_gray900_24.png";
+import ic_home_gray900_20 from "@/assets/icons/size20/ic_home_gray900_20.png";
 
-export default function Layout({ children }: { children: React.ReactNode }) {
-  // 현재 라우트 경로 정보를 가져옵니다.
+
+
+
+
+
+
+interface LayoutProps {
+  children: React.ReactNode;
+  showHeader?: boolean | 'mobile-only' | 'desktop-only';
+  showFooter?: boolean | 'mobile-only' | 'desktop-only';
+  showBottomNav?: boolean;
+  customHeader?: React.ReactNode;
+}
+
+export default function Layout({ 
+  children,
+  showHeader = true,
+  showFooter = true,
+  showBottomNav = true,
+  customHeader
+}: LayoutProps) {
   const location = useLocation();
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 750);
 
-  // 라우트(pathname)가 변경될 때마다 스크롤을 맨 위로 부드럽게 이동시키는 로직 추가
   useEffect(() => {
-    // pathname이 바뀔 때마다 실행되어 스크롤을 (0, 0)으로 부드럽게 이동시킵니다.
     window.scrollTo({
       top: 0,
       left: 0,
-      behavior: 'smooth' // 부드러운 스크롤 애니메이션 적용
+      behavior: 'smooth'
     });
-  }, [location.pathname]); // location 객체의 pathname에 의존
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 750);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const shouldShowHeader = () => {
+    if (showHeader === true) return true;
+    if (showHeader === false) return false;
+    if (showHeader === 'mobile-only') return isMobile;
+    if (showHeader === 'desktop-only') return !isMobile;
+    return true;
+  };
+
+  const shouldShowFooter = () => {
+    if (showFooter === true) return true;
+    if (showFooter === false) return false;
+    if (showFooter === 'mobile-only') return isMobile;
+    if (showFooter === 'desktop-only') return !isMobile;
+    return true;
+  };
+
+  const shouldShowBottomNav = showBottomNav && isMobile;
 
   return (
-    <div >
-      <Navbar />
-      <main >{children}
-      </main>
-      <Footer/>
+    <div>
+      {shouldShowHeader() && (customHeader || <Navbar />)}
+      
+      <main>{children}</main>
+      
+      {shouldShowFooter() && <Footer />}
+      {shouldShowFooter() && <BottomNav />}
+      
       <ToastContainer
         className="app-toast"
         position="top-center"
@@ -44,7 +103,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         draggable
         theme="light"
       />
-      <BottomNav/>
     </div>
   );
 }

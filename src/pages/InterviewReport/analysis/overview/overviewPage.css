@@ -878,5 +878,9 @@ mock-analysis-overview__recommended-jobs */
     padding: 5px !important;
     gap: 5px !important;
   }
+
+  .bottom-nav-container{
+    display: none !important;
+  }
 }
 
