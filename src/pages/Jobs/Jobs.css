@@ -7,15 +7,23 @@
 }
 
 
+.resume-promo-container{
+    display: flex;
+    background: #1EC280;
+    border-bottom: 1px solid var(--gray-300, #E0E2E4);
+    justify-content: center;
+}
 
 .resume-promo{
     display: flex;
-    padding: 24px 360px;
+    padding: 24px 0px;
     justify-content: space-between;
     align-items: center;
     align-self: stretch;
-    border-bottom: 1px solid #E0E2E4;
-    background: #1EC280;
+    width: 100%;
+    max-width: 1200px;
+    align-items: center;
+    align-self: center;
 }
 
 .resume-promo .resume-promo__action{
@@ -62,7 +70,7 @@
 
 .jobs-toolbar{
     display: flex;
-    padding-top: 52px;
+    padding-top: 30px;
     flex-direction: column;
     align-items: center;
     gap: 52px;
@@ -138,14 +146,21 @@
     display: none;
 }
 
+.jobs-toolbar-container{
+    width: 100%;
+    border-top: 1px solid var(--gray-300, #E0E2E4);
+    background: var(--gray-50, #F8F8F9);
+}
+
 .jobs-toolbar__actions{
-display: flex;
-width: 100%;
-padding: 24px 360px;
-align-items: flex-start;
-gap: 24px;
-border-top: 1px solid var(--gray-300, #E0E2E4);
-background: var(--gray-50, #F8F8F9);
+    display: flex;
+    max-width: 1200px;
+    width: 100%;
+    padding: 24px 0px;
+    align-items: flex-start;
+    gap: 24px;
+    background: var(--gray-50, #F8F8F9);
+    margin: auto;
 }
 
 .jobs-actions__reset{
@@ -240,26 +255,29 @@ background: var(--gray-50, #F8F8F9);
     aspect-ratio: 2/1;
   }
 
-
+.job-tabs-container{
+    display: flex;
+    width: 100%;
+    background: var(--white-100, #FFF);
+    border-bottom: 1px solid var(--gray-300, #E0E2E4);
+}
 .jobs-tabs{
     display: flex;
-    padding: 52px 360px 0 360px;
+    padding: 42px 0px 0 0px;
     align-items: flex-start;
     gap: 28px;
     align-self: stretch;
-    border-bottom: 1px solid var(--gray-300, #E0E2E4);
-    background: var(--white-100, #FFF);
     cursor: pointer;
+    max-width: 1200px;
+    width: 100%;
+    align-items: start;
+    align-self: start;
+    margin: auto;
 } 
 
-
-/* 
-.jobs-tabs{
-    display: flex;
-    align-items: center;
-    gap: 28px;
-    align-self: stretch;
-} */
+.jobs .saved-jobs__main-container{
+    padding: 40px 0 100px 0;
+}
 
 .jobs-tabs .jobs-tab{
     display: flex;
@@ -314,13 +332,28 @@ background: var(--gray-50, #F8F8F9);
 }
 
 .job-posting__container{
-    display: flex;
+    /* display: flex;
     padding: 40px 360px 100px 360px;
     flex-direction: column;
     align-items: center;
     gap: 40px;
     align-self: stretch;
     margin-bottom: 50px;
+
+     */
+
+     display: flex;
+    padding: 40px 0px 40px 0px;
+    max-width: 1200px;
+    width: 100%;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    align-self: center;
+    gap: 40px;
+    align-self: stretch;
+    margin-bottom: 50px;
+    margin: auto;
 }
 
 .job-posting__content{
@@ -415,7 +448,7 @@ background: var(--gray-50, #F8F8F9);
 
 
 
-  /* 모바일: 450px 이하 */
+  /* 모바일: 750px 이하 */
 @media (max-width: 750px) {
     body{
      .jobs{
@@ -442,29 +475,53 @@ background: var(--gray-50, #F8F8F9);
 
      .job-posting__container{
         padding: 0px;
+        gap: 0px;
      }
      
      .jobs-toolbar{
         padding: 0px;
      }
      .job-search-filters{
-        width: 375px;
+        width: 100%;
+        height: 37px;
+        padding: 0 0 0 20px;
+        gap: 12px;
      }
+     .job-list-separator{
+        width: 1px;
+        height: 20px;
+        background: #E0E2E4;
+     }
+     .jobs-toolbar__search .panel-search{
+        width: 90%;
+        align-self: center;
+        
+     }
+
      .jobs-toolbar__actions{
-        padding: 0px;
+        display: none;
      }
      .jobs-toolbar .jobs-toolbar__search{
-        
+        display: flex;
+        padding: 10px 0px 10px 0px;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+        gap: 20px;
+        align-self: stretch;
      }
      .job-search-filter-menu {
         display: flex; 
         overflow-x: auto; 
         overflow-y: hidden;
         list-style: none; /* 리스트 스타일 제거 */
-        padding: 0;
+        padding: 20px 0 20px 0;
         margin: 0;
     }
-
+    .job-search-filter-menu::-webkit-scrollbar {
+        display: none;
+    }
+ 
      .job-list-action__refresh,
      .job-list-action__filter{
         display: flex;
@@ -481,8 +538,7 @@ background: var(--gray-50, #F8F8F9);
      } 
      
      
-     .job-search-filter-menu .job-search-filter-menu__item,
-     .job-search-filter--toggle
+     .job-search-filter-menu .job-search-filter-menu__item
      {
         display: flex;
         height: 36px;
@@ -491,24 +547,97 @@ background: var(--gray-50, #F8F8F9);
         align-items: center;
         gap: 2px;
      }
+     .job-search-filter--toggle{
+        display: flex;
+        width: 100%;
+        justify-content: space-between;
+        padding: 0 20px 0 20px;
+     }
+     
      .job-search-filter-menu__item .job-search-filter-menu__label{
         font-size: 14px;
      }
-        /* .resume-promo{
-        padding: 0px;
+
+     .jobs .job-posting .job-posting__ai-recommend{
+        display: none;
      }
-     .jobs-tabs{
-        padding: 0px;
+
+     .job-search-filter__label{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
      }
-     .job-search-filters{
+
+     .job-search-filter__text{
+        display: flex;
+        font-family: Pretendard;
+        font-size: 14px;
+        font-style: normal;
+        font-weight: 600;
+        line-height: 18px; 
+        background: var(--ai-100, linear-gradient(90deg, #15D078 0%, #4BD1C8 100%));
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        gap: 4px;
+     }
+
+     .job-posting__header{
+        display: flex;
+        padding: 20px;
+        justify-content: space-between;
+        align-items: center;
+        align-self: stretch;
+        background: var(--gray-50, #F8F8F9);
+        border-bottom: 1px solid var(--gray-300, #E0E2E4);
+     }
+
+     .job-posting__header .job-posting__view-toggle{
+        display: none;
+     }
+     .job-posting__content{
+          gap: 0px;  
+     }
+     .job-search-filter__label .tooltip__content{
+        width: 270px;
+     }
+     .tooltip__title{
+        font-size: 14px;
+     }
+
+     .tooltip__desc{
+        font-size: 14px;
+     }
+
+     .jobs .job-posting .job-posting__list--grid{
+        width: auto;
+        gap: 0px;
+     }
+
+     .jobs .job-posting .job-card__divider{
+        display: none;
+     }
+     .jobs .job-posting .job-posting__card{
+        border: none;
+        border-bottom: 1px solid var(--gray-300, #E0E2E4);
         width: 100%;
-        overflow: auto;
-     }
-     .job-posting__container{
-        padding: 100px 0px 100px 0px;
-     }
-     .jobs-toolbar__actions{
-        padding: 0px;
-     } */
+        border-radius: 0px;
+    }
+    .jobs .job-posting .job-posting__card .job-card__body .job-card__control{
+        display: none;
+    }
+    .job-posting__pagination{
+        width: 100%;
+        display: flex;
+        padding: 20px 20px 36px 20px;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        align-self: stretch;
+        background: var(--gray-50, #F8F8F9);
+    }
+    
+    
    }
 }

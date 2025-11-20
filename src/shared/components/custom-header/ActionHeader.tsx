@@ -1,5 +1,5 @@
 import React from 'react';
-import { X } from 'lucide-react';
+
 import './CustomHeader.css';
 // Props 타입을 정의합니다. (title이 제외됨)
 interface ActionHeaderProps {

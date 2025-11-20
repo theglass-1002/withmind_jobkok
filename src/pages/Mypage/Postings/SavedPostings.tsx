@@ -10,8 +10,9 @@ import ic_grid_view_gray400_20 from '@/assets/icons/size20/ic_grid_view_gray400_
 import ic_list_view_gray400_20 from '@/assets/icons/size20/ic_list_view_gray400_20.png';
 import ic_list_view_gray900_20 from '@/assets/icons/size20/ic_list_view_gray900_20.png';
 import ic_arrow_drop_down_gray500_24 from '@/assets/icons/size24/ic_arrow_drop_down_gray500_24.png';
-
 import "./SavedPostings.css";
+import "@/shared/components/job-posting-item/JobPostingItem.css"
+
 
 const filters = [
     { label: "전체", value: "all" },

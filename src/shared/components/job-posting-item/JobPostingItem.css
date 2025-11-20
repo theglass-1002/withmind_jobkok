@@ -237,6 +237,19 @@
   align-self: stretch;
 }
 
+.job-posting__badges .job-posting__ai-pick{
+  display: flex;
+  height: 28px;
+  padding: 4px 6px;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  border-radius: 4px;
+  background: var(--ai-100, linear-gradient(90deg, #15D078 0%, #4BD1C8 100%));
+  color: var(--white-100, #FFF);
+  font-size: 12px;
+  font-weight: 600;
+}
 
 
 
