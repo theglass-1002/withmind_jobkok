@@ -31,7 +31,7 @@ export default function M_JobPostingItemCardAi({
   const [recordAsApplied, setRecordAsApplied] = useState(0);
 
   const handleGoToJobPost = () => {
-    navigate('/jobs/13');
+    navigate('/jobs/13?title=위드마인드');
   };
 
   const handleBookmarkToggle = (e: React.MouseEvent) => {

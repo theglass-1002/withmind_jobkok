@@ -27,6 +27,11 @@ import icon_location_gray from '@/assets/icons/aside_item_logo/icon-location-gra
 import icon_role_gray from '@/assets/icons/aside_item_logo/icon-role-gray.png';
 
 import RecommendedJobCard from "@/shared/components/job-posting-item/RecommendedJobCard";
+import M_JobDetail from "./M_JobDetail";
+
+
+
+
 import Modal from "@/shared/components/modal/Modal";
 
 
@@ -63,6 +68,7 @@ export default function JobDetail() {
 
   return (
     <>
+      <div className="job-detail__container">
       <article className="job-detail">
         <section className="job-detail__main">
           <div className="job-detail__header">
@@ -244,8 +250,10 @@ export default function JobDetail() {
         <div className="job-recos__title">추천 채용공고</div>
         <RecommendedJobCard/>
       </section>
+      </div>
+      <M_JobDetail/>
       <Modal
-              open={isModalOpen}
+          open={isModalOpen}
               title="이력서가 등록되어 있지 않습니다."
               desc="모의면접을 진행하기 위해 먼저 이력서를 작성해 주세요."
               confirmText="이력서 작성하기"
@@ -253,8 +261,8 @@ export default function JobDetail() {
               cancelClassName ="btn_w_full default_btn_white"
               confirmClassName="btn_w_full default_btn_black"
               onConfirm={()=>{navigate(`/resumes/create`);}}
-              onClose={handleModalClose}
-            />
+          onClose={handleModalClose}
+       />
     </>
   );
 }

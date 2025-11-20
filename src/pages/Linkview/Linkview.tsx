@@ -46,7 +46,7 @@ export default function Linkview() {
       </div>
       <div className='link-list-page__header link-list-page__item'>
         <span className='link-list-page__header-item name link-list-page__item-name'>공고상세</span>
-        <Link to="/jobs/1" className='link-list-page__header-item address link-list-page__item-address' >
+        <Link to={`/jobs/${13}?title=${'위드마인드'}`} className='link-list-page__header-item address link-list-page__item-address' >
         /job/:공고id</Link>
       </div>
       <div className='link-list-page__header link-list-page__item'>

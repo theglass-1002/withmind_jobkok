@@ -96,3 +96,12 @@
     font-weight: 400;
     line-height: 20px; /* 125% */
   }
+
+    /* 모바일: 750px 이하 */
+    @media (max-width: 750px) {
+      body{
+        .modal {
+          width: auto;
+        }
+      }
+    }

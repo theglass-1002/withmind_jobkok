@@ -40,7 +40,7 @@ export default function JobPostingCard() {
   return (
          <>
           <div className="job-posting__list job-posting__list--grid">
-             <Link to="/jobs/3">
+          <Link to={`/jobs/${13}?title=${'위드마인드'}`} >
              <div className="job-posting__card">
                <div className="job-card__header">
                 <div className="job-posting__left">
@@ -95,7 +95,7 @@ export default function JobPostingCard() {
                     <div className="job-card__sticker">  <img src={ai_pick} alt="" /></div>
                  </div>
              </Link>
-             <Link to="/jobs/3">
+             <Link to={`/jobs/${13}?title=${'위드마인드'}`} >
              <div className="job-posting__card">
                <div className="job-card__header">
                 <div className="job-posting__left">
@@ -150,7 +150,7 @@ export default function JobPostingCard() {
                     <div className="job-card__sticker">  <img src={ai_pick} alt="" /></div>
                  </div>
              </Link>
-             <Link to="/jobs/3">
+             <Link to={`/jobs/${13}?title=${'위드마인드'}`} >
              <div className="job-posting__card">
                <div className="job-card__header">
                 <div className="job-posting__left">
@@ -205,7 +205,7 @@ export default function JobPostingCard() {
                     <div className="job-card__sticker">  <img src={ai_pick} alt="" /></div>
                  </div>
              </Link>
-             <Link to="/jobs/3">
+             <Link to={`/jobs/${13}?title=${'위드마인드'}`} >
              <div className="job-posting__card">
                <div className="job-card__header">
                 <div className="job-posting__left">
@@ -260,7 +260,7 @@ export default function JobPostingCard() {
                     <div className="job-card__sticker">  <img src={ai_pick} alt="" /></div>
                  </div>
              </Link>
-             <Link to="/jobs/3">
+             <Link to={`/jobs/${13}?title=${'위드마인드'}`} >
              <div className="job-posting__card">
                <div className="job-card__header">
                 <div className="job-posting__left">
@@ -315,7 +315,7 @@ export default function JobPostingCard() {
                     <div className="job-card__sticker">  <img src={ai_pick} alt="" /></div>
                  </div>
              </Link>
-             <Link to="/jobs/3">
+             <Link to={`/jobs/${13}?title=${'위드마인드'}`} >
              <div className="job-posting__card">
                <div className="job-card__header">
                 <div className="job-posting__left">

@@ -1,6 +1,6 @@
 // Layout.tsx
 import React, { useEffect, useState } from 'react';
-
+import { useParams, useSearchParams } from 'react-router-dom';
 import Navbar from '@/shared/components/Navbar';
 import Footer from '@/shared/components/Footer';
 import BottomNav from '@/shared/components/bottomNav/BottomNav';
@@ -36,6 +36,7 @@ interface LayoutProps {
   showFooter?: boolean | 'mobile-only' | 'desktop-only';
   showBottomNav?: boolean;
   customHeader?: React.ReactNode;
+  screen?:string
 }
 
 export default function Layout({ 
@@ -43,12 +44,13 @@ export default function Layout({
   showHeader = true,
   showFooter = true,
   showBottomNav = true,
+  screen = '',
   customHeader
 }: LayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 750);
- 
+  const [searchParams] = useSearchParams();
  
   useEffect(() => {
     window.scrollTo({
@@ -85,7 +87,6 @@ export default function Layout({
 
   const getMobileHeader = () => {
     const path = location.pathname;
-    console.log(path);
     if (path === '/signup') {
       return (
         <PageHeader 
@@ -101,21 +102,32 @@ export default function Layout({
           leftElement={<img src={ic_close_gray900_24} alt="닫기" />}
           onLeftElementClick={() => navigate('/login')}
         />);
-    }else if(path === '/jobs'){
-          return(
-            <Navbar 
-            titleText='채용 공고'
-          />);
-  }else if(path ==='/saved-jobs'){
-    return(
-      <PageHeader 
-      title="저장한 공고" 
-      leftElement={<img src={ic_arrow_back_ios_gray900_20} alt="닫기" />}
-      onLeftElementClick={() => navigate('/mypage')}
-      rightIcons={<img src={ic_home_gray900_20}/>}
-      onRightElementClick={()=> navigate('/')}
-    />);
-  }
+        }else if(path === '/jobs'){
+              return(
+                <Navbar 
+                titleText='채용 공고'
+        />);
+      }else if(path ==='/saved-jobs'){
+        return(
+          <PageHeader 
+          title="저장한 공고" 
+          leftElement={<img src={ic_arrow_back_ios_gray900_20} alt="닫기" />}
+          onLeftElementClick={() => navigate('/mypage')}
+          rightIcons={<img src={ic_home_gray900_20}/>}
+          onRightElementClick={()=> navigate('/')}
+        />);
+      }else if(screen ==='JobPostingDetail'){
+        const jobTitle = searchParams.get('title');
+        console.log(jobTitle);
+        return(
+          <PageHeader 
+          title={jobTitle} 
+          leftElement={<img src={ic_arrow_back_ios_gray900_20} alt="닫기" />}
+          onLeftElementClick={() => navigate('/jobs')}
+          rightIcons={<img src={ic_home_gray900_20}/>}
+          onRightElementClick={()=> navigate('/')}
+        />);
+      }
     
     return null;
   }
@@ -124,8 +136,6 @@ export default function Layout({
   const getHeader = () => {
 
     if (customHeader) return customHeader;
-    
-    console.log(isMobile);
     if (isMobile) {
       const mobileHeader = getMobileHeader();
       if (mobileHeader) return mobileHeader;

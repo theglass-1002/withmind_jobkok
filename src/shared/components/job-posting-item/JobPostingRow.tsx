@@ -42,7 +42,7 @@ export default function JobPostingRow() {
     <>
       <div className="job-posting__list job-posting__list--row">
         <div className="job-posting__item job-posting__item--row">
-        <Link to="/jobs/3">
+        <Link to={`/jobs/${13}?title=${'위드마인드'}`} >
           <div className="job-posting__card">
             <div className="job-posting__row job-posting__row--top">
              <div className="job-posting__left">

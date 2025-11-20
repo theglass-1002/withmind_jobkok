@@ -88,7 +88,9 @@ export const router = createBrowserRouter([
   { path: "/mock-interview-report", element: <Layout><InterviewReport /></Layout> },
   { path: "/mock-interview/analysis/:interviewId", element: <Layout><MockAnalysisPage /></Layout> } ,
  
-  { path: "jobs/:jobId", element: <Layout><JobDetail/></Layout>  } ,
+  { path: "jobs/:jobId", element: <Layout 
+    screen="JobPostingDetail"
+    showFooter="desktop-only" showBottomNav={false} ><JobDetail/></Layout>  } ,
   { 
     path: "/login", 
     element: <Layout showHeader="desktop-only" showFooter="desktop-only" showBottomNav={false}><Login /></Layout> 
