@@ -6,8 +6,9 @@ import './CustomHeader.css';
 interface HeaderProps {
   leftElement?: React.ReactNode; // 뒤로가기 버튼(아이콘) 또는 텍스트
   title?: string;            // 중앙 페이지명 (버전 1의 핵심)
-  rightIcons?: React.ReactNode[]; 
+  rightIcons?: React.ReactNode; 
   onLeftElementClick?: () => void; // 왼쪽 요소 클릭 시 실행할 함수
+  onRightElementClick?: () => void;
 }
 
 /**
@@ -17,8 +18,9 @@ interface HeaderProps {
 export default function PageHeader({ // 👈 컴포넌트 이름 변경: PageHeader
   leftElement, 
   title, 
-  rightIcons = [], 
-  onLeftElementClick 
+  rightIcons, 
+  onLeftElementClick,
+  onRightElementClick
 }: HeaderProps) {
 
   return (
@@ -33,12 +35,8 @@ export default function PageHeader({ // 👈 컴포넌트 이름 변경: PageHea
       {/* 2. 중앙 영역 (페이지 제목) */}
       {title && <span className="header-title">{title}</span>}
       {/* 3. 오른쪽 영역 (아이콘 목록) */}
-      <div className="header-right">
-        {rightIcons.map((icon, index) => (
-          <div key={index} className="icon-container">
-            {icon}
-          </div>
-        ))}
+      <div className="header-right" onClick={onRightElementClick}>
+        {rightIcons}
       </div>
     </header>
   );

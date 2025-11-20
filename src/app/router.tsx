@@ -113,7 +113,7 @@ export const router = createBrowserRouter([
         
       ]
    },
-   {path:"/saved-jobs",element:<Layout><SavedPostings/></Layout>},
+   {path:"/saved-jobs",element:<Layout showFooter='desktop-only' showBottomNav={false} ><SavedPostings/></Layout>},
    { path: "/purchase", element: <Layout><PurchaseLayout /></Layout> },
    {
     path: "/purchase/result/success",

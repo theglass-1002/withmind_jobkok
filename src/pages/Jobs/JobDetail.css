@@ -1,10 +1,11 @@
 
 .job-detail{
     display: flex;
-    padding: 110px 360px;
+    padding: 110px 0 52px 0;
     align-items: flex-start;
     gap: 52px;
     align-self: stretch;
+    justify-content: center;
     background-color: white;
   }
   
@@ -404,14 +405,16 @@ line-height: 20px; /* 125% */
 
 .job-recos{
   display: flex;
-  padding: 52px 360px;
+  padding: 52px 0px;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   gap: 24px;
-  align-self: stretch;
+  background: var(--gray-50, #F8F8F9);
 }
 
 .job-recos__title{
+  width: 100%;
+  max-width: 1200px;
   color: var(--gray-900, #2A2D2F);
   font-family: Pretendard;
   font-size: 24px;

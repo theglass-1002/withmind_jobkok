@@ -79,16 +79,6 @@
     background: var(--white-100, #FFF);
 }
 
-/* .jobs-toolbar{
-    display: flex;
-    padding: 52px 360px 0 360px;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 52px;
-    align-self: stretch;
-    border-bottom: 1px solid var(--gray-300, #E0E2E4);
-    background: var(--white-100, #FFF);
-} */
 
 .jobs-toolbar .search-toolbar-fixed{
     position: fixed;
@@ -115,13 +105,7 @@
     gap: 24px;
     align-self: center;
 }
-/* .jobs-toolbar .jobs-toolbar__search{
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 24px;
-    align-self: stretch;
-} */
+
 
 .job-search-filters{
     display: flex;
@@ -129,18 +113,6 @@
         align-items: center;
         gap: 24px;
 }
-
-/* .job-search-filters{
-    display: flex;
-    align-items: center;
-    gap: 24px;
-    color: var(--gray-900, #2A2D2F);
-    font-family: Pretendard;
-    font-size: 16px;
-    font-style: normal;
-    font-weight: 600;
-    line-height: 20px; 
-} */
 
 .search-toolbar-fixed .jobs-toolbar__actions{
     display: none;
@@ -637,7 +609,6 @@
         align-self: stretch;
         background: var(--gray-50, #F8F8F9);
     }
-    
     
    }
 }

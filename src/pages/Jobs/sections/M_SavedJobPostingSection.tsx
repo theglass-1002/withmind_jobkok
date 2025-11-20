@@ -4,6 +4,7 @@ import UiFilter from "@/shared/components/ui-filter/UiFilter";
 import AllSavedJobsList from "@/pages/Mypage/Postings/AllSavedJobs/AllSavedJobsList";
 import BeforeJobsList from "@/pages/Mypage/Postings/BeforeJobs/BeforeJobsList";
 import CompletedJobsList from "@/pages/Mypage/Postings/CompletedJobs/CompletedJobsList";
+import SortDropdown from "@/shared/components/sort-dropdown/SortDropdown";
 
 import ic_grid_view_gray900_20 from '@/assets/icons/size20/ic_grid_view_gray900_20.png';
 import ic_grid_view_gray400_20 from '@/assets/icons/size20/ic_grid_view_gray400_20.png';
@@ -27,6 +28,8 @@ type ViewType = 'row' | 'card';
 export default function M_SavedJobPostingSection() {
     const [currentFilter, setCurrentFilter] = useState<FilterValue>('all'); 
     const [currentView, setCurrentView] = useState<ViewType>('card');
+    const [sort, setSort] = useState("적합도순");
+    const sortOptions = ["적합도순", "최신순", "인기순", "마감임박순"];
     const totalCount = 0; 
     const isListEmpty = totalCount === 0;
     
@@ -51,9 +54,14 @@ export default function M_SavedJobPostingSection() {
         <div className="toolbar__controls">
 
         <div className="control__sort-by">
-            <span className="control__label">최신순</span>
-            <img src={ic_arrow_drop_down_gray500_24} alt="정렬 변경 아이콘" className="control__icon" />
-        </div>
+          
+        <SortDropdown
+                      value={sort}
+                      options={sortOptions}
+                      onChange={setSort}
+                      className="job-posting__sort"
+                    />
+            </div>
         
 
         <div className="control__page-size">

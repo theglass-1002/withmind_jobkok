@@ -18,6 +18,8 @@ import "./Layout.css";
 
 
 import ic_close_gray900_24 from "@/assets/icons/size24/ic_close_gray900_24.png";
+import ic_arrow_back_ios_gray900_20 from "@/assets/icons/size20/ic_arrow_back_ios_gray900_20.png";
+
 import ic_search_gray900_24 from "@/assets/icons/size24/ic_search_gray900_24.png";
 import ic_bookmark_gray900_24 from "@/assets/icons/size24/ic_bookmark_gray900_24.png";
 import ic_home_gray900_20 from "@/assets/icons/size20/ic_home_gray900_20.png";
@@ -98,14 +100,21 @@ export default function Layout({
           title="아이디/비밀번호 찾기" 
           leftElement={<img src={ic_close_gray900_24} alt="닫기" />}
           onLeftElementClick={() => navigate('/login')}
-        />
-        );
+        />);
     }else if(path === '/jobs'){
-      return(
-        <Navbar 
-        titleText='채용 공고'
-      />
-      );
+          return(
+            <Navbar 
+            titleText='채용 공고'
+          />);
+  }else if(path ==='/saved-jobs'){
+    return(
+      <PageHeader 
+      title="저장한 공고" 
+      leftElement={<img src={ic_arrow_back_ios_gray900_20} alt="닫기" />}
+      onLeftElementClick={() => navigate('/mypage')}
+      rightIcons={<img src={ic_home_gray900_20}/>}
+      onRightElementClick={()=> navigate('/')}
+    />);
   }
     
     return null;
