@@ -1084,5 +1084,8 @@ interview_result */
       .mock-interview__jobcard-list--grid{
         gap: 0px;
       }
+      .mock-interview-summary__chart .tooltip__content{
+        width: auto;
+      }
     }
   }

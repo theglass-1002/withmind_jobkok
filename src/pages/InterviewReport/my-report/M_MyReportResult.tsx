@@ -171,7 +171,6 @@ export default function M_MyReportResult() {
           bestDate="2025.01.01"
           bestScore="100점"
         />
-
         <div className="mock-interview-summary__charts">
           <AverageScoreCard
             score={82}
