@@ -100,29 +100,47 @@ export default function M_JobDetail() {
 
   useEffect(() => {
     const handleScroll = () => {
+      // 1. 필요한 DOM 요소 가져오기
       const descriptionSection = document.getElementById('section-description');
       const tabsElement = document.querySelector('.job-detail-tabs');
       const pageHeaderElement = document.querySelector('.page-header');
  
+      // 2. 핵심 요소가 존재하는지 확인
       if (descriptionSection && tabsElement) {
         const descriptionTop = descriptionSection.offsetTop;
-        const tabsHeight = (tabsElement as HTMLElement).offsetHeight;
+        const tabsHeight = (tabsElement as HTMLElement).offsetHeight; 
         const scrollPosition = window.scrollY;
-       if(scrollPosition+tabsHeight>descriptionTop){
-             setIsTabsSticky(true);
-            pageHeaderElement.classList.add('sticky-active');
-        }
-         else {
-            pageHeaderElement.classList.remove('sticky-active');
-          setIsTabsSticky(false);
+
+        // 3. 탭 고정 조건: 스크롤 위치 + 탭 높이가 설명 섹션 시작 지점을 넘었을 때
+        const shouldBeSticky = scrollPosition + tabsHeight > descriptionTop;
+        
+        if (shouldBeSticky) {
+            // 고정 상태로 전환
+            setIsTabsSticky(true);
+            
+            // pageHeaderElement가 존재할 때만 클래스 추가 (널 체크)
+            if (pageHeaderElement) {
+                pageHeaderElement.classList.add('sticky-active');
+            }
+        } else {
+            // 고정 상태 해제
+            setIsTabsSticky(false);
+            
+            // pageHeaderElement가 존재할 때만 클래스 제거 (널 체크)
+            if (pageHeaderElement) {
+                pageHeaderElement.classList.remove('sticky-active');
+            }
         }
       }
     };
   
+    // 이벤트 리스너 등록
     window.addEventListener('scroll', handleScroll);
-    // 초기 실행
+    
+    // 초기 실행: 페이지 로드 시 현재 스크롤 위치에 따라 상태 설정
     handleScroll();
   
+    // 클린업 함수: 컴포넌트 언마운트 시 리스너 제거
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };

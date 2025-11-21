@@ -121,6 +121,7 @@ export default function ResumeCreate() {
 
   return (
     <div className="resume-create-page">
+      <div className="resume-controls-wrapper">
       <div className="resume-create-page__status">
         <span className="default_btn_white" onClick={handleTempSave}>
           임시저장
@@ -133,6 +134,8 @@ export default function ResumeCreate() {
           작성 완료
         </span>
       </div>
+      </div>
+   
 
       <div className="resume-create-page__container">
         <div className="resume-create-page__main">

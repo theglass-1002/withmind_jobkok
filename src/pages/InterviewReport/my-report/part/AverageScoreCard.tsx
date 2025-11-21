@@ -5,6 +5,8 @@ import ic_yellow_flag20 from "@/assets/icons/size20/ic_yellow_flag20.png";
 import ic_check_circle_white_100_20 from "@/assets/icons/size20/ic_check_circle_white_100_20.png";
 import ScoreBarChartJS from "@/pages/InterviewReport/my-report/part/ScoreBarChartJS";
 
+import Tooltip from "@/shared/components/tooltip/Tooltip";
+
 type AverageScoreCardProps = {
   score: number;
   average: number;
@@ -39,7 +41,16 @@ export default function AverageScoreCard({
             />
             나의 모의면접 평균 점수
           </div>
-          <span className="tooltip tooltip--top mock-interview__chart-info">
+        
+          <Tooltip  
+              iconElement={<img src={ic_info_white80_20} alt="" />}
+                        title="모의면접 평균 점수"
+                        desc=" 모의면접 평균 점수는 여러분이 면접에 얼마나 잘 대비하고 있는지를 평가하는 지표입니다.
+              이 지표는 3단계(미흡, 보통, 우수)로 나뉘며, 모의면접 종합 코멘트가 함께 제공됩니다."
+                        position="top"
+                        className="mock-interview__chart-info"
+                      />
+          {/* <span className="tooltip tooltip--top mock-interview__chart-info">
           <img
             className="mock-interview-summary__chart-info-icon"
             src={ic_info_white80_20}
@@ -54,7 +65,7 @@ export default function AverageScoreCard({
               이 지표는 3단계(미흡, 보통, 우수)로 나뉘며, 모의면접 종합 코멘트가 함께 제공됩니다.
             </span>
           </div>
-        </span>
+        </span> */}
                 
         </div>
         <div className="mock-interview-summary__chart-scorebox">

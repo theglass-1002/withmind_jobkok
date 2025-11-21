@@ -19,10 +19,11 @@ import "./Layout.css";
 
 import ic_close_gray900_24 from "@/assets/icons/size24/ic_close_gray900_24.png";
 import ic_arrow_back_ios_gray900_20 from "@/assets/icons/size20/ic_arrow_back_ios_gray900_20.png";
-
+import ic_home_gray900_20 from "@/assets/icons/size20/ic_home_gray900_20.png";
+import ic_download_gray900_20 from "@/assets/icons/size20/ic_download_gray900_20.png";
 import ic_search_gray900_24 from "@/assets/icons/size24/ic_search_gray900_24.png";
 import ic_bookmark_gray900_24 from "@/assets/icons/size24/ic_bookmark_gray900_24.png";
-import ic_home_gray900_20 from "@/assets/icons/size20/ic_home_gray900_20.png";
+
 
 
 
@@ -87,6 +88,7 @@ export default function Layout({
 
   const getMobileHeader = () => {
     const path = location.pathname;
+    console.log(screen);
     if (path === '/signup') {
       return (
         <PageHeader 
@@ -124,10 +126,32 @@ export default function Layout({
           title={jobTitle} 
           leftElement={<img src={ic_arrow_back_ios_gray900_20} alt="닫기" />}
           onLeftElementClick={() => navigate('/jobs')}
-          rightIcons={<img src={ic_home_gray900_20}/>}
+          rightIcons={<img src={ic_download_gray900_20}/>}
+          onRightElementClick={()=> {
+            console.log('pdf 저장버튼 ');
+          }}
+        />);
+      }else if(screen ==='Resumes'){
+        return(
+          <Navbar 
+          titleText='이력서'
+       />);
+      }else if(screen==='ResumeCreation'){
+        return(
+          <PageHeader 
+          title={'이력서 상세'} 
+          leftElement={<img src={ic_arrow_back_ios_gray900_20} alt="닫기" />}
+          onLeftElementClick={() => navigate('/resumes')}
+          rightIcons={<img src={ic_download_gray900_20}/>}
           onRightElementClick={()=> navigate('/')}
         />);
+      }else if(screen==='MockInterviewReport'){
+        return(
+          <Navbar 
+          titleText='모의면접'
+       />);
       }
+    
     
     return null;
   }

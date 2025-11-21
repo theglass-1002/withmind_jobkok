@@ -7,11 +7,16 @@
 @media (max-width: 750px) {
     body{
         .bottom-nav-container{
+            position: fixed;
+            bottom: 0px;
             display: flex;
-            height: 60px;
+            height: 70px;
             flex-direction: column;
             align-items: flex-start;
             align-self: stretch;
+            width: 100%;
+            border-top: 1px solid #E0E2E4;
+            background: var(--white-100, #FFF);
         }
         .bottom-nav-bar{
             display: flex;

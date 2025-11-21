@@ -2,6 +2,7 @@ import React,{useState}from 'react'
 import { Link, NavLink } from "react-router-dom";
 import "./ResumeList.css";
 import resume_banner1200x218 from '@/assets/icons/resume_banner1200x218.png';
+import resume_illustration_bg from '@/assets/illustrations/resume_illustration_bg.png';
 import add_btn_white20x20 from '@/assets/icons/add_btn_white20x20.png';
 import ic_more_dot_gray24x24 from '@/assets/icons/ic_more_dot_gray24x24.png';
 import icon_career from '@/assets/icons/icon_career_gray700_20.png';
@@ -26,6 +27,15 @@ export default function ResumeList() {
         <div className="resume-list-page">
         <div className="resume-list-page__banner">
         <img src={resume_banner1200x218} alt="이력서 배너" />
+        </div>
+        <div className="resume-list-page__banner mobile">
+        <img src={resume_illustration_bg} alt="이력서 배너" />
+        <span className="resume-cta-banner__subtitle">적합 공고 추천부터 맞춤 예상 질문까지</span>
+            <div className="resume-cta-banner__content">
+                <span className="resume-cta-banner__heading-line">지금 바로 이력서를 작성하고,</span>
+                <span className="resume-cta-banner__heading-line">합격 가능성을</span>
+                <span className="resume-cta-banner__heading-line">한층 더 높여보세요!</span>
+            </div>
         </div>
         <div className="resume-list-page__body">
         <div className="resume-list-page__header">
@@ -65,7 +75,7 @@ export default function ResumeList() {
                     <div className="resume-item__top">
                         <div className="resume-item__meta">
                         <span className="resume-item__id">12</span>
-                        <span className="resume-item__tag">기본이력서</span>
+                        <span className="resume-item__tag on">기본이력서</span>
                         </div>
                         <div className="resume-item__actions">
                         <span className='resume-item__edit-btn'>
@@ -124,7 +134,7 @@ export default function ResumeList() {
                 <div className="resume-item__top">
                     <div className="resume-item__meta">
                     <span className="resume-item__id">12</span>
-                    <span className="resume-item__tag">기본이력서</span>
+                    <span className="resume-item__tag"></span>
                     </div>
                     <div className="resume-item__actions">
                     <span className='resume-item__edit-btn'>
@@ -184,7 +194,7 @@ export default function ResumeList() {
                 <div className="resume-item__top">
                     <div className="resume-item__meta">
                     <span className="resume-item__id">12</span>
-                    <span className="resume-item__tag">기본이력서</span>
+                    <span className="resume-item__tag"></span>
                     </div>
                     <div className="resume-item__actions">
                     <span className='resume-item__edit-btn'>
@@ -244,7 +254,7 @@ export default function ResumeList() {
                 <div className="resume-item__top">
                     <div className="resume-item__meta">
                     <span className="resume-item__id">12</span>
-                    <span className="resume-item__tag">기본이력서</span>
+                    <span className="resume-item__tag"></span>
                     </div>
                     <div className="resume-item__actions">
                     <span className='resume-item__edit-btn'>

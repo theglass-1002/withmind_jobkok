@@ -80,16 +80,15 @@ export const router = createBrowserRouter([
     ]
 
    },
-  { path: "/resumes", element: <Layout><ResumeList/></Layout> },
-  { path: "/resumes/create", element: <Layout><ResumeCreate /></Layout> },
+  { path: "/resumes", element: <Layout screen="Resumes"><ResumeList/></Layout> },
+  { path: "/resumes/create", element: <Layout screen="ResumeCreation"><ResumeCreate /></Layout> },
   { path: "/resumes/:resumeId", element: <Layout><ResumeDetail /></Layout> },
   { path: "/resumes/:resumeId/edit", element: <Layout><ResumeEdit /></Layout> },
 
-  { path: "/mock-interview-report", element: <Layout><InterviewReport /></Layout> },
+  { path: "/mock-interview-report", element: <Layout screen="MockInterviewReport"><InterviewReport /></Layout> },
   { path: "/mock-interview/analysis/:interviewId", element: <Layout><MockAnalysisPage /></Layout> } ,
  
-  { path: "jobs/:jobId", element: <Layout 
-    screen="JobPostingDetail"
+  { path: "jobs/:jobId", element: <Layout screen="JobPostingDetail"
     showFooter="desktop-only" showBottomNav={false} ><JobDetail/></Layout>  } ,
   { 
     path: "/login", 

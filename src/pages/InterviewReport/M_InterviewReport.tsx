@@ -4,11 +4,10 @@ import "./InterviewReport.css";
 import ic_star_white_20 from "@/assets/icons/size20/ic_star_white_20.png";
 import ic_star_gray900_20 from "@/assets/icons/size20/ic_star_gray900_20.png";
 import MyReportEmpty from "@/pages/InterviewReport/my-report/MyReportEmpty";
-import MyReportResult from "@/pages/InterviewReport/my-report/MyReportResult";
+import M_MyReportResult from "@/pages/InterviewReport/my-report/M_MyReportResult";
 import UiFilter, { type UiFilterOption } from "@/shared/components/ui-filter/UiFilter";
 import InterviewReportHistory from "@/pages/InterviewReport/history/MockInterviewHistory";
 import Modal from "@/shared/components/modal/Modal";
-import M_InterviewReport from "@/pages/InterviewReport/M_InterviewReport";
 
 const FILTERS: UiFilterOption[] = [
   { label: "전체", value: "all" },
@@ -17,7 +16,7 @@ const FILTERS: UiFilterOption[] = [
 ];
 
 
-export default function InterviewReport() {
+export default function M_InterviewReport() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState("report");
@@ -44,8 +43,27 @@ export default function InterviewReport() {
 
 
   return (
-    <>
-    <div className="mock-interview-page">
+    <div className="mock-interview-page mobile">
+      <div className="mock-interview-tabs-wrapper">
+      <div className="mock-interview-tabs" role="tablist">
+        <span
+          className={`mock-interview-tabs__item tabs__item ${activeTab === "report" ? "on" : ""}`}
+          role="tab"
+          aria-selected={activeTab === "report"}
+          onClick={() => setActiveTab("report")}
+        >
+          MY 리포트
+        </span>
+        <span
+          className={`mock-interview-tabs__item tabs__item ${activeTab === "history" ? "on" : ""}`}
+          role="tab"
+          aria-selected={activeTab === "history"}
+          onClick={() => setActiveTab("history")}
+        >
+          모의면접 내역
+        </span>
+      </div>
+      </div>
       <header className="mock-interview-page__hero">
         <div className="mock-interview-page__hero-headings">
           <span className="mock-interview-page__hero-title">AI 모의면접</span>
@@ -68,30 +86,11 @@ export default function InterviewReport() {
           <span className="mock-interview-page__hero-cta-label">모의면접 시작</span>
         </button>
       </header>
-      <div className="mock-interview-tabs-wrapper">
-      <div className="mock-interview-tabs" role="tablist">
-        <span
-          className={`mock-interview-tabs__item tabs__item ${activeTab === "report" ? "on" : ""}`}
-          role="tab"
-          aria-selected={activeTab === "report"}
-          onClick={() => setActiveTab("report")}
-        >
-          MY 리포트
-        </span>
-        <span
-          className={`mock-interview-tabs__item tabs__item ${activeTab === "history" ? "on" : ""}`}
-          role="tab"
-          aria-selected={activeTab === "history"}
-          onClick={() => setActiveTab("history")}
-        >
-          모의면접 내역
-        </span>
-      </div>
-      </div>
+    
       <section className="mock-interview-page__section">
       {activeTab === "report" && (
           // <MyReportEmpty/>
-          <MyReportResult/>
+          <M_MyReportResult/>
         )}
           {activeTab === "history" && (
             <InterviewReportHistory
@@ -116,7 +115,5 @@ export default function InterviewReport() {
         onClose={handleCloseConfirm}
       />
     </div>
-    <M_InterviewReport/>
-    </>
   );
 }

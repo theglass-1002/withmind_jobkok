@@ -1,18 +1,38 @@
 .resume-list-page{
-    display: flex;
-    padding: 108px 360px 100px 360px;
+    /* display: flex;
+    padding: 108px 0 100px 0;
     flex-direction: column;
     align-items: center;
     gap: 40px;
-    align-self: stretch;
+    align-self: stretch; */
+    display: flex;
+    width: 100%;
+    padding: 108px 0 100px 0;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    align-self: center;
+    max-width: 1200px;
+    justify-content: center;
+    margin: auto;
 }
 
 .resume-list-page__body{
+    /* display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 24px;
+    align-self: center; */
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 24px;
-    align-self: stretch;
+    align-self: center;
+    width: 100%;
+}
+
+.resume-list-page__banner.mobile{
+    display: none;
 }
 
 .resume-list-page__header{
@@ -169,6 +189,10 @@ box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.08);
     font-style: normal;
     font-weight: 600;
     line-height: 18px; 
+}
+
+.resume-item__tag.on{
+    display: flex;;
 }
 
 
@@ -356,4 +380,98 @@ background: var(--green-8, rgba(30, 194, 128, 0.08));
     font-style: normal;
     font-weight: 400;
     line-height: 20px; /* 125% */
+}
+
+@media (max-width: 760px) {
+    body{
+        .resume-list-page{
+            padding: 36px 0 0 0;
+            gap: 20px;
+        }
+        .resume-list-page__banner{
+            display: none;
+        }
+        .resume-list-page__banner.mobile{
+               display: flex;
+               position: relative;
+        }
+        .resume-list-page__banner.mobile img{
+            width: 100%;
+        }
+        .resume-cta-banner__subtitle{
+            position: absolute;
+            padding: 0 20px;
+            top: 60px;
+            color: var(--green-100, #1EC280);
+            font-family: Pretendard;
+            font-size: 14px;
+            font-style: normal;
+            font-weight: 600;
+            line-height: 18px; /* 128.571% */
+        }
+        .resume-cta-banner__content{
+            display: flex;
+            padding: 0 20px;
+            flex-direction: column;
+            position: absolute;
+            top: 95px;
+            color: var(--white-100, #FFF);
+            font-family: Pretendard;
+            font-size: 20px;
+            font-style: normal;
+            font-weight: 700;
+            line-height: 30px;
+        }
+        .resume-list-page__header{
+            display: flex;
+            width: 100%;
+            align-items: end;
+            gap: 16px;
+            color: var(--gray-700, #6F767E);
+            font-family: Pretendard;
+            font-size: 16px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 20px;
+        }
+        .resume-list-page__tabs{
+            flex-direction: column;
+            gap: 20px;
+        }
+        .resume-list-page__body{
+            width: 100%;
+            padding: 0 20px;
+            justify-content: center;
+        }
+        .resume-list-page__grid{
+            width: 100%;
+            flex-direction: column;
+        }
+        .resume-list-page__item{
+            width: 100%;
+        }
+
+        .resume-list-page__list{
+            width: 100%;
+        }
+
+        .resume-list-page__tabs-group{
+            width: 100%;
+        }
+
+        .resume-list-page__tab{
+          flex: 1;
+          width: 100%;
+        }
+
+        .resume-list-page__empty{
+            padding:36px;
+        }
+        .resume-list-page__empty-subtext{
+            line-height: 30px;
+        }
+        .resume-list-page__empty .default_btn_white{
+            display: none;
+         }
+    }
 }
