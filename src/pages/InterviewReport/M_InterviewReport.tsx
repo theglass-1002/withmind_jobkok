@@ -8,6 +8,7 @@ import M_MyReportResult from "@/pages/InterviewReport/my-report/M_MyReportResult
 import UiFilter, { type UiFilterOption } from "@/shared/components/ui-filter/UiFilter";
 import InterviewReportHistory from "@/pages/InterviewReport/history/MockInterviewHistory";
 import Modal from "@/shared/components/modal/Modal";
+import Tabs from "@/shared/components/tabs/Tabs";
 
 const FILTERS: UiFilterOption[] = [
   { label: "전체", value: "all" },
@@ -18,11 +19,41 @@ const FILTERS: UiFilterOption[] = [
 
 export default function M_InterviewReport() {
   const navigate = useNavigate();
+  const [isTabsSticky, setIsTabsSticky] = useState(false);
   const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState("report");
   const [filter, setFilter] = useState("all");
   const [showConfirm, setShowConfirm] = useState(false);
   
+  const tabItems = [
+    { key: "report", label: "MY 리포트" },
+    { key: "history", label: "모의면접 내역" },
+  ];
+
+  const handleTabClick = (key: "report" | "history" ) => {
+    setActiveTab(key);
+    console.log("선택된 탭:", key);  // 필요하면
+    const targetId = `section-${key}`;
+    const targetElement = document.getElementById(targetId);
+    console.log(targetElement);
+    if (targetElement) {
+
+        const stickyTabElement = document.querySelector('.mock-interview__sticky-tabs');
+     
+        const offset = stickyTabElement 
+        ? (stickyTabElement as HTMLElement).offsetHeight + 10 
+        : 0; 
+
+        window.scrollTo({
+      
+          top: targetElement.offsetTop - offset,
+          behavior: 'smooth'
+        });
+      }
+
+  };
+
+
   const handleStart = () => {
     console.log("start mock interview");
   };
@@ -39,30 +70,53 @@ export default function M_InterviewReport() {
     if (tab === 'history') {
       setActiveTab('history');
     }
-  }, [searchParams]);
+
+    const handleScroll = () => {
+      const descriptionSection = document.getElementById('section-description');
+      const tabsElement = document.querySelector('.mock-interview-tabs-wrapper');
+      const pageHeaderElement = document.querySelector('.masthead');
+      if (descriptionSection && tabsElement) {
+        const descriptionTop = descriptionSection.offsetTop;        
+        const tabsHeight = (tabsElement as HTMLElement).offsetHeight; 
+        const scrollPosition = window.scrollY;
+        const shouldBeSticky = scrollPosition + tabsHeight > descriptionTop;
+        if(shouldBeSticky){
+          setIsTabsSticky(true);
+          console.log(tabsElement);
+          if (pageHeaderElement) {
+            tabsElement.classList.add('sticky-active');
+        }
+        }else{
+          setIsTabsSticky(false);
+          if (pageHeaderElement) {
+            tabsElement.classList.remove('sticky-active');
+        }
+        }
+      }
+    
+    }
+    window.addEventListener('scroll', handleScroll);
+    handleScroll();
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+
+
+  }, []);
 
 
   return (
     <div className="mock-interview-page mobile">
-      <div className="mock-interview-tabs-wrapper">
-      <div className="mock-interview-tabs" role="tablist">
-        <span
-          className={`mock-interview-tabs__item tabs__item ${activeTab === "report" ? "on" : ""}`}
-          role="tab"
-          aria-selected={activeTab === "report"}
-          onClick={() => setActiveTab("report")}
-        >
-          MY 리포트
-        </span>
-        <span
-          className={`mock-interview-tabs__item tabs__item ${activeTab === "history" ? "on" : ""}`}
-          role="tab"
-          aria-selected={activeTab === "history"}
-          onClick={() => setActiveTab("history")}
-        >
-          모의면접 내역
-        </span>
-      </div>
+      <div className={`mock-interview__sticky-tabs ${isTabsSticky ? 'is-sticky' : ''}`}>
+      <Tabs
+            tabs={tabItems}
+            active={activeTab}
+            onChange={handleTabClick}
+            className="mock-interview-tabs default_tabs"
+            itemClassName="mock-interview-tabs__item"
+            activeClassName="on"
+            />
       </div>
       <header className="mock-interview-page__hero">
         <div className="mock-interview-page__hero-headings">
@@ -87,7 +141,7 @@ export default function M_InterviewReport() {
         </button>
       </header>
     
-      <section className="mock-interview-page__section">
+      <section id="section-description" className="mock-interview-page__section">
       {activeTab === "report" && (
           // <MyReportEmpty/>
           <M_MyReportResult/>

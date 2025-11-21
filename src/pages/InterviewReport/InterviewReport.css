@@ -60,7 +60,7 @@
     padding: 16px 20px;       /* 버튼 내부 여백 */
   }
 
-  .mock-interview-tabs-wrapper{
+  .mock-interview__sticky-tabs{
     display: flex;
     justify-content: center;
     width: 100%;
@@ -932,10 +932,10 @@ interview_result */
         display: flex;
       }
       .mock-interview-tabs{
-        padding: 8px 0 0 20px;
+        padding: 14px 0 0 20px;
       }
-      .mock-interview-tabs__item{
-        padding-bottom: 16px;
+      .mock-interview-tabs .mock-interview-tabs__item{
+        padding-bottom: 17px;
       }
       .mock-interview-page__hero-title{
         font-size: 14px;
@@ -1098,6 +1098,13 @@ interview_result */
       .mock-interview__jobcard-actions .default_btn_white{
         width: 100%;
         border-radius: 0px;
+      }
+
+      .mock-interview__sticky-tabs.is-sticky{
+        position: fixed;
+        top: 60px;
+        z-index: 1;
+        
       }
     }
   }

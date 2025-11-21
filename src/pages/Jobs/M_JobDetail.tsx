@@ -50,7 +50,7 @@ export default function M_JobDetail() {
     console.log("선택된 탭:", key);  // 필요하면
     const targetId = `section-${key}`;
     const targetElement = document.getElementById(targetId);
-
+    console.log(targetElement);  
     if (targetElement) {
      
         const stickyTabElement = document.querySelector('.job-detail__sticky-tabs');
