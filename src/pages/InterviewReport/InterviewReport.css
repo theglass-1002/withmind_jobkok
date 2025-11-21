@@ -1059,6 +1059,7 @@ interview_result */
       .mock-interview-summary__panel{
         padding: 20px;
         gap: 20px;
+        background: var(--white-100, #FFF);
       }
       .mock-trend__legend{
         flex-direction: column;
@@ -1076,6 +1077,7 @@ interview_result */
       .mock-interview-summary__panel--jobs{
         padding: 20px 0;
         border-radius: 0px;
+        background: var(--gray-100, #F2F3F4);
       }
       .mock-interview-summary__panel--jobs .mock-interview__title{
         padding: 0 20px;
@@ -1086,6 +1088,16 @@ interview_result */
       }
       .mock-interview-summary__chart .tooltip__content{
         width: auto;
+      }
+      .mock-interview__jobcard-actions{
+        width: 100%;
+        padding: 24px 20px;
+        height: auto;
+        background: var(--white-100, #FFF);
+      }
+      .mock-interview__jobcard-actions .default_btn_white{
+        width: 100%;
+        border-radius: 0px;
       }
     }
   }
