@@ -21,7 +21,7 @@ export default function JobMatchHistoryPanel({
   return (
     <>
       <span className="mock-interview__title mock-interview-summary__panel-title">
-        <img src={titleIconSrc} alt="" />
+        <img className="job-match-history-icon" src={titleIconSrc} alt="" />
         {title}
       </span>
 

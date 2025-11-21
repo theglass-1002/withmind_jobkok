@@ -10,6 +10,7 @@ export interface MockInterviewKeywordsPanelProps {
   keywords: KeywordPoint[];
   rankItems: RankItem[];
   chartClassName?: string;
+  scale?: number; // 버블 크기 스케일 (기본값: 1)
 }
 
 export default function MockInterviewKeywordsPanel({
@@ -18,17 +19,21 @@ export default function MockInterviewKeywordsPanel({
   keywords,
   rankItems,
   chartClassName = "keywords-panel__chart-fill",
+  scale = 1,
+  
 }: MockInterviewKeywordsPanelProps) {
   return (
      <>
       <span className="mock-interview__title mock-interview-category-trend__title">
-        <img src={iconSrc} alt="" aria-hidden="true" />
+        <img className="keywords-keywords-icon" src={iconSrc} alt="" aria-hidden="true" />
         {title}
       </span>
       <div className="keywords-panel__content">
         <div className="keywords-panel__chart">
           <div className="keywords-panel__chart-box">
-            <KeywordsBubbleChart data={keywords} showLabels className={chartClassName} />
+            <KeywordsBubbleChart 
+            scale={scale}
+            data={keywords} showLabels className={chartClassName} />
           </div>
         </div>
 

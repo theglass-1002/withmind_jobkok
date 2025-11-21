@@ -23,7 +23,7 @@ export interface CategoryTrendPanelProps {
   tension?: number;
   /** 차트 높이(px) */
   height?: number;
-
+  multiLineLabels?: boolean; // true면 "YYYY\nMM.DD" 형식으로 2줄 표시
   /** 우측 레전드 아이템들 */
   legendItems: Array<
     Omit<TrendLegendItemProps, "variant" | "name"> & {
@@ -47,17 +47,19 @@ export default function CategoryTrendPanel({
   tension = 0,
   height = 260,
   legendItems,
+  multiLineLabels = false,
 }: CategoryTrendPanelProps) {
   return (
     <>
        <span className="mock-interview__title mock-interview-category-trend__title">
-        <img src={ic_card_index_dividers_24} alt="" aria-hidden="true" />
+        <img className="mock-category-icon" src={ic_card_index_dividers_24} alt="" aria-hidden="true" />
         {title}
       </span>
 
       <div className="mock-interview-category-trend__content">
         <div className="mock-interview-category-trend__chart">
           <CategoryTrendLineChart
+            multiLineLabels={multiLineLabels}
             labels={labels}
             tension={tension}
             dataStress={series.stress}

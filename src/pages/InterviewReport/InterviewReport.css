@@ -1002,6 +1002,7 @@ interview_result */
       }
       .mock-interview-summary__chart--brand{
         width: 100%;
+        border-radius: 0px;
       }
       .mock-interview-summary__chart-header .mock-interview__chart-info:hover .tooltip__content{
         top: 40px;
@@ -1012,7 +1013,8 @@ interview_result */
       .mock-interview-summary__chart-header .mock-interview__chart-info:hover .tooltip__content::after{
         left: 250px;
       }
-      .mock-interview-summary__chart-title{
+      .mock-interview-summary__chart-title,
+      .mock-interview__title{
         font-size: 18px;
       }
       .mock-interview-summary__chart-score{
@@ -1026,5 +1028,61 @@ interview_result */
         font-size: 14px;
       }
     
+      .mock-interview-summary__chart-left{
+        padding: 24px 20px;
+        gap: 20px;
+      }
+      .mock-interview-summary__chart{
+        border-radius: 0px;
+      }
+      .mock-interview-summary__chart-title--surface{
+        padding: 24px 20px 20px 20px;
+      }
+
+      .mock-interview-summary__chart-summary-label,
+      .mock-interview-summary__chart-summary-value{
+        font-size: 16px;
+      }
+      .mock-interview-summary__trend-graph{
+        padding: 20px;
+      }
+      .mock-interview-summary__chart-summary{
+        padding: 20px;
+      }
+      .mock-category-icon,
+      .keywords-keywords-icon,
+      .job-match-history-icon
+      {
+        width: 22px;
+        height: 22px;
+      }
+      .mock-interview-summary__panel{
+        padding: 20px;
+        gap: 20px;
+      }
+      .mock-trend__legend{
+        flex-direction: column;
+        gap: 12px;
+      }
+      .mock-trend__legend-item{
+        width: 100%;
+      }
+      .keywords-panel__content{
+        flex-direction: column;
+      }
+      .keywords-panel__rank{
+        gap: 12px;
+      }
+      .mock-interview-summary__panel--jobs{
+        padding: 20px 0;
+        border-radius: 0px;
+      }
+      .mock-interview-summary__panel--jobs .mock-interview__title{
+        padding: 0 20px;
+      }
+
+      .mock-interview__jobcard-list--grid{
+        gap: 0px;
+      }
     }
   }

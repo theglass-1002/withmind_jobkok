@@ -28,6 +28,7 @@ export interface KeywordsBubbleChartProps {
   showLabels?: boolean;
   className?: string;
   style?: React.CSSProperties;
+  scale?: number; // 버블 크기 스케일 (기본값: 1)
 }
 
 function makeGradient(chart: Chart, group: ColorGroup) {
@@ -61,7 +62,7 @@ const cssVar = (name: string, fallback: string) => {
   return v || fallback;
 };
 
-const bubbleLabelPlugin: Plugin<"bubble"> = {
+const createBubbleLabelPlugin = (scale: number): Plugin<"bubble"> => ({
   id: "bubbleLabel",
   afterDatasetsDraw(chart) {
     const meta = chart.getDatasetMeta(0);
@@ -70,14 +71,18 @@ const bubbleLabelPlugin: Plugin<"bubble"> = {
 
     const ctx = chart.ctx;
     ctx.save();
-    ctx.font = "600 20px Pretendard, system-ui, -apple-system";
+    
+    // scale에 따라 폰트 크기 조정
+    const baseFontSize = 25;
+    const fontSize = Math.round(baseFontSize * scale);
+    ctx.font = `600 ${fontSize}px Pretendard, system-ui, -apple-system`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
 
     const white = cssVar("--white-100", "#FFF");
     ctx.fillStyle = white;
-    ctx.shadowColor = "rgba(42, 45, 47, 0.08)"; // ← 명시
-    ctx.shadowBlur = 12;
+    ctx.shadowColor = "rgba(42, 45, 47, 0.08)";
+    ctx.shadowBlur = 12 * scale; // shadow도 스케일에 맞춤
 
     meta.data.forEach((el: any, i: number) => {
       const p = (ds._points as KeywordPoint[])[i];
@@ -88,21 +93,31 @@ const bubbleLabelPlugin: Plugin<"bubble"> = {
 
     ctx.restore();
   },
-};
+});
 
 export default function KeywordsBubbleChart({
-  data = [],              // ← 기본값으로 안전 가드
+  data = [],
   showLabels = true,
   className,
   style,
+  scale = 1, // 기본값 1 (원본 크기)
 }: KeywordsBubbleChartProps) {
+  // scale 적용된 데이터
+  const scaledData = useMemo(
+    () => data.map(point => ({
+      ...point,
+      r: point.r * scale,
+    })),
+    [data, scale]
+  );
+
   const chartData = useMemo(
     () => ({
-      labels: data.map((d) => d.label),
+      labels: scaledData.map((d) => d.label),
       datasets: [
         {
           label: "keywords",
-          data: data.map(({ x, y, r }) => ({ x, y, r })),
+          data: scaledData.map(({ x, y, r }) => ({ x, y, r })),
           borderWidth: 0,
           backgroundColor: (ctx: any) => {
             const idx = ctx.dataIndex ?? 0;
@@ -114,11 +129,11 @@ export default function KeywordsBubbleChart({
             const p: KeywordPoint = (ctx.dataset as any)._points[idx];
             return makeGradient(ctx.chart, p.group);
           },
-          _points: data,
+          _points: scaledData,
         } as any,
       ],
     }),
-    [data]
+    [scaledData]
   );
 
   const options = useMemo<ChartOptions<'bubble'>>( 
@@ -178,7 +193,7 @@ export default function KeywordsBubbleChart({
     <Bubble
       data={chartData}
       options={options}
-      plugins={showLabels ? [bubbleLabelPlugin] : []}
+      plugins={showLabels ? [createBubbleLabelPlugin(scale)] : []}
       className={className}
       style={style}
     />

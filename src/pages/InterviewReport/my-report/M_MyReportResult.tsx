@@ -184,6 +184,7 @@ export default function M_MyReportResult() {
           />
           <ScoreTrendCard bestScore="92점">
             <ScoreTrendBarChart
+             className="score_trend_bar_chart-mobile"
               dates={[
                 "2025-01-01",
                 "2025-01-03",
@@ -202,6 +203,8 @@ export default function M_MyReportResult() {
 
         <div className="mock-interview-summary__panel mock-interview-category-trend">
           <CategoryTrendPanel
+            title="나의 모의면접 항목별 종합 분석 추이"
+            multiLineLabels={true}
             labels={[
               "2025.01.02",
               "2025.01.04",
@@ -257,6 +260,7 @@ export default function M_MyReportResult() {
 
         <div className="mock-interview-summary__panel mock-interview-summary__panel--keywords">
           <MockInterviewKeywordsPanel
+            scale={0.5}
             iconSrc={ic_open_book_24}
             title="내가 자주 사용하는 단어"
             keywords={keywords}
