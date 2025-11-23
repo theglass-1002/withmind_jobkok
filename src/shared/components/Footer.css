@@ -20,6 +20,7 @@ background: var(---gray-800, #3A3E42);
     height: 100%;
     padding-top: 65px;
     margin: auto;
+    width: 100%;
 }
 
 

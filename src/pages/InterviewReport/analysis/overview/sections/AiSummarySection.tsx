@@ -36,7 +36,7 @@ export default function AiSummarySection({
   return (
     <div className="analysis-section mock-analysis-overview__ai-summary">
       <span className="analysis-section__title">
-        {titleIconSrc && <img src={titleIconSrc} alt="" />}
+        {titleIconSrc && <img className="ai-summary-icon" src={titleIconSrc} alt="" />}
         {title}
       </span>
 

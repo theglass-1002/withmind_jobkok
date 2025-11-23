@@ -17,6 +17,7 @@ import { useLocation } from 'react-router-dom';
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
 export interface ScoreDistributionChartProps {
+  className?: string;
   labels: (string | string[])[];
   values: number[];
   max?: number;
@@ -81,6 +82,7 @@ const scoreTextLabelPlugin: Plugin<"bar", any> = {
 };
 
 export default function ScoreDistributionChart({
+  className,
   labels,
   values,
   max = 100,
@@ -104,13 +106,11 @@ export default function ScoreDistributionChart({
 }: ScoreDistributionChartProps) {
   const location = useLocation(); 
 
-  // URL에서 printViewr 쿼리 파라미터 존재 여부를 확인
   const isPrintMode = useMemo(() => {
     const query = new URLSearchParams(location.search);
     return query.has('printViewr');
   }, [location.search]);
   
-  // 최종 애니메이션 활성화 여부 결정: animate prop이 true이고 인쇄 모드가 아닐 때만 활성화
   const enableAnimation = animate && !isPrintMode;
 
   const len = Math.min(labels.length, values.length);
@@ -137,11 +137,20 @@ export default function ScoreDistributionChart({
     const css = getComputedStyle(document.documentElement);
     return (css.getPropertyValue("--gray-600") || "#848B93").trim();
   }, []);
+  
   const gridColor = useMemo(() => {
     if (typeof window === 'undefined') return "#EEEEEE";
     const css = getComputedStyle(document.documentElement);
     return (css.getPropertyValue("--gray-200") || "#EEEEEE").trim();
   }, []);
+
+  // 최소 너비 계산: 막대 수 * (막대 너비 + 여백) + Y축 공간
+  const minWidth = useMemo(() => {
+    const barCount = series.length;
+    const barGap = 30; // 막대 간 최소 간격
+    const yAxisSpace = 0; // Y축 레이블 공간
+    return barCount * (barThickness + barGap) + yAxisSpace;
+  }, [series.length, barThickness]);
 
   const data = useMemo(
     () => ({
@@ -166,7 +175,6 @@ export default function ScoreDistributionChart({
           borderWidth: 0,
           hoverBorderWidth: 0,
           borderRadius: { topLeft: 2, topRight: 2, bottomLeft: 0, bottomRight: 0 },
-          // borderSkipped 타입 에러 수정
           borderSkipped: "bottom" as const,
           barThickness,
           maxBarThickness: barThickness,
@@ -180,7 +188,7 @@ export default function ScoreDistributionChart({
   const options: ChartOptions<"bar"> = useMemo(
     () => ({
       maintainAspectRatio: false,
-      responsive: true,
+      responsive: false, // responsive를 false로 변경
       elements: { bar: { borderWidth: 0 } },
       layout: { padding: { top: 30 } },
       scales: {
@@ -192,12 +200,13 @@ export default function ScoreDistributionChart({
             font: { 
               family: tickFontFamily, 
               size: tickFontSize, 
-              //  font.weight 타입 에러 수정
               weight: "400" as "400" | "normal", 
-            } as Partial<FontSpec>, // FontSpec으로 명시하여 타입 오류를 좁힘
+            } as Partial<FontSpec>,
             stepSize: Math.ceil(max / 5),
             callback: (v: any) => `${v}`,
             padding: 6,
+            autoSkip: false, // 자동 생략 방지
+            autoSkip: false, // 자동 생략 방지
           },
           grid: { color: gridColor, drawBorder: false, drawTicks: false },
           border: { display: false },
@@ -209,12 +218,13 @@ export default function ScoreDistributionChart({
             font: { 
               family: tickFontFamily, 
               size: tickFontSize, 
-              // 🚨 font.weight 타입 에러 수정
               weight: "400" as "400" | "normal",
-            } as Partial<FontSpec>, // FontSpec으로 명시하여 타입 오류를 좁힘
+            } as Partial<FontSpec>,
             padding: 8,
             maxRotation: 0,
             minRotation: 0,
+            autoSkip: false, // 자동 생략 방지
+            autoSkip: false, // 자동 생략 방지
             callback: (val: any, idx: number) => {
               const raw = labelItems[idx];
               if (Array.isArray(raw)) return raw;
@@ -247,11 +257,9 @@ export default function ScoreDistributionChart({
         },
       } as any,
 
-      // 애니메이션 일반 속성 (duration, delay, easing)
       animation: enableAnimation
         ? {
             duration: durationMs,
-            // 🚨 Easing 값 타입 에러 수정
             easing:
               (easing === "linear"
                 ? "linear"
@@ -265,13 +273,11 @@ export default function ScoreDistributionChart({
           }
         : { duration: 0 },
 
-      // 속성별 애니메이션 설정 (솟아오르는 효과)
       animations: enableAnimation
         ? {
-            y: { // y축 애니메이션은 0에서 시작하여 값으로 증가
+            y: {
               from: 0, 
               duration: durationMs,
-              //  Easing 값 타입 에러 수정
               easing:
                 (easing === "linear"
                   ? "linear"
@@ -281,7 +287,7 @@ export default function ScoreDistributionChart({
             },
             base: {
               from: 0,
-              duration: 0, // 막대 바닥은 0에 즉시 고정
+              duration: 0,
             }
           }
         : undefined,
@@ -304,17 +310,28 @@ export default function ScoreDistributionChart({
     ]
   );
 
-  // 차트 Key에 max 값을 추가하여 애니메이션이 0에서 확실히 시작되도록 강제 리셋 (솟아오르는 문제 해결)
   const chartKey = useMemo(() => JSON.stringify({ labels, values, animate: enableAnimation, max }), [labels, values, enableAnimation, max]);
 
   return (
-    <div className="score_distribuiton_chart" style={{ height, width: "100%" }}>
-      <Bar 
-        key={chartKey} 
-        data={data} 
-        options={options} 
-        plugins={[scoreTextLabelPlugin]} 
-      />
+    <div
+      className={className}
+      style={{
+        height,
+        width: "100%",
+        overflowX: "auto",
+        overflowY: "hidden",
+      }}
+    >
+      <div style={{ minWidth, height: "100%" }}>
+        <Bar 
+          key={chartKey} 
+          data={data} 
+          options={options} 
+          plugins={[scoreTextLabelPlugin]}
+          width={minWidth}
+          height={height}
+        />
+      </div>
     </div>
   );
 }

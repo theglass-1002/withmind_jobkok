@@ -95,8 +95,8 @@ export default function InterviewReport() {
         )}
           {activeTab === "history" && (
             <InterviewReportHistory
-              totalCount={0}
-              doneCount={0}
+              totalCount={10}
+              doneCount={10}
               filter={filter}
               onChangeFilter={setFilter}
               onStart={handleStart}

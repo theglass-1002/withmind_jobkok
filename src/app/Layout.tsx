@@ -150,6 +150,15 @@ export default function Layout({
           <Navbar 
           titleText='모의면접'
        />);
+      }else if(screen ==='MockAnalysisPage'){
+        return(
+          <PageHeader 
+          title={'분석 결과'} 
+          leftElement={<img src={ic_arrow_back_ios_gray900_20} alt="닫기" />}
+          onLeftElementClick={() => navigate('/mock-interview-report')}
+          rightIcons={<img src={ic_home_gray900_20}/>}
+          onRightElementClick={()=> navigate('/')}
+        />);
       }
     
     

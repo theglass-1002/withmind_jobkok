@@ -48,7 +48,7 @@ export default function ScoreDistributionSection({
               <span className="analysis-badge__text">{left.badgeText}</span>
             </div>
           </div>
-
+        
           <ScoreDistributionChart
             labels={labels}
             values={left.values}

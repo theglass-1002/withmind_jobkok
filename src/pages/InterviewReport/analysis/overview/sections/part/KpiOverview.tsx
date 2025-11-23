@@ -5,6 +5,7 @@ import KpiGaugeChart from "@/pages/InterviewReport/analysis/chart/KpiGaugeChart"
 import ic_page_facing_up_24 from "@/assets/icons/size24/ic_page-facing-up_24.png";
 import ic_info_white80_20 from "@/assets/icons/size20/ic_info_white80_20.png";
 import ic_yellow_flag20 from "@/assets/icons/size20/ic_yellow_flag20.png";
+import Tooltip from "@/shared/components/tooltip/Tooltip";
 
 type Props = {
   score: number;
@@ -95,13 +96,20 @@ export default function KpiOverview({
             <img className="mock-analysis-overview__kpi-icon" src={ic_page_facing_up_24} alt="" />
             모의면접 종합 평가
           </div>
-          <span className="mock-analysis-overview__kpi-help" role="button" aria-label="도움말">
+          <Tooltip  
+              iconElement={<img src={ic_info_white80_20} alt="" />}
+                        title={tooltipTitle}
+                        desc={tooltipDesc}
+                        position="top"
+                        className="mock-analysis-overview__kpi-help"
+                      />
+          {/* <span className="mock-analysis-overview__kpi-help" role="button" aria-label="도움말">
             <img className="mock-analysis-overview__kpi-help-icon" src={ic_info_white80_20} alt="" />
             <div className="tooltip__content" role="tooltip">
               <span className="tooltip__title">{tooltipTitle}</span>
               <span className="tooltip__desc">{tooltipDesc}</span>
             </div>
-          </span>
+          </span> */}
         </div>
 
         <div className="mock-analysis-overview__kpi-desc">
@@ -111,9 +119,8 @@ export default function KpiOverview({
               홍길동님의 종합 평가 점수는 {score}점이며, 응시자 {totalCandidates}명 중
               <span className="mock-analysis-overview__percent">
                 <img className="mock-analysis-overview__percent-icon" src={ic_yellow_flag20} alt="" />
-                상위 {percentile}%
+                상위 {percentile}% 에 해당합니다.
               </span>
-              에 해당
             </div>
             영상 분석 결과, 홍길동님은 자연스럽고 안정적인 목소리로 신뢰감을 주며, 중요한 단어를 잘 살려 말의 흐름이 자연스러웠습니다. 답변의 논리성과 구체성이 다소 부족했으나, 직무에 대한 이해도와 전문성은 높게 평가되었습니다. 전반적으로 직무 적합성과 대인 관계 능력이 돋보이는 면접이었습니다. 전반적으로 직무 적합성과 대인 관계 능력이 돋보이는 면접이었습니다.
           </div>
@@ -122,13 +129,11 @@ export default function KpiOverview({
         <div className="mock-analysis-overview__kpi-chart">
           <div className="kpi-chart__gauge">
           <KpiGaugeChart
-            // 필수 데이터/레이아웃 props
             segments={segments}
             labels={labels}
             valueLabel={`${score}점`}
             height={chartHeight}
 
-            // Theme props (색상/텍스트 관련)
             theme={{
                 base: baseColor,       // baseColor 대신 theme.base
                 fill: fillColor,       // fillColor 대신 theme.fill

@@ -1,12 +1,20 @@
-// src/pages/InterviewReport/history/InterviewReportHistory.tsx
+// src/pages/InterviewReport/history/M_InterviewReportHistory.tsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom"; 
 import UiFilter, { type UiFilterOption } from "@/shared/components/ui-filter/UiFilter";
-import MockInterviewHistoryList, { type InterviewReportHistoryItemData } from "./MockInterviewHistoryList";
+ import M_MockInterviewHistoryList, { type M_InterviewReportHistoryItemData } from "@/pages/InterviewReport/history/mobile/M_MockInterviewHistoryList";
+
+
+// import MockInterviewHistoryList, { type InterviewReportHistoryItemData } from "@/pages/InterviewReport/history/MockInterviewHistoryList";
+
+
+
+
+
 import ic_switch_right_white_20 from "@/assets/icons/size20/ic_switch_right_white_20.png";
-import test_profile_img2 from "@/assets/testImg/test_profile_img2.png";
+import test_profile_img2 from "@/assets/testImg/test_profile_img.jpg";
 import ic_arrow_up_right_gray900_20 from "@/assets/icons/size20/ic_arrow_up_right_gray900_20.png";
-import ic_selected_file_purple_20 from "@/assets/icons/size20/ic_selected_file_purple_20.png";
+import ic_task_gray900_18 from "@/assets/icons/size18/ic_task_gray900_18.png";
 import ic_keyboard_arrow_left_gray700_20 from "@/assets/icons/size20/ic_keyboard_arrow_left_gray700_20.png";
 import ic_keyboard_arrow_right_gray700_20 from "@/assets/icons/size20/ic_keyboard_arrow_right_gray700_20.png";
 
@@ -20,7 +28,7 @@ const DEFAULT_FILTERS: UiFilterOption[] = [
 ];
 
 
-interface InterviewReportHistoryProps {
+interface M_InterviewReportHistoryProps {
   totalCount: number;
   doneCount: number;
   filter: string;
@@ -30,7 +38,7 @@ interface InterviewReportHistoryProps {
   emptyIconSrc: string;       // 빈 상태 버튼 아이콘 (ex. ic_star_gray900_20)
 }
 
-export default function InterviewReportHistory({
+export default function M_InterviewReportHistory({
   totalCount,
   doneCount,
   filter,
@@ -38,13 +46,13 @@ export default function InterviewReportHistory({
   onStart,
   filters = DEFAULT_FILTERS,
   emptyIconSrc,
-}: InterviewReportHistoryProps) {
+}: M_InterviewReportHistoryProps) {
   const navigate = useNavigate();
   const isEmpty = totalCount === 0;
   const [page, setPage] = useState(1);
 
 
-  const HISTORY_ITEMS: InterviewReportHistoryItemData[] = [
+  const HISTORY_ITEMS: M_InterviewReportHistoryItemData[] = [
     {
       id: 1,
       title:"",
@@ -55,7 +63,7 @@ export default function InterviewReportHistory({
       dateText: "2025.01.01",
       statusText: "진행완료",
       statusState: "done",
-      resumeLabelIconSrc: ic_selected_file_purple_20,
+      resumeLabelIconSrc: ic_task_gray900_18,
       resumeText: "개발자 준비된 홍길동입니다.",
       resumeDate: "2025.01.01",
       onClickView: () => {
@@ -72,7 +80,7 @@ export default function InterviewReportHistory({
       dateText: "2025.01.01",
       statusText: "진행 중",
       statusState: "doing",
-      resumeLabelIconSrc: ic_selected_file_purple_20,
+      resumeLabelIconSrc: ic_task_gray900_18,
       resumeText: "개발자 준비된 홍길동입니다.",
       resumeDate: "2025.01.01",
       onClickView: () => {
@@ -89,7 +97,7 @@ export default function InterviewReportHistory({
       dateText: "2025.01.01",
       statusText: "진행완료",
       statusState: "done",
-      resumeLabelIconSrc: ic_selected_file_purple_20,
+      resumeLabelIconSrc: ic_task_gray900_18,
       resumeText: "개발자 준비된 홍길동입니다.",
       resumeDate: "2025.01.01",
       onClickView: () => {
@@ -106,7 +114,7 @@ export default function InterviewReportHistory({
         dateText: "2025.01.01",
         statusText: "진행 중",
         statusState: "doing",
-        resumeLabelIconSrc: ic_selected_file_purple_20,
+        resumeLabelIconSrc: ic_task_gray900_18,
         resumeText: "성장하는 개발자, 준비된 홍길동입니다..",
         resumeDate: "2025.01.01",
         onClickView: () => {
@@ -149,7 +157,7 @@ export default function InterviewReportHistory({
         </div>
       ) : 
       (
-        <MockInterviewHistoryList
+        <M_MockInterviewHistoryList
           sortIconSrc={ic_switch_right_white_20}
           viewIconSrc={ic_arrow_up_right_gray900_20}
           items={HISTORY_ITEMS}

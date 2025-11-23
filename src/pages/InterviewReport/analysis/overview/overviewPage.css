@@ -401,14 +401,15 @@ background: var(--white-12, rgba(255, 255, 255, 0.12));
   
   .mock-analysis-overview__score-distribution .analysis-section__left,
   .mock-analysis-overview__score-distribution .analysis-section__right{
-  padding: 28px;
+  padding: 20px;
+  width: 50%;
   }
 
   .mock-analysis-overview__category-summary .analysis-section__left,
   .mock-analysis-overview__category-summary .analysis-section__right{
     padding: 0px;
     border: none;;
-    width: 100%;
+    width: 50%;
     height: 100%;
     justify-content: space-between;
   }
@@ -622,6 +623,8 @@ background: var(--primary-12, rgba(129, 107, 254, 0.12));
   align-items: center;
   gap: 10px;
   border-radius: 4px;
+  color: white;
+  font-weight: 600;
 }
 
 /* 태그(변형) */
@@ -881,6 +884,148 @@ mock-analysis-overview__recommended-jobs */
 
   .bottom-nav-container{
     display: none !important;
+  }
+}
+
+@media (max-width: 750px) {
+  body{
+    .mock-analysis-overview__kpi{
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .mock-analysis-overview__kpi-title,
+    .mock-analysis-overview__kpi-fit{
+      border-radius: 0px;
+    }
+
+    .mock-analysis-overview__kpi-fit{
+      gap: 20px;
+    }
+
+    .mock-analysis-overview__kpi-headline,
+    .kpi-fit__head-title,
+    .analysis-badge,
+    .analysis-section__title{
+      font-size: 18px;
+    }
+    .mock-analysis-overview__kpi-icon,
+    .kpi-fit__head-icon,
+    .ai-summary-icon{
+      width: 22px;
+      height: 22px;
+
+    }
+    .mock-analysis-overview__kpi-desc,
+    .kpi-fit__percent{
+      font-size: 32px;
+    }
+
+    .mock-analysis-overview__kpi-desc-text,
+    .mock-analysis-overview__kpi-desc-lead,
+    .mock-analysis-overview__percent,
+    .kpi-fit__desc,
+    .kpi-fit__note,
+    .analysis-section__stat-role,
+    .analysis-section__stat-rank{
+      font-size: 14px;
+    }
+    .mock-analysis-overview__kpi-desc-lead{
+      flex-direction: column;
+      align-items: start;
+    }
+
+    .mock-analysis .mock-analysis-overview__kpi-help .tooltip__content{
+      width: 260px;
+      left: -230px;
+    }
+    .mock-analysis .mock-analysis-overview__kpi-help .tooltip__content::after {
+      left: 230px;
+    }
+    .kpi-fit__meter{
+      gap: 12px;
+    }
+    .analysis-section__body{
+      flex-direction: column;
+    }
+    .mock-analysis-overview__score-distribution .analysis-section__left,
+    .mock-analysis-overview__score-distribution .analysis-section__right{
+      width: 100%;
+      padding: 20px;
+    }
+    .analysis-section{
+      padding: 20px;
+    }
+    .mock-analysis-overview__category-summary .analysis-section__body{
+      height: auto;
+    }
+    
+    .mock-analysis-overview__category-summary .analysis-section__left,
+    .mock-analysis-overview__category-summary .analysis-section__right{
+      width: 100%;
+    }
+    .mock-analysis-overview__category-summary .analysis-section__right{
+      gap: 12px;
+    }
+    .analysis-eval-item__label,
+    .analysis-eval-item__grade,
+    .analysis-strength__label, 
+    .analysis-weakness__label
+    {
+      font-size: 16px;
+    }
+    .analysis-eval-item__descriptio,
+    .analysis-tag--strength
+    .analysis-tag--weakness,
+    .analysis-strength__description,
+    .analysis-weakness__description
+    {
+      font-size: 14px;
+    }
+    .analysis-strength__head,
+    .analysis-weakness__head{
+     padding: 20px;  
+    }
+
+    .analysis-strength__description,
+    .analysis-weakness__description{
+      padding: 20px;
+    }
+
+    .analysis-section.mock-analysis-overview__recommended-jobs{
+      padding: 0px;
+      gap: 0px;
+    }
+
+    .mock-analysis-overview__recommended-jobs .analysis-section__body{
+      gap: 0px;
+    }
+    .mock-analysis-report .analysis-resume-recommended-jobs{
+      gap: 0px;
+    }
+    .mock-analysis-report .analysis-resume-recommended-jobs__item{
+      width: 100%;
+    }
+    .mock-analysis-overview__recommended-jobs .analysis-section__title{
+      display: flex;
+      padding: 24px 0 20px 20px;
+      align-items: flex-start;
+      gap: 20px;
+      align-self: stretch;
+      border-bottom: 1px solid var(--gray-300, #E0E2E4);
+    }
+
+    .mock-analysis-report .analysis-resume-recommended-jobs__item .jobcard-v2{
+      width: 100%;
+      border-radius: 0px;
+      border: none;
+      border-bottom: 1px solid var(--gray-300, #E0E2E4);
+      background: var(--white-100, #FFF);
+    }
+    .mock-analysis-report .analysis-resume-recommended-jobs__item .jobcard-v2 .jobcard-v2__divider{
+      display: none;
+    }
   }
 }
 

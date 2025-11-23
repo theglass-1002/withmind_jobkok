@@ -6,7 +6,13 @@ import ic_star_gray900_20 from "@/assets/icons/size20/ic_star_gray900_20.png";
 import MyReportEmpty from "@/pages/InterviewReport/my-report/MyReportEmpty";
 import M_MyReportResult from "@/pages/InterviewReport/my-report/M_MyReportResult";
 import UiFilter, { type UiFilterOption } from "@/shared/components/ui-filter/UiFilter";
-import InterviewReportHistory from "@/pages/InterviewReport/history/MockInterviewHistory";
+
+import M_MockInterviewHistory from "@/pages/InterviewReport/history/mobile/M_MockInterviewHistory";
+
+
+
+
+
 import Modal from "@/shared/components/modal/Modal";
 import Tabs from "@/shared/components/tabs/Tabs";
 
@@ -30,29 +36,6 @@ export default function M_InterviewReport() {
     { key: "history", label: "모의면접 내역" },
   ];
 
-  const handleTabClick = (key: "report" | "history" ) => {
-    setActiveTab(key);
-    console.log("선택된 탭:", key);  // 필요하면
-    const targetId = `section-${key}`;
-    const targetElement = document.getElementById(targetId);
-    console.log(targetElement);
-    if (targetElement) {
-
-        const stickyTabElement = document.querySelector('.mock-interview__sticky-tabs');
-     
-        const offset = stickyTabElement 
-        ? (stickyTabElement as HTMLElement).offsetHeight + 10 
-        : 0; 
-
-        window.scrollTo({
-      
-          top: targetElement.offsetTop - offset,
-          behavior: 'smooth'
-        });
-      }
-
-  };
-
 
   const handleStart = () => {
     console.log("start mock interview");
@@ -65,46 +48,61 @@ export default function M_InterviewReport() {
     navigate(`/resumes/create`);
   };
 
-  useEffect(() => {
-    const tab = searchParams.get('tab');
-    if (tab === 'history') {
-      setActiveTab('history');
-    }
 
-    const handleScroll = () => {
-      const descriptionSection = document.getElementById('section-description');
-      const tabsElement = document.querySelector('.mock-interview-tabs-wrapper');
-      const pageHeaderElement = document.querySelector('.masthead');
-      if (descriptionSection && tabsElement) {
-        const descriptionTop = descriptionSection.offsetTop;        
-        const tabsHeight = (tabsElement as HTMLElement).offsetHeight; 
-        const scrollPosition = window.scrollY;
-        const shouldBeSticky = scrollPosition + tabsHeight > descriptionTop;
-        if(shouldBeSticky){
-          setIsTabsSticky(true);
-          console.log(tabsElement);
-          if (pageHeaderElement) {
-            tabsElement.classList.add('sticky-active');
-        }
-        }else{
-          setIsTabsSticky(false);
-          if (pageHeaderElement) {
-            tabsElement.classList.remove('sticky-active');
-        }
-        }
-      }
+  const handleTabClick = (key: "report" | "history") => {
+    setActiveTab(key);
+    const targetElement = document.getElementById('section-description');
+
+    if (targetElement) {
+     
+      const stickyTabElement = document.querySelector('.mock-interview__sticky-tabs');
+   
+      const offset = stickyTabElement 
+      ? (stickyTabElement as HTMLElement).offsetHeight + 10 
+      : 0; 
+
+      window.scrollTo({
     
+        top: targetElement.offsetTop - offset,
+        behavior: 'smooth'
+      });
     }
-    window.addEventListener('scroll', handleScroll);
-    handleScroll();
 
+  };
+
+  useEffect(() => {
+    const handleScroll = () => {
+    // 1. 필요한 DOM 요소 가져오기
+    const descriptionSection = document.getElementById('section-description');
+    const tabsElement = document.querySelector('.mock-interview-tabs');
+    
+    if (descriptionSection && tabsElement) {
+      const descriptionTop = descriptionSection.offsetTop;
+      const tabsHeight = (tabsElement as HTMLElement).offsetHeight; 
+      const scrollPosition = window.scrollY;
+      const shouldBeSticky = scrollPosition + tabsHeight > descriptionTop;
+      if(shouldBeSticky){
+        setIsTabsSticky(true);
+        console.log('고정 ㄱㄱ');
+      }else{
+        console.log('고정 ㄴㄴ');
+        setIsTabsSticky(false);
+      }
+      }
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+
+    console.log(`=== ${activeTab} 탭 활성화 ===`);
+    console.log('스크롤 가능:', document.documentElement.scrollHeight > window.innerHeight);
+    
+    handleScroll();
+  
     return () => {
+      console.log(`=== ${activeTab} 탭 이벤트 제거 ===`);
       window.removeEventListener('scroll', handleScroll);
     };
-
-
-  }, []);
-
+  }, [activeTab]);
 
   return (
     <div className="mock-interview-page mobile">
@@ -118,7 +116,7 @@ export default function M_InterviewReport() {
             activeClassName="on"
             />
       </div>
-      <header className="mock-interview-page__hero">
+      <header id="section-description" className="mock-interview-page__hero">
         <div className="mock-interview-page__hero-headings">
           <span className="mock-interview-page__hero-title">AI 모의면접</span>
           <span className="mock-interview-page__hero-subtitle">
@@ -141,15 +139,14 @@ export default function M_InterviewReport() {
         </button>
       </header>
     
-      <section id="section-description" className="mock-interview-page__section">
+      <section className="mock-interview-page__section">
       {activeTab === "report" && (
-          // <MyReportEmpty/>
           <M_MyReportResult/>
         )}
           {activeTab === "history" && (
-            <InterviewReportHistory
-              totalCount={0}
-              doneCount={0}
+            <M_MockInterviewHistory
+              totalCount={10}
+              doneCount={10}
               filter={filter}
               onChangeFilter={setFilter}
               onStart={handleStart}

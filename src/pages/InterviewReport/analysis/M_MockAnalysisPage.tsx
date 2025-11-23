@@ -12,8 +12,8 @@ import ic_arrow_left_gray900_20 from "@/assets/icons/size20/ic_arrow_left_gray90
 import ic_star_white_20 from "@/assets/icons/size20/ic_star_white_20.png";
 import ic_weakness_circle_24 from "@/assets/icons/size24/ic_weakness_circle_24.png";
 import ic_strength_circle_24 from "@/assets/icons/size24/ic_strength_circle_24.png";
-import M_MockAnalysisPage from "./M_MockAnalysisPage";
-import MockAnalysisHeader from "./MockAnalysisHeader";
+
+import M_MockAnalysisHeader from "./M_MockAnalysisHeader";
 import OverviewPage from "./overview/OverviewPage";
 import DetailPage from "./detail/DetailPage";
 import ResumeInterviewMatchPage from "./match/ResumeInterviewMatchPage";
@@ -149,10 +149,10 @@ export default function MockAnalysisPage() {
 
   return (
     <>
-    <div className="mock-analysis">
+    <div className="mock-analysis mobile">
       <div className="mock-analysis__inner page-summary">
         <div className="mock-analysis__header_container">
-        <MockAnalysisHeader
+        <M_MockAnalysisHeader
           title="분석결과"
           date="2025.01.01 00:00"
           status="진행 완료"
@@ -334,11 +334,6 @@ export default function MockAnalysisPage() {
         </div>
       </div>
     </div>
-
-    <M_MockAnalysisPage/>
-
-
-
     </>
   );
 }
