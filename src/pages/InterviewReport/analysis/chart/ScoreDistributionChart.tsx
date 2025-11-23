@@ -206,7 +206,7 @@ export default function ScoreDistributionChart({
             callback: (v: any) => `${v}`,
             padding: 6,
             autoSkip: false, // 자동 생략 방지
-            autoSkip: false, // 자동 생략 방지
+           
           },
           grid: { color: gridColor, drawBorder: false, drawTicks: false },
           border: { display: false },
@@ -224,7 +224,7 @@ export default function ScoreDistributionChart({
             maxRotation: 0,
             minRotation: 0,
             autoSkip: false, // 자동 생략 방지
-            autoSkip: false, // 자동 생략 방지
+  
             callback: (val: any, idx: number) => {
               const raw = labelItems[idx];
               if (Array.isArray(raw)) return raw;
