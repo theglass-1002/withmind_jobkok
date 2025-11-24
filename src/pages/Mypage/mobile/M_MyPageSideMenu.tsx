@@ -1,4 +1,5 @@
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
+
 import calendar_today from '@/assets/icons/calendar_today.png';
 import ic_setting_gray700_20 from '@/assets/icons/size20/ic_setting_gray700_20.png';
 import ic_plan_green_20 from '@/assets/icons/size20/ic_plan_green_20.png';
@@ -13,7 +14,7 @@ const GROUPS = [
     id: "plan",
     label: "이용권",
     items: [
-      { to: "plan/history",  label: "이용권 내역" },
+      { to: "m-plan/history",  label: "이용권 내역" },
       { to: "/purchase", label: "이용권 구매" }, 
     ],
   },
@@ -32,6 +33,15 @@ const GROUPS = [
 
 
 export default function M_MyPageSideMenu() {
+
+  const navigate = useNavigate();
+
+  const handleNavigation = (to) => {
+    // 'to' 경로로 이동
+    console.log('경로이동');
+    navigate(to);
+};
+
     return (
      <>
       <aside className="mypage__sidebar" aria-label="마이페이지 메뉴">
@@ -45,8 +55,10 @@ export default function M_MyPageSideMenu() {
                         <span>010-1234-5678</span>
                         </div>
                         </div>
-                        <NavLink to="edit-profile" className="setting-icon_contaitner"> 
-                          <img src={ic_setting_gray700_20} alt="" /></NavLink>         
+                       <span className="setting-icon_contaitner"   onClick={() => handleNavigation('m-edit-profile')}>
+                       <img src={ic_setting_gray700_20} alt="" />
+                       </span>
+                          
                     </div>
                     <div className="usercard__plan">
                     <span className="plan-status__detail">

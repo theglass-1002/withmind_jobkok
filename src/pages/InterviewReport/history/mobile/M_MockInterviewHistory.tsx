@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom"; 
 import UiFilter, { type UiFilterOption } from "@/shared/components/ui-filter/UiFilter";
- import M_MockInterviewHistoryList, { type M_InterviewReportHistoryItemData } from "@/pages/InterviewReport/history/mobile/M_MockInterviewHistoryList";
+import M_MockInterviewHistoryList, { type M_InterviewReportHistoryItemData } from "@/pages/InterviewReport/history/mobile/M_MockInterviewHistoryList";
 
 
 // import MockInterviewHistoryList, { type InterviewReportHistoryItemData } from "@/pages/InterviewReport/history/MockInterviewHistoryList";

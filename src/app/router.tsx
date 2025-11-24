@@ -114,6 +114,12 @@ export const router = createBrowserRouter([
         
       ]
    },
+
+   {path: "/mypage/m-edit-profile", element:<Layout screen="EditProfile" showFooter="desktop-only" showBottomNav={false}> <EditProfile/></Layout> },
+   {path: "/mypage/m-plan/history", element:<Layout screen="PlanHistory" showFooter="desktop-only" showBottomNav={false}> <PlanHistory/></Layout> },
+
+
+
    {path:"/saved-jobs",element:<Layout showFooter='desktop-only' showBottomNav={false} ><SavedPostings/></Layout>},
    { path: "/purchase", element: <Layout><PurchaseLayout /></Layout> },
    {

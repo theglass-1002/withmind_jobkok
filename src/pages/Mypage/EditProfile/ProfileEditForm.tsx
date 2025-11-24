@@ -50,16 +50,16 @@ export default function ProfileEditForm({
                 </div>
                 <span className="field__label">성별 <em>*</em></span>
                 <div className="btn_wrap">
-                  <span>
+                  
                   <button
                      className={`default_btn_white ${userInfo.gender === 'm' ? 'on' : ''}`}>
                   남성</button>
-                  </span>
-                  <span>
+                  
+                  
                   <button
                   className={`default_btn_white ${userInfo.gender === 'f' ? 'on' : ''}`}>
                     여성</button>
-                  </span>
+                
 
                   </div>
                 <div className="field__value_gray hint">
@@ -71,10 +71,10 @@ export default function ProfileEditForm({
               <div className="field">
                 <button className="default_a_btn_line">회원 탈퇴</button>
               </div>
-              <div className="field">
+              <div className="field form-action-group">
               <div className="btn_wrap">
-                <button className="default_btn_white" onClick={onCancel}>취소</button>
-                 <button className="default_btn_black" onClick={onSubmit}>저장</button>
+                <button className="default_btn_white btn-cancel" onClick={onCancel}>취소</button>
+                 <button className="default_btn_black btn_w_full" onClick={onSubmit}>저장</button>
                   </div>
               </div>
             </div>

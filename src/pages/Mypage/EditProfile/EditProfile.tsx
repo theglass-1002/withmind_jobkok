@@ -5,6 +5,8 @@ import ProfileReadonly from "./ProfileReadonly";
 import ProfileEditForm from "./ProfileEditForm";
 import Modal from '@/shared/components/modal/Modal';
 import { UserProfile } from '@/shared/api/user';
+import Tabs from "@/shared/components/tabs/Tabs";
+
 
 const initialProfile: UserProfile = {
   email: "hong1234@withmind.net",
@@ -17,7 +19,7 @@ const initialProfile: UserProfile = {
 
 
 
-type TabKey = "profile" | "password";
+
 type DialogKind = "deleteAccount" | "editAccountSuccess"|"deleteAccountSuccess"|"error";
 
 
@@ -25,13 +27,20 @@ export default function EditProfile() {
     const navigate = useNavigate();
     const [userData, setUserData] = useState<UserProfile>(initialProfile);
     const profileMode: "view" | "edit" = userData.certified ? "edit" : "view";
-    const [tab, setTab] = useState<TabKey>("profile");
     const [dialog, setDialog] = useState<DialogKind>("deleteAccount");
 
+    const [activeTab, setActiveTab] = useState("edit");
+    const tabItems = [
+      { key: "edit", label: "기본 정보" },
+      { key: "password", label: "비밀번호" },
+    ];
+
+    const handleTabClick = (key: "password" | "edit") => {
+      setActiveTab(key);
+    }
+
     const closeDialog = () => setDialog(null);
-    const handleTabSelect = (key: TabKey) => {
-        setTab(key);
-      };
+
   const openDeleteAccountModal = () => setDialog("deleteAccount");      
 
 
@@ -39,50 +48,32 @@ export default function EditProfile() {
   const handleConfirmDeleteAccount = async () => {
     setDialog("deleteAccountSuccess");
     console.log('회원탈퇴 api 진행');;
-    // try {
-    //   await UserAPI.deleteAccount();
-    //   // 로그아웃/리다이렉트 등 후처리
-    // } catch (e) {
-    //   console.error(e);
-    // } finally {
-    //   closeModal();
-    // }
   };
 
 
   const handleConfirmEditAccount = async () => {
     console.log('회원정보수정api 진행');;
     setDialog("editAccountSuccess");
-    // try {
-    //   await UserAPI.deleteAccount();
-    //   // 로그아웃/리다이렉트 등 후처리
-    // } catch (e) {
-    //   console.error(e);
-    // } finally {
-    //   closeModal();
-    // }
   };
 
 
 
     return (
          <>
+         <div className="edit-profile__container">
          <header className="mypage__content-header tabs">
               <h2 className="title">회원 정보 수정</h2>
-              <nav className="tabs" aria-label="계정 탭">
-                <ul className="tabs__list" role="tablist">
-                  <li className={`tabs__item${tab=='profile'?'-is-active':''}`} onClick={()=>handleTabSelect("profile")}>
-                    기본 정보
-                  </li>
-                  <li className={`tabs__item${tab=='password'?'-is-active':''}`} onClick={()=>handleTabSelect("password")}>
-                    비밀번호
-                  </li>
-                </ul>
-              </nav>
+              <Tabs
+                tabs={tabItems}
+                active={activeTab}
+                onChange={handleTabClick}
+                className="my-page_edit-tabs default_tabs"
+                itemClassName="my-page-tabs__item"
+                activeClassName="on"
+                />
             </header> 
-       
           <div className="mypage__content-main">
-            {tab === "password" ? (
+            {activeTab === "password" ? (
               <PasswordTab 
               onCancel={() => navigate("/mypage", { replace: true })}
                />
@@ -99,6 +90,37 @@ export default function EditProfile() {
               />
             )}
           </div>
+         </div>
+         <div className="edit-profile__container mobile">
+         <header className="edit-profile__sticky-tabs">
+              <Tabs
+                tabs={tabItems}
+                active={activeTab}
+                onChange={handleTabClick}
+                className="my-page_edit-tabs default_tabs"
+                itemClassName="my-page-tabs__item"
+                activeClassName="on"
+                />
+            </header> 
+          <div className="mypage__content-main">
+            {activeTab === "password" ? (
+              <PasswordTab 
+              onCancel={() => navigate("/mypage", { replace: true })}
+               />
+            ) : profileMode === "edit" ? (
+              <ProfileEditForm 
+              userInfo={userData as UserProfile}
+              onCancel={() => navigate("/mypage", { replace: true })}
+              onSubmit={handleConfirmEditAccount}                             // 부모가 API 호출
+              onRequestDelete={openDeleteAccountModal} 
+              />
+            ) : (
+              <ProfileReadonly
+              userInfo={userData as UserProfile}
+              />
+            )}
+          </div>
+         </div>
           <Modal
               open={dialog=="deleteAccount"}
               title="정말 탈퇴하시겠습니까?"

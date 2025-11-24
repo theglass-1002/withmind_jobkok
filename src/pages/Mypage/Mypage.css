@@ -348,6 +348,18 @@ line-height: 20px; /* 125% */
     border-radius: 6px 6px 0 0;  
     }
 
+.my-page_edit-tabs{
+    height: 40px;
+    gap: 20px;
+}
+
+.edit-profile__sticky-tabs{
+    height: 50px;
+    border-bottom: 1px solid var(--gray-300, #E0E2E4);
+    background: var(--white-100, #FFF);
+    padding: 8px 20px 0 20px;
+}
+    
 .mypage__content .mypage__content-header .title{
     color: var(---gray-900, #2A2D2F);
     font-family: Pretendard;
@@ -400,7 +412,13 @@ line-height: 20px; /* 125% */
 .mypage__content-main{
     width: 100%;
     height: 100%;
-    
+}
+
+.edit-profile__container{
+    width: 100%;
+}
+.edit-profile__container.mobile{
+    display: none;
 }
 
 .mypage__content-main.faq-container{
@@ -644,6 +662,7 @@ line-height: 18px; /* 128.571% */
     display: flex;
     align-items: flex-start;
     gap: 16px;
+    justify-content: start;
 }
 
 .mypage__content-main .account-main .field .btn_wrap:last-child {
@@ -669,6 +688,16 @@ line-height: 18px; /* 128.571% */
     font-style: normal;
     font-weight: 600;
     line-height: 20px; /* 125% */
+  }
+  
+  .plan-history__container{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .plan-history__container.mobile{
+    display: none;
   }
 
   .mypage__content-main .plan{
@@ -1159,6 +1188,43 @@ line-height: 180%; /* 28.8px */
     grid-template-columns: repeat(3, minmax(0, 1fr));
  }
 
+ .job_submission_banner{
+    display: flex;
+    position: relative;
+    cursor: pointer;
+    width: 100%;
+    height: 112px;
+ }
+
+ .job_submission_banner__image{
+    position: absolute;
+    height: 100%;
+    width: 100%;
+ }
+
+ .job_submission_banner__headline{
+    top: 30px;
+    left: 20px;
+    position: absolute;
+    color: var(--white-100, #FFF);
+    font-weight: 700;
+
+ }
+ .job_submission_banner__content_wrap{
+    position: absolute;
+    left: 20px;
+    top: 60px;
+    color: var(--white-100, #FFF);
+    font-weight: 500; 
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.job_submission_banner__action{
+    text-decoration-line: underline;
+    text-decoration-style: solid;
+}
 
  .mp-section .job-list .job-card{
     display: flex;
@@ -1544,6 +1610,135 @@ line-height: 20px; /* 125% */
             text-decoration-line: underline;
             text-decoration-style: solid;
         }
+
+        /* .mypage_main */
+
+        .mypage_main{
+            display: none;
+        }
+        .mypage_main.mobile{
+            display: flex;
+            width: 100%;
+        }
+
+        .mp-section{
+            padding: 24px 20px;
+        }
+
+        .mp-section .mypage__content-header{
+            display: flex;
+            width: 100%;
+            justify-content: space-between;
+        }
+        .mypage__section__title{
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .mp-section .mp-more{
+            font-size: 14px;
+        }
+        .mp-section .job-list{
+            display: flex;
+          
+        }
+        .mp-section .job-list .job-card{
+            flex: 0 0 260px;
+        }
+        .job-list.recommend{
+            display: flex;
+            gap: 12px;
+            overflow: auto;
+            flex-direction: row;
+            justify-content: start;
+        }
+
+        .job_submission_banner{
+            height: 90px;
+        }
+        .job_submission_banner__headline{
+            top: 20px;
+            font-size: 16px;
+        }
+        .job_submission_banner__content_wrap{
+            top: 50px;
+            font-size: 12px;
+        }
+
+        .mp-section .data-list__body{
+            padding: 0px;
+        }
+
+        .mp-section .data-list__body .mock-history__item_num{
+            display: none;
+        }
+        .edit-profile__container{
+            display: none;
+        }
+        .edit-profile__container.mobile{
+            display: flex;
+            flex-direction: column;
+        }
+
+        .my-page_edit-tabs{
+            height: 100%;
+        }
+
+        .mypage__content-main .account-main .field .btn_wrap button{
+            width: 100%;
+        }
+        .field.form-action-group .btn-cancel{
+            display: none;
+        }
+        .mypage__content-main .account-main .field .btn_wrap:last-child button{
+            width: 100%;
+        }
+        .plan-history__container{
+            display: none;
+        }
+        .plan-history__container.mobile{
+            display: flex;
+        }
+
+        .plan-history__container .mypage__content-header{
+            display: none;
+        }
+        .mypage__content-main .plan .plan-current--active{
+            display: flex;
+            flex-direction: column;
+            align-items: start;
+            padding: 16px;
+            gap: 12px;
+        }
+
+        .plan .plan-history{
+            width: 100%;
+            overflow: auto;
+        }
+        .plan-history__head,
+        .plan-history__body{
+            overflow: visible;
+        }
+
+        .plan-history__head .cell{
+            background: var(--gray-50, #F8F8F9);
+        }
+        .plan-history__row{
+            border: none;
+        }
+
+        .plan-history__row.is-active .cell{
+            background: linear-gradient(0deg, rgba(30, 194, 128, 0.04) 0%, rgba(30, 194, 128, 0.04) 100%), #FFF;
+          }
+        .plan-history__row .cell{
+            border-bottom: 1px solid var(--gray-300, #E0E2E4);
+     
+        }
+
+        .mypage__content-main .plan .plan-info{
+            height: auto;
+            font-size: 14px;
+        }
+
     }
 
 }

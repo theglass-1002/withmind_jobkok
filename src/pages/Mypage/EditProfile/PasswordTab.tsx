@@ -104,9 +104,9 @@ export default function PasswordTab({onCancel}:PasswordTabProps) {
                   <span>※ 비밀번호는 영문, 숫자, 특수문자를 모두 포함한 8~16자로 입력해 주세요.</span>
                 </div>
               </div>
-              <div className="field">
+              <div className="field form-action-group">
               <div className="btn_wrap">
-                  <button className="default_btn_white" onClick={onCancel}>취소</button>
+                  <button className="default_btn_white btn-cancel" onClick={onCancel}>취소</button>
                   <button className="default_btn_black"  onClick={handleSave}>저장</button>
                   </div>
               </div>

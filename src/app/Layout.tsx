@@ -164,6 +164,24 @@ export default function Layout({
           <Navbar 
           titleText='마이페이지'
        />);
+      }else if(screen ==='EditProfile'){
+        return(
+          <PageHeader 
+          title={'회원 정보 수정'} 
+          leftElement={<img src={ic_arrow_back_ios_gray900_20} alt="닫기" />}
+          onLeftElementClick={() => navigate('/mypage')}
+          rightIcons={<img src={ic_home_gray900_20}/>}
+          onRightElementClick={()=> navigate('/')}
+        />);
+      }else if(screen ==='PlanHistory'){
+        return(
+          <PageHeader 
+          title={'이용권 내역'} 
+          leftElement={<img src={ic_arrow_back_ios_gray900_20} alt="닫기" />}
+          onLeftElementClick={() => navigate('/mypage')}
+          rightIcons={<img src={ic_home_gray900_20}/>}
+          onRightElementClick={()=> navigate('/')}
+        />);
       }
     
     
