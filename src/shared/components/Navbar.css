@@ -302,9 +302,14 @@
 }
 
 /* 기준 부모: 아이콘 감싸는 래퍼 */
-.mypage {
+.mypage_icon {
   position: relative;
   align-items: center;
+  /* display: flex;
+  align-items: center;
+  margin: auto;
+  justify-content: center;
+  background: var(--gray-50, #F8F8F9); */
 }
 
 .mypage-menu {
@@ -385,9 +390,6 @@
       font-weight: 600;
       line-height: 24px; /* 120% */
     }
-    .mypage{
-      display: none;
-    }
     .search-panel{
       display: none;
     }
@@ -453,6 +455,10 @@
     }
 
     .masthead.masthead-static{
+      display: none;
+    }
+
+    .mypage_icon{
       display: none;
     }
     

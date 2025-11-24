@@ -8,7 +8,7 @@ export default function ResumeSummarySection() {
     return (
         <div className="report-section report-section--sum">
           <span className="report-section__title">
-            <img src={ic_check_mark_24} alt="" />
+            <img className="report-section--sum_icon" src={ic_check_mark_24} alt="" />
             이력서 종합 평가</span>
           <div className="summary__content">
          
@@ -19,7 +19,7 @@ export default function ResumeSummarySection() {
           
             <div className="summary__detail-container">
               <span className="summary__detail-title">
-                <img src={ic_tooltip_gray600_20} alt="" />
+                <img className="summary__detail_icon" src={ic_tooltip_gray600_20} alt="" />
                 해설</span>
               <span className="summary__detail-text">
                 홍길동님 이력서는 전반적으로 지원 직무에 대한 경험과 이해도가 잘 드러나 있으며, 다양한 프로젝트 참여 경험은 차별화된 강점으로 보입니다.

@@ -80,7 +80,7 @@
 
     display: flex;
     height: 98px;
-    padding: 52px 0px 0 0px;
+    padding: 54px 0px 0 0px;
     align-items: center;
     gap: 28px;
     align-self: stretch;
@@ -249,7 +249,9 @@
         .mock-analysis{
             display: none;
         }
-
+        .mock-analysis__inner{
+            border: none;
+        }
         .mock-analysis.mobile{
             display: flex;
             padding:0px;
@@ -293,7 +295,7 @@
         }
 
         .mock-analysis-panel{
-            padding: 0px 0px 100px 0px;
+            padding: 0px;
 
         }
         .mock-analysis-report__content{

@@ -1,9 +1,30 @@
+.mypage{
+  display: flex;
+  align-items: center;
+  margin: auto;
+  justify-content: center;
+  background: var(--gray-50, #F8F8F9);
+}
+
+
 .mypage .mypage__container{
     display: flex;
+    padding: 104px 0px 100px 0px;
+    width: 100%;
+    max-width: 1200px;
+    flex-direction: column;
+    gap: 40px;
+
+
+    /* display: flex;
     padding: 104px 360px 100px 360px;
     flex-direction: column;
     gap: 40px;
-    align-self: stretch;
+    align-self: stretch; */
+}
+
+.mypage .mypage__container.mobile{
+    display: none;
 }
 
 .mypage .mypage__header .mypage__title{
@@ -24,7 +45,8 @@
 
 .mypage__body .mypage__sidebar{
 display: flex;
-width: 400px;
+width: 300px;
+/* width: 400px; */
 flex-direction: column;
 align-items: flex-start;
 border-radius: 6px;
@@ -47,6 +69,29 @@ background: var(--white-100, #FFF);
     border: none;
 }
 
+.my-page.sticky-tabs{
+    display: flex;
+    width: 100%;
+    padding: 8px 20px 0 20px;
+    align-items: center;
+    gap: 20px;
+    background: var(--white-100, #FFF);
+    height: 48px;
+    border-bottom: 1px solid var(--gray-300, #E0E2E4);
+    background: var(--white-100, #FFF);
+    /* width: 100%;
+    height: 52px;
+    background: var(--white-100, #FFF); */
+}
+
+.my-page.sticky-tabs .default_tabs{
+  gap: 20px;
+  height: 100%;
+}
+
+.tabs__item.my-page-tabs__item{
+    padding-bottom: 16px;
+}
 
 .mypage__body .sidemenu{
     display: flex;
@@ -64,7 +109,35 @@ background: var(--white-100, #FFF);
     border-bottom: 1px solid var(---gray-300, #E0E2E4);
 }
 
+.sidebar-user__header{
+    display: flex;
+    width: 100%;
+    gap: 16px;
+    justify-content: space-between;
+}
+.sidebar-user__details{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    flex: 1 0 0;
+}
 
+.setting-icon_contaitner{
+    display: flex;
+    width: 48px;
+    height: 48px;
+    padding: 8px 20px;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    aspect-ratio: 1/1;
+    border-radius: 100px;
+    border: 1px solid var(--gray-300, #E0E2E4);
+    background: var(--white-100, #FFF);
+    cursor: pointer;
+}
 
 .mypage__body .sidemenu .user_info .user_name{
     color: var(---gray-900, #2A2D2F);
@@ -114,6 +187,12 @@ background: var(--white-100, #FFF);
     min-width: 0;  
     font-family: Pretendard;
   }
+
+.plan-status__detail{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
   
 
 .mypage__body .sidemenu .user_info .usercard__plan::before{
@@ -248,7 +327,8 @@ line-height: 20px; /* 125% */
 
 .mypage_main{
     display: flex;
-    width: 100%;
+    width: 876px;
+    /* width: 100%; */
     flex-direction: column;
     align-items: flex-start;
     gap: 24px;
@@ -1072,10 +1152,11 @@ line-height: 180%; /* 28.8px */
  }
 
  .mp-section .job-list{
-    display: flex;
+    /* display: flex; */
     align-items: center;
     gap: 20px;
     align-self: stretch;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
  }
 
 
@@ -1370,3 +1451,99 @@ line-height: 20px; /* 125% */
 /* .inquiry.report .input-group input{
     padding: 0px;
 } */
+
+/* 모바일: 760px 이하 */
+@media (max-width: 760px) {
+    body{
+        .mypage .mypage__container{
+            display: none;
+        }
+        .mypage .mypage__container.mobile{
+            display: flex;
+            gap: 0px;
+            padding: 64px 0px 0 0px;
+        }
+        .mypage__body .mypage__sidebar{
+            width: 100%;
+            border-radius: 0px;
+            border: none;
+        }
+        .mypage__body .sidemenu{
+            gap: 20px;
+            background: var(--gray-100, #F2F3F4);
+        }
+        .mypage__body .sidemenu .user_info{
+            padding: 24px 20px;
+            background: var(--white-100, #FFF);
+        }
+        .mypage__body .sidemenu .user_info .user_name{
+            font-size: 20px;
+        }
+        .mypage__body .sidemenu .user_info .user_contact{
+            gap: 8px;
+        }
+
+        .mypage__body .sidemenu .user_info .usercard__plan{
+            width: 100%;
+            padding: 12px;
+            border-radius: 4px;
+            background: var(--green-8, rgba(30, 194, 128, 0.08));
+            justify-content: space-between;
+        }
+
+
+
+        .mypage__body .sidemenu .user_info .usercard__plan::before{
+         display: none;
+        }
+        .plan-status__expiry{
+            font-weight: 400;
+        }
+        .sidemenu__list{
+            width: 100%;
+        }
+        .sidemenu .sidemenu__list .sidemenu__group{
+            display: flex;
+            padding: 14px 0;
+            flex-direction: column;
+            align-items: flex-start;
+            align-self: stretch;
+            background: var(--white-100, #FFF);
+        }
+        .sidemenu__group .sidemenu__sublist a{
+            display: flex;
+            padding: 14px 20px;
+            display: flex;
+            overflow: hidden;
+            color: var(--gray-900, #2A2D2F);
+            text-overflow: ellipsis;
+            font-family: Pretendard;
+            font-size: 16px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 20px;
+            width: 100%;
+            justify-content: space-between;
+        }
+        .sidemenu .sidemenu__link.sidemenu_logout_btn::before{
+            display: none;
+        }
+        .sidemenu .sidemenu__item--logout {
+            display: flex;
+            height: auto;
+            padding: 0px 0px 20px 20px;
+            align-items: start;
+            gap: 12px;
+            align-self: stretch;
+        }
+        .sidemenu .sidemenu__link.sidemenu_logout_btn{
+            font-size: 14px;
+            font-style: normal;
+            font-weight: 400;
+            
+            text-decoration-line: underline;
+            text-decoration-style: solid;
+        }
+    }
+
+}

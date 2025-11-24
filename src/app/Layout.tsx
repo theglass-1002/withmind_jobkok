@@ -159,6 +159,11 @@ export default function Layout({
           rightIcons={<img src={ic_home_gray900_20}/>}
           onRightElementClick={()=> navigate('/')}
         />);
+      }else if(screen ==='Mypage'){
+        return(
+          <Navbar 
+          titleText='마이페이지'
+       />);
       }
     
     

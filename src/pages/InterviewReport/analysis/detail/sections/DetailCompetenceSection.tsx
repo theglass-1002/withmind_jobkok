@@ -172,7 +172,7 @@ export default function DetailCompetenceSection({
                 <div className="detail-analysis__question-info">
                   <div className="detail-analysis__answer-grade">
                     <div className="detail-analysis__answer-grade-label">
-                      <img src={ic_stars_gray600_20} alt="" />
+                      <img className="detail-analysis__answer-grade_icon" src={ic_stars_gray600_20} alt="" />
                       답변 등급
                     </div>
                     <div className="detail-analysis__answer-grade-options">
@@ -184,7 +184,7 @@ export default function DetailCompetenceSection({
 
                   <div className="detail-analysis__answer-keywords">
                     <span className="detail-analysis__answer-keywords-label">
-                      <img src={ic_emergency_gray600_20} alt="" />
+                      <img className="detail-analysis__answer-keywords_icon" src={ic_emergency_gray600_20} alt="" />
                       답변 핵심 표현
                     </span>
                     <div className="detail-analysis__answer-keyword-list">
@@ -202,7 +202,7 @@ export default function DetailCompetenceSection({
                 <div className="detail-analysis__question-info">
                   <div className="detail-analysis__answer-analysis">
                     <div className="detail-analysis__answer-analysis-title">
-                      <img src={ic_forum_gray600_20} alt="" />
+                      <img className="detail-analysis__answer-analysis_icon" src={ic_forum_gray600_20} alt="" />
                       답변 분석
                     </div>
                     <span className="detail-analysis__answer-analysis-text">
@@ -236,11 +236,11 @@ export default function DetailCompetenceSection({
 
                   <div className="detail-analysis__video-info">
                     <span className="detail-analysis__video-notice">
-                      <img src={ic_info_white_20} alt="" />
-                      면접 영상은 분석 리포트 생성일로부터 90일간 제공됩니다.
+                      <img className="video-notice_icon" src={ic_info_white_20} alt="" />
+                      <span className="detail-analysis__video-notice_text">면접 영상은 분석 리포트 생성일로부터 90일간 제공됩니다.</span> 
                     </span>
                     <span className="detail-analysis__video-download">
-                      영상 다운로드 <img src={ic_download_white_20} alt="" />
+                      영상 다운로드 <img className="detail-analysis__video-download_icon" src={ic_download_white_20} alt="" />
                     </span>
                   </div>
 
@@ -255,7 +255,7 @@ export default function DetailCompetenceSection({
 
                   <div className="detail-analysis__answer-grade">
                     <div className="detail-analysis__answer-grade-label">
-                      <img src={ic_stars_gray600_20} alt="" />
+                      <img className="detail-analysis__answer-grade_icon" src={ic_stars_gray600_20} alt="" />
                       답변 등급
                     </div>
                     <div className="detail-analysis__answer-grade-options">
@@ -273,7 +273,7 @@ export default function DetailCompetenceSection({
 
                   <div className="detail-analysis__answer-keywords">
                     <span className="detail-analysis__answer-keywords-label">
-                      <img src={ic_emergency_gray600_20} alt="" />
+                      <img className="detail-analysis__answer-keywords_icon" src={ic_emergency_gray600_20} alt="" />
                       답변 핵심 표현
                     </span>
                     <div className="detail-analysis__answer-keyword-list">
@@ -293,7 +293,7 @@ export default function DetailCompetenceSection({
 
               <div className="detail-analysis__answer-analysis">
                 <div className="detail-analysis__answer-analysis-title">
-                  <img src={ic_forum_gray600_20} alt="" />
+                  <img className="detail-analysis__answer-analysis_icon" src={ic_forum_gray600_20} alt="" />
                   답변 분석
                 </div>
                 <span className="detail-analysis__answer-analysis-text">
@@ -308,7 +308,7 @@ export default function DetailCompetenceSection({
           <div className="detail-analysis__word-section">
             <div className="detail-analysis__word-common">
               <span className="detail-analysis__word-title">
-                <img src={ic_inventory_gray600_20} alt="" />
+                <img className="detail-analysis__word-common_icon" src={ic_inventory_gray600_20} alt="" />
                 자주 사용하는 단어
               </span>
               <div className="detail-analysis__word-list">
@@ -326,7 +326,7 @@ export default function DetailCompetenceSection({
 
             <div className="detail-analysis__word-habit">
               <span className="detail-analysis__word-title">
-                <img src={ic_inventory_gray600_20} alt="" />
+                <img className="detail-analysis__word-habit_icon" src={ic_inventory_gray600_20} alt="" />
                 자주 사용하는 습관어
               </span>
               <div className="detail-analysis__word-list">

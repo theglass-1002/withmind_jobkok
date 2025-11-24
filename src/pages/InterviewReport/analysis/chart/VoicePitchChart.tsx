@@ -24,6 +24,7 @@ ChartJS.register(
 );
 
 type Props = {
+  className?: string;
   /** 데이터 값 배열 (예: [220, 195, 210, 180, ...]) */
   values: number[];
   /** X축 라벨 (예: ["질문 1", "질문 2", ...] 또는 [["질문", "1"], ["질문", "2"], ...]) */
@@ -49,10 +50,12 @@ type Props = {
 };
 
 export default function VoicePitchChart({
+  className,
   values,
   labels,
   averageLine = 200,
   averageLabel = "평균",
+  height = 300,
   lineColor = "#15D078",
   areaColorStart = "rgba(21, 208, 120, 0.3)",
   areaColorEnd = "rgba(21, 208, 120, 0.05)",
@@ -70,6 +73,14 @@ export default function VoicePitchChart({
     values.map(() => min)
   );
   const animationRef = useRef<number | undefined>(undefined);
+
+  // 최소 너비 계산: 데이터 포인트 수 * 포인트당 최소 간격
+  const minWidth = useMemo(() => {
+    const pointCount = values.length;
+    const minGap = 60; // 포인트 간 최소 간격
+    const yAxisSpace = 80; // Y축 레이블 공간
+    return pointCount * minGap + yAxisSpace;
+  }, [values.length]);
 
   // 애니메이션 효과
   useEffect(() => {
@@ -142,7 +153,7 @@ export default function VoicePitchChart({
   const options = useMemo(() => {
     return {
       animation: false as const,
-      responsive: true,
+      responsive: false, // responsive를 false로 변경
       maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
@@ -162,6 +173,7 @@ export default function VoicePitchChart({
             callback: (v: any) => `${v} Hz`,
             font: { size: 14, family: "Pretendard" },
             color: "#848B93",
+            autoSkip: false, // 자동 생략 방지
           },
           grid: {
             color: "#E0E2E4",
@@ -173,6 +185,9 @@ export default function VoicePitchChart({
           ticks: {
             font: { size: 14, family: "Pretendard" },
             color: "#848B93",
+            autoSkip: false, // 자동 생략 방지
+            maxRotation: 0,
+            minRotation: 0,
           },
           grid: { display: false, drawBorder: false },
           border: { display: false },
@@ -209,7 +224,7 @@ export default function VoicePitchChart({
         const textWidth = ctx.measureText(text).width;
         const badgeW = textWidth + 16;
         const badgeH = 24;
-        const badgeX = chartArea.right - badgeW ;
+        const badgeX = chartArea.right - badgeW;
         const badgeY = y - badgeH / 2;
 
         // 배지 배경
@@ -231,8 +246,24 @@ export default function VoicePitchChart({
   );
 
   return (
-    <div style={{ width: "100%", height:"100%", padding:"0px" }}>
-      <Line data={data} options={options} plugins={[averageLinePlugin]} />
+    <div
+      className={className}
+      style={{
+        width: "100%",
+        height,
+        overflowX: "auto",
+        overflowY: "hidden",
+      }}
+    >
+      <div style={{ minWidth, height: "100%" }}>
+        <Line 
+          data={data} 
+          options={options} 
+          plugins={[averageLinePlugin]} 
+          width={minWidth}
+          height={height}
+        />
+      </div>
     </div>
   );
 }

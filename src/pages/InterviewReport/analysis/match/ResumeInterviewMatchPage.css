@@ -218,7 +218,6 @@ background: var(--report-green-12, rgba(21, 208, 120, 0.12));
 /* Cell - Detail (세부 분석) */
 .analysis-table__cell--detail {
     flex: 1 0 0;
-    min-height: 132px;
     align-items: flex-start;
     text-align: left;
     font-size: 16px;
@@ -510,3 +509,92 @@ QuestionSection */
     }
   }
   
+
+@media (max-width: 750px) {
+    body{
+        .report-section__title{
+            font-size: 18px;
+        }
+        .report-section--sum_icon,
+        .analysis__icon{
+            width: 22px;
+            height: 22px;
+        }
+        .summary__key-takeaway{
+            padding: 16px 20px;
+            font-size: 16px;
+        }
+        .summary__detail-container{
+            padding: 20px 20px 16px 20px;
+            gap: 12px;
+        }
+        .summary__detail-text,
+        .summary__detail-title{
+            font-size: 14px;
+        }
+        .summary__detail_icon{
+            width: 18px;
+            height: 18px;
+        }
+        .match-analysis__container{
+            width: 100%;
+            overflow: auto;
+        }
+        .analysis-table__row{
+            height: 107px;
+        }
+        .analysis-table__cell{
+            flex-shrink: 0;
+            height: 100%;
+        
+        }
+        .analysis-table__col-title--detail,
+        .analysis-table__cell--detail{
+            width: 100%;
+            flex: none;
+        }
+
+        .analysis__note{
+            align-items: start;
+            font-size: 14px;
+        }
+
+        .suggest-analysis__container{
+            overflow: auto;
+        }
+        .suggest-analysis__container .analysis-table__header .analysis-table__col-title,
+        .suggest-analysis__container .analysis-table__row .analysis-table__cell{
+            width: 100%;
+            flex: none;
+        }
+  
+        .question-analysis__container{
+            overflow: auto;
+            width: 100%
+        }
+        .analysis-table__header{
+            width: 910px;
+        }
+        .question-analysis__container .analysis-table__row{
+            height: 100%;
+            border: none;
+            width: 910px;
+        }
+        .question-analysis__container .analysis-table__col-title:first-child{
+            width: 20%;
+        }
+        .question-analysis__container .analysis-table__col-title{
+            width: 80%;
+        }
+        .question-analysis__container .analysis-table__cell--label{
+            padding: 0px;
+            width: 20%;
+            flex: none;
+            height: auto;
+        }
+        .question-analysis__container .analysis-table__cell--content{
+            width: 80%;
+        }
+            
+    }
+}

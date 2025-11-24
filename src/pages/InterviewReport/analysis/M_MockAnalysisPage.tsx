@@ -322,10 +322,9 @@ export default function MockAnalysisPage() {
 
             <div className="btn_wrap mock-analysis-report__actions">
               <span className="default_btn_white">
-                <img className="mock-analysis-report__btn-icon" src={ic_arrow_left_gray900_20} alt="" />
-                목록으로
+                <img className="mock-analysis-report__btn-icon" src={ic_print_gray900_24} alt="" />
               </span>
-              <span className="default_btn_black">
+              <span className="btn_w_full default_btn_black">
                 <img className="mock-analysis-report__btn-icon" src={ic_star_white_20} alt="" />
                 모의면접 다시 보기
               </span>

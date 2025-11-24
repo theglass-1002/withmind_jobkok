@@ -550,7 +550,7 @@ background: var(--white-100, #FFF);
   flex: 1;
   flex-direction: column;
   align-items: flex-start;
-  gap: 16px;
+  gap: 25px;
   align-self: stretch;
   border-radius: 4px;
   border: 1px solid var(--gray-300, #E0E2E4);
@@ -579,7 +579,7 @@ background: var(--white-100, #FFF);
 .detail-analysis__metric-grade-option{
   display: flex;
   flex: 1;
-  padding: 12px 20px;
+  padding: 7px 7px;
   justify-content: center;
   align-items: center;
   gap: 4px;
@@ -973,7 +973,7 @@ DetailTensionSection */
 
 .detail-analysis__attitude-content.tension .detail-analysis__attitude-left{
   display: flex;
-  width: 744px;
+  width: 70%;
   padding: 20px;
   flex-direction: column;
   align-items: flex-start;
@@ -1286,7 +1286,7 @@ line-height: 24px; /* 120% */
   .speech_speed .detail-analysis__attitude-content {
     gap: 10px !important;
   }
-  .voice_tone .detail-analysis__attitude-left canvas,
+   canvas,
   .speech_speed .detail-analysis__attitude-left canvas {
     width: 400px !important;
   }
@@ -1334,5 +1334,174 @@ line-height: 24px; /* 120% */
   }
   .detail-analysis__tension-chart-wrapper canvas {
     width: 100% !important;
+  }
+}
+
+
+@media (max-width: 750px) {
+  body{
+    .detail-analysis__content{
+      gap: 20px;
+      background: var(--white-100, #FFF);
+      border: none;
+      border-top: 1px solid var(--gray-300, #E0E2E4);
+      padding: 0px;
+    }
+    .detail-analysis__attitude .analysis-section__body{
+      padding: 0px 20px;
+    }
+    .mock-analysis--detail .detail-analysis__attitude .analysis-section__title{
+      padding: 0px 20px;
+    }
+
+    .detail-analysis__level-graph{
+      flex-direction: column;
+      padding: 0px;
+    }
+    .detail-analysis__level-info{
+      padding: 20px;
+    }
+    .detail-analysis__level-label{
+      font-size: 32px;
+    }
+    .detail-analysis__level-desc{
+      font-size: 14px;
+    }
+    .detail-analysis__question-main{
+      flex-direction: column;
+      height: auto;
+    }
+    .detail-analysis__video{
+      height: auto;
+    }
+    .detail-analysis__word-section{
+      flex-direction: column;
+    }
+    .detail-analysis__question__filters{
+      overflow: auto;
+    }
+
+    .detail-analysis__qa-section .ui-filter {
+      display: flex;
+      overflow-x: auto; /* 가로 스크롤 생성 */
+      overflow-y: hidden;
+      height: 48px;
+      padding: 4px;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+ 
+    .detail-analysis__qa-section .ui-filter__item,
+    .detail-analysis__keyword{
+      white-space: nowrap;
+      flex-shrink: 0;
+      padding: 12px;
+    }
+    .detail-analysis__video-notice_text{
+      display: none;
+    }
+    .video-notice_icon,
+    .detail-analysis__video-download_icon,
+    .detail-analysis__answer-grade_icon,
+    .detail-analysis__answer-keywords_icon,
+    .detail-analysis__answer-analysis_icon,
+    .detail-analysis__answer-analysis_icon,
+    .detail-analysis__word-common_icon,
+    .detail-analysis__word-habit_icon
+    {
+      width: 18px;
+      height: 18px;
+    }
+    .detail-analysis__video-download{
+      font-size: 14px;
+    }
+ 
+    .detail-analysis__question-info{
+      width: 100%;
+    }
+    .detail-analysis__question-text{
+      flex-direction: column;
+      align-items: start;
+    }
+    .analysis-section.detail-analysis__attitude{
+      border-radius: 0px;
+    }
+    .detail-analysis__word-common, 
+    .detail-analysis__word-habit{
+      width: 100%;
+    }
+    .detail-analysis__answer-keyword-list{
+      overflow: auto;
+    }
+    .detail-analysis__attitude-content{
+      flex-direction: column;
+      height: auto;
+    }
+    /* 태도 */
+    .detail-analysis__attitude{
+      border: none;
+      border-top: 1px solid var(--gray-300, #E0E2E4);
+      background-color: white;
+      border-radius: 0px;
+      padding: 20px 0;
+    }
+    .detail-analysis__metric-grade-option{
+      padding: 9px 16px;
+   }
+   .detail-analysis__answer-grade-label, 
+   .detail-analysis__answer-keywords-label, 
+   .detail-analysis__answer-analysis-title, 
+   .detail-analysis__metric-grade-label,
+   .detail-analysis__metric-analysis-title,
+   .detail-analysis__metric-grade-option,
+   .detail-analysis__metric-analysis-text,
+   .detail-analysis__metric-highlight
+   {
+    font-size: 14px;
+   }
+   .detail-analysis__metric-table .detail-analysis__metric-table-cell{
+    font-size: 14px;
+   }
+   .detail-analysis__metric-table-cell:first-child{
+    flex: 2;
+   }
+   .detail-analysis__attitude-left.expression{
+    padding: 15px;
+   }
+   .voice_tone .detail-analysis__attitude-left{
+    width: 100%;
+   }
+   .detail-analysis__metric-table{
+    flex-direction: row;
+    }
+    .detail-analysis__metric-table-header{
+      display: flex;
+      flex-direction: column;
+      width: 30%;
+    }
+    .detail-analysis__metric-table-row{
+      display: flex;
+      flex-direction: column;
+      width: 70%;
+    }
+
+    .detail-analysis__attitude-content.tension {
+      padding: 0px;
+      border: none;
+      background: var(--white-100, #FFF);
+    }
+    .detail-analysis__attitude-content.tension .detail-analysis__attitude-left{
+      width: 100%;
+    }
+    .detail-analysis__tension-header{
+      width: 100%;
+    }
+    .detail-analysis__tension-description{
+      font-size: 14px;
+    }
+    .detail-analysis__attitude.tension .detail-analysis__attitude-right{
+      width: 100%;
+    }
   }
 }

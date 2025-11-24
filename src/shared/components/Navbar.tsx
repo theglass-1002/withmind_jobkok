@@ -189,7 +189,7 @@ export default function Navbar({ titleText }: NavbarProps) {
               <img src={bookmarkIcon} alt="" />
             </NavLink>
 
-            <div className="mypage" ref={mypageRef}>
+            <div className="mypage_icon" ref={mypageRef}>
               <span
                 className="icon-btn"
                 onClick={toggleMypage}

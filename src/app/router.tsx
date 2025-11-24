@@ -98,7 +98,7 @@ export const router = createBrowserRouter([
   { path: "/signup", element:<Layout showFooter="desktop-only" showBottomNav={false}> <Signup/></Layout> },
   { path: "/recovery", element: <Layout showFooter="desktop-only" showBottomNav={false}><Recovery/></Layout> },
   { path: "/mypage", 
-    element: <Layout><MyPageLayout/></Layout>,
+    element: <Layout screen="Mypage" ><MyPageLayout/></Layout>,
       children:[
         {index:true,element:<Mypage/>},
         {path:"edit-profile",element:<EditProfile/>},

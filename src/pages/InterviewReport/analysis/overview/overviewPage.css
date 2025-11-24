@@ -956,6 +956,7 @@ mock-analysis-overview__recommended-jobs */
     }
     .analysis-section{
       padding: 20px;
+      border-radius: 0px;
     }
     .mock-analysis-overview__category-summary .analysis-section__body{
       height: auto;
@@ -996,6 +997,7 @@ mock-analysis-overview__recommended-jobs */
     .analysis-section.mock-analysis-overview__recommended-jobs{
       padding: 0px;
       gap: 0px;
+      border-radius: 0px;
     }
 
     .mock-analysis-overview__recommended-jobs .analysis-section__body{
@@ -1025,6 +1027,26 @@ mock-analysis-overview__recommended-jobs */
     }
     .mock-analysis-report .analysis-resume-recommended-jobs__item .jobcard-v2 .jobcard-v2__divider{
       display: none;
+    }
+
+    .mock-analysis-overview__recommended-jobs .pagination-round{
+      display: flex;
+      padding: 24px 0;
+      gap: 20px;
+      align-self: stretch;
+      justify-content: center;
+    }
+
+    .mock-analysis-report .btn_wrap{
+      background: var(--white-100, #FFF);
+      display: flex;
+      padding: 20px;
+      align-items: center;
+      gap: 12px;
+      align-self: stretch;
+    }
+    .mock-analysis-report .btn_wrap .default_btn_white{
+      width: 52px;
     }
   }
 }
