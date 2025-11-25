@@ -1,5 +1,6 @@
 import { useState, useRef,useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import Tabs from "@/shared/components/tabs/Tabs";
 import search from '@/assets/icons/search.png';
 import chevronDown from '@/assets/icons/chevron-down.png';
 import chevronUp from '@/assets/icons/chevron-up.png';
@@ -16,7 +17,7 @@ const FAQ_TABS = [
     { key: "account", label: "회원 정보" },
     { key: "payment", label: "결제" },
     { key: "etc",     label: "기타" },
-  ] as const;
+  ];
 
   type FaqTabKey = typeof FAQ_TABS[number]["key"];
   type Category = Exclude<FaqTabKey, "all">;
@@ -57,11 +58,16 @@ const ITEMS: FaqItem[] = [
 const PAGE_SIZE = 10;
 
 export default function Faq() {
-  const [tab, setTab] = useState<FaqTabKey>("all");
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const [openIds, setOpenIds] = useState<Set<string>>(new Set());
   const [searchText, setSearchText] = useState("");
+  const [tab, setTab] = useState<FaqTabKey>("all");
+
+
+  const handleTabClick = (key: "all" | "howto" |"account"|"payment"|"etc") => {
+    setTab(key);
+  }
 
 
   useEffect(() => {
@@ -104,28 +110,19 @@ export default function Faq() {
       return next;
     });
 
-
     return (
          <>
-         <header className="mypage__content-header tabs">
-              <h1 className="title">자주 묻는 질문</h1>
-              <nav className="tabs" aria-label="계정 탭">
-                <ul className="tabs__list" role="tablist">
-                  {FAQ_TABS.map(t =>(
-                    <li key={t.key}
-                    className={`tabs__item${tab===t.key?"-is-active":""}`}
-                    role="tab"
-                    aria-selected={tab === t.key}
-                    tabIndex={tab===t.key?0:-1}
-                    onClick={()=> setTab(t.key)}
-                    >
-                        {t.label}
-                   </li>
-                ))}
-                </ul>
-              </nav>
+         <header className="my-page_faq_header">
+              <h1 className="faq-title">자주 묻는 질문</h1>
+              <Tabs
+                tabs={FAQ_TABS}
+                active={tab}
+                onChange={handleTabClick}
+                className="my-page_faq-tabs default_tabs"
+                itemClassName="my-page-tabs__item"
+                activeClassName="on"
+                />
             </header> 
-        
           <div className="mypage__content-main faq-container">
             <div className="search_field"> 
                 <span className="icon-container"><img src={search} alt="" /></span>
@@ -140,6 +137,22 @@ export default function Faq() {
                 }}
                 /> 
             </div>
+            <div className="search_container-mobile">
+            <div className="search_field"> 
+                <span className="icon-container"><img src={search} alt="" /></span>
+                <input 
+                type="search"
+                value={searchText}
+                onChange={(e)=> setSearchText(e.target.value)}
+                placeholder="(엔터)검색어를 입력해 주세요."
+                onKeyDown={(e) => {
+                  const isIme = (e.nativeEvent as any)?.isComposing;
+                  if (e.key === "Enter" && !isIme) applySearch();
+                }}
+                /> 
+            </div>
+            </div>
+      
             <div className="faq__list-container">
             {pageItems.length === 0 ? (
               <div className="faq__empty">검색 결과가 없습니다.</div>

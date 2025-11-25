@@ -1,19 +1,16 @@
-import React, { useState } from 'react';
+import React, { use, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLayoutContext } from '@/app/LayoutContext';
 import "./MockSettings.css";
-
-import SettingsSidebar from './components/SettingsSidebar';
-import SettingsPanel from './components/SettingsPanel';
 
 import InterviewInfoSection from './step-setup/InterviewInfoSection';
 import QuestionSettingsSection from './step-setup/QuestionSettingsSection';
-
-import ic_chevron_right_gray700_24 from "@/assets/icons/size24/ic_chevron_right_gray700_24.png";
 import ic_chevron_right_white_24 from "@/assets/icons/size24/ic_chevron_right_white_24.png";
 import Modal from "@/shared/components/modal/Modal";
 
 
-export default function MockSettings() {
+export default function M_MockSettings() {
+    const { actionType } = useLayoutContext();
     const navigate = useNavigate();
     const [activeStep, setActiveStep] = useState(1);
     const [desiredJob, setDesiredJob] = useState('');
@@ -26,6 +23,18 @@ export default function MockSettings() {
         { id: 3, isAiGenerated: true, customText: '' },
     ]);
 
+
+ 
+useEffect(() => {
+  if (!actionType) return;
+  console.log("헤더 값 변경 감지:", actionType);
+
+  if (actionType === "나가기") {
+    console.log("나가기 눌림");
+    // 여기서 모달 열거나, 페이지 이동하거나, 상태 변경
+  }
+
+}, [actionType]);
     // 모달 닫기
     const handleCloseConfirm = () => setShowConfirm(false);
 
@@ -51,8 +60,7 @@ export default function MockSettings() {
 
     return (
      
-    <div className="mock-settings-page">
-             <SettingsSidebar activeStep={activeStep} onStepChange={setActiveStep} />
+        <div className="mock-settings-page">
             <div className={`mock-settings__content mock-settings--step-${activeStep}`}>
                 <div className="mock-settings__content-inner">
                     <InterviewInfoSection {...step1Props} />
@@ -60,17 +68,17 @@ export default function MockSettings() {
                 </div>
                 <div className="mock-settings__submit-btn-container">
                  
-                <button className='mock-settings__submit-btn' disabled>    
+                {/* <button className='mock-settings__submit-btn' disabled>    
                         설정 완료
                         <img src={ic_chevron_right_gray700_24} alt="" />
-                        </button>
-              <button className='mock-settings__submit-btn on' onClick={handleNextStep}>    
+                        </button> */}
+              <button className='btn_w_full mock-settings__submit-btn on' onClick={handleNextStep}>    
                         설정 완료
                         <img src={ic_chevron_right_white_24} alt="" />
                         </button>    
                     </div>           
             </div>
-            <SettingsPanel activeStep={activeStep} onExit={handleExitRequest} />
+            {/* <SettingsPanel activeStep={activeStep} onExit={handleExitRequest} /> */}
 
             {/* 중단 확인 모달 */}
             <Modal
@@ -90,7 +98,7 @@ export default function MockSettings() {
                 onClose={handleCloseConfirm}
             />
         </div>
-    
+  
     
     );
 }

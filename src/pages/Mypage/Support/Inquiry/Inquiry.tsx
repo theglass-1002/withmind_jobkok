@@ -27,11 +27,7 @@ const ITEMS: FaqItem[] = [
   { id: "5", cat: "howto",   title: "5모의면접을 다시 보거나 완료된 모의면접을 삭제할 수 있나요?",  date: "2025.00.00",status:"answered" },
   { id: "6", cat: "payment", title: "6결제 영수증은 어디에서 확인하나요?",                       date: "2025.00.00",status:"answered" },
   { id: "7", cat: "etc",     title: "7문의는 어디로 하면 되나요?",                              date: "2025.00.00",status:"answered"},
-  { id: "8", cat: "account", title: "8이메일을 변경할 수 있나요?",                               date: "2025.00.00",status:"answered" },
-  { id: "9", cat: "howto",   title: "9모의면접을 다시 보거나 완료된 모의면접을 삭제할 수 있나요?", date: "2025.00.00",status:"hold" },
-  { id: "10", cat: "payment", title: "10결제 영수증은 어디에서 확인하나요?",                    date: "2025.00.00",status:"hold" },
-  { id: "11", cat: "etc",     title: "11문의는 어디로 하면 되나요?",                             date: "2025.00.00",status:"hold" },
-
+ 
 ];
 
 
@@ -68,9 +64,10 @@ export default function Inquiry() {
 
 
     return (
+      <>
         <div className="inquiry">
         <header className="mypage__content-header">
-             <h2 className="title">1:1 문의</h2>
+             <h2 className="inquiry-title">1:1 문의</h2>
            </header> 
            {/* <section className="mypage__content-main inquiry-container" aria-labelledby="plan-empty-title">
                 <span className="empty"> <p>문의 내역이 없습니다.</p></span>
@@ -118,6 +115,37 @@ export default function Inquiry() {
             </div>
       
          </div>
+         <div className="inquiry mobile">
+           {/* <section className="mypage__content-main inquiry-container" aria-labelledby="plan-empty-title">
+                <span className="empty"> <p>문의 내역이 없습니다.</p></span>
+           </section> */}
+        <section className="mypage__content-main inquiry-container" >
+           <div className="inquiry-history">
+          <div className="inquiry-history__body">
+           <ul className="inquiry-history__body-list">
+            {pageItems.map((r)=>(
+              <NavLink className="inquiry-history__item" to={`${r.id}`}  key={r.id}>
+                    <span className={`inquiry-history__cell inquiry-history__cell--status ${r.status}`}>{labelOfStatus(r.status)}</span>
+                     <span className='inquiry-history__cell--title'> {r.title}</span>
+                     <div className="inquiry-history__meta-group">
+                     <span className="inquiry-history__cell">{r.date}</span>
+                     <span className="inquiry-history__cell inquiry-history__cell--category">{labelOfCat(r.cat)}</span>
+                     </div>
+              </NavLink> 
+            ))}
+      
+           </ul>
+          </div>
+           </div>
+           </section>  
+           <div className="btn_wrap">
+              <NavLink  className="default_btn_black" to={'create'}>
+              1:1 문의하기
+              </NavLink>
+            </div>
+      
+         </div>
+         </>
     );
   }
 

@@ -977,6 +977,28 @@ body.mock-analysis-print-mode .mock-analysis {
         .badge--required{
             font-size: 14px;
         }
+        .mypage__content-main.notice__detail{
+            padding-bottom: 100px;
+        }
+        .mypage__detail-view.notice__detail .card{
+            padding: 0px;
+            gap: 0px;
+        }
+        .mypage__detail-view.notice__detail .card .card__infos{
+            padding: 20px 20px 24px 20px;
+            width: 100%;
+            border-bottom: 1px solid var(--gray-300, #E0E2E4);
+            background: var(--white-100, #FFF);
+        }
+        .mypage__detail-view.notice__detail .card .card__content{
+            padding: 20px;
+        }
+        .card__infos .card__title{
+            font-size: 16px;
+        }
+        .card__meta.date, .card__meta.category{
+            font-size: 14px;
+        }
     }
 
 }

@@ -1,3 +1,29 @@
+.my-page_faq-tabs{
+    padding: 0px 0px 0px 28px;
+    height: 41px;
+    gap: 20px;
+    width: 100%;
+    border-bottom: 1px solid var(--gray-300, #E0E2E4);
+    background: var(--white-100, #FFF);
+}
+.search_container-mobile{
+    display: none;
+}
+
+.my-page_faq_header{
+    display: flex;
+    padding: 28px 0px 0px 0px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 28px;
+    align-self: stretch;
+}
+
+.faq-title{
+    font-size: 20px;
+    padding: 0px 28px 0 28px;
+}
+
 .faq-container .search_field{
     display: flex;
     width: 400px;
@@ -155,4 +181,77 @@
 
 .faq__item .icon-container.on{
  padding: 28px 24px 28px 0;  
+}
+
+/* 모바일: 760px 이하 */
+@media (max-width: 760px) {
+    body{
+        .faq-title{
+            display: none;
+        }
+        .my-page_faq_header{
+            padding:0px;
+        }
+        .my-page_faq-tabs{
+            height: 51px;
+            padding: 10px 20px 0 20px;
+            border-bottom: 1px solid var(--gray-300, #E0E2E4);
+            background: var(--white-100, #FFF);
+        }
+        .faq-container .faq__list-container{
+            gap: 0px;
+        }
+        .mypage__content-main.faq-container{
+            padding: 0px;
+            gap: 0px;
+        }
+        .faq-container .search_field{
+            display: none;
+        
+        }
+        .search_container-mobile{
+            display: flex;
+            padding: 20px;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 20px;
+            align-self: stretch;
+            background: var(--gray-50, #F8F8F9);
+        }
+
+        .search_container-mobile .search_field{
+            display: flex;
+            width: 100%;
+        }
+
+        .faq-container .faq__list .faq__item .faq__question{
+            display: flex;
+            width: 100%;
+            height: 80px;
+            align-items: start;
+        }
+
+        .faq__list .faq__item .faq__question .q_mark{
+            display: flex;
+            align-items: start;
+            justify-content: start;
+            padding: 20px 12px 20px 20px;
+        }
+
+        .faq__list .faq__item .faq__question .q_text{
+            width: 100%;
+            padding: 20px 12px;
+            overflow: inherit;
+        }
+        .faq__list-container .pagination{
+            display: flex;
+            padding: 20px 20px 36px 20px;
+            /* flex-direction: column; */
+            align-items: center;
+            gap: 10px;
+            align-self: stretch;
+            background: var(--gray-50, #F8F8F9);
+        }
+    
+    }
 }

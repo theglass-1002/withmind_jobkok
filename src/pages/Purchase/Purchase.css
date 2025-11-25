@@ -10,8 +10,12 @@ flex-direction: column;
 padding: 104px 0px 100px 0px;
 gap: 40px;
 background: var(--gray-50, #F8F8F9);
+align-items: center;
 }
 
+.purchase__container.mobile{
+    display: none;
+}
 
 .purchase__container .header{
     max-width: 1200px;
@@ -124,7 +128,10 @@ line-height: 34px; /* 121.429% */
     font-style: normal;
     font-weight: 600;
     line-height: 22px; /* 122.222% */
-    
+}
+
+.plans__item__icon{
+    display: none;
 }
 
 .plans__item.on .plans__item__title .plans__item__title__name{
@@ -423,3 +430,137 @@ line-height: 34px; /* 121.429% */
     padding: 16px 20px;
 }
 
+
+/* 모바일: 760px 이하 */
+@media (max-width: 760px) {
+    body{
+        .purchase__container{
+            display: none;
+        }
+        .purchase__container.mobile{
+            display: flex;
+            padding: 0px;
+        }
+        .purchase__container .body{
+            width: 100%;
+            flex-direction: column;
+        }
+        .purchase__grid .purchase__main{
+            width: 100%;
+        }
+        .purchase__grid .purchase__main .box{
+            width: 100%;
+            padding: 19px;
+            gap: 20px;
+            border-radius: 0px;
+            border: none;
+        }
+        .purchase__grid .purchase__main .plans .plans__grid{
+            flex-direction: column;
+            align-items: start;
+            padding: 0px;
+        }
+        .plans .plans__grid .plans__item{
+            width: 100%;
+        }
+        .plan_title,
+        .purchase__grid .purchase__main .box .title{
+            color: var(--gray-900, #2A2D2F);
+            font-family: Pretendard;
+            font-size: 18px;
+            font-style: normal;
+            font-weight: 600;
+            line-height: 22px; /* 122.222% */
+        }
+        .plans .plans__grid .plans__item .plans__item__desc{
+            flex-direction: row;
+            gap: 16px;
+        }
+        .plans__item .plans__item__desc li,
+        .plans__item.on .plans__item__desc li{
+            flex: none;
+        }
+        .plans__item .plans__item__desc li::before {
+            position: relative;
+            display: flex;
+            width: 1px;
+            height: 10px;
+            background: #E0E2E4;
+            top: 15px;
+            right: 8px;
+            margin-left: 0px;
+            margin-right: 0px;
+        }
+        .plans__item .plans__item__desc li:first-child::before {
+            width: 0px;
+        }
+        .plans .plans__grid .plans__item{
+            gap: 12px;
+        }
+        .plans .plans__grid .plans__item.on{
+            gap: 12px;
+            border-radius: 4px;
+            border: 1.4px solid var(--primary-primary, #816BFE);
+            background: var(--white-100, #FFF);
+        }
+        .plans .plans__grid .plans__item .plans__item__title{
+            border: none;
+            padding: 0px;
+        }
+        .plans__item__title-group{
+            display: flex;
+            width: 100%;
+            justify-content: space-between;
+        }
+        .plans__item__icon{
+            display: flex;
+            width: 20px;
+            height: 20px;
+        }
+        .payment .payment__methods{
+            width: 100%;
+            align-items: normal;
+            gap: 12px;
+        }
+        .payment .payment__methods .payment__item{
+            width: 104px;
+            padding: 15px 0px;
+            gap: 8px;
+        }
+        .payment__item .paymethod__icon .samsung{
+            width: 55%;
+        }
+        .payment__item .paymethod__icon .kakao,
+        .payment__item .paymethod__icon .naver{
+            width: 34%;
+        }
+        .notice .notice__agree .notice__agree-text{
+            font-size: 14px;
+        }
+        .notice .notice__agree .notice__agree-text .badge--required{
+            color: var(--red-100, #FF524C);
+            font-family: Pretendard;
+            font-size: 14px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 18px; /* 128.571% */
+        }
+        .purchase__aside{
+            width: 100%;
+            border-radius: 0px;
+            border: none;
+        }
+        .notice .notice__list li{
+            font-size: 14px;
+        }
+        .summary__actions{
+            display: flex;
+            padding: 20px;
+            align-items: center;
+            gap: 12px;
+            align-self: stretch;
+            border-top: 1px solid var(--gray-300, #E0E2E4);
+            background: var(--white-100, #FFF);
+        }
+    }
+}

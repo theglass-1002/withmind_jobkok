@@ -21,11 +21,11 @@ const GROUPS = [
   {
     id: "support",
     label: "고객 지원",
-    items: [
-      { to: "support/faq",        label: "자주 묻는 질문" },
-      { to: "support/inquiry",    label: "1:1 문의" },
-      { to: "support/notices",    label: "공지사항" },
-      { to: "support/report-job", label: "공고 제보하기" },
+    items: [ 
+      { to: "m-support/faq",        label: "자주 묻는 질문" },
+      { to: "m-support/inquiry",    label: "1:1 문의" },
+      { to: "m-support/notices",    label: "공지사항" },
+      { to: "m-support/report-job", label: "공고 제보하기" },
     ],
   },
   

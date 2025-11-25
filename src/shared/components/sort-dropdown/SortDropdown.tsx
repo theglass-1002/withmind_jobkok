@@ -3,6 +3,8 @@ import "./SortDropdown.css";
 
 
 
+// 화살표 표시있는 드롭다운
+
 type SortDropdownProps = {
   value: string;
   options: string[];

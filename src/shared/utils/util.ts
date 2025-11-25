@@ -110,3 +110,34 @@ export function modifierByBucket(i: number) {
 export function tensionModifierByBucket(i: number) {
   return ["low", "medium", "high"][i] ?? "medium";
 }
+
+export interface LayoutProps {
+  children: React.ReactNode;
+  showHeader?: boolean | 'mobile-only' | 'desktop-only';
+  showFooter?: boolean | 'mobile-only' | 'desktop-only';
+  showBottomNav?: boolean;
+  customHeader?: React.ReactNode;
+  screen?:string
+  onScreenAction?: (payload: { type: string, data?: any }) => void; 
+}
+
+
+export interface SortOption {
+  label: string;
+  value: string;
+  emoji?: React.ReactNode; 
+  className?: string; // 옵션별 커스텀 스타일링을 위한 클래스
+}
+
+export interface HeaderProps {
+  leftElement?: React.ReactNode; 
+  title?: string;
+  rightIcons?: React.ReactNode; 
+  onLeftElementClick?: () => void;
+  onRightElementClick?: () => void;
+  sort?: boolean;
+  sortClassName?: string;
+  sortValue?: string;
+  sortOptions?: SortOption[]; 
+  onSortChange?: (val: string) => void;
+}

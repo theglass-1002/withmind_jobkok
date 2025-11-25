@@ -76,7 +76,7 @@ export default function StepTwo({ onPrev }: StepTwoProps) {
           </div>
         </div>
       </div>
-             <div className="btn_wrap">
+      <div className="btn_wrap">
              <button className="default_btn_white radius" onClick={onPrev}>
                <img src={ic_keyboard_arrow_left_gray900_24} alt="" />
                이전으로
@@ -87,6 +87,16 @@ export default function StepTwo({ onPrev }: StepTwoProps) {
                <img src={ic_chevron_right_white_24} alt="" />
              </button>
            </div>
-           </>
+           <div className="btn_wrap mobile">
+             <button className="default_btn_white radius back_btn" onClick={onPrev}>
+               <img src={ic_keyboard_arrow_left_gray900_24} alt="" />
+             </button>
+             <button className="mock-instructions__btn--primary radius btn_w_full"
+               onClick={() => navigate('/mock-interview/m-settings')}>
+               시작하기
+               <img src={ic_chevron_right_white_24} alt="" />
+             </button>
+           </div>
+      </>
     );
 }

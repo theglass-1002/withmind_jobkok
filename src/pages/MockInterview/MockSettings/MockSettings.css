@@ -139,6 +139,7 @@
 
 .mock-settings__content-inner{
     display: flex;
+    justify-content: center;
     height: 940px;
     padding: 28px;
     align-items: flex-start;
@@ -504,4 +505,56 @@ mock-settings--step-2 */
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+}
+
+/* 모바일: 760px 이하 */
+@media (max-width: 760px) {
+    body{
+        .mock-settings-page{
+            flex-direction: column;
+            padding-top: 80px;
+            padding-bottom: 120px;
+        }
+
+        .mock-settings--step-1 .mock-settings__content-inner{
+            flex-direction: column;
+            height: 100%;
+            padding: 20px;
+            overflow: visible;
+            gap: 20px;
+        }
+        .mock-settings__section{
+            width: 100%;
+        }
+    
+        .mock-settings__section-header,
+        .mock-settings__section-body,
+        .mock-settings__question-list{
+            padding: 24px 20px;
+        }
+        .mock-settings--step-1 .mock-settings__submit-btn-container{
+            position: fixed;
+            bottom: 0px;
+            width: 100%;
+            background: var(--gray-900, #2A2D2F);
+        }
+        .mock-settings__question-item{
+            padding: 0px;
+            gap: 0px;
+        }
+        .mock-settings__question-header{
+            padding: 16px;
+            border-bottom: 1px solid var(--gray-300, #E0E2E4);
+            background: var(--white-100, #FFF);
+        }
+        .mock-settings__question-description{
+            padding: 16px;
+        }
+        .mock-settings__question-input-area{
+            padding: 00px 20px 20px 20px;
+        }
+        .mock-settings__question-input-area .form-input {
+            height: 90px;
+        }
+    }
 }

@@ -1,3 +1,5 @@
+import ic_radio_checked_purple_20 from '@/assets/icons/size20/ic_radio_checked_purple_20.png';
+import ic_radio_unchecked_gray400_20 from '@/assets/icons/size20/ic_radio_unchecked_gray400_20.png';
 
 export type Plan = {
   id: string;
@@ -25,7 +27,10 @@ export default  function PlanCard({plan, active, onSelect }: Props) {
     
     >
       <div className="plans__item__title">
+      <div className="plans__item__title-group">
         <span className="plans__item__title__name">{plan.name}</span>
+         <img className="plans__item__icon" src={active?ic_radio_checked_purple_20:ic_radio_unchecked_gray400_20} alt="" />
+        </div>
         <span className="plans__item__title__price">
           {plan.price.toLocaleString("ko-KR")}원
         </span>

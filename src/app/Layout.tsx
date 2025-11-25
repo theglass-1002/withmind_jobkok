@@ -1,10 +1,12 @@
 // Layout.tsx
 import React, { useEffect, useState } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { LayoutContext } from './LayoutContext';
+import {useParams, useSearchParams } from 'react-router-dom';
+import {SortOption,LayoutProps} from '@/shared/utils/util';
 import Navbar from '@/shared/components/Navbar';
 import Footer from '@/shared/components/Footer';
 import BottomNav from '@/shared/components/bottomNav/BottomNav';
-
+import MockPageHeader from '@/shared/components/custom-header/MockPageHeader';
 import PageHeader from '@/shared/components/custom-header/PageHeader'; 
 import ActionHeader from '@/shared/components/custom-header/ActionHeader';
 
@@ -24,21 +26,10 @@ import ic_download_gray900_20 from "@/assets/icons/size20/ic_download_gray900_20
 import ic_search_gray900_24 from "@/assets/icons/size24/ic_search_gray900_24.png";
 import ic_bookmark_gray900_24 from "@/assets/icons/size24/ic_bookmark_gray900_24.png";
 
+import ic_close_white_24 from "@/assets/icons/size24/ic_close_white_24.png";
+import ic_more_horiz_white_24 from "@/assets/icons/size24/ic_more_horiz_white_24.png";
+import ic_logout_red_18 from "@/assets/icons/size18/ic_logout_red_18.png";
 
-
-
-
-
-
-
-interface LayoutProps {
-  children: React.ReactNode;
-  showHeader?: boolean | 'mobile-only' | 'desktop-only';
-  showFooter?: boolean | 'mobile-only' | 'desktop-only';
-  showBottomNav?: boolean;
-  customHeader?: React.ReactNode;
-  screen?:string
-}
 
 export default function Layout({ 
   children,
@@ -46,13 +37,30 @@ export default function Layout({
   showFooter = true,
   showBottomNav = true,
   screen = '',
-  customHeader
+  customHeader,
+  onScreenAction
+  
 }: LayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 750);
   const [searchParams] = useSearchParams();
- 
+  const [ActionsValue, setActionsValue] = useState(''); 
+  
+  const sortMockOptions: SortOption[] = [
+    { label: "면접 진행 현황", value: "status" },
+    { label: "나가기", value: "exit", emoji: <img src={ic_logout_red_18} alt="닫기" />, className: "logout_icon-container" },
+  ];
+  const handleSendActions = (newValue: string) => {
+    setActionsValue(newValue);
+    // onScreenAction?.({ type: 'sort', data: newValue });
+    // if (newValue === "나가기") {
+    //   // 여기서 나가기 처리
+    // } else {
+    //   setMockSettingsortValue(newValue);
+    // }
+  };
+  
   useEffect(() => {
     window.scrollTo({
       top: 0,
@@ -88,7 +96,6 @@ export default function Layout({
 
   const getMobileHeader = () => {
     const path = location.pathname;
-    console.log(screen);
     if (path === '/signup') {
       return (
         <PageHeader 
@@ -182,9 +189,80 @@ export default function Layout({
           rightIcons={<img src={ic_home_gray900_20}/>}
           onRightElementClick={()=> navigate('/')}
         />);
+      }else if(screen ==='Purchase'){
+        return(
+          <PageHeader 
+          title={'이용권 내역'} 
+          leftElement={<img src={ic_arrow_back_ios_gray900_20} alt="닫기" />}
+          onLeftElementClick={() => navigate('/mypage')}
+          rightIcons={<img src={ic_home_gray900_20}/>}
+          onRightElementClick={()=> navigate('/')}
+        />);
+      }else if(screen ==='Faq'){
+        return(
+          <PageHeader 
+          title={'자주 묻는 질문'} 
+          leftElement={<img src={ic_arrow_back_ios_gray900_20} alt="닫기" />}
+          onLeftElementClick={() => navigate('/mypage')}
+          rightIcons={<img src={ic_home_gray900_20}/>}
+          onRightElementClick={()=> navigate('/')}
+        />);
+      }else if(screen ==='Inquiry'){
+        return(
+          <PageHeader 
+          title={'1:1 문의'} 
+          leftElement={<img src={ic_arrow_back_ios_gray900_20} alt="닫기" />}
+          onLeftElementClick={() => navigate('/mypage')}
+          rightIcons={<img src={ic_home_gray900_20}/>}
+          onRightElementClick={()=> navigate('/')}
+        />);
+      }else if(screen ==='InquiryDetail'){
+        return(
+          <PageHeader 
+          title={'1:1 문의'} 
+          leftElement={<img src={ic_arrow_back_ios_gray900_20} alt="닫기" />}
+          onLeftElementClick={() => navigate('/mypage/m-support/inquiry')}
+        />);
+      }else if(screen ==='InquiryCreate'){
+        return(
+          <PageHeader 
+          title={'1:1 문의하기'} 
+          leftElement={<img src={ic_arrow_back_ios_gray900_20} alt="닫기" />}
+          onLeftElementClick={() => navigate('/mypage/m-support/inquiry')}
+        />);
+      }else if(screen ==='NoticeList'){
+        return(
+          <PageHeader 
+          title={'공지사항'} 
+          leftElement={<img src={ic_arrow_back_ios_gray900_20} alt="닫기" />}
+          onLeftElementClick={() => navigate('/mypage')}
+          rightIcons={<img src={ic_home_gray900_20}/>}
+          onRightElementClick={()=> navigate('/')}
+        />);
+      }else if(screen ==='ReportJob'){
+        return(
+          <PageHeader 
+          title={'공고 제보하기'} 
+          leftElement={<img src={ic_arrow_back_ios_gray900_20} alt="닫기" />}
+          onLeftElementClick={() => navigate('/mypage')}
+          rightIcons={<img src={ic_home_gray900_20}/>}
+          onRightElementClick={()=> navigate('/')}
+        />);
+      }else if(screen ==='MockSetting'){
+        return(
+          <MockPageHeader 
+          title={'모의면접 설정'}
+          leftElement={null}  
+          rightIcons={<img src={ic_more_horiz_white_24}/>}
+          sort={true}
+          sortOptions={sortMockOptions}
+          sortClassName={'mock-setting'}
+          onSortChange={handleSendActions}
+        />);
       }
-    
-    
+      
+      
+      
     return null;
   }
 
@@ -204,6 +282,10 @@ export default function Layout({
   const shouldShowBottomNav = showBottomNav && isMobile;
 
   return (
+    <LayoutContext.Provider value={{ 
+      actionType:ActionsValue
+      
+    }}>
      <div>
         {shouldShowHeader() && getHeader()}
         
@@ -226,5 +308,6 @@ export default function Layout({
           theme="light"
         />
       </div>
+      </LayoutContext.Provider>
   );
 }

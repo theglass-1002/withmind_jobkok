@@ -90,7 +90,7 @@ background: var(--white-100, #FFF);
 }
 
 .tabs__item.my-page-tabs__item{
-    padding-bottom: 16px;
+    padding-bottom: 17px;
 }
 
 .mypage__body .sidemenu{
@@ -985,12 +985,22 @@ line-height: 18px; /* 128.571% */
     width: 100%;
 }
 
-.inquiry,
-.notice{
+.inquiry{
     display: flex;
     flex-direction: column;
     width: 100%;
     height: auto;
+}
+
+.mypage__content .notice{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+}
+
+.mypage__content .notice.mobile{
+    display: none;
 }
 
 
@@ -1504,19 +1514,6 @@ line-height: 20px; /* 125% */
 
 }
 
-/* .inquiry.report .input-group{
-    display: flex;
-    padding: 16px;
-    justify-content: space-between;
-    align-items: center;
-    flex: 1 0 0;
-    border-radius: 4px;
-    border: 1px solid var(--red-100, #FF524C);
-    background: var(--white-100, #FFF);
-} */
-/* .inquiry.report .input-group input{
-    padding: 0px;
-} */
 
 /* 모바일: 760px 이하 */
 @media (max-width: 760px) {
@@ -1739,6 +1736,60 @@ line-height: 20px; /* 125% */
             font-size: 14px;
         }
 
+        /* notice */
+
+        .notice{
+            display: none;
+        }
+
+        .notice.mobile{
+            display: flex;
+        }
+        .notice .mypage__content-header{
+            display: none;
+        }
+        
+        .mypage__content-main.notice-container{
+            padding: 0px;
+            border-radius: 0px;
+            background: var(--gray-50, #F8F8F9);
+        }
+        .notice-container .body .body-list .cell__item{
+            display: flex;
+            padding: 20px;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+            align-self: stretch;
+        }
+        .notice-container .cell--title{
+           padding: 0px;
+           gap: 5px;
+           align-items: start;
+           text-align: start;
+           line-height: 25px;
+        }
+        .notice-container .mypage__table{
+            border: none;
+        }
+
+        .notice-container .cell--date,
+        .notice-container .cell--num{
+            width: 100%;
+            justify-content: start;
+            padding: 0px;
+            color: var(--gray-700, #6F767E);
+            font-size: 12px;
+        }
+        .notice-container .mypage__table .body .body-list {
+            background: var(--white-100, #FFF);
+            border-bottom: 1px solid var(--gray-300, #E0E2E4);
+        }
+        .notice-container .mypage__table .body{
+            padding-bottom: 50px;
+        }
+
+ 
     }
 
 }

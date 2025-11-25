@@ -45,6 +45,7 @@ export default function NoticeList() {
   const pageItems = ITEMS.slice(start, start + PAGE_SIZE);
 
   return (
+    <>
     <div className="notice">
       <header className="mypage__content-header">
         <h2 className="title">공지사항</h2>
@@ -100,5 +101,31 @@ export default function NoticeList() {
         />
       </section>
     </div>
+    <div className="notice mobile">
+      <header className="mypage__content-header">
+        <h2 className="title">공지사항</h2>
+      </header>
+      <section className="mypage__content-main notice-container" >
+        {/* 테이블 */}
+        <div className="mypage__table">
+          <div className="body">
+            <ul className="body-list">
+              {pageItems.map((r, index) => (
+                // 실제 공지 상세 페이지 경로로 변경 필요. 임시로 '2' 유지.
+                <NavLink to={r.id} key={r.id} className="cell__item">
+                    <span className="cell--title start">
+                      {/* <span className="cell--status">[공지]</span> */}
+                      [공지]  {r.title}
+                    </span>
+                    <span className="cell--date">{r.date}</span>
+                  
+                </NavLink>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+    </div>
+    </>
   );
 }

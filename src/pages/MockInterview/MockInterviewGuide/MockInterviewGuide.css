@@ -111,3 +111,15 @@
     outline: none;
     cursor: pointer;
 }
+
+/* 모바일: 760px 이하 */
+@media (max-width: 760px) {
+    body{
+        .guide-content-area__title{
+            font-size: 32px;
+        }
+        .guide-content-area__subtitle{
+            font-size: 16px;
+        }
+    }
+}

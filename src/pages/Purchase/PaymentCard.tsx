@@ -16,7 +16,7 @@ export default function PaymentCard({ method, active, onSelect }: Props) {
       onClick={() => onSelect(method)}
     >
       <span className="paymethod__icon" aria-hidden="true">
-        <img src={method.icon} alt="" />
+        <img className={method.id} src={method.icon} alt="" />
       </span>
       <span className="paymethod__label">{method.label}</span>
     </li>
