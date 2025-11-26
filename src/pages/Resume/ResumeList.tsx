@@ -52,7 +52,11 @@ export default function ResumeList() {
                 <span className={`resume-list-page__tab ${activeTab==1?'on':''}`} onClick={()=>setActiveTab(1)}>작성완료</span>
                 <span className={`resume-list-page__tab ${activeTab==2?'on':''}`} onClick={()=>setActiveTab(2)}>작성 중</span>
             </div>
-            <NavLink to="/resumes/create" className="default_btn_black">
+            <NavLink to="/resumes/create" className="create_resumes default_btn_black">
+            <img src={add_btn_white20x20} alt="" />
+            새 이력서 작성</NavLink>
+
+            <NavLink to="/resumes/m-create" className="create_resumes mobile default_btn_black">
             <img src={add_btn_white20x20} alt="" />
             새 이력서 작성</NavLink>
             </div>
@@ -64,7 +68,7 @@ export default function ResumeList() {
                 AI 기반의 문장 및 키워드 추천 기능으로 간편하게 작성해 보세요.
               </span>
             </div>
-            <NavLink to="/resumes/create" className="default_btn_white">
+            <NavLink to="/resumes/create" className="create_resumes default_btn_white">
             <img src={icon_btn_black} alt="" />
             새 이력서 작성</NavLink>
           </div>

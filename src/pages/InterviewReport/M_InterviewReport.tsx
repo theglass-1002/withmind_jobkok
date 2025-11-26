@@ -45,7 +45,7 @@ export default function M_InterviewReport() {
 
   const handleConfirmCancel = () => {
     setShowConfirm(false);
-    navigate(`/resumes/create`);
+    navigate(`/resumes/m-create`);
   };
 
 

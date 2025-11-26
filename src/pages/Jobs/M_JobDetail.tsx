@@ -242,7 +242,7 @@ export default function M_JobDetail() {
                 이력서 작성하고 나에게 맞는 AI 공고 추천을 받아보세요.
                 </span>
               </div>
-              <div className="job-detail__resume-cta" onClick={()=>{navigate(`/resumes/create`);}}>
+              <div className="job-detail__resume-cta" onClick={()=>{navigate(`/resumes/m-create`);}}>
                 <span className="job-detail__resume-button">이력서 작성하기</span>
                 <img src={ic_chevron_forward_right_purple_20} alt="" />
               </div>
@@ -359,7 +359,7 @@ export default function M_JobDetail() {
               cancelText="취소"
               cancelClassName ="btn_w_full default_btn_white"
               confirmClassName="btn_w_full default_btn_black"
-              onConfirm={()=>{navigate(`/resumes/create`);}}
+              onConfirm={()=>{navigate(`/resumes/m-create`);}}
           onClose={handleModalClose}
        />
     </>

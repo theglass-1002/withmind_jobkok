@@ -6,6 +6,15 @@ import Layout from "./Layout";
 
 import Linkview from "@/pages/Linkview/Linkview";
 
+
+// 모바일
+
+import M_ResumeCreate from "@/pages/Resume/M_ResumeCreate";
+import M_MockInterviewLive from "@/pages/MockInterview/MockInterviewLive/M_MockInterviewLive";
+import M_MockSettings from "@/pages/MockInterview/MockSettings/M_MockSettings";
+import M_EnvironmentTestView from "@/pages/MockInterview/MockSettings/step-test/M_EnvironmentTestView";
+
+
 import Home from "@/pages/Home/Home";
 import JobsList from "@/pages/Jobs/JobsList";
 import JobDetail from "@/pages/Jobs/JobDetail";
@@ -24,14 +33,6 @@ import MockInstructions from "@/pages/MockInterview/MockInstructions/MockInstruc
 import MockSettings from "@/pages/MockInterview/MockSettings/MockSettings";
 import EnvironmentTestView from "@/pages/MockInterview/MockSettings/step-test/EnvironmentTestView";
 import MockInterviewLive from "@/pages/MockInterview/MockInterviewLive/MockInterviewLive";
-
-
-
-import M_MockInterviewLive from "@/pages/MockInterview/MockInterviewLive/M_MockInterviewLive";
-
-import M_MockSettings from "@/pages/MockInterview/MockSettings/M_MockSettings";
-import M_EnvironmentTestView from "@/pages/MockInterview/MockSettings/step-test/M_EnvironmentTestView";
-
 
 import Mypage from "@/pages/Mypage/Mypage";
 import EditProfile from "@/pages/Mypage/EditProfile/EditProfile";
@@ -76,6 +77,9 @@ import AIReport from "@/pages/Company/dashboard/AIMatching/report/AIReport";
 export const router = createBrowserRouter([
 
   // 모바일화면
+
+  { path: "/resumes/m-create", element: <Layout screen="ResumeCreation"><M_ResumeCreate/></Layout> },
+
   {path: "/mypage/m-edit-profile", element:<Layout screen="EditProfile" showFooter="desktop-only" showBottomNav={false}> <EditProfile/></Layout> },
   {path: "/mypage/m-plan/history", element:<Layout screen="PlanHistory" showFooter="desktop-only" showBottomNav={false}> <PlanHistory/></Layout> },
   {path: "/mypage/m-support/faq", element:<Layout screen="Faq" showFooter="desktop-only" showBottomNav={false}> <Faq/></Layout> },
