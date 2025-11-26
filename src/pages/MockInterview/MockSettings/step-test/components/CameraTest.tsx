@@ -132,8 +132,14 @@ export default function CameraTest({ testType, onNext, onFail }: CameraTestProps
                             정확한 결과 분석을 위해 조용한 장소에서 테스트를 진행해 주세요.
                         </span>
                     </div>
+              
+                    <div className='camera-test__guide-icon_container'>
                     <img className='camera-test__guide-icon' src={face_outline_guide} alt="얼굴 가이드" />
-                    <div className="camera-test__controls-wrapper">
+               
+            
+              
+                    </div>
+                     <div className="camera-test__controls-wrapper">
                         <div className={`camera-test__mic-prompt ${isRecording ? 'is-recording' : ''}`}>
                             <div className="camera-test__prompt-text">
                                 {text.split('').map((char, index) => (

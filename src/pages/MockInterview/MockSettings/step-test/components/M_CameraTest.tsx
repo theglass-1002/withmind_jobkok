@@ -125,9 +125,9 @@ export default function M_CameraTest({ testType, onNext, onFail }: M_CameraTestP
         // }
         
         // 임시: 성공으로 설정 (테스트용)
-        // setTestStatus('success');
+         setTestStatus('success');
         // 실패 테스트: 
-        setTestStatus('failed');
+       // setTestStatus('failed');
     };
 
     const handleRetry = () => {
@@ -153,8 +153,9 @@ export default function M_CameraTest({ testType, onNext, onFail }: M_CameraTestP
                                 </span>
                             </div>
                         )}
-                        
-                        <img className='camera-test__guide-icon' src={face_outline_guide} alt="얼굴 가이드" />
+                     <div className='camera-test__guide-icon_container'>
+                    <img className='camera-test__guide-icon' src={face_outline_guide} alt="얼굴 가이드" />
+                    </div>
                         <div className="camera-test__controls-wrapper">
                             <div className={`camera-test__mic-prompt ${isRecording ? 'is-recording' : ''}`}>
                                 <div className="camera-test__prompt-text">
@@ -192,7 +193,7 @@ export default function M_CameraTest({ testType, onNext, onFail }: M_CameraTestP
                             <img src={ic_keyboard_arrow_left_gray900_24} alt="" />
                             </button>
                             <button className="btn_w_full mock-instructions__btn--primary radius"
-                              onClick={()=>{}}>
+                           onClick={() => navigate('/mock-interview/m-mock-interview-live')}>
                             모의면접 시작하기
                             <img src={ic_chevron_right_white_24} alt="" />
                             </button>

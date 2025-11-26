@@ -12,8 +12,8 @@ import Modal from "@/shared/components/modal/Modal";
 
 
 export default function M_MockSettings() {
-    const { actionType } = useLayoutContext();
     const navigate = useNavigate();
+    const { actionType, resetAction } = useLayoutContext();
     const [activeStep, setActiveStep] = useState(1);
     const [desiredJob, setDesiredJob] = useState('');
     const [jobPostingUrl, setJobPostingUrl] = useState('');
@@ -35,6 +35,7 @@ export default function M_MockSettings() {
         } else if (actionType === "exit") {
             setShowConfirm(true);
         }   
+        resetAction?.();
     }, [actionType]);
 
     // 모달 닫기

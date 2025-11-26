@@ -16,7 +16,7 @@ import Modal from "@/shared/components/modal/Modal";
 
 
 export default function M_EnvironmentTestView() {
-    const { actionType } = useLayoutContext();
+    const { actionType, resetAction } = useLayoutContext();
     const [activeStep, setActiveStep] = useState(2);
     const [showSettingsPanel, setShowSettingsPanel] = useState(false); 
     const [showConfirm, setShowConfirm] = useState(false);
@@ -35,6 +35,7 @@ export default function M_EnvironmentTestView() {
         } else if (actionType === "exit") {
             setShowConfirm(true);
         }   
+        resetAction?.();
     }, [actionType]);
 
     const handleExitRequest = () => {

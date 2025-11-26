@@ -25,7 +25,7 @@ export default function InterviewReport() {
   const [showConfirm, setShowConfirm] = useState(false);
   
   const handleStart = () => {
-    console.log("start mock interview");
+    navigate(`/mock-interview/guide`);
   };
 
   const handleCloseConfirm = () => setShowConfirm(false);

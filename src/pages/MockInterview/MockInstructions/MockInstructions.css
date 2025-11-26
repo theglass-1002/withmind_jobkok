@@ -8,8 +8,7 @@
     background: var(--gray-900, #2A2D2F); */
 
     display: flex;
-
-    padding: 100px 0px;
+    height: 100vh;
     flex-direction: column;
     justify-content: center;
     align-items: center;
@@ -438,6 +437,7 @@ background: var(--gray-700, #6F767E);
         .mock-instructions-page{
             padding: 24px 20px;
             gap: 24px;
+            height: auto;
         }
         .mock-instructions__header{
             gap: 12px;

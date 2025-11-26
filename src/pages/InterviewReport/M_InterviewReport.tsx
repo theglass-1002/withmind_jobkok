@@ -38,7 +38,7 @@ export default function M_InterviewReport() {
 
 
   const handleStart = () => {
-    console.log("start mock interview");
+    navigate(`/mock-interview/guide`);
   };
 
   const handleCloseConfirm = () => setShowConfirm(false);

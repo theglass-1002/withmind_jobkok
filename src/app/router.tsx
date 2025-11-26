@@ -25,6 +25,10 @@ import MockSettings from "@/pages/MockInterview/MockSettings/MockSettings";
 import EnvironmentTestView from "@/pages/MockInterview/MockSettings/step-test/EnvironmentTestView";
 import MockInterviewLive from "@/pages/MockInterview/MockInterviewLive/MockInterviewLive";
 
+
+
+import M_MockInterviewLive from "@/pages/MockInterview/MockInterviewLive/M_MockInterviewLive";
+
 import M_MockSettings from "@/pages/MockInterview/MockSettings/M_MockSettings";
 import M_EnvironmentTestView from "@/pages/MockInterview/MockSettings/step-test/M_EnvironmentTestView";
 
@@ -70,6 +74,23 @@ import AIReport from "@/pages/Company/dashboard/AIMatching/report/AIReport";
 
 
 export const router = createBrowserRouter([
+
+  // 모바일화면
+  {path: "/mypage/m-edit-profile", element:<Layout screen="EditProfile" showFooter="desktop-only" showBottomNav={false}> <EditProfile/></Layout> },
+  {path: "/mypage/m-plan/history", element:<Layout screen="PlanHistory" showFooter="desktop-only" showBottomNav={false}> <PlanHistory/></Layout> },
+  {path: "/mypage/m-support/faq", element:<Layout screen="Faq" showFooter="desktop-only" showBottomNav={false}> <Faq/></Layout> },
+  {path: "/mypage/m-support/inquiry", element:<Layout screen="Inquiry" showFooter="desktop-only" showBottomNav={false}> <Inquiry/></Layout> },
+  {path: "/mypage/m-support/inquiry/:id",element:<Layout screen="InquiryDetail" showFooter="desktop-only" showBottomNav={false}> <InquiryDetail/></Layout> },
+  {path: "/mypage/m-support/inquiry/create", element:<Layout screen="InquiryCreate" showFooter="desktop-only" showBottomNav={false}> <InquiryCreate/></Layout> },
+  {path: "/mypage/m-support/notices", element:<Layout screen="NoticeList" showFooter="desktop-only" showBottomNav={false}> <NoticeList/></Layout> },
+  {path: "/mypage/m-support/notices/:id", element:<Layout screen="NoticeList" showFooter="desktop-only" showBottomNav={false}> <NoticeDetail/></Layout> },
+  {path: "/mypage/m-support/report-job", element:<Layout screen="ReportJob" showFooter="desktop-only" showBottomNav={false}> <ReportJob/></Layout> },
+  {path: "/mock-interview/m-settings", element:<Layout screen="MockSetting" showFooter="desktop-only" showBottomNav={false}> <M_MockSettings/></Layout> },
+  {path: "/mock-interview/m-environment-test", element:<Layout screen="EnvironmentTestView" showFooter="desktop-only" showBottomNav={false}> <M_EnvironmentTestView/> </Layout> },
+  { path: "/mock-interview/m-mock-interview-live",element:<Layout screen="MockInterviewLive" showFooter="desktop-only" showBottomNav={false}> <M_MockInterviewLive/> </Layout> },
+
+
+
   { path: "/", element: <Layout><Home/></Layout>, errorElement: <Layout><NotFound /></Layout>},
   {path:"/linkview",element:<Layout><Linkview/></Layout>},
  
@@ -116,19 +137,10 @@ export const router = createBrowserRouter([
       ]
    },
 
-   {path: "/mypage/m-edit-profile", element:<Layout screen="EditProfile" showFooter="desktop-only" showBottomNav={false}> <EditProfile/></Layout> },
-   {path: "/mypage/m-plan/history", element:<Layout screen="PlanHistory" showFooter="desktop-only" showBottomNav={false}> <PlanHistory/></Layout> },
    {path: "/purchase", element:<Layout screen="Purchase" showFooter="desktop-only" showBottomNav={false}><PurchaseLayout /></Layout> },
    {path: "/purchase/result/success",element: <Layout showHeader="desktop-only" showFooter="desktop-only" showBottomNav={false}><PurchaseSuccess  /></Layout>,},
    {path: "/purchase/result/fail",element: <Layout showHeader="desktop-only" showFooter="desktop-only" showBottomNav={false}><PurchaseFail /></Layout>,},
-   {path: "/mypage/m-support/faq", element:<Layout screen="Faq" showFooter="desktop-only" showBottomNav={false}> <Faq/></Layout> },
-   {path: "/mypage/m-support/inquiry", element:<Layout screen="Inquiry" showFooter="desktop-only" showBottomNav={false}> <Inquiry/></Layout> },
-   {path: "/mypage/m-support/inquiry/:id",element:<Layout screen="InquiryDetail" showFooter="desktop-only" showBottomNav={false}> <InquiryDetail/></Layout> },
-   {path: "/mypage/m-support/inquiry/create", element:<Layout screen="InquiryCreate" showFooter="desktop-only" showBottomNav={false}> <InquiryCreate/></Layout> },
-   {path: "/mypage/m-support/notices", element:<Layout screen="NoticeList" showFooter="desktop-only" showBottomNav={false}> <NoticeList/></Layout> },
-   {path: "/mypage/m-support/notices/:id", element:<Layout screen="NoticeList" showFooter="desktop-only" showBottomNav={false}> <NoticeDetail/></Layout> },
-   {path: "/mypage/m-support/report-job", element:<Layout screen="ReportJob" showFooter="desktop-only" showBottomNav={false}> <ReportJob/></Layout> },
-  {path:"/saved-jobs",element:<Layout showFooter='desktop-only' showBottomNav={false} ><SavedPostings/></Layout>},
+   {path:"/saved-jobs",element:<Layout showFooter='desktop-only' showBottomNav={false} ><SavedPostings/></Layout>},
   
   { path: "/mock-interview/guide", element:<MockInterviewGuide/> },
   { path: "/mock-interview/instructions", element:<MockInstructions/> },
@@ -136,11 +148,7 @@ export const router = createBrowserRouter([
   { path: "/mock-interview/environment-test", element: <EnvironmentTestView/> },
   { path: "/mock-interview/mock-interview-live", element: <MockInterviewLive/> },
 
-  {path: "/mock-interview/m-settings", element:<Layout screen="MockSetting" showFooter="desktop-only" showBottomNav={false}> <M_MockSettings/></Layout> },
-  {path: "/mock-interview/m-environment-test", element:<Layout screen="EnvironmentTestView" showFooter="desktop-only" showBottomNav={false}> <M_EnvironmentTestView/> </Layout> },
   
-
-
   { path: "/company/login", element: <CompanyLogin/> },
   { path: "/company/signup", element: <CompanySignup/> },
   { 

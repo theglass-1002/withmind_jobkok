@@ -31,6 +31,7 @@ export default function EnvironmentTestView() {
     return (
         <>
         <div className="mock-settings-page environment">
+          
             <SettingsSidebar activeStep={2} onStepChange={() => {}} />
             
             <div className="mock-settings__content">
@@ -63,7 +64,7 @@ export default function EnvironmentTestView() {
                     </div>
                 </>
             )}
-        </div>
+       
         <div className="mock-settings-page mobile environment">
             {/* <SettingsSidebar activeStep={2} onStepChange={() => {}} /> */}
             
@@ -98,8 +99,9 @@ export default function EnvironmentTestView() {
                 </>
             )}
             
+       
         </div>
-
+        </div>
         </>
     );
 }

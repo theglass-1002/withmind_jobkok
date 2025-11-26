@@ -52,7 +52,9 @@ export default function MockSettings() {
     return (
      
     <div className="mock-settings-page">
-             <SettingsSidebar activeStep={activeStep} onStepChange={setActiveStep} />
+        
+       <div className='mock-settings-page_container'>
+        <SettingsSidebar activeStep={activeStep} onStepChange={setActiveStep} />
             <div className={`mock-settings__content mock-settings--step-${activeStep}`}>
                 <div className="mock-settings__content-inner">
                     <InterviewInfoSection {...step1Props} />
@@ -89,6 +91,8 @@ export default function MockSettings() {
                 onConfirm={handleConfirmExit} 
                 onClose={handleCloseConfirm}
             />
+        
+        </div>
         </div>
     
     

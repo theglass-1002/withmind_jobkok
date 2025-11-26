@@ -54,6 +54,11 @@ export default function Layout({
   const handleSendActions = (newValue: string) => {
     setActionsValue(newValue);
   };
+
+  const resetAction = () => {
+    setActionsValue('');
+  };
+  
   
   useEffect(() => {
     window.scrollTo({
@@ -264,7 +269,19 @@ export default function Layout({
           sortClassName={'mock-setting'}
           onSortChange={(handleSendActions)}
         />);
+      }else if(screen ==='MockInterviewLive'){
+        return(
+          <MockPageHeader 
+          title={'모의면접'}
+          leftElement={null}  
+          rightIcons={<img src={ic_more_horiz_white_24}/>}
+          sort={true}
+          sortOptions={sortMockOptions}
+          sortClassName={'mock-setting'}
+          onSortChange={(handleSendActions)}
+        />);
       }
+      
       
       
       
@@ -288,7 +305,8 @@ export default function Layout({
 
   return (
     <LayoutContext.Provider value={{ 
-      actionType:ActionsValue
+      actionType:ActionsValue,
+      resetAction: resetAction
       
     }}>
      <div>

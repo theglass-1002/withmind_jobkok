@@ -1,6 +1,8 @@
 .mock-settings-page.environment{
     display: flex;
-    height: 1000px;
+    /* height: 1000px; */
+/* 
+    height: 100vh; */
 }
 .mock-settings-page.mobile.environment{
     display: none;
@@ -24,9 +26,16 @@
 }
 
 .camera-test-container {
+    max-width: 1400px;
+    display: flex;
+    justify-content: center;
     position: relative;
     width: 100%;
     height: 100%;
+
+    /* position: relative;
+    width: 100%;
+    height: 100%; */
 }
 
 .camera-test-container.mobile {
@@ -65,6 +74,8 @@
     z-index: 5;
     background: rgba(42, 45, 47, 0.40);
     backdrop-filter: blur(16px);
+
+    left: 0px;
 }
 
 .camera-test__main-instruction{
@@ -86,14 +97,18 @@
     font-weight: 400;
     line-height: 22px;
 }
-
-.camera-test__guide-icon{
+.camera-test__guide-icon_container{
     position: absolute;
+    width: 100%;
+    height: 40%;
+    left: 0px;
+    bottom: 40%;
     display: flex;
-    top: 30%;
-    left: 35%;
-    height: 50%;
-    z-index: 2;
+    justify-content: center;
+}
+.camera-test__guide-icon{
+    height: 100%;
+    z-index: 5;
 }
 
 .camera-test__controls-wrapper{
@@ -106,6 +121,8 @@
     align-items: flex-start;
     gap: 10px;
     bottom: 12%;
+
+    left: 0px;
 }
 
 .camera-test__mic-prompt{
@@ -117,6 +134,8 @@
     border-radius: 100px;
     background: var(--white-100, #FFF);
     box-shadow: 0 0 28px 0 rgba(42, 45, 47, 0.40);
+
+    
 }
 
 .camera-test__prompt-text{
@@ -336,6 +355,7 @@
         }
         
         .camera-test-container.mobile {
+            height: 100vh;
             display: flex;
         }
         
@@ -349,7 +369,7 @@
          
         }
         .mock-settings-page.environment .mock-settings__content-inner{
-            padding-top: 70px;
+            /* padding-top: 70px; */
             width: 100%;
             overflow:visible;
         }
@@ -365,7 +385,7 @@
         .camera-test__guide-icon{
             top: 15%;
             left: 10%;
-            height: 40%;
+            
         }
         .camera-test__overlay-text{
          height: 100%;
@@ -428,7 +448,7 @@
         }
         .env-test-result{
             padding: 160px 0;
-            justify-content: start;
+            justify-content: center;
         } 
 
        .env-test-result_btn-container{
@@ -459,6 +479,19 @@
         }
         .env-test-result .retry_btn{
             display: none;
+        }
+
+        .camera-test__prompt-text{
+            font-size: 20px;
+        }
+        .env-test-result__title{
+            font-size: 18px;
+        }
+        .env-test-result__description,
+        .env-test-result__detail,
+        .env-test-result--error .env-test-result__description em
+        {
+            font-size: 14px;
         }
      
     }

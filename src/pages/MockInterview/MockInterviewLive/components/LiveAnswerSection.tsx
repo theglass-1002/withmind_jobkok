@@ -176,8 +176,12 @@ export default function LiveAnswerSection() {
         onClick={handleMain}>
         메인 페이지로
         </button>
-        <button className="mock-interview-dialog__btn--primary">
-        분석 결과 보기
+        <button className="mock-interview-dialog__btn--primary"
+        onClick={()=>{
+          navigate('/mock-interview-report');
+        }}
+        >
+         분석 결과 보기
         </button>
     </div>
     </div>
