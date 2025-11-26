@@ -119,6 +119,7 @@ export default function CameraTest({ testType, onNext, onFail }: CameraTestProps
     };
 
     return (
+        <>
         <div className="camera-test-container">
             <video ref={videoRef} autoPlay playsInline muted className="camera-test__video-feed" />
             {testStatus === 'testing' && (
@@ -184,5 +185,6 @@ export default function CameraTest({ testType, onNext, onFail }: CameraTestProps
                     
                     </div>
         </div>
+        </>
     );
 }

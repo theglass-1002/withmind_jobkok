@@ -23,11 +23,13 @@ export default function EnvironmentTestView() {
     };
 
     const handleStartTest = () => {
+        console.log('받음 클릭');
         setShowDialog(false);
         setTestStep('camera1');
     };
 
     return (
+        <>
         <div className="mock-settings-page environment">
             <SettingsSidebar activeStep={2} onStepChange={() => {}} />
             
@@ -62,5 +64,42 @@ export default function EnvironmentTestView() {
                 </>
             )}
         </div>
+        <div className="mock-settings-page mobile environment">
+            {/* <SettingsSidebar activeStep={2} onStepChange={() => {}} /> */}
+            
+            <div className="mock-settings__content">
+                <div className="mock-settings__content-inner">
+                    {testStep === 'intro' && (
+                        <>
+                    <div className="mock-settings__submit-btn-container">
+                        <button className='default_btn_white radius'>
+                            <img src={ic_chevron_left_gray900_24} alt="" />
+                            이전으로</button>
+                        <button className='default_btn_gray radius' disabled>
+                            모의면접 시작하기
+                            <img src={ic_chevron_right_gray700_24} alt="" />
+                            </button>
+                    </div>
+                        </>
+                    )}
+                   {testStep === 'camera1' && <CameraTest testType="camera" onNext={() => setTestStep('camera2')} onFail={() => setTestStep('failed')} />}
+                </div>
+              
+            </div>
+           
+            {/* <SettingsPanel onExit={handleExitRequest} /> */}
+
+            {showDialog && testStep === 'intro' && (
+                <>
+                    <div className="env-test-overlay"></div>
+                    <div className="env-test-dialog">
+                        <TestIntro onStart={handleStartTest} />
+                    </div>
+                </>
+            )}
+            
+        </div>
+
+        </>
     );
 }

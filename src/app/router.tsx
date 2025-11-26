@@ -26,6 +26,7 @@ import EnvironmentTestView from "@/pages/MockInterview/MockSettings/step-test/En
 import MockInterviewLive from "@/pages/MockInterview/MockInterviewLive/MockInterviewLive";
 
 import M_MockSettings from "@/pages/MockInterview/MockSettings/M_MockSettings";
+import M_EnvironmentTestView from "@/pages/MockInterview/MockSettings/step-test/M_EnvironmentTestView";
 
 
 import Mypage from "@/pages/Mypage/Mypage";
@@ -132,9 +133,13 @@ export const router = createBrowserRouter([
   { path: "/mock-interview/guide", element:<MockInterviewGuide/> },
   { path: "/mock-interview/instructions", element:<MockInstructions/> },
   { path: "/mock-interview/settings", element:<MockSettings/> },
-   {path: "/mock-interview/m-settings", element:<Layout screen="MockSetting" showFooter="desktop-only" showBottomNav={false}> <M_MockSettings/></Layout> },
   { path: "/mock-interview/environment-test", element: <EnvironmentTestView/> },
   { path: "/mock-interview/mock-interview-live", element: <MockInterviewLive/> },
+
+  {path: "/mock-interview/m-settings", element:<Layout screen="MockSetting" showFooter="desktop-only" showBottomNav={false}> <M_MockSettings/></Layout> },
+  {path: "/mock-interview/m-environment-test", element:<Layout screen="EnvironmentTestView" showFooter="desktop-only" showBottomNav={false}> <M_EnvironmentTestView/> </Layout> },
+  
+
 
   { path: "/company/login", element: <CompanyLogin/> },
   { path: "/company/signup", element: <CompanySignup/> },

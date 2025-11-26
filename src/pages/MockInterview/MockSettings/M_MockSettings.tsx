@@ -5,6 +5,8 @@ import "./MockSettings.css";
 
 import InterviewInfoSection from './step-setup/InterviewInfoSection';
 import QuestionSettingsSection from './step-setup/QuestionSettingsSection';
+import SettingsPanel from "@/pages/MockInterview/MockSettings/components/SettingsPanel";
+
 import ic_chevron_right_white_24 from "@/assets/icons/size24/ic_chevron_right_white_24.png";
 import Modal from "@/shared/components/modal/Modal";
 
@@ -16,7 +18,8 @@ export default function M_MockSettings() {
     const [desiredJob, setDesiredJob] = useState('');
     const [jobPostingUrl, setJobPostingUrl] = useState('');
     const [selectedResume, setSelectedResume] = useState('');
-    const [showConfirm, setShowConfirm] = useState(false); 
+    const [showConfirm, setShowConfirm] = useState(false);
+    const [showSettingsPanel, setShowSettingsPanel] = useState(false); 
     const [questions, setQuestions] = useState([
         { id: 1, isAiGenerated: true, customText: '' },
         { id: 2, isAiGenerated: true, customText: '' },
@@ -24,21 +27,22 @@ export default function M_MockSettings() {
     ]);
 
 
- 
-useEffect(() => {
-  if (!actionType) return;
-  console.log("헤더 값 변경 감지:", actionType);
+    useEffect(() => {
+        console.log(showSettingsPanel);
+        if (!actionType) return;   
+        if (actionType === "view_status") {
+             setShowSettingsPanel(true);
+        } else if (actionType === "exit") {
+            setShowConfirm(true);
+        }   
+    }, [actionType]);
 
-  if (actionType === "나가기") {
-    console.log("나가기 눌림");
-    // 여기서 모달 열거나, 페이지 이동하거나, 상태 변경
-  }
-
-}, [actionType]);
     // 모달 닫기
     const handleCloseConfirm = () => setShowConfirm(false);
 
-    const handleExitRequest = () => setShowConfirm(true);
+    const handleExitRequest = () => {
+        setShowSettingsPanel(false);
+    };
 
     const handleConfirmExit = () => {
         setShowConfirm(false);
@@ -47,7 +51,9 @@ useEffect(() => {
     
 
     const handleNextStep = () => {
-        navigate('/mock-interview/environment-test');
+       console.log('??');
+        // setShowSettingsPanel(false);
+        navigate('/mock-interview/m-environment-test');
     };
 
     const step1Props = {
@@ -59,8 +65,8 @@ useEffect(() => {
 
 
     return (
-     
         <div className="mock-settings-page">
+               {showSettingsPanel && <SettingsPanel activeStep={activeStep} onExit={handleExitRequest} />}
             <div className={`mock-settings__content mock-settings--step-${activeStep}`}>
                 <div className="mock-settings__content-inner">
                     <InterviewInfoSection {...step1Props} />
@@ -72,13 +78,13 @@ useEffect(() => {
                         설정 완료
                         <img src={ic_chevron_right_gray700_24} alt="" />
                         </button> */}
-              <button className='btn_w_full mock-settings__submit-btn on' onClick={handleNextStep}>    
+                     <button className='btn_w_full mock-settings__submit-btn on' onClick={handleNextStep}>    
                         설정 완료
                         <img src={ic_chevron_right_white_24} alt="" />
                         </button>    
                     </div>           
             </div>
-            {/* <SettingsPanel activeStep={activeStep} onExit={handleExitRequest} /> */}
+           
 
             {/* 중단 확인 모달 */}
             <Modal

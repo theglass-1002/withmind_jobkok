@@ -66,6 +66,28 @@
     background: var(--gray-800, #3A3E42);
 }
 
+.mock-settings_header_icon{
+    cursor: pointer;
+}
+
+.mock-settings__panel.mobile{
+    display: none;
+}
+
+.mock-settings__panel-header{
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    align-self: stretch;
+    background: var(--gray-900, #2A2D2F);
+}
+
+.mock-settings__panel-header .mock-settings__panel-section-title{
+    display: flex;
+    width: 100%;
+    justify-content: center;
+}
+
 .mock-settings__panel-section{
     display: flex;
     padding: 32px;
@@ -404,6 +426,13 @@ mock-settings--step-2 */
     border-radius: 8px;
     background: var(--white-100, #FFF);
 }
+.env-guide{
+    display: flex;
+}
+
+.env-guide.mobile{
+    display:none;
+}
 
 .env-guide__description{
     color: var(--gray-900, #2A2D2F);
@@ -507,6 +536,48 @@ mock-settings--step-2 */
     align-items: center;
 }
 
+
+
+/* 모바일 슬라이더 스타일 */
+.env-guide__slider {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+.env-guide__slides {
+    display: flex;
+    transition: transform 0.3s ease-out;
+}
+
+.env-guide__slide {
+    min-width: 100%;
+    flex-shrink: 0;
+}
+
+.env-guide__indicators {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.env-guide__indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--gray-300, #E0E2E4);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.env-guide__indicator.active {
+
+    border-radius: 4px;
+    background: var(--gray-900, #2A2D2F);
+}
+
 /* 모바일: 760px 이하 */
 @media (max-width: 760px) {
     body{
@@ -555,6 +626,107 @@ mock-settings--step-2 */
         }
         .mock-settings__question-input-area .form-input {
             height: 90px;
+        }
+
+        .mock-settings__panel{
+            display: none;
+        }
+
+        .mock-settings__panel.mobile{
+            display: flex;
+            gap: 12px;
+        }
+        .mock-settings__panel{
+            position: fixed; 
+            width: 100%;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;        
+            opacity: 1;
+            visibility: visible;
+            z-index: 10;
+        }
+
+      
+        .mock-settings__panel-section{
+            padding: 24px 20px;
+            gap: 20px;
+        }
+        .mock-settings__panel-section:nth-child(2){
+            flex: none;
+        }
+        .mock-settings__panel.mobile .mock-settings__panel-section{
+            flex: 1 0 0;
+        }
+        .mock-settings__panel-section-description{
+            height: 100%;
+            font-size: 14px;
+        }
+        .env-guide{
+            display: none;
+        }
+        .env-guide.mobile{
+            display:flex;
+            width: 100%;
+            padding: 24px 20px 20px 20px;
+            gap: 20px;
+        }
+        .env-guide__content-wrapper{
+            gap: 20px;
+        }
+        .env-test-dialog {
+            padding: 0px;
+            overflow: auto;
+            width: 90%;
+        }
+        .env-guide__slider{
+            overflow: auto;
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+
+        .env-guide__slides{
+            width: 100%;
+        }
+
+        .env-guide__slide{
+            width: 100%;
+        }
+        .env-guide__item{
+            /* width: 100%;
+            padding: 0px; */
+            width: 95%;
+            padding: 0px;
+            padding: 16px;
+        }
+        .env-guide__text-group{
+            width: 95%;
+        }
+        .env-guide__item-title{
+            display: flex;
+            flex-direction: column;
+            align-items: start;
+            font-size: 16px;
+        }
+        .env-guide__item-desc{
+            font-size: 14px;
+        }
+     
+        .env-guide__image-box{
+            width: 100%;
+        }
+        .env-guide__image-box img{
+            height: auto;
+            width: 100%;
+         
+        }
+
+        .env-guide__description{
+            font-size: 18px;
+            width: 100%;
+            text-align: start;
+            line-height: 22px;
         }
     }
 }

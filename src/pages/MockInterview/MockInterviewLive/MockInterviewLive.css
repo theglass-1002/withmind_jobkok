@@ -1,6 +1,7 @@
 /* src/pages/MockInterview/MockInterviewLive.css */
 .mock-interview-live{
     display:flex;
+    justify-content: center;
     width:100%;
     height: 100%;
     align-items:center;

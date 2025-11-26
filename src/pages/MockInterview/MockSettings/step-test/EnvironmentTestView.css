@@ -1,5 +1,9 @@
 .mock-settings-page.environment{
+    display: flex;
     height: 1000px;
+}
+.mock-settings-page.mobile.environment{
+    display: none;
 }
 
 .mock-settings-page.environment .mock-settings__content-inner{
@@ -23,6 +27,10 @@
     position: relative;
     width: 100%;
     height: 100%;
+}
+
+.camera-test-container.mobile {
+    display: none;
 }
 
 .camera-test{
@@ -85,7 +93,7 @@
     top: 30%;
     left: 35%;
     height: 50%;
-    z-index: 10;
+    z-index: 2;
 }
 
 .camera-test__controls-wrapper{
@@ -194,7 +202,7 @@
     flex-shrink: 0;
     background: rgba(42, 45, 47, 0.80);
     backdrop-filter: blur(16px);
-    z-index: 10;
+    z-index: 9;
 }
 
 .env-test-result.show {
@@ -316,4 +324,142 @@
     font-style: normal;
     font-weight: 700;
     border:none;
+}
+
+/* 모바일: 760px 이하 */
+@media (max-width: 760px) {
+    body{
+
+
+        .camera-test-container {
+            display: none;
+        }
+        
+        .camera-test-container.mobile {
+            display: flex;
+        }
+        
+
+        .mock-settings-page.environment{
+            display: none;
+        }
+        .mock-settings-page.mobile.environment{
+            display: flex;
+            padding: 0px;
+         
+        }
+        .mock-settings-page.environment .mock-settings__content-inner{
+            padding-top: 70px;
+            width: 100%;
+            overflow:visible;
+        }
+        .camera-test__main-instruction{
+            font-size: 18px;
+        }
+        .camera-test__sub-instruction{
+            font-size: 14px;
+        }
+        .camera-test-container{
+            width: 100%;
+        }
+        .camera-test__guide-icon{
+            top: 15%;
+            left: 10%;
+            height: 40%;
+        }
+        .camera-test__overlay-text{
+         height: 100%;
+         flex-direction: column;
+         justify-content: center;
+         align-items: center;
+         padding-bottom: 40%;
+         z-index: 6;
+        }
+        .camera-test__controls-wrapper{
+            width: 100%;
+            padding: 0px;
+        }
+
+        .camera-test__video-feed{
+            z-index: 0;
+        }
+
+        .mock-settings-page .camera-test-container .mock-settings__submit-btn-container{
+            display: none;
+        }
+        .mic-btn_container{
+            display: flex;
+            width: 100%;
+            justify-content: center;
+            padding: 20px;
+        }
+        .camera-test__mic-prompt{
+            display: flex;
+            position: fixed;
+            bottom: 0px;
+            width: 100%;
+            padding: 0px;
+            border-radius: 0px;
+            flex-direction: column;
+            background: var(--gray-900, #2A2D2F);
+        }
+
+        .camera-test__prompt-text{
+            display: flex;
+            width: 100%;
+            background-color: #ffffff;
+            padding: 0px;
+            padding: 36px 20px;
+
+        }
+
+        .camera-test__mic-button-wrapper.recording{
+            border-radius: 100px;
+            background: var(--gray-700, #6F767E);
+        }
+
+        .mock-settings-page.mobile.environment .mock-settings__submit-btn-container{
+            width: 100%;
+            z-index: 2;
+            background: var(--gray-900, #2A2D2F);
+            justify-content: center;
+            position: fixed;
+            bottom: 0;
+        }
+        .env-test-result{
+            padding: 160px 0;
+            justify-content: start;
+        } 
+
+       .env-test-result_btn-container{
+          display: flex;
+          width: 100%;
+          height: 100px;
+          position: fixed;
+          bottom: 0;
+          z-index: 11;
+          padding: 20px;
+          background: var(--gray-900, #2A2D2F);
+          gap: 16px;
+        }
+
+        .env-test-result_btn-container .back_btn{
+            width: 56px;
+            height: 56px;
+        }
+        .env-test-result_btn-container button{
+            height: 56px;
+        }
+        .env-test-result__details{
+            width: 100%;
+            border-radius: 0px;
+        }
+        .env-test-result--error{
+            gap: 40px;
+        }
+        .env-test-result .retry_btn{
+            display: none;
+        }
+     
+    }
 }

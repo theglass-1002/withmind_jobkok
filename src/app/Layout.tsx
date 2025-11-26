@@ -48,17 +48,11 @@ export default function Layout({
   const [ActionsValue, setActionsValue] = useState(''); 
   
   const sortMockOptions: SortOption[] = [
-    { label: "면접 진행 현황", value: "status" },
+    { label: "면접 진행 현황", value: "view_status" },
     { label: "나가기", value: "exit", emoji: <img src={ic_logout_red_18} alt="닫기" />, className: "logout_icon-container" },
   ];
   const handleSendActions = (newValue: string) => {
     setActionsValue(newValue);
-    // onScreenAction?.({ type: 'sort', data: newValue });
-    // if (newValue === "나가기") {
-    //   // 여기서 나가기 처리
-    // } else {
-    //   setMockSettingsortValue(newValue);
-    // }
   };
   
   useEffect(() => {
@@ -257,7 +251,18 @@ export default function Layout({
           sort={true}
           sortOptions={sortMockOptions}
           sortClassName={'mock-setting'}
-          onSortChange={handleSendActions}
+          onSortChange={(handleSendActions)}
+        />);
+      }else if(screen ==='EnvironmentTestView'){
+        return(
+          <MockPageHeader 
+          title={'환경 테스트'}
+          leftElement={null}  
+          rightIcons={<img src={ic_more_horiz_white_24}/>}
+          sort={true}
+          sortOptions={sortMockOptions}
+          sortClassName={'mock-setting'}
+          onSortChange={(handleSendActions)}
         />);
       }
       
