@@ -120,7 +120,7 @@
 
 .jobs-toolbar-container{
     width: 100%;
-    border-top: 1px solid var(--gray-300, #E0E2E4);
+    /* border-top: 1px solid var(--gray-300, #E0E2E4); */
     background: var(--gray-50, #F8F8F9);
 }
 

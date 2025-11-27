@@ -97,3 +97,11 @@
 }
 
 
+/* 모바일: 760px 이하 */
+@media (max-width: 760px) {
+    body{
+        .resume-create-page__section--education .resume-create-page__section-title{
+            padding: 0px;
+        }
+    }
+}

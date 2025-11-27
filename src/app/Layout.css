@@ -249,6 +249,9 @@ textarea:focus {
     gap: 4px;
 }
 
+.default_tabs.is-sticky{
+    position: fixed;  
+}
 
 .default_tabs .tab{
     display: flex;

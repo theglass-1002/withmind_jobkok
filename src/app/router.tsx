@@ -78,7 +78,7 @@ export const router = createBrowserRouter([
 
   // 모바일화면
 
-  { path: "/resumes/m-create", element: <Layout screen="ResumeCreation"><M_ResumeCreate/></Layout> },
+  { path: "/resumes/m-create", element: <Layout screen="ResumeCreation" showFooter="desktop-only" showBottomNav={false}><M_ResumeCreate/></Layout> },
 
   {path: "/mypage/m-edit-profile", element:<Layout screen="EditProfile" showFooter="desktop-only" showBottomNav={false}> <EditProfile/></Layout> },
   {path: "/mypage/m-plan/history", element:<Layout screen="PlanHistory" showFooter="desktop-only" showBottomNav={false}> <PlanHistory/></Layout> },

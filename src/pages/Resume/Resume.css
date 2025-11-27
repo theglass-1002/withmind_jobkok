@@ -7,12 +7,12 @@
   
   .resume-page__status {
     display: flex;
-    padding: 96px 360px 24px 360px;
+    padding: 96px 0px 24px 0px;
     justify-content: space-between;
     align-items: center;
     align-self: stretch;
     border-bottom: 1px solid var(--gray-300, #E0E2E4);
-background: var(--white-100, #FFF);
+    background: var(--white-100, #FFF);
   }
   
   .resume-detail__actions-left,
@@ -20,6 +20,11 @@ background: var(--white-100, #FFF);
     display: flex;
     align-items: center;
     gap: 16px;
+  }
+
+  .resume-edit-page .resume-create-page__status,
+  .resume-page--detail .resume-create-page__status{
+    justify-content: space-between;
   }
 
 
@@ -73,10 +78,11 @@ background: var(--white-100, #FFF);
 
   .resume-page__container {
     display: flex;
-    padding: 52px 360px 100px 360px;
+    padding: 52px 0px 100px 0px;
     align-items: flex-start;
     gap: 24px;
     align-self: stretch;
+    justify-content: center;
   }
   
   .resume-page__main {

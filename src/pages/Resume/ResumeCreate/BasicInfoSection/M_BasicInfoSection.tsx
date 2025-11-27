@@ -8,6 +8,11 @@ import InlineDayPicker from "@/shared/components/calendar/InlineDayPicker";
 import PhotoModal from "@/shared/components/photo/PhotoModal";
 import type { PhotoErrorState } from "@/shared/components/photo/PhotoModal";
 
+import ic_mail_gray500_20 from "@/assets/icons/size20/ic_mail_gray500_20.png";
+import ic_mobile_gray_20 from "@/assets/icons/size20/ic_mobile_gray_20.png";
+import ic_edit_gray900_20 from "@/assets/icons/size20/ic_edit_gray900_20.png";
+
+
 import ic_error_red100_20 from "@/assets/icons/size20/ic_error_red100_20.png";
 import ic_calendar_gray900_20 from "@/assets/icons/size20/ic_calendar_gray900_20.png";
 import icon_calendar_red_20 from "@/assets/icons/size20/icon_calendar_red_20.png";
@@ -15,36 +20,22 @@ import ic_add_btn_gray700_20 from "@/assets/icons/size20/ic_add_btn_gray700_20.p
 import ic_close_white_20 from "@/assets/icons/size20/ic_close_white_20.png";
 import "./BasicInfoSection.css";
 
-type Gender = "male" | "female" | null;
 
-export type BasicInfo = {
-  name: string;
-  birth: string;
-  gender: Gender;
-  email: string;
-  phone: string;
-  photoUrl?: string;
-};
-export type BasicErrors = Partial<Record<keyof BasicInfo, string>>;
+import {BasicInfo ,BasicErrors, parseYMD, fmtYMD} from '@/shared/utils/util';
 
-const parseYMD = (s: string) => {
-  const m = /^(\d{4})\.(\d{2})\.(\d{2})$/.exec((s || "").trim());
-  if (!m) return null;
-  return { year: +m[1], month: +m[2] - 1, day: +m[3] };
-};
-const fmtYMD = (d: { year: number; month: number; day: number }) =>
-  `${d.year}.${String(d.month + 1).padStart(2, "0")}.${String(d.day).padStart(2, "0")}`;
 
-export default function BasicInfoSection({
+export default function M_BasicInfoSection({
   values,
   errors,
   onChange,
   onFocusAny,
+  sectionRef,
 }: {
   values: BasicInfo;
   errors?: BasicErrors;
   onChange: (patch: Partial<BasicInfo>) => void;
   onFocusAny?: () => void;
+  sectionRef?: (el: HTMLDivElement | null) => void;
 }) {
   const { name, birth, gender, email, phone, photoUrl } = values;
 
@@ -130,14 +121,37 @@ export default function BasicInfoSection({
   const hasPhoto = !!(photoUrl || photoFile);
 
   return (
-    <div className="resume-create-page__section resume-create-page__section--basic">
+    <div id="resume__create-section--basic" 
+    ref={sectionRef}
+    className="resume-create-page__section resume-create-page__section--basic">
       <div className="resume-create-page__section-title resume-create-page__section-title--simple">
         <div className="resume-create-page__section-title__heading">
-          기본정보 <em className="resume-create-page__required">*</em>
+          기본정보<em className="resume-create-page__required">*</em>
         </div>
       </div>
+      <div className="resume-basic-preview">
+        <div className="resume-basic-preview__row">
+          <span className="resume-basic-preview__name">홍길동</span>
+          <span className="resume-basic-preview__value info">2000년생(만 23세), 남성</span>
+        </div>
+
+        <div className="resume-basic-preview__row">
+        <div className="resume-basic-preview__group">
+          <img className="resume-basic-preview__label_icon" src={ic_mail_gray500_20} alt="" />
+          <span className="resume-basic-preview__value">abc@example.com</span>
+          </div>
+          <div className="resume-basic-preview__group">
+          <img className="resume-basic-preview__label_icon" src={ic_mobile_gray_20} alt="" />
+         <span className="resume-basic-preview__value">010-1234-5678</span>
+         </div>
+        </div>
+
     
-      <div className="resume-create-page__section-body">
+      </div>
+      <div className="resume-create-page__section-action">
+        <button className="btn_w_full default_btn_white"><img src={ic_edit_gray900_20} alt="" /> 수정</button>
+      </div>
+      {/* <div className="resume-create-page__section-body">
         <div className="resume-create-page__col resume-create-page__col--left">
           <FormField label={<>이름 <em>*</em></>} className="in_icon">
             <FormInput
@@ -296,7 +310,7 @@ export default function BasicInfoSection({
             )}
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }

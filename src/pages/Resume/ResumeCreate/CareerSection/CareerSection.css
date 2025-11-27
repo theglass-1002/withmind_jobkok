@@ -83,3 +83,17 @@
     border: 1px solid var(--gray-300, #E0E2E4);
     background: var(--white-100, #FFF);
 }
+
+
+/* 모바일: 760px 이하 */
+@media (max-width: 760px) {
+    body{
+        .resume-create-page__section--career .resume-create-page__section-title{
+            padding: 0px;
+        }
+        .resume-create-page__section-body.career-section{
+            background: none;
+            padding: 0px;
+        }
+    }
+}

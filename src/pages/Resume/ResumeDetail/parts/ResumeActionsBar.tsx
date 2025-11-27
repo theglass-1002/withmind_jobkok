@@ -10,7 +10,8 @@ type Props = {
 
 export default function ResumeActionsBar({ onTempSave, onSubmit }: Props) {
   return (
-    <div className="resume-page__status">
+    <div className="resume-controls-wrapper">
+    <div className="resume-create-page__status">
       <div className="resume-detail__actions-left">
         <span className="default_btn_white">
           <img src={ic_download_gray900_20} alt="" />
@@ -33,6 +34,7 @@ export default function ResumeActionsBar({ onTempSave, onSubmit }: Props) {
           작성 완료
         </span>
       </div>
+    </div>
     </div>
   );
 }

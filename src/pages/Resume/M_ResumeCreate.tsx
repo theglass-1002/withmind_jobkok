@@ -1,19 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef ,useCallback } from "react";
 import "./ResumeCreate.css";
+import Switch from "react-switch";
+import Tabs from "@/shared/components/tabs/Tabs";
+import {useStickyTabs, tabItems, BasicInfo ,ALL_SECTIONS ,
+  BasicErrors,initial,FormState,SectionId,
+  LocationValue} from '@/shared/utils/util';
+import M_BasicInfoSection from "./ResumeCreate/BasicInfoSection/M_BasicInfoSection";
 
-import BasicInfoSection, {
-  type BasicInfo,
-  type BasicErrors,
-} from "./ResumeCreate/BasicInfoSection/BasicInfoSection";
-import LocationSection, {
-  type LocationValue, // ← 추가: Location 섹션 값 타입
-} from "./ResumeCreate/LocationSection/LocationSection";
-import CareerSection from "./ResumeCreate/CareerSection/CareerSection";
-import EducationSection,{
+import M_LocationSection from "./ResumeCreate/LocationSection/M_LocationSection";
+import M_CareerSection from "./ResumeCreate/CareerSection/M_CareerSection";
+import M_EducationSection,{
   type Education,
   type EducationErrors
-} from "./ResumeCreate/EducationSection/EducationSection";
-import DesiredRoleSection from "./ResumeCreate/DesiredRoleSection/DesiredRoleSection";
+} from "./ResumeCreate/EducationSection/M_EducationSection";
+import M_DesiredRoleSection from "./ResumeCreate/DesiredRoleSection/M_DesiredRoleSection";
 import HardSkillSection from "./ResumeCreate/HardSkillSection/HardSkillSection";
 import SoftSkillsSection from "./ResumeCreate/SoftSkillsSection/SoftSkillsSection";
 import ActivitiesSection from "./ResumeCreate/ActivitiesSection/ActivitiesSection";
@@ -22,7 +22,6 @@ import PortfolioDocumentsSection from "./ResumeCreate/PortfolioDocumentsSection/
 import SelfIntroductionSection from "./ResumeCreate/SelfIntroductionSection/SelfIntroductionSection";
 import MockInterviewAnalysisSection from "./ResumeCreate/MockInterviewAnalysisSection/MockInterviewAnalysisSection";
 import ResumeSidebar, {
-  type SectionId,
   type Status,
 } from "./ResumeSidebar/ResumeSidebar";
 
@@ -30,38 +29,8 @@ import ic_star_gray700_20 from "@/assets/icons/size20/ic_star_gray700_20.png";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-// 폼 상태에 title/location 추가
-type FormState = {
-  title: string;
-  basic: BasicInfo;
-  location: LocationValue;
-  education: Education[];
-};
 
-const initial: FormState = {
-  title: "",
-  basic: { name: "", birth: "", gender: null, email: "", phone: "", photoUrl: "" },
-  location: { nationwide: false, selectedKeys: [] },
-  education:[]
-};
-
-const ALL_SECTIONS: SectionId[] = [
-  "title",
-  "basic",
-  "location",
-  "career",
-  "education",
-  "desiredRole",
-  "hardSkills",
-  "softSkills",
-  "activities",
-  "awards",
-  "portfolio",
-  "selfIntro",
-  "mockInterview",
-];
-
-export default function ResumeCreate() {
+export default function M_ResumeCreate() {
   const [form, setForm] = useState<FormState>(initial);
   const [errors, setErrors] = useState<{ 
     education? :EducationErrors;
@@ -72,10 +41,41 @@ export default function ResumeCreate() {
   });
   const [isDefaultResume, setIsDefaultResume] = useState(false);
   const [sidebarStatus, setSidebarStatus] = useState<Partial<Record<SectionId, Status>>>({});
+  const [activeTab, setActiveTab] = useState("title");
+
+  const isTabsSticky = useStickyTabs(
+    "resume__create-section--title",
+    ".default_tabs",
+    ".page-header"
+  );
+
+  const handleTabClick = (key: string) => {
+    setActiveTab(key);
+    console.log('선택 된 탭', key);
+  
+    if (key === 'title') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    
+    const targetId = `resume__create-section--${key}`;
+    const targetElement = document.getElementById(targetId);
+  
+    if (targetElement) {
+      targetElement.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  };
+
+  const handleToggle = (checked: boolean) => {
+    setIsDefaultResume(checked);
+    console.log("기본 이력서 설정:", checked);
+  };
 
   const updateBasic = (patch: Partial<BasicInfo>) =>
     setForm((prev) => ({ ...prev, basic: { ...prev.basic, ...patch } }));
-
 
   const updateLocation = (patch: Partial<LocationValue>) =>
     setForm((prev) => ({ ...prev, location: { ...prev.location, ...patch } }));
@@ -89,7 +89,6 @@ export default function ResumeCreate() {
     toast.success("임시 저장되었습니다.");
   };
 
-  // 간단한 필수검증
   const validate = () => {
     const nextErr: typeof errors = { basic: {} };
     if (!form.title.trim()) nextErr.title = "이력서 제목을 입력해 주세요.";
@@ -110,37 +109,48 @@ export default function ResumeCreate() {
       next[id] = "completed";
     });
     setSidebarStatus(next);
-
-    // TODO: 실제 전송
-    // fetch("/api/resumes", { method:"POST", body: JSON.stringify(form) })
   };
 
   const isSubmitDisabled =
     !form.title.trim() ||
     (!form.location.nationwide && form.location.selectedKeys.length === 0);
 
-  return (
-    <div className="resume-create-page">
-      <div className="resume-controls-wrapper">
-      <div className="resume-create-page__status">
-        <span className="default_btn_white" onClick={handleTempSave}>
-          임시저장
-        </span>
-        <span
-          className={`default_btn_black ${isSubmitDisabled ? "disabled" : ""}`}
-          onClick={handleSubmit}
-          aria-disabled={isSubmitDisabled}
-        >
-          작성 완료
-        </span>
-      </div>
-      </div>
-   
 
+  return (
+    <div className="resume-create-page mobile">
       <div className="resume-create-page__container">
         <div className="resume-create-page__main">
-          {/* 제목 */}
-          <div className="resume-create-page__section resume-create-page__section--title">
+        <div className="resume-sidebar__default">
+        <span className="resume-sidebar__default-text">기본 이력서로 설정</span>
+        <label className="resume-sidebar__default-label" aria-label="기본 이력서로 설정">
+            <Switch
+              checked={isDefaultResume}
+              onChange={handleToggle}
+              onColor="#000000"
+              offColor="#E5E7EB"
+              onHandleColor="#FFFFFF"
+              offHandleColor="#FFFFFF"
+              handleDiameter={18}
+              height={22}
+              width={42}
+              uncheckedIcon={false}
+              checkedIcon={false}
+              aria-label="기본 이력서로 설정"
+            />
+          </label>
+        </div>
+        <Tabs
+            tabs={tabItems}
+            active={activeTab}
+            onChange={handleTabClick}
+            className={`resume-create-tabs default_tabs ${isTabsSticky?'is-sticky':''}`}
+            itemClassName="resume-create-tabs__item"
+            activeClassName="on"
+            />
+            
+        <div className="resume-create-page__section_container">
+          <div id="resume__create-section--title" 
+           className="resume-create-page__section resume-create-page__section--title">
             <div className="resume-create-page__field">
               <input
                 className="resume-create-page__label"
@@ -164,25 +174,22 @@ export default function ResumeCreate() {
             </div>
             <div className="resume-create-page__assist">
               <span className="resume-create-page__assist-text">
-                <img src={ic_star_gray700_20} alt="" />
+                <img className="ai-suggest-icon" src={ic_star_gray700_20} alt="" />
                 더 적합한 문장을 추천을 위해 아래 항목들을 먼저 채워주세요.
-              </span>
-              <span className="ai-suggest-btn career-section__summary-ai-btn">
+                <span className="ai-suggest-btn career-section__summary-ai-btn">
                 AI 문장 추천
               </span>
+              </span>
+           
             </div>
           </div>
-
-          {/* 기본정보 */}
-          <BasicInfoSection
+          <M_BasicInfoSection
             values={form.basic}
             errors={errors.basic}
             onChange={updateBasic}
             onFocusAny={resetBasicErrors}
           />
-
-          {/* 희망 근무 지역: defaultValue/onChange 바인딩 */}
-          <LocationSection
+          <M_LocationSection
             defaultValue={initial.location}
             onChange={updateLocation}
           />
@@ -191,35 +198,35 @@ export default function ResumeCreate() {
               {errors.location}
             </div>
           )}
-
-          {/* 이하 섹션들은 처음 작성 시 초기값 불필요 → 그대로 */}
-          <CareerSection
+          <M_CareerSection
             values={form.basic}
             errors={errors.basic}
             onChange={updateBasic}
             onFocusAny={resetBasicErrors}
           />
-          <EducationSection
+          <M_EducationSection
             values={form.education}
             errors={errors.education}
             onChange={updateEducation}
             onFocusAny={resetBasicErrors}
           />
-          <DesiredRoleSection />
-          <HardSkillSection />
-          <SoftSkillsSection />
-          <ActivitiesSection />
-          <AwardsCertificationsSection />
-          <PortfolioDocumentsSection />
-          <SelfIntroductionSection />
-          <MockInterviewAnalysisSection />
+            <M_DesiredRoleSection />
         </div>
-
-        <ResumeSidebar
-          statusMap={sidebarStatus}
-          isDefault={isDefaultResume}
-          onToggleDefault={setIsDefaultResume}
-        />
+        </div>
+      </div>
+      <div className="resume-controls-wrapper">
+      <div className="resume-create-page__status">
+        <span className="default_btn_white btn_w_full" onClick={handleTempSave}>
+          임시저장
+        </span>
+        <span
+          className={`default_btn_black btn_w_full ${isSubmitDisabled ? "disabled" : ""}`}
+          onClick={handleSubmit}
+          aria-disabled={isSubmitDisabled}
+        >
+          작성 완료
+        </span>
+      </div>
       </div>
     </div>
   );

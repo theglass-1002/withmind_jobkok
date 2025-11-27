@@ -62,3 +62,12 @@
     width: 100%;
 }
 
+
+/* 모바일: 760px 이하 */
+@media (max-width: 760px) {
+    body{
+        .resume-create-page__location{
+            padding: 0px;
+        }
+    }
+}

@@ -230,7 +230,8 @@ export default function ResumeEdit() {
 
   return (
     <div className="resume-edit-page resume-create-page">
-      <div className="resume-page__status">
+      <div className="resume-controls-wrapper">
+      <div className="resume-create-page__status">
         <div className="resume-detail__actions-left">
           <span className="default_btn_white">
             <img src={ic_download_gray900_20} alt="" />
@@ -255,7 +256,7 @@ export default function ResumeEdit() {
           </span>
         </div>
       </div>
-
+     </div>
       <div className="resume-edit-page__container resume-create-page__container">
         <div className="resume-edit-page__main resume-create-page__main">
           <div className="resume-edit-page__section resume-create-page__section resume-edit-page__section--title resume-create-page__section--title">

@@ -1,3 +1,52 @@
+import { useEffect, useState, useRef } from "react";
+
+
+export function useStickyTabs(
+  sectionId: string,        // ex: "section-description"
+  tabsSelector: string,     // ex: ".default_tabs"
+  headerSelector?: string   // ex: ".page-header" (없으면 skip)
+) {
+  const [isSticky, setIsSticky] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const section = document.getElementById(sectionId);
+      const tabs = document.querySelector(tabsSelector) as HTMLElement | null;
+      const header = headerSelector
+        ? document.querySelector(headerSelector)
+        : null;
+
+      if (!section || !tabs) return;
+
+      const sectionTop = section.offsetTop;
+      const tabsHeight = tabs.offsetHeight;
+      const scrollY = window.scrollY;
+
+      const shouldStick = scrollY + tabsHeight > sectionTop;
+
+      setIsSticky(shouldStick);
+
+      if (header) {
+        header.classList.toggle("sticky-active", shouldStick);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    handleScroll(); // 초기 1회 실행
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [sectionId, tabsSelector, headerSelector]);
+
+  return isSticky;
+}
+
+
+
+
+
+
+
+
 
 export function stripAllWhitespace(value: string): string {
     // 스페이스/탭/개행 등 모든 공백 제거
@@ -141,3 +190,137 @@ export interface HeaderProps {
   sortOptions?: SortOption[]; 
   onSortChange?: (val: string) => void;
 }
+
+
+
+// resume
+
+export const tabItems = [
+  { key: "title", label:"이력서 제목" },
+  { key: "basic", label:"기본 정보" },
+  { key: "location", label:"희망 근무 지역" },
+  { key: "career", label:"경력" },
+  { key: "education", label:"학력" },
+  { key: "desiredRole", label:"희망 직무" },
+  { key: "hardSkills", label:"하드 스킬" },
+  { key: "softSkills", label:"소프트 스킬" },
+  { key: "activities", label:"활동ㆍ경험" },
+  { key: "awards", label:"수상ㆍ자격증" },
+  { key: "portfolio", label:"포트폴리오ㆍ기타 문서" },
+  { key: "selfIntro", label:"자기소개서" },
+  { key: "mockInterview", label:"모의면접 분석 결과" },
+];
+
+
+type Gender = "male" | "female" | null;
+export type BasicInfo = {
+  name: string;
+  birth: string;
+  gender: Gender;
+  email: string;
+  phone: string;
+  photoUrl?: string;
+};
+
+export type BasicErrors = Partial<Record<keyof BasicInfo, string>>;
+
+
+export const parseYMD = (s: string) => {
+  const m = /^(\d{4})\.(\d{2})\.(\d{2})$/.exec((s || "").trim());
+  if (!m) return null;
+  return { year: +m[1], month: +m[2] - 1, day: +m[3] };
+};
+export const fmtYMD = (d: { year: number; month: number; day: number }) =>
+  `${d.year}.${String(d.month + 1).padStart(2, "0")}.${String(d.day).padStart(2, "0")}`;
+
+export type LocationValue = {
+  nationwide: boolean;
+  selectedKeys: string[]; // "RegionName|DistrictName" or "RegionName|ALL"
+};
+
+export type Education = {
+  school_name?: string;
+  major_degree?: string;
+  startDate?: string;
+  endDate?: string;
+};
+
+
+export type FormState = {
+  title: string;
+  basic: BasicInfo;
+  location: LocationValue;
+  education: Education[];
+};
+
+export const initial: FormState = {
+  title: "",
+  basic: { name: "", birth: "", gender: null, email: "", phone: "", photoUrl: "" },
+  location: { nationwide: false, selectedKeys: [] },
+  education:[]
+};
+
+export type SectionId =
+  | "title"
+  | "basic"
+  | "location"
+  | "career"
+  | "education"
+  | "desiredRole"
+  | "hardSkills"
+  | "softSkills"
+  | "activities"
+  | "awards"
+  | "portfolio"
+  | "selfIntro"
+  | "mockInterview";
+
+
+export const ALL_SECTIONS: SectionId[] = [
+  "title",
+  "basic",
+  "location",
+  "career",
+  "education",
+  "desiredRole",
+  "hardSkills",
+  "softSkills",
+  "activities",
+  "awards",
+  "portfolio",
+  "selfIntro",
+  "mockInterview",
+];
+
+
+// M_LocationSection
+
+
+export type District = { id?: string; name: string };
+export type Region = {
+  id?: string;
+  name: string;
+  all?: string | { id?: string; label: string };
+  districts: (string | District)[];
+};
+
+export interface LocationSectionProps {
+  defaultValue?: LocationValue;
+  onChange: (v: LocationValue) => void;
+  sectionRef?: (el: HTMLDivElement | null) => void;
+  
+}
+
+// CareerSection
+
+export type CareerItem = {
+  company: string;
+  start: string;       // 예: "2020.04"
+  end: string;         // 예: "재직중" or "2024.08"
+  isCurrent?: boolean; // true면 .current 클래스 추가
+  tenure: string;      // 예: "(0년 0개월)"
+  employment?: string; // 예: "정규직"
+  role?: string;       // 예: "프론트엔드 개발자"
+  level?: string;      // 예: "매니저"
+  bullets: string[];   // 예: ["• ...", "• ..."]
+};
