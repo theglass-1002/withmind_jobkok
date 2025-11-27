@@ -251,6 +251,7 @@ textarea:focus {
 
 .default_tabs.is-sticky{
     position: fixed;  
+    z-index: 5;
 }
 
 .default_tabs .tab{

@@ -1,28 +1,11 @@
-// src/pages/.../BasicInfoSection.tsx
-import React, { useEffect, useRef, useState } from "react";
-import FormField from "@/shared/components/form/FormField";
-import FormInput from "@/shared/components/form/FormInput";
-import DateInline from "@/shared/components/form/DateInline";
-import GenderChoice from "@/shared/components/form/GenderChoice";
-import InlineDayPicker from "@/shared/components/calendar/InlineDayPicker";
-import PhotoModal from "@/shared/components/photo/PhotoModal";
-import type { PhotoErrorState } from "@/shared/components/photo/PhotoModal";
+import React, { useState } from "react";
+import { BasicInfo, BasicErrors } from "@/shared/utils/util";
+import M_BasicInfoForm from "./Form/M_BasicInfoForm";
 
 import ic_mail_gray500_20 from "@/assets/icons/size20/ic_mail_gray500_20.png";
 import ic_mobile_gray_20 from "@/assets/icons/size20/ic_mobile_gray_20.png";
 import ic_edit_gray900_20 from "@/assets/icons/size20/ic_edit_gray900_20.png";
-
-
-import ic_error_red100_20 from "@/assets/icons/size20/ic_error_red100_20.png";
-import ic_calendar_gray900_20 from "@/assets/icons/size20/ic_calendar_gray900_20.png";
-import icon_calendar_red_20 from "@/assets/icons/size20/icon_calendar_red_20.png";
-import ic_add_btn_gray700_20 from "@/assets/icons/size20/ic_add_btn_gray700_20.png";
-import ic_close_white_20 from "@/assets/icons/size20/ic_close_white_20.png";
 import "./BasicInfoSection.css";
-
-
-import {BasicInfo ,BasicErrors, parseYMD, fmtYMD} from '@/shared/utils/util';
-
 
 export default function M_BasicInfoSection({
   values,
@@ -37,280 +20,97 @@ export default function M_BasicInfoSection({
   onFocusAny?: () => void;
   sectionRef?: (el: HTMLDivElement | null) => void;
 }) {
-  const { name, birth, gender, email, phone, photoUrl } = values;
+  const { name, birth, gender, email, phone } = values;
+  const [isEditing, setIsEditing] = useState(false);
 
-  const [openBirth, setOpenBirth] = useState(false);
-  const birthRef = useRef<HTMLDivElement | null>(null);
-
-  const [showPhotoModal, setShowPhotoModal] = useState(false);
-  const [photoFile, setPhotoFile] = useState<File | null>(null);
-  const [photoPreview, setPhotoPreview] = useState<string | undefined>();
-  const [photoFilename, setPhotoFilename] = useState<string | undefined>();
-  const [photoErrState, setPhotoErrState] = useState<PhotoErrorState>("none");
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const openPhotoModal = () => {
-    setPhotoErrState("none");
-    setShowPhotoModal(true);
+  const handleEdit = () => {
+    console.log("✏️ 수정 버튼 클릭! 편집 모드로 전환");
+    console.log("📋 현재 데이터:", values);
+    setIsEditing(true);
   };
-  const closePhotoModal = () => setShowPhotoModal(false);
-  const onPickFile = () => fileInputRef.current?.click();
 
-  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0];
-    if (!f) return;
+  const handleSave = () => {
+    console.log("✅ 저장 완료! 미리보기 모드로 전환");
+    console.log("💾 최종 저장된 데이터:", values);
+    setIsEditing(false);
+  };
 
-    if (!/\.(jpe?g|png|gif)$/i.test(f.name)) {
-      setPhotoFile(null);
-      setPhotoPreview(undefined);
-      setPhotoFilename(undefined);
-      setPhotoErrState("invalid");
-      if (fileInputRef.current) fileInputRef.current.value = "";
-      return;
+  const handleCancel = () => {
+    console.log("🚫 취소! 미리보기 모드로 복귀");
+    setIsEditing(false);
+  };
+
+  const calculateAge = (birthStr: string) => {
+    if (!birthStr) return "";
+    const birthDate = new Date(birthStr.replace(/\./g, "-"));
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
     }
-    if (f.size > 10 * 1024 * 1024) {
-      setPhotoFile(null);
-      setPhotoPreview(undefined);
-      setPhotoFilename(undefined);
-      setPhotoErrState("tooLarge");
-      if (fileInputRef.current) fileInputRef.current.value = "";
-      return;
-    }
-
-    setPhotoErrState("none");
-    setPhotoFile(f);
-    setPhotoPreview(URL.createObjectURL(f));
-    setPhotoFilename(f.name);
+    return age;
   };
 
-  const onApplyPhoto = () => {
-    if (!photoFile) {
-      setPhotoErrState("missing");
-      return;
-    }
-    onChange({ photoUrl: photoPreview || "" });
-    closePhotoModal();
-  };
-
-  const removePhoto = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setPhotoFile(null);
-    setPhotoPreview(undefined);
-    setPhotoFilename(undefined);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-    onChange({ photoUrl: undefined });
-  };
-
-  useEffect(() => {
-    const onDocClick = (e: MouseEvent | TouchEvent) => {
-      if (!openBirth) return;
-      const t = e.target as Node;
-      if (birthRef.current && !birthRef.current.contains(t)) {
-        setOpenBirth(false);
-      }
-    };
-    document.addEventListener("mousedown", onDocClick, true);
-    document.addEventListener("touchstart", onDocClick, true);
-    return () => {
-      document.removeEventListener("mousedown", onDocClick, true);
-      document.removeEventListener("touchstart", onDocClick, true);
-    };
-  }, [openBirth]);
-
-  const hasPhoto = !!(photoUrl || photoFile);
+  const birthYear = birth ? birth.split(".")[0] : "";
+  const age = calculateAge(birth);
+  const genderText = gender === "male" ? "남성" : gender === "female" ? "여성" : "";
 
   return (
-    <div id="resume__create-section--basic" 
-    ref={sectionRef}
-    className="resume-create-page__section resume-create-page__section--basic">
+    <div
+      id="resume__create-section--basic"
+      ref={sectionRef}
+      className="resume-create-page__section resume-create-page__section--basic"
+    >
       <div className="resume-create-page__section-title resume-create-page__section-title--simple">
         <div className="resume-create-page__section-title__heading">
           기본정보<em className="resume-create-page__required">*</em>
         </div>
       </div>
+
       <div className="resume-basic-preview">
         <div className="resume-basic-preview__row">
-          <span className="resume-basic-preview__name">홍길동</span>
-          <span className="resume-basic-preview__value info">2000년생(만 23세), 남성</span>
+          <span className="resume-basic-preview__name">{name || "이름 없음"}</span>
+          <span className="resume-basic-preview__value info">
+            {birthYear ? `${birthYear}년생` : ""}
+            {age ? `(만 ${age}세)` : ""}
+            {genderText ? `, ${genderText}` : ""}
+            {!birthYear && !age && !genderText && "정보 없음"}
+          </span>
         </div>
 
         <div className="resume-basic-preview__row">
-        <div className="resume-basic-preview__group">
-          <img className="resume-basic-preview__label_icon" src={ic_mail_gray500_20} alt="" />
-          <span className="resume-basic-preview__value">abc@example.com</span>
+          <div className="resume-basic-preview__group">
+            <img className="resume-basic-preview__label_icon" src={ic_mail_gray500_20} alt="" />
+            <span className="resume-basic-preview__value">{email || "이메일 없음"}</span>
           </div>
           <div className="resume-basic-preview__group">
-          <img className="resume-basic-preview__label_icon" src={ic_mobile_gray_20} alt="" />
-         <span className="resume-basic-preview__value">010-1234-5678</span>
-         </div>
+            <img className="resume-basic-preview__label_icon" src={ic_mobile_gray_20} alt="" />
+            <span className="resume-basic-preview__value">{phone || "연락처 없음"}</span>
+          </div>
         </div>
-
-    
       </div>
+
       <div className="resume-create-page__section-action">
-        <button className="btn_w_full default_btn_white"><img src={ic_edit_gray900_20} alt="" /> 수정</button>
+        <button className="btn_w_full default_btn_white" onClick={handleEdit}>
+          <img src={ic_edit_gray900_20} alt="" /> 수정
+        </button>
       </div>
-      {/* <div className="resume-create-page__section-body">
-        <div className="resume-create-page__col resume-create-page__col--left">
-          <FormField label={<>이름 <em>*</em></>} className="in_icon">
-            <FormInput
-              id="name"
-              required
-              value={name}
-              onChange={(v) => onChange({ name: v })}
-              onFocus={onFocusAny}
-              invalid={!!errors?.name}
-              rightIconSrc={errors?.name ? ic_error_red100_20 : undefined}
+
+      {isEditing && (
+        <div className="basic-info-form-overlay">
+          <div className="basic-info-form-container">
+            <M_BasicInfoForm
+              values={values}
+              errors={errors}
+              onChange={onChange}
+              onFocusAny={onFocusAny}
+              onSave={handleSave}
+              onCancel={handleCancel}
             />
-          </FormField>
-
-          <div className="resume-create-page__field-row">
-            <div className="birth section-period__start-wrap" ref={birthRef}>
-              <FormField label={<>생년월일 <em>*</em></>} className="">
-                <DateInline
-                  id="birth"
-                  iconSrc={errors?.birth ? icon_calendar_red_20 : ic_calendar_gray900_20}
-                  value={birth || "YYYY.MM.DD"}
-                  onClick={() => setOpenBirth(true)}
-                  invalid={!!errors?.birth}
-                  errorMessage={errors?.birth}
-                  isOpen={openBirth}
-                />
-              </FormField>
-
-              {openBirth && (
-                <div className="calendar-popover" onClick={(e) => e.stopPropagation()}>
-                  <div className="calendar-popover__panel">
-                    <InlineDayPicker
-                      className="cal--day"
-                      value={parseYMD(birth || "") || undefined}
-                      minYear={1950}
-                      onChange={() => {}}
-                      onApply={(d) => {
-                        onChange({ birth: fmtYMD(d) });
-                        setOpenBirth(false);
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <FormField label={<>성별 <em>*</em></>} className="gender">
-              <GenderChoice value={gender} onChange={(g) => onChange({ gender: g })} />
-            </FormField>
-          </div>
-
-          <div className="resume-create-page__field-row">
-            <FormField label={<>이메일 <em>*</em></>} className="in_icon email">
-              <FormInput
-                id="email"
-                type="email"
-                required
-                value={email}
-                onChange={(v) => onChange({ email: v })}
-                onFocus={onFocusAny}
-                invalid={!!errors?.email}
-                rightIconSrc={errors?.email ? ic_error_red100_20 : undefined}
-              />
-            </FormField>
-
-            <FormField label={<>연락처 <em>*</em></>} className="in_icon phone">
-              <FormInput
-                id="phone"
-                type="tel"
-                required
-                value={phone}
-                onChange={(v) => onChange({ phone: v })}
-                onFocus={onFocusAny}
-                invalid={!!errors?.phone}
-                rightIconSrc={errors?.phone ? ic_error_red100_20 : undefined}
-              />
-            </FormField>
           </div>
         </div>
-
-        <div className="resume-create-page__col resume-create-page__col--right">
-          <span className="small_labe_black-14">사진</span>
-
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".jpg,.jpeg,.png,.gif"
-            style={{ display: "none" }}
-            onChange={onFileChange}
-          />
-
-          <div
-            className="resume-create-page__photo"
-            role="button"
-            tabIndex={0}
-            onClick={() => {
-              if (!photoUrl) openPhotoModal();
-            }}
-            onKeyDown={(e) => {
-              if ((e.key === "Enter" || e.key === " ") && !photoUrl) {
-                e.preventDefault();
-                openPhotoModal();
-              }
-            }}
-          >
-            {photoUrl ? (
-              <>
-                <img
-                  className="resume-create-page__photo-img"
-                  src={photoUrl}
-                  alt="증명사진 미리보기"
-                  draggable={false}
-                  onDragStart={(e) => e.preventDefault()}
-                  style={{ pointerEvents: "none" }}
-                />
-                <span
-                  className="resume-create-page__photo-close"
-                  onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                  onClick={removePhoto}
-                >
-                  <img src={ic_close_white_20} alt="" />
-                </span>
-                <span
-                  className="resume-create-page__photo-change-btn"
-                  onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    openPhotoModal();
-                  }}
-                >
-                  사진 변경
-                </span>
-              </>
-            ) : (
-              <>
-                <img src={ic_add_btn_gray700_20} alt="" />
-                <span>{hasPhoto ? "사진 변경" : "사진 추가"}</span>
-              </>
-            )}
-
-            {showPhotoModal && (
-              <div
-                className="photo-modal__overlay"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (e.target === e.currentTarget) closePhotoModal();
-                }}
-              >
-                <PhotoModal
-                  hasFile={!!photoFile}
-                  filename={photoFilename}
-                  onPick={onPickFile}
-                  onApply={onApplyPhoto}
-                  errorState={photoErrState}
-                />
-              </div>
-            )}
-          </div>
-        </div>
-      </div> */}
+      )}
     </div>
   );
 }

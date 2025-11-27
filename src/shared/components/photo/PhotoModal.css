@@ -110,3 +110,14 @@
     flex: 0 0 auto;
   }
   
+
+/* 모바일: 760px 이하 */
+@media (max-width: 760px) {
+  body{
+    .photo-modal__overlay{
+      position: fixed;
+      top: 30%;
+      width: 100%;
+    }
+  }
+}

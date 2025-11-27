@@ -14,13 +14,13 @@ import M_EducationSection,{
   type EducationErrors
 } from "./ResumeCreate/EducationSection/M_EducationSection";
 import M_DesiredRoleSection from "./ResumeCreate/DesiredRoleSection/M_DesiredRoleSection";
-import HardSkillSection from "./ResumeCreate/HardSkillSection/HardSkillSection";
-import SoftSkillsSection from "./ResumeCreate/SoftSkillsSection/SoftSkillsSection";
-import ActivitiesSection from "./ResumeCreate/ActivitiesSection/ActivitiesSection";
-import AwardsCertificationsSection from "./ResumeCreate/AwardsCertificationsSection/AwardsCertificationsSection";
-import PortfolioDocumentsSection from "./ResumeCreate/PortfolioDocumentsSection/PortfolioDocumentsSection";
-import SelfIntroductionSection from "./ResumeCreate/SelfIntroductionSection/SelfIntroductionSection";
-import MockInterviewAnalysisSection from "./ResumeCreate/MockInterviewAnalysisSection/MockInterviewAnalysisSection";
+import M_HardSkillSection from "./ResumeCreate/HardSkillSection/M_HardSkillSection";
+import M_SoftSkillsSection from "./ResumeCreate/SoftSkillsSection/M_SoftSkillsSection";
+import M_ActivitiesSection from "./ResumeCreate/ActivitiesSection/M_ActivitiesSection";
+import M_AwardsCertificationsSection from "./ResumeCreate/AwardsCertificationsSection/M_AwardsCertificationsSection";
+import M_PortfolioDocumentsSection from "./ResumeCreate/PortfolioDocumentsSection/M_PortfolioDocumentsSection";
+import M_SelfIntroductionSection from "./ResumeCreate/SelfIntroductionSection/M_SelfIntroductionSection";
+import M_MockInterviewAnalysisSection from "./ResumeCreate/MockInterviewAnalysisSection/M_MockInterviewAnalysisSection";
 import ResumeSidebar, {
   type Status,
 } from "./ResumeSidebar/ResumeSidebar";
@@ -210,7 +210,17 @@ export default function M_ResumeCreate() {
             onChange={updateEducation}
             onFocusAny={resetBasicErrors}
           />
-            <M_DesiredRoleSection />
+         <M_DesiredRoleSection />
+
+
+         <M_HardSkillSection />
+
+         <M_SoftSkillsSection />
+         <M_ActivitiesSection />
+         <M_AwardsCertificationsSection />
+         <M_PortfolioDocumentsSection />
+         <M_SelfIntroductionSection />
+         <M_MockInterviewAnalysisSection /> 
         </div>
         </div>
       </div>

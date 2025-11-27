@@ -271,3 +271,14 @@ line-height: 20px; /* 125% */
     border-radius: 4px;
   }
 
+
+
+  /* 모바일: 760px 이하 */
+@media (max-width: 760px) {
+  body{
+    .resume-create-page__section--mock-interview-analysis .resume-create-page__section-body.empty{
+      padding: 0px;
+    }
+  }
+}
+

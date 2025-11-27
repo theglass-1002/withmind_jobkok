@@ -90,3 +90,12 @@ line-height: 20px; /* 125% */
     align-self: stretch;
 }
 
+
+/* 모바일: 760px 이하 */
+@media (max-width: 760px) {
+    body{
+        .resume-create-page__section--personal-statement .resume-create-page__section-body.empty{
+            padding: 0px;
+        }
+    }
+  }

@@ -228,3 +228,13 @@ line-height: 20px; /* 125% */
 .hard-skills__menu-footer .hard-skills__highlight{
   color: var(--gray-900, #2A2D2F);
 }
+
+
+/* 모바일: 760px 이하 */
+@media (max-width: 760px) {
+  body{
+    .resume-create-page__section--hard-skills .resume-create-page__section-body.empty{
+      padding: 0px;
+    }
+  }
+}

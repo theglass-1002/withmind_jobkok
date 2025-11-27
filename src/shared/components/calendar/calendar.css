@@ -418,3 +418,13 @@
   pointer-events: none;
   cursor: default;
 }
+
+/* 모바일: 760px 이하 */
+@media (max-width: 760px) {
+  body{
+    .cal.cal--day{
+      width: 100%;
+    }
+    
+  }
+}

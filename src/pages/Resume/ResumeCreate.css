@@ -930,5 +930,12 @@ background: var(--gray-50, #F8F8F9);
             padding: 0px;
             border: none;
         }
+
+
+        .resume-create-page__field-row{
+            flex-direction: column;
+        }
+
+        
     }
 }

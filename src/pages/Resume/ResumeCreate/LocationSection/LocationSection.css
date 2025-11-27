@@ -66,8 +66,51 @@
 /* 모바일: 760px 이하 */
 @media (max-width: 760px) {
     body{
+        .resume-create-page__location .location-picker__body{
+            width: 100%;
+            height: 100%;
+        }
+
         .resume-create-page__location{
             padding: 0px;
+            /* padding: 60px 0px 0px 0px; */
+            height: 100%;
+        }
+        .resume-create-page__location .location-picker{
+            padding: 60px 0px 0px 0px;
+        }
+
+        .resume-create-page__location .location-picker__column{
+            height: 100%;
+        }
+        .resume-create-page__location .location-picker__category-group{
+            height: 100%;
+            
+        }
+        .resume-create-page__location .location-picker__header{
+            display: flex;
+            color: var(--gray-700, #6F767E);
+            padding: 16px;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            align-self: stretch;
+            font-size: 14px;
+            border-radius: 4px;
+           
+            background: var(--gray-50, #F8F8F9);
+        }
+        
+ 
+        .basic-info-form-overlay.location-section .resume-create-page__form-action{
+            flex-direction: column;
+            
+        }
+
+        .basic-info-form-overlay.location-section .resume-create-page__form-action .btn_wrap{
+            width: 100%;
+            flex-direction: row;
+            gap: 10px;
         }
     }
 }

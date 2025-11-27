@@ -101,3 +101,101 @@
     line-height: 18px;    
 }
   
+/* 모바일: 760px 이하 */
+@media (max-width: 760px) {
+  body{
+
+    .resume-create-page__section--basic .basic-info-form-container .resume-create-page__section-body{
+          padding: 100px 20px 120px 20px;
+      }
+
+      .basic-info-form-overlay {
+        width: 100%;
+        height: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 15;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow-y: auto;
+      }
+
+      .basic-info-form-container {
+        width: 100%;
+        height: 100%;
+        background: #fff;
+        padding: 0px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        overflow-y: auto;
+        position: relative;
+      }
+      .resume-create-form__header{
+        position: fixed;
+        top: 0;
+        display: flex;
+        height: 64px;
+        padding: 20px;
+        width: 100%;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        align-self: stretch;
+        border-bottom: 1px solid var(--gray-300, #E0E2E4);
+        background: var(--white-100, #FFF);
+      }
+      .resume-create-form__title{
+        color: var(--gray-900, #2A2D2F);
+        text-align: center;
+        font-family: Pretendard;
+        font-size: 18px;
+        font-style: normal;
+        font-weight: 600;
+        line-height: 22px; /* 122.222% */
+      }
+
+      .resume-create-page__form-action{
+        position: fixed;
+        width: 100%;
+        bottom: 0px;
+        display: flex;
+        padding: 20px;
+        align-items: center;
+        gap: 12px;
+        align-self: stretch;
+        border-top: 1px solid var(--gray-300, #E0E2E4);
+        background: var(--white-100, #FFF);
+      }
+      .resume-create-page__section--basic .resume-create-page__col--left{
+        width: 100%;
+      }
+
+      .resume-create-page__section--basic .birth,
+      .resume-create-page__section--basic .phone,
+      .resume-create-page__section--basic .email {
+        width: 100%;
+      }
+
+      .resume-create-page__photo{
+ 
+      }
+      /* .resume-create-page__section-action{
+        width: 100%;
+        position: fixed;
+        bottom: 0;
+        display: flex;
+        padding: 20px;
+        align-items: center;
+        gap: 12px;
+        align-self: stretch;
+        border-top: 1px solid var(--gray-300, #E0E2E4);
+        background: var(--white-100, #FFF);
+      }
+      */
+
+  }
+}
