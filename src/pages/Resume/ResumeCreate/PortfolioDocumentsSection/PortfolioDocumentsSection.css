@@ -158,5 +158,28 @@ background-color: white;
         .resume-create-page__section--portfolio-documents .resume-create-page__section-body.empty{
             padding: 0px;
         }
+        .portfolio-documents-section__item{
+            flex-direction: column;
+            /* padding: 0px 0px 24px 0px; */
+        }
+        .resume-create-page__section--portfolio-documents .portfolio-documents__fields{
+            width: 100%;
+        }
+        .portfolio-documents__controls{
+            width: 100%;
+            justify-content: center;
+            flex-direction: row;
+        }
+        .portfolio-documents__file{
+            flex-direction: column;
+            width: 100%;
+            align-items: start;
+        }
+        .portfolio-documents__uploader{
+            padding: 24px 20px;
+        }
+        .portfolio-documents__file-name{
+            width: 100%;
+        }
     }
   }

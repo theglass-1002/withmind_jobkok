@@ -85,6 +85,7 @@
     border: 1px solid var(--gray-300, #E0E2E4);
     box-shadow: 0 0 24px 0 rgba(42, 45, 47, 0.16);
     overflow: auto;
+    z-index: 1;
   }
   
   .select-dropdown__option {

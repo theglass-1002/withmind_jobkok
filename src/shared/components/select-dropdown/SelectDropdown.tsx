@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import ic_arrow_drop_down_gray900_24 from "@/assets/icons/size24/ic_arrow_drop_down_gray900_24.png";
 import "./SelectDropdown.css";
+
 type SelectDropdownProps = {
   label: string;
   required?: boolean;
@@ -11,6 +12,7 @@ type SelectDropdownProps = {
   onChange?: (value: string) => void;
   helperText?: string;
   errorText?: string;
+  errorIconSrc?: string;     
   disabled?: boolean;
   className?: string;
 };
@@ -24,6 +26,7 @@ export default function SelectDropdown({
   onChange,
   helperText,
   errorText,
+  errorIconSrc,       
   disabled = false,
   className = '',
 }: SelectDropdownProps) {
@@ -44,14 +47,22 @@ export default function SelectDropdown({
       </label>
       
       <div 
-        className={`select-dropdown__control ${isOpen ? 'open' : ''} ${errorText ? 'error' : ''} ${disabled ? 'disabled' : ''}`}
+        className={`select-dropdown__control 
+          ${isOpen ? 'open' : ''} 
+          ${errorText||errorIconSrc ? 'error' : ''} 
+          ${disabled ? 'disabled' : ''}`}
         onClick={() => !disabled && setIsOpen(!isOpen)}
       >
         <span className="select-dropdown__placeholder">
           {selectedOption?.label || placeholder}
         </span>
+
+
         <span className={`select-dropdown__icon ${isOpen ? 'rotate' : ''}`}>
-        <img src={ic_arrow_drop_down_gray900_24} alt="" />
+          {errorText|| errorIconSrc && (
+            <img className="select-dropdown__error-icon" src={errorIconSrc} alt="error" />
+          )}
+          <img src={ic_arrow_drop_down_gray900_24} alt="open" />
         </span>
       </div>
 

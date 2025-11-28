@@ -213,7 +213,6 @@ export default function M_ResumeCreate() {
          <M_DesiredRoleSection />
          <M_HardSkillSection />
          <M_SoftSkillsSection />
-         
          <M_ActivitiesSection />
          <M_AwardsCertificationsSection />
          <M_PortfolioDocumentsSection />

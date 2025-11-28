@@ -407,6 +407,9 @@
     .resume-education__school{
       font-size: 16px;
     }
+    .resume-career-item__header{
+      gap: 8px;
+    }
     .resume-education__meta,
     .resume-education__period-start,
     .resume-education__period-sep,
@@ -417,6 +420,9 @@
     .resume-education__meta > * + *{
       padding-left: 8px;
       margin-left: 8px;
+    }
+    .resume-career-item__company{
+      font-size: 16px;
     }
   }
 }

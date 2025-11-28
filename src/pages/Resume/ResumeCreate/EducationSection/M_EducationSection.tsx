@@ -87,7 +87,7 @@ export default function M_EducationSection({
         {items.length > 0 && (
           <div className="resume-create-page__section-body education-section">
             {items.map((edu, idx) => (
-                <div className="resume-field__value resume-education">
+                <div key={idx} className="resume-field__value resume-education">
                 <span className="resume-education__school">{edu.school_name}</span>
         
                 <div className="resume-education__meta">

@@ -115,5 +115,28 @@ background-color: white;
         .resume-create-page__section--activities .resume-create-page__section-body.empty{
             padding: 0px;
         }
+        .resume-create-page__section--activities .activities-section__fields{
+            width: 100%;
+        }
+        .activities-section__item{
+            flex-direction: column;
+        }
+        .activities-section__control{
+            width: 100%;
+        }
+        .activities-period__field--end .calendar-popover{
+              left: -150px;  
+        }
+        .activities-section__controls{
+            width: 100%;
+            justify-content: center;
+            flex-direction: row;
+        }
+       .activities-section__group .input-group.error{
+            padding: 0px 16px 0px 0px;
+        }
+       .resume-activity-list .resume-career-item{
+        padding: 16px 20px 16px 20px;
+        }
     }
   }

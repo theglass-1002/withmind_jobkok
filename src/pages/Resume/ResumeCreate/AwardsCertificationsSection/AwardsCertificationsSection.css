@@ -127,5 +127,43 @@ flex: 1 0 0;
         .resume-create-page__section--awards-certifications .resume-create-page__section-body.empty{
             padding: 0px;
         }
+        .awards-certifications-section{
+            background: var(--gray-50, #F8F8F9);
+        }
+        .awards-certifications-section__item{
+            flex-direction: column;
+            
+        }
+        .resume-create-page__section--awards-certifications .awards-certifications-section__fields{
+            width: 100%;
+        }
+        .awards-certifications-section__control{
+            width: 100%;
+        }
+        .awards-certifications-period__fields{
+            flex-direction: column;
+        }
+        .awards-certifications-section__controls{
+            width: 100%;
+            justify-content: center;
+            flex-direction: row;
+        }
+        .awards-certifications-section__group .input-group.error{
+           padding: 0px 10px 0px 16px;         
+        }
+        .resume-awards-list .resume-award-item{
+            padding: 16px 20px 20px 20px;
+        }
+        .resume-award-item .resume-award-item__meta{
+            flex-direction: row;
+            gap: 0px;
+        }
+        .resume-award-item__period-start,
+        .resume-award-item__issuer{
+            font-size: 14px;
+        }
+        .resume-award-item__header--group{
+            
+        }
     }
   }
