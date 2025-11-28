@@ -1,40 +1,45 @@
+// src/pages/.../HardSkillSection/M_HardSkillSection.tsx
 import React, { useMemo, useState, useRef, useEffect } from 'react';
 import './HardSkillSection.css';
 import roles from '@/data/desired_roles.json';
 import { toast } from 'react-toastify';
-import Tooltip from "@/shared/components/tooltip/Tooltip";
+import Tooltip from '@/shared/components/tooltip/Tooltip';
+
 import ic_search_gray900_20 from '@/assets/icons/size20/ic_search_gray900_20.png';
 import ic_clear_btn_gray400_20 from '@/assets/icons/size20/ic_clear_btn_gray400_20.png';
 import ic_error_gray500_20 from '@/assets/icons/size20/ic_error_gray500_20.png';
 import ic_add_purple_20 from '@/assets/icons/size20/ic_add_purple_20.png';
 import ic_close_gray500_24 from '@/assets/icons/size24/ic_close_gray500_24.png';
 import ic_add_btn_gray900_20 from '@/assets/icons/size20/ic_add_btn_gray900_20.png';
+import ic_close_gray900_24 from '@/assets/icons/size24/ic_close_gray900_24.png';
+import ic_replay_gray900_20 from '@/assets/icons/size20/ic_replay_gray900_20.png';
 
 import SearchField from '@/shared/components/search/SearchField';
 import AiSuggestChips from '@/shared/components/ai/AiSuggestChips';
+import Modal from '@/shared/components/modal/Modal';
 
 type RoleItem = { group: string; role: string };
 const MAX_SELECTED = 30;
 
 export default function M_HardSkillSection() {
-  const [isAdding, setIsAdding] = useState(false);
-  const [open, setOpen] = useState(false);
-  const [q, setQ] = useState('');
+  const [open, setOpen] = useState(false); // 드롭다운 열림 여부
+  const [q, setQ] = useState(''); // 검색어
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [isEditing, setIsEditing] = useState(false); // 오버레이(팝업) 열림 여부
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const startAdd = () => setIsAdding(true);
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
 
-  const stopAdd = () => {
-    setIsAdding(false);
-    setOpen(false);
-    setQ('');
-    setSelected(new Set()); // chips 초기화
-  };
+  const hasAnySelected = () => selected.size > 0;
 
-  // roles JSON → 평탄화
+  // roles JSON → 평탄화 (임시로 desired_roles 재사용)
   const flat: RoleItem[] = useMemo(() => {
-    const cats = (roles as any)?.categories as Array<{ name: string; all?: string; roles: string[] }>;
+    const cats = (roles as any)?.categories as Array<{
+      name: string;
+      all?: string;
+      roles: string[];
+    }>;
     if (!Array.isArray(cats)) return [];
     const out: RoleItem[] = [];
     for (const c of cats) {
@@ -58,7 +63,7 @@ export default function M_HardSkillSection() {
       .slice(0, 50);
   }, [q, flat]);
 
-  // 외부 클릭 시 닫기
+  // 외부 클릭 시 드롭다운 닫기
   useEffect(() => {
     if (!open) return;
     const onPointer = (e: PointerEvent) => {
@@ -69,14 +74,18 @@ export default function M_HardSkillSection() {
     return () => document.removeEventListener('pointerdown', onPointer);
   }, [open]);
 
-  // 하이라이트
+  // 검색어 하이라이트
   const highlight = (text: string, keyword: string) => {
     const k = keyword.trim();
     if (!k) return text;
     const re = new RegExp(`(${k.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\$&')})`, 'ig');
     return text.split(re).map((part, i) =>
       re.test(part)
-        ? <span className="hard-skills__highlight" key={i}>{part}</span>
+        ? (
+          <span className="hard-skills__highlight" key={i}>
+            {part}
+          </span>
+        )
         : <span key={i}>{part}</span>
     );
   };
@@ -106,7 +115,7 @@ export default function M_HardSkillSection() {
     setSelected((prev) => {
       if (prev.has(key)) return prev;
       if (prev.size >= MAX_SELECTED) {
-        toast.success('최대 30개까지 선택가능합니다.', { toastId: 'role-limit' });
+        toast.error('최대 30개까지 추가 가능합니다.', { toastId: 'hard-skill-limit' });
         return prev;
       }
       const next = new Set(prev);
@@ -118,6 +127,65 @@ export default function M_HardSkillSection() {
     setOpen(false);
   };
 
+  const handleOpenPopup = () => {
+    setIsEditing(true);
+  };
+
+  // X 버튼 클릭
+  const handleClosePopup = () => {
+    if (!hasAnySelected()) {
+      // 선택된 게 없으면 바로 닫기
+      setIsEditing(false);
+      setOpen(false);
+      setQ('');
+    } else {
+      // 선택된 게 있으면 취소 확인 모달
+      setShowCancelModal(true);
+    }
+  };
+
+  // 취소 모달에서 "예" 클릭
+  const confirmCancel = () => {
+    // 모두 초기화하고 닫기
+    setSelected(new Set());
+    setQ('');
+    setOpen(false);
+    setShowCancelModal(false);
+    setIsEditing(false);
+  };
+
+  // 초기화 버튼 클릭
+  const handleReset = () => {
+    if (!hasAnySelected()) {
+      // 선택된 게 없으면 모달 없이 정리만
+      setSelected(new Set());
+      setQ('');
+      setOpen(false);
+      return;
+    }
+    setShowResetModal(true);
+  };
+
+  // 초기화 모달에서 "예" 클릭
+  const confirmReset = () => {
+    setSelected(new Set());
+    setQ('');
+    setOpen(false);
+    setShowResetModal(false);
+  };
+
+  // 저장 버튼 클릭
+  const handleSave = () => {
+    if (selected.size === 0) {
+      toast.error('하드 스킬을 1개 이상 추가해 주세요.');
+      return;
+    }
+    // selected 가 곧 저장값이므로 팝업만 닫기
+    setIsEditing(false);
+    setOpen(false);
+    setQ('');
+  };
+
   return (
     <div className="resume-create-page__section resume-create-page__section--hard-skills">
       <div className="resume-create-page__section-title resume-create-page__section-title--simple">
@@ -126,19 +194,16 @@ export default function M_HardSkillSection() {
             <div className="resume-create-page__section-title__heading">
               하드 스킬
               <Tooltip
-               title="하드 스킬이란?"
-               desc="직무 수행에 필요한 전문 기술이나 지식을 의미합니다."
-               position="top"/>
+                title="하드 스킬이란?"
+                desc="직무 수행에 필요한 전문 기술이나 지식을 의미합니다."
+                position="top"
+              />
             </div>
           </div>
         </div>
-        {isAdding && (
-          <span className="resume-create-page__hint">
-            최대 {MAX_SELECTED}개까지 추가 가능합니다.
-          </span>
-        )}
       </div>
 
+      {/* 선택된 하드 스킬 미리보기 */}
       {chips.length > 0 && (
         <div className="resume-create-page__selected">
           {chips.map((chip) => (
@@ -150,74 +215,171 @@ export default function M_HardSkillSection() {
                 className="location-picker__chip-close"
                 onClick={() => removeRole(chip.key)}
               >
-                <img src={ic_close_gray500_24} alt="" />
+                <img src={ic_close_gray500_24} alt="삭제" />
               </span>
             </div>
           ))}
         </div>
       )}
 
-      <div className={`resume-create-page__section-body ${isAdding ? '' : 'empty'}`}>
-        {isAdding ? (
-          <>
-            <SearchField
-              className="resume-search"
-              id="desired-role-search"
-              value={q}
-              placeholder="보유 하드 스킬을 입력해 주세요. (ex. Java, React)"
-              onChange={setQ}
-              onSubmit={() => {}}
-              onFocus={() => setOpen(true)}
-              leftIconSrc={ic_search_gray900_20}
-              clearIconSrc={ic_clear_btn_gray400_20}
-              showSubmitButton={false}
-            />
-
-            {open && (
-              <div className="hard-skills__dropdown" ref={menuRef}>
-                <div className="hard-skills__menu" role="listbox">
-                  <ul className="hard-skills__list">
-                    {filtered.map((item, idx) => (
-                      <li
-                        key={`${item.group}-${item.role}-${idx}`}
-                        className="hard-skills__option"
-                        role="option"
-                        onClick={() => addRole(item)}
-                      >
-                        <span className="hard-skills__option-role">
-                          {highlight(item.role, q)}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {q && (
-                  <div
-                    className="hard-skills__menu-footer"
-                    onClick={() => addRole(q)}
-                    role="button"
-                    tabIndex={0}
-                  >
-                    <span className="hard-skills__highlight">“{q}”</span>
-                    <span className="hard-skills__create-suffix">(으)로 직접 등록하기</span>
-                  </div>
-                )}
-              </div>
-            )}
-
-            <AiSuggestChips
-              title="경력 및 학력 기반의 AI 추천 직무입니다."
-              tags={['CSS', 'JavaScript']}
-              onTagClick={(tag) => addRole(tag)}
-            />
-          </>
-        ) : (
-          <div className="resume-create-page__section-action">
-          <button className="btn_w_full default_btn_white"><img src={ic_add_btn_gray900_20} alt="" /> 추가</button>
-        </div>
-        )}
+      {/* 추가/수정 버튼 */}
+      <div className="resume-create-page__section-action">
+        <button
+          className="btn_w_full default_btn_white"
+          onClick={handleOpenPopup}
+        >
+          <img src={ic_add_btn_gray900_20} alt="" />
+          {chips.length > 0 ? '수정' : '추가'}
+        </button>
       </div>
+
+      {/* 오버레이 팝업 */}
+      {isEditing && (
+        <div className="basic-info-form-overlay hard-skills-section">
+          <div className="basic-info-form-container">
+            <header className="resume-create-form__header">
+              <img
+                src={ic_close_gray900_24}
+                alt=""
+                className="resume-create-form__close-icon"
+                onClick={handleClosePopup}
+                style={{ cursor: 'pointer' }}
+              />
+              <span className="resume-create-form__title">하드 스킬</span>
+              <Tooltip
+                title="하드 스킬이란?"
+                desc="직무 수행에 필요한 전문 기술이나 지식을 의미합니다."
+                position="top"
+              />
+            </header>
+
+            <div className="resume-create-form__content hard-skills-form">
+              <div className="hard-skills-form-hint">
+                ※ 최대 {MAX_SELECTED}개까지 추가 가능합니다.
+              </div>
+
+              {/* 검색 + 드롭다운 + AI 추천 */}
+          
+                <div className="hard-skills__search-wrapper">
+                  <SearchField
+                    className="resume-search"
+                    id="hard-skills-search"
+                    placeholder="보유 하드 스킬을 입력해 주세요. (ex. Java, React)"
+                    value={q}
+                    onChange={setQ}
+                    onSubmit={() => {}}
+                    onFocus={() => setOpen(true)}
+                    leftIconSrc={ic_search_gray900_20}
+                    clearIconSrc={ic_clear_btn_gray400_20}
+                    showSubmitButton={false}
+                  />
+
+                  {open && (
+                    <div className="hard-skills__dropdown" ref={menuRef}>
+                      <div className="hard-skills__menu" role="listbox">
+                        <ul className="hard-skills__list">
+                          {filtered.map((item, idx) => (
+                            <li
+                              key={`${item.group}-${item.role}-${idx}`}
+                              className="hard-skills__option"
+                              role="option"
+                              onClick={() => addRole(item)}
+                            >
+                              <span className="hard-skills__option-role">
+                                {highlight(item.role, q)}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      {q && (
+                        <div
+                          className="hard-skills__menu-footer"
+                          onClick={() => addRole(q)}
+                          role="button"
+                          tabIndex={0}
+                        >
+                          <span className="hard-skills__highlight">“{q}”</span>
+                          <span className="hard-skills__create-suffix">
+                            (으)로 직접 등록하기
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  <AiSuggestChips
+                    title="경력 및 학력 기반의 AI 추천 하드 스킬입니다."
+                    tags={['CSS', 'JavaScript']}
+                    onTagClick={(tag) => addRole(tag)}
+                  />
+                </div>
+            
+            </div>
+
+            {/* 하단 버튼 + 팝업 내 선택 칩 리스트 */}
+            <div className="resume-create-page__form-action">
+              {chips.length > 0 && (
+                <div className="resume-create-page__selected">
+                  {chips.map((chip) => (
+                    <span className="location-picker__chip" key={chip.key}>
+                      <span className="desired-role-chip__label">{chip.role}</span>
+                      <img
+                        className="desired-role-chip__remove-btn"
+                        onClick={() => removeRole(chip.key)}
+                        src={ic_close_gray500_24}
+                        alt="삭제"
+                      />
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              <div className="btn_wrap">
+                <button
+                  className="btn_w_full default_btn_white"
+                  onClick={handleReset}
+                  type="button"
+                >
+                  <img src={ic_replay_gray900_20} alt="" /> 초기화
+                </button>
+                <button
+                  className="btn_w_full default_btn_black"
+                  onClick={handleSave}
+                  type="button"
+                >
+                  저장
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* 초기화 확인 모달 */}
+          <Modal
+            open={showResetModal}
+            title="입력된 내용을 전부 삭제하시겠습니까?"
+            confirmText="예"
+            confirmClassName="btn_w_full default_btn_black"
+            cancelText="아니오"
+            cancelClassName="btn_w_full default_btn_white"
+            onConfirm={confirmReset}
+            onClose={() => setShowResetModal(false)}
+          />
+
+          {/* 취소 확인 모달 */}
+          <Modal
+            open={showCancelModal}
+            title="수정사항을 저장하지 않고 취소하시겠습니까?"
+            confirmText="예"
+            confirmClassName="btn_w_full default_btn_black"
+            cancelText="계속 작성"
+            cancelClassName="btn_w_full default_btn_white"
+            onConfirm={confirmCancel}
+            onClose={() => setShowCancelModal(false)}
+          />
+        </div>
+      )}
     </div>
   );
 }
