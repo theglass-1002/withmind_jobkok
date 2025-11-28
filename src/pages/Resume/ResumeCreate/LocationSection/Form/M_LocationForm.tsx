@@ -250,6 +250,15 @@ export default function M_LocationForm({
     }
   };
 
+  const confirmCancel = () => {
+    console.log("🚫 취소 확인 - 모든 선택 초기화하고 닫기");
+    setGlobalAllOnly(false);
+    setSelected(new Set());
+    onChange({ nationwide: false, selectedKeys: [] }); // ← 부모에도 초기화!
+    setShowCancelModal(false);
+    onCancel(); // ← 폼 닫기!
+  };
+
   // 초기화 확인
   const confirmReset = () => {
     console.log("🗑️ 초기화 확인 - 모든 선택 삭제");
@@ -411,7 +420,7 @@ export default function M_LocationForm({
         confirmClassName="btn_w_full default_btn_black"
         cancelText="계속 작성"
         cancelClassName="btn_w_full default_btn_white"
-        onConfirm={confirmReset}
+        onConfirm={confirmCancel}
         onClose={() => setShowCancelModal(false)}
       />
     </>

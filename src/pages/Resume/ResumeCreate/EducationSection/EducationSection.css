@@ -103,5 +103,52 @@
         .resume-create-page__section--education .resume-create-page__section-title{
             padding: 0px;
         }
+        .education-section__row{
+            flex-direction: column;
+            gap: 24px;
+        }
+        .education-section__group .education-section__period{
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+        }
+        .education-section.date{
+            width: 100%;
+            height: 100%;
+        }
+        .education-section.date .date-section{
+            width: 100%;
+            align-items: end;
+            justify-content: end;
+        }
+        .education-section__date--end{
+            
+        }
+        .education-section__period, .section-period__end-wrap{
+            width: 100%;
+            height: 100%;
+        }
+        .resume-create-page__section--education .education-section__fields{
+            gap: 24px;
+        }
+        .education-section__tilde{
+            padding-top: 30px;
+        }
+        .education-section__controls{
+            flex-direction: row;
+            width: 100%;
+        }
+        .education-section__period .section-period__end-wrap .calendar-popover{
+            left: -150px;
+        }
+        .section-period__start-wrap, .section-period__end-wrap{
+            width: 100%;
+        }
+
+        .resume-create-page__section-body.education-section{
+            padding: 0px;
+            background: none;
+            gap: 8px;
+        }
     }
 }

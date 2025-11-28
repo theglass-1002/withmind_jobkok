@@ -2,7 +2,7 @@ import React, { useMemo, useState, useRef, useEffect } from 'react';
 import './HardSkillSection.css';
 import roles from '@/data/desired_roles.json';
 import { toast } from 'react-toastify';
-
+import Tooltip from "@/shared/components/tooltip/Tooltip";
 import ic_search_gray900_20 from '@/assets/icons/size20/ic_search_gray900_20.png';
 import ic_clear_btn_gray400_20 from '@/assets/icons/size20/ic_clear_btn_gray400_20.png';
 import ic_error_gray500_20 from '@/assets/icons/size20/ic_error_gray500_20.png';
@@ -124,14 +124,11 @@ export default function M_HardSkillSection() {
         <div className="section-title__row">
           <div className="section-title__left">
             <div className="resume-create-page__section-title__heading">
-              하드 스킬?
-              <span className="tooltip tooltip--top">
-                <img className="tooltip__trigger" src={ic_error_gray500_20} alt="툴팁" />
-                <div className="tooltip__content" role="tooltip">
-                  <span className="tooltip__title">하드 스킬이란?</span>
-                  <span className="tooltip__desc">직무 수행에 필요한 전문 기술이나 지식을 의미합니다.</span>
-                </div>
-              </span>
+              하드 스킬
+              <Tooltip
+               title="하드 스킬이란?"
+               desc="직무 수행에 필요한 전문 기술이나 지식을 의미합니다."
+               position="top"/>
             </div>
           </div>
         </div>

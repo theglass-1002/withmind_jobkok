@@ -94,6 +94,82 @@
         .resume-create-page__section-body.career-section{
             background: none;
             padding: 0px;
+            gap: 16px;
         }
+        .career-section__item{
+            display: flex;
+         
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 20px;
+            align-self: stretch;
+        }
+        .career-section__period{
+            flex-direction:row;
+            width: 100%;
+        }
+        .resume-create-page .career-section__group--employment{
+            align-items: start;
+        }
+        .career-section__date-wrapper{
+            width: 100%;
+        }
+        .career-section.date{
+            width: 100%;
+        }
+   
+        .calendar-popover{
+            left: 0px;
+            width: 100%;
+        }
+
+        .career-section__row{
+            flex-direction: column;
+            gap: 24px;
+        }
+        .field .career-section__summary-input textarea{
+            height: 100%;
+
+        }
+
+        .career-section__control .resume-create-page__assist-text{
+            width: 75%;
+        }
+        .resume-ai-suggest__item{
+            font-size: 14px;
+        }
+        .resume-create-page .career-section__controls{
+            width: 100%;
+            justify-content: center;
+            flex-direction: row;
+        }
+        .resume-create-form__content{
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding: 80px 20px 120px 20px;
+            background: var(--gray-50, #F8F8F9);
+        }
+        .career-add-btn{
+            
+        }
+        .resume-create-page .career-section__fields{
+            gap: 24px;
+        }
+        .resume-career-autofill-button{
+            display: flex;
+            padding: 16px 20px;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            align-self: stretch;
+            border-radius: 4px;
+            font-size: 16px;
+            color: var(--white-100, #FFF);
+            border: 1px solid var(--gray-300, #E0E2E4);
+            background: var(--primary-primary, #816BFE);
+        }
+
     }
 }
