@@ -181,5 +181,26 @@ background-color: white;
         .portfolio-documents__file-name{
             width: 100%;
         }
+       .resume-create-page__section--portfolio-documents .basic-info-form-container{
+            background: var(--gray-50, #F8F8F9);
+        }
+        .resume-portfolio-item{
+            padding: 20px;
+        }
+        .resume-portfolio-list{
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .portfolio-documents__file-empty{
+            display: flex;
+            width: 100%;
+            justify-content: space-between;
+        }
+        .resume-portfolio-item__main{
+            display: flex;
+            gap: 12px;
+            width: 100%;
+        }
     }
   }

@@ -1,7 +1,7 @@
 // src/pages/.../ActivitiesSection/M_ActivitiesSection.tsx
 import React, { useState } from "react";
 import "./ActivitiesSection.css";
-
+import ic_edit_gray900_20 from "@/assets/icons/size20/ic_edit_gray900_20.png";
 import ic_add_btn_gray900_20 from "@/assets/icons/size20/ic_add_btn_gray900_20.png";
 import M_ActivitiesForm from "./Form/M_ActivitiesForm";
 
@@ -121,8 +121,16 @@ export default function M_ActivitiesSection() {
           onClick={handleAddOrEdit}
           disabled={isEditing}
         >
+        {items.length>0?
+          <>
+          <img src={ic_edit_gray900_20} alt="" />
+          수정
+          </>:<>
           <img src={ic_add_btn_gray900_20} alt="" />
-          {items.length > 0 ? "수정" : "추가"}
+          추가
+          </>}
+          {/* <img src={ic_add_btn_gray900_20} alt="" />
+          {items.length > 0 ? "수정" : "추가"} */}
         </button>
       </div>
 

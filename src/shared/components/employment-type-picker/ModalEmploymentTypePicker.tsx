@@ -42,7 +42,7 @@ export default function ModalEmploymentTypePicker() {
       <div className="employment-type-picker employment-type-picker--popup">
       <div className="employment-type-picker__body">
       <div className="emp-type__section emp-type__section--type">
-    <span className="emp-type__title">고용형태</span>
+      <span className="emp-type__title">고용형태</span>
       <div className="emp-type__list">
       <span
         className={`emp-type__option ${isSelected('fullTime') ? 'on' : ''}`}
@@ -86,6 +86,45 @@ export default function ModalEmploymentTypePicker() {
           </div>
           <span className="default_btn_black">적용</span>
         </div>
+      </div>
+      <div className="employment-type-picker employment-type-picker--popup mobile">
+      <div className="employment-type-picker__body">
+      <div className="emp-type__section emp-type__section--type">
+      <span className="emp-type__title">고용형태</span>
+      <div className="emp-type__list">
+      <span
+        className={`emp-type__option ${isSelected('fullTime') ? 'on' : ''}`}
+        onClick={() => handleToggleOption('fullTime')}
+        >정규직</span>
+      <span
+        className={`emp-type__option ${isSelected('contract') ? 'on' : ''}`}
+        onClick={() => handleToggleOption('contract')}
+        >계약직</span>
+      <span
+        className={`emp-type__option ${isSelected('intern') ? 'on' : ''}`}
+        onClick={() => handleToggleOption('intern')}
+        >인턴</span>
+      </div>
+    </div>
+
+    <div className="emp-type__section emp-type__section--etc">
+      <span className="emp-type__title">기타사항</span>
+      <div className="emp-type__list">
+      <span
+        className={`emp-type__option ${isSelected('militaryService') ? 'on' : ''}`}
+        onClick={() => handleToggleOption('militaryService')}
+        >병역특례</span>
+      <span
+        className={`emp-type__option ${isSelected('foreigner') ? 'on' : ''}`}
+        onClick={() => handleToggleOption('foreigner')}
+        >외국인</span>
+    <span
+        className={`emp-type__option ${isSelected('disability') ? 'on' : ''}`}
+         onClick={() => handleToggleOption('disability')}
+            >장애인</span>
+      </div>
+    </div>
+      </div>
       </div>
     </>
   );

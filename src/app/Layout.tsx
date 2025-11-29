@@ -149,7 +149,7 @@ export default function Layout({
           leftElement={<img src={ic_arrow_back_ios_gray900_20} alt="닫기" />}
           onLeftElementClick={() => navigate('/resumes')}
           rightIcons={<img src={ic_download_gray900_20}/>}
-          onRightElementClick={()=> navigate('/')}
+          onRightElementClick={()=>{console.log('다운로드')}}
         />);
       }else if(screen==='MockInterviewReport'){
         return(

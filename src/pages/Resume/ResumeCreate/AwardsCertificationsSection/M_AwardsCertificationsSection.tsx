@@ -1,6 +1,7 @@
 // src/pages/.../AwardsCertificationsSection/M_AwardsCertificationsSection.tsx
 import React, { useState } from "react";
 import "./AwardsCertificationsSection.css";
+import ic_edit_gray900_20 from "@/assets/icons/size20/ic_edit_gray900_20.png";
 
 import ic_add_btn_gray900_20 from "@/assets/icons/size20/ic_add_btn_gray900_20.png";
 import M_AwardsCertificationsForm from "./Form/M_AwardsCertificationsForm";
@@ -114,36 +115,6 @@ export default function M_AwardsCertificationsSection() {
                  </div>
                </div>
              </div>
-            // <div
-            //   className="resume-awards-item resume-career-item"
-            //   key={item.id}
-            // >
-            //   <div className="resume-awards-item__header resume-career-item__header">
-            //     <span className="resume-awards-item__title resume-career-item__company">
-            //       {item.title || "수상ㆍ자격증명 미입력"}
-            //     </span>
-
-            //     <div className="resume-awards-item__meta resume-career-item__meta">
-            //       <span className="resume-awards-item__period resume-career-item__period resume-career-item__period--stack">
-            //         <div className="resume-awards-item__period-range resume-career-item__period-range">
-            //           <span className="resume-awards-item__period-start resume-career-item__period-start">
-            //             {item.dateValue || "YYYY.MM"}
-            //           </span>
-            //         </div>
-            //       </span>
-            //       {item.score && (
-            //         <span className="resume-awards-item__score">
-            //           {item.score}
-            //         </span>
-            //       )}
-            //       {item.issuer && (
-            //         <span className="resume-awards-item__issuer">
-            //           {item.issuer}
-            //         </span>
-            //       )}
-            //     </div>
-            //   </div>
-            // </div>
           ))}
         </div>
       )}
@@ -155,8 +126,16 @@ export default function M_AwardsCertificationsSection() {
           onClick={handleAddOrEdit}
           disabled={isEditing}
         >
+          {items.length>0?
+          <>
+          <img src={ic_edit_gray900_20} alt="" />
+          수정
+          </>:<>
           <img src={ic_add_btn_gray900_20} alt="" />
-          {items.length > 0 ? "수정" : "추가"}
+          추가
+          </>}
+          {/* <img src={ic_add_btn_gray900_20} alt="" />
+          {items.length > 0 ? "수정" : "추가"} */}
         </button>
       </div>
 

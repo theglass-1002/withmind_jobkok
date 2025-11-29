@@ -496,7 +496,7 @@ function CareerItem({
             </div>
           )}
 
-<AISuggestArea
+          <AISuggestArea
             show={showAISuggest}
             items={aiSuggestions}
             onOpen={handleClickAISuggest}

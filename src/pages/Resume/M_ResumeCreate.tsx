@@ -5,8 +5,11 @@ import Tabs from "@/shared/components/tabs/Tabs";
 import {useStickyTabs, tabItems, BasicInfo ,ALL_SECTIONS ,
   BasicErrors,initial,FormState,SectionId,
   LocationValue} from '@/shared/utils/util';
-import M_BasicInfoSection from "./ResumeCreate/BasicInfoSection/M_BasicInfoSection";
+import { toast } from "react-toastify";
+import Modal from "@/shared/components/modal/Modal";
 
+
+import M_BasicInfoSection from "./ResumeCreate/BasicInfoSection/M_BasicInfoSection";
 import M_LocationSection from "./ResumeCreate/LocationSection/M_LocationSection";
 import M_CareerSection from "./ResumeCreate/CareerSection/M_CareerSection";
 import M_EducationSection,{
@@ -26,12 +29,12 @@ import ResumeSidebar, {
 } from "./ResumeSidebar/ResumeSidebar";
 
 import ic_star_gray700_20 from "@/assets/icons/size20/ic_star_gray700_20.png";
-import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 
 export default function M_ResumeCreate() {
   const [form, setForm] = useState<FormState>(initial);
+  const [showDefaultModal, setShowDefaultModal] = useState(false); // 기본 이력서 설정 모달
   const [errors, setErrors] = useState<{ 
     education? :EducationErrors;
     basic: BasicErrors; title?: string; location?: string }>({
@@ -70,9 +73,25 @@ export default function M_ResumeCreate() {
   };
 
   const handleToggle = (checked: boolean) => {
-    setIsDefaultResume(checked);
-    console.log("기본 이력서 설정:", checked);
+    if (checked) {
+      setShowDefaultModal(true);
+    } else {
+      // 끄는 건 그냥 끄기
+      setIsDefaultResume(false);
+    }
   };
+
+  const handleConfirmDefaultResume = () => {
+    setIsDefaultResume(true);
+    setShowDefaultModal(false);
+    toast.success("기본 이력서로 설정되었습니다.");
+  };
+
+  const handleCancelDefaultResume = () => {
+    setShowDefaultModal(false);
+    // 스위치 값은 그대로 false 유지
+  };
+
 
   const updateBasic = (patch: Partial<BasicInfo>) =>
     setForm((prev) => ({ ...prev, basic: { ...prev.basic, ...patch } }));
@@ -235,6 +254,17 @@ export default function M_ResumeCreate() {
         </span>
       </div>
       </div>
+      <Modal
+        open={showDefaultModal}
+        title={`해당 이력서를 기본 이력서로\n변경하시겠습니까?`}
+        confirmText="확인"
+        confirmClassName="btn_w_full default_btn_black"
+        cancelText="취소"
+        cancelClassName="btn_w_full default_btn_white"
+        onConfirm={handleConfirmDefaultResume}
+        onClose={handleCancelDefaultResume}
+      />
     </div>
+    
   );
 }

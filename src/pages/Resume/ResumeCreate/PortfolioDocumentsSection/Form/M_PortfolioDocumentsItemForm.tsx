@@ -4,7 +4,6 @@ import "../PortfolioDocumentsSection.css";
 
 import FormInput from "@/shared/components/form/FormInput";
 
-import ic_add_btn_gray900_20 from "@/assets/icons/size20/ic_add_btn_gray900_20.png";
 import ic_radio_checked_purple_20 from "@/assets/icons/size20/ic_radio_checked_purple_20.png";
 import ic_radio_unchecked_gray400_20 from "@/assets/icons/size20/ic_radio_unchecked_gray400_20.png";
 import ic_key_arrow_down_gray500_20 from "@/assets/icons/size20/ic_key_arrow_down_gray500_20.png";
@@ -14,15 +13,22 @@ import ic_key_arrow_up_gray900_20 from "@/assets/icons/size20/ic_key_arrow_up_gr
 import ic_key_arrow_down_gray900_20 from "@/assets/icons/size20/ic_key_arrow_down_gray900_20.png";
 import ic_folder_gray900_20 from "@/assets/icons/size20/ic_folder_gray900_20.png";
 import ic_link_gray900_20 from "@/assets/icons/size20/ic_link_gray900_20.png";
+import ic_error_red100_20 from "@/assets/icons/size20/ic_error_red100_20.png";
 
 import type { PortfolioDocItem, SourceType } from "../M_PortfolioDocumentsSection";
 
 const MAX_FILE_BYTES = 50 * 1024 * 1024; // 50MB
 
+type PortfolioErrors = {
+  fileMissing?: boolean;
+  urlMissing?: boolean;
+};
+
 interface Props {
   index: number;
   total: number;
   value: PortfolioDocItem;
+  errors?: PortfolioErrors;
   canMoveUp: boolean;
   canMoveDown: boolean;
   onChange: (patch: Partial<PortfolioDocItem>) => void;
@@ -35,6 +41,7 @@ export default function M_PortfolioDocumentsItemForm({
   index,
   total,
   value,
+  errors = {},
   canMoveUp,
   canMoveDown,
   onChange,
@@ -167,7 +174,7 @@ export default function M_PortfolioDocumentsItemForm({
               <div
                 className={`portfolio-documents__file-name ${
                   file ? "" : "portfolio-documents__file-name--empty"
-                }`}
+                } ${errors.fileMissing ? "error_box" : ""}`}
               >
                 <img src={ic_folder_gray900_20} alt="" />
                 {file ? (
@@ -175,15 +182,17 @@ export default function M_PortfolioDocumentsItemForm({
                     <span className="portfolio-documents__file-text">
                       {file.name}
                     </span>
-                    <span className="portfolio-documents__file-size">
-                      {formatBytes(file.size)}
-                    </span>
+                  
                   </>
                 ) : (
-                  <>선택된 파일이 없습니다</>
+                  <div className="portfolio-documents__file-empty">
+                          선택된 파일이 없습니다
+                          {errors.fileMissing&&(<img src={ic_error_red100_20} alt="" />)}
+                      </div>
+               
                 )}
               </div>
-
+              {/* ic_error_red100_20 */}
               <span
                 className="default_btn_white btn_w_full"
                 role="button"
@@ -203,87 +212,88 @@ export default function M_PortfolioDocumentsItemForm({
             <span className="portfolio-documents__hint">
               ※ 50MB 이하의 파일만 등록 가능합니다.
             </span>
-                       {/* 컨트롤: 위/아래/삭제 */}
-    <div className="portfolio-documents__controls">
-        {/* 위로 */}
-        <span
-          className={[
-            "portfolio-documents__control-btn",
-            "portfolio-documents__control--up",
-            !canMoveUp ? "is-disabled" : "",
-          ]
-            .join(" ")
-            .trim()}
-          role="button"
-          tabIndex={canMoveUp ? 0 : -1}
-          onClick={() => canMoveUp && onMoveUp()}
-          aria-disabled={!canMoveUp}
-        >
-          <img
-            src={
-              canMoveUp
-                ? ic_key_arrow_up_gray900_20
-                : ic_key_arrow_up_gray500_20
-            }
-            alt=""
-          />
-        </span>
 
-        {/* 아래로 */}
-        <span
-          className={[
-            "portfolio-documents__control-btn",
-            "portfolio-documents__control--down",
-            !canMoveDown ? "is-disabled" : "",
-          ]
-            .join(" ")
-            .trim()}
-          role="button"
-          tabIndex={canMoveDown ? 0 : -1}
-          onClick={() => canMoveDown && onMoveDown()}
-          aria-disabled={!canMoveDown}
-        >
-          <img
-            src={
-              canMoveDown
-                ? ic_key_arrow_down_gray900_20
-                : ic_key_arrow_down_gray500_20
-            }
-            alt=""
-          />
-        </span>
+            {/* 컨트롤: 위/아래/삭제 */}
+            <div className="portfolio-documents__controls">
+              {/* 위로 */}
+              <span
+                className={[
+                  "portfolio-documents__control-btn",
+                  "portfolio-documents__control--up",
+                  !canMoveUp ? "is-disabled" : "",
+                ]
+                  .join(" ")
+                  .trim()}
+                role="button"
+                tabIndex={canMoveUp ? 0 : -1}
+                onClick={() => canMoveUp && onMoveUp()}
+                aria-disabled={!canMoveUp}
+              >
+                <img
+                  src={
+                    canMoveUp
+                      ? ic_key_arrow_up_gray900_20
+                      : ic_key_arrow_up_gray500_20
+                  }
+                  alt=""
+                />
+              </span>
 
-        {/* 삭제 */}
-        <span
-          className="portfolio-documents__control-btn portfolio-documents__control--remove"
-          onClick={() => canRemove && onRemove()}
-          aria-label="삭제"
-          role="button"
-          tabIndex={0}
-        >
-          <img src={ic_trash_gray900_20} alt="" />
-        </span>
-      </div>
+              {/* 아래로 */}
+              <span
+                className={[
+                  "portfolio-documents__control-btn",
+                  "portfolio-documents__control--down",
+                  !canMoveDown ? "is-disabled" : "",
+                ]
+                  .join(" ")
+                  .trim()}
+                role="button"
+                tabIndex={canMoveDown ? 0 : -1}
+                onClick={() => canMoveDown && onMoveDown()}
+                aria-disabled={!canMoveDown}
+              >
+                <img
+                  src={
+                    canMoveDown
+                      ? ic_key_arrow_down_gray900_20
+                      : ic_key_arrow_down_gray500_20
+                  }
+                  alt=""
+                />
+              </span>
+
+              {/* 삭제 */}
+              <span
+                className="portfolio-documents__control-btn portfolio-documents__control--remove"
+                onClick={() => canRemove && onRemove()}
+                aria-label="삭제"
+                role="button"
+                tabIndex={0}
+              >
+                <img src={ic_trash_gray900_20} alt="" />
+              </span>
+            </div>
+      
           </div>
         ) : (
           <div className="portfolio-documents__uploader">
             <label className="portfolio-documents__label small_labe_black-14">
               URL <em className="error_text_red">*</em>
             </label>
+           
             <FormInput
               placeholder="https://"
               leftIconSrc={ic_link_gray900_20}
-              inputClassName="portfolio-documents__url-input"
               id={`portfolio_doc_url_${value.id}`}
               value={url}
               onChange={(v: any) => changeUrl(v)}
+              invalid={!!errors.urlMissing}
+              rightIconSrc={errors.urlMissing ? ic_error_red100_20 : undefined}
             />
           </div>
         )}
-  
       </div>
-
- 
     </div>
   );
 }

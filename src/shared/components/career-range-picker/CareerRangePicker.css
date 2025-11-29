@@ -121,3 +121,41 @@
         border-top: 1px solid var(--gray-300, #E0E2E4);
   }
   
+  @media (max-width: 760px) {
+    body{
+      .career-range--popup{
+        position: static;
+        width: 100%;
+        height: 100%;
+        box-shadow: none;
+        border: none;
+        border-radius: 0;
+  
+      }
+      .career-range__content{
+        width: 100%;
+        height: 100%;
+      }
+      .career-range--popup .career-range__actions{
+        display: none;
+        height: 100%;
+      }
+      .career-range-wrap{
+        padding: 36px 20px;
+        width: 90%;
+    }
+      }
+      .career-range__label--min{
+        top: 80%;
+      }
+      .career-range__label--max{
+        top: 80%;
+      }
+      .career-range-follow.left{
+        transform: translateX(-70%);
+      }
+      .career-range-follow.right{
+        transform: translateX(0%);
+      }
+    }
+  }

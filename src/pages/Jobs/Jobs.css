@@ -609,6 +609,14 @@
         align-self: stretch;
         background: var(--gray-50, #F8F8F9);
     }
-    
+    .jobs-chips__item{
+        display: flex;
+        padding: 8px 8px 8px 12px;
+        justify-content: center;
+        align-items: center;
+        gap: 4px;
+        border-radius: 4px;
+        background: var(--gray-100, #F2F3F4);
+    }
    }
 }

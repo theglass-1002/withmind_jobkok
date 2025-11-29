@@ -55,13 +55,13 @@ export default function ModalCareerRangePicker() {
                           onChange={(v) => setRange(v as [number, number])}
                         />
                         <div
-                          className="career-range-follow career-range__label career-range__label--min"
+                          className="career-range-follow right career-range__label career-range__label--min"
                           style={{ left: `${clampPct(pct(range[0]))}%` }}
                         >
                           <span className="career-range__label-text">{minLabel}</span>
                         </div>
                         <div
-                          className="career-range-follow career-range__label career-range__label--max"
+                          className="career-range-follow left career-range__label career-range__label--max"
                           style={{ left: `${clampPct(pct(range[1]))}%` }}
                         >
                           <span className="career-range__label-text">

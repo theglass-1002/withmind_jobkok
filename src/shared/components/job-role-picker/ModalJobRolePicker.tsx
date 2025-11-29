@@ -51,7 +51,7 @@ const handleReset = () => {
 
   return (
     <>
-  <div className="job-role-picker job-role-picker--popup">
+      <div className="job-role-picker job-role-picker--popup">
                     <div className="job-role-picker__body">
                       <div className="job-role-picker__column job-role-picker__column--left">
                         <div className="job-role-picker__category_group">

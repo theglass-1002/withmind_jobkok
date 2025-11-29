@@ -1,0 +1,400 @@
+
+/* 모바일: 760px 이하 */
+@media (max-width: 760px) {
+  body{
+    .job-filter-panel__overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(0, 0, 0, 0.4);
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+    }
+  
+    /* 배경 클릭 영역 */
+    .job-filter-panel__backdrop {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+    }
+  
+    /* 패널 자체 */
+    .job-filter-panel {
+      position: relative;
+      z-index: 2;
+      background: #fff;
+      width: 100%;
+      max-width: 768px;
+      height: 100%;
+      max-height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden; /* 패널 자체는 스크롤 없음 */
+    }
+  
+    /* 헤더 (고정) */
+    .job-filter-panel__header {
+      flex-shrink: 0; /* 크기 고정 */
+      display: flex;
+      height: 64px;
+      padding: 20px;
+      width: 100%;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    
+      background: var(--white-100, #FFF);
+      z-index: 5;
+    }
+  
+    .job-filter-panel__close-icon {
+      cursor: pointer;
+    }
+  
+    .job-filter-panel__title {
+      color: var(--gray-900, #2A2D2F);
+      text-align: center;
+      font-family: Pretendard;
+      font-size: 18px;
+      font-style: normal;
+      font-weight: 600;
+      line-height: 22px;
+    }
+  
+    /* 탭 영역 (고정) */
+    .job-filter-panel__tabs {
+      width: 100%;
+      display: flex;
+      height: 56px;
+      padding: 8px 20px 0 20px;
+      align-items: center;
+      gap: 20px;
+      align-self: stretch;
+      flex-shrink: 0; /* 크기 고정 */
+      border-bottom: 1px solid var(--gray-300, #E0E2E4);
+      background: var(--white-100, #FFF);
+      z-index: 4;
+      overflow-x: auto;
+      overflow-y: hidden;
+    }
+  
+    .tabs__item.job-filter-panel__tab-item{
+      width: 100%;
+      white-space: nowrap;
+    }
+    /* 내용: 스크롤 가능한 영역 */
+    .job-filter-panel__content {
+      flex: 1; /* 나머지 공간 차지 */
+      overflow-y: auto; /* 세로 스크롤 */
+      overflow-x: hidden;
+      background: var(--white-100, #FFF);
+      min-height: 0; /* flex 자식이 overflow 되려면 필수 */
+    }
+  
+    /* 하단 고정 버튼 영역 */
+    .job-filter-panel__footer {
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0; /* 크기 고정 */
+      gap: 20px;
+      padding: 12px 20px 24px;
+      border-top: 1px solid var(--gray-300, #E0E2E4);
+      background: var(--white-100, #FFF);
+     
+    }
+    .job-filter-panel__footer .btn_wrap{
+      gap: 12px;
+    }
+  
+    /* 직군·직무 선택 영역 */
+    .job-filter-panel__content .job-role-picker--popup {
+      position: static; /* absolute 제거 */
+      width: 100%;
+      height: 100%;
+      box-shadow: none;
+      border: none;
+      border-radius: 0;
+    }
+  
+    .job-filter-panel__content .job-role-picker__body {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+  
+    .job-filter-panel__content .job-role-picker__column--left {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      border-right: none;
+      border-bottom: 1px solid var(--gray-300, #E0E2E4);
+    }
+  
+    .job-filter-panel__content .job-role-picker__options-note {
+      display: flex;
+      padding: 16px;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      align-self: stretch;
+      border-radius: 4px;
+border-bottom: 1px solid var(--gray-300, #E0E2E4);
+background: var(--gray-50, #F8F8F9);
+    }
+  
+    .job-filter-panel__content .job-role-picker__category_group {
+      width: 100%;
+      height: 100%;
+      max-height: 100%;
+      padding: 0;
+      overflow-y: auto;
+    }
+  
+    .job-filter-panel__content .job-role-picker__category {
+      width: 100%;
+      padding: 16px 20px;
+      border-radius: 0;
+    }
+  
+    .job-filter-panel__content .job-role-picker__column--right {
+      /* width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start; */
+      position: fixed;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      top: 0;
+      z-index: 10;
+      background: white;
+      
+    
+    }
+  
+    .job-role-picker__detail-header{
+      flex-shrink: 0;
+      display: flex;
+      height: 64px;
+      padding: 20px;
+      width: 100%;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      background: var(--white-100, #FFF);
+      z-index: 6;
+      border-bottom: 1px solid var(--gray-300, #E0E2E4);
+      background: var(--white-100, #FFF);
+    }
+    .job-role-picker__detail-title{
+      color: var(--gray-900, #2A2D2F);
+      font-size: 18px;
+      font-weight: 600;
+    }
+  
+    .job-filter-panel__content .job-role-picker__group--right {
+      width: 100%;
+      height: 100%;
+      max-height: 100%;
+      padding: 0;
+      overflow-y: auto;
+    }
+  
+    .job-role-picker__column .job-filter-panel__footer{
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+    }
+  
+  
+
+
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

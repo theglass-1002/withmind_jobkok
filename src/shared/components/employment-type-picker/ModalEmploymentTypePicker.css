@@ -22,6 +22,10 @@
     z-index: 10;
 }
 
+.employment-type-picker--popup.mobile{
+    display: none;
+}
+
 .employment-type-picker__header{
     display: flex;
     align-items: center;
@@ -168,4 +172,28 @@
     align-items: center;
     text-align: center;
     cursor: pointer;
+}
+
+/* 모바일: 760px 이하 */
+@media (max-width: 760px) {
+    body{
+        .employment-type-picker--popup{
+            display: none;
+        }
+        .employment-type-picker--popup.mobile{
+            display: flex;
+            position: static;
+            width: 100%;
+            height: 100%;
+            box-shadow: none;
+            border: none;
+            border-radius: 0;
+        }
+        .emp-type__section--etc{
+            border: none;
+        }
+        .emp-type__section{
+            width: 100%;
+        }
+    }
 }

@@ -260,7 +260,179 @@ const handleReset = () => {
     <span className="default_btn_black">적용</span>
   </div>
 </div>
+<div className="location-picker location-picker--popup mobile">
+<span className="location-picker__options-note">※ 지역 옵션은 최대 5개까지 선택 가능합니다.</span>
+  <div className="location-picker__body">
+    <div className="location-picker__column location-picker__column--left">
+      <div className="location-picker__category_group">
+        <div
+          className={`location-picker__category ${isOn('dev') ? 'on' : ''}`}
+          onClick={() => toggleCategory('dev')}
+        >
+          <div className="location-picker__category-meta">
+            <span className="location-picker__category-title">서울</span>
+            <span className="location-picker__category-count">3</span>
+          </div>
+          <span className="location-picker__category-toggle">
+            <img src={chevron_right_gray_light} alt="" />
+          </span>
+        </div>
 
+        <div
+          className={`location-picker__category ${isOn('mkt') ? 'on' : ''}`}
+          onClick={() => toggleCategory('mkt')}
+        >
+          <div className="location-picker__category-meta">
+            <span className="location-picker__category-title">부산</span>
+            <span className="location-picker__category-count">3</span>
+          </div>
+          <span className="location-picker__category-toggle">
+            <img src={chevron_right_gray_light} alt="" />
+          </span>
+        </div>
+
+        <div
+          className={`location-picker__category ${isOn('biz') ? 'on' : ''}`}
+          onClick={() => toggleCategory('biz')}
+        >
+          <div className="location-picker__category-meta">
+            <span className="location-picker__category-title">대구</span>
+            <span className="location-picker__category-count">3</span>
+          </div>
+          <span className="location-picker__category-toggle">
+            <img src={chevron_right_gray_light} alt="" />
+          </span>
+        </div>
+
+        <div
+          className={`location-picker__category ${isOn('biz') ? 'on' : ''}`}
+          onClick={() => toggleCategory('biz')}
+        >
+          <div className="location-picker__category-meta">
+            <span className="location-picker__category-title">인천</span>
+            <span className="location-picker__category-count">3</span>
+          </div>
+          <span className="location-picker__category-toggle">
+            <img src={chevron_right_gray_light} alt="" />
+          </span>
+        </div>
+
+        <div
+          className={`location-picker__category ${isOn('biz') ? 'on' : ''}`}
+          onClick={() => toggleCategory('biz')}
+        >
+          <div className="location-picker__category-meta">
+            <span className="location-picker__category-title">광주</span>
+            <span className="location-picker__category-count">3</span>
+          </div>
+          <span className="location-picker__category-toggle">
+            <img src={chevron_right_gray_light} alt="" />
+          </span>
+        </div>
+
+        <div
+          className={`location-picker__category ${isOn('biz') ? 'on' : ''}`}
+          onClick={() => toggleCategory('biz')}
+        >
+          <div className="location-picker__category-meta">
+            <span className="location-picker__category-title">대전</span>
+            <span className="location-picker__category-count">3</span>
+          </div>
+          <span className="location-picker__category-toggle">
+            <img src={chevron_right_gray_light} alt="" />
+          </span>
+        </div>
+
+        <div
+          className={`location-picker__category ${isOn('biz') ? 'on' : ''}`}
+          onClick={() => toggleCategory('biz')}
+        >
+          <div className="location-picker__category-meta">
+            <span className="location-picker__category-title">경영ㆍ비즈니스</span>
+            <span className="location-picker__category-count">3</span>
+          </div>
+          <span className="location-picker__category-toggle">
+            <img src={chevron_right_gray_light} alt="" />
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div className="location-picker__column location-picker__column--right">
+      <div className="location-picker__group location-picker__group--right">
+        <div
+          className={`location-picker__role location-picker__role--all ${allChecked ? 'on' : ''}`}
+          onClick={onClickAll}
+        >
+          <span className="location-picker__checkbox-wrap">
+            <img src={`${allChecked ? check_box_purple : check_box_outline_blank_gray}`} alt="" />
+          </span>
+          <span className="location-picker__role-label">서울 전체</span>
+        </div>
+
+        <div
+          className={`location-picker__role ${checkedRoles.has('server_dev') ? 'on' : ''}`}
+          onClick={() => onClickRole('server_dev')}
+        >
+          <span className="location-picker__checkbox-wrap">
+            <img src={`${checkedRoles.has('server_dev') ? check_box_purple : check_box_outline_blank_gray}`} alt="" />
+          </span>
+          <span className="location-picker__role-label">강남구</span>
+        </div>
+
+        <div
+          className={`location-picker__role ${checkedRoles.has('software_engineer') ? 'on' : ''}`}
+          onClick={() => onClickRole('software_engineer')}
+        >
+          <span className="location-picker__checkbox-wrap">
+            <img src={`${checkedRoles.has('software_engineer') ? check_box_purple : check_box_outline_blank_gray}`} alt="" />
+          </span>
+          <span className="location-picker__role-label">강동구</span>
+        </div>
+
+        <div
+          className={`location-picker__role ${checkedRoles.has('software_engineer') ? 'on' : ''}`}
+          onClick={() => onClickRole('software_engineer')}
+        >
+          <span className="location-picker__checkbox-wrap">
+            <img src={`${checkedRoles.has('software_engineer') ? check_box_purple : check_box_outline_blank_gray}`} alt="" />
+          </span>
+          <span className="location-picker__role-label">강북구</span>
+        </div>
+
+        <div
+          className={`location-picker__role ${checkedRoles.has('software_engineer') ? 'on' : ''}`}
+          onClick={() => onClickRole('software_engineer')}
+        >
+          <span className="location-picker__checkbox-wrap">
+            <img src={`${checkedRoles.has('software_engineer') ? check_box_purple : check_box_outline_blank_gray}`} alt="" />
+          </span>
+          <span className="location-picker__role-label">관악구</span>
+        </div>
+
+        <div
+          className={`location-picker__role ${checkedRoles.has('software_engineer') ? 'on' : ''}`}
+          onClick={() => onClickRole('software_engineer')}
+        >
+          <span className="location-picker__checkbox-wrap">
+            <img src={`${checkedRoles.has('software_engineer') ? check_box_purple : check_box_outline_blank_gray}`} alt="" />
+          </span>
+          <span className="location-picker__role-label">관악구</span>
+        </div>
+
+        <div
+          className={`location-picker__role ${checkedRoles.has('software_engineer') ? 'on' : ''}`}
+          onClick={() => onClickRole('software_engineer')}
+        >
+          <span className="location-picker__checkbox-wrap">
+            <img src={`${checkedRoles.has('software_engineer') ? check_box_purple : check_box_outline_blank_gray}`} alt="" />
+          </span>
+          <span className="location-picker__role-label">관악구</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
     </>
   );
 }

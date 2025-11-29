@@ -89,8 +89,34 @@ line-height: 20px; /* 125% */
 /* 모바일: 760px 이하 */
 @media (max-width: 760px) {
     body{
+
+
         .resume-create-page__section--personal-statement .resume-create-page__section-body.empty{
-            padding: 0px;
+            padding: 16px 20px;
+            border-radius: 4px;
+            border: 1px solid var(--gray-300, #E0E2E4);
+            background: var(--white-100, #FFF);
+        }
+
+        .resume-create-page__section--personal-statement .resume-create-page__section-body{
+            padding: 16px 20px;
+            border-radius: 4px;
+            border: 1px solid var(--gray-300, #E0E2E4);
+            background: var(--white-100, #FFF);
+        }
+
+        .resume-create-page__section--personal-statement .resume-create-form__content{
+            background: none;
+        }
+
+        .personal-section__control--summary .resume-create-page__assist{
+            display: flex;
+            flex-direction: column;
+            align-items: start;
+            gap: 12px;
+        }
+        .resume-create-page__assist.is-hidden{
+            display: none;
         }
     }
   }

@@ -2,6 +2,9 @@
 import React, { useState } from "react";
 import "./PortfolioDocumentsSection.css";
 
+import ic_edit_gray900_20 from "@/assets/icons/size20/ic_edit_gray900_20.png";
+import ic_folder_gray900_20 from "@/assets/icons/size20/ic_folder_gray900_20.png";
+import ic_link_gray900_20 from "@/assets/icons/size20/ic_link_gray900_20.png";
 import ic_add_btn_gray900_20 from "@/assets/icons/size20/ic_add_btn_gray900_20.png";
 import M_PortfolioDocumentsForm from "./Form/M_PortfolioDocumentsForm";
 
@@ -73,7 +76,7 @@ export default function M_PortfolioDocumentsSection() {
             <div className="resume-portfolio-item" key={it.id}>
               <div className="resume-portfolio-item__main">
                 <span className="resume-portfolio-item__source">
-                  {it.source === "file" ? "[파일]" : "[URL]"}
+                  {it.source === "file" ? <img src={ic_folder_gray900_20} alt="" /> : <img src={ic_link_gray900_20} alt="" />}
                 </span>
                 <span className="resume-portfolio-item__label">
                   {it.source === "file"
@@ -81,11 +84,6 @@ export default function M_PortfolioDocumentsSection() {
                     : it.url || "URL 미입력"}
                 </span>
               </div>
-              {it.file && (
-                <span className="resume-portfolio-item__meta">
-                  {formatBytes(it.file.size)}
-                </span>
-              )}
             </div>
           ))}
         </div>
@@ -98,8 +96,15 @@ export default function M_PortfolioDocumentsSection() {
           onClick={handleAddOrEdit}
           disabled={isEditing}
         >
+            {items.length>0?
+          <>
+          <img src={ic_edit_gray900_20} alt="" />
+          수정
+          </>:<>
           <img src={ic_add_btn_gray900_20} alt="" />
-          {items.length > 0 ? "수정" : "추가"}
+          추가
+          </>}
+
         </button>
       </div>
 

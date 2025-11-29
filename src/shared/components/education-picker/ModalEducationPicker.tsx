@@ -176,6 +176,74 @@ return (
         <span className="default_btn_black">적용</span>
       </div>
     </div>
+
+    <div className="education-picker education-picker--popup mobile">
+      <div className="education-picker__body">
+      <span className="education-picker__options-note">※ 옵션은 최대 5개까지 선택 가능합니다.</span>
+        <div className="education-picker__column education-picker__column--left">
+         <div 
+            className={`job-role-picker__role ${checkedRoles.has('server_dev') ? 'on' : ''}`}
+             onClick={() => onClickRole('server_dev')}>
+              <span className="job-role-picker__checkbox-wrap">
+             <img src={`${checkedRoles.has('server_dev')?check_box_purple:check_box_outline_blank_gray}`} alt="" />
+              </span>
+            <span className="job-role-picker__role-label">학력 무관</span>
+            </div>  
+            <div 
+            className={`job-role-picker__role ${checkedRoles.has('server_dev') ? 'on' : ''}`}
+             onClick={() => onClickRole('server_dev')}>
+              <span className="job-role-picker__checkbox-wrap">
+             <img src={`${checkedRoles.has('server_dev')?check_box_purple:check_box_outline_blank_gray}`} alt="" />
+              </span>
+            <span className="job-role-picker__role-label">고교 졸업 이하</span>
+            </div>  
+            <div 
+            className={`job-role-picker__role ${checkedRoles.has('server_dev') ? 'on' : ''}`}
+             onClick={() => onClickRole('server_dev')}>
+              <span className="job-role-picker__checkbox-wrap">
+             <img src={`${checkedRoles.has('server_dev')?check_box_purple:check_box_outline_blank_gray}`} alt="" />
+              </span>
+            <span className="job-role-picker__role-label">고등학교 졸업</span>
+            </div>  
+            <div 
+            className={`job-role-picker__role ${checkedRoles.has('server_dev') ? 'on' : ''}`}
+             onClick={() => onClickRole('server_dev')}>
+              <span className="job-role-picker__checkbox-wrap">
+             <img src={`${checkedRoles.has('server_dev')?check_box_purple:check_box_outline_blank_gray}`} alt="" />
+              </span>
+            <span className="job-role-picker__role-label">대학 졸업(2, 3년제)</span>
+            </div>  
+        </div>
+
+        <div className="education-picker__column education-picker__column--right">
+        <div 
+            className={`job-role-picker__role ${checkedRoles.has('server_dev') ? 'on' : ''}`}
+             onClick={() => onClickRole('server_dev')}>
+              <span className="job-role-picker__checkbox-wrap">
+             <img src={`${checkedRoles.has('server_dev')?check_box_purple:check_box_outline_blank_gray}`} alt="" />
+              </span>
+            <span className="job-role-picker__role-label">대학 졸업(4년제)</span>
+            </div>  
+            <div 
+            className={`job-role-picker__role ${checkedRoles.has('server_dev') ? 'on' : ''}`}
+             onClick={() => onClickRole('server_dev')}>
+              <span className="job-role-picker__checkbox-wrap">
+             <img src={`${checkedRoles.has('server_dev')?check_box_purple:check_box_outline_blank_gray}`} alt="" />
+              </span>
+            <span className="job-role-picker__role-label">대학원 석사 졸업</span>
+            </div>  
+            <div 
+            className={`job-role-picker__role ${checkedRoles.has('server_dev') ? 'on' : ''}`}
+             onClick={() => onClickRole('server_dev')}>
+              <span className="job-role-picker__checkbox-wrap">
+             <img src={`${checkedRoles.has('server_dev')?check_box_purple:check_box_outline_blank_gray}`} alt="" />
+              </span>
+            <span className="job-role-picker__role-label">대학원 박사 졸업</span>
+            </div> 
+        </div>
+      </div>
+
+    </div>
   </>
 );
 }

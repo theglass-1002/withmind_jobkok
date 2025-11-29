@@ -1,6 +1,7 @@
 // src/pages/.../EducationSection/M_EducationSection.tsx
 import React, { useState, useEffect } from 'react';
 import ic_add_btn_gray900_20 from '@/assets/icons/size20/ic_add_btn_gray900_20.png';
+import ic_edit_gray900_20 from "@/assets/icons/size20/ic_edit_gray900_20.png";
 
 import './EducationSection.css';
 import M_EducationForm from './Form/M_EducationForm';
@@ -112,8 +113,16 @@ export default function M_EducationSection({
             onClick={handleAddOrEdit}
             disabled={isEditing}
           >
-            <img src={ic_add_btn_gray900_20} alt="" />
-            {items.length > 0 ? '수정' : '추가'}
+            {items.length>0?
+                <>
+                <img src={ic_edit_gray900_20} alt="" />
+                수정
+                </>:<>
+                <img src={ic_add_btn_gray900_20} alt="" />
+                추가
+                </>}
+            {/* <img src={ic_add_btn_gray900_20} alt="" />
+            {items.length > 0 ? '수정' : '추가'} */}
           </button>
         </div>
 

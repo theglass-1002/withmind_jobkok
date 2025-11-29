@@ -22,6 +22,11 @@ const blankItem = (): PortfolioDocItem => ({
   note: "",
 });
 
+type PortfolioErrors = {
+  fileMissing?: boolean;
+  urlMissing?: boolean;
+};
+
 interface M_PortfolioDocumentsFormProps {
   initialItems: PortfolioDocItem[];
   onSave: (items: PortfolioDocItem[]) => void;
@@ -38,6 +43,8 @@ export default function M_PortfolioDocumentsForm({
   );
   const [showResetModal, setShowResetModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
+
+  const [itemErrors, setItemErrors] = useState<PortfolioErrors[]>([]);
 
   const hasAnyInput = () =>
     items.some(
@@ -62,6 +69,7 @@ export default function M_PortfolioDocumentsForm({
       { id: makeId(), source: "file", title: "", file: null, url: "", note: "" },
       ...prev,
     ]);
+    setItemErrors((prev) => [{}, ...prev]);
   };
 
   const removeItem = (index: number) => {
@@ -74,11 +82,17 @@ export default function M_PortfolioDocumentsForm({
       next.splice(index, 1);
       return next;
     });
+    setItemErrors((prev) => prev.filter((_, i) => i !== index));
   };
 
   const moveUp = (index: number) => {
     if (index <= 0) return;
     setItems((prev) => {
+      const next = [...prev];
+      [next[index - 1], next[index]] = [next[index], next[index - 1]];
+      return next;
+    });
+    setItemErrors((prev) => {
       const next = [...prev];
       [next[index - 1], next[index]] = [next[index], next[index - 1]];
       return next;
@@ -92,31 +106,51 @@ export default function M_PortfolioDocumentsForm({
       [next[index + 1], next[index]] = [next[index], next[index + 1]];
       return next;
     });
+    setItemErrors((prev) => {
+      const next = [...prev];
+      [next[index + 1], next[index]] = [next[index], next[index + 1]];
+      return next;
+    });
   };
 
   const updateItem = (index: number, patch: Partial<PortfolioDocItem>) => {
     setItems((prev) =>
       prev.map((it, i) => (i === index ? { ...it, ...patch } : it))
     );
+
+    // 수정된 필드 에러 제거
+    if (itemErrors[index]) {
+      const updated = { ...itemErrors[index] };
+      if ("file" in patch) {
+        delete updated.fileMissing;
+      }
+      if ("url" in patch) {
+        delete updated.urlMissing;
+      }
+      setItemErrors((prev) =>
+        prev.map((err, i) => (i === index ? updated : err))
+      );
+    }
   };
 
   // 초기화 버튼 클릭
   const handleReset = () => {
-    if (!hasAnyInput()) return; // 입력 없으면 모달 안 띄움
+    if (!hasAnyInput()) return;
     setShowResetModal(true);
   };
 
   // 초기화 모달에서 "예"
   const confirmReset = () => {
     setItems([blankItem()]);
+    setItemErrors([{}]);
     setShowResetModal(false);
-    onCancel(); // 폼 닫기
+    onCancel(); // 초기화 후 닫기
   };
 
   // 취소 모달에서 "예"
   const confirmCancel = () => {
-    // 폼 내용 초기화 후 닫기
     setItems([blankItem()]);
+    setItemErrors([{}]);
     setShowCancelModal(false);
     onCancel();
   };
@@ -124,25 +158,35 @@ export default function M_PortfolioDocumentsForm({
   // 저장 버튼 클릭
   const handleSave = () => {
     // 파일/URL 검증: 각 아이템당 최소 하나는 있어야 함
-    const hasInvalid = items.some((it) => {
-      if (it.source === "file") {
-        return !it.file; // 파일 모드인데 file 없음
+    const newErrors: PortfolioErrors[] = items.map((it) => {
+      const err: PortfolioErrors = {};
+      if (it.source === "file" && !it.file) {
+        err.fileMissing = true;
       }
-      // URL 모드
-      return !(it.url && it.url.trim().length > 0);
+      if (it.source === "url" && !(it.url && it.url.trim().length > 0)) {
+        err.urlMissing = true;
+      }
+      return err;
     });
 
-    if (hasInvalid) {
+    const hasErrors = newErrors.some(
+      (e) => e.fileMissing || e.urlMissing
+    );
+
+    if (hasErrors) {
+      setItemErrors(newErrors);
       toast.error("파일 또는 URL을 등록해 주세요.");
-      return; // 저장 안 하고 폼 유지
+      return;
     }
 
+    setItemErrors([]);
     onSave(items);
   };
 
   useEffect(() => {
     if (items.length === 0) {
       setItems([blankItem()]);
+      setItemErrors([{}]);
     }
   }, [items.length]);
 
@@ -171,6 +215,7 @@ export default function M_PortfolioDocumentsForm({
               index={index}
               total={items.length}
               value={item}
+              errors={itemErrors[index] || {}}
               canMoveUp={canMoveUp}
               canMoveDown={canMoveDown}
               onChange={(patch) => updateItem(index, patch)}

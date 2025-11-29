@@ -13,6 +13,7 @@ import ic_close_gray500_24 from '@/assets/icons/size24/ic_close_gray500_24.png';
 import ic_add_btn_gray900_20 from '@/assets/icons/size20/ic_add_btn_gray900_20.png';
 import ic_close_gray900_24 from '@/assets/icons/size24/ic_close_gray900_24.png';
 import ic_replay_gray900_20 from '@/assets/icons/size20/ic_replay_gray900_20.png';
+import ic_edit_gray900_20 from "@/assets/icons/size20/ic_edit_gray900_20.png";
 
 import SearchField from '@/shared/components/search/SearchField';
 import AiSuggestChips from '@/shared/components/ai/AiSuggestChips';
@@ -228,8 +229,15 @@ export default function M_HardSkillSection() {
           className="btn_w_full default_btn_white"
           onClick={handleOpenPopup}
         >
+             {chips.length>0?
+          <>
+          <img src={ic_edit_gray900_20} alt="" />
+          수정
+          </>:<>
           <img src={ic_add_btn_gray900_20} alt="" />
-          {chips.length > 0 ? '수정' : '추가'}
+          추가
+          </>}
+
         </button>
       </div>
 
