@@ -444,3 +444,28 @@ background: var(--gray-50, #F8F8F9);
   border-radius: 4px;
 background: var(--primary-8, rgba(129, 107, 254, 0.08));
 }
+
+/* 모바일: 760px 이하 */
+@media (max-width: 760px) {
+  body{
+
+/* === Logo === */
+    .job-posting__item--row .job-posting__logo,
+    .job-posting__list--grid .job-posting__logo 
+    {
+      display: flex;
+      width: 52px;
+      height: 52px;
+      justify-content: center;
+      align-items: center;
+      aspect-ratio: 1 / 1;
+      border-radius: 4px;
+      border: 1px solid var(--gray-300);
+      background: var(--white);
+    }
+    .job-posting__item--row .job-posting__role, .job-posting__list--grid .job-posting__role{
+      font-size: 16px;
+    }
+
+  }
+}

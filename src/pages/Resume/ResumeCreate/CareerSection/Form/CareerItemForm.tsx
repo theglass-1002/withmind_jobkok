@@ -24,6 +24,7 @@ import ic_trash_gray500_20 from "@/assets/icons/size20/ic_trash_gray500_20.png";
 
 import { parseMonth, fmtMonth } from "@/shared/utils/util";
 import "../CareerSection.css";
+import { Icons } from "@/assets/icons";
 
 export type CareerInfo = {
   id: string;
@@ -358,8 +359,25 @@ export default function CareerItemForm({
           </div>
 
           {/* 재직중 토글 */}
-          <div className="career-section__toggle career-section__toggle--current">
-            <span className="career-section__toggle-label">재직중</span>
+          <span
+              className="career-section__toggle-label"
+              onClick={() => onChange({ isCurrent: !isCurrent })}
+            >
+              <img
+                src={
+                  isCurrent
+                    ? Icons.ic_check_box_purple24
+                    : Icons.ic_check_box_blank_gray400_24
+                }
+                alt=""
+              />
+              재직중
+            </span>
+
+          {/* <div className="career-section__toggle career-section__toggle--current">
+            <span className="career-section__toggle-label">
+              <img src={Icons.ic_check_box_blank_gray400_24} alt="" />
+              재직중</span>
             <Switch
               checked={!!isCurrent}
               onChange={(v) => onChange({ isCurrent: v })}
@@ -374,7 +392,7 @@ export default function CareerItemForm({
               checkedIcon={false}
               aria-label="재직중"
             />
-          </div>
+          </div> */}
         </div>
 
         {/* 직무, 직책 */}

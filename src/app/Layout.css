@@ -253,11 +253,7 @@ textarea:focus {
     gap: 4px;
 }
 
-.default_tabs.is-sticky{
-    top: 64px;
-    position: fixed;  
-    z-index: 5;
-}
+
 
 .default_tabs .tab{
     display: flex;
@@ -1012,6 +1008,11 @@ body.mock-analysis-print-mode .mock-analysis {
         }
         .default_tabs{
             height: 48px;
+        }
+        .default_tabs.is-sticky{
+            top: 64px;
+            position: fixed;  
+            z-index: 5;
         }
     }
 

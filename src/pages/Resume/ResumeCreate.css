@@ -866,12 +866,20 @@ background: var(--gray-50, #F8F8F9);
             flex-wrap: nowrap;
         }
         .resume-create-page__assist-text{
+            color: var(--gray-700, #6F767E);
+            font-family: Pretendard;
+            font-size: 14px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 18px; /* 128.571% */
+
             white-space: normal;
             align-items: start;
             font-size: 14px;
             flex-shrink: 0;
             width: 90%;
             height: 100%;
+            
         }
         .ai-suggest-btn, .career-section__summary-ai-btn{
             font-size: 14px;
@@ -940,6 +948,18 @@ background: var(--gray-50, #F8F8F9);
             
         }
 
-        
+        .career-section__toggle-label{
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow: hidden;
+            color: var(--gray-700, #6F767E);
+            font-size: 14px;
+            font-style: normal;
+            font-weight: 400;
+        }
+        .career-section__toggle--current{
+            border: none;
+        }
     }
 }

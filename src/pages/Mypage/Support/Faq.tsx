@@ -130,7 +130,8 @@ export default function Faq() {
                 activeClassName="on"
                 />
             </header> 
-            <div className="search_field"> 
+           <div className="my-page_faq_wrap">
+           <div className="search_field"> 
                 <span className="icon-container"><img src={search} alt="" /></span>
                 <input 
                 type="search"
@@ -199,6 +200,8 @@ export default function Faq() {
             nextIcon={<img src={arrow_right} alt="" aria-hidden="true" />}
             />
             </div>
+            </div> 
+        
           </div>
           </>
     );

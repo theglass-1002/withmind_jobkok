@@ -117,6 +117,7 @@
         }
         .career-section.date{
             width: 100%;
+            gap: 0px;
         }
    
         .calendar-popover{
@@ -169,6 +170,7 @@
             color: var(--white-100, #FFF);
             border: 1px solid var(--gray-300, #E0E2E4);
             background: var(--primary-primary, #816BFE);
+            font-weight: 600;
         }
 
     }
