@@ -75,6 +75,7 @@ export default function M_EducationSection({
   return (
     <>
       <div
+        id='resume__create-section--education'
         ref={sectionRef}
         className="resume-create-page__section resume-create-page__section--education"
       >

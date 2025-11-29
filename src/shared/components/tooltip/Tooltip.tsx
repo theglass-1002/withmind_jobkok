@@ -1,6 +1,17 @@
 import React from "react";
 import ic_error_gray500_20 from "@/assets/icons/size20/ic_error_gray500_20.png";
 
+
+
+// 사용법
+// import Tooltip from "@/shared/components/tooltip/Tooltip";
+// <Tooltip
+// title="이력서 기반 추천이란?"
+// desc="등록된 기본 이력서를 기반으로, 적합한 채용 공고를 찾아주는 잡콕만의 AI 추천 서비스입니다. 적합도가 높은 공고에는 [AI Pick] 태그가 표시됩니다."
+// position="top"
+// className="job-posting__tooltip"
+// />
+
 type TooltipProps = {
   iconElement?: React.ReactNode; 
   title: string;

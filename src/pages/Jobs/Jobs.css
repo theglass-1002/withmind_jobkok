@@ -622,5 +622,11 @@
         border-radius: 4px;
         background: var(--gray-100, #F2F3F4);
     }
+    .jobs-chips{
+        display: flex;
+        flex-wrap: nowrap;
+        white-space: nowrap;
+        overflow: auto;
+    }
    }
 }

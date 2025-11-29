@@ -439,7 +439,7 @@ line-height: 34px; /* 121.429% */
         }
         .purchase__container.mobile{
             display: flex;
-            padding: 0px;
+            padding: 64px 0px 0 0px;
         }
         .purchase__container .body{
             width: 100%;

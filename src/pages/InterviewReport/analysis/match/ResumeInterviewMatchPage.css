@@ -573,7 +573,7 @@ QuestionSection */
             width: 100%
         }
         .analysis-table__header{
-            width: 910px;
+            width: 100%;
         }
         .question-analysis__container .analysis-table__row{
             height: 100%;
@@ -594,6 +594,9 @@ QuestionSection */
         }
         .question-analysis__container .analysis-table__cell--content{
             width: 80%;
+        }
+        .report-section--question .analysis-table__header{
+            width: 910px;
         }
             
     }

@@ -786,7 +786,8 @@ background: var(--gray-50, #F8F8F9);
 @media (max-width: 760px) {
     body{
         .resume-create-page__container{
-            padding: 50px 0 0 0;
+            padding: 64px 0 110px 0;
+            background: var(--gray-100, #F2F3F4);
         
         }
 
@@ -801,8 +802,7 @@ background: var(--gray-50, #F8F8F9);
         .resume-create-page__main{
             width: 100%;
             gap: 0px;
-            padding-top: 18px;
-            padding-bottom: 100px;
+            padding: 0px;
         }
       
         .resume-create-tabs {
@@ -870,7 +870,7 @@ background: var(--gray-50, #F8F8F9);
             align-items: start;
             font-size: 14px;
             flex-shrink: 0;
-            width: 100%;
+            width: 90%;
             height: 100%;
         }
         .ai-suggest-btn, .career-section__summary-ai-btn{
@@ -934,6 +934,10 @@ background: var(--gray-50, #F8F8F9);
 
         .resume-create-page__field-row{
             flex-direction: column;
+        }
+
+        .resume-page--detail{
+            
         }
 
         

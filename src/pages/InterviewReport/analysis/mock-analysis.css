@@ -254,7 +254,7 @@
         }
         .mock-analysis.mobile{
             display: flex;
-            padding:0px;
+            padding:64px 0px 0px 0px;
         }
         .mock-analysis__meta{
           flex-direction: column;
@@ -281,7 +281,9 @@
         .mock-analysis-tabs{
             padding: 24px 20px 0 20px;
             gap: 20px;
-            height: 70px;
+            height: 72px;
+            border-bottom: 1px solid var(--gray-300, #E0E2E4);
+            background: var(--white-100, #FFF);
         }
         .mock-analysis-tabs.default_tabs .mock-analysis-tabs__item{
             height: 100%;

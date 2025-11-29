@@ -15,6 +15,7 @@ import cancel from '@/assets/icons/size20/ic_clear_btn_gray400_20.png'
 import error_Item from '@/assets/icons/error_Item.png';
 
 import "./Login.css";
+import { Icons } from '@/assets/icons';
 
 
 export default function Login() {
@@ -22,7 +23,7 @@ export default function Login() {
 
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-
+  const [remember, setRemember] = useState(false);
 
   const [emailErrorType, setEmailErrorType] = useState(0); 
   //0: 오류 없음 이메일을 입력해 주세요. / 이미 가입된 이메일입니다. 해당 이메일로 로그인해 주세요. / 중복 확인을 완료해 주세요.
@@ -149,9 +150,12 @@ export default function Login() {
         </div>
 
         <div className="form-meta">
-          <label className="remember">
+         <span className="remember" onClick={() => setRemember(!remember)}>
+            <img src={remember?Icons.ic_check_box_purple24:Icons.ic_check_box_blank_gray400_24} alt="" />
+            아이디 기억하기</span>
+          {/* <label className="remember">
             <input type="checkbox" /> 아이디 기억하기
-          </label>
+          </label> */}
           <div className="links">
             <NavLink to="/recovery">아이디 찾기</NavLink>
             <NavLink to="/recovery">비밀번호 찾기</NavLink>

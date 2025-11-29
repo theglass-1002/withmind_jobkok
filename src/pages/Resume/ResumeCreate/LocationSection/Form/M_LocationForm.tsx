@@ -392,7 +392,7 @@ export default function M_LocationForm({
           </div>
         )}
         <div className='btn_wrap'>
-        <button className="btn_w_full default_btn_white" onClick={handleReset}>
+        <button className="btn-reset default_btn_white" onClick={handleReset}>
           <img src={ic_replay_gray900_20} alt="" /> 초기화
         </button>
         <button className="btn_w_full default_btn_black" onClick={handleSave}>

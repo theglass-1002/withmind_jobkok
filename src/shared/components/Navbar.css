@@ -477,7 +477,11 @@
     .mypage_icon{
       display: none;
     }
-    
+    .chip.popular{
+      border: none;
+      border-radius: 4px;
+      background: var(--gray-50, #F8F8F9);
+    }
     
   }
 }

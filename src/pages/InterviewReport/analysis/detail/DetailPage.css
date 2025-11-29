@@ -1503,5 +1503,15 @@ line-height: 24px; /* 120% */
     .detail-analysis__attitude.tension .detail-analysis__attitude-right{
       width: 100%;
     }
+    .detail-analysis__attitude.tension .tooltip__content{
+      width: 300px;
+
+    }
+    .detail-analysis__tension-stat-value-wrapper{
+      width: 60%;
+    }
+    .detail-analysis__tension-stat-level{
+      width: 40%;
+    }
   }
 }

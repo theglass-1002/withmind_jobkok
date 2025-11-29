@@ -108,7 +108,7 @@ export const router = createBrowserRouter([
    },
   { path: "/resumes", element: <Layout screen="Resumes"><ResumeList/></Layout> },
   { path: "/resumes/create", element: <Layout screen="ResumeCreation"><ResumeCreate /></Layout> },
-  { path: "/resumes/:resumeId", element: <Layout><ResumeDetail /></Layout> },
+  { path: "/resumes/:resumeId", element: <Layout screen="ResumeDetail" showFooter="desktop-only" showBottomNav={false} ><ResumeDetail /></Layout> },
   { path: "/resumes/:resumeId/edit", element: <Layout><ResumeEdit /></Layout> },
 
   { path: "/mock-interview-report", element: <Layout screen="MockInterviewReport"><InterviewReport /></Layout> },

@@ -164,14 +164,14 @@ saved-jobs__content-area */
 @media (max-width: 750px) {
     body{
 
-        .jobs .saved-jobs__main-container{
+        /* .jobs .saved-jobs__main-container{
             padding: 0px;
             padding: 20px 20px 40px 20px;
             background: var(--gray-50, #F8F8F9);
 
-        }
+        } */
         .saved-jobs-page{
-            padding: 20px 0 0 0;
+            padding: 75px 20px 0 20px;
         }
         .saved-jobs-page_title{
             display: none;

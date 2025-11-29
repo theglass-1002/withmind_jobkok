@@ -58,7 +58,9 @@ export default function M_PortfolioDocumentsSection() {
   };
 
   return (
-    <div className="resume-create-page__section resume-create-page__section--portfolio-documents">
+    <div 
+     id='resume__create-section--portfolio'
+    className="resume-create-page__section resume-create-page__section--portfolio-documents">
       <div className="resume-create-page__section-title resume-create-page__section-title--simple">
         <div className="section-title__row">
           <div className="section-title__left">

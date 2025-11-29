@@ -46,13 +46,17 @@ export default function ResumeCareerSection({ totalLabel, items }: ResumeCareerS
                   </div>
                   <span className="resume-career-item__tenure">{it.tenure}</span>
                 </span>
-
-                {it.employment && (
-                  <span className="resume-career-item__employment">{it.employment}</span>
-                )}
-                {it.role && <span className="resume-career-item__role">{it.role}</span>}
-                {it.level && <span className="resume-career-item__level">{it.level}</span>}
-              </div>
+                <div className="resume-career-item__period--stack">
+                  </div>  
+                  <div className="resume-career-item__meta">
+                      {it.employment && (
+                      <span className="resume-career-item__employment">{it.employment}</span>
+                    )}
+                    {it.role && <span className="resume-career-item__role">{it.role}</span>}
+                    {it.level && <span className="resume-career-item__level">{it.level}</span>}
+              
+                    </div>      
+                  </div>
             </div>
 
             <ul className="resume-career-item__bullets">
@@ -66,3 +70,6 @@ export default function ResumeCareerSection({ totalLabel, items }: ResumeCareerS
     </div>
   );
 }
+
+
+  

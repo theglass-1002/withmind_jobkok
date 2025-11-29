@@ -6,14 +6,20 @@ import ic_edit_gray900_20 from "@/assets/icons/size20/ic_edit_gray900_20.png";
 type Props = {
   onTempSave: () => void;
   onSubmit: () => void;
+  onDownloadPdf: () => void; 
 };
 
-export default function ResumeActionsBar({ onTempSave, onSubmit }: Props) {
+export default function ResumeActionsBar({ onTempSave, onSubmit,onDownloadPdf
+  
+}: Props) {
+  
+
+
   return (
     <div className="resume-controls-wrapper">
     <div className="resume-create-page__status">
       <div className="resume-detail__actions-left">
-        <span className="default_btn_white">
+        <span className="default_btn_white" onClick={onDownloadPdf}>
           <img src={ic_download_gray900_20} alt="" />
           PDF로 저장
         </span>

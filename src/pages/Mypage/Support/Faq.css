@@ -202,7 +202,7 @@
             gap: 0px;
         }
         .mypage__content-main.faq-container{
-            padding: 0px;
+            padding: 64px 0px 0 0px;
             gap: 0px;
         }
         .faq-container .search_field{

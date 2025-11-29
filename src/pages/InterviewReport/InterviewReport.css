@@ -943,6 +943,7 @@ interview_result */
       }
       .mock-interview-tabs{
         padding: 14px 0 0 20px;
+        height: 54px;
       }
       .mock-interview-tabs .mock-interview-tabs__item{
         padding-bottom: 17px;

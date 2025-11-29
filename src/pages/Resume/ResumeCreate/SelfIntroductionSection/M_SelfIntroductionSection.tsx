@@ -139,7 +139,9 @@ export default function M_SelfIntroductionSection() {
   };
 
   return (
-    <div className="resume-create-page__section resume-create-page__section--personal-statement">
+    <div 
+    id='resume__create-section--selfIntro'
+    className="resume-create-page__section resume-create-page__section--personal-statement">
       <div className="resume-create-page__section-title resume-create-page__section-title--simple">
         <div className="section-title__row">
           <div className="section-title__left">
@@ -262,7 +264,7 @@ export default function M_SelfIntroductionSection() {
             {/* 하단 버튼 */}
             <div className="resume-create-page__form-action">
               <button
-                className="btn_w_full default_btn_white"
+                className="btn-reset default_btn_white"
                 onClick={handleReset}
                 type="button"
               >

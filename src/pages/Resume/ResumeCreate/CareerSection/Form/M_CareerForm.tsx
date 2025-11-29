@@ -287,7 +287,7 @@ export default function M_CareerForm({
 
       {/* 하단 버튼 */}
       <div className="resume-create-page__form-action">
-        <button className="btn_w_full default_btn_white" onClick={handleReset} type="button">
+        <button className="btn-reset default_btn_white" onClick={handleReset} type="button">
           <img src={ic_replay_gray900_20} alt="" /> 초기화
         </button>
         <button className="btn_w_full default_btn_black" onClick={handleSave} type="button">

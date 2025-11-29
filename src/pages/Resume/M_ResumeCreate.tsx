@@ -56,7 +56,7 @@ export default function M_ResumeCreate() {
     setActiveTab(key);
     console.log('선택 된 탭', key);
   
-    if (key === 'title') {
+    if (key === 'title'||key==='basic') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }

@@ -58,7 +58,9 @@ export default function M_AwardsCertificationsSection() {
   };
 
   return (
-    <div className="resume-create-page__section resume-create-page__section--awards-certifications">
+    <div 
+        id='resume__create-section--awards'
+    className="resume-create-page__section resume-create-page__section--awards-certifications">
       <div className="resume-create-page__section-title resume-create-page__section-title--simple">
         <div className="section-title__row">
           <div className="section-title__left">

@@ -168,6 +168,10 @@
   backdrop-filter: blur(16px);
 }
 
+.mock-interview-live__answer-timer.mobile{
+  display: none;
+}
+
 /* 시간이 5초 이하일 때 (Warning) 배경 스타일 */
 .mock-interview-live__answer-timer--warning {
   background: var(--red-100, #FF524C); /* 배경 빨간색으로 변경 */
@@ -393,6 +397,12 @@
     }
     .mock-interview-dialog__description{
       font-size: 14px;
+    }
+    .mock-interview-live__answer-timer{
+      display: none;
+    }
+    .mock-interview-live__answer-timer.mobile{
+      display: flex;
     }
   }
 }

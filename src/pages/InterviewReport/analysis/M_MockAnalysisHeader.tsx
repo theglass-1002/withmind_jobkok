@@ -42,7 +42,7 @@ export default function MockAnalysisHeader({
            {metaRows.map((row, rowIndex)=>(
             <>
           {row.map((item, itemIndex) =>(
-        <div className="mock-analysis__meta-item">
+        <div  className="mock-analysis__meta-item">
                    <span className="mock-analysis__meta-key">{item.key}</span>
                    <span className="mock-analysis__meta-value">{item.value}</span>
                    </div>

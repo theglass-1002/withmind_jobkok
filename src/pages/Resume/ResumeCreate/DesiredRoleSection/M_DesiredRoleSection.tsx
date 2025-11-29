@@ -189,7 +189,7 @@ export default function M_DesiredRoleSection() {
   };
 
   return (
-    <div className="resume-create-page__section resume-create-page__section--desired-role">
+    <div    id='resume__create-section--desiredRole' className="resume-create-page__section resume-create-page__section--desired-role">
       <div className="resume-create-page__section-title resume-create-page__section-title--simple">
         <div className="resume-create-page__section-title__heading">
           희망 직무<em className="resume-create-page__required">*</em>
@@ -339,7 +339,7 @@ export default function M_DesiredRoleSection() {
 
               <div className="btn_wrap">
                 <button
-                  className="btn_w_full default_btn_white"
+                  className="btn-reset default_btn_white"
                   onClick={handleReset}
                   type="button"
                 >

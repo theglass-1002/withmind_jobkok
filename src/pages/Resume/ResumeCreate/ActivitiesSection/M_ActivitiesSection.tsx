@@ -37,7 +37,9 @@ export default function M_ActivitiesSection() {
   };
 
   return (
-    <div className="resume-create-page__section resume-create-page__section--activities">
+    <div
+    id='resume__create-section--activities'
+    className="resume-create-page__section resume-create-page__section--activities">
       <div className="resume-create-page__section-title resume-create-page__section-title--simple">
         <div className="section-title__row">
           <div className="section-title__left">

@@ -133,7 +133,9 @@ export default function M_MockInterviewAnalysisSection() {
     : "선택된 모의면접 분석 결과가 없습니다.";
 
   return (
-    <div className="resume-create-page__section resume-create-page__section--mock-interview-analysis">
+    <div 
+    id='resume__create-section--mockInterview' 
+    className="resume-create-page__section resume-create-page__section--mock-interview-analysis">
       <div className="resume-create-page__section-title resume-create-page__section-title--simple">
         <div className="section-title__row">
           <div className="section-title__left">
@@ -229,7 +231,7 @@ export default function M_MockInterviewAnalysisSection() {
                 {/* 하단 버튼 */}
                 <div className="resume-create-page__form-action">
                   <button
-                    className="btn_w_full default_btn_white"
+                    className="btn-reset default_btn_white"
                     onClick={handleReset}
                     type="button"
                   >

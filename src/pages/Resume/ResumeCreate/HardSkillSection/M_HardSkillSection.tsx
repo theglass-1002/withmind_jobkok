@@ -188,7 +188,9 @@ export default function M_HardSkillSection() {
   };
 
   return (
-    <div className="resume-create-page__section resume-create-page__section--hard-skills">
+    <div 
+    id='resume__create-section--hardSkills'
+    className="resume-create-page__section resume-create-page__section--hard-skills">
       <div className="resume-create-page__section-title resume-create-page__section-title--simple">
         <div className="section-title__row">
           <div className="section-title__left">
@@ -346,7 +348,7 @@ export default function M_HardSkillSection() {
 
               <div className="btn_wrap">
                 <button
-                  className="btn_w_full default_btn_white"
+                  className="btn-reset default_btn_white"
                   onClick={handleReset}
                   type="button"
                 >

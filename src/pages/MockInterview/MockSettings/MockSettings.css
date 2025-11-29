@@ -591,12 +591,12 @@ mock-settings--step-2 */
 @media (max-width: 760px) {
     body{
         .mock-settings-page{
+            height: auto;
             flex-direction: column;
-            /* padding-top: 80px;
-            padding-bottom: 120px; */
+            padding: 70px 0px 120px 0px;
         }
         .mock-settings__content{
-            height: auto;
+        
         }
         .environment .mock-settings__content{
             height: 100%;
@@ -604,7 +604,7 @@ mock-settings--step-2 */
         .mock-settings--step-1 .mock-settings__content-inner{
             flex-direction: column;
             height: 100%;
-            padding: 100px 20px 140px 20px;
+         
             overflow: visible;
             gap: 20px;
         }

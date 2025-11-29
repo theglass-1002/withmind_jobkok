@@ -1,6 +1,7 @@
 import { useState, useRef,useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Tabs from "@/shared/components/tabs/Tabs";
+import {useStickyTabs} from '@/shared/utils/util'; 
 import search from '@/assets/icons/search.png';
 import chevronDown from '@/assets/icons/chevron-down.png';
 import chevronUp from '@/assets/icons/chevron-up.png';
@@ -64,6 +65,10 @@ export default function Faq() {
   const [searchText, setSearchText] = useState("");
   const [tab, setTab] = useState<FaqTabKey>("all");
 
+  const isTabsSticky = useStickyTabs(
+    "sticky-trigger",
+    ".default_tabs",
+    ".page-header")
 
   const handleTabClick = (key: "all" | "howto" |"account"|"payment"|"etc") => {
     setTab(key);
@@ -112,18 +117,19 @@ export default function Faq() {
 
     return (
          <>
-         <header className="my-page_faq_header">
+          <div className="mypage__content-main faq-container">
+          <header className="my-page_faq_header">
               <h1 className="faq-title">자주 묻는 질문</h1>
               <Tabs
                 tabs={FAQ_TABS}
                 active={tab}
                 onChange={handleTabClick}
-                className="my-page_faq-tabs default_tabs"
+                className={`my-page_faq-tabs default_tabs ${isTabsSticky?'is-sticky':''}`}
+           
                 itemClassName="my-page-tabs__item"
                 activeClassName="on"
                 />
             </header> 
-          <div className="mypage__content-main faq-container">
             <div className="search_field"> 
                 <span className="icon-container"><img src={search} alt="" /></span>
                 <input 
@@ -137,7 +143,7 @@ export default function Faq() {
                 }}
                 /> 
             </div>
-            <div className="search_container-mobile">
+            <div id="sticky-trigger" className="search_container-mobile">
             <div className="search_field"> 
                 <span className="icon-container"><img src={search} alt="" /></span>
                 <input 

@@ -218,7 +218,7 @@ export default function M_AwardsCertificationsForm({
       {/* 하단 버튼 */}
       <div className="resume-create-page__form-action">
         <button
-          className="btn_w_full default_btn_white"
+          className="btn-reset default_btn_white"
           onClick={handleReset}
           type="button"
         >

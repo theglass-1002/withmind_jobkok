@@ -38,6 +38,10 @@ textarea:focus {
     align-self: stretch;
 }
 
+.btn-reset{
+    width: 60%;
+}
+
 .btn_w_full{
     width: 100%;
 }
@@ -951,10 +955,12 @@ body.mock-analysis-print-mode .mock-analysis {
 }
 
 
+/* 인쇄페이지 분할 */
+
 .print-page-break {
-    
     page-break-after: always;
     break-after: page;
+    /* 이 요소 이후에 페이지를 끊어라 */
 }
 
 

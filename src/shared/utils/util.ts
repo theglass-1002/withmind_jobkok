@@ -13,7 +13,7 @@ export function useStickyTabs(
   //  const isTabsSticky = useStickyTabs(
   //   "sticky-trigger", <거의공통 지나가면 어디서 고정할 것인지
   //   ".default_tabs",
-  //   ".page-header"
+  //   ".page-header")
 
   //   <Tabs
   //   tabs={tabItems}

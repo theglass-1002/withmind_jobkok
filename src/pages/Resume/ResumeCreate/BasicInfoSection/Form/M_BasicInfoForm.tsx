@@ -444,7 +444,7 @@ export default function M_BasicInfoForm({
       </div>
 
       <div className="resume-create-page__form-action">
-        <button className="btn_w_full default_btn_white" onClick={handleReset}>
+        <button className="default_btn_white btn-reset" onClick={handleReset}>
           <img src={ic_replay_gray900_20} alt="" /> 초기화
         </button>
         <button className="btn_w_full default_btn_black" onClick={handleSave}>

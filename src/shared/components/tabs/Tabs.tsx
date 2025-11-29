@@ -1,5 +1,23 @@
 import React from "react";
 
+
+// 사용법
+// import Tabs from "@/shared/components/tabs/Tabs";
+// type TabKey = "overview" | "detail" | "match";
+// const tabItems: { key: TabKey; label: React.ReactNode }[] = [
+//   { key: "overview", label: "종합 분석" },
+//   { key: "detail", label: "상세 분석" },
+//   { key: "match", label: "이력서−면접 일치도 분석" },
+// ];
+// <Tabs
+//   tabs={tabItems}
+//   active={activeTab}
+//   onChange={(key) => handleTabClick(key as TabKey)}
+//   className="mock-analysis-tabs default_tabs"
+//   itemClassName="mock-analysis-tabs__item tab"
+//   activeClassName="on"
+// />
+
 type TabItem = {
   key: string;
   label: React.ReactNode;

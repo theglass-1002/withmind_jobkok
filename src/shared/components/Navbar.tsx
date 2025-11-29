@@ -260,8 +260,12 @@ export default function Navbar({ titleText }: NavbarProps) {
               <button className="section-action">전체 삭제</button>
             </header>
             <div className="chip-list">
-              <button className="chip">프론트엔드</button>
-              <button className="chip">프론트엔드 개발자</button>
+              <button className="chip">프론트엔드
+                <img src={Icons.ic_close_gray500_20} alt="" />
+              </button>
+              <button className="chip">프론트엔드 개발자
+              <img src={Icons.ic_close_gray500_20} alt="" />
+              </button>
             </div>
           </section>
 
@@ -356,11 +360,9 @@ export default function Navbar({ titleText }: NavbarProps) {
                         <button className="section-action">전체 삭제</button>
                         </header>
                         <div className="chip-list">
-                        <button className="chip">프론트엔드</button>
-                        <button className="chip">프론트엔드 개발자</button>
-                        <button className="chip">프론트엔드 개발자</button>
-                        <button className="chip">프론트엔드 개발자</button>
-                        <button className="chip">프론트엔드 개발자</button>
+                        <button className="chip recent">프론트엔드
+                        <img src={Icons.ic_close_gray500_20} alt="" />
+                        </button>
                         
                         </div>
                     </section>
@@ -370,8 +372,8 @@ export default function Navbar({ titleText }: NavbarProps) {
                         <span className="section-title">인기 검색 키워드</span>
                         </header>
                         <div className="chip-list">
-                        <button className="chip">프론트엔드</button>
-                        <button className="chip">프론트엔드 개발자</button>
+                        <button className="chip popular">프론트엔드</button>
+                        <button className="chip popular">프론트엔드 개발자</button>
                         </div>
                     </section>
                 </>

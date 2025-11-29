@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-
+import {useStickyTabs} from '@/shared/utils/util'; 
 import test_company_logo from "@/assets/testImg/company_logo/test_company_logo.png";
 import ic_saramin_18 from "@/assets/icons/size18/ic_saramin_18.png";
 import ic_star_green_18 from "@/assets/icons/size18/ic_star_green_18.png";
 import ic_fire_16 from "@/assets/icons/size16/ic_fire_16.png";
 import ic_seed_16 from "@/assets/icons/size16/ic_seed_16.png";
-
 import ic_print_gray900_24 from "@/assets/icons/size24/ic_print_gray900_24.png";
 import ic_arrow_left_gray900_20 from "@/assets/icons/size20/ic_arrow_left_gray900_20.png";
 import ic_star_white_20 from "@/assets/icons/size20/ic_star_white_20.png";
 import ic_weakness_circle_24 from "@/assets/icons/size24/ic_weakness_circle_24.png";
 import ic_strength_circle_24 from "@/assets/icons/size24/ic_strength_circle_24.png";
 
+import Tabs from "@/shared/components/tabs/Tabs";
 import M_MockAnalysisHeader from "./M_MockAnalysisHeader";
 import OverviewPage from "./overview/OverviewPage";
 import DetailPage from "./detail/DetailPage";
@@ -103,11 +103,24 @@ const mockJobs = [
 
 type TabKey = "overview" | "detail" | "match";
 
-export default function MockAnalysisPage() {
+export default function M_MockAnalysisPage() {
   const [activeTab, setActiveTab] = useState<TabKey>("overview");
   const [jobs, setJobs] = useState(mockJobs);
   const location = useLocation();
   const score = 40;
+  const tabItems: { key: TabKey; label: React.ReactNode }[] = [
+    { key: "overview", label: "종합 분석" },
+    { key: "detail", label: "상세 분석" },
+    { key: "match", label: "이력서−면접 일치도 분석" },
+  ];
+
+  const handleTabClick = (key: TabKey) => setActiveTab(key);
+
+
+   const isTabsSticky = useStickyTabs(
+    "sticky-trigger",
+    ".default_tabs",
+    ".page-header")
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -137,7 +150,6 @@ export default function MockAnalysisPage() {
     );
   };
 
-  const handleTabClick = (key: TabKey) => setActiveTab(key);
 
   const handleToggleFavorite = (id: number | string, nextValue?: boolean) => {
     setJobs(prev =>
@@ -173,35 +185,18 @@ export default function MockAnalysisPage() {
           ]}
         />
       </div>
-        <div className="mock-analysis-tabs default_tabs ">
-          <span
-            className={`mock-analysis-tabs__item tab ${activeTab === "overview" ? "on" : ""}`}
-            role="button"
-            tabIndex={0}
-            onClick={() => handleTabClick("overview")}
-          >
-            종합 분석
-          </span>
-          <span
-            className={`mock-analysis-tabs__item tab ${activeTab === "detail" ? "on" : ""}`}
-            role="button"
-            tabIndex={0}
-            onClick={() => handleTabClick("detail")}
-          >
-            상세 분석
-          </span>
-          <span
-            className={`mock-analysis-tabs__item tab ${activeTab === "match" ? "on" : ""}`}
-            role="button"
-            tabIndex={0}
-            onClick={() => handleTabClick("match")}
-          >
-           이력서−면접 일치도 분석
-          </span>
-        </div>
+       
+        <Tabs
+            tabs={tabItems}
+            active={activeTab}
+            onChange={(key) => handleTabClick(key as TabKey)}
+            className={`mock-analysis-tabs default_tabs ${isTabsSticky?'is-sticky':''}`}
+            itemClassName="mock-analysis-tabs__item "
+            activeClassName="on"
+          />
       </div>
 
-      <div className="mock-analysis-panel mock-analysis-report">
+      <div id="sticky-trigger" className="mock-analysis-panel mock-analysis-report">
         <div className="mock-analysis-report__container">
           <div className="mock-analysis-report__inner">
             <span className="mock-analysis-report__icon-btn" 
