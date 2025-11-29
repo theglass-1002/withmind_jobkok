@@ -132,10 +132,12 @@ export default function Layout({
           title={jobTitle} 
           leftElement={<img src={ic_arrow_back_ios_gray900_20} alt="닫기" />}
           onLeftElementClick={() => navigate('/jobs')}
-          rightIcons={<img src={ic_download_gray900_20}/>}
-          onRightElementClick={()=> {
-            console.log('pdf 저장버튼 ');
-          }}
+          rightIcons={<img src={ic_home_gray900_20}/>}
+          onRightElementClick={() => navigate('/')}
+          // rightIcons={<img src={ic_download_gray900_20}/>}
+          // onRightElementClick={()=> {
+          //   console.log('pdf 저장버튼 ');
+          // }}
         />);
       }else if(screen ==='Resumes'){
         return(

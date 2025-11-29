@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import jobkokLogo from "@/assets/icons/jobkok_logo_white.png";
+import { Icons } from "@/assets/icons";
 import "./Footer.css";
 
 export default function Footer() {
@@ -8,8 +8,9 @@ export default function Footer() {
     <footer className="site-footer pc_version">
       <div className="site-footer__inner">
         <div>
-           <Link to="/" aria-label="jobkok 홈">
-            <img src={jobkokLogo} alt="jobkok" />
+           <Link className="masthead__brand" to="/" aria-label="jobkok 홈">
+           <img src={Icons.jobkok_logo_gray400} alt="jobkok" />
+           <img src={Icons.jobkok_wordmark_gray400} alt="jobkok" />
           </Link>
         </div>
         <div className="wrap" aria-label="푸터">
@@ -41,8 +42,9 @@ export default function Footer() {
       </div>
     </footer>
     <footer className="site-footer mobile_version">
-       <Link to="/" aria-label="jobkok 홈">
-            <img src={jobkokLogo} alt="jobkok" />
+       <Link className="masthead__brand" to="/" aria-label="jobkok 홈">
+            <img src={Icons.jobkok_logo_gray400} alt="jobkok" />
+            <img src={Icons.jobkok_wordmark_gray400} alt="jobkok" />
           </Link>
 
           <div className="wrap" aria-label="푸터">

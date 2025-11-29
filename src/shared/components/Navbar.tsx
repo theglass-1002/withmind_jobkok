@@ -2,8 +2,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import "./Navbar.css";
-
-import jobkokLogo from "@/assets/icons/logo/ic_jobkok_logo_nav.png";
+import { Icons } from "@/assets/icons";
 import searchIcon from "@/assets/icons/size24/ic_search_gray900_24.png";
 import bookmarkIcon from "@/assets/icons/size24/ic_bookmark_gray900_24.png";
 import accountIcon from "@/assets/icons/size24/ic_account_circle_gray900_24.png";
@@ -147,12 +146,14 @@ export default function Navbar({ titleText }: NavbarProps) {
     <>
       <header className="masthead">
         <div className="masthead__inner">
-          <span className="masthead__brand">
-            {titleText?(<>{titleText}</>):(<Link to="/">
-              <img src={jobkokLogo} alt="" />
+            {titleText?(<>{titleText}</>):(<Link 
+            className="masthead__brand"
+            to="/">
+              <img src={Icons.jobkok_logo_purple} alt="" />
+              <img src={Icons.jobkok_wordmark_gray900} alt="" />
             </Link>)}
          
-          </span>
+          
 
           <ul className="masthead__menu">
             <li>
@@ -357,6 +358,10 @@ export default function Navbar({ titleText }: NavbarProps) {
                         <div className="chip-list">
                         <button className="chip">프론트엔드</button>
                         <button className="chip">프론트엔드 개발자</button>
+                        <button className="chip">프론트엔드 개발자</button>
+                        <button className="chip">프론트엔드 개발자</button>
+                        <button className="chip">프론트엔드 개발자</button>
+                        
                         </div>
                     </section>
 

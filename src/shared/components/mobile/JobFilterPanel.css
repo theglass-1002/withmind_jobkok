@@ -134,7 +134,7 @@
       border-bottom: 1px solid var(--gray-300, #E0E2E4);
     }
   
-    .job-filter-panel__content .job-role-picker__options-note {
+      .job-role-picker__options-note {
       display: flex;
       padding: 16px;
       justify-content: center;
@@ -142,8 +142,8 @@
       gap: 10px;
       align-self: stretch;
       border-radius: 4px;
-border-bottom: 1px solid var(--gray-300, #E0E2E4);
-background: var(--gray-50, #F8F8F9);
+      border-bottom: 1px solid var(--gray-300, #E0E2E4);
+      background: var(--gray-50, #F8F8F9);
     }
   
     .job-filter-panel__content .job-role-picker__category_group {

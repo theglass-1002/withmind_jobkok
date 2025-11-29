@@ -252,6 +252,25 @@ export default function Home() {
           </div>
         </div>
       </div>
+      <div className="banner-slider-container mobile">
+        <div className="banner-slider-track">
+          <div className="home-cta-banner resume">
+            <div className="banner-content" onClick={()=>{handleMovePage('/m-create')}}>
+              <span className="banner-title">이력서 작성하고 잡콕의 모든 서비스를 경험해 보세요.</span>
+              <span className="banner-desc">AI 기반의 문장 및 키워드 추천 기능으로 간편하게 작성하세요.</span>
+            </div>
+  
+          </div>
+
+          <div className="home-cta-banner interview">
+            <div className="banner-content"  onClick={()=>{handleMovePage('interview')}}>
+              <span className="banner-title">실전보다 더 실전같은 AI 모의면접으로 면접 준비 끝!</span>
+              <span className="banner-desc">면접 시뮬레이션ㆍ이력서 및 직무 기반 맞춤 질문ㆍ분석 리포트ㆍ결과 기반 피드백까지 전부 모았어요.</span>
+            </div>
+            <button className="default_btn_white">AI 모의면접 바로하기</button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

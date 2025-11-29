@@ -243,13 +243,14 @@ textarea:focus {
 
 .default_tabs{
     display: inline-flex;
-    height: 52px;
+    height: 51px;
     padding: 4px;
     align-items: center;
     gap: 4px;
 }
 
 .default_tabs.is-sticky{
+    top: 64px;
     position: fixed;  
     z-index: 5;
 }
@@ -1002,6 +1003,9 @@ body.mock-analysis-print-mode .mock-analysis {
         }
         .card__meta.date, .card__meta.category{
             font-size: 14px;
+        }
+        .default_tabs{
+            height: 48px;
         }
     }
 

@@ -163,6 +163,13 @@ saved-jobs__content-area */
 
 @media (max-width: 750px) {
     body{
+
+        .jobs .saved-jobs__main-container{
+            padding: 0px;
+            padding: 20px 20px 40px 20px;
+            background: var(--gray-50, #F8F8F9);
+
+        }
         .saved-jobs-page{
             padding: 20px 0 0 0;
         }
@@ -181,16 +188,19 @@ saved-jobs__content-area */
         }
         
         .saved-jobs__toolbar{
-            padding: 0 20px 0 20px;
+            padding:0px;
         }
         .saved-jobs__filter-tab{
             display: flex;
             width: 100%;
             justify-content: center;
-            padding: 0 20px 0 20px;
+            padding: 0px;
+        }
+        .saved-jobs__filter-tab .ui-filter{
+            width: 100%;
         }
         .saved-jobs__filter-tab .jobs-filter .ui-filter__item{
-            width: 110px;
+            width: 100%;
         }
         .saved-jobs__main-container .job-posting__list--grid{
             width: auto;
@@ -214,6 +224,9 @@ saved-jobs__content-area */
 
         .saved-jobs-page .pagination{
             padding: 0px 0 20px 0;
+        }
+        .saved-jobs__content-empty-area{
+            padding: 36px;
         }
         
         

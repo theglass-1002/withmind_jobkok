@@ -25,6 +25,12 @@
   align-items: center;
   width: 100%;
   max-width: 1200px;
+  font-size: 20px;
+  font-weight: 600;
+}
+.masthead__brand{
+  display: flex;
+  gap: 8px;
 }
 
 .masthead__menu {
@@ -126,6 +132,7 @@
 
 /* ============ Search Panel(필터 패널) - 애니메이션 추가 ============ */
 .search-panel {
+  
   position: fixed;
   left: 0;
   right: 0;
@@ -139,6 +146,9 @@
   transform: translateY(-10px);
   transition: opacity 0.3s ease-out, transform 0.3s ease-out, visibility 0.3s;
   z-index: 2;
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 .search-panel-mobile{
@@ -155,7 +165,7 @@
   pointer-events: none;
   transform: translateY(-10px);
   transition: opacity 0.3s ease-out, transform 0.3s ease-out, visibility 0.3s;
-  z-index: 3;
+  z-index: 10;
 }
 
 .search-panel.is-open {
@@ -175,7 +185,7 @@
 
 .panel-body {
   display: flex;
-  padding: 52px 360px;
+  padding: 52px 0px;
   flex-direction: column;
   align-items: flex-start;
   gap: 52px;
@@ -303,6 +313,7 @@
 
 /* 기준 부모: 아이콘 감싸는 래퍼 */
 .mypage_icon {
+  display: flex;
   position: relative;
   align-items: center;
   /* display: flex;
@@ -378,6 +389,8 @@
       align-items: center;
       top: 0;
       left: 0; /* ← 추가하면 더 안전 */
+      border: none;
+     
     } 
     .masthead__menu{
       display: none;
@@ -399,6 +412,7 @@
     .panel-body{
       width: 100%;
       padding: 20px 20px;
+      gap: 24px;
     }
 
     .panel-search-header{
@@ -455,7 +469,9 @@
     }
 
     .masthead.masthead-static{
-      display: none;
+      /* display: none; */
+      position: fixed !important;
+      z-index: 10;
     }
 
     .mypage_icon{

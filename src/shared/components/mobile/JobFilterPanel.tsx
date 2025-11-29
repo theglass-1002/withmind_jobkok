@@ -1,8 +1,9 @@
 // src/pages/.../JobFilterPanel.tsx
 import React, { useEffect, useState } from "react";
 import "./JobFilterPanel.css";
-import Tabs from "@/shared/components/tabs/Tabs";
+import desiredRolesJson from "@/data/desired_roles.json";
 
+import Tabs from "@/shared/components/tabs/Tabs";
 import M_ModalJobRolePicker, { SelectedRole } from "@/shared/components/job-role-picker/mobile/M_ModalJobRolePicker";
 import ModalCareerRangePicker from "@/shared/components/career-range-picker/ModalCareerRangePicker";
 import ModalEducationPicker from "@/shared/components/education-picker/ModalEducationPicker";

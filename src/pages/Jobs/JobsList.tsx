@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
 import 'rc-slider/assets/index.css';
 
+import Tabs from "@/shared/components/tabs/Tabs";
+import {useStickyTabs} from '@/shared/utils/util';
 import keyboard_arrow_right from '@/assets/icons/chevron_right_white.png';
-
-
-
 import AllJobPostingSection from "@/pages/Jobs/sections/AllJobPostingSection";
 import M_AllJobPostingSection from "@/pages/Jobs/sections/M_AllJobPostingSection";
 import SavedJobPostingSection from "@/pages/Jobs/sections/SavedJobPostingSection";
@@ -17,10 +16,21 @@ import "./Jobs.css";
 
 
 export default function JobsList() {
-
   const [activeTab, setActiveTab] = useState<'all' | 'saved'>('all'); // 탭 상태
+  const isTabsSticky = useStickyTabs(
+    "sticky-trigger",
+    ".default_tabs",
+    ".page-header"
+  );
   
+  const tabItems = [
+    { key: "all", label: "전체공고" },
+    { key: "saved", label: "저장공고" },
+  ];
 
+  const handleTabClick = (key: string) => {
+    setActiveTab(key as "all" | "saved");
+  };
 
 
   useEffect(() => {
@@ -67,7 +77,7 @@ export default function JobsList() {
   return (
     <>
       <div className="jobs">
-      <div className="resume-promo-container">
+      <div className="resume-promo-container" id="sticky-trigger">
           <div className="resume-promo">
             <span className="resume-promo__text">
               이력서 작성하고 나에게 맞는 AI 공고 추천을 받아보세요.
@@ -81,51 +91,28 @@ export default function JobsList() {
           </div>
           </div>
           <div className="job-tabs-container">
-          <div className="jobs-tabs" role="tablist" aria-label="공고 탭">
-              <span 
-                className={`jobs-tab ${activeTab === 'all' ? 'on' : ''}`}
-                onClick={() => setActiveTab('all')}
-                role="tab"
-                aria-selected={activeTab === 'all'}
-              >
-              전체공고
-              </span>
-              <span 
-                className={`jobs-tab ${activeTab === 'saved' ? 'on' : ''}`}
-                onClick={() => setActiveTab('saved')}
-                role="tab"
-                aria-selected={activeTab === 'saved'}
-              >
-                저장공고
-              </span>
-            </div>
+          <Tabs
+            tabs={tabItems}
+            active={activeTab}
+            onChange={handleTabClick}
+            className={`jobs-tabs default_tabs`}
+            itemClassName="jobs-tab"
+            activeClassName="on"
+          />
           </div>
        
           {activeTab==='all'?<AllJobPostingSection/>:<SavedJobPostingSection/>}
       </div>
 
       <div className="jobs mobile">
-         <div className="job-tabs-container">
-         <div className="jobs-tabs" role="tablist" aria-label="공고 탭">
-              <span 
-                className={`jobs-tab ${activeTab === 'all' ? 'on' : ''}`}
-                onClick={() => setActiveTab('all')}
-                role="tab"
-                aria-selected={activeTab === 'all'}
-              >
-              전체공고
-              </span>
-              <span 
-                className={`jobs-tab ${activeTab === 'saved' ? 'on' : ''}`}
-                onClick={() => setActiveTab('saved')}
-                role="tab"
-                aria-selected={activeTab === 'saved'}
-              >
-                저장공고
-              </span>
-            </div>
-          
-         </div>
+      <Tabs
+          tabs={tabItems}
+          active={activeTab}
+          onChange={handleTabClick}
+          className={`jobs-tabs default_tabs ${isTabsSticky ? "is-sticky" : ""}`}
+          itemClassName="jobs-tab"
+          activeClassName="on"
+        />
             {activeTab==='all'?
             <M_AllJobPostingSection/>:
              <M_SavedJobPostingSection/>

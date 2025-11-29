@@ -6,6 +6,26 @@ export function useStickyTabs(
   tabsSelector: string,     // ex: ".default_tabs"
   headerSelector?: string   // ex: ".page-header" (없으면 skip)
 ) {
+
+ 
+  // ex: 사용법
+  // import {useStickyTabs} from '@/shared/utils/util'; 
+  //  const isTabsSticky = useStickyTabs(
+  //   "sticky-trigger", <거의공통 지나가면 어디서 고정할 것인지
+  //   ".default_tabs",
+  //   ".page-header"
+
+  //   <Tabs
+  //   tabs={tabItems}
+  //   active={activeTab}
+  //   onChange={handleTabClick}
+  //   className={`resume-create-tabs default_tabs ${isTabsSticky?'is-sticky':''}`}
+  //   itemClassName="resume-create-tabs__item"
+  //   activeClassName="on"
+  //   />
+
+
+
   const [isSticky, setIsSticky] = useState(false);
 
   useEffect(() => {

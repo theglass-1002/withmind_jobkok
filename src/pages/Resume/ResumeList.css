@@ -395,6 +395,7 @@ background: var(--green-8, rgba(30, 194, 128, 0.08));
         .resume-list-page{
             padding: 36px 0 0 0;
             gap: 20px;
+            background: var(--gray-50, #F8F8F9);
         }
         .resume-list-page__banner{
             display: none;

@@ -467,6 +467,7 @@ line-height: 20px; /* 125% */
       }
       .job-detail__container.mobile{
        display: flex;
+       padding: 64px 0px 90px 0px;
       }
       
       .job-detail__main{
@@ -639,11 +640,16 @@ line-height: 20px; /* 125% */
       }
 
       .job-detail__header-actions{
+        position: fixed;
+        width: 100%;
         display: flex;
         padding: 20px;
         align-items: center;
         gap: 12px;
         align-self: stretch;
+        bottom: 0px;
+        border-top: 1px solid var(--gray-300, #E0E2E4);
+        background: var(--white-100, #FFF);
       }
       .job-detail__action{
         display: flex;
@@ -663,7 +669,7 @@ line-height: 20px; /* 125% */
       }
       .job-detail__sticky-tabs.is-sticky{
         position: fixed;
-        top: 70px;
+        top: 64px;
         
       }
       
