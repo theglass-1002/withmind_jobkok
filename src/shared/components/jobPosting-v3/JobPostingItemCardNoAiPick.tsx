@@ -30,7 +30,7 @@ export default function JobPostingItemCardNoAiPick({
   const [recordAsApplied, setRecordAsApplied] = useState(0);
 
   const handleGoToJobPost = () => {
-    navigate('/jobs/13?title=위드마인드');
+    navigate('/jobs/13?title=밀리의서재');
   };
 
   const handleBookmarkToggle = (e: React.MouseEvent) => {
@@ -57,7 +57,7 @@ export default function JobPostingItemCardNoAiPick({
                 <img className="job-posting__logo" src={mp_test_logo} alt="" />
                 <div className="job-card__identity">
                 <div className="job-card__byline">
-                <span className="job-posting__company">위드마인드</span>
+                <span className="job-posting__company">밀리의서재</span>
                     <span className="job-posting__source-logo"><img src={jobkorea} alt="" /></span>
                     </div>
                     <span className="job-posting__role">프론트앤드 개발자</span>

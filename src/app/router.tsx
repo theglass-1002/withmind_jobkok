@@ -120,6 +120,15 @@ export const router = createBrowserRouter([
     path: "/login", 
     element: <Layout showHeader="desktop-only" showFooter="desktop-only" showBottomNav={false}><Login /></Layout> 
   },
+  { 
+    path: "/auth/oauth/kakao/callback", 
+    element: <Layout showHeader="desktop-only" showFooter="desktop-only" showBottomNav={false}><Login /></Layout> 
+  },
+  { 
+    path: "/auth/oauth/naver/callback", 
+    element: <Layout showHeader="desktop-only" showFooter="desktop-only" showBottomNav={false}><Login /></Layout> 
+  },
+
 
   { path: "/signup", element:<Layout showFooter="desktop-only" showBottomNav={false}> <Signup/></Layout> },
   { path: "/recovery", element: <Layout showFooter="desktop-only" showBottomNav={false}><Recovery/></Layout> },

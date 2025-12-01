@@ -1,37 +1,60 @@
-import React, { useState, useMemo, useCallback } from 'react';
-import { Link, NavLink } from "react-router-dom";
-import ic_visibility_gray700_20 from '@/assets/icons/size20/ic_visibility_gray700_20.png';
-import ic_visibility_off_gray700_20 from '@/assets/icons/size20/ic_visibility_off_gray700_20.png';
-import kakao_login from '@/assets/icons/kakao_login_btn.png';
-import naver_login from '@/assets/icons/naver_login_btn.png';
-import google_login from '@/assets/icons/google_login_btn.png';
+// Login.tsx
+import React, {
+  useState,
+  useMemo,
+  useCallback,
+  MouseEvent,
+  ChangeEvent,
+  useEffect,
+} from "react";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 
-import m_kakao_login52 from '@/assets/icons/size52/m_kakao_login52.png';
-import m_naver_login52 from '@/assets/icons/size52/m_naver_login52.png';
-import m_google_login52 from '@/assets/icons/size52/m_google_login52.png';
+import ic_visibility_gray700_20 from "@/assets/icons/size20/ic_visibility_gray700_20.png";
+import ic_visibility_off_gray700_20 from "@/assets/icons/size20/ic_visibility_off_gray700_20.png";
 
-import chevron_forward_black8x12 from '@/assets/icons/chevron_forward_black8x12.png';
-import cancel from '@/assets/icons/size20/ic_clear_btn_gray400_20.png'
-import error_Item from '@/assets/icons/error_Item.png';
+import m_kakao_login52 from "@/assets/icons/size52/m_kakao_login52.png";
+import m_naver_login52 from "@/assets/icons/size52/m_naver_login52.png";
+import m_google_login52 from "@/assets/icons/size52/m_google_login52.png";
+
+import chevron_forward_black8x12 from "@/assets/icons/chevron_forward_black8x12.png";
+import cancel from "@/assets/icons/size20/ic_clear_btn_gray400_20.png";
+import error_Item from "@/assets/icons/error_Item.png";
 
 import "./Login.css";
-import { Icons } from '@/assets/icons';
+import { Icons } from "@/assets/icons";
+import {
+  API_BASE_URL,
+  KAKAO_REDIRECT_URI,
+  KAKAO_REST_API_KEY,
+  NAVER_CLIENT_ID,
+  NAVER_REDIRECT_URI,
+} from "@/config/config";
+
+interface NaverLoginResponse {
+  // 백엔드에서 내려주는 필드에 맞게 나중에 바꾸면 됨
+  id?: string;
+  email?: string;
+  name?: string;
+  nickname?: string;
+  profileImage?: string;
+  mobile?: string;
+  accessToken?: string;
+}
 
 
-export default function Login() {
-  const [email, setEmail] = useState('');
 
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [remember, setRemember] = useState(false);
+const Login: React.FC = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  const [emailErrorType, setEmailErrorType] = useState(0); 
-  //0: 오류 없음 이메일을 입력해 주세요. / 이미 가입된 이메일입니다. 해당 이메일로 로그인해 주세요. / 중복 확인을 완료해 주세요.
-  const [passwordErrorType, setPasswordErrorType] = useState(0); 
-  //0: 오류 없음  비밀번호를 입력해 주세요. / 입력한 비밀번호를 확인해 주세요. / 비밀번호가 일치하지 않습니다.
- 
-  const [loginStatus, setLoginStatus] = useState(null); 
-  //로그인
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [remember, setRemember] = useState<boolean>(false);
+
+  const [emailErrorType, setEmailErrorType] = useState<number>(0);
+  const [passwordErrorType, setPasswordErrorType] = useState<number>(0);
+  const [loginStatus, setLoginStatus] = useState<string | null>(null);
 
   const emailErrorMessage = useMemo(() => {
     switch (emailErrorType) {
@@ -46,7 +69,6 @@ export default function Login() {
     }
   }, [emailErrorType]);
 
-
   const passwordErrorMessage = useMemo(() => {
     switch (passwordErrorType) {
       case 1:
@@ -60,102 +82,296 @@ export default function Login() {
     }
   }, [passwordErrorType]);
 
+  const handleEmailChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      setEmail(e.target.value);
+    },
+    []
+  );
 
-  const handleEmailChange = useCallback((e) => {
-    setEmail(e.target.value);
-  }, []);
+  const handlePasswordChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      setPassword(e.target.value);
+    },
+    []
+  );
 
-
-  const handlePasswordChange = useCallback((e) => {
-    setPassword(e.target.value);
-  }, []);
-
-
-  // 이메일 초기화 핸들러 (입력값이 있을 때만 초기화)
   const handleClearEmail = useCallback(() => {
-    setEmail(''); 
+    setEmail("");
   }, []);
 
-  // 비밀번호 초기화 핸들러 (입력값이 있을 때만 초기화)
   const handleClearPassword = useCallback(() => {
-    // password.length>0 체크는 JSX에서 조건부 렌더링으로 처리하므로, 여기서는 무조건 초기화
-    setPassword(''); 
+    setPassword("");
   }, []);
 
-  // 비밀번호 표시/숨김 토글 핸들러
   const togglePasswordVisibility = useCallback(() => {
-    setShowPassword(prev => !prev);
+    setShowPassword((prev) => !prev);
   }, []);
 
-  const passwordType = showPassword ? 'text' : 'password';
+  const passwordType = showPassword ? "text" : "password";
 
-  const handleLogin = () => {
+  const handleLogin = (e: MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
     setEmailErrorType(1);
     setPasswordErrorType(2);
-    // setLoginStatus(null); // 상태 초기화
+    setLoginStatus(null);
+  };
 
-  }
+  const handleKakaoLogin = useCallback(() => {
+    const state = encodeURIComponent(
+      Math.random().toString(36).substring(2, 15)
+    );
+    localStorage.setItem("kakao_oauth_state", state);
+
+    const url =
+      `https://kauth.kakao.com/oauth/authorize?response_type=code` +
+      `&client_id=${KAKAO_REST_API_KEY}` +
+      `&redirect_uri=${encodeURIComponent(KAKAO_REDIRECT_URI)}` +
+      `&state=${state}`;
+
+    window.location.href = url;
+  }, []);
+
+
+  
+
+  const handleNaverLogin = useCallback(() => {
+    const state = encodeURIComponent(
+      Math.random().toString(36).substring(2, 15)
+    );
+    localStorage.setItem("naver_oauth_state", state);
+    const url =
+      `https://nid.naver.com/oauth2.0/authorize?response_type=code` +
+      `&client_id=${NAVER_CLIENT_ID}` +
+      `&redirect_uri=${encodeURIComponent(NAVER_REDIRECT_URI)}` +
+      `&state=${state}`;
+
+    window.location.href = url;
+  }, []);
+
+
+  useEffect(() => {
+    // 콜백 경로인지 확인
+    console.log(location.pathname);
+    if (location.pathname === "/auth/oauth/naver/callback"){
+     
+    const query = new URLSearchParams(location.search);
+    const code = query.get("code");
+    const stateFromNaver = query.get("state");
+    const error = query.get("error");
+
+    console.log("네이버 콜백 도착!");
+    console.log("code:", code);
+    console.log("state:", stateFromNaver);
+    console.log("error:", error);
+    console.log("NAVER_CLIENT_ID:", NAVER_CLIENT_ID);
+    console.log("NAVER_REDIRECT_URI:", NAVER_REDIRECT_URI);
+    console.log("API_BASE_URL:", API_BASE_URL);
+
+    const savedState = localStorage.getItem("naver_oauth_state");
+    if (savedState && stateFromNaver && savedState !== stateFromNaver) {
+      console.error("state 불일치 → 보안상 실패");
+      navigate("/login");
+      return;
+    }
+
+    if (error || !code) {
+      console.error("네이버 로그인 실패:", error);
+      navigate("/login");
+      return;
+    }
+ 
+    console.log("콜백 접근 완료, 백엔드로 코드 전송 시작");
+
+    const sendAuthCode = async () => {
+      try {
+        const payload = {
+          client_id:NAVER_CLIENT_ID,
+          authorizationCode: code,
+          redirectUri: NAVER_REDIRECT_URI,
+          codeVerifier: null,
+          deviceId: "dev-001",
+          state: "1",
+          
+          
+        };
+
+        console.log("백엔드로 보낼 payload:", payload);
+        console.log("백엔드에 보낼주소22 :", API_BASE_URL, "/auth/oauth/naver/callback", );
+
+        //https://nid.naver.com/oauth2.0/token
+        const res = await fetch(
+          `${API_BASE_URL}/auth/oauth/naver/callback`, // 서버 엔드포인트에 맞게 수정
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          }
+        );
+        console.log(res);
+        const text = await res.text();
+
+        if (!res.ok) {
+          console.error("백엔드 네이버 로그인 처리 실패:", res.status, text);
+          navigate("/login");
+          return;
+        }
+
+        let data: NaverLoginResponse;
+        try {
+          data = JSON.parse(text);
+        } catch (e) {
+          console.error("JSON 파싱 실패, 응답:", text);
+          navigate("/login");
+          return;
+        }
+
+        console.log("🎉 네이버 로그인/회원정보 응답:", data);
+
+        // TODO: 여기서 토큰/유저 정보 저장
+        // localStorage.setItem("accessToken", data.accessToken ?? "");
+        // 유저 정보 상태 관리 라이브러리로 넘겨도 되고
+
+        navigate("/"); // 로그인 성공 후 메인으로 이동 (원하는 경로로 바꿔도 됨)
+      } catch (e) {
+        console.error("네이버 코드 전달/회원정보 조회 중 오류:", e);
+        navigate("/login");
+      }
+    };
+
+    sendAuthCode();
+
+    }else if(location.pathname==="/auth/oauth/kakao/callback"){
+      console.log('카카오로그인');
+    }
+  }, [location.pathname, location.search, navigate]);
 
   return (
     <div className="login-page">
       <h1 className="login-title">로그인</h1>
 
       <form className="login-card">
-      {emailErrorType==0?<div className="field in_icon">
-          <label className="label" >
-            아이디(이메일)
-          </label>
-          <div className="input-group">
-            <input className="form-input" type="text" value={email} onChange={handleEmailChange} required />
+        {emailErrorType === 0 ? (
+          <div className="field in_icon">
+            <label className="label">아이디(이메일)</label>
+            <div className="input-group">
+              <input
+                className="form-input"
+                type="text"
+                value={email}
+                onChange={handleEmailChange}
+                required
+              />
               <img src={cancel} onClick={handleClearEmail} alt="" />
+            </div>
           </div>
-        </div>
-        :<div className="field in_icon">
-        <label className="label" >
-          아이디(이메일)
-        </label>
-        <div className="input-group error">
-        <input className="form-input" type="text" value={email} onChange={handleEmailChange} required />
-            <img src={cancel} onClick={handleClearEmail} alt="" />
-            <img src={error_Item} alt="" />
-        </div>
-        <p className="error_text_red">{emailErrorMessage}</p>
-        </div>
-        }  
-      {passwordErrorType==0?<div className="field in_icon">
-          <label className="label" htmlFor="password">
-            비밀번호
-          </label>
-          <div className="input-group">
-            <input id="password"  value={password}  onChange={handlePasswordChange} className="form-input" type={passwordType}  required />
-             <img src={cancel} onClick={handleClearPassword} alt="비밀번호 지우기" />
-             <img src={showPassword ? ic_visibility_off_gray700_20 : ic_visibility_gray700_20}  onClick={togglePasswordVisibility} alt="" />
+        ) : (
+          <div className="field in_icon">
+            <label className="label">아이디(이메일)</label>
+            <div className="input-group error">
+              <input
+                className="form-input"
+                type="text"
+                value={email}
+                onChange={handleEmailChange}
+                required
+              />
+              <img src={cancel} onClick={handleClearEmail} alt="" />
+              <img src={error_Item} alt="" />
+            </div>
+            <p className="error_text_red">{emailErrorMessage}</p>
           </div>
-        </div>:<div className="field in_icon">
-          <label className="label" htmlFor="password">
-            비밀번호
-          </label>
-          <div className="input-group error">
-            <input id="password"  value={password}  onChange={handlePasswordChange} className="form-input" type={passwordType}  required />
-            <img src={cancel} onClick={handleClearPassword} alt="비밀번호 지우기" />
-             <img src={showPassword ? ic_visibility_off_gray700_20 : ic_visibility_gray700_20}  onClick={togglePasswordVisibility} alt="" />
-             <img src={error_Item} alt="" />
-          </div>
-          <p className="error_text_red">{passwordErrorMessage}</p>
-        </div>}
+        )}
 
+        {passwordErrorType === 0 ? (
+          <div className="field in_icon">
+            <label className="label" htmlFor="password">
+              비밀번호
+            </label>
+            <div className="input-group">
+              <input
+                id="password"
+                value={password}
+                onChange={handlePasswordChange}
+                className="form-input"
+                type={passwordType}
+                required
+              />
+              <img
+                src={cancel}
+                onClick={handleClearPassword}
+                alt="비밀번호 지우기"
+              />
+              <img
+                src={
+                  showPassword
+                    ? ic_visibility_off_gray700_20
+                    : ic_visibility_gray700_20
+                }
+                onClick={togglePasswordVisibility}
+                alt=""
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="field in_icon">
+            <label className="label" htmlFor="password">
+              비밀번호
+            </label>
+            <div className="input-group error">
+              <input
+                id="password"
+                value={password}
+                onChange={handlePasswordChange}
+                className="form-input"
+                type={passwordType}
+                required
+              />
+              <img
+                src={cancel}
+                onClick={handleClearPassword}
+                alt="비밀번호 지우기"
+              />
+              <img
+                src={
+                  showPassword
+                    ? ic_visibility_off_gray700_20
+                    : ic_visibility_gray700_20
+                }
+                onClick={togglePasswordVisibility}
+                alt=""
+              />
+              <img src={error_Item} alt="" />
+            </div>
+            <p className="error_text_red">{passwordErrorMessage}</p>
+          </div>
+        )}
 
         <div className="btn_w_full">
-          <button className="btn_w_full default_btn_black" type="submit" onClick={handleLogin}>로그인</button>
+          <button
+            className="btn_w_full default_btn_black"
+            type="submit"
+            onClick={handleLogin}
+          >
+            로그인
+          </button>
         </div>
 
         <div className="form-meta">
-         <span className="remember" onClick={() => setRemember(!remember)}>
-            <img src={remember?Icons.ic_check_box_purple24:Icons.ic_check_box_blank_gray400_24} alt="" />
-            아이디 기억하기</span>
-          {/* <label className="remember">
-            <input type="checkbox" /> 아이디 기억하기
-          </label> */}
+          <span
+            className="remember"
+            onClick={() => setRemember((prev) => !prev)}
+          >
+            <img
+              src={
+                remember
+                  ? Icons.ic_check_box_purple24
+                  : Icons.ic_check_box_blank_gray400_24
+              }
+              alt=""
+            />
+            아이디 기억하기
+          </span>
           <div className="links">
             <NavLink to="/recovery">아이디 찾기</NavLink>
             <NavLink to="/recovery">비밀번호 찾기</NavLink>
@@ -164,28 +380,52 @@ export default function Login() {
       </form>
 
       <div className="oauth">
-        <img className="login_btn" src={kakao_login} alt="" />
-        <img className="login_btn" src={naver_login} alt="" />
-        <img className="login_btn" src={google_login} alt="" />
+        <span
+          className="oauth-buttons__button oauth-buttons__button--kakao"
+          onClick={handleKakaoLogin}
+        >
+          <img src={Icons.ic_kakao_login_20} alt="" /> 카카오로 시작하기
+        </span>
+        <span
+          className="oauth-buttons__button oauth-buttons__button--naver"
+          onClick={handleNaverLogin}
+        >
+          <img src={Icons.ic_naver_login_20} alt="" /> 네이버로 시작하기
+        </span>
+        <span className="oauth-buttons__button oauth-buttons__button--google">
+          <img src={Icons.ic_google_login_20} alt="" /> Google로 시작하기
+        </span>
       </div>
 
       <div className="oauth mobile">
-        <img className="login_btn" src={m_kakao_login52} alt="" />
-        <img className="login_btn" src={m_naver_login52} alt="" />
+        <img
+          className="login_btn"
+          src={m_kakao_login52}
+          alt=""
+          onClick={handleKakaoLogin}
+        />
+        <img
+          className="login_btn"
+          src={m_naver_login52}
+          alt=""
+          onClick={handleNaverLogin}
+        />
         <img className="login_btn" src={m_google_login52} alt="" />
       </div>
 
-    <NavLink to="/signup" className="auth-signup-wrap">
-    <div className="auth-signup">
-      <span className="auth-signup__text">아직 회원이 아니신가요?</span>
-      <div className="auth-signup__action" >
-        <span className="auth-signup__label">회원가입</span>
-        <span className="auth-signup__icon">
-        <img  src={chevron_forward_black8x12} alt="" />
-        </span>
-      </div>
-    </div>
-    </NavLink>
+      <NavLink to="/signup" className="auth-signup-wrap">
+        <div className="auth-signup">
+          <span className="auth-signup__text">아직 회원이 아니신가요?</span>
+          <div className="auth-signup__action">
+            <span className="auth-signup__label">회원가입</span>
+            <span className="auth-signup__icon">
+              <img src={chevron_forward_black8x12} alt="" />
+            </span>
+          </div>
+        </div>
+      </NavLink>
     </div>
   );
-}
+};
+
+export default Login;

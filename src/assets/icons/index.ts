@@ -8,6 +8,12 @@ import jobkok_wordmark_gray900 from "./logo/jobkok_wordmark_gray900.png";
 import jobkok_logo_purple from "./logo/jobkok_logo_purple.png";
 import jobkok_logo_gray400 from "./logo/jobkok_logo_gray400.png";
 
+
+import ic_kakao_login_20 from "./login/ic_kakao_login_20.svg";
+import ic_naver_login_20 from "./login/ic_naver_login_20.svg";
+import ic_google_login_20 from "./login/ic_google_login_20.svg";
+
+
 import ic_check_box_blank_gray400_24 from "./size24/ic_check_box_blank_gray400_24.png";
 import ic_check_box_purple24 from "./size24/ic_check_box_purple24.png";
 import ic_close_gray500_20 from "./size20/ic_close_gray500_20.png";
@@ -19,6 +25,11 @@ export const Icons = {
     jobkok_logo_purple,
     jobkok_logo_gray400,
     jobkok_wordmark_gray400,
+    ic_kakao_login_20,
+    ic_naver_login_20,
+    ic_google_login_20,
+
+
     ic_check_box_blank_gray400_24,
     ic_check_box_purple24,
     ic_close_gray500_20
