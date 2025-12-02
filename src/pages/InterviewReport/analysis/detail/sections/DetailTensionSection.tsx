@@ -30,21 +30,6 @@ export default function DetailTensionSection({
              position="top"
             className=""
          />
-        {/* <span className="tooltip tooltip--top">
-          <img
-            className="tooltip-icon"
-            src={ic_error_gray500_20}
-            alt=""
-            aria-hidden="true"
-            tabIndex={0}
-          />
-          <div className="tooltip__content" role="tooltip">
-            <span className="tooltip__title">긴장도</span>
-            <span className="tooltip__desc">
-              긴장도는 심박 분석 결과에 따라 3단계(높음, 보통, 낮음)로 나누어져 있습니다. 긴장도 상태를 직관적으로 확인할 수 있습니다.
-            </span>
-          </div>
-        </span> */}
       </span>
       
       <div className="analysis-section__body">

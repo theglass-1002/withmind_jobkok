@@ -22,24 +22,11 @@ import error_Item from "@/assets/icons/error_Item.png";
 
 import "./Login.css";
 import { Icons } from "@/assets/icons";
-import {
-  API_BASE_URL,
-  KAKAO_REDIRECT_URI,
-  KAKAO_REST_API_KEY,
-  NAVER_CLIENT_ID,
-  NAVER_REDIRECT_URI,
-} from "@/config/config";
 
-interface NaverLoginResponse {
-  // 백엔드에서 내려주는 필드에 맞게 나중에 바꾸면 됨
-  id?: string;
-  email?: string;
-  name?: string;
-  nickname?: string;
-  profileImage?: string;
-  mobile?: string;
-  accessToken?: string;
-}
+import { deviceId, parseJwt } from "@/shared/utils/util";
+import { buildKakaoAuthUrl, buildNaverLoginUrl, loginWithKakao, registerUser } from "@/api/auth.api";
+
+
 
 
 
@@ -55,6 +42,7 @@ const Login: React.FC = () => {
   const [emailErrorType, setEmailErrorType] = useState<number>(0);
   const [passwordErrorType, setPasswordErrorType] = useState<number>(0);
   const [loginStatus, setLoginStatus] = useState<string | null>(null);
+  const passwordType = showPassword ? "text" : "password";
 
   const emailErrorMessage = useMemo(() => {
     switch (emailErrorType) {
@@ -108,7 +96,6 @@ const Login: React.FC = () => {
     setShowPassword((prev) => !prev);
   }, []);
 
-  const passwordType = showPassword ? "text" : "password";
 
   const handleLogin = (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -121,130 +108,59 @@ const Login: React.FC = () => {
     const state = encodeURIComponent(
       Math.random().toString(36).substring(2, 15)
     );
-    localStorage.setItem("kakao_oauth_state", state);
-
-    const url =
-      `https://kauth.kakao.com/oauth/authorize?response_type=code` +
-      `&client_id=${KAKAO_REST_API_KEY}` +
-      `&redirect_uri=${encodeURIComponent(KAKAO_REDIRECT_URI)}` +
-      `&state=${state}`;
-
+    const url = buildKakaoAuthUrl(state);
     window.location.href = url;
   }, []);
-
-
-  
 
   const handleNaverLogin = useCallback(() => {
     const state = encodeURIComponent(
       Math.random().toString(36).substring(2, 15)
     );
-    localStorage.setItem("naver_oauth_state", state);
-    const url =
-      `https://nid.naver.com/oauth2.0/authorize?response_type=code` +
-      `&client_id=${NAVER_CLIENT_ID}` +
-      `&redirect_uri=${encodeURIComponent(NAVER_REDIRECT_URI)}` +
-      `&state=${state}`;
-
+   
+    const url = buildNaverLoginUrl(state);
     window.location.href = url;
   }, []);
+
 
 
   useEffect(() => {
     // 콜백 경로인지 확인
     console.log(location.pathname);
-    if (location.pathname === "/auth/oauth/naver/callback"){
-     
-    const query = new URLSearchParams(location.search);
-    const code = query.get("code");
-    const stateFromNaver = query.get("state");
-    const error = query.get("error");
+  
+    if (location.pathname === "/auth/oauth/naver/callback") {
+      const query = new URLSearchParams(location.search);
+      const code = query.get("code");
+      const stateFromNaver = query.get("state");
+      const error = query.get("error");
+      console.log('code',code);
+      console.log('state',stateFromNaver);
+      console.log('error',error);
+      console.log('deviceId',deviceId());
 
-    console.log("네이버 콜백 도착!");
-    console.log("code:", code);
-    console.log("state:", stateFromNaver);
-    console.log("error:", error);
-    console.log("NAVER_CLIENT_ID:", NAVER_CLIENT_ID);
-    console.log("NAVER_REDIRECT_URI:", NAVER_REDIRECT_URI);
-    console.log("API_BASE_URL:", API_BASE_URL);
-
-    const savedState = localStorage.getItem("naver_oauth_state");
-    if (savedState && stateFromNaver && savedState !== stateFromNaver) {
-      console.error("state 불일치 → 보안상 실패");
-      navigate("/login");
-      return;
-    }
-
-    if (error || !code) {
-      console.error("네이버 로그인 실패:", error);
-      navigate("/login");
-      return;
-    }
- 
-    console.log("콜백 접근 완료, 백엔드로 코드 전송 시작");
-
-    const sendAuthCode = async () => {
-      try {
-        const payload = {
-          client_id:NAVER_CLIENT_ID,
-          authorizationCode: code,
-          redirectUri: NAVER_REDIRECT_URI,
-          codeVerifier: null,
-          deviceId: "dev-001",
-          state: "1",
-          
-          
-        };
-
-        console.log("백엔드로 보낼 payload:", payload);
-        console.log("백엔드에 보낼주소22 :", API_BASE_URL, "/auth/oauth/naver/callback", );
-
-        //https://nid.naver.com/oauth2.0/token
-        const res = await fetch(
-          `${API_BASE_URL}/auth/oauth/naver/callback`, // 서버 엔드포인트에 맞게 수정
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-          }
-        );
-        console.log(res);
-        const text = await res.text();
-
-        if (!res.ok) {
-          console.error("백엔드 네이버 로그인 처리 실패:", res.status, text);
-          navigate("/login");
-          return;
-        }
-
-        let data: NaverLoginResponse;
-        try {
-          data = JSON.parse(text);
-        } catch (e) {
-          console.error("JSON 파싱 실패, 응답:", text);
-          navigate("/login");
-          return;
-        }
-
-        console.log("🎉 네이버 로그인/회원정보 응답:", data);
-
-        // TODO: 여기서 토큰/유저 정보 저장
-        // localStorage.setItem("accessToken", data.accessToken ?? "");
-        // 유저 정보 상태 관리 라이브러리로 넘겨도 되고
-
-        navigate("/"); // 로그인 성공 후 메인으로 이동 (원하는 경로로 바꿔도 됨)
-      } catch (e) {
-        console.error("네이버 코드 전달/회원정보 조회 중 오류:", e);
+    } else if (location.pathname === "/auth/oauth/kakao/callback") {
+      const query = new URLSearchParams(location.search);
+      const code = query.get("code");
+      const state = query.get("state");
+      const error = query.get("error");
+      if (!code || error) {
         navigate("/login");
+        return;
       }
-    };
+      (async () => {
+        console.log("code",code);
+        console.log("state",state);
+        const { kakaoToken } = await loginWithKakao(code, state, deviceId());
+         console.log("카카오 SNS가입여부체크:", kakaoToken);
+         //동의화면
+         navigate("/socialConsent?snsType=kakao");
+      })();
+    
 
-    sendAuthCode();
-
-    }else if(location.pathname==="/auth/oauth/kakao/callback"){
-      console.log('카카오로그인');
     }
   }, [location.pathname, location.search, navigate]);
+  
+
+
 
   return (
     <div className="login-page">

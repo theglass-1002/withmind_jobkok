@@ -56,6 +56,9 @@ import PurchaseFail from "@/pages/PurchaseResult/PurchaseFail";
 
 import Login from "@/pages/Auth/Login/Login";
 import Signup from "@/pages/Auth/Signup/Signup";
+import InicisSuccess from "@/pages/Auth/Signup/InicisSuccess";
+
+import SocialConsent from "@/pages/Auth/Consent/SocialConsent";
 import Recovery from "@/pages/Auth/Recovery/Recovery";
 import NotFound from "@/pages/NotFound";
 import MyPageLayout from "@/pages/Mypage/MyPageLayout";
@@ -124,13 +127,19 @@ export const router = createBrowserRouter([
     path: "/auth/oauth/kakao/callback", 
     element: <Layout showHeader="desktop-only" showFooter="desktop-only" showBottomNav={false}><Login /></Layout> 
   },
+  
   { 
     path: "/auth/oauth/naver/callback", 
     element: <Layout showHeader="desktop-only" showFooter="desktop-only" showBottomNav={false}><Login /></Layout> 
   },
 
-
   { path: "/signup", element:<Layout showFooter="desktop-only" showBottomNav={false}> <Signup/></Layout> },
+  {
+    path: "/inicisSuccess",
+    element: <InicisSuccess />,
+  },
+
+  { path: "/socialConsent", element:<Layout showFooter="desktop-only" showBottomNav={false}> <SocialConsent/></Layout> },
   { path: "/recovery", element: <Layout showFooter="desktop-only" showBottomNav={false}><Recovery/></Layout> },
   { path: "/mypage", 
     element: <Layout screen="Mypage" ><MyPageLayout/></Layout>,

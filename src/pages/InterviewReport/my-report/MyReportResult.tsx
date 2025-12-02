@@ -161,14 +161,6 @@ export default function MyReportResult() {
                       onChange={setSort}
                       className="job-posting__sort"
                     />
-        {/* <div className="mock-interview-summary__header-right sort-control">
-          <span className="mock-interview-summary__window sort-control__label">최근 10일</span>
-          <div className="sort-control__menu">
-              <span className="sort-control__option">최근 10일</span>
-               <span className="sort-control__option">최근 한달</span>
-               <span className="sort-control__option">최근 1년</span>
-              </div>
-        </div> */}
       </div>
 
       <div className="mock-interview-summary__content">

@@ -344,3 +344,53 @@ export type CareerItem = {
   level?: string;      // 예: "매니저"
   bullets: string[];   // 예: ["• ...", "• ..."]
 };
+
+export function parseJwt<T = any>(token: string): T {
+  const base64Url = token.split(".")[1];
+  const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+
+  const jsonPayload = decodeURIComponent(
+    atob(base64)
+      .split("")
+      .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+      .join("")
+  );
+
+  return JSON.parse(jsonPayload);
+}
+
+export function deviceId(): string {
+  let t = new Date().getTime();
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (t + Math.random() * 16) % 16 | 0;
+    t = Math.floor(t / 16);
+    return (c === "x" ? r : ((r & 0x3) | 0x8)).toString(16);
+  });
+}
+
+export function openAuthPopup(
+  width = 430,
+  height = 640,
+  name = "sa_popup"
+): Window | null {
+  const dualScreenLeft = window.screenLeft ?? window.screenX;
+  const dualScreenTop = window.screenTop ?? window.screenY;
+
+  const screenWidth = window.innerWidth ?? document.documentElement.clientWidth;
+  const screenHeight =
+    window.innerHeight ?? document.documentElement.clientHeight;
+
+  const left = dualScreenLeft + (screenWidth - width) / 2;
+  const top = dualScreenTop + (screenHeight - height) / 2;
+
+  return window.open(
+    "",
+    name,
+    `scrollbars=yes,width=${width},height=${height},top=${top},left=${left}`
+  );
+}
+
+export const isValidEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
