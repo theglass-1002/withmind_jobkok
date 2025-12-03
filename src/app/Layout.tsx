@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { LayoutContext } from './LayoutContext';
 import {useParams, useSearchParams } from 'react-router-dom';
-import {SortOption,LayoutProps} from '@/shared/utils/util';
+import {SortOption,LayoutProps, scrollToTop} from '@/shared/utils/util';
 import Navbar from '@/shared/components/Navbar';
 import Footer from '@/shared/components/Footer';
 import BottomNav from '@/shared/components/bottomNav/BottomNav';
@@ -59,13 +59,9 @@ export default function Layout({
     setActionsValue('');
   };
   
-  
   useEffect(() => {
-    window.scrollTo({
-      top: 0,
-      left: 0,
-      behavior: 'smooth'
-    });
+    scrollToTop();  // ← 여기!
+    console.log('스크롤위로');
   }, [location.pathname]);
 
   useEffect(() => {

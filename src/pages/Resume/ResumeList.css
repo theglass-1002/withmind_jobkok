@@ -1,3 +1,7 @@
+.resume-list-page__container{
+    background: var(--gray-50, #F8F8F9);
+}
+
 .resume-list-page{
     /* display: flex;
     padding: 108px 0 100px 0;
@@ -124,7 +128,9 @@ box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.08);
 }
 
 .resume-list-page__list{
-    
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
 }
 
 .resume-list-page__grid{
@@ -230,9 +236,6 @@ box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.08);
 background: var(--green-8, rgba(30, 194, 128, 0.08));
 }
 
-.resume-item__actions{
-
-}
 
 .resume-item__title-row{
     display: flex;
@@ -302,16 +305,18 @@ background: var(--green-8, rgba(30, 194, 128, 0.08));
     line-height: 20px; 
 }
 
-.resume-item__edit-btn{
+
+.resume-item__actions{
     position: relative;
     cursor: pointer;
 }
 
+
 .resume-item__menu{
     position: absolute;
     display: flex;
-    right: 0;
-    top: 150%;
+    top: 30px;
+    right: 20px;
     width: 152px;
     flex-direction: column;
     align-items: flex-start;
@@ -461,6 +466,7 @@ background: var(--green-8, rgba(30, 194, 128, 0.08));
         }
 
         .resume-list-page__list{
+            gap: 0px;
             width: 100%;
         }
 

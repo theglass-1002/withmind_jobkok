@@ -57,7 +57,7 @@
 }
 
 .login_off {
-  display: none;
+  display: flex;
   align-items: center;
   gap: 24px;
 }

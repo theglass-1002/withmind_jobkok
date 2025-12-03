@@ -11,9 +11,10 @@ interface UiFilterProps {
   value: string;                      // 현재 선택값
   onChange: (value: string) => void;  // 선택 변경
   className?: string;                 // 페이지 전용 클래스 추가용
+  itemClassName?: string; 
 }
 
-export default function UiFilter({ options, value, onChange, className }: UiFilterProps) {
+export default function UiFilter({ options, value, onChange, className, itemClassName }: UiFilterProps) {
   return (
     <div className={`ui-filter${className ? ` ${className}` : ""}`}>
       {options.map((opt) => {
@@ -21,7 +22,8 @@ export default function UiFilter({ options, value, onChange, className }: UiFilt
         return (
           <span
             key={opt.value}
-            className={`ui-filter__item${active ? " on" : ""}`}
+            className={`${itemClassName? `${itemClassName}`:'' } ui-filter__item${active?" on":""}`}
+            // className={`${itemClassName} ui-filter__item${active ? " on" : ""}`}
             role="button"
             tabIndex={0}
             onClick={() => onChange(opt.value)}

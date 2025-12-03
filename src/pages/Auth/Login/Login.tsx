@@ -23,12 +23,19 @@ import error_Item from "@/assets/icons/error_Item.png";
 import "./Login.css";
 import { Icons } from "@/assets/icons";
 
-import { deviceId, parseJwt } from "@/shared/utils/util";
-import { buildKakaoAuthUrl, buildNaverLoginUrl, loginWithKakao, registerUser } from "@/api/auth.api";
+import { deviceId, parseJwt, stripAllWhitespace } from "@/shared/utils/util";
+import {
+  buildKakaoAuthUrl,
+  buildNaverLoginUrl,
+  loginUser,
+  loginWithKakao,
+  logout,
+} from "@/api/auth.api";
+import { LoginRequest } from "@/api/auth.types";
+import { ApiErrorResponse } from "@/api/axios.instance";
+import { toast } from "react-toastify";
 
-
-
-
+const REMEMBER_ID_KEY = "rememberId";
 
 const Login: React.FC = () => {
   const location = useLocation();
@@ -43,6 +50,15 @@ const Login: React.FC = () => {
   const [passwordErrorType, setPasswordErrorType] = useState<number>(0);
   const [loginStatus, setLoginStatus] = useState<string | null>(null);
   const passwordType = showPassword ? "text" : "password";
+
+  // 처음 진입 시 저장된 아이디가 있으면 불러오기
+  useEffect(() => {
+    const savedId = localStorage.getItem(REMEMBER_ID_KEY);
+    if (savedId) {
+      setEmail(savedId);
+      setRemember(true);
+    }
+  }, []);
 
   const emailErrorMessage = useMemo(() => {
     switch (emailErrorType) {
@@ -72,9 +88,15 @@ const Login: React.FC = () => {
 
   const handleEmailChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
-      setEmail(e.target.value);
+      const value = e.target.value;
+      setEmail(value);
+
+      // 아이디 기억하기가 켜져 있으면 localStorage도 함께 업데이트
+      if (remember) {
+        localStorage.setItem(REMEMBER_ID_KEY, value);
+      }
     },
-    []
+    [remember]
   );
 
   const handlePasswordChange = useCallback(
@@ -85,10 +107,15 @@ const Login: React.FC = () => {
   );
 
   const handleClearEmail = useCallback(() => {
+    setEmailErrorType(0);
     setEmail("");
+    // 아이디 기억하기 중에 지우면 저장된 값도 삭제
+    localStorage.removeItem(REMEMBER_ID_KEY);
+    setRemember(false);
   }, []);
 
   const handleClearPassword = useCallback(() => {
+    setPasswordErrorType(0);
     setPassword("");
   }, []);
 
@@ -96,12 +123,85 @@ const Login: React.FC = () => {
     setShowPassword((prev) => !prev);
   }, []);
 
+  // 아이디 기억하기 토글
+  const handleToggleRemember = useCallback(() => {
+    setRemember((prev) => {
+      const next = !prev;
 
-  const handleLogin = (e: MouseEvent<HTMLButtonElement>) => {
+      if (next && email) {
+        // 켜질 때 현재 이메일 저장
+        localStorage.setItem(REMEMBER_ID_KEY, email);
+      }
+
+      if (!next) {
+        // 꺼질 때 저장된 이메일 삭제
+        localStorage.removeItem(REMEMBER_ID_KEY);
+      }
+
+      return next;
+    });
+  }, [email]);
+
+  const handleLogin = async (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    setEmailErrorType(1);
-    setPasswordErrorType(2);
-    setLoginStatus(null);
+
+    let hasError = false;
+    const trimmedEmail = stripAllWhitespace(email);
+    const trimmedPassword = stripAllWhitespace(password);
+    if (!trimmedEmail.trim()) {
+      setEmailErrorType(1);
+      hasError = true;
+    } else {
+      setEmailErrorType(0);
+    }
+
+    if (!trimmedPassword.trim()) {
+      setPasswordErrorType(1);
+      hasError = true;
+    } else {
+      setPasswordErrorType(0);
+    }
+
+    if (hasError) return;
+
+    // 실제 로그인 API 호출
+    console.log("로그인 시도:", trimmedEmail, trimmedPassword);
+
+    try {
+      const loginRequest: LoginRequest = {
+        userId: trimmedEmail,
+        password: trimmedPassword,
+        deviceId: deviceId(),
+      };
+      const result = await loginUser(loginRequest);
+      console.log("로그인 결과", result);
+      console.log("리플", result.refreshToken);
+      if (result.code === 200) {
+        localStorage.setItem("accessToken", result.token);
+        localStorage.setItem("refreshToken", result.refreshToken);
+        localStorage.setItem("userName", result.user.userName);
+        localStorage.setItem("userId", result.user.userId);
+        localStorage.setItem("userIdx", String(result.user.userIdx));
+
+        // remember 상태에 따라 아이디 저장/삭제
+        if (remember) {
+          localStorage.setItem(REMEMBER_ID_KEY, trimmedEmail);
+        } else {
+          localStorage.removeItem(REMEMBER_ID_KEY);
+        }
+
+        setPasswordErrorType(0);
+        // TODO: 로그인 성공 후 이동할 경로
+         navigate("/");
+      }
+    } catch (error) {
+      const e = error as ApiErrorResponse;
+      logout();
+
+      if (e.code == 401) {
+        setPasswordErrorType(3);
+      }
+    }
   };
 
   const handleKakaoLogin = useCallback(() => {
@@ -116,27 +216,24 @@ const Login: React.FC = () => {
     const state = encodeURIComponent(
       Math.random().toString(36).substring(2, 15)
     );
-   
+
     const url = buildNaverLoginUrl(state);
     window.location.href = url;
   }, []);
 
-
-
   useEffect(() => {
     // 콜백 경로인지 확인
     console.log(location.pathname);
-  
+
     if (location.pathname === "/auth/oauth/naver/callback") {
       const query = new URLSearchParams(location.search);
       const code = query.get("code");
       const stateFromNaver = query.get("state");
       const error = query.get("error");
-      console.log('code',code);
-      console.log('state',stateFromNaver);
-      console.log('error',error);
-      console.log('deviceId',deviceId());
-
+      console.log("code", code);
+      console.log("state", stateFromNaver);
+      console.log("error", error);
+      console.log("deviceId", deviceId());
     } else if (location.pathname === "/auth/oauth/kakao/callback") {
       const query = new URLSearchParams(location.search);
       const code = query.get("code");
@@ -147,20 +244,19 @@ const Login: React.FC = () => {
         return;
       }
       (async () => {
-        console.log("code",code);
-        console.log("state",state);
-        const { kakaoToken } = await loginWithKakao(code, state, deviceId());
-         console.log("카카오 SNS가입여부체크:", kakaoToken);
-         //동의화면
-         navigate("/socialConsent?snsType=kakao");
+        console.log("code", code);
+        console.log("state", state);
+        const { kakaoToken } = await loginWithKakao(
+          code,
+          state,
+          deviceId()
+        );
+        console.log("카카오 SNS가입여부체크:", kakaoToken);
+        //동의화면
+        navigate("/socialConsent?snsType=kakao");
       })();
-    
-
     }
   }, [location.pathname, location.search, navigate]);
-  
-
-
 
   return (
     <div className="login-page">
@@ -274,10 +370,7 @@ const Login: React.FC = () => {
         </div>
 
         <div className="form-meta">
-          <span
-            className="remember"
-            onClick={() => setRemember((prev) => !prev)}
-          >
+          <span className="remember" onClick={handleToggleRemember}>
             <img
               src={
                 remember

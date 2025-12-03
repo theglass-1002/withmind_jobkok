@@ -83,9 +83,7 @@ export default function M_InterviewReport() {
       const shouldBeSticky = scrollPosition + tabsHeight > descriptionTop;
       if(shouldBeSticky){
         setIsTabsSticky(true);
-        console.log('고정 ㄱㄱ');
       }else{
-        console.log('고정 ㄴㄴ');
         setIsTabsSticky(false);
       }
       }

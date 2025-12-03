@@ -394,3 +394,15 @@ export const isValidEmail = (email: string): boolean => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 };
+
+// 날짜 "2025-12-03 15:09:14" → "2025.12.03."
+export const formatDate = (dt?: string) => {
+  if (!dt) return "";
+  const [date] = dt.split(" "); // "2025-12-03"
+  return date.replace(/-/g, ".") + ".";
+};
+
+export const scrollToTop = () => {
+  //스크롤위로
+ return window.scrollTo({ top: 0, behavior: "smooth" });
+};

@@ -13,7 +13,9 @@ import ic_turn_right_gray400_22x21 from "@/assets/icons/ic_turn_right_gray400_22
 import "./Signup.css";
 import { isValidEmail, isValidPassword, openAuthPopup, stripAllWhitespace } from "@/shared/utils/util";
  import { inicisParams } from "@/pages/Auth/Signup/inicisParams";
-import { checkEmailDuplicate, registerUser,RegisterRequest } from "@/api/auth.api";
+import { checkEmailDuplicate, logout, registerUser } from "@/api/auth.api";
+import { ApiErrorResponse } from "@/api/axios.instance";
+import { RegisterRequest } from "@/api/auth.types";
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -27,8 +29,7 @@ export default function Signup() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
-    useState(false);
+  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
 
   const [passwordErrorType, setPasswordErrorType] = useState(0);
   //0: 오류 없음 / 1: 비밀번호 입력 / 2: 비밀번호 확인 / 3: 불일치
@@ -80,6 +81,8 @@ export default function Signup() {
   
     try {
       const result = await checkEmailDuplicate(trimmedEmail);
+      console.log('이메일 중복확인 결과:',result);
+      //check -> true 중복 fasle 중복x
       if (result.check === true) {
         setIsEmailChecked(false);
         setEmailErrorType(2);
@@ -186,7 +189,7 @@ export default function Signup() {
       setter(e.target.checked);
     };
 
-  const handleSignup = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleSignup = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
     console.log("🔍 회원가입 검증 시작");
@@ -215,18 +218,6 @@ export default function Signup() {
       return;
     }
 
-    const Regis: RegisterRequest = {
-      "userId": email,
-      "password": password,
-      "userName": "홍길동",
-      "ci": "1122398",
-      "ciProvider": "pass",
-      "realName": "홍길동",
-      "birthdate": "19901231",
-     "gender": selectedGender==1?"M":"W",
-      "phone": "01012345678",
-      "email": email
-  }
  
   console.log("✅ 모든 검증 통과!");
 
@@ -234,11 +225,13 @@ export default function Signup() {
     const trimmedEmail = stripAllWhitespace(email);
     const trimmedPassword = stripAllWhitespace(password);
 
+
+  
     const regisData: RegisterRequest = {
       userId: trimmedEmail,
       password: trimmedPassword,
       userName: "홍길동", // TODO: 본인인증에서 받은 실제 이름
-      ci: "1122398", // TODO: 본인인증에서 받은 실제 CI
+      ci: "797979", // TODO: 본인인증에서 받은 실제 CI
       ciProvider: "pass",
       realName: "홍길동", // TODO: 본인인증에서 받은 실제 이름
       birthdate: "19901231", // TODO: 본인인증에서 받은 실제 생년월일
@@ -246,19 +239,36 @@ export default function Signup() {
       phone: "01012345678", // TODO: 본인인증에서 받은 실제 전화번호
       email: trimmedEmail,
     };
-    console.log(regisData);
+    console.log("회원가입 보낼값!",regisData);
 
-    // console.log(Regis);
-    // registerUser(Regis);
-
+    try {
+      const result = await registerUser(regisData);
+      if(result.code==200){
+        logout(); //로그인 초기화
+        navigate("/login");
+        toast.success('회원가입 완료');
+      }
+    } catch (error) {
+      logout(); //로그인 초기화
+      const e = error as ApiErrorResponse;
+      console.log("에러코드:", e.code);
+      console.log("에러메시지:", e.message);
+      if(e.code==400){
+        return toast.error("존재하는 계정입니다.");
+      }else{
+        return toast.error(`관리자에게 문의해주세요 Ecode:${e.code}`);
+      }
+    }  
   };
 
   const handleClearEmail = () => {
+    setEmailErrorType(0);
     setEmail("");
     setIsEmailChecked(false);
   };
 
   const handleClearPassword = () => {
+    setPasswordErrorType(0);
     setPassword("");
   };
 

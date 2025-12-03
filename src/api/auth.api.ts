@@ -1,37 +1,77 @@
-import axios from "axios";
-import { API_BASE_URL,KAKAO_REST_API_KEY,KAKAO_REDIRECT_URI,NAVER_CLIENT_ID,NAVER_REDIRECT_URI } from "@/config/config";
 
-// 회원가입 API
-// 로그인 API
-// 로그아웃 API
-// accessToken 재발급
-// 카카오 로그인
-// 네이버 로그인
-// Apple 로그인
-// 이니시스 본인인증(precheck)
-// 비밀번호 재설정 인증
+// auth.api.ts
+import instance from "@/api/axios.instance";
+
+import {
+  EmailCheckResponse,
+  LoginRequest,
+  LoginResponse,
+  RegisterRequest,
+  RegisterResponse,
+} from "./auth.types";
+import { API_BASE_URL, KAKAO_REDIRECT_URI, KAKAO_REST_API_KEY, NAVER_CLIENT_ID, NAVER_REDIRECT_URI } from "@/config/config";
+
+
 
 
 //이메일 중복확인
-export interface EmailCheckResponse {
-    code: number;
-    check: boolean;
-    msg: string;
-  }
+export async function checkEmailDuplicate(email: string): Promise<EmailCheckResponse> {
+  const res = await instance.get<EmailCheckResponse>("/auth/emailCheck", {
+    params: { email },
+    requiresAuth: false,
+  });
   
-  export async function checkEmailDuplicate(email: string): Promise<EmailCheckResponse> {
-    const res = await axios.get<EmailCheckResponse>(
-      `${API_BASE_URL}/auth/emailCheck`,
-      {
-        params: { email }, // 
-        headers: {
-            "Content-Type": "application/json",
-        },
-      }
-    );
+  return res.data;
+}
 
-    return res.data;
-  }
+//회원가입
+export async function registerUser(
+  payload: RegisterRequest
+): Promise<RegisterResponse> {
+  const res = await instance.post<RegisterResponse>("/auth/register", payload,{
+    requiresAuth:false
+  });
+  return res.data;
+}
+
+// 로그인
+export async function loginUser(payload: LoginRequest): Promise<LoginResponse> {
+  const res = await instance.post<LoginResponse>("/auth/login", payload,{
+   requiresAuth: false});
+  return res.data;
+}
+
+// 로그아웃
+export async function logoutUser() {
+  return await instance.post("/auth/logout");
+}
+
+// accessToken 재발급
+export async function refreshAccessToken(refreshToken: string) {
+  const res = await instance.post("/auth/refresh", { refreshToken });
+  return res.data;
+}
+
+// 로그인 여부 체크
+export const isLoggedIn = () => {
+  return !!localStorage.getItem("accessToken");
+};
+
+// 로그아웃
+export const logout = () => {
+ // 세션 스토리지
+ sessionStorage.removeItem("accessToken");
+ sessionStorage.removeItem("refreshToken");
+ sessionStorage.removeItem("userName");
+ sessionStorage.removeItem("userId");
+ sessionStorage.removeItem("userIdx");
+
+ localStorage.removeItem("accessToken");
+ localStorage.removeItem("refreshToken");
+ localStorage.removeItem("userName");
+ localStorage.removeItem("userId");
+ localStorage.removeItem("userIdx");
+};
 
 
 
@@ -46,6 +86,20 @@ export function buildKakaoAuthUrl(state: string) {
     `&state=${state}`
   );
 }
+
+// ----------------------
+// 1) 네이버 로그인 URL 생성
+// ----------------------
+export function buildNaverLoginUrl(state: string) {
+  return (
+    `https://nid.naver.com/oauth2.0/authorize?response_type=code` +
+    `&client_id=${NAVER_CLIENT_ID}` +
+    `&redirect_uri=${encodeURIComponent(NAVER_REDIRECT_URI)}` +
+    `&state=${state}`
+  );
+}
+
+
 
 export async function loginWithKakao(code: string, state: string , deviceId:string) {
 const body = JSON.stringify({
@@ -75,56 +129,5 @@ const body = JSON.stringify({
 }
 
 
-// ----------------------
-// 1) 네이버 로그인 URL 생성
-// ----------------------
-export function buildNaverLoginUrl(state: string) {
-    return (
-      `https://nid.naver.com/oauth2.0/authorize?response_type=code` +
-      `&client_id=${NAVER_CLIENT_ID}` +
-      `&redirect_uri=${encodeURIComponent(NAVER_REDIRECT_URI)}` +
-      `&state=${state}`
-    );
-  }
 
 
-  
-
-export interface RegisterRequest {
-  userId: string;
-  password: string;
-  userName: string;
-  ci: string;
-  ciProvider: string;
-  realName: string;
-  birthdate: string;
-  gender: string;
-  phone: string;
-  email: string;
-}
-
-export interface RegisterResponse {
-  code: number;
-  msg: string;
-  data?: any;
-}
-
-
-export async function registerUser(data?: RegisterRequest): Promise<RegisterResponse> {
-  const config = {
-    method: "post" as const,
-    url: `${API_BASE_URL}/auth/register`,
-    headers: {
-      "Content-Type": "application/json",
-    },
-    data,
-  };
-
-  console.log("보내는 요청:", config);
-
-  const res = await axios.request<RegisterResponse>(config);
-
-  console.log("응답:", res.data);
-
-  return res.data;
-}
