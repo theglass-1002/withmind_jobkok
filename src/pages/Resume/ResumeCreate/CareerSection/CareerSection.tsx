@@ -468,7 +468,7 @@ function CareerItem({
           </div>
 
           {/* 재직중 토글 */}
-          <div className="career-section__toggle career-section__toggle--current error_box">
+          <div className="career-section__toggle career-section__toggle--current">
             <span className="career-section__toggle-label">재직중</span>
             <Switch
               checked={!!isCurrent}

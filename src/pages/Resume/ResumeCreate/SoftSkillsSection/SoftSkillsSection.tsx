@@ -9,14 +9,18 @@ import ic_error_gray500_20 from '@/assets/icons/size20/ic_error_gray500_20.png';
 import ic_add_purple_20 from '@/assets/icons/size20/ic_add_purple_20.png';
 import ic_close_gray500_24 from '@/assets/icons/size24/ic_close_gray500_24.png';
 
-
 import SearchField from '@/shared/components/search/SearchField';
 import AiSuggestChips from '@/shared/components/ai/AiSuggestChips';
 
 type RoleItem = { group: string; role: string };
 const MAX_SELECTED = 30;
 
-export default function SoftSkillsSection() {
+// 부모로 값 전달하고 싶을 때를 위한 선택적 props
+interface SoftSkillsSectionProps {
+  onChange?: (skills: string[]) => void; // 선택된 소프트 스킬 텍스트 배열
+}
+
+export default function SoftSkillsSection({ onChange }: SoftSkillsSectionProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState('');
@@ -31,6 +35,14 @@ export default function SoftSkillsSection() {
     setQ('');
     setSelected(new Set()); // chips 초기화
   };
+
+  //  선택된 소프트 스킬 콘솔로그 + 부모로 전달
+  useEffect(() => {
+    const skills = Array.from(selected).map((key) => key.split('|')[1]);
+   
+    onChange?.(skills);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected]);
 
   // roles JSON → 평탄화
   const flat: RoleItem[] = useMemo(() => {
@@ -106,7 +118,7 @@ export default function SoftSkillsSection() {
     setSelected((prev) => {
       if (prev.has(key)) return prev;
       if (prev.size >= MAX_SELECTED) {
-        toast.success('최대 30개까지 선택가능합니다.', { toastId: 'role-limit' });
+        toast.success('최대 30개까지 선택가능합니다.', { toastId: 'soft-skill-limit' });
         return prev;
       }
       const next = new Set(prev);
@@ -129,26 +141,29 @@ export default function SoftSkillsSection() {
                 <img className="tooltip__trigger" src={ic_error_gray500_20} alt="툴팁" />
                 <div className="tooltip__content" role="tooltip">
                   <span className="tooltip__title">소프트 스킬이란?</span>
-                  <span className="tooltip__desc">업무를 효과적으로 수행하고 다른 사람들과 협력하는 데 필요한 개인의 역량, 특성, 태도 등을 의미합니다.</span>
+                  <span className="tooltip__desc">
+                    업무를 효과적으로 수행하고 다른 사람들과 협력하는 데 필요한
+                    개인의 역량, 특성, 태도 등을 의미합니다.
+                  </span>
                 </div>
               </span>
             </div>
           </div>
-               {isAdding ? (
-              <img
-                src={ic_close_gray500_24}
-                alt="닫기"
-                onClick={stopAdd}
-              />
-            ) : (
-              <span
-                className="resume-section-title__action--import"
-                onClick={startAdd}
-              >
-                <img src={ic_add_purple_20} alt="" />
-                추가
-              </span>
-            )}
+          {isAdding ? (
+            <img
+              src={ic_close_gray500_24}
+              alt="닫기"
+              onClick={stopAdd}
+            />
+          ) : (
+            <span
+              className="resume-section-title__action--import"
+              onClick={startAdd}
+            >
+              <img src={ic_add_purple_20} alt="" />
+              추가
+            </span>
+          )}
         </div>
         {isAdding && (
           <span className="resume-create-page__hint">
@@ -180,7 +195,7 @@ export default function SoftSkillsSection() {
           <>
             <SearchField
               className="resume-search"
-              id="desired-role-search"
+              id="soft-skill-search"
               value={q}
               placeholder="보유 소프트 스킬을 입력해 주세요. (ex. 팀워크, 리더십)"
               onChange={setQ}
@@ -218,14 +233,16 @@ export default function SoftSkillsSection() {
                     tabIndex={0}
                   >
                     <span className="soft-skills__highlight">“{q}”</span>
-                    <span className="soft-skills__create-suffix">(으)로 직접 등록하기</span>
+                    <span className="soft-skills__create-suffix">
+                      (으)로 직접 등록하기
+                    </span>
                   </div>
                 )}
               </div>
             )}
 
             <AiSuggestChips
-              title="경력 및 학력 기반의 AI 추천 직무입니다."
+              title="경력 및 학력 기반의 AI 추천 소프트 스킬입니다."
               tags={['리더십', '적응력']}
               onTagClick={(tag) => addRole(tag)}
             />

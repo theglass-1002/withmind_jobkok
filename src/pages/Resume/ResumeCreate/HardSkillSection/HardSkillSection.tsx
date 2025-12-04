@@ -15,7 +15,12 @@ import AiSuggestChips from '@/shared/components/ai/AiSuggestChips';
 type RoleItem = { group: string; role: string };
 const MAX_SELECTED = 30;
 
-export default function HardSkillSection() {
+//  부모로 값 올려보내고 싶을 때를 위한 선택적 props
+interface HardSkillSectionProps {
+  onChange?: (skills: string[]) => void; // 선택된 하드 스킬 텍스트 배열
+}
+
+export default function HardSkillSection({ onChange }: HardSkillSectionProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState('');
@@ -30,6 +35,15 @@ export default function HardSkillSection() {
     setQ('');
     setSelected(new Set()); // chips 초기화
   };
+
+  // 선택된 하드 스킬 콘솔로그 + 부모로 전달
+  useEffect(() => {
+    const skills = Array.from(selected).map((key) => key.split('|')[1]);
+    console.log('🎯 선택된 하드 스킬:', skills);
+    onChange?.(skills);
+    // onChange는 렌더마다 새로 만들어질 수 있어도 selected가 바뀔 때만 실행되면 되므로 의존성에서 제외
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected]);
 
   // roles JSON → 평탄화
   const flat: RoleItem[] = useMemo(() => {
@@ -134,20 +148,20 @@ export default function HardSkillSection() {
             </div>
           </div>
           {isAdding ? (
-              <img
-                src={ic_close_gray500_24}
-                alt="닫기"
-                onClick={stopAdd}
-              />
-            ) : (
-              <span
-                className="resume-section-title__action--import"
-                onClick={startAdd}
-              >
-                <img src={ic_add_purple_20} alt="" />
-                추가
-              </span>
-            )}
+            <img
+              src={ic_close_gray500_24}
+              alt="닫기"
+              onClick={stopAdd}
+            />
+          ) : (
+            <span
+              className="resume-section-title__action--import"
+              onClick={startAdd}
+            >
+              <img src={ic_add_purple_20} alt="" />
+              추가
+            </span>
+          )}
         </div>
         {isAdding && (
           <span className="resume-create-page__hint">

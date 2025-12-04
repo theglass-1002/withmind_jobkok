@@ -30,7 +30,7 @@ import ic_star_gray700_20 from "@/assets/icons/size20/ic_star_gray700_20.png";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { createResume } from "@/api/resume/resume.api";
-import { CreateResumeRequest, normalizeYm } from "@/api/resume/resume.types";
+import { CreateResumeRequest, mapEducationStatusToGraduatedYn, normalizeYm } from "@/api/resume/resume.types";
 import { Storage } from "@/shared/utils/StorageManager";
 import { getAwsPresignedUrl, getPreSignedUrl, uploadFileToS3 } from "@/api/fileUpload.api";
 import { getLocationList } from "@/shared/utils/util";
@@ -43,6 +43,9 @@ type FormState = {
   careers: CareerInfo[]; 
   education: Education[];
   photoFile?: File | null; // 업로드할 파일
+  desiredRoles: string[];  
+  hardSkills: string[];
+  softSkills: string[];
 };
 
 // 초기값
@@ -53,6 +56,9 @@ const initial: FormState = {
   careers: [], // ✨ 경력 초기값
   education: [],
   photoFile: null,
+  desiredRoles: [],     
+  hardSkills: [],  
+  softSkills:[]
 };
 
 // 전체 섹션 목록
@@ -103,6 +109,16 @@ export default function ResumeCreate() {
   const updatePhotoFile = (file: File | null) =>
     setForm((prev) => ({ ...prev, photoFile: file }));
 
+  const updateDesiredRoles = (roles: string[]) =>
+    setForm((prev) => ({ ...prev, desiredRoles: roles }));
+  
+  const updateHardSkills = (skills: string[]) =>
+    setForm((prev) => ({ ...prev, hardSkills: skills }));
+
+  const updateSoftSkills = (skills: string[]) =>
+    setForm((prev) => ({ ...prev, softSkills: skills }));
+
+
   const resetBasicErrors = () => setErrors((prev) => ({ ...prev, basic: {} }));
 
   // ===== 핸들러 함수들 =====
@@ -121,18 +137,6 @@ export default function ResumeCreate() {
   };
 
   const handleSubmit = async () => {
-    console.log("📝 ===== 이력서 등록 시작 =====");
-    console.log("📌 이력서 제목:", form.title);
-    console.log("👤 ===== 기본정보 ===== ",form.basic);
-    // 희망 근무 지역
-    console.log("📍 ===== 희망 근무 지역 =====");
-    console.log("📍 ===== 희망 근무 지역 =====");
-    console.log("  원본:", form.location);
-    console.log("  변환:", getLocationList(form.location));
-    console.log("💼 ===== 경력 =====");
-    console.log("  경력 목록:", form.careers);
-    console.log("🎓 ===== 학력 =====");
-    console.log("  학력 목록:", form.education);
     try {
 
       console.log("📦 이력서 데이터 준비 중...");
@@ -167,19 +171,14 @@ export default function ResumeCreate() {
         })),
         educations: form.education.map((edu) => ({
           schoolName: edu.school_name,
-          startYm: edu.startDate, // "YYYY.MM" 형식
+          startYm:normalizeYm(edu.startDate)!,
           endYm: edu.endDate,
           majorDegree: edu.major_degree,
-          graduatedYn: "N",
+          graduatedYn: mapEducationStatusToGraduatedYn(edu.status),
         })),
-        // educations: [
-        //   { schoolName: "OO대", startYm: "2016-03", endYm: "2020-02", majorDegree: "컴공 학사", graduatedYn: "Y" },
-        //   { schoolName: "성신대", startYm: "2020-03", endYm: "2022-02", majorDegree: "컴공 학사", graduatedYn: "Y" },
-        //   { schoolName: "연세대", startYm: "2023-03", endYm: "2025-02", majorDegree: "컴공 학사", graduatedYn: "Y" }
-        // ],
-        jobs: ["AI엔지니어", "웹개발"],
-        hardSkills: ["JavaScript", "Reect", "view"],
-        softSkills: ["팀워크", "공감능력", "협업능력"],
+        jobs: form.desiredRoles,
+        hardSkills: form.hardSkills,
+        softSkills: form.softSkills,
         activities: [
           {
             category: "경험",
@@ -216,9 +215,9 @@ export default function ResumeCreate() {
         ]
       };
       console.log('전송한 값',payload);
-      const result = await createResume(payload);
-      toast.success("이력서가 등록되었습니다!");
-      console.log(result);
+      //  const result = await createResume(payload);
+     // toast.success("이력서가 등록되었습니다!");
+      //console.log(result);
 
             // let uploadedPhotoUrl = form.basic.photoUrl;
       // let photoS3Key = "";
@@ -356,10 +355,6 @@ export default function ResumeCreate() {
           {/* 경력 */}
           <CareerSection
              onChange={updateCareers}
-           // values={form.basic}
-            // errors={errors.basic}
-            // onChange={updateBasic}
-            // onFocusAny={resetBasicErrors}
           />
 
           {/* 학력 */}
@@ -371,13 +366,16 @@ export default function ResumeCreate() {
           />
 
           {/* 희망 직무 */}
-          <DesiredRoleSection />
+          <DesiredRoleSection
+            value={form.desiredRoles}
+            onChange={updateDesiredRoles}
+          />
 
           {/* 기술 스택 */}
-          <HardSkillSection />
+          <HardSkillSection onChange={updateHardSkills} />
 
           {/* 소프트 스킬 */}
-          <SoftSkillsSection />
+          <SoftSkillsSection onChange={updateSoftSkills} />
 
           {/* 활동 */}
           <ActivitiesSection />

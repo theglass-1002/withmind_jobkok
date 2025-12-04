@@ -25,7 +25,7 @@ export interface ResumeItem {
     startYm: string;
     endYm: string;
     majorDegree: string;
-    graduatedYn: "Y" | "N";
+    graduatedYn: string;
   }
   
   export interface Activity {
@@ -176,6 +176,9 @@ export interface ResumeItem {
     // ... 필요하면 추가
   }
   
+
+
+
  export const normalizeYm = (ym?: string | null): string | null => {
     //"2025.03" 헬퍼함수
     if (!ym) return null;
@@ -185,3 +188,23 @@ export interface ResumeItem {
     return `${m[1]}-${m[2]}`;
   };
   
+
+  // 학력 졸업 여부(status) -> 코드(A~F) 매핑
+  export const mapEducationStatusToGraduatedYn = (status?: string): string | undefined => {
+  switch (status) {
+    case "졸업":
+      return "A";
+    case "졸업 예정":
+      return "B";
+    case "재학중":
+      return "C";
+    case "중퇴":
+      return "D";
+    case "수료":
+      return "E";
+    case "휴학":
+      return "F";
+    default:
+      return "A"; // 
+  }
+};

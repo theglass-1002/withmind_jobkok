@@ -27,6 +27,7 @@ export type Education = {
   major_degree?: string;
   startDate?: string;
   endDate?: string;
+  status?: string; // 졸업 여부
 };
 
 export type EducationErrors = Partial<Record<keyof Education, string>>;
@@ -36,6 +37,7 @@ const blankItem = (): Education => ({
   major_degree: '',
   startDate: '',
   endDate: '',
+  status: '',
 });
 
 const initialItems = (values?: Education[]): Education[] =>
@@ -53,9 +55,14 @@ export default function EducationSection({
   errors?: EducationErrors;
 }) {
   const [items, setItems] = useState<Education[]>(() => initialItems(values));
+
+  // 🔥 status(졸업 여부)를 표시용 gradType과 연결
   const [gradType, setGradType] = useState<(string | null)[]>(() =>
-    values && values.length > 0 ? values.map(() => null) : [null]
+    values && values.length > 0
+      ? values.map((v) => v.status ?? null)
+      : [null]
   );
+
   const [openedSelectIdx, setOpenedSelectIdx] = useState<number | null>(null);
 
   const swap = <T,>(arr: T[], i: number, j: number) => {
@@ -75,11 +82,17 @@ export default function EducationSection({
 
   const removeItem = (idx: number) => {
     setItems((prev) => {
-      const next = prev.length <= 1 ? prev.filter((_, i) => i !== idx) : prev.filter((_, i) => i !== idx);
-      onChange(next.length === 0 ? [blankItem()] : next);
-      return next.length === 0 ? [blankItem()] : next;
+      const next =
+        prev.length <= 1
+          ? prev.filter((_, i) => i !== idx)
+          : prev.filter((_, i) => i !== idx);
+      const normalized = next.length === 0 ? [blankItem()] : next;
+      onChange(normalized);
+      return normalized;
     });
-    setGradType((prev) => prev.length <= 1 ? prev : prev.filter((_, i) => i !== idx));
+    setGradType((prev) =>
+      prev.length <= 1 ? prev : prev.filter((_, i) => i !== idx)
+    );
   };
 
   const moveUp = (idx: number) => {
@@ -132,8 +145,14 @@ export default function EducationSection({
               setOpenedSelectIdx((o) => (o === idx ? null : idx))
             }
             onSelectGrad={(label) => {
-              setGradType((prev) => prev.map((v, i) => (i === idx ? label : v)));
+              // 🔥 1) 드롭다운 표시용 상태 업데이트
+              setGradType((prev) =>
+                prev.map((v, i) => (i === idx ? label : v))
+              );
               setOpenedSelectIdx(null);
+
+              // 🔥 2) 실제 Education.status 필드 업데이트
+              patchItem(idx, { status: label });
             }}
             onChange={(patch) => patchItem(idx, patch)}
             onMoveUp={() => moveUp(idx)}
@@ -191,7 +210,8 @@ function EducationItem({
   const startMV = parseMonth(startDate) ?? null;
   const disableEndMonth = (y: number, m: number) => {
     const now = new Date();
-    const afterToday = y > now.getFullYear() || (y === now.getFullYear() && m > now.getMonth());
+    const afterToday =
+      y > now.getFullYear() || (y === now.getFullYear() && m > now.getMonth());
     const beforeStart =
       !!startMV && (y < startMV.year || (y === startMV.year && m < startMV.month));
     return beforeStart || afterToday;
@@ -283,7 +303,11 @@ function EducationItem({
                       onApply={(d) => {
                         onChange({ startDate: fmtMonth(d) });
                         const endMV = parseMonth(endDate);
-                        if (endMV && (endMV.year < d.year || (endMV.year === d.year && endMV.month < d.month))) {
+                        if (
+                          endMV &&
+                          (endMV.year < d.year ||
+                            (endMV.year === d.year && endMV.month < d.month))
+                        ) {
                           onChange({ endDate: fmtMonth(d) });
                         }
                         setOpenStartCal(false);
@@ -306,7 +330,8 @@ function EducationItem({
                   invalid={!!errors?.endDate}
                   errorMessage={errors?.endDate}
                   rightIconSrc={errors?.endDate ? ic_error_red100_20 : undefined}
-                  isOpen={openEndCal}/>
+                  isOpen={openEndCal}
+                />
               </FormField>
               {openEndCal && (
                 <div className="calendar-popover">
@@ -337,16 +362,58 @@ function EducationItem({
                 onToggleSelect();
               }}
             >
-              {gradLabel ?? <span className="ui-select-none-default">졸업 여부</span>}
+              {gradLabel ?? (
+                <span className="ui-select-none-default">졸업 여부</span>
+              )}
               <img src={ic_arrow_drop_down_gray900_24} alt="" />
               {selectOpen && (
-                <div className="ui-select__menu" role="listbox" onClick={(e) => e.stopPropagation()}>
-                  <div className="ui-select__option" role="option" onClick={() => onSelectGrad('졸업')}>졸업</div>
-                  <div className="ui-select__option" role="option" onClick={() => onSelectGrad('졸업 예정')}>졸업 예정</div>
-                  <div className="ui-select__option" role="option" onClick={() => onSelectGrad('재학중')}>재학중</div>
-                  <div className="ui-select__option" role="option" onClick={() => onSelectGrad('중퇴')}>중퇴</div>
-                  <div className="ui-select__option" role="option" onClick={() => onSelectGrad('수료')}>수료</div>
-                  <div className="ui-select__option" role="option" onClick={() => onSelectGrad('휴학')}>휴학</div>
+                <div
+                  className="ui-select__menu"
+                  role="listbox"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div
+                    className="ui-select__option"
+                    role="option"
+                    onClick={() => onSelectGrad('졸업')}
+                  >
+                    졸업
+                  </div>
+                  <div
+                    className="ui-select__option"
+                    role="option"
+                    onClick={() => onSelectGrad('졸업 예정')}
+                  >
+                    졸업 예정
+                  </div>
+                  <div
+                    className="ui-select__option"
+                    role="option"
+                    onClick={() => onSelectGrad('재학중')}
+                  >
+                    재학중
+                  </div>
+                  <div
+                    className="ui-select__option"
+                    role="option"
+                    onClick={() => onSelectGrad('중퇴')}
+                  >
+                    중퇴
+                  </div>
+                  <div
+                    className="ui-select__option"
+                    role="option"
+                    onClick={() => onSelectGrad('수료')}
+                  >
+                    수료
+                  </div>
+                  <div
+                    className="ui-select__option"
+                    role="option"
+                    onClick={() => onSelectGrad('휴학')}
+                  >
+                    휴학
+                  </div>
                 </div>
               )}
             </div>
@@ -357,11 +424,13 @@ function EducationItem({
       <div className="education-section__controls">
         <span
           className={[
-            "education-section__control_btn",
-            "education-section__control--up",
-            !canMoveUp ? "is-disabled" : "",
-            !canMoveUp ? "first" : "",
-          ].join(" ").trim()}
+            'education-section__control_btn',
+            'education-section__control--up',
+            !canMoveUp ? 'is-disabled' : '',
+            !canMoveUp ? 'first' : '',
+          ]
+            .join(' ')
+            .trim()}
           role="button"
           tabIndex={canMoveUp ? 0 : -1}
           onClick={() => canMoveUp && onMoveUp()}
@@ -375,28 +444,36 @@ function EducationItem({
 
         <span
           className={[
-            "education-section__control_btn",
-            "education-section__control--down",
-            !canMoveDown ? "is-disabled" : "",
-            !canMoveDown ? "last" : "",
-          ].join(" ").trim()}
+            'education-section__control_btn',
+            'education-section__control--down',
+            !canMoveDown ? 'is-disabled' : '',
+            !canMoveDown ? 'last' : '',
+          ]
+            .join(' ')
+            .trim()}
           role="button"
           tabIndex={canMoveDown ? 0 : -1}
           onClick={() => canMoveDown && onMoveDown()}
           aria-disabled={!canMoveDown}
         >
           <img
-            src={canMoveDown ? ic_key_arrow_down_gray900_20 : ic_key_arrow_down_gray500_20}
+            src={
+              canMoveDown
+                ? ic_key_arrow_down_gray900_20
+                : ic_key_arrow_down_gray500_20
+            }
             alt=""
           />
         </span>
 
         <span
           className={[
-            "education-section__control_btn",
-            "education-section__control--remove",
-            !canRemove ? "is-disabled" : "",
-          ].join(" ").trim()}
+            'education-section__control_btn',
+            'education-section__control--remove',
+            !canRemove ? 'is-disabled' : '',
+          ]
+            .join(' ')
+            .trim()}
           role="button"
           tabIndex={canRemove ? 0 : -1}
           onClick={() => canRemove && onRemove()}
