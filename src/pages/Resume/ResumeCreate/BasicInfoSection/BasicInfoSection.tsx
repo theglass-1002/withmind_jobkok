@@ -28,23 +28,36 @@ export type BasicInfo = {
 export type BasicErrors = Partial<Record<keyof BasicInfo, string>>;
 
 const parseYMD = (s: string) => {
-  const m = /^(\d{4})\.(\d{2})\.(\d{2})$/.exec((s || "").trim());
+  const trimmed = (s || "").trim();
+  if (!trimmed) return null;
+
+  // 우선 새 형식: YYYY-MM-DD
+  let m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(trimmed);
+
+  // 예전 형식: YYYY.MM.DD 도 fallback으로 지원
+  if (!m) {
+    m = /^(\d{4})\.(\d{2})\.(\d{2})$/.exec(trimmed);
+  }
+
   if (!m) return null;
   return { year: +m[1], month: +m[2] - 1, day: +m[3] };
 };
+
 const fmtYMD = (d: { year: number; month: number; day: number }) =>
-  `${d.year}.${String(d.month + 1).padStart(2, "0")}.${String(d.day).padStart(2, "0")}`;
+  `${d.year}-${String(d.month + 1).padStart(2, "0")}-${String(d.day).padStart(2, "0")}`;
 
 export default function BasicInfoSection({
   values,
   errors,
   onChange,
   onFocusAny,
+  onPhotoFileChange, // ✨ 추가
 }: {
   values: BasicInfo;
   errors?: BasicErrors;
   onChange: (patch: Partial<BasicInfo>) => void;
   onFocusAny?: () => void;
+  onPhotoFileChange?: (file: File | null) => void; // ✨ 추가
 }) {
   const { name, birth, gender, email, phone, photoUrl } = values;
 
@@ -75,6 +88,7 @@ export default function BasicInfoSection({
       setPhotoFilename(undefined);
       setPhotoErrState("invalid");
       if (fileInputRef.current) fileInputRef.current.value = "";
+      if (onPhotoFileChange) onPhotoFileChange(null); // ✨ 부모에게 전달
       return;
     }
     if (f.size > 10 * 1024 * 1024) {
@@ -83,6 +97,7 @@ export default function BasicInfoSection({
       setPhotoFilename(undefined);
       setPhotoErrState("tooLarge");
       if (fileInputRef.current) fileInputRef.current.value = "";
+      if (onPhotoFileChange) onPhotoFileChange(null); // ✨ 부모에게 전달
       return;
     }
 
@@ -90,6 +105,9 @@ export default function BasicInfoSection({
     setPhotoFile(f);
     setPhotoPreview(URL.createObjectURL(f));
     setPhotoFilename(f.name);
+    
+    // ✨ 부모에게 파일 전달 (업로드는 나중에!)
+    if (onPhotoFileChange) onPhotoFileChange(f);
   };
 
   const onApplyPhoto = () => {
@@ -97,6 +115,7 @@ export default function BasicInfoSection({
       setPhotoErrState("missing");
       return;
     }
+    // ✨ 미리보기 URL만 저장 (실제 업로드는 등록 버튼 클릭 시!)
     onChange({ photoUrl: photoPreview || "" });
     closePhotoModal();
   };
@@ -109,6 +128,9 @@ export default function BasicInfoSection({
     setPhotoFilename(undefined);
     if (fileInputRef.current) fileInputRef.current.value = "";
     onChange({ photoUrl: undefined });
+    
+    // ✨ 부모에게 파일 제거 알림
+    if (onPhotoFileChange) onPhotoFileChange(null);
   };
 
   useEffect(() => {
@@ -157,7 +179,7 @@ export default function BasicInfoSection({
                 <DateInline
                   id="birth"
                   iconSrc={errors?.birth ? icon_calendar_red_20 : ic_calendar_gray900_20}
-                  value={birth || "YYYY.MM.DD"}
+                  value={birth || "YYYY-MM-DD"}
                   onClick={() => setOpenBirth(true)}
                   invalid={!!errors?.birth}
                   errorMessage={errors?.birth}
@@ -174,7 +196,7 @@ export default function BasicInfoSection({
                       minYear={1950}
                       onChange={() => {}}
                       onApply={(d) => {
-                        onChange({ birth: fmtYMD(d) });
+                        onChange({ birth: fmtYMD(d) });  //  이제 "YYYY-MM-DD"로 저장
                         setOpenBirth(false);
                       }}
                     />

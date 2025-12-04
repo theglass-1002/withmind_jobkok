@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import data from '@/data/locations.json';
 
 
 export function useStickyTabs(
@@ -84,21 +85,34 @@ export function stripAllWhitespace(value: string): string {
 // 월 단위 ---------------------------------------
 export type MonthValue = { year: number; month: number }; // 0~11
 
-/** "YYYY.MM" -> {year, month(0~11)} 엄격 파서 */
+
+/** "YYYY-MM" 또는 "YYYY.MM" -> {year, month(0~11)} 엄격 파서 */
 export const parseMonth = (s?: string | null): MonthValue | null => {
   if (!s) return null;
-  const m = s.match(/^(\d{4})\.(\d{2})$/);
+  const trimmed = s.trim();
+
+  // 1순위: 새 포맷 "YYYY-MM"
+  let m = trimmed.match(/^(\d{4})-(\d{2})$/);
+
+  // 호환: 기존 포맷 "YYYY.MM"도 허용
+  if (!m) {
+    m = trimmed.match(/^(\d{4})\.(\d{2})$/);
+  }
+
   if (!m) return null;
+
   const y = Number(m[1]);
   const mm = Number(m[2]);
   if (!y || mm < 1 || mm > 12) return null;
+
   return { year: y, month: (mm - 1) as MonthValue["month"] };
 };
 
-/** {year, month(0~11)} -> "YYYY.MM" */
-export const fmtMonth = (v: MonthValue): string =>
-  `${v.year}.${String(v.month + 1).padStart(2, "0")}`;
 
+
+/** {year, month(0~11)} -> "YYYY-MM" */
+export const fmtMonth = (d: { year: number; month: number }) =>
+  `${d.year}-${String(d.month + 1).padStart(2, "0")}`;
 
 // 일 단위 ---------------------------------------
 export type DateValue = Date;
@@ -324,15 +338,62 @@ export type Region = {
   districts: (string | District)[];
 };
 
+
+/**
+ * selectedKeys를 실제 지역명 배열로 변환
+ * "서울|ALL" → ["서울 전체", "강남구", "강동구", ...]
+ * "서울|강남구" → ["강남구"]
+ */
+export function expandLocationKeys(selectedKeys: string[]): string[] {
+  const { regions } = data as unknown as { regions: Region[] };
+  const result: string[] = [];
+
+  selectedKeys.forEach((key) => {
+    const [regionName, tail] = key.split('|');
+    
+    // 해당 지역 찾기
+    const region = regions.find((r) => r.name === regionName || r.id === regionName);
+    if (!region) return;
+
+    if (tail === 'ALL') {
+      // "서울|ALL" → 서울의 모든 구 추가
+      const allLabel = typeof region.all === 'string' 
+        ? region.all 
+        : region.all?.label || `${regionName} 전체`;
+      
+      result.push(allLabel); // "서울 전체" 추가
+      
+      // 모든 구/시 추가
+      region.districts.forEach((d) => {
+        const districtName = typeof d === 'string' ? d : d.name;
+        result.push(districtName);
+      });
+    } else {
+      // "서울|강남구" → 강남구만 추가
+      result.push(tail);
+    }
+  });
+
+  return result;
+}
+
+/**
+ * LocationValue를 실제 지역명 배열로 변환
+ */
+export function getLocationList(location: { nationwide: boolean; selectedKeys: string[] }): string[] {
+  if (location.nationwide) {
+    return ['전국'];
+  }
+  return expandLocationKeys(location.selectedKeys);
+}
+
 export interface LocationSectionProps {
   defaultValue?: LocationValue;
   onChange: (v: LocationValue) => void;
   sectionRef?: (el: HTMLDivElement | null) => void;
-  
 }
 
 // CareerSection
-
 export type CareerItem = {
   company: string;
   start: string;       // 예: "2020.04"
@@ -406,3 +467,6 @@ export const scrollToTop = () => {
   //스크롤위로
  return window.scrollTo({ top: 0, behavior: "smooth" });
 };
+
+
+

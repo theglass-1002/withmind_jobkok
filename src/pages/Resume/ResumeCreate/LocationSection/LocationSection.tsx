@@ -32,7 +32,7 @@ const districtKeyOf = (r: Region, d: District) => d.id ?? `${r.name}|${d.name}`;
 const regionAllKeyOf = (r: Region) => `${regionKeyOf(r)}|ALL`;
 
 export default function LocationSection({ 
-  defaultValue = { nationwide: false, selectedKeys: [] }, // 기본값 설정
+  defaultValue = { nationwide: false, selectedKeys: [] },
   onChange 
 }: LocationSectionProps) {
   const { regions } = data as unknown as { regions: Region[] };
@@ -48,9 +48,11 @@ export default function LocationSection({
     return seoul ? regionKeyOf(seoul) : '';
   });
 
-  // useEffect(() => {
-  //   onChange({ nationwide: globalAllOnly, selectedKeys: Array.from(selected) });
-  // }, [globalAllOnly, selected, onChange]);
+  // ✨ 선택값이 변경될 때마다 부모에게 전달
+  useEffect(() => {
+    onChange({ nationwide: globalAllOnly, selectedKeys: Array.from(selected) });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [globalAllOnly, selected]); // onChange는 의존성에서 제외 (무한 루프 방지)
 
   const activeRegion = useMemo(
     () => regions.find(r => regionKeyOf(r) === activeRegionKey),

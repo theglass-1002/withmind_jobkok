@@ -124,7 +124,7 @@ instance.interceptors.response.use(
       originalRequest._retry = true;
       const refreshToken = getRefreshToken();
      
-
+      console.log('토큰갱신 함수요청12');
       if (!refreshToken) {
         console.log('여기로들어옴',refreshToken);
         const apiError: ApiErrorResponse = {
@@ -134,6 +134,8 @@ instance.interceptors.response.use(
         };
         return Promise.reject(apiError);
       }
+      console.log('토큰갱신 함수요청33');
+      console.log('리프래쉬토큰:',refreshToken);
 
       try {
         const refreshResponse = await axios.post(
@@ -144,10 +146,13 @@ instance.interceptors.response.use(
           }
         );
 
-        console.log('토큰갱신 함수요청');
-
+        console.log('토큰갱신 함수요청44');
+        console.log('토큰갱신 함수요청55',refreshResponse);
         const newAccessToken = (refreshResponse.data as any).token;
-        sessionStorage.setItem("accessToken", newAccessToken);
+        const newRefreshToken = (refreshResponse.data as any).refreshToken;
+        localStorage.setItem("accessToken",newAccessToken);
+        localStorage.setItem("refreshToken",newRefreshToken);
+        
 
         if (!originalRequest.headers) {
           originalRequest.headers = {} as AxiosRequestHeaders;

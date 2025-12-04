@@ -25,11 +25,11 @@ import "./CareerSection.css";
 
 import InlineMonthPicker from "@/shared/components/calendar/InlineMonthPicker";
 import { parseMonth, fmtMonth } from "@/shared/utils/util";
-
 import AISuggestArea from "@/pages/Resume/ResumeAISuggest";
 
 const makeId = () => Math.random().toString(36).slice(2, 10);
 
+// ===== 타입 정의 =====
 export type CareerInfo = {
   id: string;
   company_name: string;
@@ -38,18 +38,14 @@ export type CareerInfo = {
   summary: string;
   employmentType: string | null;
   isCurrent: boolean;
-  startDate: string; // "YYYY.MM"
-  endDate: string;   // "YYYY.MM"
+  startDate: string; // "YYYY-MM"
+  endDate: string;   // "YYYY-MM"
 };
+
 type CareerErrors = Partial<Record<keyof CareerInfo, string>>;
 
-// 상위 컴포넌트(ResumeCreate)에서 전달하는 Props 타입을 정의합니다.
-// 이 타입은 ResumeCreate의 BasicInfo 타입과 일치해야 합니다. (여기서는 any로 처리)
 interface CareerSectionProps {
-  values: any;
-  errors: any;
-  onChange: (patch: any) => void;
-  onFocusAny: () => void;
+  onChange: (careers: CareerInfo[]) => void; // ✨ 부모로 전체 배열 전달
 }
 
 const blankItem = (): CareerInfo => ({
@@ -70,31 +66,38 @@ const swap = <T,>(arr: T[], i: number, j: number) => {
   return next;
 };
 
-export default function CareerSection(props: CareerSectionProps) {
+// ===== 메인 컴포넌트 =====
+export default function CareerSection({ onChange }: CareerSectionProps) {
   const [items, setItems] = useState<CareerInfo[]>([blankItem()]);
   const [itemErrors] = useState<CareerErrors[]>([]);
+
+  // ✨ items가 변경될 때마다 부모에게 전달
+  useEffect(() => {
+    onChange(items);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items]); // onChange는 의존성에서 제외 (무한 루프 방지)
 
   const importCareers = async () => {
     const fetched: Omit<CareerInfo, "id">[] = [
       {
         company_name: "위드마인드",
-        role: "",
-        position: "",
-        summary: "",
+        role: "백엔드 개발자",
+        position: "매니저",
+        summary: "API 설계 및 개발",
         employmentType: "정규직",
         isCurrent: false,
-        startDate: "2022.03",
-        endDate: "2023.01",
+        startDate: "2022-03",
+        endDate: "2023-01",
       },
       {
         company_name: "케이티밀리의서재",
-        role: "",
-        position: "",
-        summary: "",
+        role: "프론트엔드 개발자",
+        position: "시니어",
+        summary: "웹 서비스 개발",
         employmentType: "계약직",
         isCurrent: false,
-        startDate: "2023.02",
-        endDate: "2024.11",
+        startDate: "2023-02",
+        endDate: "2024-11",
       },
     ];
     setItems((fetched.length ? fetched : [blankItem()]).map(it => ({ id: makeId(), ...it })));
@@ -161,6 +164,7 @@ export default function CareerSection(props: CareerSectionProps) {
   );
 }
 
+// ===== CareerItem 컴포넌트 =====
 function CareerItem({
   index,
   total,
@@ -201,6 +205,7 @@ function CareerItem({
 
   const MAX_SUMMARY = 2000;
   const [editing, setEditing] = useState(false);
+
   const startEditing = (e?: React.KeyboardEvent | React.MouseEvent) => {
     if (e && "key" in e) {
       if ((e as React.KeyboardEvent).nativeEvent?.isComposing) return;
@@ -265,7 +270,9 @@ function CareerItem({
     ]);
     setShowAISuggest(true);
   };
+
   const handleCloseAISuggest = () => setShowAISuggest(false);
+
   const handlePickSuggestion = (text: string) => {
     const prefix = (summary ?? "").trim().length > 0 ? "\n" : "";
     const next = `${summary ?? ""}${prefix}• ${text}`;
@@ -275,6 +282,7 @@ function CareerItem({
   return (
     <div className="career-section__item">
       <div className="career-section__fields">
+        {/* 회사명 */}
         <FormField label={<>회사명 <em>*</em></>} className="in_icon">
           <FormInput
             id={`company_name_${index}`}
@@ -287,6 +295,7 @@ function CareerItem({
           />
         </FormField>
 
+        {/* 재직 형태 및 기간 */}
         <div className="career-section__group career-section__group--employment">
           <div className="career-section__control career-section__control--employment">
             <label className="small_labe_black-14">
@@ -304,15 +313,56 @@ function CareerItem({
               <img src={ic_arrow_drop_down_gray900_24} alt="" />
               {openEmp && (
                 <div className="ui-select__menu" role="listbox">
-                  <div className="ui-select__option" role="option" onClick={(e) => { e.stopPropagation(); onChange({ employmentType: "정규직" }); setOpenEmp(false); }}>정규직</div>
-                  <div className="ui-select__option" role="option" onClick={(e) => { e.stopPropagation(); onChange({ employmentType: "계약직" }); setOpenEmp(false); }}>계약직</div>
-                  <div className="ui-select__option" role="option" onClick={(e) => { e.stopPropagation(); onChange({ employmentType: "인턴" }); setOpenEmp(false); }}>인턴</div>
-                  <div className="ui-select__option" role="option" onClick={(e) => { e.stopPropagation(); onChange({ employmentType: "프리랜서" }); setOpenEmp(false); }}>프리랜서</div>
+                  <div
+                    className="ui-select__option"
+                    role="option"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onChange({ employmentType: "정규직" });
+                      setOpenEmp(false);
+                    }}
+                  >
+                    정규직
+                  </div>
+                  <div
+                    className="ui-select__option"
+                    role="option"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onChange({ employmentType: "계약직" });
+                      setOpenEmp(false);
+                    }}
+                  >
+                    계약직
+                  </div>
+                  <div
+                    className="ui-select__option"
+                    role="option"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onChange({ employmentType: "인턴" });
+                      setOpenEmp(false);
+                    }}
+                  >
+                    인턴
+                  </div>
+                  <div
+                    className="ui-select__option"
+                    role="option"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onChange({ employmentType: "프리랜서" });
+                      setOpenEmp(false);
+                    }}
+                  >
+                    프리랜서
+                  </div>
                 </div>
               )}
             </div>
           </div>
 
+          {/* 시작일~종료일 */}
           <div className="career-section__period">
             <div className="career-section__date-wrapper" ref={startCalRef}>
               <FormField label="" className="career-section date career-section__date--start">
@@ -337,9 +387,13 @@ function CareerItem({
                       minYear={1970}
                       onChange={() => {}}
                       onApply={(d) => {
-                        onChange({ startDate: fmtMonth(d) });
+                        onChange({ startDate: fmtMonth(d) }); // "YYYY-MM"
                         const endMV = parseMonth(endDate);
-                        if (endMV && (endMV.year < d.year || (endMV.year === d.year && endMV.month < d.month))) {
+                        if (
+                          endMV &&
+                          (endMV.year < d.year ||
+                            (endMV.year === d.year && endMV.month < d.month))
+                        ) {
                           onChange({ endDate: fmtMonth(d) });
                         }
                         setOpenStartCal(false);
@@ -388,13 +442,19 @@ function CareerItem({
                         showCurrentToggle
                         currentChecked={!!isCurrent}
                         onCurrentChange={(next) => {
-                          onChange({ isCurrent: next, ...(next ? { endDate: "" } : {}) });
+                          onChange({
+                            isCurrent: next,
+                            ...(next ? { endDate: "" } : {}),
+                          });
                         }}
                         onApplyEx={(pickedMonth, current) => {
                           if (current) {
                             onChange({ isCurrent: true, endDate: "" });
                           } else {
-                            onChange({ isCurrent: false, endDate: fmtMonth(pickedMonth) });
+                            onChange({
+                              isCurrent: false,
+                              endDate: fmtMonth(pickedMonth), // "YYYY-MM"
+                            });
                           }
                           setOpenEndCal(false);
                         }}
@@ -407,6 +467,7 @@ function CareerItem({
             )}
           </div>
 
+          {/* 재직중 토글 */}
           <div className="career-section__toggle career-section__toggle--current error_box">
             <span className="career-section__toggle-label">재직중</span>
             <Switch
@@ -426,6 +487,7 @@ function CareerItem({
           </div>
         </div>
 
+        {/* 직무 & 직책 */}
         <div className="career-section__row">
           <div className="career-section__control career-section__control--role">
             <FormField label={<>직무 <em>*</em></>} className="in_icon">
@@ -455,6 +517,7 @@ function CareerItem({
           </div>
         </div>
 
+        {/* 담당 업무 및 주요 성과 */}
         <div className="field career-section__control career-section__control--summary">
           <div className="small_labe_black-14">담당 업무 및 주요 성과</div>
 
@@ -463,7 +526,9 @@ function CareerItem({
               <textarea
                 id={`summary_${index}`}
                 value={summary ?? ""}
-                onChange={(e) => onChange({ summary: e.target.value.slice(0, 2000) })}
+                onChange={(e) =>
+                  onChange({ summary: e.target.value.slice(0, 2000) })
+                }
                 maxLength={2000}
               />
               <span className="career-section__char-count">
@@ -480,13 +545,15 @@ function CareerItem({
               tabIndex={0}
             >
               {(summary ?? "").trim().length > 0 ? (
-                <div className="career-section__summary-read">
-                  {summary}
-                </div>
+                <div className="career-section__summary-read">{summary}</div>
               ) : (
                 <ul className="career-section__summary-tips">
-                  <li className="career-section__summary-tip">세부 내용을 입력해 주세요.</li>
-                  <li className="career-section__summary-tip">프로젝트 경험은 역할ㆍ기여도ㆍ성과 중심으로 정리하면 좋습니다.</li>
+                  <li className="career-section__summary-tip">
+                    세부 내용을 입력해 주세요.
+                  </li>
+                  <li className="career-section__summary-tip">
+                    프로젝트 경험은 역할ㆍ기여도ㆍ성과 중심으로 정리하면 좋습니다.
+                  </li>
                 </ul>
               )}
               <span className="career-section__char-count">
@@ -509,35 +576,53 @@ function CareerItem({
         </div>
       </div>
 
+      {/* 순서 변경 및 삭제 버튼 */}
       <div className="career-section__controls">
         <span
-          className={`career-section__control_btn career-section__control--up ${!canMoveUp ? 'is-disabled first' : ''}`}
+          className={`career-section__control_btn career-section__control--up ${
+            !canMoveUp ? "is-disabled first" : ""
+          }`}
           role="button"
           tabIndex={0}
           onClick={() => canMoveUp && onMoveUp()}
           aria-disabled={!canMoveUp}
         >
-          <img src={canMoveUp ? ic_key_arrow_up_gray900_20 : ic_key_arrow_up_gray500_20} alt="" />
+          <img
+            src={canMoveUp ? ic_key_arrow_up_gray900_20 : ic_key_arrow_up_gray500_20}
+            alt=""
+          />
         </span>
 
         <span
-          className={`career-section__control_btn career-section__control--down ${!canMoveDown ? 'is-disabled last' : ''}`}
+          className={`career-section__control_btn career-section__control--down ${
+            !canMoveDown ? "is-disabled last" : ""
+          }`}
           role="button"
           tabIndex={0}
           onClick={() => canMoveDown && onMoveDown()}
           aria-disabled={!canMoveDown}
         >
-          <img src={canMoveDown ? ic_key_arrow_down_gray900_20 : ic_key_arrow_down_gray500_20} alt="" />
+          <img
+            src={
+              canMoveDown ? ic_key_arrow_down_gray900_20 : ic_key_arrow_down_gray500_20
+            }
+            alt=""
+          />
         </span>
 
         <span
-          className={`career-section__control_btn career-section__control--remove ${!canRemove ? 'is-disabled' : ''}`}
+          className={`career-section__control_btn career-section__control--remove ${
+            !canRemove ? "is-disabled" : ""
+          }`}
           role="button"
           tabIndex={0}
           onClick={() => canRemove && onRemove()}
           aria-disabled={!canRemove}
         >
-          <img src={canRemove ? ic_trash_gray900_20 : ic_trash_gray500_20} alt="" />
+          <img
+            src={canRemove ? ic_trash_gray900_20 : ic_trash_gray500_20}
+            alt=""
+          />
         </span>
       </div>
     </div>
