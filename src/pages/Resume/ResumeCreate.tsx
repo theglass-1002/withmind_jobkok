@@ -16,9 +16,16 @@ import EducationSection, {
 import DesiredRoleSection from "./ResumeCreate/DesiredRoleSection/DesiredRoleSection";
 import HardSkillSection from "./ResumeCreate/HardSkillSection/HardSkillSection";
 import SoftSkillsSection from "./ResumeCreate/SoftSkillsSection/SoftSkillsSection";
-import ActivitiesSection from "./ResumeCreate/ActivitiesSection/ActivitiesSection";
-import AwardsCertificationsSection from "./ResumeCreate/AwardsCertificationsSection/AwardsCertificationsSection";
-import PortfolioDocumentsSection from "./ResumeCreate/PortfolioDocumentsSection/PortfolioDocumentsSection";
+import ActivitiesSection, {
+  type Activity as ActivityItem,
+} from "./ResumeCreate/ActivitiesSection/ActivitiesSection";
+import AwardsCertificationsSection, {
+  type AwardsCertItem,
+} from "./ResumeCreate/AwardsCertificationsSection/AwardsCertificationsSection";
+
+import PortfolioDocumentsSection, {
+  type PortfolioDocItem,
+} from "./ResumeCreate/PortfolioDocumentsSection/PortfolioDocumentsSection";
 import SelfIntroductionSection from "./ResumeCreate/SelfIntroductionSection/SelfIntroductionSection";
 import MockInterviewAnalysisSection from "./ResumeCreate/MockInterviewAnalysisSection/MockInterviewAnalysisSection";
 import ResumeSidebar, {
@@ -30,7 +37,7 @@ import ic_star_gray700_20 from "@/assets/icons/size20/ic_star_gray700_20.png";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { createResume } from "@/api/resume/resume.api";
-import { CreateResumeRequest, mapEducationStatusToGraduatedYn, normalizeYm } from "@/api/resume/resume.types";
+import { CreateResumeRequest, mapAwardsKindToCategoryLabel, mapEducationStatusToGraduatedYn, normalizeYm } from "@/api/resume/resume.types";
 import { Storage } from "@/shared/utils/StorageManager";
 import { getAwsPresignedUrl, getPreSignedUrl, uploadFileToS3 } from "@/api/fileUpload.api";
 import { getLocationList } from "@/shared/utils/util";
@@ -46,6 +53,9 @@ type FormState = {
   desiredRoles: string[];  
   hardSkills: string[];
   softSkills: string[];
+  activities: ActivityItem[]; 
+  awardCerts: AwardsCertItem[]; 
+  portfolios: PortfolioDocItem[];
 };
 
 // 초기값
@@ -53,12 +63,15 @@ const initial: FormState = {
   title: "",
   basic: { name: "", birth: "", gender: null, email: "", phone: "", photoUrl: "" },
   location: { nationwide: false, selectedKeys: [] },
-  careers: [], // ✨ 경력 초기값
+  careers: [], // 경력 초기값
   education: [],
   photoFile: null,
   desiredRoles: [],     
   hardSkills: [],  
-  softSkills:[]
+  softSkills:[],
+  activities: [],
+  awardCerts: [],   
+  portfolios: [],             
 };
 
 // 전체 섹션 목록
@@ -118,6 +131,14 @@ export default function ResumeCreate() {
   const updateSoftSkills = (skills: string[]) =>
     setForm((prev) => ({ ...prev, softSkills: skills }));
 
+  const updateActivities = (activities: ActivityItem[]) =>
+    setForm((prev) => ({ ...prev, activities }));
+
+  const updateAwardCerts = (list: AwardsCertItem[]) =>
+    setForm((prev) => ({ ...prev, awardCerts: list }));
+
+  const updatePortfolios = (list: PortfolioDocItem[]) =>
+    setForm((prev) => ({ ...prev, portfolios: list }));
 
   const resetBasicErrors = () => setErrors((prev) => ({ ...prev, basic: {} }));
 
@@ -179,45 +200,39 @@ export default function ResumeCreate() {
         jobs: form.desiredRoles,
         hardSkills: form.hardSkills,
         softSkills: form.softSkills,
-        activities: [
-          {
-            category: "경험",
-            activityTitle: "오픈소스 기여",
-            startYm: "2021-01",
-            endYm: "2021-12",
-            description: "버그 수정",
-            linkUrl: "https://github.com/user"
-          }
-        ],
-        awardCerts: [
-          {
-            category: "수상",
-            name: "정보처리기사",
-            issuer: "큐넷",
-            acquiredYm: "202006",
-            licenseNo: "ABC-123",
-            note: "합격"
-          }
-        ],
-        portfolios: [
-          {
-            itemType: "URL",
-            title: "깃랩",
-            docName: "GitHub",
-            url: "https://github.com/user",
-            fileRef: null,
-            description: "모음",
-            sortOrder: 3
-          }
-        ],
+        activities: form.activities.map((act) => ({
+          category: act.activityType ?? "교내활동",
+          activityTitle: act.activityName,
+          startYm: act.startDate ? normalizeYm(act.startDate) : "1999-09-09",
+          endYm: act.endDate ? normalizeYm(act.endDate) : "1999-09-09",
+          description: act.summary,
+          linkUrl: "https://github.com/user",
+        })),
+        awardCerts: form.awardCerts.map((item) => ({
+          category: mapAwardsKindToCategoryLabel(item.kind),
+          name: item.title,
+          issuer: item.issuer ?? "",
+          acquiredYm: item.dateValue ? normalizeYm(item.dateValue)!.replace("-", "") : "",
+          licenseNo: item.score ?? "",
+          note: "",
+        })),
+        portfolios: form.portfolios.map((p, idx) => ({
+          itemType: p.source === "url" ? "URL" : "FILE",
+          title: p.title || `포트폴리오 ${idx + 1}`,
+          docName: p.file?.name ?? "",
+          url: p.source === "url" ? p.url : "",
+          fileRef: null, // 실제 업로드 후 S3 키 등 연결할 수 있음
+          description: p.note ?? "",
+          sortOrder: idx + 1,
+        })),
         selfIntros: [
           { title: "소개", content: "안녕하세요.", isAi: false }
         ]
       };
       console.log('전송한 값',payload);
-      //  const result = await createResume(payload);
+     // const result = await createResume(payload);
      // toast.success("이력서가 등록되었습니다!");
-      //console.log(result);
+     // console.log(result);
 
             // let uploadedPhotoUrl = form.basic.photoUrl;
       // let photoS3Key = "";
@@ -378,14 +393,23 @@ export default function ResumeCreate() {
           <SoftSkillsSection onChange={updateSoftSkills} />
 
           {/* 활동 */}
-          <ActivitiesSection />
+          <ActivitiesSection
+            value={form.activities}
+            onChange={updateActivities}
+          />
+
 
           {/* 수상 및 자격증 */}
-          <AwardsCertificationsSection />
+          <AwardsCertificationsSection
+            value={form.awardCerts}
+            onChange={updateAwardCerts}
+          />
 
           {/* 포트폴리오 및 문서 */}
-          <PortfolioDocumentsSection />
-
+          <PortfolioDocumentsSection
+            value={form.portfolios}
+            onChange={updatePortfolios}
+          />
           {/* 자기소개서 */}
           <SelfIntroductionSection />
 

@@ -208,3 +208,18 @@ export interface ResumeItem {
       return "A"; // 
   }
 };
+
+
+// 수상·자격증 kind -> 한글 카테고리 라벨 매핑
+export const mapAwardsKindToCategoryLabel = (status?: string): string => {
+  switch (status) {
+    case "Certification":
+      return "자격증";
+    case "LanguageTest":
+      return "어학시험";
+    case "Award":
+      return "수상";
+    default:
+      return "기타";
+  }
+}

@@ -16,14 +16,13 @@ import ic_arrow_drop_down_gray900_24 from "@/assets/icons/size24/ic_arrow_drop_d
 import ic_key_arrow_down_gray500_20 from "@/assets/icons/size20/ic_key_arrow_down_gray500_20.png";
 import ic_key_arrow_up_gray500_20 from "@/assets/icons/size20/ic_key_arrow_up_gray500_20.png";
 import ic_trash_gray900_20 from "@/assets/icons/size20/ic_trash_gray900_20.png";
-
-// ★ 추가: 활성(진한) 아이콘
 import ic_key_arrow_up_gray900_20 from "@/assets/icons/size20/ic_key_arrow_up_gray900_20.png";
 import ic_key_arrow_down_gray900_20 from "@/assets/icons/size20/ic_key_arrow_down_gray900_20.png";
 
+// kind 타입: 자격증, 어학시험, 수상, 기타
 export type AwardsCertItem = {
   id: string;
-  kind: "Award" | "Certification" | "License" | null;
+  kind: "Certification" | "LanguageTest" | "Award" | "Etc" | null;
   title: string;
   dateValue?: string; // YYYY.MM
   score?: string;
@@ -40,9 +39,20 @@ const blankItem = (): AwardsCertItem => ({
   issuer: "",
 });
 
-export default function AwardsCertificationsSection() {
+// 🔥 상위와 연동을 위한 props
+interface AwardsCertificationsSectionProps {
+  value?: AwardsCertItem[];
+  onChange?: (items: AwardsCertItem[]) => void;
+}
+
+export default function AwardsCertificationsSection({
+  value = [],
+  onChange,
+}: AwardsCertificationsSectionProps) {
   const [isAdding, setIsAdding] = useState(false);
-  const [items, setItems] = useState<AwardsCertItem[]>([]);
+  const [items, setItems] = useState<AwardsCertItem[]>(
+    () => (value.length > 0 ? value : [])
+  );
   const [openDropdownIndex, setOpenDropdownIndex] = useState<number | null>(null);
   const [openDateIdx, setOpenDateIdx] = useState<number | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -50,6 +60,12 @@ export default function AwardsCertificationsSection() {
   // 드롭다운/달력 바깥 클릭 감지용 refs
   const selectRefs = useRef<(HTMLDivElement | null)[]>([]);
   const dateRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  // items가 바뀔 때마다 상위에 전달
+  useEffect(() => {
+    onChange?.(items);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items]);
 
   const startAdd = () => {
     setIsAdding(true);
@@ -208,7 +224,7 @@ export default function AwardsCertificationsSection() {
                           수상ㆍ자격증명 <em className="error_text_red">*</em>
                         </label>
 
-                        {/* 드롭다운 */}
+                        {/* 🔻 드롭다운: 자격증 / 어학시험 / 수상 / 기타 */}
                         <div
                           className="ui-select"
                           ref={el => {
@@ -228,13 +244,17 @@ export default function AwardsCertificationsSection() {
                             if (e.key === "Escape") setOpenDropdownIndex(null);
                           }}
                         >
-                          {item.kind
-                            ? item.kind === "Award"
-                              ? "수상"
-                              : item.kind === "Certification"
+                          {item.kind ? (
+                            item.kind === "Certification"
                               ? "자격증"
-                              : "면허"
-                            : <span className="ui-select-none-default">구분</span>}
+                              : item.kind === "LanguageTest"
+                              ? "어학시험"
+                              : item.kind === "Award"
+                              ? "수상"
+                              : "기타"
+                          ) : (
+                            <span className="ui-select-none-default">구분</span>
+                          )}
                           <img src={ic_arrow_drop_down_gray900_24} alt="" />
 
                           {openDropdownIndex === index && (
@@ -243,14 +263,37 @@ export default function AwardsCertificationsSection() {
                               role="listbox"
                               onClick={e => e.stopPropagation()}
                             >
-                              <div className="ui-select__option" role="option" tabIndex={0} onClick={() => selectKind(index, "Award")}>
-                                수상
-                              </div>
-                              <div className="ui-select__option" role="option" tabIndex={0} onClick={() => selectKind(index, "Certification")}>
+                              <div
+                                className="ui-select__option"
+                                role="option"
+                                tabIndex={0}
+                                onClick={() => selectKind(index, "Certification")}
+                              >
                                 자격증
                               </div>
-                              <div className="ui-select__option" role="option" tabIndex={0} onClick={() => selectKind(index, "License")}>
-                                면허
+                              <div
+                                className="ui-select__option"
+                                role="option"
+                                tabIndex={0}
+                                onClick={() => selectKind(index, "LanguageTest")}
+                              >
+                                어학시험
+                              </div>
+                              <div
+                                className="ui-select__option"
+                                role="option"
+                                tabIndex={0}
+                                onClick={() => selectKind(index, "Award")}
+                              >
+                                수상
+                              </div>
+                              <div
+                                className="ui-select__option"
+                                role="option"
+                                tabIndex={0}
+                                onClick={() => selectKind(index, "Etc")}
+                              >
+                                기타
                               </div>
                             </div>
                           )}
@@ -287,7 +330,7 @@ export default function AwardsCertificationsSection() {
                             value={item.dateValue || "YYYY.MM"}
                             onClick={() => setOpenDateIdx(index)}
                             invalid={false}
-                            isOpen={openDateIdx === index} 
+                            isOpen={openDateIdx === index}
                           />
                           {openDateIdx === index && (
                             <div

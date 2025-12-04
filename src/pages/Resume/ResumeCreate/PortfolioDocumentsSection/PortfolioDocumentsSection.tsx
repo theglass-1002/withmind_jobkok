@@ -15,7 +15,7 @@ import ic_trash_gray900_20 from "@/assets/icons/size20/ic_trash_gray900_20.png";
 import ic_folder_gray900_20 from "@/assets/icons/size20/ic_folder_gray900_20.png";
 import ic_link_gray900_20 from "@/assets/icons/size20/ic_link_gray900_20.png";
 
-// 활성(진한) 화살표 아이콘 추가
+// 활성(진한) 화살표 아이콘
 import ic_key_arrow_up_gray900_20 from "@/assets/icons/size20/ic_key_arrow_up_gray900_20.png";
 import ic_key_arrow_down_gray900_20 from "@/assets/icons/size20/ic_key_arrow_down_gray900_20.png";
 
@@ -24,27 +24,48 @@ type SourceType = "file" | "url";
 export type PortfolioDocItem = {
   id: string;
   source: SourceType;   // 파일 / URL
-  title: string;        // (선택) 문서명 — 현재 UI엔 미노출
+  title: string;        // (선택) 문서명
   file: File | null;    // 파일 모드일 때
   url: string;          // URL 모드일 때
-  note?: string;        // (선택) 설명 — 현재 UI엔 미노출
+  note?: string;        // (선택) 설명
 };
 
 const makeId = () => Math.random().toString(36).slice(2, 10);
 const MAX_FILE_BYTES = 50 * 1024 * 1024; // 50MB
 
-export default function PortfolioDocumentsSection() {
-  const [isAdding, setIsAdding] = useState(false);
-  const [items, setItems] = useState<PortfolioDocItem[]>([]);
-  const [showConfirm, setShowConfirm] = useState(false);
+// 🔥 상위와 연동을 위한 props
+interface PortfolioDocumentsSectionProps {
+  value?: PortfolioDocItem[];
+  onChange?: (items: PortfolioDocItem[]) => void;
+}
 
+export default function PortfolioDocumentsSection({
+  value = [],
+  onChange,
+}: PortfolioDocumentsSectionProps) {
+  const [isAdding, setIsAdding] = useState(false);
+
+  // 🔥 초기값은 props.value에서 가져오고 이후에는 로컬 상태로 관리
+  const [items, setItems] = useState<PortfolioDocItem[]>(
+    () => (value.length > 0 ? value : [])
+  );
+
+  const [showConfirm, setShowConfirm] = useState(false);
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+
+  // 🔥 items가 바뀔 때마다 상위에 전달
+  useEffect(() => {
+    onChange?.(items);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items]);
 
   // 섹션 열기/닫기
   const startAdd = () => {
     setIsAdding(true);
     if (items.length === 0) {
-      setItems([{ id: makeId(), source: "file", title: "", file: null, url: "", note: "" }]);
+      setItems([
+        { id: makeId(), source: "file", title: "", file: null, url: "", note: "" },
+      ]);
     }
   };
 
@@ -66,20 +87,20 @@ export default function PortfolioDocumentsSection() {
   const handleCancelDelete = () => setShowConfirm(false);
 
   // 아이템 조작
-  // 추가는 아래로 쌓이게 유지
   const addItem = () => {
-    setItems(prev => [
+    setItems((prev) => [
       { id: makeId(), source: "file", title: "", file: null, url: "", note: "" },
       ...prev,
     ]);
   };
+
   // 쓰레기통: 1개면 모달, 2개 이상은 즉시 삭제
   const removeItem = (index: number) => {
     if (items.length === 1) {
       setShowConfirm(true);
       return;
     }
-    setItems(prev => {
+    setItems((prev) => {
       const next = [...prev];
       next.splice(index, 1);
       return next;
@@ -88,15 +109,16 @@ export default function PortfolioDocumentsSection() {
 
   const moveUp = (index: number) => {
     if (index <= 0) return;
-    setItems(prev => {
+    setItems((prev) => {
       const next = [...prev];
       [next[index - 1], next[index]] = [next[index], next[index - 1]];
       return next;
     });
   };
+
   const moveDown = (index: number) => {
     if (index >= items.length - 1) return;
-    setItems(prev => {
+    setItems((prev) => {
       const next = [...prev];
       [next[index + 1], next[index]] = [next[index], next[index + 1]];
       return next;
@@ -105,7 +127,7 @@ export default function PortfolioDocumentsSection() {
 
   // 파일/URL 라디오 전환
   const setSource = (index: number, src: SourceType) => {
-    setItems(prev => {
+    setItems((prev) => {
       const next = [...prev];
       next[index] =
         src === "file"
@@ -119,9 +141,10 @@ export default function PortfolioDocumentsSection() {
   const openFilePicker = (id: string) => {
     const el = fileInputRefs.current[id];
     if (!el) return;
-    el.value = "";  // 같은 파일 재선택 시 onChange 보장
+    el.value = ""; // 같은 파일 재선택 시 onChange 보장
     el.click();
   };
+
   const onFileChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0] ?? null;
     if (!f) return;
@@ -130,7 +153,7 @@ export default function PortfolioDocumentsSection() {
       e.target.value = "";
       return;
     }
-    setItems(prev => {
+    setItems((prev) => {
       const next = [...prev];
       next[index] = { ...next[index], file: f };
       return next;
@@ -140,7 +163,7 @@ export default function PortfolioDocumentsSection() {
   // URL 입력
   const changeUrl = (index: number, v: any) => {
     const value = typeof v === "string" ? v : v?.target?.value ?? "";
-    setItems(prev => {
+    setItems((prev) => {
       const next = [...prev];
       next[index] = { ...next[index], url: value };
       return next;
@@ -177,7 +200,11 @@ export default function PortfolioDocumentsSection() {
         </div>
       </div>
 
-      <div className={`resume-create-page__section-body ${isAdding ? "portfolio-documents-section" : "empty"}`}>
+      <div
+        className={`resume-create-page__section-body ${
+          isAdding ? "portfolio-documents-section" : "empty"
+        }`}
+      >
         {isAdding ? (
           <>
             {items.map((item, index) => {
@@ -187,28 +214,62 @@ export default function PortfolioDocumentsSection() {
               return (
                 <div className="portfolio-documents-section__item" key={item.id}>
                   <div className="portfolio-documents__fields">
-                    <div className="portfolio-documents__source" role="radiogroup" aria-label="업로드 방식 선택">
+                    <div
+                      className="portfolio-documents__source"
+                      role="radiogroup"
+                      aria-label="업로드 방식 선택"
+                    >
                       <div
-                        className={`portfolio-documents__source-option portfolio-documents__source-option--file ${item.source === "file" ? "is-active" : ""}`}
+                        className={`portfolio-documents__source-option portfolio-documents__source-option--file ${
+                          item.source === "file" ? "is-active" : ""
+                        }`}
                         role="radio"
                         aria-checked={item.source === "file"}
                         tabIndex={0}
                         onClick={() => setSource(index, "file")}
-                        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSource(index, "file"); } }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            setSource(index, "file");
+                          }
+                        }}
                       >
-                        <img className="portfolio-documents__source-icon" src={item.source === "file" ? ic_radio_checked_purple_20 : ic_radio_unchecked_gray400_20} alt="" />
+                        <img
+                          className="portfolio-documents__source-icon"
+                          src={
+                            item.source === "file"
+                              ? ic_radio_checked_purple_20
+                              : ic_radio_unchecked_gray400_20
+                          }
+                          alt=""
+                        />
                         <span className="portfolio-documents__source-label">파일</span>
                       </div>
 
                       <div
-                        className={`portfolio-documents__source-option portfolio-documents__source-option--url ${item.source === "url" ? "is-active" : ""}`}
+                        className={`portfolio-documents__source-option portfolio-documents__source-option--url ${
+                          item.source === "url" ? "is-active" : ""
+                        }`}
                         role="radio"
                         aria-checked={item.source === "url"}
                         tabIndex={0}
                         onClick={() => setSource(index, "url")}
-                        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSource(index, "url"); } }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            setSource(index, "url");
+                          }
+                        }}
                       >
-                        <img className="portfolio-documents__source-icon" src={item.source === "url" ? ic_radio_checked_purple_20 : ic_radio_unchecked_gray400_20} alt="" />
+                        <img
+                          className="portfolio-documents__source-icon"
+                          src={
+                            item.source === "url"
+                              ? ic_radio_checked_purple_20
+                              : ic_radio_unchecked_gray400_20
+                          }
+                          alt=""
+                        />
                         <span className="portfolio-documents__source-label">URL</span>
                       </div>
                     </div>
@@ -223,7 +284,7 @@ export default function PortfolioDocumentsSection() {
                         <input
                           type="file"
                           ref={(el) => {
-                            fileInputRefs.current[item.id] = el; 
+                            fileInputRefs.current[item.id] = el;
                           }}
                           style={{ display: "none" }}
                           accept=".pdf,.doc,.docx,.ppt,.pptx,.zip,.png,.jpg,.jpeg,.gif"
@@ -231,12 +292,20 @@ export default function PortfolioDocumentsSection() {
                         />
 
                         <div className="portfolio-documents__file">
-                          <div className={`portfolio-documents__file-name ${item.file ? "" : "portfolio-documents__file-name--empty"}`}>
+                          <div
+                            className={`portfolio-documents__file-name ${
+                              item.file ? "" : "portfolio-documents__file-name--empty"
+                            }`}
+                          >
                             <img src={ic_folder_gray900_20} alt="" />
                             {item.file ? (
                               <>
-                                <span className="portfolio-documents__file-text">{item.file.name}</span>
-                                <span className="portfolio-documents__file-size">{formatBytes(item.file.size)}</span>
+                                <span className="portfolio-documents__file-text">
+                                  {item.file.name}
+                                </span>
+                                <span className="portfolio-documents__file-size">
+                                  {formatBytes(item.file.size)}
+                                </span>
                               </>
                             ) : (
                               <>선택된 파일이 없습니다</>
@@ -259,7 +328,9 @@ export default function PortfolioDocumentsSection() {
                           </span>
                         </div>
 
-                        <span className="portfolio-documents__hint">※ 50MB 이하의 파일만 등록 가능합니다.</span>
+                        <span className="portfolio-documents__hint">
+                          ※ 50MB 이하의 파일만 등록 가능합니다.
+                        </span>
                       </div>
                     ) : (
                       <div className="portfolio-documents__uploader">
@@ -286,14 +357,20 @@ export default function PortfolioDocumentsSection() {
                         "portfolio-documents__control-btn",
                         "portfolio-documents__control--up",
                         !canMoveUp ? "is-disabled" : "",
-                      ].join(" ").trim()}
+                      ]
+                        .join(" ")
+                        .trim()}
                       role="button"
                       tabIndex={canMoveUp ? 0 : -1}
                       onClick={() => canMoveUp && moveUp(index)}
                       aria-disabled={!canMoveUp}
                     >
                       <img
-                        src={canMoveUp ? ic_key_arrow_up_gray900_20 : ic_key_arrow_up_gray500_20}
+                        src={
+                          canMoveUp
+                            ? ic_key_arrow_up_gray900_20
+                            : ic_key_arrow_up_gray500_20
+                        }
                         alt=""
                       />
                     </span>
@@ -304,14 +381,20 @@ export default function PortfolioDocumentsSection() {
                         "portfolio-documents__control-btn",
                         "portfolio-documents__control--down",
                         !canMoveDown ? "is-disabled" : "",
-                      ].join(" ").trim()}
+                      ]
+                        .join(" ")
+                        .trim()}
                       role="button"
                       tabIndex={canMoveDown ? 0 : -1}
                       onClick={() => canMoveDown && moveDown(index)}
                       aria-disabled={!canMoveDown}
                     >
                       <img
-                        src={canMoveDown ? ic_key_arrow_down_gray900_20 : ic_key_arrow_down_gray500_20}
+                        src={
+                          canMoveDown
+                            ? ic_key_arrow_down_gray900_20
+                            : ic_key_arrow_down_gray500_20
+                        }
                         alt=""
                       />
                     </span>
@@ -331,7 +414,12 @@ export default function PortfolioDocumentsSection() {
               );
             })}
 
-            <span className="default_btn_white" onClick={addItem} role="button" tabIndex={0}>
+            <span
+              className="default_btn_white"
+              onClick={addItem}
+              role="button"
+              tabIndex={0}
+            >
               <img src={ic_add_btn_gray900_20} alt="" />
               추가
             </span>

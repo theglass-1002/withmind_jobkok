@@ -22,32 +22,51 @@ import InlineMonthPicker from "@/shared/components/calendar/InlineMonthPicker";
 import Modal from "@/shared/components/modal/Modal";
 import { parseMonth, fmtMonth } from "@/shared/utils/util";
 
-type ActivityItem = {
+// 🔥 상위에서 사용할 타입 export
+export type Activity = {
   id: string;
   activityType: string | null;
   activityName: string;
-  startDate?: string; // "YYYY.MM"
-  endDate?: string;   // "YYYY.MM"
-  summary?: string;   // 아이템별 세부내용
+  startDate?: string; // "YYYY-MM" (fmtMonth 결과)
+  endDate?: string;
+  summary?: string;
 };
+
+// 내부에서 Activity 그대로 사용
+type ActivityItem = Activity;
 
 const makeId = () => Math.random().toString(36).slice(2, 10);
 
-export default function ActivitiesSection() {
+// 부모와 연동을 위한 props
+interface ActivitiesSectionProps {
+  value?: Activity[];                         // 상위 폼에서 내려주는 초기값 (없으면 [])
+  onChange?: (activities: Activity[]) => void; // 변경 시 상위로 올려주는 콜백
+}
+
+export default function ActivitiesSection({ value = [], onChange }: ActivitiesSectionProps) {
   const MAX_SUMMARY = 2000;
   const [showConfirm, setShowConfirm] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
-  const [items, setItems] = useState<ActivityItem[]>([]);
+
+  // 초기값만 value에서 가져오고 이후엔 로컬 상태로 관리
+  const [items, setItems] = useState<ActivityItem[]>(
+    () => (value.length > 0 ? value : [])
+  );
+
   const [openDropdownIndex, setOpenDropdownIndex] = useState<number | null>(null);
-
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-
   const [openStartIdx, setOpenStartIdx] = useState<number | null>(null);
   const [openEndIdx, setOpenEndIdx] = useState<number | null>(null);
 
   const selectRefs = useRef<(HTMLDivElement | null)[]>([]);
   const startRefs  = useRef<(HTMLDivElement | null)[]>([]);
   const endRefs    = useRef<(HTMLDivElement | null)[]>([]);
+
+  //  items 변경 시 상위로 전달
+  useEffect(() => {
+    onChange?.(items);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items]);
 
   const handleClickClose = () => {
     if (items.length > 0) {
@@ -90,7 +109,7 @@ export default function ActivitiesSection() {
     setEditingIndex((cur) => (cur === null ? null : cur + 1));
   };
 
-  // ★ 여기 변경: 아이템 1개일 때는 모달만 띄우고, 2개 이상이면 바로 삭제
+  // 아이템 1개일 때는 모달만 띄우고, 2개 이상이면 바로 삭제
   const removeItem = (index: number) => {
     if (items.length === 1) {
       setShowConfirm(true);
@@ -261,8 +280,7 @@ export default function ActivitiesSection() {
 
                         <div
                           className="ui-select"
-                          ref={el=>{selectRefs.current[index]=el}}
-                          // ref={(el) => (selectRefs.current[index] = el)}
+                          ref={el => { selectRefs.current[index] = el; }}
                           role="combobox"
                           aria-expanded={openDropdownIndex === index}
                           tabIndex={0}
@@ -331,7 +349,7 @@ export default function ActivitiesSection() {
                       <div className="activities-period__fields">
                         <div
                           className="activities-period__field activities-period__field--start"
-                          ref={el=>{startRefs.current[index]=el}}
+                          ref={el => { startRefs.current[index] = el; }}
                         >
                           <DateInline
                             id={`activities-start_${index}`}
@@ -377,9 +395,8 @@ export default function ActivitiesSection() {
 
                         <div
                           className="activities-period__field activities-period__field--end"
-                          ref={el => {endRefs.current[index] = el;}}
+                          ref={el => { endRefs.current[index] = el; }}
                         >
-                          
                           <DateInline
                             id={`activities-end_${index}`}
                             iconSrc={ic_calendar_gray900_20}
@@ -496,7 +513,7 @@ export default function ActivitiesSection() {
                       />
                     </span>
 
-                    {/* ★ 삭제 버튼은 항상 클릭 가능: 1개일 때는 모달, 2개 이상은 즉시 삭제 */}
+                    {/* 삭제 버튼 */}
                     <span
                       className={[
                         "activities-section__control_btn",
