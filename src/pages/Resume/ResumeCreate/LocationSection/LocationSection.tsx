@@ -296,9 +296,7 @@ export default function LocationSection({
         <span className="resume-create-page__hint">
           최대 {MAX_SELECTED}개까지 추가 가능합니다.
         </span>
-        {selectedCodes.size === 0 && !globalAllOnly ? (
-          <span className="resume-create-page__error">1개 이상 추가해 주세요.</span>
-        ) : null}
+        {/* <span className="resume-create-page__error">1개 이상 추가해 주세요.</span> */}
       </div>
 
       {/* 선택된 칩 (한글로 표시!) */}

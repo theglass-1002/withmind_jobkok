@@ -160,14 +160,14 @@ export interface ResumeItem {
   
   export interface CreateResumeRequest {
     userIdx: number;
-    isDefault: number;          // ← 실제로 0/1 쓰면 이렇게 정의하는 게 더 정확
-    temp: "Y" | "N";           // ← 백엔드가 temp를 받으니까 추가
+    isDefault: number;
+    temp: "Y" | "N";
     title: string;
     name: string;
     email: string;
     gender: "M" | "W";
-    phone: string; //010-1234-5678
-    birth: string;             // "1990-12-27" 같은 형태
+    phone: string;
+    birth: string;
     profilePhotoFile?: ProfilePhotoFile;
     regions: string[];
     careers: Career[];
@@ -175,10 +175,12 @@ export interface ResumeItem {
     jobs: string[];
     hardSkills: string[];
     softSkills: string[];
-    activities: Activity[];
-    awardCerts: AwardCert[];
-    portfolios: Portfolio[];
-    selfIntros: SelfIntro[];
+  
+    // 🔥 여기 네 필드들을 optional로
+    activities?: Activity[];
+    awardCerts?: AwardCert[];
+    portfolios?: Portfolio[];
+    selfIntros?: SelfIntro[];
   }
   
   export interface CreateResumeResponse {

@@ -141,9 +141,8 @@ export default function DesiredRoleSection({ value, onChange }: DesiredRoleSecti
         <span className="resume-create-page__hint">
           최대 {MAX_SELECTED}개까지 추가 가능합니다.
         </span>
-        {selected.size === 0 && (
-          <span className="resume-create-page__error">1개 이상 추가해 주세요.</span>
-        )}
+        {/* <span className="resume-create-page__error">1개 이상 추가해 주세요.</span>
+       */}
       </div>
 
       {chips.length > 0 && (
