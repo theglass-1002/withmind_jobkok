@@ -118,11 +118,11 @@ export default function ResumeCreate() {
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   const [form, setForm] = useState<FormState>(initial);
   const [errors, setErrors] = useState<{
-    education?: EducationErrors[]; // ✅ 배열로 변경
     basic: BasicErrors;
     title?: string;
     location?: string;
     careers?: CareerErrors[];
+    education?: EducationErrors[]; 
   }>({
     basic: {},
     education: [],
@@ -277,6 +277,8 @@ export default function ResumeCreate() {
 
   const resetBasicErrors = () => setErrors((prev) => ({ ...prev, basic: {} }));
 
+  const resetEducationErrors = () =>
+    setErrors((prev) => ({ ...prev, education: [] }));
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // 파일 업로드 함수
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -692,9 +694,11 @@ export default function ResumeCreate() {
           />
 
           <EducationSection
-            values={form.education}
-            onChange={updateEducation}
-            onFocusAny={resetBasicErrors}
+              values={form.education}
+              errors={errors.education ?? []}   // 🔥 에러 배열 전달
+              onChange={updateEducation}
+              onFocusAny={resetEducationErrors} // 🔥 학력 에러만 리셋
+   
           />
 
           <DesiredRoleSection

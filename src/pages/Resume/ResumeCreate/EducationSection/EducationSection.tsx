@@ -46,12 +46,12 @@ export default function EducationSection({
   values = [],
   onChange,
   onFocusAny,
-  errors = {},
+  errors = [],
 }: {
   values?: Education[];
   onChange: (list: Education[]) => void;
   onFocusAny?: () => void;
-  errors?: EducationErrors;
+  errors?: EducationErrors[];   // ✅ 배열
 }) {
   // 항상 최소 1개의 빈 아이템은 화면에 보여 주되,
   // 실제 form.education 값은 부모에서만 관리
@@ -152,7 +152,8 @@ export default function EducationSection({
             index={idx}
             total={items.length}
             value={it}
-            errors={errors} // 필요하면 여기서 per-index 에러로 바꿔도 됨
+            // 🔥 이 아이템에 해당하는 에러만 전달
+            errors={errors[idx]}
             gradLabel={it.status ?? null}
             selectOpen={openedSelectIdx === idx}
             onToggleSelect={() =>
@@ -267,6 +268,8 @@ function EducationItem({
   const canMoveUp = total > 1 && index > 0;
   const canMoveDown = total > 1 && index < total - 1;
   const canRemove = total > 1;
+
+  const hasStatusError = !!errors?.status;
 
   return (
     <div className="education-section__item">
@@ -396,7 +399,10 @@ function EducationItem({
 
           <div className="education-section__control education-section__control--employment">
             <div
-              className="ui-select"
+              className={[
+                'ui-select',
+                hasStatusError ? 'error' : '',
+              ].join(' ').trim()}
               onClick={(e) => {
                 e.stopPropagation();
                 onToggleSelect();
