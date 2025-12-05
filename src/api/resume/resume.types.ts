@@ -236,3 +236,5 @@ export const mapAwardsKindToCategoryLabel = (status?: string): string => {
       return "기타";
   }
 }
+
+

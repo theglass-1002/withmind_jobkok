@@ -1,4 +1,3 @@
-// src/pages/.../BasicInfoSection.tsx
 import React, { useEffect, useRef, useState } from "react";
 import FormField from "@/shared/components/form/FormField";
 import FormInput from "@/shared/components/form/FormInput";
@@ -14,6 +13,7 @@ import icon_calendar_red_20 from "@/assets/icons/size20/icon_calendar_red_20.png
 import ic_add_btn_gray700_20 from "@/assets/icons/size20/ic_add_btn_gray700_20.png";
 import ic_close_white_20 from "@/assets/icons/size20/ic_close_white_20.png";
 import "./BasicInfoSection.css";
+import { formatPhone, isValidPhone } from "@/shared/utils/validators";
 
 type Gender = "male" | "female" | null;
 
@@ -25,16 +25,17 @@ export type BasicInfo = {
   phone: string;
   photoUrl?: string;
 };
+
 export type BasicErrors = Partial<Record<keyof BasicInfo, string>>;
 
 const parseYMD = (s: string) => {
   const trimmed = (s || "").trim();
   if (!trimmed) return null;
 
-  // 우선 새 형식: YYYY-MM-DD
+  // 새 형식: YYYY-MM-DD
   let m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(trimmed);
 
-  // 예전 형식: YYYY.MM.DD 도 fallback으로 지원
+  // 예전 형식: YYYY.MM.DD 도 fallback
   if (!m) {
     m = /^(\d{4})\.(\d{2})\.(\d{2})$/.exec(trimmed);
   }
@@ -51,13 +52,13 @@ export default function BasicInfoSection({
   errors,
   onChange,
   onFocusAny,
-  onPhotoFileChange, // ✨ 추가
+  onPhotoFileChange,
 }: {
   values: BasicInfo;
   errors?: BasicErrors;
   onChange: (patch: Partial<BasicInfo>) => void;
   onFocusAny?: () => void;
-  onPhotoFileChange?: (file: File | null) => void; // ✨ 추가
+  onPhotoFileChange?: (file: File | null) => void;
 }) {
   const { name, birth, gender, email, phone, photoUrl } = values;
 
@@ -88,7 +89,7 @@ export default function BasicInfoSection({
       setPhotoFilename(undefined);
       setPhotoErrState("invalid");
       if (fileInputRef.current) fileInputRef.current.value = "";
-      if (onPhotoFileChange) onPhotoFileChange(null); // ✨ 부모에게 전달
+      onPhotoFileChange?.(null);
       return;
     }
     if (f.size > 10 * 1024 * 1024) {
@@ -97,7 +98,7 @@ export default function BasicInfoSection({
       setPhotoFilename(undefined);
       setPhotoErrState("tooLarge");
       if (fileInputRef.current) fileInputRef.current.value = "";
-      if (onPhotoFileChange) onPhotoFileChange(null); // ✨ 부모에게 전달
+      onPhotoFileChange?.(null);
       return;
     }
 
@@ -105,9 +106,7 @@ export default function BasicInfoSection({
     setPhotoFile(f);
     setPhotoPreview(URL.createObjectURL(f));
     setPhotoFilename(f.name);
-    
-    // ✨ 부모에게 파일 전달 (업로드는 나중에!)
-    if (onPhotoFileChange) onPhotoFileChange(f);
+    onPhotoFileChange?.(f);
   };
 
   const onApplyPhoto = () => {
@@ -115,7 +114,6 @@ export default function BasicInfoSection({
       setPhotoErrState("missing");
       return;
     }
-    // ✨ 미리보기 URL만 저장 (실제 업로드는 등록 버튼 클릭 시!)
     onChange({ photoUrl: photoPreview || "" });
     closePhotoModal();
   };
@@ -128,9 +126,7 @@ export default function BasicInfoSection({
     setPhotoFilename(undefined);
     if (fileInputRef.current) fileInputRef.current.value = "";
     onChange({ photoUrl: undefined });
-    
-    // ✨ 부모에게 파일 제거 알림
-    if (onPhotoFileChange) onPhotoFileChange(null);
+    onPhotoFileChange?.(null);
   };
 
   useEffect(() => {
@@ -158,9 +154,10 @@ export default function BasicInfoSection({
           기본정보 <em className="resume-create-page__required">*</em>
         </div>
       </div>
-    
+
       <div className="resume-create-page__section-body">
         <div className="resume-create-page__col resume-create-page__col--left">
+          {/* 이름 */}
           <FormField label={<>이름 <em>*</em></>} className="in_icon">
             <FormInput
               id="name"
@@ -169,10 +166,12 @@ export default function BasicInfoSection({
               onChange={(v) => onChange({ name: v })}
               onFocus={onFocusAny}
               invalid={!!errors?.name}
+             
               rightIconSrc={errors?.name ? ic_error_red100_20 : undefined}
             />
           </FormField>
 
+          {/* 생년월일 + 성별 */}
           <div className="resume-create-page__field-row">
             <div className="birth section-period__start-wrap" ref={birthRef}>
               <FormField label={<>생년월일 <em>*</em></>} className="">
@@ -182,7 +181,6 @@ export default function BasicInfoSection({
                   value={birth || "YYYY-MM-DD"}
                   onClick={() => setOpenBirth(true)}
                   invalid={!!errors?.birth}
-                  errorMessage={errors?.birth}
                   isOpen={openBirth}
                 />
               </FormField>
@@ -196,20 +194,27 @@ export default function BasicInfoSection({
                       minYear={1950}
                       onChange={() => {}}
                       onApply={(d) => {
-                        onChange({ birth: fmtYMD(d) });  //  이제 "YYYY-MM-DD"로 저장
+                        onChange({ birth: fmtYMD(d) });
                         setOpenBirth(false);
                       }}
                     />
                   </div>
                 </div>
               )}
+              {errors?.birth && (
+                <p className="form-error-text">{errors.birth}</p>
+              )}
             </div>
 
             <FormField label={<>성별 <em>*</em></>} className="gender">
               <GenderChoice value={gender} onChange={(g) => onChange({ gender: g })} />
+              {errors?.gender && (
+                <p className="form-error-text">{errors.gender}</p>
+              )}
             </FormField>
           </div>
 
+          {/* 이메일 + 연락처 */}
           <div className="resume-create-page__field-row">
             <FormField label={<>이메일 <em>*</em></>} className="in_icon email">
               <FormInput
@@ -230,15 +235,26 @@ export default function BasicInfoSection({
                 type="tel"
                 required
                 value={phone}
-                onChange={(v) => onChange({ phone: v })}
+                onChange={(v) => {
+                  const formatted = formatPhone(v);
+                  onChange({ phone: formatted });
+                }}
+                onBlur={() => {
+                  if (!isValidPhone(phone)) {
+                    onChange({ phone }); // 포맷은 유지
+                  }
+                }}
                 onFocus={onFocusAny}
                 invalid={!!errors?.phone}
                 rightIconSrc={errors?.phone ? ic_error_red100_20 : undefined}
               />
             </FormField>
+
+
           </div>
         </div>
 
+        {/* 사진 */}
         <div className="resume-create-page__col resume-create-page__col--right">
           <span className="small_labe_black-14">사진</span>
 
@@ -276,14 +292,20 @@ export default function BasicInfoSection({
                 />
                 <span
                   className="resume-create-page__photo-close"
-                  onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
                   onClick={removePhoto}
                 >
                   <img src={ic_close_white_20} alt="" />
                 </span>
                 <span
                   className="resume-create-page__photo-change-btn"
-                  onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
                   onClick={(e) => {
                     e.stopPropagation();
                     openPhotoModal();
