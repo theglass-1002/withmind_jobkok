@@ -17,9 +17,10 @@ import icon_btn_black from "@/assets/icons/ic_add_btn_gray900_20.png";
 import arrow_left from "@/assets/icons/keyboard_arrow_left.png";
 import arrow_right from "@/assets/icons/keyboard_arrow_right.png";
 import Pagination from "@/shared/components/Pagination";
-import { fetchResumeList, ResumeItem } from "@/api/resume/resume.api";
+import { fetchResumeList } from "@/api/resume/resume.api";
 import { logout } from "@/api/auth.api";
 import { formatDate, scrollToTop } from "@/shared/utils/util";
+import { ResumeItem } from "@/api/resume/resume.types";
 
 
 type ResumeTabKey = "all" | "done" | "doing";

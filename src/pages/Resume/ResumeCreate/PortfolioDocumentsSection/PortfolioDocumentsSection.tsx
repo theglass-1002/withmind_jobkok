@@ -287,7 +287,7 @@ export default function PortfolioDocumentsSection({
                             fileInputRefs.current[item.id] = el;
                           }}
                           style={{ display: "none" }}
-                          accept=".pdf,.doc,.docx,.ppt,.pptx,.zip,.png,.jpg,.jpeg,.gif"
+                          accept=".pdf,.doc,.docx,.ppt,.pptx,.png,.jpg,.jpeg,.gif"
                           onChange={(e) => onFileChange(index, e)}
                         />
 

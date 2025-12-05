@@ -252,7 +252,7 @@ export default function Signup() {
       logout(); //로그인 초기화
       const e = error as ApiErrorResponse;
       console.log("에러코드:", e.code);
-      console.log("에러메시지:", e.message);
+   
       if(e.code==400){
         return toast.error("존재하는 계정입니다.");
       }else{

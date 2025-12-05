@@ -49,12 +49,14 @@ export interface ResumeItem {
   export interface Portfolio {
     itemType: string;
     title: string;
-    docName: string;
-    url: string | null;
-    fileRef: string | null;
+    docName?: string;
+    url?: string | null;
+    fileRef?: string | null;
     description: string;
     sortOrder: number;
+    portfolioFile?: PortfolioFile | null;
   }
+  
   
   export interface SelfIntro {
     title: string;
@@ -63,6 +65,15 @@ export interface ResumeItem {
   }
 
   export interface ProfilePhotoFile {
+    filePath: string;
+    originalName: string;
+    storedName: string;
+    sizeBytes: number;
+    contentType: string;
+  }
+
+
+  export interface PortfolioFile {
     filePath: string;
     originalName: string;
     storedName: string;

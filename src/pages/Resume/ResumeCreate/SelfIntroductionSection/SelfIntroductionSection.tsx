@@ -6,18 +6,30 @@ import ic_close_gray500_24 from "@/assets/icons/size24/ic_close_gray500_24.png";
 import ic_star_gray700_20 from "@/assets/icons/size20/ic_star_gray700_20.png";
 import Modal from "@/shared/components/modal/Modal";
 
-export default function SelfIntroductionSection() {
+// 🔥 상위와 연결하기 위한 props 타입
+interface SelfIntroductionSectionProps {
+  value: string;                     // 현재 자기소개 내용
+  onChange: (content: string) => void; // 내용 변경 시 호출
+}
+
+export default function SelfIntroductionSection({
+  value,
+  onChange,
+}: SelfIntroductionSectionProps) {
   const MAX_SUMMARY = 2000;
 
   const [isAdding, setIsAdding] = useState(false);
-  const [summary, setSummary] = useState("");
   const [editing, setEditing] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
+  const summary = value;
+  const count = summary.length;
+
   const startAdd = () => setIsAdding(true);
+
   const stopAdd = () => {
     setIsAdding(false);
-    setSummary("");
+    onChange("");     // 🔥 내용도 같이 초기화
     setEditing(false);
   };
 
@@ -45,10 +57,8 @@ export default function SelfIntroductionSection() {
 
   const onChangeSummary = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const v = e.target.value.slice(0, MAX_SUMMARY);
-    setSummary(v);
+    onChange(v);     // 🔥 로컬 state 대신 상위로 전달
   };
-
-  const count = summary.length;
 
   return (
     <div className="resume-create-page__section resume-create-page__section--personal-statement">
@@ -68,7 +78,11 @@ export default function SelfIntroductionSection() {
         </div>
       </div>
 
-      <div className={`resume-create-page__section-body ${isAdding ? "personal-statement-section" : "empty"}`}>
+      <div
+        className={`resume-create-page__section-body ${
+          isAdding ? "personal-statement-section" : "empty"
+        }`}
+      >
         {isAdding ? (
           <div className="field personal-section__control personal-section__control--summary">
             <label className="small_labe_black-14">
@@ -99,7 +113,9 @@ export default function SelfIntroductionSection() {
                   <div className="personal-section__summary-read">{summary}</div>
                 ) : (
                   <ul className="personal-section__summary-tips">
-                    <li className="personal-section__summary-tip">내용을 입력해 주세요.</li>
+                    <li className="personal-section__summary-tip">
+                      내용을 입력해 주세요.
+                    </li>
                   </ul>
                 )}
                 <span className="personal-section__char-count">
@@ -114,7 +130,9 @@ export default function SelfIntroductionSection() {
                 <img src={ic_star_gray700_20} alt="" />
                 [AI 문장 추천]을 통해 간편하게 작성해 보세요.
               </span>
-              <span className="ai-suggest-btn personal-section__summary-ai-btn">AI 문장 추천</span>
+              <span className="ai-suggest-btn personal-section__summary-ai-btn">
+                AI 문장 추천
+              </span>
             </div>
           </div>
         ) : (
