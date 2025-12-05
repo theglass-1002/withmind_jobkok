@@ -3,8 +3,8 @@ import FormField from "@/shared/components/form/FormField";
 import FormInput from "@/shared/components/form/FormInput";
 import DateInline from "@/shared/components/form/DateInline";
 import Switch from "react-switch";
+import Modal from "@/shared/components/modal/Modal";
 
-import ic_error_red100_20 from "@/assets/icons/size20/ic_error_red100_20.png";
 import ic_star_gray700_20 from "@/assets/icons/size20/ic_star_gray700_20.png";
 import ic_star_green_20 from "@/assets/icons/size20/ic_star_green_20.png";
 import ic_trash_gray500_20 from "@/assets/icons/size20/ic_trash_gray500_20.png";
@@ -26,6 +26,7 @@ import "./CareerSection.css";
 import InlineMonthPicker from "@/shared/components/calendar/InlineMonthPicker";
 import { parseMonth, fmtMonth } from "@/shared/utils/util";
 import AISuggestArea from "@/pages/Resume/ResumeAISuggest";
+import { Icons } from "@/assets/icons";
 
 const makeId = () => Math.random().toString(36).slice(2, 10);
 
@@ -39,13 +40,17 @@ export type CareerInfo = {
   employmentType: string | null;
   isCurrent: boolean;
   startDate: string; // "YYYY-MM"
-  endDate: string;   // "YYYY-MM"
+  endDate: string; // "YYYY-MM"
 };
 
-type CareerErrors = Partial<Record<keyof CareerInfo, string>>;
+export type CareerErrors = Partial<Record<keyof CareerInfo, string>>;
 
 interface CareerSectionProps {
-  onChange: (careers: CareerInfo[]) => void; // ✨ 부모로 전체 배열 전달
+  value?: CareerInfo[]; // ✅ 초기값 받기
+  isFreshGraduate?: boolean; // ✅ 신입 상태 받기
+  onChange: (careers: CareerInfo[], isFresh: boolean) => void; // ✅ 신입 상태도 함께 전달
+  errors?: CareerErrors[];
+  onClearErrors?: () => void; // ✅ 에러 초기화 함수 추가
 }
 
 const blankItem = (): CareerInfo => ({
@@ -66,17 +71,86 @@ const swap = <T,>(arr: T[], i: number, j: number) => {
   return next;
 };
 
+// 아이템이 비어있는지 체크
+const isItemEmpty = (item: CareerInfo): boolean => {
+  return (
+    !item.company_name.trim() &&
+    !item.role.trim() &&
+    !item.position.trim() &&
+    !item.summary.trim() &&
+    !item.employmentType &&
+    !item.startDate &&
+    !item.endDate
+  );
+};
+
 // ===== 메인 컴포넌트 =====
-export default function CareerSection({ onChange }: CareerSectionProps) {
-  const [items, setItems] = useState<CareerInfo[]>([blankItem()]);
-  const [itemErrors] = useState<CareerErrors[]>([]);
+export default function CareerSection({
+  value = [],
+  isFreshGraduate = false,
+  onChange,
+  errors,
+  onClearErrors, // ✅ 에러 초기화 함수
+}: CareerSectionProps) {
+  // ✅ props에서 받은 초기값 사용
+  const [items, setItems] = useState<CareerInfo[]>(
+    () => (value.length > 0 ? value : [blankItem()])
+  );
+  const [isFresh, setIsFresh] = useState(isFreshGraduate);
 
-  // ✨ items가 변경될 때마다 부모에게 전달
+  // 모달 상태
+  const [showFreshModal, setShowFreshModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteTargetIndex, setDeleteTargetIndex] = useState<number | null>(null);
+
+  // ✨ items나 isFresh가 변경될 때마다 부모에게 전달
   useEffect(() => {
-    onChange(items);
+    onChange(items, isFresh); // ✅ 신입 상태도 함께 전달
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [items]); // onChange는 의존성에서 제외 (무한 루프 방지)
+  }, [items, isFresh]);
 
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 신입 체크박스 핸들러
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  const handleFreshCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = e.target.checked;
+
+    if (checked) {
+      // 신입으로 체크 → 입력된 내용이 있으면 모달 표시
+      const hasContent = items.some((item) => !isItemEmpty(item));
+
+      if (hasContent) {
+        // 입력된 내용이 있으면 모달 띄우기
+        setShowFreshModal(true);
+      } else {
+        // 입력된 내용이 없으면 즉시 신입으로 변경
+        setIsFresh(true);
+        setItems([blankItem()]);
+        onClearErrors?.(); // ✅ 에러 초기화
+      }
+    } else {
+      // 신입 체크 해제
+      setIsFresh(false);
+    }
+  };
+
+  // 신입 모달 - 예
+  const handleConfirmFresh = () => {
+    setIsFresh(true);
+    setItems([blankItem()]);
+    setShowFreshModal(false);
+    onClearErrors?.(); // ✅ 에러 초기화
+  };
+
+  // 신입 모달 - 취소
+  const handleCancelFresh = () => {
+    setShowFreshModal(false);
+    // 체크박스 상태는 그대로 유지 (신입 체크 안됨)
+  };
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 경력 불러오기
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   const importCareers = async () => {
     const fetched: Omit<CareerInfo, "id">[] = [
       {
@@ -100,13 +174,59 @@ export default function CareerSection({ onChange }: CareerSectionProps) {
         endDate: "2024-11",
       },
     ];
-    setItems((fetched.length ? fetched : [blankItem()]).map(it => ({ id: makeId(), ...it })));
+    setItems(
+      (fetched.length ? fetched : [blankItem()]).map((it) => ({
+        id: makeId(),
+        ...it,
+      }))
+    );
+    setIsFresh(false); // 경력 불러오면 신입 체크 해제
   };
 
-  const addItem = () => setItems((prev) => [blankItem(), ...prev]);
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 아이템 조작
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  const addItem = () => {
+    setItems((prev) => [blankItem(), ...prev]);
+    setIsFresh(false); // 추가하면 신입 체크 해제
+  };
 
-  const removeItem = (idx: number) =>
+  // 삭제 버튼 클릭
+  const handleRemoveClick = (idx: number) => {
+    if (items.length <= 1) return; // 1개 남았으면 삭제 불가
+
+    const item = items[idx];
+    const isEmpty = isItemEmpty(item);
+
+    if (isEmpty) {
+      // 입력된 내용이 없으면 즉시 삭제
+      removeItem(idx);
+    } else {
+      // 입력된 내용이 있으면 모달 띄우기
+      setDeleteTargetIndex(idx);
+      setShowDeleteModal(true);
+    }
+  };
+
+  // 삭제 모달 - 예
+  const handleConfirmDelete = () => {
+    if (deleteTargetIndex !== null) {
+      removeItem(deleteTargetIndex);
+    }
+    setShowDeleteModal(false);
+    setDeleteTargetIndex(null);
+  };
+
+  // 삭제 모달 - 아니오
+  const handleCancelDelete = () => {
+    setShowDeleteModal(false);
+    setDeleteTargetIndex(null);
+  };
+
+  // 실제 삭제 함수
+  const removeItem = (idx: number) => {
     setItems((prev) => (prev.length <= 1 ? prev : prev.filter((_, i) => i !== idx)));
+  };
 
   const moveUp = (idx: number) =>
     setItems((prev) => (idx <= 0 ? prev : swap(prev, idx, idx - 1)));
@@ -114,8 +234,10 @@ export default function CareerSection({ onChange }: CareerSectionProps) {
   const moveDown = (idx: number) =>
     setItems((prev) => (idx >= prev.length - 1 ? prev : swap(prev, idx, idx + 1)));
 
-  const patchItem = (idx: number, patch: Partial<CareerInfo>) =>
+  const patchItem = (idx: number, patch: Partial<CareerInfo>) => {
     setItems((prev) => prev.map((it, i) => (i === idx ? { ...it, ...patch } : it)));
+    setIsFresh(false); // 수정하면 신입 체크 해제
+  };
 
   return (
     <div className="resume-create-page__section resume-create-page__section--career">
@@ -125,7 +247,12 @@ export default function CareerSection({ onChange }: CareerSectionProps) {
         </div>
         <div className="resume-section-title__actions">
           <label className="resume-section-title__control resume-section-title__control--fresh">
-            <input type="checkbox" className="resume-section-title__checkbox" />
+            <input
+              type="checkbox"
+              className="resume-section-title__checkbox"
+              checked={isFresh}
+              onChange={handleFreshCheckboxChange}
+            />
             <span className="resume-section-title__control-label">신입</span>
           </label>
           <span
@@ -147,11 +274,11 @@ export default function CareerSection({ onChange }: CareerSectionProps) {
             index={idx}
             total={items.length}
             value={it}
-            errors={itemErrors[idx]}
+            errors={errors?.[idx]}
             onChange={(patch) => patchItem(idx, patch)}
             onMoveUp={() => moveUp(idx)}
             onMoveDown={() => moveDown(idx)}
-            onRemove={() => removeItem(idx)}
+            onRemove={() => handleRemoveClick(idx)}
           />
         ))}
 
@@ -160,6 +287,34 @@ export default function CareerSection({ onChange }: CareerSectionProps) {
           추가
         </span>
       </div>
+
+      {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+      {/* 신입 변경 모달 */}
+      {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+      <Modal
+        open={showFreshModal}
+        title="신입으로 변경하시겠습니까?"
+        confirmText="예"
+        confirmClassName="btn_w_full default_btn_black"
+        cancelText="취소"
+        cancelClassName="btn_w_full default_btn_white"
+        onConfirm={handleConfirmFresh}
+        onClose={handleCancelFresh}
+      />
+
+      {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+      {/* 삭제 확인 모달 */}
+      {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+      <Modal
+        open={showDeleteModal}
+        title="입력된 내용을 전부 삭제하시겠습니까?"
+        confirmText="예"
+        confirmClassName="btn_w_full default_btn_black"
+        cancelText="아니오"
+        cancelClassName="btn_w_full default_btn_white"
+        onConfirm={handleConfirmDelete}
+        onClose={handleCancelDelete}
+      />
     </div>
   );
 }
@@ -290,7 +445,7 @@ function CareerItem({
             value={company_name}
             onChange={(v) => onChange({ company_name: v })}
             invalid={!!errors?.company_name}
-            rightIconSrc={errors?.company_name ? ic_error_red100_20 : undefined}
+            rightIconSrc={errors?.company_name ? Icons.ic_error_red100_20 : undefined}
             placeholder="회사명을 입력해 주세요."
           />
         </FormField>
@@ -302,7 +457,7 @@ function CareerItem({
               재직 기간 <em className="error_text_red">*</em>
             </label>
             <div
-              className="ui-select"
+              className={`ui-select ${errors?.employmentType ? "error" : ""}`}
               ref={empRef}
               onClick={(e) => {
                 e.stopPropagation();
@@ -372,8 +527,7 @@ function CareerItem({
                   value={startDate}
                   onClick={() => setOpenStartCal(true)}
                   invalid={!!errors?.startDate}
-                  errorMessage={errors?.startDate}
-                  rightIconSrc={errors?.startDate ? ic_error_red100_20 : undefined}
+                  rightIconSrc={errors?.startDate ? Icons.ic_error_red100_20 : undefined}
                   isOpen={openStartCal}
                 />
               </FormField>
@@ -387,12 +541,11 @@ function CareerItem({
                       minYear={1970}
                       onChange={() => {}}
                       onApply={(d) => {
-                        onChange({ startDate: fmtMonth(d) }); // "YYYY-MM"
+                        onChange({ startDate: fmtMonth(d) });
                         const endMV = parseMonth(endDate);
                         if (
                           endMV &&
-                          (endMV.year < d.year ||
-                            (endMV.year === d.year && endMV.month < d.month))
+                          (endMV.year < d.year || (endMV.year === d.year && endMV.month < d.month))
                         ) {
                           onChange({ endDate: fmtMonth(d) });
                         }
@@ -425,8 +578,7 @@ function CareerItem({
                     value={endDate}
                     onClick={() => setOpenEndCal(true)}
                     invalid={!!errors?.endDate}
-                    errorMessage={errors?.endDate}
-                    rightIconSrc={errors?.endDate ? ic_error_red100_20 : undefined}
+                    rightIconSrc={errors?.endDate ? Icons.ic_error_red100_20 : undefined}
                     isOpen={openEndCal}
                   />
                 </FormField>
@@ -453,7 +605,7 @@ function CareerItem({
                           } else {
                             onChange({
                               isCurrent: false,
-                              endDate: fmtMonth(pickedMonth), // "YYYY-MM"
+                              endDate: fmtMonth(pickedMonth),
                             });
                           }
                           setOpenEndCal(false);
@@ -497,7 +649,6 @@ function CareerItem({
                 value={role}
                 onChange={(v) => onChange({ role: v })}
                 invalid={!!errors?.role}
-                rightIconSrc={errors?.role ? ic_error_red100_20 : undefined}
                 placeholder="직무를 입력해 주세요."
               />
             </FormField>
@@ -510,7 +661,6 @@ function CareerItem({
                 value={position}
                 onChange={(v) => onChange({ position: v })}
                 invalid={!!errors?.position}
-                rightIconSrc={errors?.position ? ic_error_red100_20 : undefined}
                 placeholder="직책을 입력해 주세요."
               />
             </FormField>
@@ -526,9 +676,7 @@ function CareerItem({
               <textarea
                 id={`summary_${index}`}
                 value={summary ?? ""}
-                onChange={(e) =>
-                  onChange({ summary: e.target.value.slice(0, 2000) })
-                }
+                onChange={(e) => onChange({ summary: e.target.value.slice(0, 2000) })}
                 maxLength={2000}
               />
               <span className="career-section__char-count">
@@ -548,9 +696,7 @@ function CareerItem({
                 <div className="career-section__summary-read">{summary}</div>
               ) : (
                 <ul className="career-section__summary-tips">
-                  <li className="career-section__summary-tip">
-                    세부 내용을 입력해 주세요.
-                  </li>
+                  <li className="career-section__summary-tip">세부 내용을 입력해 주세요.</li>
                   <li className="career-section__summary-tip">
                     프로젝트 경험은 역할ㆍ기여도ㆍ성과 중심으로 정리하면 좋습니다.
                   </li>
@@ -603,9 +749,7 @@ function CareerItem({
           aria-disabled={!canMoveDown}
         >
           <img
-            src={
-              canMoveDown ? ic_key_arrow_down_gray900_20 : ic_key_arrow_down_gray500_20
-            }
+            src={canMoveDown ? ic_key_arrow_down_gray900_20 : ic_key_arrow_down_gray500_20}
             alt=""
           />
         </span>
@@ -619,10 +763,7 @@ function CareerItem({
           onClick={() => canRemove && onRemove()}
           aria-disabled={!canRemove}
         >
-          <img
-            src={canRemove ? ic_trash_gray900_20 : ic_trash_gray500_20}
-            alt=""
-          />
+          <img src={canRemove ? ic_trash_gray900_20 : ic_trash_gray500_20} alt="" />
         </span>
       </div>
     </div>

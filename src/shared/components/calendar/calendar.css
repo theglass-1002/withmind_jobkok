@@ -4,7 +4,7 @@
 .calendar-popover {
   position: absolute;
   z-index: 1;
-  top: 130%;
+  top: 100px;
 }
 
 /* =========================

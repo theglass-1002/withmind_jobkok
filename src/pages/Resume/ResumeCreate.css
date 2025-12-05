@@ -481,7 +481,7 @@ background: var(--gray-50, #F8F8F9);
 .education-section__period
 {
     display: flex;
-    align-items: center;
+    align-items: end;
     gap: 8px;
     flex: 1 0 0;
 

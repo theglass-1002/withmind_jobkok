@@ -22,6 +22,8 @@ import './EducationSection.css';
 import InlineMonthPicker from '@/shared/components/calendar/InlineMonthPicker';
 import { parseMonth, fmtMonth } from '@/shared/utils/util';
 
+import Modal from '@/shared/components/modal/Modal';
+
 export type Education = {
   school_name?: string;
   major_degree?: string;
@@ -40,9 +42,6 @@ const blankItem = (): Education => ({
   status: '',
 });
 
-const initialItems = (values?: Education[]): Education[] =>
-  values && values.length > 0 ? values : [blankItem()];
-
 export default function EducationSection({
   values = [],
   onChange,
@@ -54,16 +53,16 @@ export default function EducationSection({
   onFocusAny?: () => void;
   errors?: EducationErrors;
 }) {
-  const [items, setItems] = useState<Education[]>(() => initialItems(values));
-
-  // 🔥 status(졸업 여부)를 표시용 gradType과 연결
-  const [gradType, setGradType] = useState<(string | null)[]>(() =>
-    values && values.length > 0
-      ? values.map((v) => v.status ?? null)
-      : [null]
-  );
+  // 항상 최소 1개의 빈 아이템은 화면에 보여 주되,
+  // 실제 form.education 값은 부모에서만 관리
+  const items: Education[] =
+    values && values.length > 0 ? values : [blankItem()];
 
   const [openedSelectIdx, setOpenedSelectIdx] = useState<number | null>(null);
+
+  // 삭제 모달 관련 상태
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [pendingRemoveIdx, setPendingRemoveIdx] = useState<number | null>(null);
 
   const swap = <T,>(arr: T[], i: number, j: number) => {
     const next = arr.slice();
@@ -72,55 +71,70 @@ export default function EducationSection({
   };
 
   const addItem = () => {
-    setItems((prev) => {
-      const next = [blankItem(), ...prev];
-      onChange(next);
-      return next;
-    });
-    setGradType((prev) => [null, ...prev]);
+    const next = [blankItem(), ...items];
+    onChange(next);
   };
 
+  // 실제 삭제 로직 (확인 버튼 눌렀을 때만 호출)
   const removeItem = (idx: number) => {
-    setItems((prev) => {
-      const next =
-        prev.length <= 1
-          ? prev.filter((_, i) => i !== idx)
-          : prev.filter((_, i) => i !== idx);
-      const normalized = next.length === 0 ? [blankItem()] : next;
-      onChange(normalized);
-      return normalized;
-    });
-    setGradType((prev) =>
-      prev.length <= 1 ? prev : prev.filter((_, i) => i !== idx)
-    );
+    const next = items.filter((_, i) => i !== idx);
+    // 값은 그냥 []로 넘기면, 다음 렌더에서 다시 [blankItem()]으로 fallback됨
+    onChange(next);
   };
 
   const moveUp = (idx: number) => {
     if (idx <= 0) return;
-    setItems((prev) => {
-      const next = swap(prev, idx, idx - 1);
-      onChange(next);
-      return next;
-    });
-    setGradType((prev) => swap(prev, idx, idx - 1));
+    const next = swap(items, idx, idx - 1);
+    onChange(next);
   };
 
   const moveDown = (idx: number) => {
     if (idx >= items.length - 1) return;
-    setItems((prev) => {
-      const next = swap(prev, idx, idx + 1);
-      onChange(next);
-      return next;
-    });
-    setGradType((prev) => swap(prev, idx, idx + 1));
+    const next = swap(items, idx, idx + 1);
+    onChange(next);
   };
 
   const patchItem = (idx: number, patch: Partial<Education>) => {
-    setItems((prev) => {
-      const next = prev.map((it, i) => (i === idx ? { ...it, ...patch } : it));
-      onChange(next);
-      return next;
-    });
+    const next = items.map((it, i) => (i === idx ? { ...it, ...patch } : it));
+    onChange(next);
+  };
+
+  // 삭제 버튼 클릭 시:
+  // - 해당 아이템에 입력된 내용이 하나라도 있으면 모달 띄우기
+  // - 전부 비어 있으면 모달 없이 바로 삭제
+  const handleClickRemove = (idx: number) => {
+    const target = items[idx];
+    const isEmpty =
+      !target?.school_name &&
+      !target?.major_degree &&
+      !target?.startDate &&
+      !target?.endDate &&
+      !target?.status;
+
+    if (isEmpty) {
+      // 그냥 삭제
+      removeItem(idx);
+      return;
+    }
+
+    // 내용이 있으면 확인 모달
+    setPendingRemoveIdx(idx);
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (pendingRemoveIdx === null) {
+      setShowDeleteModal(false);
+      return;
+    }
+    removeItem(pendingRemoveIdx);
+    setPendingRemoveIdx(null);
+    setShowDeleteModal(false);
+  };
+
+  const handleCancelDelete = () => {
+    setPendingRemoveIdx(null);
+    setShowDeleteModal(false);
   };
 
   return (
@@ -138,35 +152,47 @@ export default function EducationSection({
             index={idx}
             total={items.length}
             value={it}
-            errors={undefined}
-            gradLabel={gradType[idx]}
+            errors={errors} // 필요하면 여기서 per-index 에러로 바꿔도 됨
+            gradLabel={it.status ?? null}
             selectOpen={openedSelectIdx === idx}
             onToggleSelect={() =>
               setOpenedSelectIdx((o) => (o === idx ? null : idx))
             }
             onSelectGrad={(label) => {
-              // 🔥 1) 드롭다운 표시용 상태 업데이트
-              setGradType((prev) =>
-                prev.map((v, i) => (i === idx ? label : v))
-              );
-              setOpenedSelectIdx(null);
-
-              // 🔥 2) 실제 Education.status 필드 업데이트
+              // status 필드에 직접 라벨 저장
               patchItem(idx, { status: label });
+              setOpenedSelectIdx(null);
             }}
             onChange={(patch) => patchItem(idx, patch)}
             onMoveUp={() => moveUp(idx)}
             onMoveDown={() => moveDown(idx)}
-            onRemove={() => removeItem(idx)}
+            onRemove={() => handleClickRemove(idx)}
             onFocusAny={onFocusAny}
           />
         ))}
 
-        <span className="default_btn_white" role="button" tabIndex={0} onClick={addItem}>
+        <span
+          className="default_btn_white"
+          role="button"
+          tabIndex={0}
+          onClick={addItem}
+        >
           <img src={ic_add_btn_gray900_20} alt="" />
           추가
         </span>
       </div>
+
+      {/* 삭제 확인 모달 */}
+      <Modal
+        open={showDeleteModal}
+        title="입력된 내용을 전부 삭제하시겠습니까?"
+        confirmText="예"
+        confirmClassName="btn_w_full default_btn_black"
+        cancelText="아니오"
+        cancelClassName="btn_w_full default_btn_white"
+        onConfirm={handleConfirmDelete}
+        onClose={handleCancelDelete}
+      />
     </div>
   );
 }
@@ -279,17 +305,26 @@ function EducationItem({
         <div className="education-section__group education-section__group--employment">
           <div className="education-section__period">
             <div className="section-period__start-wrap" ref={startCalRef}>
-              <FormField label="" className="education-section date education-section__date--start">
+              <FormField
+                label={
+                  <>
+                    재학 기간 <em>*</em>
+                  </>
+                }
+                className="education-section date education-section__date--start"
+              >
                 <DateInline
                   id={`education-start_${index}`}
-                  iconSrc={errors?.startDate ? icon_calendar_red_20 : ic_calendar_gray900_20}
+                  iconSrc={
+                    errors?.startDate ? icon_calendar_red_20 : ic_calendar_gray900_20
+                  }
                   value={startDate}
                   onClick={() => setOpenStartCal(true)}
                   invalid={!!errors?.startDate}
                   errorMessage={errors?.startDate}
                   rightIconSrc={errors?.startDate ? ic_error_red100_20 : undefined}
                   isOpen={openStartCal}
-               />
+                />
               </FormField>
 
               {openStartCal && (
@@ -321,10 +356,15 @@ function EducationItem({
             <span className="education-section__tilde">~</span>
 
             <div className="section-period__end-wrap" ref={endCalRef}>
-              <FormField label="" className="education-section date education-section__date--end">
+              <FormField
+                label=""
+                className="education-section date education-section__date--end"
+              >
                 <DateInline
                   id={`education-end_${index}`}
-                  iconSrc={errors?.endDate ? icon_calendar_red_20 : ic_calendar_gray900_20}
+                  iconSrc={
+                    errors?.endDate ? icon_calendar_red_20 : ic_calendar_gray900_20
+                  }
                   value={endDate}
                   onClick={() => setOpenEndCal(true)}
                   invalid={!!errors?.endDate}

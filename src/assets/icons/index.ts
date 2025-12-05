@@ -17,7 +17,7 @@ import ic_google_login_20 from "./login/ic_google_login_20.svg";
 import ic_check_box_blank_gray400_24 from "./size24/ic_check_box_blank_gray400_24.png";
 import ic_check_box_purple24 from "./size24/ic_check_box_purple24.png";
 import ic_close_gray500_20 from "./size20/ic_close_gray500_20.png";
-
+import ic_error_red100_20 from "@/assets/icons/size20/ic_error_red100_20.png";
 
 
 export const Icons = {
@@ -32,7 +32,7 @@ export const Icons = {
 
     ic_check_box_blank_gray400_24,
     ic_check_box_purple24,
-    ic_close_gray500_20
-
+    ic_close_gray500_20,
+    ic_error_red100_20
     
 };

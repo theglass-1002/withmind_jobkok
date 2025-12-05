@@ -166,7 +166,6 @@ export default function BasicInfoSection({
               onChange={(v) => onChange({ name: v })}
               onFocus={onFocusAny}
               invalid={!!errors?.name}
-             
               rightIconSrc={errors?.name ? ic_error_red100_20 : undefined}
             />
           </FormField>
@@ -179,7 +178,11 @@ export default function BasicInfoSection({
                   id="birth"
                   iconSrc={errors?.birth ? icon_calendar_red_20 : ic_calendar_gray900_20}
                   value={birth || "YYYY-MM-DD"}
-                  onClick={() => setOpenBirth(true)}
+                  onClick={() => {
+                    // 캘린더 클릭 시 에러 리셋
+                    onFocusAny?.();
+                    setOpenBirth(true);
+                  }}
                   invalid={!!errors?.birth}
                   isOpen={openBirth}
                 />
@@ -207,7 +210,14 @@ export default function BasicInfoSection({
             </div>
 
             <FormField label={<>성별 <em>*</em></>} className="gender">
-              <GenderChoice value={gender} onChange={(g) => onChange({ gender: g })} />
+              <GenderChoice
+                value={gender}
+                onChange={(g) => {
+                  // ✨ 성별 변경 시 에러 리셋
+                  onFocusAny?.();
+                  onChange({ gender: g });
+                }}
+              />
               {errors?.gender && (
                 <p className="form-error-text">{errors.gender}</p>
               )}
@@ -249,8 +259,6 @@ export default function BasicInfoSection({
                 rightIconSrc={errors?.phone ? ic_error_red100_20 : undefined}
               />
             </FormField>
-
-
           </div>
         </div>
 

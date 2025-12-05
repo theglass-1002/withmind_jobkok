@@ -170,7 +170,7 @@ export interface ResumeItem {
     birth: string;
     profilePhotoFile?: ProfilePhotoFile;
     regions: string[];
-    careers: Career[];
+    careers?: Career[];
     educations: Education[];
     jobs: string[];
     hardSkills: string[];
