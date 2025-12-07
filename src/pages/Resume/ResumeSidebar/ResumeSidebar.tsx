@@ -56,7 +56,8 @@ export default function ResumeSidebar({
     if (typeof isDefault !== "undefined") setLocalDefault(!!isDefault);
   }, [isDefault]);
 
-  const checked = typeof isDefault === "undefined" ? localDefault : !!isDefault;
+  const checked =
+    typeof isDefault === "undefined" ? localDefault : !!isDefault;
 
   const handleToggle = (next: boolean) => {
     onToggleDefault?.(next);
@@ -64,6 +65,7 @@ export default function ResumeSidebar({
   };
 
   return (
+    console.log('사이드',SECTIONS),
     <aside className="resume-create-page__aside">
       <div className="resume-sidebar__header">
         <span className="resume-sidebar__title">이력서 관리</span>
@@ -71,7 +73,10 @@ export default function ResumeSidebar({
 
       <div className="resume-sidebar__default">
         <span className="resume-sidebar__default-text">기본 이력서로 설정</span>
-        <label className="resume-sidebar__default-label" aria-label="기본 이력서로 설정">
+        <label
+          className="resume-sidebar__default-label"
+          aria-label="기본 이력서로 설정"
+        >
           <Switch
             checked={checked}
             onChange={handleToggle}
@@ -92,15 +97,23 @@ export default function ResumeSidebar({
       <div className="resume-sidebar__sections">
         {SECTIONS.map((s) => {
           const st: Status = statusMap[s.id] ?? "pending";
-          const icon = st === "completed" ? ic_check_purple_20 : ic_check_gray300_20;
+          const icon =
+            st === "completed" ? ic_check_purple_20 : ic_check_gray300_20;
 
           return (
             <div key={s.id} className="resume-sidebar__section-row">
               <span className="resume-sidebar__section-name">
                 {s.title}
-                {s.required && <em className="badge--required" aria-label="필수">*</em>}
+                {s.required && (
+                  <em className="badge--required" aria-label="필수">
+                    *
+                  </em>
+                )}
               </span>
-              <img src={icon} alt={st === "completed" ? "설정완료" : "설정 필요"} />
+              <img
+                src={icon}
+                alt={st === "completed" ? "설정완료" : "설정 필요"}
+              />
             </div>
           );
         })}

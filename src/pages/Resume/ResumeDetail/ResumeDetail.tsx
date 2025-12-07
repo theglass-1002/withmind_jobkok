@@ -1,4 +1,5 @@
-import React, { useState, useRef } from "react"; 
+import React, {useEffect, useState, useRef } from "react"; 
+import { useParams } from "react-router-dom";
 import "@/pages/Resume/Resume.css";
 import "./ResumeDetail.css";
 import { toast} from "react-toastify";
@@ -13,6 +14,10 @@ import ResumeSidebar, {
   type Status,
 } from "@/pages/Resume/ResumeSidebar/ResumeSidebar";
 import Modal from "@/shared/components/modal/Modal";
+import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
+
+
+
 import test_resume_img from "@/assets/testImg/test_resume_img.png";
 import ic_link_gray900_20 from "@/assets/icons/size20/ic_link_gray900_20.png";
 import ic_folder_gray900_20 from "@/assets/icons/size20/ic_folder_gray900_20.png";
@@ -106,6 +111,8 @@ const careerItems: CareerItem[] = [
 
 
 export default function ResumeDetail() {
+  const { resumeId } = useParams<{ resumeId: string }>();
+  const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("title");
   const resumeRef = useRef<HTMLDivElement | null>(null); 
   const [isDefaultResume, setIsDefaultResume] = useState(false);
@@ -226,10 +233,30 @@ export default function ResumeDetail() {
   };
 
 
+  useEffect(() => {
+    if (!resumeId) return;
+    const fetchResume = async () => {
+      try {
+        //setIsLoading(true);
+        const numericId = Number(resumeId);
+        //const res = await getResumeDetail(numericId);
+        //setResumeData(res.data); // API 응답 구조에 맞게 조정
+      } catch (e) {
+        console.error("이력서 상세 조회 실패:", e);
+        toast.error("이력서 정보를 불러오는 중 오류가 발생했습니다.");
+      } finally {
+       // setIsLoading(false);
+      }
+    };
+
+    fetchResume();
+  }, [resumeId]);
+
   return (
     <>
     <div  
     className="resume-page resume-page--detail">
+        <LoadingOverlay isLoading={isLoading}/>
       <ResumeActionsBar 
       onDownloadPdf={handleDownloadPdf} 
       onTempSave={handleTempSave} onSubmit={handleSubmit} />

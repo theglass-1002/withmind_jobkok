@@ -153,6 +153,7 @@ box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.08);
     border-radius: 6px;
     border: 1px solid var(--gray-300, #E0E2E4);
     background: var(--white-100, #FFF);
+    cursor: pointer;
 }
 
 .resume-item__top{
