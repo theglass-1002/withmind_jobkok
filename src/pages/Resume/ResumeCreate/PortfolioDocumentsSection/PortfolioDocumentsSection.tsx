@@ -30,18 +30,37 @@ export type PortfolioDocItem = {
   note?: string;        // (선택) 설명
 };
 
+// ✅ 포트폴리오 에러 타입 export
+export type PortfolioErrors = {
+  file?: string;
+  url?: string;
+};
+
 const makeId = () => Math.random().toString(36).slice(2, 10);
 const MAX_FILE_BYTES = 50 * 1024 * 1024; // 50MB
+
+// ✅ 아이템이 비어있는지 체크 (필수값만)
+const isItemEmpty = (item: PortfolioDocItem): boolean => {
+  if (item.source === "file") {
+    return !item.file;
+  } else {
+    return !item.url.trim();
+  }
+};
 
 // 🔥 상위와 연동을 위한 props
 interface PortfolioDocumentsSectionProps {
   value?: PortfolioDocItem[];
   onChange?: (items: PortfolioDocItem[]) => void;
+  errors?: PortfolioErrors[]; // ✅ 에러 배열 추가
+  onFocusAny?: () => void; // ✅ 포커스 시 에러 리셋
 }
 
 export default function PortfolioDocumentsSection({
   value = [],
   onChange,
+  errors = [], // ✅ 기본값 빈 배열
+  onFocusAny,
 }: PortfolioDocumentsSectionProps) {
   const [isAdding, setIsAdding] = useState(false);
 
@@ -51,6 +70,8 @@ export default function PortfolioDocumentsSection({
   );
 
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false); // ✅ 개별 삭제 모달
+  const [deleteTargetIndex, setDeleteTargetIndex] = useState<number | null>(null); // ✅ 삭제 대상 인덱스
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   // 🔥 items가 바뀔 때마다 상위에 전달
@@ -94,12 +115,38 @@ export default function PortfolioDocumentsSection({
     ]);
   };
 
-  // 쓰레기통: 1개면 모달, 2개 이상은 즉시 삭제
-  const removeItem = (index: number) => {
-    if (items.length === 1) {
-      setShowConfirm(true);
-      return;
+  // ✅ 삭제 버튼 클릭 핸들러
+  const handleRemoveClick = (index: number) => {
+    const item = items[index];
+    const isEmpty = isItemEmpty(item);
+
+    if (isEmpty) {
+      // 입력된 내용이 없으면 즉시 삭제
+      performRemove(index);
+    } else {
+      // 입력된 내용이 있으면 모달 띄우기
+      setDeleteTargetIndex(index);
+      setShowDeleteModal(true);
     }
+  };
+
+  // ✅ 삭제 모달 - 예
+  const handleConfirmItemDelete = () => {
+    if (deleteTargetIndex !== null) {
+      performRemove(deleteTargetIndex);
+    }
+    setShowDeleteModal(false);
+    setDeleteTargetIndex(null);
+  };
+
+  // ✅ 삭제 모달 - 계속 작성
+  const handleCancelItemDelete = () => {
+    setShowDeleteModal(false);
+    setDeleteTargetIndex(null);
+  };
+
+  // ✅ 실제 삭제 수행
+  const performRemove = (index: number) => {
     setItems((prev) => {
       const next = [...prev];
       next.splice(index, 1);
@@ -182,6 +229,12 @@ export default function PortfolioDocumentsSection({
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
+  // ✅ 포커스 핸들러 (에러 리셋)
+  const handleAnyFocus = () => {
+    onFocusAny?.();
+  };
+
+
   return (
     <div className="resume-create-page__section resume-create-page__section--portfolio-documents">
       <div className="resume-create-page__section-title resume-create-page__section-title--simple">
@@ -211,6 +264,13 @@ export default function PortfolioDocumentsSection({
               const canMoveUp = items.length > 1 && index > 0;
               const canMoveDown = items.length > 1 && index < items.length - 1;
 
+              // ✅ 현재 아이템의 에러 가져오기
+              const itemErrors = errors[index] || {};
+              const hasFileError = !!itemErrors.file;
+              const hasUrlError = !!itemErrors.url;
+
+              console.log(`🔍 [포트폴리오 아이템 ${index}] errors:`, itemErrors);
+
               return (
                 <div className="portfolio-documents-section__item" key={item.id}>
                   <div className="portfolio-documents__fields">
@@ -226,11 +286,15 @@ export default function PortfolioDocumentsSection({
                         role="radio"
                         aria-checked={item.source === "file"}
                         tabIndex={0}
-                        onClick={() => setSource(index, "file")}
+                        onClick={() => {
+                          setSource(index, "file");
+                          handleAnyFocus();
+                        }}
                         onKeyDown={(e) => {
                           if (e.key === "Enter" || e.key === " ") {
                             e.preventDefault();
                             setSource(index, "file");
+                            handleAnyFocus();
                           }
                         }}
                       >
@@ -253,11 +317,15 @@ export default function PortfolioDocumentsSection({
                         role="radio"
                         aria-checked={item.source === "url"}
                         tabIndex={0}
-                        onClick={() => setSource(index, "url")}
+                        onClick={() => {
+                          setSource(index, "url");
+                          handleAnyFocus();
+                        }}
                         onKeyDown={(e) => {
                           if (e.key === "Enter" || e.key === " ") {
                             e.preventDefault();
                             setSource(index, "url");
+                            handleAnyFocus();
                           }
                         }}
                       >
@@ -291,10 +359,11 @@ export default function PortfolioDocumentsSection({
                           onChange={(e) => onFileChange(index, e)}
                         />
 
-                        <div className="portfolio-documents__file">
+                        {/* ✅ 파일 선택 영역 - 에러 상태 추가 */}
+                        <div className={`portfolio-documents__file`}>
                           <div
-                            className={`portfolio-documents__file-name ${
-                              item.file ? "" : "portfolio-documents__file-name--empty"
+                            className={`portfolio-documents__file-name ${hasFileError ? "error_box" : ""} ${
+                              item.file ? "" : "portfolio-documents__file-name--empty "
                             }`}
                           >
                             <img src={ic_folder_gray900_20} alt="" />
@@ -316,11 +385,15 @@ export default function PortfolioDocumentsSection({
                             className="default_btn_white"
                             role="button"
                             tabIndex={0}
-                            onClick={() => openFilePicker(item.id)}
+                            onClick={() => {
+                              openFilePicker(item.id);
+                              handleAnyFocus();
+                            }}
                             onKeyDown={(e) => {
                               if (e.key === "Enter" || e.key === " ") {
                                 e.preventDefault();
                                 openFilePicker(item.id);
+                                handleAnyFocus();
                               }
                             }}
                           >
@@ -337,13 +410,16 @@ export default function PortfolioDocumentsSection({
                         <label className="portfolio-documents__label small_labe_black-14">
                           URL <em className="error_text_red">*</em>
                         </label>
+
                         <FormInput
                           placeholder="https://"
                           leftIconSrc={ic_link_gray900_20}
-                          inputClassName="portfolio-documents__url-input"
+                          inputClassName={`portfolio-documents__url-input`}
                           id={`portfolio_doc_url_${item.id}`}
+                          invalid={hasUrlError}
                           value={item.url}
                           onChange={(v: any) => changeUrl(index, v)}
+                          onFocus={handleAnyFocus}
                         />
                       </div>
                     )}
@@ -399,10 +475,10 @@ export default function PortfolioDocumentsSection({
                       />
                     </span>
 
-                    {/* 삭제 */}
+                    {/* ✅ 삭제 - handleRemoveClick으로 변경 */}
                     <span
                       className="portfolio-documents__control-btn portfolio-documents__control--remove"
-                      onClick={() => removeItem(index)}
+                      onClick={() => handleRemoveClick(index)}
                       aria-label="삭제"
                       role="button"
                       tabIndex={0}
@@ -439,6 +515,18 @@ export default function PortfolioDocumentsSection({
         cancelClassName="btn_w_full default_btn_white"
         onConfirm={handleConfirmDeleteAll}
         onClose={handleCancelDelete}
+      />
+
+      {/* ✅ 개별 아이템 삭제 모달 */}
+      <Modal
+        open={showDeleteModal}
+        title="입력된 내용을 전부 삭제하시겠습니까?"
+        confirmText="예"
+        confirmClassName="btn_w_full default_btn_black"
+        cancelText="계속 작성"
+        cancelClassName="btn_w_full default_btn_white"
+        onConfirm={handleConfirmItemDelete}
+        onClose={handleCancelItemDelete}
       />
     </div>
   );

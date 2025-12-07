@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import FormField from '@/shared/components/form/FormField';
 import FormInput from '@/shared/components/form/FormInput';
 import DateInline from '@/shared/components/form/DateInline';
+import Modal from '@/shared/components/modal/Modal';
 
 import ic_error_red100_20 from '@/assets/icons/size20/ic_error_red100_20.png';
 import icon_calendar_red_20 from '@/assets/icons/size20/icon_calendar_red_20.png';
@@ -22,8 +23,6 @@ import './EducationSection.css';
 import InlineMonthPicker from '@/shared/components/calendar/InlineMonthPicker';
 import { parseMonth, fmtMonth } from '@/shared/utils/util';
 
-import Modal from '@/shared/components/modal/Modal';
-
 export type Education = {
   school_name?: string;
   major_degree?: string;
@@ -42,6 +41,18 @@ const blankItem = (): Education => ({
   status: '',
 });
 
+const initialItems = (values?: Education[]): Education[] =>
+  values && values.length > 0 ? values : [blankItem()];
+
+// ✅ 아이템이 비어있는지 체크 (필수 입력값만)
+const isItemEmpty = (item: Education): boolean => {
+  return (
+    !item.school_name?.trim() &&
+    !item.startDate?.trim() &&
+    !item.endDate?.trim()
+  );
+};
+
 export default function EducationSection({
   values = [],
   onChange,
@@ -53,16 +64,21 @@ export default function EducationSection({
   onFocusAny?: () => void;
   errors?: EducationErrors[];   // ✅ 배열
 }) {
-  // 항상 최소 1개의 빈 아이템은 화면에 보여 주되,
-  // 실제 form.education 값은 부모에서만 관리
-  const items: Education[] =
-    values && values.length > 0 ? values : [blankItem()];
+  const [items, setItems] = useState<Education[]>(() => initialItems(values));
+
+  // 🔥 status(졸업 여부)를 표시용 gradType과 연결
+  const [gradType, setGradType] = useState<(string | null)[]>(() =>
+    values && values.length > 0
+      ? values.map((v) => v.status ?? null)
+      : [null]
+  );
 
   const [openedSelectIdx, setOpenedSelectIdx] = useState<number | null>(null);
 
-  // 삭제 모달 관련 상태
+  // ✅ 모달 상태
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [pendingRemoveIdx, setPendingRemoveIdx] = useState<number | null>(null);
+  const [deleteTargetIndex, setDeleteTargetIndex] = useState<number | null>(null);
+
 
   const swap = <T,>(arr: T[], i: number, j: number) => {
     const next = arr.slice();
@@ -71,70 +87,88 @@ export default function EducationSection({
   };
 
   const addItem = () => {
-    const next = [blankItem(), ...items];
-    onChange(next);
+    setItems((prev) => {
+      const next = [blankItem(), ...prev];
+      onChange(next);
+      return next;
+    });
+    setGradType((prev) => [null, ...prev]);
   };
 
-  // 실제 삭제 로직 (확인 버튼 눌렀을 때만 호출)
+  // ✅ 삭제 버튼 클릭 핸들러
+  const handleRemoveClick = (idx: number) => {
+    if (items.length <= 1) return; // 1개 남았으면 삭제 불가
+
+    const item = items[idx];
+    const isEmpty = isItemEmpty(item);
+
+    if (isEmpty) {
+      // 입력된 내용이 없으면 즉시 삭제
+      removeItem(idx);
+    } else {
+      // 입력된 내용이 있으면 모달 띄우기
+      setDeleteTargetIndex(idx);
+      setShowDeleteModal(true);
+    }
+  };
+
+  // ✅ 삭제 모달 - 예
+  const handleConfirmDelete = () => {
+    if (deleteTargetIndex !== null) {
+      removeItem(deleteTargetIndex);
+    }
+    setShowDeleteModal(false);
+    setDeleteTargetIndex(null);
+  };
+
+  // ✅ 삭제 모달 - 아니오
+  const handleCancelDelete = () => {
+    setShowDeleteModal(false);
+    setDeleteTargetIndex(null);
+  };
+
+  // ✅ 실제 삭제 함수
   const removeItem = (idx: number) => {
-    const next = items.filter((_, i) => i !== idx);
-    // 값은 그냥 []로 넘기면, 다음 렌더에서 다시 [blankItem()]으로 fallback됨
-    onChange(next);
+    setItems((prev) => {
+      const next =
+        prev.length <= 1
+          ? prev.filter((_, i) => i !== idx)
+          : prev.filter((_, i) => i !== idx);
+      const normalized = next.length === 0 ? [blankItem()] : next;
+      onChange(normalized);
+      return normalized;
+    });
+    setGradType((prev) =>
+      prev.length <= 1 ? prev : prev.filter((_, i) => i !== idx)
+    );
   };
 
   const moveUp = (idx: number) => {
     if (idx <= 0) return;
-    const next = swap(items, idx, idx - 1);
-    onChange(next);
+    setItems((prev) => {
+      const next = swap(prev, idx, idx - 1);
+      onChange(next);
+      return next;
+    });
+    setGradType((prev) => swap(prev, idx, idx - 1));
   };
 
   const moveDown = (idx: number) => {
     if (idx >= items.length - 1) return;
-    const next = swap(items, idx, idx + 1);
-    onChange(next);
+    setItems((prev) => {
+      const next = swap(prev, idx, idx + 1);
+      onChange(next);
+      return next;
+    });
+    setGradType((prev) => swap(prev, idx, idx + 1));
   };
 
   const patchItem = (idx: number, patch: Partial<Education>) => {
-    const next = items.map((it, i) => (i === idx ? { ...it, ...patch } : it));
-    onChange(next);
-  };
-
-  // 삭제 버튼 클릭 시:
-  // - 해당 아이템에 입력된 내용이 하나라도 있으면 모달 띄우기
-  // - 전부 비어 있으면 모달 없이 바로 삭제
-  const handleClickRemove = (idx: number) => {
-    const target = items[idx];
-    const isEmpty =
-      !target?.school_name &&
-      !target?.major_degree &&
-      !target?.startDate &&
-      !target?.endDate &&
-      !target?.status;
-
-    if (isEmpty) {
-      // 그냥 삭제
-      removeItem(idx);
-      return;
-    }
-
-    // 내용이 있으면 확인 모달
-    setPendingRemoveIdx(idx);
-    setShowDeleteModal(true);
-  };
-
-  const handleConfirmDelete = () => {
-    if (pendingRemoveIdx === null) {
-      setShowDeleteModal(false);
-      return;
-    }
-    removeItem(pendingRemoveIdx);
-    setPendingRemoveIdx(null);
-    setShowDeleteModal(false);
-  };
-
-  const handleCancelDelete = () => {
-    setPendingRemoveIdx(null);
-    setShowDeleteModal(false);
+    setItems((prev) => {
+      const next = prev.map((it, i) => (i === idx ? { ...it, ...patch } : it));
+      onChange(next);
+      return next;
+    });
   };
 
   return (
@@ -152,38 +186,39 @@ export default function EducationSection({
             index={idx}
             total={items.length}
             value={it}
-            // 🔥 이 아이템에 해당하는 에러만 전달
-            errors={errors[idx]}
-            gradLabel={it.status ?? null}
+            errors={errors[idx]}  // ✅ 배열의 idx번째 에러 전달
+            gradLabel={gradType[idx]}
             selectOpen={openedSelectIdx === idx}
             onToggleSelect={() =>
               setOpenedSelectIdx((o) => (o === idx ? null : idx))
             }
             onSelectGrad={(label) => {
-              // status 필드에 직접 라벨 저장
-              patchItem(idx, { status: label });
+              // 🔥 1) 드롭다운 표시용 상태 업데이트
+              setGradType((prev) =>
+                prev.map((v, i) => (i === idx ? label : v))
+              );
               setOpenedSelectIdx(null);
+
+              // 🔥 2) 실제 Education.status 필드 업데이트
+              patchItem(idx, { status: label });
             }}
             onChange={(patch) => patchItem(idx, patch)}
             onMoveUp={() => moveUp(idx)}
             onMoveDown={() => moveDown(idx)}
-            onRemove={() => handleClickRemove(idx)}
+            onRemove={() => handleRemoveClick(idx)}
             onFocusAny={onFocusAny}
           />
         ))}
 
-        <span
-          className="default_btn_white"
-          role="button"
-          tabIndex={0}
-          onClick={addItem}
-        >
+        <span className="default_btn_white" role="button" tabIndex={0} onClick={addItem}>
           <img src={ic_add_btn_gray900_20} alt="" />
           추가
         </span>
       </div>
 
+      {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
       {/* 삭제 확인 모달 */}
+      {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
       <Modal
         open={showDeleteModal}
         title="입력된 내용을 전부 삭제하시겠습니까?"
@@ -270,6 +305,7 @@ function EducationItem({
   const canRemove = total > 1;
 
   const hasStatusError = !!errors?.status;
+
 
   return (
     <div className="education-section__item">
@@ -402,7 +438,9 @@ function EducationItem({
               className={[
                 'ui-select',
                 hasStatusError ? 'error' : '',
-              ].join(' ').trim()}
+              ]
+                .join(' ')
+                .trim()}
               onClick={(e) => {
                 e.stopPropagation();
                 onToggleSelect();

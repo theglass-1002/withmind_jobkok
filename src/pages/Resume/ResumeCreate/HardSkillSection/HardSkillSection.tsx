@@ -39,7 +39,6 @@ export default function HardSkillSection({ onChange }: HardSkillSectionProps) {
   // 선택된 하드 스킬 콘솔로그 + 부모로 전달
   useEffect(() => {
     const skills = Array.from(selected).map((key) => key.split('|')[1]);
-    console.log('🎯 선택된 하드 스킬:', skills);
     onChange?.(skills);
     // onChange는 렌더마다 새로 만들어질 수 있어도 selected가 바뀔 때만 실행되면 되므로 의존성에서 제외
     // eslint-disable-next-line react-hooks/exhaustive-deps

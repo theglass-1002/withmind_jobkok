@@ -57,7 +57,7 @@ type FormState = {
   basic: BasicInfo;
   location: LocationValue;
   careers: CareerInfo[];
-  isFreshGraduate: boolean; // ✅ 신입 상태 추가
+  isFreshGraduate: boolean;
   education: Education[];
   photoFile?: File | null;
   desiredRoles: string[];
@@ -67,6 +67,26 @@ type FormState = {
   awardCerts: AwardsCertItem[];
   portfolios: PortfolioDocItem[];
   selfIntro: string;
+};
+
+// ✅ 활동 에러 타입 추가
+export type ActivityErrors = {
+  activityType?: string;
+  activityName?: string;
+  startDate?: string;
+  endDate?: string;
+};
+
+// ✅ 수상·자격증 에러 타입 추가
+export type AwardsCertErrors = {
+  kind?: string;
+  title?: string;
+};
+
+// ✅ 포트폴리오 에러 타입 추가
+export type PortfolioErrors = {
+  file?: string;
+  url?: string;
 };
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -84,7 +104,7 @@ const initial: FormState = {
   },
   location: { nationwide: false, selectedCodes: [] },
   careers: [],
-  isFreshGraduate: false, // ✅ 신입 초기값
+  isFreshGraduate: false,
   education: [],
   photoFile: null,
   desiredRoles: [],
@@ -122,10 +142,17 @@ export default function ResumeCreate() {
     title?: string;
     location?: string;
     careers?: CareerErrors[];
-    education?: EducationErrors[]; 
+    education?: EducationErrors[];
+    desiredRoles?: string;
+    activities?: ActivityErrors[];
+    awardCerts?: AwardsCertErrors[];
+    portfolios?: PortfolioErrors[]; // ✅ 포트폴리오 에러 추가
   }>({
     basic: {},
     education: [],
+    activities: [],
+    awardCerts: [],
+    portfolios: [], // ✅ 빈 배열로 초기화
   });
   const [isDefaultResume, setIsDefaultResume] = useState(false);
   const [sidebarStatus, setSidebarStatus] =
@@ -164,19 +191,10 @@ export default function ResumeCreate() {
   // 학력 검증 헬퍼
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   const buildEducationErrors = (educations: Education[]): EducationErrors[] => {
-    return educations.map((e) => {
+    return educations.map((e, idx) => {
       const ee: EducationErrors = {};
 
-      const isEmptyRow =
-        !e.school_name &&
-        !e.major_degree &&
-        !e.startDate &&
-        !e.endDate &&
-        !e.status;
-
-      // 완전 빈 행은 에러 없이 통과
-      if (isEmptyRow) return ee;
-
+      // ✅ 필수값 검증
       if (!e.school_name?.trim()) {
         ee.school_name = "required";
       }
@@ -195,6 +213,88 @@ export default function ResumeCreate() {
   };
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // ✅ 활동 검증 헬퍼
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  const buildActivityErrors = (activities: ActivityItem[]): ActivityErrors[] => {
+    console.log("🔍 [buildActivityErrors 시작]", activities);
+    
+    return activities.map((act, idx) => {
+      const ae: ActivityErrors = {};
+
+      console.log(`📋 [활동 ${idx}]`, act);
+
+      // ✅ 필수값 검증
+      if (!act.activityType) {
+        ae.activityType = "required";
+      }
+      if (!act.activityName?.trim()) {
+        ae.activityName = "required";
+      }
+      if (!act.startDate?.trim()) {
+        ae.startDate = "required";
+      }
+      if (!act.endDate?.trim()) {
+        ae.endDate = "required";
+      }
+
+      console.log(`🔍 [활동 ${idx}] 에러:`, ae);
+      return ae;
+    });
+  };
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // ✅ 수상·자격증 검증 헬퍼
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  const buildAwardCertErrors = (awardCerts: AwardsCertItem[]): AwardsCertErrors[] => {
+    console.log("🔍 [buildAwardCertErrors 시작]", awardCerts);
+    
+    return awardCerts.map((item, idx) => {
+      const ace: AwardsCertErrors = {};
+
+      console.log(`📋 [수상·자격증 ${idx}]`, item);
+
+      // ✅ 필수값 검증
+      if (!item.kind) {
+        ace.kind = "required";
+      }
+      if (!item.title?.trim()) {
+        ace.title = "required";
+      }
+
+      console.log(`🔍 [수상·자격증 ${idx}] 에러:`, ace);
+      return ace;
+    });
+  };
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // ✅ 포트폴리오 검증 헬퍼
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  const buildPortfolioErrors = (portfolios: PortfolioDocItem[]): PortfolioErrors[] => {
+    console.log("🔍 [buildPortfolioErrors 시작]", portfolios);
+    
+    return portfolios.map((item, idx) => {
+      const pe: PortfolioErrors = {};
+
+      console.log(`📋 [포트폴리오 ${idx}]`, item);
+
+      // ✅ 필수값 검증
+      if (item.source === "file") {
+        if (!item.file) {
+          pe.file = "required";
+        }
+      } else {
+        // source === "url"
+        if (!item.url?.trim()) {
+          pe.url = "required";
+        }
+      }
+
+      console.log(`🔍 [포트폴리오 ${idx}] 에러:`, pe);
+      return pe;
+    });
+  };
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // Update 함수들
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   const updateBasic = (patch: Partial<BasicInfo>) =>
@@ -207,7 +307,6 @@ export default function ResumeCreate() {
         ...patch,
       };
 
-      // 위치가 유효하게 선택되면 location 에러 제거
       if (nextLocation.nationwide || nextLocation.selectedCodes.length > 0) {
         setErrors((prevErr) => ({
           ...prevErr,
@@ -218,15 +317,14 @@ export default function ResumeCreate() {
       return { ...prev, location: nextLocation };
     });
 
-  // ✅ 경력과 신입 상태를 함께 업데이트
   const updateCareers = (newList: CareerInfo[], isFresh: boolean) => {
     setForm((prev) => ({
       ...prev,
       careers: newList,
-      isFreshGraduate: isFresh, // ✅ 신입 상태 업데이트
+      isFreshGraduate: isFresh,
     }));
 
-    // 기존에 경력 에러가 있었다면, 입력 변화에 맞춰 다시 계산
+    // ✅ 경력 입력 중에는 에러 재계산하여 빨간 테두리 제거
     setErrors((prev) => {
       if (!prev.careers) return prev;
       const nextCareerErrors = buildCareerErrors(newList);
@@ -237,13 +335,18 @@ export default function ResumeCreate() {
     });
   };
 
-  // ✅ 학력 변경 시 에러 다시 계산 (빨간 테두리 해제용)
+  // ✅ 학력 변경 시 에러 다시 계산
   const updateEducation = (newList: Education[]) => {
     setForm((prev) => ({ ...prev, education: newList }));
 
+    // ✅ 학력 입력 중에는 에러 재계산하여 빨간 테두리 제거
     setErrors((prev) => {
-      if (!prev.education) return prev; // 아직 검증 전이면 패스
+      if (!prev.education || prev.education.length === 0) {
+        return prev;
+      }
+      
       const nextEduErrors = buildEducationErrors(newList);
+      
       return {
         ...prev,
         education: nextEduErrors,
@@ -254,8 +357,14 @@ export default function ResumeCreate() {
   const updatePhotoFile = (file: File | null) =>
     setForm((prev) => ({ ...prev, photoFile: file }));
 
-  const updateDesiredRoles = (roles: string[]) =>
+  const updateDesiredRoles = (roles: string[]) => {
     setForm((prev) => ({ ...prev, desiredRoles: roles }));
+    
+    // ✅ 희망직무 선택 시 에러 제거
+    if (roles.length > 0) {
+      setErrors((prev) => ({ ...prev, desiredRoles: undefined }));
+    }
+  };
 
   const updateHardSkills = (skills: string[]) =>
     setForm((prev) => ({ ...prev, hardSkills: skills }));
@@ -263,22 +372,88 @@ export default function ResumeCreate() {
   const updateSoftSkills = (skills: string[]) =>
     setForm((prev) => ({ ...prev, softSkills: skills }));
 
-  const updateActivities = (activities: ActivityItem[]) =>
+  // ✅ 활동 변경 시 에러 다시 계산
+  const updateActivities = (activities: ActivityItem[]) => {
     setForm((prev) => ({ ...prev, activities }));
 
-  const updateAwardCerts = (list: AwardsCertItem[]) =>
+    setErrors((prev) => {
+      if (!prev.activities || prev.activities.length === 0) {
+        return prev;
+      }
+      
+      const nextActivityErrors = buildActivityErrors(activities);
+      console.log("🔄 [활동 재계산된 에러]", nextActivityErrors);
+      
+      return {
+        ...prev,
+        activities: nextActivityErrors,
+      };
+    });
+  };
+
+  // ✅ 수상·자격증 변경 시 에러 다시 계산
+  const updateAwardCerts = (list: AwardsCertItem[]) => {
     setForm((prev) => ({ ...prev, awardCerts: list }));
 
-  const updatePortfolios = (list: PortfolioDocItem[]) =>
+    // ✅ 수상·자격증 입력 중에는 에러 재계산하여 빨간 테두리 제거
+    setErrors((prev) => {
+      if (!prev.awardCerts || prev.awardCerts.length === 0) {
+        return prev;
+      }
+      
+      const nextAwardCertErrors = buildAwardCertErrors(list);
+      console.log("🔄 [수상·자격증 재계산된 에러]", nextAwardCertErrors);
+      
+      return {
+        ...prev,
+        awardCerts: nextAwardCertErrors,
+      };
+    });
+  };
+
+
+  const updatePortfolios = (list: PortfolioDocItem[]) => {
     setForm((prev) => ({ ...prev, portfolios: list }));
+    setErrors((prev) => {
+    
+      
+      if (!prev.portfolios || prev.portfolios.length === 0) {
+        return prev;
+      }
+      
+      const nextPortfolioErrors = buildPortfolioErrors(list);
+      console.log("🔄 [포트폴리오 재계산된 에러]", nextPortfolioErrors);
+      
+      return {
+        ...prev,
+        portfolios: nextPortfolioErrors,
+      };
+    });
+  };
 
   const updateSelfIntro = (content: string) =>
     setForm((prev) => ({ ...prev, selfIntro: content }));
 
   const resetBasicErrors = () => setErrors((prev) => ({ ...prev, basic: {} }));
 
+  // ✅ 학력 에러만 리셋
   const resetEducationErrors = () =>
     setErrors((prev) => ({ ...prev, education: [] }));
+
+  // ✅ 활동 에러만 리셋
+  const resetActivityErrors = () =>
+    setErrors((prev) => ({ ...prev, activities: [] }));
+
+  // ✅ 수상·자격증 에러만 리셋
+  const resetAwardCertErrors = () =>
+    setErrors((prev) => ({ ...prev, awardCerts: [] }));
+
+  // ✅ 포트폴리오 에러만 리셋
+  const resetPortfolioErrors = () => {
+    console.log("🔄 [resetPortfolioErrors 호출]");
+    setErrors((prev) => ({ ...prev, portfolios: [] }));
+  };
+
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // 파일 업로드 함수
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -297,7 +472,6 @@ export default function ResumeCreate() {
         contentType: form.photoFile.type,
       };
 
-      console.log("📋 프로필 사진 메타데이터:", profilePhotoFile);
       return profilePhotoFile;
     } catch (error) {
       console.error("❌ 업로드 실패:", error);
@@ -372,6 +546,9 @@ export default function ResumeCreate() {
     const nextErr: typeof errors = {
       basic: {} as BasicErrors,
       education: [],
+      activities: [],
+      awardCerts: [],
+      portfolios: [], // ✅ 빈 배열로 시작
     };
 
     // 1) 이력서 제목
@@ -379,7 +556,7 @@ export default function ResumeCreate() {
       nextErr.title = "여기 이력서 제목을 입력해 주세요.";
     }
 
-    // 2) 희망 근무 지역 (최소 1개 이상 필수)
+    // 2) 희망 근무 지역
     if (!form.location.nationwide && form.location.selectedCodes.length === 0) {
       nextErr.location = "1개 이상 추가해 주세요.";
     }
@@ -409,9 +586,48 @@ export default function ResumeCreate() {
       nextErr.careers = careerErrs;
     }
 
-    // 5) 학력 필수값 검증
-    const eduErrs = buildEducationErrors(form.education);
+    // 5) 학력 필수값 검증 (✅ 항상 실행)
+    const educationsToValidate = form.education.length > 0 
+      ? form.education 
+      : [{
+          school_name: '',
+          major_degree: '',
+          startDate: '',
+          endDate: '',
+          status: '',
+        }];
+    
+    const eduErrs = buildEducationErrors(educationsToValidate);
     nextErr.education = eduErrs;
+
+    // 6) 희망직무 필수값 검증 (✅ 최소 1개 이상)
+    if (form.desiredRoles.length === 0) {
+      nextErr.desiredRoles = "1개 이상 추가해 주세요.";
+    }
+
+    // 7) 활동·경험 필수값 검증 (✅ 활동이 있을 때만)
+    if (form.activities.length > 0) {
+      const activityErrs = buildActivityErrors(form.activities);
+      nextErr.activities = activityErrs;
+      console.log("🔍 [활동 데이터]", form.activities);
+      console.log("🔍 [활동 에러]", activityErrs);
+    }
+
+    // 8) 수상·자격증 필수값 검증 (✅ 수상·자격증이 있을 때만)
+    if (form.awardCerts.length > 0) {
+      const awardCertErrs = buildAwardCertErrors(form.awardCerts);
+      nextErr.awardCerts = awardCertErrs;
+      console.log("🔍 [수상·자격증 데이터]", form.awardCerts);
+      console.log("🔍 [수상·자격증 에러]", awardCertErrs);
+    }
+
+    // 9) 포트폴리오 필수값 검증 (✅ 포트폴리오가 있을 때만)
+    if (form.portfolios.length > 0) {
+      const portfolioErrs = buildPortfolioErrors(form.portfolios);
+      nextErr.portfolios = portfolioErrs;
+      console.log("🔍 [포트폴리오 데이터]", form.portfolios);
+      console.log("🔍 [포트폴리오 에러]", portfolioErrs);
+    }
 
     setErrors(nextErr);
 
@@ -422,16 +638,59 @@ export default function ResumeCreate() {
       !form.isFreshGraduate &&
       nextErr.careers &&
       nextErr.careers.some((ce) => Object.keys(ce).length > 0);
-    const hasEduError =
-      nextErr.education &&
-      nextErr.education.some((ee) => Object.keys(ee).length > 0);
+    
+    const hasEduError = eduErrs.some((ee) => Object.keys(ee).length > 0);
+    const hasDesiredRolesError = !!nextErr.desiredRoles;
+    
+    // ✅ 활동 에러 검증
+    const hasActivityError =
+      form.activities.length > 0 &&
+      nextErr.activities &&
+      nextErr.activities.some((ae) => Object.keys(ae).length > 0);
 
-    return !hasTitleError && !hasLocationError && !hasBasicError && !hasCareerError && !hasEduError;
+    // ✅ 수상·자격증 에러 검증
+    const hasAwardCertError =
+      form.awardCerts.length > 0 &&
+      nextErr.awardCerts &&
+      nextErr.awardCerts.some((ace) => Object.keys(ace).length > 0);
+
+    // ✅ 포트폴리오 에러 검증
+    const hasPortfolioError =
+      form.portfolios.length > 0 &&
+      nextErr.portfolios &&
+      nextErr.portfolios.some((pe) => Object.keys(pe).length > 0);
+
+    console.log("🔍 [검증 결과]", {
+      hasTitleError,
+      hasLocationError,
+      hasBasicError,
+      hasCareerError,
+      hasEduError,
+      hasDesiredRolesError,
+      hasActivityError,
+      hasAwardCertError,
+      hasPortfolioError, // ✅ 추가
+      activityErrsDetail: nextErr.activities,
+      awardCertErrsDetail: nextErr.awardCerts,
+      portfolioErrsDetail: nextErr.portfolios,
+    });
+
+    return (
+      !hasTitleError &&
+      !hasLocationError &&
+      !hasBasicError &&
+      !hasCareerError &&
+      !hasEduError &&
+      !hasDesiredRolesError &&
+      !hasActivityError &&
+      !hasAwardCertError &&
+      !hasPortfolioError // ✅ 추가
+    );
   };
 
   const handleSubmit = async () => {
     try {
-      // ✅ 검증 먼저 수행
+      
       const ok = validate();
       if (!ok) {
         toast.error("필수 항목을 먼저 입력해 주세요.");
@@ -439,15 +698,12 @@ export default function ResumeCreate() {
       }
 
       console.log("📦 이력서 데이터 준비 중...");
-      console.log("✏️ 자기소개:", form.selfIntro);
-      console.log("👔 신입 여부:", form.isFreshGraduate);
 
       // 1) 프로필 사진 업로드
       const profilePhotoFile = await handleFileSubmit();
 
       // 2) 포트폴리오 파일 업로드
       const portfolioFilesResults = await handlePortfolioFilesSubmit();
-      console.log("📁 업로드된 포트폴리오 파일들:", portfolioFilesResults);
 
       // 3) payload 생성
       const payload: CreateResumeRequest = {
@@ -465,9 +721,8 @@ export default function ResumeCreate() {
 
         regions: form.location.nationwide ? [] : form.location.selectedCodes,
 
-        // ✅ 신입이 아닐 때만 careers 키 추가
         ...(form.isFreshGraduate
-          ? {} // 신입이면 careers 키 자체를 제외
+          ? {}
           : {
               careers: form.careers.map((career) => ({
                 employmentType: career.employmentType || "정규직",
@@ -489,12 +744,10 @@ export default function ResumeCreate() {
           graduatedYn: mapEducationStatusToGraduatedYn(edu.status),
         })),
 
-        // 필수 값들은 항상 포함
         jobs: form.desiredRoles,
         hardSkills: form.hardSkills,
         softSkills: form.softSkills,
 
-        // 활동: 값이 있을 때만 key 추가
         ...(form.activities.length > 0
           ? {
               activities: form.activities.map((act) => ({
@@ -510,7 +763,6 @@ export default function ResumeCreate() {
             }
           : {}),
 
-        // 수상·자격증: 값이 있을 때만 key 추가
         ...(form.awardCerts.length > 0
           ? {
               awardCerts: form.awardCerts.map((item) => ({
@@ -526,7 +778,6 @@ export default function ResumeCreate() {
             }
           : {}),
 
-        // 포트폴리오: 값이 있을 때만 key 추가
         ...(form.portfolios.length > 0
           ? {
               portfolios: form.portfolios.map((p, idx) => {
@@ -572,7 +823,6 @@ export default function ResumeCreate() {
             }
           : {}),
 
-        // 자기소개: 내용이 있을 때만 key 추가
         ...(form.selfIntro.trim().length > 0
           ? {
               selfIntros: [
@@ -587,18 +837,14 @@ export default function ResumeCreate() {
       };
 
       console.log("📤 전송할 데이터:", payload);
-      console.log("📍 regions:", payload.regions);
-      console.log("👔 careers:", payload.careers); // ✅ 신입이면 undefined
 
-      // const result = await createResume(payload);
-      // console.log("✅ 이력서 등록 성공:", result);
+      const result = await createResume(payload);
+      console.log("✅ 이력서 등록 성공:", result);
       toast.success("이력서가 등록되었습니다!");
     } catch (error) {
       console.error("❌ 이력서 등록 실패:", error);
       toast.error("이력서 등록 중 오류가 발생했습니다.");
     }
-
-    console.log("✅ ===== 이력서 등록 완료 =====");
   };
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -614,9 +860,7 @@ export default function ResumeCreate() {
             임시저장
           </span>
           <span
-            className={`default_btn_black ${
-              isSubmitDisabled ? "disabled" : ""
-            }`}
+            className={`default_btn_black ${isSubmitDisabled ? "disabled" : ""}`}
             onClick={handleSubmit}
             aria-disabled={isSubmitDisabled}
           >
@@ -631,9 +875,7 @@ export default function ResumeCreate() {
           <div className="resume-create-page__section resume-create-page__section--title">
             <div className="resume-create-page__field">
               <input
-                className={`resume-create-page__label ${
-                  errors.title ? "error" : ""
-                }`}
+                className={`resume-create-page__label ${errors.title ? "error" : ""}`}
                 type="text"
                 value={form.title}
                 onChange={(e) =>
@@ -652,9 +894,7 @@ export default function ResumeCreate() {
                 }}
               />
               {errors.title && (
-                <span className="resume-create-page__error">
-                  {errors.title}
-                </span>
+                <span className="resume-create-page__error">{errors.title}</span>
               )}
             </div>
             <div className="resume-create-page__assist">
@@ -682,11 +922,10 @@ export default function ResumeCreate() {
             error={errors.location}
           />
 
-          {/*  신입 상태도 함께 전달 */}
           <CareerSection
             value={form.careers}
             isFreshGraduate={form.isFreshGraduate}
-            onChange={updateCareers} // (careers, isFresh) => void
+            onChange={updateCareers}
             errors={errors.careers}
             onClearErrors={() =>
               setErrors((prev) => ({ ...prev, careers: undefined }))
@@ -694,16 +933,16 @@ export default function ResumeCreate() {
           />
 
           <EducationSection
-              values={form.education}
-              errors={errors.education ?? []}   // 🔥 에러 배열 전달
-              onChange={updateEducation}
-              onFocusAny={resetEducationErrors} // 🔥 학력 에러만 리셋
-   
+            values={form.education}
+            errors={errors.education ?? []}
+            onChange={updateEducation}
+            onFocusAny={resetEducationErrors}
           />
 
           <DesiredRoleSection
             value={form.desiredRoles}
             onChange={updateDesiredRoles}
+            error={errors.desiredRoles}
           />
 
           <HardSkillSection onChange={updateHardSkills} />
@@ -713,16 +952,23 @@ export default function ResumeCreate() {
           <ActivitiesSection
             value={form.activities}
             onChange={updateActivities}
+            errors={errors.activities ?? []}
+            onFocusAny={resetActivityErrors}
           />
 
           <AwardsCertificationsSection
             value={form.awardCerts}
             onChange={updateAwardCerts}
+            errors={errors.awardCerts ?? []}
+            onFocusAny={resetAwardCertErrors}
           />
 
+      
           <PortfolioDocumentsSection
             value={form.portfolios}
             onChange={updatePortfolios}
+            errors={errors.portfolios ?? []}
+            onFocusAny={resetPortfolioErrors} 
           />
 
           <SelfIntroductionSection

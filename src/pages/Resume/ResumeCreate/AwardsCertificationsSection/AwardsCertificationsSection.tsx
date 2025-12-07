@@ -29,6 +29,12 @@ export type AwardsCertItem = {
   issuer?: string;
 };
 
+// ✅ 수상·자격증 에러 타입 export
+export type AwardsCertErrors = {
+  kind?: string;
+  title?: string;
+};
+
 const makeId = () => Math.random().toString(36).slice(2, 10);
 const blankItem = (): AwardsCertItem => ({
   id: makeId(),
@@ -39,15 +45,24 @@ const blankItem = (): AwardsCertItem => ({
   issuer: "",
 });
 
+// ✅ 아이템이 비어있는지 체크 (필수값만)
+const isItemEmpty = (item: AwardsCertItem): boolean => {
+  return !item.kind && !item.title.trim();
+};
+
 // 🔥 상위와 연동을 위한 props
 interface AwardsCertificationsSectionProps {
   value?: AwardsCertItem[];
   onChange?: (items: AwardsCertItem[]) => void;
+  errors?: AwardsCertErrors[]; // ✅ 에러 배열 추가
+  onFocusAny?: () => void; // ✅ 포커스 시 에러 리셋
 }
 
 export default function AwardsCertificationsSection({
   value = [],
   onChange,
+  errors = [], // ✅ 기본값 빈 배열
+  onFocusAny,
 }: AwardsCertificationsSectionProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [items, setItems] = useState<AwardsCertItem[]>(
@@ -56,6 +71,8 @@ export default function AwardsCertificationsSection({
   const [openDropdownIndex, setOpenDropdownIndex] = useState<number | null>(null);
   const [openDateIdx, setOpenDateIdx] = useState<number | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false); // ✅ 개별 삭제 모달
+  const [deleteTargetIndex, setDeleteTargetIndex] = useState<number | null>(null); // ✅ 삭제 대상 인덱스
 
   // 드롭다운/달력 바깥 클릭 감지용 refs
   const selectRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -94,12 +111,38 @@ export default function AwardsCertificationsSection({
   // 새 아이템을 "위"에 추가 (최근 추가 항목 상단)
   const addItem = () => setItems(prev => [blankItem(), ...prev]);
 
-  // 쓰레기통: 아이템 1개면 모달, 2개 이상이면 바로 삭제
-  const removeItem = (index: number) => {
-    if (items.length === 1) {
-      setShowConfirm(true);
-      return;
+  // ✅ 삭제 버튼 클릭 핸들러
+  const handleRemoveClick = (index: number) => {
+    const item = items[index];
+    const isEmpty = isItemEmpty(item);
+
+    if (isEmpty) {
+      // 입력된 내용이 없으면 즉시 삭제
+      performRemove(index);
+    } else {
+      // 입력된 내용이 있으면 모달 띄우기
+      setDeleteTargetIndex(index);
+      setShowDeleteModal(true);
     }
+  };
+
+  // ✅ 삭제 모달 - 예
+  const handleConfirmItemDelete = () => {
+    if (deleteTargetIndex !== null) {
+      performRemove(deleteTargetIndex);
+    }
+    setShowDeleteModal(false);
+    setDeleteTargetIndex(null);
+  };
+
+  // ✅ 삭제 모달 - 계속 작성
+  const handleCancelItemDelete = () => {
+    setShowDeleteModal(false);
+    setDeleteTargetIndex(null);
+  };
+
+  // ✅ 실제 삭제 수행
+  const performRemove = (index: number) => {
     setItems(prev => {
       const next = [...prev];
       next.splice(index, 1);
@@ -185,6 +228,12 @@ export default function AwardsCertificationsSection({
     return y > now.getFullYear() || (y === now.getFullYear() && m > now.getMonth());
   };
 
+  // ✅ 포커스 핸들러 (에러 리셋)
+  const handleAnyFocus = () => {
+    onFocusAny?.();
+  };
+
+
   return (
     <div className="resume-create-page__section resume-create-page__section--awards-certifications">
       <div className="resume-create-page__section-title resume-create-page__section-title--simple">
@@ -214,6 +263,13 @@ export default function AwardsCertificationsSection({
               const canMoveUp = items.length > 1 && index > 0;
               const canMoveDown = items.length > 1 && index < items.length - 1;
 
+              // ✅ 현재 아이템의 에러 가져오기
+              const itemErrors = errors[index] || {};
+              const hasKindError = !!itemErrors.kind;
+              const hasTitleError = !!itemErrors.title;
+
+              console.log(`🔍 [수상·자격증 아이템 ${index}] errors:`, itemErrors);
+
               return (
                 <div className="awards-certifications-section__item" key={item.id}>
                   <div className="awards-certifications-section__fields">
@@ -224,22 +280,24 @@ export default function AwardsCertificationsSection({
                           수상ㆍ자격증명 <em className="error_text_red">*</em>
                         </label>
 
-                        {/* 🔻 드롭다운: 자격증 / 어학시험 / 수상 / 기타 */}
+                        {/* 🔻 드롭다운: 자격증 / 어학시험 / 수상 / 기타 - ✅ 에러 상태 추가 */}
                         <div
-                          className="ui-select"
+                          className={`ui-select ${hasKindError ? "error" : ""}`}
                           ref={el => {
                             selectRefs.current[index] = el;
                           }}
                           role="combobox"
                           aria-expanded={openDropdownIndex === index}
                           tabIndex={0}
-                          onClick={() =>
-                            setOpenDropdownIndex(cur => (cur === index ? null : index))
-                          }
+                          onClick={() => {
+                            setOpenDropdownIndex(cur => (cur === index ? null : index));
+                            handleAnyFocus();
+                          }}
                           onKeyDown={e => {
                             if (e.key === "Enter" || e.key === " ") {
                               e.preventDefault();
                               setOpenDropdownIndex(cur => (cur === index ? null : index));
+                              handleAnyFocus();
                             }
                             if (e.key === "Escape") setOpenDropdownIndex(null);
                           }}
@@ -299,14 +357,14 @@ export default function AwardsCertificationsSection({
                           )}
                         </div>
                       </div>
-
-                      {/* 제목 입력 */}
                       <FormInput
                         placeholder="수상ㆍ자격증명을 입력해 주세요."
-                        inputClassName="awards-certifications_name"
+                        inputClassName={`awards-certifications_name ${hasTitleError ? "error" : ""}`}
+                        invalid={hasTitleError}
                         id={`awards-certifications_name_${item.id}`}
                         value={item.title}
                         onChange={(v: any) => changeTitle(index, v)}
+                        onFocus={handleAnyFocus}
                       />
                     </div>
 
@@ -328,7 +386,10 @@ export default function AwardsCertificationsSection({
                             id={`awards-certifications_${index}`}
                             iconSrc={ic_calendar_gray900_20}
                             value={item.dateValue || "YYYY.MM"}
-                            onClick={() => setOpenDateIdx(index)}
+                            onClick={() => {
+                              setOpenDateIdx(index);
+                              handleAnyFocus();
+                            }}
                             invalid={false}
                             isOpen={openDateIdx === index}
                           />
@@ -363,6 +424,7 @@ export default function AwardsCertificationsSection({
                             const val = typeof v === "string" ? v : v?.target?.value ?? "";
                             patch(index, { score: val });
                           }}
+                          onFocus={handleAnyFocus}
                         />
 
                         {/* 발행처 */}
@@ -375,6 +437,7 @@ export default function AwardsCertificationsSection({
                             const val = typeof v === "string" ? v : v?.target?.value ?? "";
                             patch(index, { issuer: val });
                           }}
+                          onFocus={handleAnyFocus}
                         />
                       </div>
                     </div>
@@ -422,10 +485,10 @@ export default function AwardsCertificationsSection({
                       />
                     </span>
 
-                    {/* 삭제 */}
+                    {/* ✅ 삭제 - handleRemoveClick으로 변경 */}
                     <span
                       className="awards-certifications-section__control_btn awards-certifications-section__control--remove"
-                      onClick={() => removeItem(index)}
+                      onClick={() => handleRemoveClick(index)}
                       aria-label="삭제"
                       role="button"
                       tabIndex={0}
@@ -457,6 +520,17 @@ export default function AwardsCertificationsSection({
         cancelClassName="btn_w_full default_btn_white"
         onConfirm={handleConfirmDeleteAll}
         onClose={handleCancelDelete}
+      />
+
+      <Modal
+        open={showDeleteModal}
+        title="입력된 내용을 전부 삭제하시겠습니까?"
+        confirmText="예"
+        confirmClassName="btn_w_full default_btn_black"
+        cancelText="계속 작성"
+        cancelClassName="btn_w_full default_btn_white"
+        onConfirm={handleConfirmItemDelete}
+        onClose={handleCancelItemDelete}
       />
     </div>
   );

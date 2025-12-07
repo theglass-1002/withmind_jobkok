@@ -32,20 +32,48 @@ export type Activity = {
   summary?: string;
 };
 
+// ✅ 활동 에러 타입 export
+export type ActivityErrors = {
+  activityType?: string;
+  activityName?: string;
+  startDate?: string;
+  endDate?: string;
+};
+
 // 내부에서 Activity 그대로 사용
 type ActivityItem = Activity;
 
 const makeId = () => Math.random().toString(36).slice(2, 10);
 
+// ✅ 아이템이 비어있는지 체크
+const isItemEmpty = (item: ActivityItem): boolean => {
+  return (
+    !item.activityType &&
+    !item.activityName.trim() &&
+    !item.startDate &&
+    !item.endDate &&
+    !item.summary?.trim()
+  );
+};
+
 // 부모와 연동을 위한 props
 interface ActivitiesSectionProps {
-  value?: Activity[];                         // 상위 폼에서 내려주는 초기값 (없으면 [])
-  onChange?: (activities: Activity[]) => void; // 변경 시 상위로 올려주는 콜백
+  value?: Activity[];
+  onChange?: (activities: Activity[]) => void;
+  errors?: ActivityErrors[]; // ✅ 에러 배열 추가
+  onFocusAny?: () => void; // ✅ 포커스 시 에러 리셋
 }
 
-export default function ActivitiesSection({ value = [], onChange }: ActivitiesSectionProps) {
+export default function ActivitiesSection({ 
+  value = [], 
+  onChange, 
+  errors = [], // ✅ 기본값 빈 배열
+  onFocusAny 
+}: ActivitiesSectionProps) {
   const MAX_SUMMARY = 2000;
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteTargetIndex, setDeleteTargetIndex] = useState<number | null>(null);
   const [isAdding, setIsAdding] = useState(false);
 
   // 초기값만 value에서 가져오고 이후엔 로컬 상태로 관리
@@ -109,13 +137,36 @@ export default function ActivitiesSection({ value = [], onChange }: ActivitiesSe
     setEditingIndex((cur) => (cur === null ? null : cur + 1));
   };
 
-  // 아이템 1개일 때는 모달만 띄우고, 2개 이상이면 바로 삭제
-  const removeItem = (index: number) => {
-    if (items.length === 1) {
-      setShowConfirm(true);
-      return;
-    }
+  // ✅ 삭제 버튼 클릭 핸들러
+  const handleRemoveClick = (index: number) => {
+    const item = items[index];
+    const isEmpty = isItemEmpty(item);
 
+    if (isEmpty) {
+      performRemove(index);
+    } else {
+      setDeleteTargetIndex(index);
+      setShowDeleteModal(true);
+    }
+  };
+
+  // ✅ 삭제 모달 - 예
+  const handleConfirmItemDelete = () => {
+    if (deleteTargetIndex !== null) {
+      performRemove(deleteTargetIndex);
+    }
+    setShowDeleteModal(false);
+    setDeleteTargetIndex(null);
+  };
+
+  // ✅ 삭제 모달 - 계속 작성
+  const handleCancelItemDelete = () => {
+    setShowDeleteModal(false);
+    setDeleteTargetIndex(null);
+  };
+
+  // ✅ 실제 삭제 수행
+  const performRemove = (index: number) => {
     setItems((prev) => {
       const next = [...prev];
       next.splice(index, 1);
@@ -234,6 +285,12 @@ export default function ActivitiesSection({ value = [], onChange }: ActivitiesSe
     };
   };
 
+  // ✅ 포커스 핸들러 (에러 리셋)
+  const handleAnyFocus = () => {
+    onFocusAny?.();
+  };
+
+
   return (
     <div className="resume-create-page__section resume-create-page__section--activities">
       <div className="resume-create-page__section-title resume-create-page__section-title--simple">
@@ -269,6 +326,15 @@ export default function ActivitiesSection({ value = [], onChange }: ActivitiesSe
               const canMoveUp = items.length > 1 && index > 0;
               const canMoveDown = items.length > 1 && index < items.length - 1;
 
+              // ✅ 현재 아이템의 에러 가져오기
+              const itemErrors = errors[index] || {};
+              const hasTypeError = !!itemErrors.activityType;
+              const hasNameError = !!itemErrors.activityName;
+              const hasStartDateError = !!itemErrors.startDate;
+              const hasEndDateError = !!itemErrors.endDate;
+
+              console.log(`🔍 [활동 아이템 ${index}] errors:`, itemErrors);
+
               return (
                 <div className="activities-section__item" key={item.id}>
                   <div className="activities-section__fields">
@@ -278,19 +344,22 @@ export default function ActivitiesSection({ value = [], onChange }: ActivitiesSe
                           활동ㆍ경험명 <em className="error_text_red">*</em>
                         </label>
 
+                        {/* ✅ 구분 드롭다운 - 에러 상태 추가 */}
                         <div
-                          className="ui-select"
+                          className={`ui-select ${hasTypeError ? "error" : ""}`}
                           ref={el => { selectRefs.current[index] = el; }}
                           role="combobox"
                           aria-expanded={openDropdownIndex === index}
                           tabIndex={0}
-                          onClick={() =>
-                            setOpenDropdownIndex((cur) => (cur === index ? null : index))
-                          }
+                          onClick={() => {
+                            setOpenDropdownIndex((cur) => (cur === index ? null : index));
+                            handleAnyFocus();
+                          }}
                           onKeyDown={(e) => {
                             if (e.key === "Enter" || e.key === " ") {
                               e.preventDefault();
                               setOpenDropdownIndex((cur) => (cur === index ? null : index));
+                              handleAnyFocus();
                             }
                             if (e.key === "Escape") setOpenDropdownIndex(null);
                           }}
@@ -332,12 +401,16 @@ export default function ActivitiesSection({ value = [], onChange }: ActivitiesSe
                         </div>
                       </div>
 
+                      {/* ✅ 활동명 입력 - 에러 상태 추가 */}
                       <FormInput
                         placeholder="활동ㆍ경험명을 입력해 주세요."
-                        inputClassName="activity_name"
+                        inputClassName={`activity_name`}
                         id={`activity_name_${item.id}`}
                         value={item.activityName}
+                        invalid={hasNameError}
                         onChange={(v: any) => changeName(index, v)}
+                        onFocus={handleAnyFocus}
+                      
                       />
                     </div>
 
@@ -347,6 +420,7 @@ export default function ActivitiesSection({ value = [], onChange }: ActivitiesSe
                       </label>
 
                       <div className="activities-period__fields">
+                        {/* ✅ 시작일 - 에러 상태 추가 */}
                         <div
                           className="activities-period__field activities-period__field--start"
                           ref={el => { startRefs.current[index] = el; }}
@@ -355,8 +429,11 @@ export default function ActivitiesSection({ value = [], onChange }: ActivitiesSe
                             id={`activities-start_${index}`}
                             iconSrc={ic_calendar_gray900_20}
                             value={item.startDate || "YYYY.MM"}
-                            onClick={() => setOpenStartIdx(index)}
-                            invalid={false}
+                            onClick={() => {
+                              setOpenStartIdx(index);
+                              handleAnyFocus();
+                            }}
+                            invalid={hasStartDateError}
                             isOpen={openStartIdx === index} 
                           />
                           {openStartIdx === index && (
@@ -393,6 +470,7 @@ export default function ActivitiesSection({ value = [], onChange }: ActivitiesSe
 
                         <div className="activities-period__divider">~</div>
 
+                        {/* ✅ 종료일 - 에러 상태 추가 */}
                         <div
                           className="activities-period__field activities-period__field--end"
                           ref={el => { endRefs.current[index] = el; }}
@@ -401,8 +479,11 @@ export default function ActivitiesSection({ value = [], onChange }: ActivitiesSe
                             id={`activities-end_${index}`}
                             iconSrc={ic_calendar_gray900_20}
                             value={item.endDate || "YYYY.MM"}
-                            onClick={() => setOpenEndIdx(index)}
-                            invalid={false}
+                            onClick={() => {
+                              setOpenEndIdx(index);
+                              handleAnyFocus();
+                            }}
+                            invalid={hasEndDateError}
                             isOpen={openEndIdx === index}   
                           />
                           {openEndIdx === index && (
@@ -438,6 +519,7 @@ export default function ActivitiesSection({ value = [], onChange }: ActivitiesSe
                             value={item.summary ?? ""}
                             onChange={(e) => onChangeSummary(index, e)}
                             maxLength={MAX_SUMMARY}
+                            onFocus={handleAnyFocus}
                           />
                           <span className="activities-section__char-count">
                             <span>{(item.summary ?? "").length}</span>
@@ -513,7 +595,6 @@ export default function ActivitiesSection({ value = [], onChange }: ActivitiesSe
                       />
                     </span>
 
-                    {/* 삭제 버튼 */}
                     <span
                       className={[
                         "activities-section__control_btn",
@@ -521,7 +602,7 @@ export default function ActivitiesSection({ value = [], onChange }: ActivitiesSe
                       ].join(" ").trim()}
                       role="button"
                       tabIndex={0}
-                      onClick={() => removeItem(index)}
+                      onClick={() => handleRemoveClick(index)}
                       aria-disabled={false}
                     >
                       <img
@@ -544,6 +625,7 @@ export default function ActivitiesSection({ value = [], onChange }: ActivitiesSe
         ) : null}
       </div>
 
+      {/* 전체 삭제 모달 (닫기 버튼 클릭 시) */}
       <Modal
         open={showConfirm}
         title="입력된 내용을 전부 삭제하시겠습니까?"
@@ -553,6 +635,18 @@ export default function ActivitiesSection({ value = [], onChange }: ActivitiesSe
         cancelClassName="btn_w_full default_btn_white"
         onConfirm={handleConfirmDeleteAll}
         onClose={handleCancelDelete}
+      />
+
+      {/* 개별 아이템 삭제 모달 */}
+      <Modal
+        open={showDeleteModal}
+        title="입력된 내용을 전부 삭제하시겠습니까?"
+        confirmText="예"
+        confirmClassName="btn_w_full default_btn_black"
+        cancelText="계속 작성"
+        cancelClassName="btn_w_full default_btn_white"
+        onConfirm={handleConfirmItemDelete}
+        onClose={handleCancelItemDelete}
       />
     </div>
   );

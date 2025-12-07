@@ -18,9 +18,10 @@ const MAX_SELECTED = 30;
 interface DesiredRoleSectionProps {
   value: string[];                     // 선택된 직무 텍스트 배열
   onChange: (roles: string[]) => void; // 선택 변경 시 호출
+  error?: string;                       // ✅ 에러 메시지 추가
 }
 
-export default function DesiredRoleSection({ value, onChange }: DesiredRoleSectionProps) {
+export default function DesiredRoleSection({ value, onChange, error }: DesiredRoleSectionProps) {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState('');
 
@@ -138,11 +139,15 @@ export default function DesiredRoleSection({ value, onChange }: DesiredRoleSecti
         <div className="resume-create-page__section-title__heading">
           희망 직무 <em className="resume-create-page__required">*</em>
         </div>
-        <span className="resume-create-page__hint">
-          최대 {MAX_SELECTED}개까지 추가 가능합니다.
-        </span>
-        {/* <span className="resume-create-page__error">1개 이상 추가해 주세요.</span>
-       */}
+        <div className="resume-create-page__section-title__right">
+          <span className="resume-create-page__hint">
+            최대 {MAX_SELECTED}개까지 추가 가능합니다.
+          </span>
+      
+        </div>
+        {error && (
+            <span className="resume-create-page__error">{error}</span>
+          )}
       </div>
 
       {chips.length > 0 && (
@@ -200,7 +205,7 @@ export default function DesiredRoleSection({ value, onChange }: DesiredRoleSecti
                 role="button"
                 tabIndex={0}
               >
-                <span className="desired-role__highlight">“{q}”</span>
+                <span className="desired-role__highlight">"{q}"</span>
                 <span className="desired-role__create-suffix">
                   (으)로 직접 등록하기
                 </span>
