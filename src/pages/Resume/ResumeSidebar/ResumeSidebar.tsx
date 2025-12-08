@@ -1,3 +1,4 @@
+// src/pages/Resume/ResumeSidebar/ResumeSidebar.tsx
 import React, { useEffect, useState } from "react";
 import Switch from "react-switch";
 import ic_check_gray300_20 from "@/assets/icons/size20/ic_check_gray300_20.png";
@@ -65,7 +66,6 @@ export default function ResumeSidebar({
   };
 
   return (
-    console.log('사이드',SECTIONS),
     <aside className="resume-create-page__aside">
       <div className="resume-sidebar__header">
         <span className="resume-sidebar__title">이력서 관리</span>

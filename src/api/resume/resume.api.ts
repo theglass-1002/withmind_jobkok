@@ -1,7 +1,7 @@
 // src/api/resume.api.ts
 
 import instance from "@/api/axios.instance";
-import { CreateResumeRequest, CreateResumeResponse, ResumeDetail, ResumeItem } from "./resume.types";
+import { CreateResumeRequest, CreateResumeResponse, ResumeDetailResponse, ResumeItem } from "./resume.types";
 
 export async function fetchResumeList(): Promise<ResumeItem[]> {
   // 백엔드 응답이 배열 그대로라면 이렇게:
@@ -19,8 +19,8 @@ export async function createResume(payload: CreateResumeRequest): Promise<Create
   return res.data;
 }
 
-export async function fetchResumeDetail(resumeIdx: number): Promise<ResumeDetail> {
-  const res = await instance.get<ResumeDetail>(
+export async function fetchResumeDetail(resumeIdx: number): Promise<ResumeDetailResponse> {
+  const res = await instance.get<ResumeDetailResponse>(
     `/api/resume/detail/${resumeIdx}`
   );
   return res.data;

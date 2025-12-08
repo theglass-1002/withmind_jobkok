@@ -25,8 +25,6 @@ export default function LoadingOverlay({
   if (!isLoading) return null;
 
   return (
-    console.log(text),
-    console.log(isLogo),
     <div className={`loading-overlay ${overlayClassName}`}>
       <div className={`loading-box ${boxClassName}`}>
         {isLogo?<img className={`loading-logo`} src={Icons.jobkok_logo_purple} alt="" />:

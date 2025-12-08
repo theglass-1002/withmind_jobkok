@@ -1,26 +1,12 @@
 // src/pages/Resume/parts/ResumePortfolioSection.tsx
+import { PortfolioItem } from "@/api/resume/resume.types";
 import React from "react";
 
-type PortfolioFileItem = {
-  kind: "file";
-  name: string;                // 예: "홍길동_포트폴리오.pdf"
-  iconSrc?: string;            // 없으면 defaultIcons.file 사용
-};
-
-type PortfolioLinkItem = {
-  kind: "link";
-  url: string;                 // 예: "https://interview.kr"
-  displayText?: string;        // 표시 텍스트 커스텀 (없으면 url 그대로)
-  iconSrc?: string;            // 없으면 defaultIcons.link 사용
-};
-
-export type PortfolioItem = PortfolioFileItem | PortfolioLinkItem;
-
 type ResumePortfolioSectionProps = {
-  label?: string;              // 기본: "포트폴리오ㆍ기타 문서"
+  label?: string; // 기본: "포트폴리오ㆍ기타 문서"
   items: PortfolioItem[];
   defaultIcons?: { file?: string; link?: string };
-  className?: string;          // 섹션에 추가 클래스 필요할 때
+  className?: string; // 섹션에 추가 클래스 필요할 때
 };
 
 export default function ResumePortfolioSection({
@@ -36,15 +22,17 @@ export default function ResumePortfolioSection({
       <div className="resume-portfolio-list resume-career-list">
         {items.map((it, idx) => {
           if (it.kind === "file") {
+            const iconSrc = it.iconSrc ?? defaultIcons?.file;
+
             return (
               <div
                 key={idx}
                 className="resume-portfolio-item resume-portfolio-item--file"
               >
-                { (it.iconSrc || defaultIcons?.file) && (
+                {iconSrc && (
                   <img
                     className="resume-portfolio-item__icon"
-                    src={it.iconSrc || defaultIcons?.file!}
+                    src={iconSrc}
                     alt=""
                   />
                 )}
@@ -54,15 +42,17 @@ export default function ResumePortfolioSection({
           }
 
           // kind === "link"
+          const iconSrc = it.iconSrc ?? defaultIcons?.link;
+
           return (
             <div
               key={idx}
               className="resume-portfolio-item resume-portfolio-item--link"
             >
-              { (it.iconSrc || defaultIcons?.link) && (
+              {iconSrc && (
                 <img
                   className="resume-portfolio-item__icon"
-                  src={it.iconSrc || defaultIcons?.link!}
+                  src={iconSrc}
                   alt=""
                 />
               )}

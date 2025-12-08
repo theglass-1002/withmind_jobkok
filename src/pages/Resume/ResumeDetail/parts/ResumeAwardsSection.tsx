@@ -25,6 +25,7 @@ export default function ResumeAwardsSection({
 
       <div className="resume-award-list resume-career-list">
         {items.map((it, idx) => (
+         
           <div className="resume-award-item resume-career-item" key={idx}>
             <div className="resume-award-item__header resume-career-item__header">
               <span className="resume-award-item__title resume-career-item__company">

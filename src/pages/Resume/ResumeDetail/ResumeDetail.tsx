@@ -1,13 +1,14 @@
-import React, {useEffect, useState, useRef } from "react"; 
+// src/pages/Resume/ResumeDetail.tsx
+import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import "@/pages/Resume/Resume.css";
 import "./ResumeDetail.css";
-import { toast} from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import html2canvas from "html2canvas";        
-import jsPDF from "jspdf";                       
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 import Switch from "react-switch";
-import {useStickyTabs,tabItems,} from '@/shared/utils/util';
+import { useStickyTabs, tabItems } from "@/shared/utils/util";
 import Tabs from "@/shared/components/tabs/Tabs";
 import ResumeSidebar, {
   type SectionId,
@@ -16,13 +17,9 @@ import ResumeSidebar, {
 import Modal from "@/shared/components/modal/Modal";
 import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
 
-
-
 import test_resume_img from "@/assets/testImg/test_resume_img.png";
 import ic_link_gray900_20 from "@/assets/icons/size20/ic_link_gray900_20.png";
 import ic_folder_gray900_20 from "@/assets/icons/size20/ic_folder_gray900_20.png";
-
-
 
 import ResumeActionsBar from "./parts/ResumeActionsBar";
 import ResumeHeaderTitle from "./parts/ResumeHeaderTitle";
@@ -39,7 +36,17 @@ import ResumeAwardsSection from "./parts/ResumeAwardsSection";
 import ResumePortfolioSection from "./parts/ResumePortfolioSection";
 import ResumeSelfIntroSection from "./parts/ResumeSelfIntroSection";
 import ResumeMockInterviewSection from "./parts/ResumeMockInterviewSection";
-
+import { fetchResumeDetail } from "@/api/resume/resume.api";
+import {
+  calcTotalCareerLabel,
+  formatMeta,
+  mapCareerListToCareerItems,
+  mapGraduatedYnToLabel,
+  mapLicenseListToAwardItems,
+  mapPortfolioListToPortfolioItems,
+  mapRegionListToLocationItems,
+  type ResumeDetailResponse,
+} from "@/api/resume/resume.types";
 
 const ALL_SECTIONS: SectionId[] = [
   "title",
@@ -57,69 +64,54 @@ const ALL_SECTIONS: SectionId[] = [
   "mockInterview",
 ];
 
-// --- 위쪽(파일 상단) 추가: 타입 + 더미 데이터 (API 연동 전에 사용) ---
-type CareerItem = {
-  company: string;
-  start: string;
-  end: string;
-  isCurrent?: boolean;
-  tenure: string;
-  employment?: string;
-  role?: string;
-  level?: string;
-  bullets: string[];
-};
+// ✅ 섹션별 값 유무로 completed / pending 계산
+function buildStatusMap(
+  data: ResumeDetailResponse
+): Partial<Record<SectionId, Status>> {
+  const map: Partial<Record<SectionId, Status>> = {};
 
-const commonBullets: string[] = [
-  "• 면접 분석 서비스 API 설계 및 FastAPI 기반 서버 구축",
-  "• RabbitMQ, Redis 기반 비동기 영상 처리 파이프라인 설계",
-  "• GCP Cloud Run + Cloud Tasks 전환으로 처리 시간 35% 개선",
-  "• 서비스 응답 속도 1.2s → 0.6s 단축",
-  "• GPU 서버 병목 제거로 모델 동시 실행 성능 2배 향상",
-];
+  const hasText = (v?: string | null) =>
+    typeof v === "string" && v.trim().length > 0;
+  const hasArray = (arr?: unknown[] | null) => Array.isArray(arr) && arr.length > 0;
 
-const careerItems: CareerItem[] = [
-  {
-    company: "위드마인드",
-    start: "2020.04",
-    end: "재직중",
-    isCurrent: true,
-    tenure: "(0년 0개월)",
-    employment: "정규직",
-    role: "프론트엔드 개발자",
-    level: "매니저",
-    bullets: commonBullets,
-  },
-  {
-    company: "마인드위드",
-    start: "2018.01",
-    end: "2020.03",
-    isCurrent: false,
-    tenure: "(2년 3개월)",
-    employment: "정규직",
-    role: "프론트엔드 개발자",
-    level: "시니어",
-    bullets: [
-      "• React 기반 사내 Admin 대시보드 설계/구축",
-      "• Webpack 빌드 최적화 및 번들 크기 30% 감소",
-      "• 디자인 시스템(Storybook) 도입 및 컴포넌트 표준화",
-      "• 주요 페이지 LCP 45% 개선",
-      "• 접근성 가이드 정립 및 자동화 검사 도입",
-    ],
-  },
-];
+  map.title = hasText(data.title) ? "completed" : "pending";
 
+  // 기본정보: 이름/이메일/휴대폰 정도 체크
+  const basicFilled =
+    hasText(data.name) && hasText(data.email) && hasText(data.phone);
+  map.basic = basicFilled ? "completed" : "pending";
+
+  map.location = hasArray(data.regionList) ? "completed" : "pending";
+  map.career = hasArray(data.careerList) ? "completed" : "pending";
+  map.education = hasArray(data.educationList) ? "completed" : "pending";
+  map.desiredRole = hasArray(data.jobList) ? "completed" : "pending";
+  map.hardSkills = hasArray(data.hardSkillList) ? "completed" : "pending";
+  map.softSkills = hasArray(data.softSkillList) ? "completed" : "pending";
+  map.activities = hasArray(data.activityList ?? []) ? "completed" : "pending";
+  map.awards = hasArray(data.licenseList) ? "completed" : "pending";
+  map.portfolio = hasArray(data.portfolioList) ? "completed" : "pending";
+  map.selfIntro = hasArray(data.selfIntroList) ? "completed" : "pending";
+
+  // 모의면접: 아직 BE 필드 없으니 기본 pending
+  map.mockInterview = "pending";
+
+  return map;
+}
+
+// ----------------------------------------
+// 컴포넌트
+// ----------------------------------------
 
 export default function ResumeDetail() {
   const { resumeId } = useParams<{ resumeId: string }>();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [resumeData, setResumeData] = useState<ResumeDetailResponse | null>(
+    null
+  );
   const [activeTab, setActiveTab] = useState("title");
-  const resumeRef = useRef<HTMLDivElement | null>(null); 
+  const resumeRef = useRef<HTMLDivElement | null>(null);
   const [isDefaultResume, setIsDefaultResume] = useState(false);
-  const [showDefaultModal, setShowDefaultModal] = useState(false); // 기본 이력서 설정 모달
-  const [sidebarStatus, setSidebarStatus] = useState<
-    Partial<Record<SectionId, Status>>
-  >({});
+  const [showDefaultModal, setShowDefaultModal] = useState(false);
 
   const isTabsSticky = useStickyTabs(
     "sticky-trigger",
@@ -129,45 +121,43 @@ export default function ResumeDetail() {
 
   const handleTabClick = (key: string) => {
     setActiveTab(key);
-    console.log('선택 된 탭', key);
-  
-    if (key === 'title'||key==='basic') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    if (key === "title" || key === "basic") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
-    
+
     const targetId = `resume-field--${key}`;
-    console.log(targetId);
-    const targetElement = document.querySelector(`.${targetId}`) as HTMLElement | null;
-    console.log(targetElement);
-  
+    const targetElement = document.querySelector(
+      `.${targetId}`
+    ) as HTMLElement | null;
+
     if (targetElement) {
       targetElement.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
+        behavior: "smooth",
+        block: "start",
       });
     }
   };
-  
 
-  const handleToggle = (checked: boolean) => {
-    console.log(checked);
+  const handleToggleDefault = (checked: boolean) => {
     if (checked) {
       setShowDefaultModal(true);
     } else {
-      // 끄는 건 그냥 끄기
       setIsDefaultResume(false);
+      // TODO: 기본 이력서 해제 API 연동
     }
   };
+
   const handleConfirmDefaultResume = () => {
     setIsDefaultResume(true);
     setShowDefaultModal(false);
     toast.success("기본 이력서로 설정되었습니다.");
+    // TODO: 기본 이력서 설정 API 연동
   };
 
   const handleCancelDefaultResume = () => {
     setShowDefaultModal(false);
-    // 스위치 값은 그대로 false 유지
   };
 
   const handleTempSave = () => {
@@ -175,39 +165,27 @@ export default function ResumeDetail() {
   };
 
   const handleSubmit = () => {
-    const next: Partial<Record<SectionId, Status>> = {};
-    ALL_SECTIONS.forEach((id) => {
-      next[id] = "completed";
-    });
-    setSidebarStatus(next);
+    // TODO: 제출 API 연동
+    toast.success("이력서가 제출되었습니다.");
   };
 
   const handleDownloadPdf = async () => {
-    console.log('다운');
-
     if (!resumeRef.current) return;
 
     const wrapper = resumeRef.current;
-
-    // 1) A4 레이아웃용 클래스 추가
     wrapper.classList.add("resume-page--pdf");
-
-    // 레이아웃 적용될 시간 살짝 주기
     await new Promise((r) => setTimeout(r, 0));
 
     try {
-      // 2) 화면 캡쳐
       const canvas = await html2canvas(wrapper, {
-        scale: 2, // 해상도 업
+        scale: 2,
         useCORS: true,
       });
 
       const imgData = canvas.toDataURL("image/png");
-
-      // 3) jsPDF로 A4 사이즈 PDF 생성
       const pdf = new jsPDF("p", "mm", "a4");
-      const pdfWidth = pdf.internal.pageSize.getWidth();   // 210mm
-      const pdfHeight = pdf.internal.pageSize.getHeight(); // 297mm
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
 
       const imgWidth = pdfWidth;
       const imgHeight = (canvas.height * pdfWidth) / canvas.width;
@@ -227,143 +205,195 @@ export default function ResumeDetail() {
 
       pdf.save("jobkok-resume.pdf");
     } finally {
-      // 4) 클래스 제거해서 화면 레이아웃 원복
       wrapper.classList.remove("resume-page--pdf");
     }
   };
 
-
+  // 상세 조회
   useEffect(() => {
     if (!resumeId) return;
+
+    let cancelled = false;
+
     const fetchResume = async () => {
+      setIsLoading(true);
       try {
-        //setIsLoading(true);
         const numericId = Number(resumeId);
-        //const res = await getResumeDetail(numericId);
-        //setResumeData(res.data); // API 응답 구조에 맞게 조정
+        const res = await fetchResumeDetail(numericId);
+        if (!cancelled) {
+          setResumeData(res);
+          setIsDefaultResume(res.isDefault); // 기본 이력서 여부 동기화
+        }
       } catch (e) {
-        console.error("이력서 상세 조회 실패:", e);
-        toast.error("이력서 정보를 불러오는 중 오류가 발생했습니다.");
+        if (!cancelled) {
+          console.error("이력서 상세 조회 실패:", e);
+          toast.error("이력서 정보를 불러오는 중 오류가 발생했습니다.");
+        }
       } finally {
-       // setIsLoading(false);
+        if (!cancelled) {
+          setIsLoading(false);
+        }
       }
     };
 
     fetchResume();
+
+    // 언마운트 / resumeId 변경 시
+    return () => {
+      cancelled = true;
+    };
   }, [resumeId]);
+
+  // 디버그용 로그 (값 바뀔 때만)
+  useEffect(() => {
+    if (resumeData) {
+      console.log("ResumeDetail loaded:", resumeData);
+    }
+  }, [resumeData]);
+
+  if (!resumeData) {
+    return (
+      <div className="resume-page resume-page--detail">
+        <LoadingOverlay
+          isLoading={isLoading}
+          text="이력서를 불러오는 중입니다..."
+        />
+      </div>
+    );
+  }
+
+  // ✅ 여기서 섹션 상태 자동 계산
+  const sidebarStatusMap = buildStatusMap(resumeData);
 
   return (
     <>
-    <div  
-    className="resume-page resume-page--detail">
-        <LoadingOverlay isLoading={isLoading}/>
-      <ResumeActionsBar 
-      onDownloadPdf={handleDownloadPdf} 
-      onTempSave={handleTempSave} onSubmit={handleSubmit} />
+      <div className="resume-page resume-page--detail">
+        <LoadingOverlay isLoading={isLoading} />
+        <ResumeActionsBar
+          onDownloadPdf={handleDownloadPdf}
+          onTempSave={handleTempSave}
+          onSubmit={handleSubmit}
+        />
 
-      <div className="resume-page__container">
-        <div className="resume-page__main"
-            ref={resumeRef} 
-        >
-          <ResumeHeaderTitle text="성장하는 개발자, 준비된 홍길동입니다." />
+        <div className="resume-page__container">
+          <div className="resume-page__main" ref={resumeRef}>
+            <ResumeHeaderTitle text={resumeData.title} />
 
-          <div className="resume-detail__content">
-            <ResumeBasicInfo
-              name="홍길동"
-              meta="2000년생(만 23세), 남성"
-              email="hong1234@withmind.net"
-              phone="010-1234-5678"
-              imageSrc={test_resume_img}
-            />
+            <div className="resume-detail__content">
+              <ResumeBasicInfo
+                name={resumeData.name}
+                meta={formatMeta(resumeData.birth, resumeData.gender)}
+                email={resumeData.email}
+                phone={resumeData.phone}
+                imageSrc={
+                  resumeData.profilePhotoFile?.filePath ?? test_resume_img
+                }
+              />
 
-            <ResumeFieldSection
-              label="희망 근무 지역"
-              className="resume-field--location"
-              valueAs="div"
-              valueClassName="resume-location-list"
-            >
-              <ResumeLocationList
+              <ResumeFieldSection
+                label="희망 근무 지역"
+                className="resume-field--location"
+                valueAs="div"
+                valueClassName="resume-location-list"
+              >
+                <ResumeLocationList
+                  items={mapRegionListToLocationItems(
+                    resumeData.regionList ?? []
+                  )}
+                />
+              </ResumeFieldSection>
+
+              <ResumeCareerSection
+                totalLabel={calcTotalCareerLabel(resumeData.careerList)}
+                items={mapCareerListToCareerItems(resumeData.careerList)}
+              />
+
+              <ResumeEducationSection
+                items={(resumeData.educationList ?? []).map((edu) => ({
+                  school: edu.schoolName,
+                  start: edu.startYm,
+                  end: edu.endYm,
+                  major: edu.majorDegree,
+                  status: mapGraduatedYnToLabel(edu.graduatedYn),
+                }))}
+              />
+
+              <ResumeDesiredRoleSection
+                items={resumeData.jobList ?? ["자바 개발자", "웹 개발자"]}
+              />
+
+              <ResumeHardSkillsSection items={resumeData.hardSkillList ?? []} />
+              <ResumeSoftSkillsSection items={resumeData.softSkillList ?? []} />
+
+              {/* TODO: activityList 매핑으로 교체 */}
+              <ResumeActivitiesSection
                 items={[
-                  { city: "서울", district: "강남구" },
-                  { city: "서울", district: "용산구" },
+                  {
+                    title: "[교육 이수] 임베디드 소프트웨어 융합 풀스택 과정",
+                    start: "2016.06",
+                    end: "2017.03",
+                    bullets: [
+                      "커머스 플랫폼 스타트업 대표와 개발자들의 시장 분석 및 실제 시뮬레이션 적용",
+                    ],
+                  },
                 ]}
               />
-            </ResumeFieldSection>
-            <ResumeCareerSection
-              totalLabel="(총 0년 0개월)"
-              items={careerItems}
-            />
-          <ResumeEducationSection
-                school="위드대학교"
-                start="2010.03"
-                end="2015.03"
-                major="컴퓨터공학과"
-                status="졸업"
-              />
-          <ResumeDesiredRoleSection
-              items={["자바 개발자", "웹 개발자", "프론트엔드 개발자"]}
-            />
-          <ResumeHardSkillsSection items={["자바", "피그마"]} />
-          <ResumeSoftSkillsSection items={["팀워크", "공감 능력"]} />
-          <ResumeActivitiesSection
-            items={[
-              {
-                title: "[교육 이수] 임베디드 소프트웨어 융합 풀스택 과정",
-                start: "2016.06",
-                end: "2017.03",
-                bullets: ["커머스 플랫폼 스타트업 대표와 개발자들의 시장 분석 및 실제 시뮬레이션 적용"],
-              },
-            ]}
-          />        
-        <ResumeAwardsSection
-          items={[
-            { title: "[자격증] 정보처리기사", start: "2017.09", issuer: "한국산업인력공단" },
-            { title: "[수상] SW 공모전 우수상", start: "2022.11", issuer: "OO대학교" },
-          ]}
-        />
-        <ResumePortfolioSection
-            defaultIcons={{ file: ic_folder_gray900_20, link: ic_link_gray900_20 }}
-            items={[
-              { kind: "file", name: "홍길동_포트폴리오.pdf" },
-              { kind: "link", url: "https://interview.kr" },
-            ]}
-          />
 
-          <ResumeSelfIntroSection
-            text={
-              "5년 8개월차 JAVA 개발자 홍길동입니다. Spring Boot와 JPA를 활용한 백엔드 개발 및 API 설계 경험이 있으며, 성능 최적화와 데이터베이스 설계에 강점을 가지고 있습니다. 최근에는 MSA 및 CI/CD 구축을 통해 서비스 확장성과 자동화를 경험했습니다. 효율적인 시스템 개발과 문제 해결을 통해 성장하는 개발자가 되고 싶습니다."
-            }
+              <ResumeAwardsSection
+                items={mapLicenseListToAwardItems(resumeData.licenseList)}
+              />
+
+              <ResumePortfolioSection
+                defaultIcons={{
+                  file: ic_folder_gray900_20,
+                  link: ic_link_gray900_20,
+                }}
+                items={mapPortfolioListToPortfolioItems(
+                  resumeData.portfolioList
+                )}
+              />
+
+              <ResumeSelfIntroSection
+                text={
+                  resumeData.selfIntroList?.[0]?.content ??
+                  "자기소개 내용이 없습니다."
+                }
+              />
+
+              <ResumeMockInterviewSection
+                lastItem
+                defaultIcon={ic_folder_gray900_20}
+                items={[
+                  {
+                    title:
+                      "82점ㆍ프론트엔드 개발자ㆍ25.01.01 [성장하는 개발자, 준비된 홍길동입니다.]",
+                  },
+                ]}
+              />
+            </div>
+          </div>
+
+          <ResumeSidebar
+            statusMap={sidebarStatusMap}
+            isDefault={isDefaultResume}
+            onToggleDefault={handleToggleDefault}
           />
-            <ResumeMockInterviewSection
-              lastItem
-              defaultIcon={ic_folder_gray900_20}
-              items={[
-                {
-                  title:
-                    "82점ㆍ프론트엔드 개발자ㆍ25.01.01 [성장하는 개발자, 준비된 홍길동입니다.]",
-                },
-              ]}
-            />
-         </div>
         </div>
-        <ResumeSidebar statusMap={sidebarStatus} />
       </div>
 
-   
-    </div>
-    <div  
-    className="resume-page resume-page--detail mobile">
-      {/* <ResumeActionsBar 
-      onDownloadPdf={handleDownloadPdf} 
-      onTempSave={handleTempSave} onSubmit={handleSubmit} /> */}
-
-     
-      <div className="resume-sidebar__default">
-        <span className="resume-sidebar__default-text">기본 이력서로 설정</span>
-        <label className="resume-sidebar__default-label" aria-label="기본 이력서로 설정">
+      {/* 모바일 레이아웃 */}
+      <div className="resume-page resume-page--detail mobile">
+        <div className="resume-sidebar__default">
+          <span className="resume-sidebar__default-text">
+            기본 이력서로 설정
+          </span>
+          <label
+            className="resume-sidebar__default-label"
+            aria-label="기본 이력서로 설정"
+          >
             <Switch
               checked={isDefaultResume}
-              onChange={handleToggle}
+              onChange={handleToggleDefault}
               onColor="#000000"
               offColor="#E5E7EB"
               onHandleColor="#FFFFFF"
@@ -377,28 +407,30 @@ export default function ResumeDetail() {
             />
           </label>
         </div>
+
         <Tabs
-            tabs={tabItems}
-            active={activeTab}
-            onChange={handleTabClick}
-            className={`resume-create-tabs default_tabs ${isTabsSticky?'is-sticky':''}`}
-            itemClassName="resume-create-tabs__item"
-            activeClassName="on"
-            />
-            
-        <div id="sticky-trigger" className="resume-page__main"
-            ref={resumeRef} 
-        >
-          <ResumeHeaderTitle 
-          text="성장하는 개발자, 준비된 홍길동입니다." />
+          tabs={tabItems}
+          active={activeTab}
+          onChange={handleTabClick}
+          className={`resume-create-tabs default_tabs ${
+            isTabsSticky ? "is-sticky" : ""
+          }`}
+          itemClassName="resume-create-tabs__item"
+          activeClassName="on"
+        />
+
+        <div id="sticky-trigger" className="resume-page__main" ref={resumeRef}>
+          <ResumeHeaderTitle text={resumeData.title} />
 
           <div className="resume-detail__content">
             <ResumeBasicInfo
-              name="홍길동"
-              meta="2000년생(만 23세), 남성"
-              email="hong1234@withmind.net"
-              phone="010-1234-5678"
-              imageSrc={test_resume_img}
+              name={resumeData.name}
+              meta={formatMeta(resumeData.birth, resumeData.gender)}
+              email={resumeData.email}
+              phone={resumeData.phone}
+              imageSrc={
+                resumeData.profilePhotoFile?.filePath ?? test_resume_img
+              }
             />
 
             <ResumeFieldSection
@@ -408,57 +440,66 @@ export default function ResumeDetail() {
               valueClassName="resume-location-list"
             >
               <ResumeLocationList
-                items={[
-                  { city: "서울", district: "강남구" },
-                  { city: "서울", district: "용산구" },
-                ]}
+                items={mapRegionListToLocationItems(
+                  resumeData.regionList ?? []
+                )}
               />
             </ResumeFieldSection>
-            <ResumeCareerSection
-              totalLabel="(총 0년 0개월)"
-              items={careerItems}
-            />
-          <ResumeEducationSection
-                school="위드대학교"
-                start="2010.03"
-                end="2015.03"
-                major="컴퓨터공학과"
-                status="졸업"
-              />
-          <ResumeDesiredRoleSection
-              items={["자바 개발자", "웹 개발자", "프론트엔드 개발자"]}
-            />
-          <ResumeHardSkillsSection items={["자바", "피그마"]} />
-          <ResumeSoftSkillsSection items={["팀워크", "공감 능력"]} />
-          <ResumeActivitiesSection
-            items={[
-              {
-                title: "[교육 이수] 임베디드 소프트웨어 융합 풀스택 과정",
-                start: "2016.06",
-                end: "2017.03",
-                bullets: ["커머스 플랫폼 스타트업 대표와 개발자들의 시장 분석 및 실제 시뮬레이션 적용"],
-              },
-            ]}
-          />        
-        <ResumeAwardsSection
-          items={[
-            { title: "[자격증] 정보처리기사", start: "2017.09", issuer: "한국산업인력공단" },
-            { title: "[수상] SW 공모전 우수상", start: "2022.11", issuer: "OO대학교" },
-          ]}
-        />
-        <ResumePortfolioSection
-            defaultIcons={{ file: ic_folder_gray900_20, link: ic_link_gray900_20 }}
-            items={[
-              { kind: "file", name: "홍길동_포트폴리오.pdf" },
-              { kind: "link", url: "https://interview.kr" },
-            ]}
-          />
 
-          <ResumeSelfIntroSection
-            text={
-              "5년 8개월차 JAVA 개발자 홍길동입니다. Spring Boot와 JPA를 활용한 백엔드 개발 및 API 설계 경험이 있으며, 성능 최적화와 데이터베이스 설계에 강점을 가지고 있습니다. 최근에는 MSA 및 CI/CD 구축을 통해 서비스 확장성과 자동화를 경험했습니다. 효율적인 시스템 개발과 문제 해결을 통해 성장하는 개발자가 되고 싶습니다."
-            }
-          />
+            <ResumeCareerSection
+              totalLabel={calcTotalCareerLabel(resumeData.careerList)}
+              items={mapCareerListToCareerItems(resumeData.careerList)}
+            />
+
+            <ResumeEducationSection
+              items={(resumeData.educationList ?? []).map((edu) => ({
+                school: edu.schoolName,
+                start: edu.startYm,
+                end: edu.endYm,
+                major: edu.majorDegree,
+                status: mapGraduatedYnToLabel(edu.graduatedYn),
+              }))}
+            />
+
+            <ResumeDesiredRoleSection items={resumeData.jobList ?? []} />
+
+            <ResumeHardSkillsSection items={resumeData.hardSkillList ?? []} />
+            <ResumeSoftSkillsSection items={resumeData.softSkillList ?? []} />
+
+            <ResumeActivitiesSection
+              items={[
+                {
+                  title: "[교육 이수] 임베디드 소프트웨어 융합 풀스택 과정",
+                  start: "2016.06",
+                  end: "2017.03",
+                  bullets: [
+                    "커머스 플랫폼 스타트업 대표와 개발자들의 시장 분석 및 실제 시뮬레이션 적용",
+                  ],
+                },
+              ]}
+            />
+
+            <ResumeAwardsSection
+              items={mapLicenseListToAwardItems(resumeData.licenseList)}
+            />
+
+            <ResumePortfolioSection
+              defaultIcons={{
+                file: ic_folder_gray900_20,
+                link: ic_link_gray900_20,
+              }}
+              items={mapPortfolioListToPortfolioItems(
+                resumeData.portfolioList
+              )}
+            />
+
+            <ResumeSelfIntroSection
+              text={
+                resumeData.selfIntroList?.[0]?.content ??
+                "자기소개 내용이 없습니다."
+              }
+            />
+
             <ResumeMockInterviewSection
               lastItem
               defaultIcon={ic_folder_gray900_20}
@@ -469,22 +510,20 @@ export default function ResumeDetail() {
                 },
               ]}
             />
-         </div>
+          </div>
         </div>
-        {/* <ResumeSidebar statusMap={sidebarStatus} /> */}
-     
+
         <Modal
-        open={showDefaultModal}
-        title={`해당 이력서를 기본 이력서로\n변경하시겠습니까?`}
-        confirmText="확인"
-        confirmClassName="btn_w_full default_btn_black"
-        cancelText="취소"
-        cancelClassName="btn_w_full default_btn_white"
-        onConfirm={handleConfirmDefaultResume}
-        onClose={handleCancelDefaultResume}
-      />
-   
-    </div>
+          open={showDefaultModal}
+          title={`해당 이력서를 기본 이력서로\n변경하시겠습니까?`}
+          confirmText="확인"
+          confirmClassName="btn_w_full default_btn_black"
+          cancelText="취소"
+          cancelClassName="btn_w_full default_btn_white"
+          onConfirm={handleConfirmDefaultResume}
+          onClose={handleCancelDefaultResume}
+        />
+      </div>
     </>
   );
 }

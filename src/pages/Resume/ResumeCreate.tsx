@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import "./ResumeCreate.css";
 
 import BasicInfoSection, {
@@ -226,9 +228,7 @@ const calcSectionStatus = (
   return status;
 };
 export default function ResumeCreate() {
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // State
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  const navigate = useNavigate();
   const [form, setForm] = useState<FormState>(initial);
   const [errors, setErrors] = useState<{
     basic: BasicErrors;
@@ -763,6 +763,7 @@ export default function ResumeCreate() {
         return;
       }
       const result = await createResume(payload);
+      //navigate(`/resumes/${result}`);
       console.log("✅ 이력서 등록 성공:", result);
       //이동
       console.log("✅ 이력서 등록 성공:", payload);
@@ -923,10 +924,11 @@ export default function ResumeCreate() {
           : {}),
       };
 
-     // const result = await createResume(payload);
+      //const result = await createResume(payload);
      // console.log("✅ 이력서 등록 성공:", result);
       console.log("✅ 이력서 등록 성공:", payload);
       setIsLoading(false);
+     // navigate(`/resumes/${result}`);
       toast.success("임시 저장되었습니다.");
     } catch (error) {
       setIsLoading(false);
