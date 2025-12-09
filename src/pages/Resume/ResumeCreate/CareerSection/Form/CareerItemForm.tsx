@@ -456,7 +456,7 @@ export default function CareerItemForm({
           <AISuggestArea
             show={showAISuggest}
             items={aiSuggestions}
-            onOpen={handleClickAISuggest}
+            onClickSuggest={handleClickAISuggest}
             onClose={handleCloseAISuggest}
             onPick={handlePickSuggestion}
             starIconGray={ic_star_gray700_20}

@@ -18,7 +18,6 @@ export default function ResumePortfolioSection({
   return (
     <div className={`resume-field resume-field--portfolio ${className}`.trim()}>
       <div className="resume-field__label">{label}</div>
-
       <div className="resume-portfolio-list resume-career-list">
         {items.map((it, idx) => {
           if (it.kind === "file") {
@@ -36,9 +35,36 @@ export default function ResumePortfolioSection({
                     alt=""
                   />
                 )}
-                <span className="resume-portfolio-item__name">{it.name}</span>
+
+                {it.filePath ? (
+                  <a
+                    href={it.filePath}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    download // ✅ 다운로드 시도
+                  >
+                  <span className="resume-portfolio-item__name">{it.name}</span>
+                  </a>
+                ) : (
+                  <span className="resume-portfolio-item__name">{it.name}</span>
+                )}
               </div>
             );
+            // return (
+            //   <div
+            //     key={idx}
+            //     className="resume-portfolio-item resume-portfolio-item--file"
+            //   >
+            //     {iconSrc && (
+            //       <img
+            //         className="resume-portfolio-item__icon"
+            //         src={iconSrc}
+            //         alt=""
+            //       />
+            //     )}
+            //     <span className="resume-portfolio-item__name">{it.name}</span>
+            //   </div>
+            // );
           }
 
           // kind === "link"

@@ -1,6 +1,6 @@
 // src/pages/Resume/ResumeDetail.tsx
 import React, { useEffect, useState, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import "@/pages/Resume/Resume.css";
 import "./ResumeDetail.css";
 import { toast } from "react-toastify";
@@ -36,7 +36,10 @@ import ResumeAwardsSection from "./parts/ResumeAwardsSection";
 import ResumePortfolioSection from "./parts/ResumePortfolioSection";
 import ResumeSelfIntroSection from "./parts/ResumeSelfIntroSection";
 import ResumeMockInterviewSection from "./parts/ResumeMockInterviewSection";
-import { fetchResumeDetail } from "@/api/resume/resume.api";
+import {
+  fetchResumeDetail,
+  updateDefaultResume,
+} from "@/api/resume/resume.api";
 import {
   calcTotalCareerLabel,
   formatMeta,
@@ -64,6 +67,12 @@ const ALL_SECTIONS: SectionId[] = [
   "mockInterview",
 ];
 
+// YYYY-MM -> YYYY.MM
+const formatYmToDot = (ym?: string | null): string => {
+  if (!ym) return "";
+  return ym.replace("-", ".");
+};
+
 // ✅ 섹션별 값 유무로 completed / pending 계산
 function buildStatusMap(
   data: ResumeDetailResponse
@@ -72,11 +81,11 @@ function buildStatusMap(
 
   const hasText = (v?: string | null) =>
     typeof v === "string" && v.trim().length > 0;
-  const hasArray = (arr?: unknown[] | null) => Array.isArray(arr) && arr.length > 0;
+  const hasArray = (arr?: unknown[] | null) =>
+    Array.isArray(arr) && arr.length > 0;
 
   map.title = hasText(data.title) ? "completed" : "pending";
 
-  // 기본정보: 이름/이메일/휴대폰 정도 체크
   const basicFilled =
     hasText(data.name) && hasText(data.email) && hasText(data.phone);
   map.basic = basicFilled ? "completed" : "pending";
@@ -92,7 +101,6 @@ function buildStatusMap(
   map.portfolio = hasArray(data.portfolioList) ? "completed" : "pending";
   map.selfIntro = hasArray(data.selfIntroList) ? "completed" : "pending";
 
-  // 모의면접: 아직 BE 필드 없으니 기본 pending
   map.mockInterview = "pending";
 
   return map;
@@ -103,6 +111,7 @@ function buildStatusMap(
 // ----------------------------------------
 
 export default function ResumeDetail() {
+  const navigate = useNavigate();
   const { resumeId } = useParams<{ resumeId: string }>();
   const [isLoading, setIsLoading] = useState(true);
   const [resumeData, setResumeData] = useState<ResumeDetailResponse | null>(
@@ -110,8 +119,12 @@ export default function ResumeDetail() {
   );
   const [activeTab, setActiveTab] = useState("title");
   const resumeRef = useRef<HTMLDivElement | null>(null);
+
   const [isDefaultResume, setIsDefaultResume] = useState(false);
   const [showDefaultModal, setShowDefaultModal] = useState(false);
+  const [nextDefaultState, setNextDefaultState] = useState<boolean | null>(
+    null
+  ); // true: 기본 설정, false: 해제
 
   const isTabsSticky = useStickyTabs(
     "sticky-trigger",
@@ -140,49 +153,102 @@ export default function ResumeDetail() {
     }
   };
 
+  
   const handleToggleDefault = (checked: boolean) => {
-    if (checked) {
-      setShowDefaultModal(true);
-    } else {
-      setIsDefaultResume(false);
-      // TODO: 기본 이력서 해제 API 연동
-    }
+    if (!resumeId) return;
+    setNextDefaultState(checked);
+    setShowDefaultModal(true);
   };
 
-  const handleConfirmDefaultResume = () => {
-    setIsDefaultResume(true);
-    setShowDefaultModal(false);
-    toast.success("기본 이력서로 설정되었습니다.");
-    // TODO: 기본 이력서 설정 API 연동
+
+  const handleChangeDefaultResume = async () => {
+    if (!resumeId || nextDefaultState === null) return;
+    const numericId = Number(resumeId);
+  
+    try {
+      setIsLoading(true);
+      const newValue: 0 | 1 = nextDefaultState ? 1 : 0;
+  
+      const res = await updateDefaultResume(numericId, newValue);
+      console.log("✅ 기본 이력서 변경 응답:", res);
+      if (res.code !== 200) {
+        throw new Error(res.msg || "기본 이력서 변경 실패");
+      }
+      setIsDefaultResume(nextDefaultState);
+  
+      if (nextDefaultState) {
+        toast.success("기본 이력서로 설정되었습니다.");
+      } else {
+        toast.success("기본 이력서 설정이 해제되었습니다.");
+      }
+    } catch (e) {
+      console.error("❌ 기본 이력서 변경 실패:", e);
+      toast.error("기본 이력서 변경 중 오류가 발생했습니다.");
+    } finally {
+      setShowDefaultModal(false);
+      setNextDefaultState(null);
+      setIsLoading(false);
+    }
   };
+  
+
 
   const handleCancelDefaultResume = () => {
     setShowDefaultModal(false);
+    setNextDefaultState(null);
+
   };
 
-  const handleTempSave = () => {
-    toast.success("임시 저장되었습니다.");
-  };
 
-  const handleSubmit = () => {
-    // TODO: 제출 API 연동
-    toast.success("이력서가 제출되었습니다.");
+
+  const handleEdit = () => {
+    if (!resumeId) return;
+    navigate(`/resumes/${resumeId}/edit`);
   };
 
   const handleDownloadPdf = async () => {
-    if (!resumeRef.current) return;
-
-    const wrapper = resumeRef.current;
-    wrapper.classList.add("resume-page--pdf");
-    await new Promise((r) => setTimeout(r, 0));
-
     try {
+      toast.info("PDF 생성 중...");
+
+      const desktopWrapper = document.querySelector(
+        ".resume-page--detail:not(.mobile) .resume-page__main"
+      ) as HTMLElement;
+
+      const mobileWrapper = document.querySelector(
+        ".resume-page--detail.mobile .resume-page__main"
+      ) as HTMLElement;
+
+      const wrapper =
+        desktopWrapper && desktopWrapper.offsetHeight > 0
+          ? desktopWrapper
+          : mobileWrapper;
+
+      if (!wrapper) {
+        throw new Error("이력서 영역을 찾을 수 없습니다");
+      }
+
+      const shouldAddPdfClass = true;
+      if (shouldAddPdfClass) {
+        wrapper.classList.add("resume-page--pdf");
+        await new Promise((r) => setTimeout(r, 100));
+      }
+
       const canvas = await html2canvas(wrapper, {
         scale: 2,
         useCORS: true,
+        logging: false,
+        backgroundColor: "#ffffff",
+        width: wrapper.scrollWidth || wrapper.offsetWidth,
+        height: wrapper.scrollHeight || wrapper.offsetHeight,
       });
 
-      const imgData = canvas.toDataURL("image/png");
+      if (canvas.width === 0 || canvas.height === 0) {
+        throw new Error(
+          `Canvas 크기가 0입니다: ${canvas.width} x ${canvas.height}`
+        );
+      }
+
+      const imgData = canvas.toDataURL("image/jpeg", 0.98);
       const pdf = new jsPDF("p", "mm", "a4");
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
@@ -190,22 +256,36 @@ export default function ResumeDetail() {
       const imgWidth = pdfWidth;
       const imgHeight = (canvas.height * pdfWidth) / canvas.width;
 
+      if (!isFinite(imgWidth) || !isFinite(imgHeight) || imgWidth <= 0 || imgHeight <= 0) {
+        throw new Error(`잘못된 이미지 크기: ${imgWidth} x ${imgHeight}`);
+      }
+
       let position = 0;
       let heightLeft = imgHeight;
 
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+      pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
       heightLeft -= pdfHeight;
 
       while (heightLeft > 0) {
         pdf.addPage();
         position = heightLeft * -1;
-        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+        pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
         heightLeft -= pdfHeight;
       }
 
-      pdf.save("jobkok-resume.pdf");
-    } finally {
-      wrapper.classList.remove("resume-page--pdf");
+      const fileName = `jobkok-resume-${resumeData?.name || "resume"}.pdf`;
+      pdf.save(fileName);
+
+      toast.success("PDF 다운로드가 완료되었습니다!");
+
+      if (shouldAddPdfClass) {
+        wrapper.classList.remove("resume-page--pdf");
+      }
+    } catch (error) {
+      console.error("❌ PDF 생성 실패:", error);
+      toast.error("PDF 생성 중 오류가 발생했습니다.");
+      const allWrappers = document.querySelectorAll(".resume-page__main");
+      allWrappers.forEach((w) => w.classList.remove("resume-page--pdf"));
     }
   };
 
@@ -222,7 +302,7 @@ export default function ResumeDetail() {
         const res = await fetchResumeDetail(numericId);
         if (!cancelled) {
           setResumeData(res);
-          setIsDefaultResume(res.isDefault); // 기본 이력서 여부 동기화
+          setIsDefaultResume(res.isDefault);
         }
       } catch (e) {
         if (!cancelled) {
@@ -238,13 +318,11 @@ export default function ResumeDetail() {
 
     fetchResume();
 
-    // 언마운트 / resumeId 변경 시
     return () => {
       cancelled = true;
     };
   }, [resumeId]);
 
-  // 디버그용 로그 (값 바뀔 때만)
   useEffect(() => {
     if (resumeData) {
       console.log("ResumeDetail loaded:", resumeData);
@@ -262,8 +340,26 @@ export default function ResumeDetail() {
     );
   }
 
-  // ✅ 여기서 섹션 상태 자동 계산
   const sidebarStatusMap = buildStatusMap(resumeData);
+
+  const activityItems =
+    (resumeData.activityList ?? []).map((act) => ({
+      title: act.activityTitle,
+      start: formatYmToDot(act.startYm),
+      end: formatYmToDot(act.endYm),
+      bullets: act.description
+        ? act.description
+            .split("\n")
+            .map((line) => line.trim())
+            .filter(Boolean)
+        : undefined,
+    })) ?? [];
+
+  // 🔥 모달 타이틀 - 토글 방향에 따라 다르게
+  const defaultModalTitle =
+    nextDefaultState === false
+      ? "기본이력서를 해지 하시겠습니까?"
+      : `해당 이력서를 기본 이력서로\n변경하시겠습니까?`;
 
   return (
     <>
@@ -271,8 +367,8 @@ export default function ResumeDetail() {
         <LoadingOverlay isLoading={isLoading} />
         <ResumeActionsBar
           onDownloadPdf={handleDownloadPdf}
-          onTempSave={handleTempSave}
-          onSubmit={handleSubmit}
+          onEdit={handleEdit}
+          showRightActions={false}
         />
 
         <div className="resume-page__container">
@@ -285,9 +381,7 @@ export default function ResumeDetail() {
                 meta={formatMeta(resumeData.birth, resumeData.gender)}
                 email={resumeData.email}
                 phone={resumeData.phone}
-                imageSrc={
-                  resumeData.profilePhotoFile?.filePath ?? test_resume_img
-                }
+                imageSrc={resumeData.profilePhotoFile?.filePath ?? ""}
               />
 
               <ResumeFieldSection
@@ -325,19 +419,7 @@ export default function ResumeDetail() {
               <ResumeHardSkillsSection items={resumeData.hardSkillList ?? []} />
               <ResumeSoftSkillsSection items={resumeData.softSkillList ?? []} />
 
-              {/* TODO: activityList 매핑으로 교체 */}
-              <ResumeActivitiesSection
-                items={[
-                  {
-                    title: "[교육 이수] 임베디드 소프트웨어 융합 풀스택 과정",
-                    start: "2016.06",
-                    end: "2017.03",
-                    bullets: [
-                      "커머스 플랫폼 스타트업 대표와 개발자들의 시장 분석 및 실제 시뮬레이션 적용",
-                    ],
-                  },
-                ]}
-              />
+              <ResumeActivitiesSection items={activityItems} />
 
               <ResumeAwardsSection
                 items={mapLicenseListToAwardItems(resumeData.licenseList)}
@@ -419,7 +501,7 @@ export default function ResumeDetail() {
           activeClassName="on"
         />
 
-        <div id="sticky-trigger" className="resume-page__main" ref={resumeRef}>
+        <div id="sticky-trigger" className="resume-page__main">
           <ResumeHeaderTitle text={resumeData.title} />
 
           <div className="resume-detail__content">
@@ -466,18 +548,7 @@ export default function ResumeDetail() {
             <ResumeHardSkillsSection items={resumeData.hardSkillList ?? []} />
             <ResumeSoftSkillsSection items={resumeData.softSkillList ?? []} />
 
-            <ResumeActivitiesSection
-              items={[
-                {
-                  title: "[교육 이수] 임베디드 소프트웨어 융합 풀스택 과정",
-                  start: "2016.06",
-                  end: "2017.03",
-                  bullets: [
-                    "커머스 플랫폼 스타트업 대표와 개발자들의 시장 분석 및 실제 시뮬레이션 적용",
-                  ],
-                },
-              ]}
-            />
+            <ResumeActivitiesSection items={activityItems} />
 
             <ResumeAwardsSection
               items={mapLicenseListToAwardItems(resumeData.licenseList)}
@@ -515,12 +586,12 @@ export default function ResumeDetail() {
 
         <Modal
           open={showDefaultModal}
-          title={`해당 이력서를 기본 이력서로\n변경하시겠습니까?`}
+          title={defaultModalTitle}
           confirmText="확인"
           confirmClassName="btn_w_full default_btn_black"
           cancelText="취소"
           cancelClassName="btn_w_full default_btn_white"
-          onConfirm={handleConfirmDefaultResume}
+          onConfirm={handleChangeDefaultResume}
           onClose={handleCancelDefaultResume}
         />
       </div>

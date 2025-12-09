@@ -15,17 +15,29 @@ import AiSuggestChips from '@/shared/components/ai/AiSuggestChips';
 type RoleItem = { group: string; role: string };
 const MAX_SELECTED = 30;
 
-//  부모로 값 올려보내고 싶을 때를 위한 선택적 props
+// 부모와 값 주고받는 props
 interface HardSkillSectionProps {
+  value?: string[];                 // 🔥 (선택) 초기 하드스킬 목록 (edit에서 내려줌)
   onChange?: (skills: string[]) => void; // 선택된 하드 스킬 텍스트 배열
+  isEdit?: boolean;                // 🔥 수정 모드 여부
 }
 
-export default function HardSkillSection({ onChange }: HardSkillSectionProps) {
+export default function HardSkillSection({
+  value = [],
+  onChange,
+  isEdit = false,
+}: HardSkillSectionProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState('');
-  const [selected, setSelected] = useState<Set<string>>(new Set());
+
+  // 내부 선택 상태: "그룹|스킬명" 형태로 저장
+  const [selected, setSelected] = useState<Set<string>>(
+    () => new Set(value.map((s) => `직접 입력|${s}`))
+  );
+
   const menuRef = useRef<HTMLDivElement>(null);
+  const didSyncFromValueRef = useRef(false);
 
   const startAdd = () => setIsAdding(true);
 
@@ -33,20 +45,34 @@ export default function HardSkillSection({ onChange }: HardSkillSectionProps) {
     setIsAdding(false);
     setOpen(false);
     setQ('');
-    setSelected(new Set()); // chips 초기화
+    // ❌ selected 비우지 않음 (edit에서 초기값 날아가는 것 방지)
   };
 
-  // 선택된 하드 스킬 콘솔로그 + 부모로 전달
+  // 🔥 edit 모드일 때만, 부모 value(hardSkills) 로 한 번만 selected 세팅
+  useEffect(() => {
+    if (!isEdit) return;
+    if (!value || value.length === 0) return;
+    if (didSyncFromValueRef.current) return;
+
+    console.log('✅ HardSkillSection(edit): value 동기화', value);
+    setSelected(new Set(value.map((s) => `직접 입력|${s}`)));
+    didSyncFromValueRef.current = true;
+  }, [isEdit, value]);
+
+  // 선택된 하드 스킬 → 부모로 전달
   useEffect(() => {
     const skills = Array.from(selected).map((key) => key.split('|')[1]);
     onChange?.(skills);
-    // onChange는 렌더마다 새로 만들어질 수 있어도 selected가 바뀔 때만 실행되면 되므로 의존성에서 제외
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected]);
 
-  // roles JSON → 평탄화
+  // roles JSON → 평탄화 (직무 json 재활용)
   const flat: RoleItem[] = useMemo(() => {
-    const cats = (roles as any)?.categories as Array<{ name: string; all?: string; roles: string[] }>;
+    const cats = (roles as any)?.categories as Array<{
+      name: string;
+      all?: string;
+      roles: string[];
+    }>;
     if (!Array.isArray(cats)) return [];
     const out: RoleItem[] = [];
     for (const c of cats) {
@@ -56,11 +82,12 @@ export default function HardSkillSection({ onChange }: HardSkillSectionProps) {
     return out;
   }, []);
 
-  // 필터링
+  // 검색 필터링
   const filtered = useMemo(() => {
     const k = (q ?? '').trim().toLowerCase();
     if (!k) return flat.slice(0, 20);
-    const toStr = (v: unknown) => (typeof v === 'string' ? v : String(v ?? ''));
+    const toStr = (v: unknown) =>
+      typeof v === 'string' ? v : String(v ?? '');
     return flat
       .filter((i) => {
         const role = toStr(i.role).toLowerCase();
@@ -70,7 +97,7 @@ export default function HardSkillSection({ onChange }: HardSkillSectionProps) {
       .slice(0, 50);
   }, [q, flat]);
 
-  // 외부 클릭 시 닫기
+  // 외부 클릭 시 드롭다운 닫기
   useEffect(() => {
     if (!open) return;
     const onPointer = (e: PointerEvent) => {
@@ -81,15 +108,22 @@ export default function HardSkillSection({ onChange }: HardSkillSectionProps) {
     return () => document.removeEventListener('pointerdown', onPointer);
   }, [open]);
 
-  // 하이라이트
+  // 검색어 하이라이트
   const highlight = (text: string, keyword: string) => {
     const k = keyword.trim();
     if (!k) return text;
-    const re = new RegExp(`(${k.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\$&')})`, 'ig');
+    const re = new RegExp(
+      `(${k.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\$&')})`,
+      'ig'
+    );
     return text.split(re).map((part, i) =>
-      re.test(part)
-        ? <span className="hard-skills__highlight" key={i}>{part}</span>
-        : <span key={i}>{part}</span>
+      part.toLowerCase() === k.toLowerCase() ? (
+        <span className="hard-skills__highlight" key={i}>
+          {part}
+        </span>
+      ) : (
+        <span key={i}>{part}</span>
+      )
     );
   };
 
@@ -118,7 +152,9 @@ export default function HardSkillSection({ onChange }: HardSkillSectionProps) {
     setSelected((prev) => {
       if (prev.has(key)) return prev;
       if (prev.size >= MAX_SELECTED) {
-        toast.success('최대 30개까지 선택가능합니다.', { toastId: 'role-limit' });
+        toast.success('최대 30개까지 선택가능합니다.', {
+          toastId: 'hard-skill-limit',
+        });
         return prev;
       }
       const next = new Set(prev);
@@ -138,10 +174,16 @@ export default function HardSkillSection({ onChange }: HardSkillSectionProps) {
             <div className="resume-create-page__section-title__heading">
               하드 스킬
               <span className="tooltip tooltip--top">
-                <img className="tooltip__trigger" src={ic_error_gray500_20} alt="툴팁" />
+                <img
+                  className="tooltip__trigger"
+                  src={ic_error_gray500_20}
+                  alt="툴팁"
+                />
                 <div className="tooltip__content" role="tooltip">
                   <span className="tooltip__title">하드 스킬이란?</span>
-                  <span className="tooltip__desc">직무 수행에 필요한 전문 기술이나 지식을 의미합니다.</span>
+                  <span className="tooltip__desc">
+                    직무 수행에 필요한 전문 기술이나 지식을 의미합니다.
+                  </span>
                 </div>
               </span>
             </div>
@@ -187,12 +229,16 @@ export default function HardSkillSection({ onChange }: HardSkillSectionProps) {
         </div>
       )}
 
-      <div className={`resume-create-page__section-body ${isAdding ? '' : 'empty'}`}>
+      <div
+        className={`resume-create-page__section-body ${
+          isAdding ? '' : 'empty'
+        }`}
+      >
         {isAdding ? (
           <>
             <SearchField
               className="resume-search"
-              id="desired-role-search"
+              id="hard-skill-search"
               value={q}
               placeholder="보유 하드 스킬을 입력해 주세요. (ex. Java, React)"
               onChange={setQ}
@@ -230,14 +276,16 @@ export default function HardSkillSection({ onChange }: HardSkillSectionProps) {
                     tabIndex={0}
                   >
                     <span className="hard-skills__highlight">“{q}”</span>
-                    <span className="hard-skills__create-suffix">(으)로 직접 등록하기</span>
+                    <span className="hard-skills__create-suffix">
+                      (으)로 직접 등록하기
+                    </span>
                   </div>
                 )}
               </div>
             )}
 
             <AiSuggestChips
-              title="경력 및 학력 기반의 AI 추천 직무입니다."
+              title="경력 및 학력 기반의 AI 추천 하드 스킬입니다."
               tags={['CSS', 'JavaScript']}
               onTagClick={(tag) => addRole(tag)}
             />

@@ -44,7 +44,7 @@ const blankItem = (): Education => ({
 const initialItems = (values?: Education[]): Education[] =>
   values && values.length > 0 ? values : [blankItem()];
 
-// ✅ 아이템이 비어있는지 체크 (필수 입력값만)
+// 필수 입력값 기준으로 비어있는지 체크
 const isItemEmpty = (item: Education): boolean => {
   return (
     !item.school_name?.trim() &&
@@ -53,32 +53,56 @@ const isItemEmpty = (item: Education): boolean => {
   );
 };
 
+interface EducationSectionProps {
+  values?: Education[];
+  onChange: (list: Education[]) => void;
+  onFocusAny?: () => void;
+  errors?: EducationErrors[];
+  isEdit?: boolean; // 🔥 추가: 수정 모드 여부
+}
+
 export default function EducationSection({
   values = [],
   onChange,
   onFocusAny,
   errors = [],
-}: {
-  values?: Education[];
-  onChange: (list: Education[]) => void;
-  onFocusAny?: () => void;
-  errors?: EducationErrors[];   // ✅ 배열
-}) {
+  isEdit = false, // 🔥 기본값: create 모드
+}: EducationSectionProps) {
   const [items, setItems] = useState<Education[]>(() => initialItems(values));
 
-  // 🔥 status(졸업 여부)를 표시용 gradType과 연결
+  // status(졸업 여부)를 표시용 gradType과 연결
   const [gradType, setGradType] = useState<(string | null)[]>(() =>
-    values && values.length > 0
-      ? values.map((v) => v.status ?? null)
-      : [null]
+    values && values.length > 0 ? values.map((v) => v.status ?? null) : [null]
   );
 
   const [openedSelectIdx, setOpenedSelectIdx] = useState<number | null>(null);
 
-  // ✅ 모달 상태
+  // 모달 상태
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTargetIndex, setDeleteTargetIndex] = useState<number | null>(null);
 
+  const didSyncRef = useRef(false);
+
+  // 🔥 edit 모드일 때만, 부모 values(서버 데이터) → 내부 items/gradType 으로 한 번만 동기화
+  useEffect(() => {
+    if (!isEdit) return;              // create 모드면 그냥 패스
+    if (didSyncRef.current) return;
+
+    if (!values || values.length === 0) {
+      didSyncRef.current = true;
+      return;
+    }
+
+    // 내부가 "처음 1줄 + 완전 비어있는 상태"일 때만 덮어씀
+    const isInitialEmpty = items.length === 1 && isItemEmpty(items[0]);
+    if (!isInitialEmpty && didSyncRef.current) return;
+
+    console.log('✅ EducationSection(edit): values 동기화', values);
+    setItems(values);
+    setGradType(values.map((v) => v.status ?? null));
+    didSyncRef.current = true;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEdit, values]);
 
   const swap = <T,>(arr: T[], i: number, j: number) => {
     const next = arr.slice();
@@ -95,24 +119,20 @@ export default function EducationSection({
     setGradType((prev) => [null, ...prev]);
   };
 
-  // ✅ 삭제 버튼 클릭 핸들러
   const handleRemoveClick = (idx: number) => {
-    if (items.length <= 1) return; // 1개 남았으면 삭제 불가
+    if (items.length <= 1) return;
 
     const item = items[idx];
     const isEmpty = isItemEmpty(item);
 
     if (isEmpty) {
-      // 입력된 내용이 없으면 즉시 삭제
       removeItem(idx);
     } else {
-      // 입력된 내용이 있으면 모달 띄우기
       setDeleteTargetIndex(idx);
       setShowDeleteModal(true);
     }
   };
 
-  // ✅ 삭제 모달 - 예
   const handleConfirmDelete = () => {
     if (deleteTargetIndex !== null) {
       removeItem(deleteTargetIndex);
@@ -121,19 +141,14 @@ export default function EducationSection({
     setDeleteTargetIndex(null);
   };
 
-  // ✅ 삭제 모달 - 아니오
   const handleCancelDelete = () => {
     setShowDeleteModal(false);
     setDeleteTargetIndex(null);
   };
 
-  // ✅ 실제 삭제 함수
   const removeItem = (idx: number) => {
     setItems((prev) => {
-      const next =
-        prev.length <= 1
-          ? prev.filter((_, i) => i !== idx)
-          : prev.filter((_, i) => i !== idx);
+      const next = prev.filter((_, i) => i !== idx);
       const normalized = next.length === 0 ? [blankItem()] : next;
       onChange(normalized);
       return normalized;
@@ -186,20 +201,17 @@ export default function EducationSection({
             index={idx}
             total={items.length}
             value={it}
-            errors={errors[idx]}  // ✅ 배열의 idx번째 에러 전달
+            errors={errors[idx]}
             gradLabel={gradType[idx]}
             selectOpen={openedSelectIdx === idx}
             onToggleSelect={() =>
               setOpenedSelectIdx((o) => (o === idx ? null : idx))
             }
             onSelectGrad={(label) => {
-              // 🔥 1) 드롭다운 표시용 상태 업데이트
               setGradType((prev) =>
                 prev.map((v, i) => (i === idx ? label : v))
               );
               setOpenedSelectIdx(null);
-
-              // 🔥 2) 실제 Education.status 필드 업데이트
               patchItem(idx, { status: label });
             }}
             onChange={(patch) => patchItem(idx, patch)}
@@ -210,15 +222,17 @@ export default function EducationSection({
           />
         ))}
 
-        <span className="default_btn_white" role="button" tabIndex={0} onClick={addItem}>
+        <span
+          className="default_btn_white"
+          role="button"
+          tabIndex={0}
+          onClick={addItem}
+        >
           <img src={ic_add_btn_gray900_20} alt="" />
           추가
         </span>
       </div>
 
-      {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-      {/* 삭제 확인 모달 */}
-      {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
       <Modal
         open={showDeleteModal}
         title="입력된 내용을 전부 삭제하시겠습니까?"
@@ -305,7 +319,6 @@ function EducationItem({
   const canRemove = total > 1;
 
   const hasStatusError = !!errors?.status;
-
 
   return (
     <div className="education-section__item">
@@ -521,7 +534,9 @@ function EducationItem({
           aria-disabled={!canMoveUp}
         >
           <img
-            src={canMoveUp ? ic_key_arrow_up_gray900_20 : ic_key_arrow_up_gray500_20}
+            src={
+              canMoveUp ? ic_key_arrow_up_gray900_20 : ic_key_arrow_up_gray500_20
+            }
             alt=""
           />
         </span>

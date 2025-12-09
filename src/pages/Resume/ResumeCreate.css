@@ -13,6 +13,10 @@
     border-bottom: 1px solid var(--gray-300, #E0E2E4);
 }
 
+.resume-create-page.edit .resume-create-page__status{
+    justify-content: space-between;
+}
+
 .resume-create-page__status{
     /* display: flex;
     padding: 96px 360px 24px 360px;

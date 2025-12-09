@@ -1,3 +1,4 @@
+// src/pages/Resume/ResumeCreate/CareerSection/CareerSection.tsx
 import React, { useEffect, useRef, useState } from "react";
 import FormField from "@/shared/components/form/FormField";
 import FormInput from "@/shared/components/form/FormInput";
@@ -32,25 +33,26 @@ const makeId = () => Math.random().toString(36).slice(2, 10);
 
 // ===== 타입 정의 =====
 export type CareerInfo = {
-  id: string;
+  id?: string;
   company_name: string;
   role: string;
   position: string;
   summary: string;
   employmentType: string | null;
   isCurrent: boolean;
-  startDate: string; // "YYYY-MM"
-  endDate: string; // "YYYY-MM"
+  startDate: string;
+  endDate: string;
 };
 
 export type CareerErrors = Partial<Record<keyof CareerInfo, string>>;
 
 interface CareerSectionProps {
-  value?: CareerInfo[]; // ✅ 초기값 받기
-  isFreshGraduate?: boolean; // ✅ 신입 상태 받기
-  onChange: (careers: CareerInfo[], isFresh: boolean) => void; // ✅ 신입 상태도 함께 전달
+  value?: CareerInfo[];
+  isFreshGraduate?: boolean;
+  onChange: (careers: CareerInfo[], isFresh: boolean) => void;
   errors?: CareerErrors[];
-  onClearErrors?: () => void; // ✅ 에러 초기화 함수 추가
+  onClearErrors?: () => void;
+  isEdit?: boolean; // 🔥 추가
 }
 
 const blankItem = (): CareerInfo => ({
@@ -71,7 +73,6 @@ const swap = <T,>(arr: T[], i: number, j: number) => {
   return next;
 };
 
-// 아이템이 비어있는지 체크
 const isItemEmpty = (item: CareerInfo): boolean => {
   return (
     !item.company_name.trim() &&
@@ -84,73 +85,83 @@ const isItemEmpty = (item: CareerInfo): boolean => {
   );
 };
 
-// ===== 메인 컴포넌트 =====
+const normalizeItemsFromValue = (value: CareerInfo[]): CareerInfo[] => {
+  if (!value || value.length === 0) return [blankItem()];
+  return value.map((it) => ({
+    ...it,
+    id: it.id ?? makeId(),
+  }));
+};
+
 export default function CareerSection({
   value = [],
   isFreshGraduate = false,
   onChange,
   errors,
-  onClearErrors, // ✅ 에러 초기화 함수
+  onClearErrors,
+  isEdit = false, // 🔥 기본값: create 모드
 }: CareerSectionProps) {
-  // ✅ props에서 받은 초기값 사용
-  const [items, setItems] = useState<CareerInfo[]>(
-    () => (value.length > 0 ? value : [blankItem()])
+  const [items, setItems] = useState<CareerInfo[]>(() =>
+    normalizeItemsFromValue(value)
   );
   const [isFresh, setIsFresh] = useState(isFreshGraduate);
 
-  // 모달 상태
+  const didSyncFromValueRef = useRef(false);
+
+  // 🔥 edit 모드일 때만, 서버에서 온 value(careerList)로 한 번만 동기화
+  useEffect(() => {
+    if (!isEdit) return;                 // create 모드는 패스
+    if (didSyncFromValueRef.current) return;
+    if (!value || value.length === 0) return;
+
+    const hasRealContent = value.some((v) => !isItemEmpty(v));
+    if (!hasRealContent) return;
+
+    console.log("✅ CareerSection(edit): value 동기화", value);
+    setItems(normalizeItemsFromValue(value));
+    setIsFresh(isFreshGraduate);
+    didSyncFromValueRef.current = true;
+  }, [isEdit, value, isFreshGraduate]);
+
+  // items / isFresh 변경 시 부모에 알리기 (공통)
+  useEffect(() => {
+    onChange(items, isFresh);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items, isFresh]);
+
+  // 이하 나머지 로직은 그대로
   const [showFreshModal, setShowFreshModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTargetIndex, setDeleteTargetIndex] = useState<number | null>(null);
 
-  // ✨ items나 isFresh가 변경될 때마다 부모에게 전달
-  useEffect(() => {
-    onChange(items, isFresh); // ✅ 신입 상태도 함께 전달
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [items, isFresh]);
-
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 신입 체크박스 핸들러
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   const handleFreshCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const checked = e.target.checked;
 
     if (checked) {
-      // 신입으로 체크 → 입력된 내용이 있으면 모달 표시
       const hasContent = items.some((item) => !isItemEmpty(item));
-
       if (hasContent) {
-        // 입력된 내용이 있으면 모달 띄우기
         setShowFreshModal(true);
       } else {
-        // 입력된 내용이 없으면 즉시 신입으로 변경
         setIsFresh(true);
         setItems([blankItem()]);
-        onClearErrors?.(); // ✅ 에러 초기화
+        onClearErrors?.();
       }
     } else {
-      // 신입 체크 해제
       setIsFresh(false);
     }
   };
 
-  // 신입 모달 - 예
   const handleConfirmFresh = () => {
     setIsFresh(true);
     setItems([blankItem()]);
     setShowFreshModal(false);
-    onClearErrors?.(); // ✅ 에러 초기화
+    onClearErrors?.();
   };
 
-  // 신입 모달 - 취소
   const handleCancelFresh = () => {
     setShowFreshModal(false);
-    // 체크박스 상태는 그대로 유지 (신입 체크 안됨)
   };
 
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 경력 불러오기
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   const importCareers = async () => {
     const fetched: Omit<CareerInfo, "id">[] = [
       {
@@ -180,35 +191,29 @@ export default function CareerSection({
         ...it,
       }))
     );
-    setIsFresh(false); // 경력 불러오면 신입 체크 해제
+    setIsFresh(false);
+    onClearErrors?.();
   };
 
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 아이템 조작
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   const addItem = () => {
     setItems((prev) => [blankItem(), ...prev]);
-    setIsFresh(false); // 추가하면 신입 체크 해제
+    setIsFresh(false);
   };
 
-  // 삭제 버튼 클릭
   const handleRemoveClick = (idx: number) => {
-    if (items.length <= 1) return; // 1개 남았으면 삭제 불가
+    if (items.length <= 1) return;
 
     const item = items[idx];
-    const isEmpty = isItemEmpty(item);
+    const empty = isItemEmpty(item);
 
-    if (isEmpty) {
-      // 입력된 내용이 없으면 즉시 삭제
+    if (empty) {
       removeItem(idx);
     } else {
-      // 입력된 내용이 있으면 모달 띄우기
       setDeleteTargetIndex(idx);
       setShowDeleteModal(true);
     }
   };
 
-  // 삭제 모달 - 예
   const handleConfirmDelete = () => {
     if (deleteTargetIndex !== null) {
       removeItem(deleteTargetIndex);
@@ -217,26 +222,30 @@ export default function CareerSection({
     setDeleteTargetIndex(null);
   };
 
-  // 삭제 모달 - 아니오
   const handleCancelDelete = () => {
     setShowDeleteModal(false);
     setDeleteTargetIndex(null);
   };
 
-  // 실제 삭제 함수
   const removeItem = (idx: number) => {
-    setItems((prev) => (prev.length <= 1 ? prev : prev.filter((_, i) => i !== idx)));
+    setItems((prev) =>
+      prev.length <= 1 ? prev : prev.filter((_, i) => i !== idx)
+    );
   };
 
   const moveUp = (idx: number) =>
     setItems((prev) => (idx <= 0 ? prev : swap(prev, idx, idx - 1)));
 
   const moveDown = (idx: number) =>
-    setItems((prev) => (idx >= prev.length - 1 ? prev : swap(prev, idx, idx + 1)));
+    setItems((prev) =>
+      idx >= prev.length - 1 ? prev : swap(prev, idx, idx + 1)
+    );
 
   const patchItem = (idx: number, patch: Partial<CareerInfo>) => {
-    setItems((prev) => prev.map((it, i) => (i === idx ? { ...it, ...patch } : it)));
-    setIsFresh(false); // 수정하면 신입 체크 해제
+    setItems((prev) =>
+      prev.map((it, i) => (i === idx ? { ...it, ...patch } : it))
+    );
+    setIsFresh(false);
   };
 
   return (
@@ -270,7 +279,7 @@ export default function CareerSection({
       <div className="resume-create-page__section-body career-section">
         {items.map((it, idx) => (
           <CareerItem
-            key={it.id}
+            key={it.id ?? idx}
             index={idx}
             total={items.length}
             value={it}
@@ -282,15 +291,17 @@ export default function CareerSection({
           />
         ))}
 
-        <span className="default_btn_white" role="button" tabIndex={0} onClick={addItem}>
+        <span
+          className="default_btn_white"
+          role="button"
+          tabIndex={0}
+          onClick={addItem}
+        >
           <img src={ic_add_btn_gray900_20} alt="" />
           추가
         </span>
       </div>
 
-      {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-      {/* 신입 변경 모달 */}
-      {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
       <Modal
         open={showFreshModal}
         title="신입으로 변경하시겠습니까?"
@@ -302,9 +313,6 @@ export default function CareerSection({
         onClose={handleCancelFresh}
       />
 
-      {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-      {/* 삭제 확인 모달 */}
-      {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
       <Modal
         open={showDeleteModal}
         title="입력된 내용을 전부 삭제하시겠습니까?"
@@ -318,6 +326,7 @@ export default function CareerSection({
     </div>
   );
 }
+
 
 // ===== CareerItem 컴포넌트 =====
 function CareerItem({
@@ -404,7 +413,8 @@ function CareerItem({
     const afterToday =
       y > now.getFullYear() || (y === now.getFullYear() && m > now.getMonth());
     const beforeStart =
-      !!startMV && (y < startMV.year || (y === startMV.year && m < startMV.month));
+      !!startMV &&
+      (y < startMV.year || (y === startMV.year && m < startMV.month));
     return beforeStart || afterToday;
   };
 
@@ -445,7 +455,9 @@ function CareerItem({
             value={company_name}
             onChange={(v) => onChange({ company_name: v })}
             invalid={!!errors?.company_name}
-            rightIconSrc={errors?.company_name ? Icons.ic_error_red100_20 : undefined}
+            rightIconSrc={
+              errors?.company_name ? Icons.ic_error_red100_20 : undefined
+            }
             placeholder="회사명을 입력해 주세요."
           />
         </FormField>
@@ -464,54 +476,26 @@ function CareerItem({
                 setOpenEmp((o) => !o);
               }}
             >
-              {employmentType ?? <span className="ui-select-none-default">재직 형태</span>}
+              {employmentType ?? (
+                <span className="ui-select-none-default">재직 형태</span>
+              )}
               <img src={ic_arrow_drop_down_gray900_24} alt="" />
               {openEmp && (
                 <div className="ui-select__menu" role="listbox">
-                  <div
-                    className="ui-select__option"
-                    role="option"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onChange({ employmentType: "정규직" });
-                      setOpenEmp(false);
-                    }}
-                  >
-                    정규직
-                  </div>
-                  <div
-                    className="ui-select__option"
-                    role="option"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onChange({ employmentType: "계약직" });
-                      setOpenEmp(false);
-                    }}
-                  >
-                    계약직
-                  </div>
-                  <div
-                    className="ui-select__option"
-                    role="option"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onChange({ employmentType: "인턴" });
-                      setOpenEmp(false);
-                    }}
-                  >
-                    인턴
-                  </div>
-                  <div
-                    className="ui-select__option"
-                    role="option"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onChange({ employmentType: "프리랜서" });
-                      setOpenEmp(false);
-                    }}
-                  >
-                    프리랜서
-                  </div>
+                  {["정규직", "계약직", "인턴", "프리랜서"].map((type) => (
+                    <div
+                      key={type}
+                      className="ui-select__option"
+                      role="option"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onChange({ employmentType: type });
+                        setOpenEmp(false);
+                      }}
+                    >
+                      {type}
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
@@ -520,14 +504,21 @@ function CareerItem({
           {/* 시작일~종료일 */}
           <div className="career-section__period">
             <div className="career-section__date-wrapper" ref={startCalRef}>
-              <FormField label="" className="career-section date career-section__date--start">
+              <FormField
+                label=""
+                className="career-section date career-section__date--start"
+              >
                 <DateInline
                   id={`career-start_${index}`}
-                  iconSrc={errors?.startDate ? icon_calendar_red_20 : ic_calendar_gray900_20}
+                  iconSrc={
+                    errors?.startDate ? icon_calendar_red_20 : ic_calendar_gray900_20
+                  }
                   value={startDate}
                   onClick={() => setOpenStartCal(true)}
                   invalid={!!errors?.startDate}
-                  rightIconSrc={errors?.startDate ? Icons.ic_error_red100_20 : undefined}
+                  rightIconSrc={
+                    errors?.startDate ? Icons.ic_error_red100_20 : undefined
+                  }
                   isOpen={openStartCal}
                 />
               </FormField>
@@ -545,7 +536,8 @@ function CareerItem({
                         const endMV = parseMonth(endDate);
                         if (
                           endMV &&
-                          (endMV.year < d.year || (endMV.year === d.year && endMV.month < d.month))
+                          (endMV.year < d.year ||
+                            (endMV.year === d.year && endMV.month < d.month))
                         ) {
                           onChange({ endDate: fmtMonth(d) });
                         }
@@ -561,7 +553,7 @@ function CareerItem({
 
             {isCurrent ? (
               <div className="field career-section date career-section__date--end">
-                <label className="label">{}</label>
+                <label className="label" />
                 <div className="date-section">
                   <div className="section__date-inner disabled">
                     <img src={ic_add_btn_gray700_20} alt="" />
@@ -571,14 +563,21 @@ function CareerItem({
               </div>
             ) : (
               <div className="career-section__date-wrapper" ref={endCalRef}>
-                <FormField label="" className="career-section date career-section__date--end">
+                <FormField
+                  label=""
+                  className="career-section date career-section__date--end"
+                >
                   <DateInline
                     id={`career-end_${index}`}
-                    iconSrc={errors?.endDate ? icon_calendar_red_20 : ic_calendar_gray900_20}
+                    iconSrc={
+                      errors?.endDate ? icon_calendar_red_20 : ic_calendar_gray900_20
+                    }
                     value={endDate}
                     onClick={() => setOpenEndCal(true)}
                     invalid={!!errors?.endDate}
-                    rightIconSrc={errors?.endDate ? Icons.ic_error_red100_20 : undefined}
+                    rightIconSrc={
+                      errors?.endDate ? Icons.ic_error_red100_20 : undefined
+                    }
                     isOpen={openEndCal}
                   />
                 </FormField>
@@ -676,7 +675,9 @@ function CareerItem({
               <textarea
                 id={`summary_${index}`}
                 value={summary ?? ""}
-                onChange={(e) => onChange({ summary: e.target.value.slice(0, 2000) })}
+                onChange={(e) =>
+                  onChange({ summary: e.target.value.slice(0, 2000) })
+                }
                 maxLength={2000}
               />
               <span className="career-section__char-count">
@@ -696,7 +697,9 @@ function CareerItem({
                 <div className="career-section__summary-read">{summary}</div>
               ) : (
                 <ul className="career-section__summary-tips">
-                  <li className="career-section__summary-tip">세부 내용을 입력해 주세요.</li>
+                  <li className="career-section__summary-tip">
+                    세부 내용을 입력해 주세요.
+                  </li>
                   <li className="career-section__summary-tip">
                     프로젝트 경험은 역할ㆍ기여도ㆍ성과 중심으로 정리하면 좋습니다.
                   </li>
@@ -712,7 +715,7 @@ function CareerItem({
           <AISuggestArea
             show={showAISuggest}
             items={aiSuggestions}
-            onOpen={handleClickAISuggest}
+            onClickSuggest={handleClickAISuggest}
             onClose={handleCloseAISuggest}
             onPick={handlePickSuggestion}
             starIconGray={ic_star_gray700_20}
@@ -734,7 +737,9 @@ function CareerItem({
           aria-disabled={!canMoveUp}
         >
           <img
-            src={canMoveUp ? ic_key_arrow_up_gray900_20 : ic_key_arrow_up_gray500_20}
+            src={
+              canMoveUp ? ic_key_arrow_up_gray900_20 : ic_key_arrow_up_gray500_20
+            }
             alt=""
           />
         </span>
@@ -749,7 +754,11 @@ function CareerItem({
           aria-disabled={!canMoveDown}
         >
           <img
-            src={canMoveDown ? ic_key_arrow_down_gray900_20 : ic_key_arrow_down_gray500_20}
+            src={
+              canMoveDown
+                ? ic_key_arrow_down_gray900_20
+                : ic_key_arrow_down_gray500_20
+            }
             alt=""
           />
         </span>
@@ -763,7 +772,10 @@ function CareerItem({
           onClick={() => canRemove && onRemove()}
           aria-disabled={!canRemove}
         >
-          <img src={canRemove ? ic_trash_gray900_20 : ic_trash_gray500_20} alt="" />
+          <img
+            src={canRemove ? ic_trash_gray900_20 : ic_trash_gray500_20}
+            alt=""
+          />
         </span>
       </div>
     </div>

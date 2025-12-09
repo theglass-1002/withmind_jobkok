@@ -17,15 +17,27 @@ const MAX_SELECTED = 30;
 
 // 부모로 값 전달하고 싶을 때를 위한 선택적 props
 interface SoftSkillsSectionProps {
+  value?: string[];                  // 🔥 edit 시 초기 소프트 스킬 목록
   onChange?: (skills: string[]) => void; // 선택된 소프트 스킬 텍스트 배열
+  isEdit?: boolean;                  // 🔥 수정 모드 여부
 }
 
-export default function SoftSkillsSection({ onChange }: SoftSkillsSectionProps) {
+export default function SoftSkillsSection({
+  value = [],
+  onChange,
+  isEdit = false,
+}: SoftSkillsSectionProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState('');
-  const [selected, setSelected] = useState<Set<string>>(new Set());
+
+  // 내부 선택 상태: "그룹|스킬명" 형태로 저장
+  const [selected, setSelected] = useState<Set<string>>(
+    () => new Set(value.map((s) => `직접 입력|${s}`))
+  );
+
   const menuRef = useRef<HTMLDivElement>(null);
+  const didSyncFromValueRef = useRef(false);
 
   const startAdd = () => setIsAdding(true);
 
@@ -33,20 +45,34 @@ export default function SoftSkillsSection({ onChange }: SoftSkillsSectionProps) 
     setIsAdding(false);
     setOpen(false);
     setQ('');
-    setSelected(new Set()); // chips 초기화
+    // ❌ 선택된 소프트 스킬은 유지 (edit에서 초기값 날리는 거 방지)
   };
 
-  //  선택된 소프트 스킬 콘솔로그 + 부모로 전달
+  // 🔥 edit 모드일 때만, 부모 value(softSkills) 로 한 번만 selected 세팅
+  useEffect(() => {
+    if (!isEdit) return;
+    if (!value || value.length === 0) return;
+    if (didSyncFromValueRef.current) return;
+
+    console.log('✅ SoftSkillsSection(edit): value 동기화', value);
+    setSelected(new Set(value.map((s) => `직접 입력|${s}`)));
+    didSyncFromValueRef.current = true;
+  }, [isEdit, value]);
+
+  // 선택된 소프트 스킬 → 부모로 전달
   useEffect(() => {
     const skills = Array.from(selected).map((key) => key.split('|')[1]);
-   
     onChange?.(skills);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected]);
 
   // roles JSON → 평탄화
   const flat: RoleItem[] = useMemo(() => {
-    const cats = (roles as any)?.categories as Array<{ name: string; all?: string; roles: string[] }>;
+    const cats = (roles as any)?.categories as Array<{
+      name: string;
+      all?: string;
+      roles: string[];
+    }>;
     if (!Array.isArray(cats)) return [];
     const out: RoleItem[] = [];
     for (const c of cats) {
@@ -60,7 +86,8 @@ export default function SoftSkillsSection({ onChange }: SoftSkillsSectionProps) 
   const filtered = useMemo(() => {
     const k = (q ?? '').trim().toLowerCase();
     if (!k) return flat.slice(0, 20);
-    const toStr = (v: unknown) => (typeof v === 'string' ? v : String(v ?? ''));
+    const toStr = (v: unknown) =>
+      typeof v === 'string' ? v : String(v ?? '');
     return flat
       .filter((i) => {
         const role = toStr(i.role).toLowerCase();
@@ -85,11 +112,18 @@ export default function SoftSkillsSection({ onChange }: SoftSkillsSectionProps) 
   const highlight = (text: string, keyword: string) => {
     const k = keyword.trim();
     if (!k) return text;
-    const re = new RegExp(`(${k.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\$&')})`, 'ig');
+    const re = new RegExp(
+      `(${k.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\$&')})`,
+      'ig'
+    );
     return text.split(re).map((part, i) =>
-      re.test(part)
-        ? <span className="soft-skills__highlight" key={i}>{part}</span>
-        : <span key={i}>{part}</span>
+      part.toLowerCase() === k.toLowerCase() ? (
+        <span className="soft-skills__highlight" key={i}>
+          {part}
+        </span>
+      ) : (
+        <span key={i}>{part}</span>
+      )
     );
   };
 
@@ -118,7 +152,9 @@ export default function SoftSkillsSection({ onChange }: SoftSkillsSectionProps) 
     setSelected((prev) => {
       if (prev.has(key)) return prev;
       if (prev.size >= MAX_SELECTED) {
-        toast.success('최대 30개까지 선택가능합니다.', { toastId: 'soft-skill-limit' });
+        toast.success('최대 30개까지 선택가능합니다.', {
+          toastId: 'soft-skill-limit',
+        });
         return prev;
       }
       const next = new Set(prev);
@@ -138,12 +174,16 @@ export default function SoftSkillsSection({ onChange }: SoftSkillsSectionProps) 
             <div className="resume-create-page__section-title__heading">
               소프트 스킬
               <span className="tooltip tooltip--top">
-                <img className="tooltip__trigger" src={ic_error_gray500_20} alt="툴팁" />
+                <img
+                  className="tooltip__trigger"
+                  src={ic_error_gray500_20}
+                  alt="툴팁"
+                />
                 <div className="tooltip__content" role="tooltip">
                   <span className="tooltip__title">소프트 스킬이란?</span>
                   <span className="tooltip__desc">
-                    업무를 효과적으로 수행하고 다른 사람들과 협력하는 데 필요한
-                    개인의 역량, 특성, 태도 등을 의미합니다.
+                    업무를 효과적으로 수행하고 다른 사람들과 협력하는 데
+                    필요한 개인의 역량, 특성, 태도 등을 의미합니다.
                   </span>
                 </div>
               </span>
@@ -190,7 +230,11 @@ export default function SoftSkillsSection({ onChange }: SoftSkillsSectionProps) 
         </div>
       )}
 
-      <div className={`resume-create-page__section-body ${isAdding ? '' : 'empty'}`}>
+      <div
+        className={`resume-create-page__section-body ${
+          isAdding ? '' : 'empty'
+        }`}
+      >
         {isAdding ? (
           <>
             <SearchField

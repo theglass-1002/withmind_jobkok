@@ -182,6 +182,7 @@ export interface ResumeItem {
       fileIdx: number | null;
       fileIdxsCsv: string | null;
       order: number | null;
+      filePath?: string | null;
     }[];
   
     selfIntroList: {
@@ -475,6 +476,7 @@ export type PortfolioFileItem = {
   kind: "file";
   name: string; // 예: "홍길동_포트폴리오.pdf"
   iconSrc?: string; // 없으면 defaultIcons.file 사용
+  filePath?:string;
 };
 
 export type PortfolioLinkItem = {
@@ -504,17 +506,18 @@ export function mapPortfolioListToPortfolioItems(
       });
       return items;
     }
-
     // 2) FILE 타입인 경우 -> file 아이템
     if (p.itemType === "FILE") {
       // 실제 파일 정보를 못 가져오니까, title을 파일명처럼 사용
       const name =
         p.title ||
         "포트폴리오 파일"; // title 없으면 기본값 (거의 title에 파일명이 들어오겠죠)
+      
 
       items.push({
         kind: "file",
         name,
+        filePath:p.filePath||""
       });
 
       return items;
@@ -524,3 +527,31 @@ export function mapPortfolioListToPortfolioItems(
     return items;
   });
 }
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// AI 이력서 제목 추천 API
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// 요청 바디 타입 (API 스펙 그대로 - postion 오타 주의)
+export interface ResumeTitleRequest {
+  postion: string;      // 예: "디자이너"
+  experiences: string;  // 예: "협업"
+  activities: string;   // 예: "동아리 활동"
+  awards: string;       // 예: "수상 내역"
+}
+
+// 응답 타입
+export interface ResumeTitleAIResponse {
+  success: boolean;
+  data: {
+    titles: string[];
+  } | null;
+  error: any;
+  meta: {
+    request_id: string;
+    timestamp: string;
+    [key: string]: any;
+  };
+}
+
+

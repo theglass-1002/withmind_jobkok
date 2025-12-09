@@ -35,9 +35,14 @@ export default function ResumeBasicInfo({
           </span>
         </div>
       </div>
-      <span className="resume-basic__img">
+      {imageSrc?
+       <span className="resume-basic__img">
+       <img src={imageSrc} alt="" />
+     </span>
+      :<></>}
+      {/* <span className="resume-basic__img">
         <img src={imageSrc} alt="" />
-      </span>
+      </span> */}
     </div>
   );
 }

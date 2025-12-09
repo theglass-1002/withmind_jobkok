@@ -24,10 +24,10 @@ import { parseMonth, fmtMonth } from "@/shared/utils/util";
 
 // 🔥 상위에서 사용할 타입 export
 export type Activity = {
-  id: string;
+  id?: string;
   activityType: string | null;
   activityName: string;
-  startDate?: string; // "YYYY-MM" (fmtMonth 결과)
+  startDate?: string; // "YYYY-MM"
   endDate?: string;
   summary?: string;
 };
@@ -56,19 +56,30 @@ const isItemEmpty = (item: ActivityItem): boolean => {
   );
 };
 
+// 부모 value → 내부 items 로 옮길 때 id 보정
+const normalizeItemsFromValue = (value: Activity[]): ActivityItem[] => {
+  if (!value || value.length === 0) return [];
+  return value.map((it) => ({
+    ...it,
+    id: it.id ?? makeId(),
+  }));
+};
+
 // 부모와 연동을 위한 props
 interface ActivitiesSectionProps {
   value?: Activity[];
   onChange?: (activities: Activity[]) => void;
-  errors?: ActivityErrors[]; // ✅ 에러 배열 추가
-  onFocusAny?: () => void; // ✅ 포커스 시 에러 리셋
+  errors?: ActivityErrors[];
+  onFocusAny?: () => void;
+  isEdit?: boolean; // 🔥 작성 / 수정 구분
 }
 
-export default function ActivitiesSection({ 
-  value = [], 
-  onChange, 
-  errors = [], // ✅ 기본값 빈 배열
-  onFocusAny 
+export default function ActivitiesSection({
+  value = [],
+  onChange,
+  errors = [],
+  onFocusAny,
+  isEdit = false,
 }: ActivitiesSectionProps) {
   const MAX_SUMMARY = 2000;
   const [showConfirm, setShowConfirm] = useState(false);
@@ -76,9 +87,9 @@ export default function ActivitiesSection({
   const [deleteTargetIndex, setDeleteTargetIndex] = useState<number | null>(null);
   const [isAdding, setIsAdding] = useState(false);
 
-  // 초기값만 value에서 가져오고 이후엔 로컬 상태로 관리
-  const [items, setItems] = useState<ActivityItem[]>(
-    () => (value.length > 0 ? value : [])
+  // 🔥 내부 items: 처음엔 value 기반으로, id 보정해서
+  const [items, setItems] = useState<ActivityItem[]>(() =>
+    normalizeItemsFromValue(value)
   );
 
   const [openDropdownIndex, setOpenDropdownIndex] = useState<number | null>(null);
@@ -87,10 +98,24 @@ export default function ActivitiesSection({
   const [openEndIdx, setOpenEndIdx] = useState<number | null>(null);
 
   const selectRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const startRefs  = useRef<(HTMLDivElement | null)[]>([]);
-  const endRefs    = useRef<(HTMLDivElement | null)[]>([]);
+  const startRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const endRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  //  items 변경 시 상위로 전달
+  // 🔥 edit 모드일 때만, 부모 value(activities) 로 한 번만 초기화
+  const didSyncFromValueRef = useRef(false);
+  useEffect(() => {
+    if (!isEdit) return;
+    if (!value || value.length === 0) return;
+    if (didSyncFromValueRef.current) return;
+
+    console.log("✅ ActivitiesSection(edit): value 동기화", value);
+    const normalized = normalizeItemsFromValue(value);
+    setItems(normalized);
+    setIsAdding(true); // 처음부터 카드가 보이도록
+    didSyncFromValueRef.current = true;
+  }, [isEdit, value]);
+
+  // items 변경 시 상위로 전달
   useEffect(() => {
     onChange?.(items);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -125,7 +150,14 @@ export default function ActivitiesSection({
   const startAdd = () => {
     setIsAdding(true);
     if (items.length === 0) {
-      setItems([{ id: makeId(), activityType: null, activityName: "", summary: "" }]);
+      setItems([
+        {
+          id: makeId(),
+          activityType: null,
+          activityName: "",
+          summary: "",
+        },
+      ]);
     }
   };
 
@@ -137,12 +169,12 @@ export default function ActivitiesSection({
     setEditingIndex((cur) => (cur === null ? null : cur + 1));
   };
 
-  // ✅ 삭제 버튼 클릭 핸들러
+  // 삭제 버튼 클릭 핸들러
   const handleRemoveClick = (index: number) => {
     const item = items[index];
-    const isEmpty = isItemEmpty(item);
+    const empty = isItemEmpty(item);
 
-    if (isEmpty) {
+    if (empty) {
       performRemove(index);
     } else {
       setDeleteTargetIndex(index);
@@ -150,7 +182,6 @@ export default function ActivitiesSection({
     }
   };
 
-  // ✅ 삭제 모달 - 예
   const handleConfirmItemDelete = () => {
     if (deleteTargetIndex !== null) {
       performRemove(deleteTargetIndex);
@@ -159,13 +190,11 @@ export default function ActivitiesSection({
     setDeleteTargetIndex(null);
   };
 
-  // ✅ 삭제 모달 - 계속 작성
   const handleCancelItemDelete = () => {
     setShowDeleteModal(false);
     setDeleteTargetIndex(null);
   };
 
-  // ✅ 실제 삭제 수행
   const performRemove = (index: number) => {
     setItems((prev) => {
       const next = [...prev];
@@ -192,7 +221,9 @@ export default function ActivitiesSection({
       [next[index - 1], next[index]] = [next[index], next[index - 1]];
       return next;
     });
-    setEditingIndex((cur) => (cur === index ? index - 1 : cur === index - 1 ? index : cur));
+    setEditingIndex((cur) =>
+      cur === index ? index - 1 : cur === index - 1 ? index : cur
+    );
   };
 
   const moveDown = (index: number) => {
@@ -202,7 +233,9 @@ export default function ActivitiesSection({
       [next[index + 1], next[index]] = [next[index], next[index + 1]];
       return next;
     });
-    setEditingIndex((cur) => (cur === index ? index + 1 : cur === index + 1 ? index : cur));
+    setEditingIndex((cur) =>
+      cur === index ? index + 1 : cur === index + 1 ? index : cur
+    );
   };
 
   const selectType = (index: number, val: string) => {
@@ -223,7 +256,10 @@ export default function ActivitiesSection({
     });
   };
 
-  const startEditing = (index: number, e?: React.KeyboardEvent | React.MouseEvent) => {
+  const startEditing = (
+    index: number,
+    e?: React.KeyboardEvent | React.MouseEvent
+  ) => {
     if (e && "key" in e) {
       // @ts-ignore
       if (e.nativeEvent?.isComposing) return;
@@ -234,7 +270,10 @@ export default function ActivitiesSection({
     setEditingIndex(index);
   };
 
-  const onChangeSummary = (index: number, e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const onChangeSummary = (
+    index: number,
+    e: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
     const v = e.target.value.slice(0, MAX_SUMMARY);
     setItems((prev) => {
       const next = [...prev];
@@ -278,25 +317,28 @@ export default function ActivitiesSection({
     return (y: number, m: number) => {
       const now = new Date();
       const afterToday =
-        y > now.getFullYear() || (y === now.getFullYear() && m > now.getMonth());
+        y > now.getFullYear() ||
+        (y === now.getFullYear() && m > now.getMonth());
       const beforeStart =
-        !!startMV && (y < startMV.year || (y === startMV.year && m < startMV.month));
+        !!startMV &&
+        (y < startMV.year || (y === startMV.year && m < startMV.month));
       return beforeStart || afterToday;
     };
   };
 
-  // ✅ 포커스 핸들러 (에러 리셋)
+  // 포커스 핸들러 (에러 리셋)
   const handleAnyFocus = () => {
     onFocusAny?.();
   };
-
 
   return (
     <div className="resume-create-page__section resume-create-page__section--activities">
       <div className="resume-create-page__section-title resume-create-page__section-title--simple">
         <div className="section-title__row">
           <div className="section-title__left">
-            <div className="resume-create-page__section-title__heading">활동ㆍ경험</div>
+            <div className="resume-create-page__section-title__heading">
+              활동ㆍ경험
+            </div>
           </div>
           {isAdding ? (
             <img
@@ -305,7 +347,10 @@ export default function ActivitiesSection({
               onClick={handleClickClose}
             />
           ) : (
-            <span className="resume-section-title__action--import" onClick={startAdd}>
+            <span
+              className="resume-section-title__action--import"
+              onClick={startAdd}
+            >
               <img src={ic_add_purple_20} alt="" />
               추가
             </span>
@@ -326,14 +371,11 @@ export default function ActivitiesSection({
               const canMoveUp = items.length > 1 && index > 0;
               const canMoveDown = items.length > 1 && index < items.length - 1;
 
-              // ✅ 현재 아이템의 에러 가져오기
               const itemErrors = errors[index] || {};
               const hasTypeError = !!itemErrors.activityType;
               const hasNameError = !!itemErrors.activityName;
               const hasStartDateError = !!itemErrors.startDate;
               const hasEndDateError = !!itemErrors.endDate;
-
-              console.log(`🔍 [활동 아이템 ${index}] errors:`, itemErrors);
 
               return (
                 <div className="activities-section__item" key={item.id}>
@@ -341,33 +383,50 @@ export default function ActivitiesSection({
                     <div className="activities-section__group">
                       <div className="activities-section__control">
                         <label className="small_labe_black-14">
-                          활동ㆍ경험명 <em className="error_text_red">*</em>
+                          활동ㆍ경험명{" "}
+                          <em className="error_text_red">*</em>
                         </label>
 
-                        {/* ✅ 구분 드롭다운 - 에러 상태 추가 */}
                         <div
-                          className={`ui-select ${hasTypeError ? "error" : ""}`}
-                          ref={el => { selectRefs.current[index] = el; }}
+                          className={`ui-select ${
+                            hasTypeError ? "error" : ""
+                          }`}
+                          ref={(el) => {
+                            selectRefs.current[index] = el;
+                          }}
                           role="combobox"
                           aria-expanded={openDropdownIndex === index}
                           tabIndex={0}
                           onClick={() => {
-                            setOpenDropdownIndex((cur) => (cur === index ? null : index));
+                            setOpenDropdownIndex((cur) =>
+                              cur === index ? null : index
+                            );
                             handleAnyFocus();
                           }}
                           onKeyDown={(e) => {
-                            if (e.key === "Enter" || e.key === " ") {
+                            if (
+                              e.key === "Enter" ||
+                              e.key === " "
+                            ) {
                               e.preventDefault();
-                              setOpenDropdownIndex((cur) => (cur === index ? null : index));
+                              setOpenDropdownIndex((cur) =>
+                                cur === index ? null : index
+                              );
                               handleAnyFocus();
                             }
-                            if (e.key === "Escape") setOpenDropdownIndex(null);
+                            if (e.key === "Escape")
+                              setOpenDropdownIndex(null);
                           }}
                         >
                           {item.activityType ?? (
-                            <span className="ui-select-none-default">구분</span>
+                            <span className="ui-select-none-default">
+                              구분
+                            </span>
                           )}
-                          <img src={ic_arrow_drop_down_gray900_24} alt="" />
+                          <img
+                            src={ic_arrow_drop_down_gray900_24}
+                            alt=""
+                          />
 
                           {openDropdownIndex === index && (
                             <div
@@ -375,33 +434,37 @@ export default function ActivitiesSection({
                               role="listbox"
                               onClick={(e) => e.stopPropagation()}
                             >
-                              {["교내활동", "인턴", "자원봉사", "동아리"].map((opt) => (
-                                <div
-                                  key={opt}
-                                  className="ui-select__option"
-                                  role="option"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    selectType(index, opt);
-                                  }}
-                                  onKeyDown={(e) => {
-                                    if (e.key === "Enter" || e.key === " ") {
-                                      e.preventDefault();
+                              {["교내활동", "인턴", "자원봉사", "동아리"].map(
+                                (opt) => (
+                                  <div
+                                    key={opt}
+                                    className="ui-select__option"
+                                    role="option"
+                                    onClick={(e) => {
                                       e.stopPropagation();
                                       selectType(index, opt);
-                                    }
-                                  }}
-                                  tabIndex={0}
-                                >
-                                  {opt}
-                                </div>
-                              ))}
+                                    }}
+                                    onKeyDown={(e) => {
+                                      if (
+                                        e.key === "Enter" ||
+                                        e.key === " "
+                                      ) {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        selectType(index, opt);
+                                      }
+                                    }}
+                                    tabIndex={0}
+                                  >
+                                    {opt}
+                                  </div>
+                                )
+                              )}
                             </div>
                           )}
                         </div>
                       </div>
 
-                      {/* ✅ 활동명 입력 - 에러 상태 추가 */}
                       <FormInput
                         placeholder="활동ㆍ경험명을 입력해 주세요."
                         inputClassName={`activity_name`}
@@ -410,20 +473,21 @@ export default function ActivitiesSection({
                         invalid={hasNameError}
                         onChange={(v: any) => changeName(index, v)}
                         onFocus={handleAnyFocus}
-                      
                       />
                     </div>
 
                     <div className="activities-period">
                       <label className="activities-period__label small_labe_black-14">
-                        활동ㆍ경험 기간 <em className="error_text_red">*</em>
+                        활동ㆍ경험 기간{" "}
+                        <em className="error_text_red">*</em>
                       </label>
 
                       <div className="activities-period__fields">
-                        {/* ✅ 시작일 - 에러 상태 추가 */}
                         <div
                           className="activities-period__field activities-period__field--start"
-                          ref={el => { startRefs.current[index] = el; }}
+                          ref={(el) => {
+                            startRefs.current[index] = el;
+                          }}
                         >
                           <DateInline
                             id={`activities-start_${index}`}
@@ -434,13 +498,16 @@ export default function ActivitiesSection({
                               handleAnyFocus();
                             }}
                             invalid={hasStartDateError}
-                            isOpen={openStartIdx === index} 
+                            isOpen={openStartIdx === index}
                           />
                           {openStartIdx === index && (
                             <div className="calendar-popover">
                               <div className="calendar-popover__panel">
                                 <InlineMonthPicker
-                                  value={parseMonth(item.startDate || "") || undefined}
+                                  value={
+                                    parseMonth(item.startDate || "") ||
+                                    undefined
+                                  }
                                   minYear={1970}
                                   onChange={() => {}}
                                   onApply={(d) => {
@@ -452,11 +519,14 @@ export default function ActivitiesSection({
                                       const needFix =
                                         !!endMV &&
                                         (endMV.year < d.year ||
-                                          (endMV.year === d.year && endMV.month < d.month));
+                                          (endMV.year === d.year &&
+                                            endMV.month < d.month));
                                       next[index] = {
                                         ...next[index],
                                         startDate: fmtMonth(d),
-                                        ...(needFix ? { endDate: fmtMonth(d) } : {}),
+                                        ...(needFix
+                                          ? { endDate: fmtMonth(d) }
+                                          : {}),
                                       };
                                       return next;
                                     });
@@ -470,10 +540,11 @@ export default function ActivitiesSection({
 
                         <div className="activities-period__divider">~</div>
 
-                        {/* ✅ 종료일 - 에러 상태 추가 */}
                         <div
                           className="activities-period__field activities-period__field--end"
-                          ref={el => { endRefs.current[index] = el; }}
+                          ref={(el) => {
+                            endRefs.current[index] = el;
+                          }}
                         >
                           <DateInline
                             id={`activities-end_${index}`}
@@ -484,21 +555,29 @@ export default function ActivitiesSection({
                               handleAnyFocus();
                             }}
                             invalid={hasEndDateError}
-                            isOpen={openEndIdx === index}   
+                            isOpen={openEndIdx === index}
                           />
                           {openEndIdx === index && (
                             <div className="calendar-popover">
                               <div className="calendar-popover__panel">
                                 <InlineMonthPicker
-                                  value={parseMonth(item.endDate || "") || undefined}
+                                  value={
+                                    parseMonth(item.endDate || "") ||
+                                    undefined
+                                  }
                                   defaultValue={startMV}
                                   minYear={startMV?.year ?? 1970}
-                                  isDisabledMonth={makeDisableEnd(item.startDate)}
+                                  isDisabledMonth={makeDisableEnd(
+                                    item.startDate
+                                  )}
                                   onChange={() => {}}
                                   onApply={(d) => {
                                     setItems((prev) => {
                                       const next = [...prev];
-                                      next[index] = { ...next[index], endDate: fmtMonth(d) };
+                                      next[index] = {
+                                        ...next[index],
+                                        endDate: fmtMonth(d),
+                                      };
                                       return next;
                                     });
                                     setOpenEndIdx(null);
@@ -512,18 +591,25 @@ export default function ActivitiesSection({
                     </div>
 
                     <div className="field activities-section__control--summary">
-                      <div className="small_labe_black-14">세부 내용</div>
+                      <div className="small_labe_black-14">
+                        세부 내용
+                      </div>
                       {editingIndex === index ? (
                         <div className="activities-section__summary-input">
                           <textarea
                             value={item.summary ?? ""}
-                            onChange={(e) => onChangeSummary(index, e)}
+                            onChange={(e) =>
+                              onChangeSummary(index, e)
+                            }
                             maxLength={MAX_SUMMARY}
                             onFocus={handleAnyFocus}
                           />
                           <span className="activities-section__char-count">
                             <span>{(item.summary ?? "").length}</span>
-                            <span className="max"> / {MAX_SUMMARY}</span>
+                            <span className="max">
+                              {" "}
+                              / {MAX_SUMMARY}
+                            </span>
                           </span>
                         </div>
                       ) : (
@@ -547,7 +633,10 @@ export default function ActivitiesSection({
                           )}
                           <span className="activities-section__char-count">
                             <span>{(item.summary ?? "").length}</span>
-                            <span className="max"> / {MAX_SUMMARY}</span>
+                            <span className="max">
+                              {" "}
+                              / {MAX_SUMMARY}
+                            </span>
                           </span>
                         </div>
                       )}
@@ -561,14 +650,20 @@ export default function ActivitiesSection({
                         "activities-section__control--up",
                         !canMoveUp ? "is-disabled" : "",
                         !canMoveUp ? "first" : "",
-                      ].join(" ").trim()}
+                      ]
+                        .join(" ")
+                        .trim()}
                       role="button"
                       tabIndex={canMoveUp ? 0 : -1}
                       onClick={() => canMoveUp && moveUp(index)}
                       aria-disabled={!canMoveUp}
                     >
                       <img
-                        src={canMoveUp ? ic_key_arrow_up_gray900_20 : ic_key_arrow_up_gray500_20}
+                        src={
+                          canMoveUp
+                            ? ic_key_arrow_up_gray900_20
+                            : ic_key_arrow_up_gray500_20
+                        }
                         alt=""
                       />
                     </span>
@@ -579,7 +674,9 @@ export default function ActivitiesSection({
                         "activities-section__control--down",
                         !canMoveDown ? "is-disabled" : "",
                         !canMoveDown ? "last" : "",
-                      ].join(" ").trim()}
+                      ]
+                        .join(" ")
+                        .trim()}
                       role="button"
                       tabIndex={canMoveDown ? 0 : -1}
                       onClick={() => canMoveDown && moveDown(index)}
@@ -599,23 +696,27 @@ export default function ActivitiesSection({
                       className={[
                         "activities-section__control_btn",
                         "activities-section__control--remove",
-                      ].join(" ").trim()}
+                      ]
+                        .join(" ")
+                        .trim()}
                       role="button"
                       tabIndex={0}
                       onClick={() => handleRemoveClick(index)}
                       aria-disabled={false}
                     >
-                      <img
-                        src={ic_trash_gray900_20}
-                        alt=""
-                      />
+                      <img src={ic_trash_gray900_20} alt="" />
                     </span>
                   </div>
                 </div>
               );
             })}
 
-            <span className="default_btn_white" onClick={addItem} role="button" tabIndex={0}>
+            <span
+              className="default_btn_white"
+              onClick={addItem}
+              role="button"
+              tabIndex={0}
+            >
               <img src={ic_add_btn_gray900_20} alt="" />
               추가
             </span>

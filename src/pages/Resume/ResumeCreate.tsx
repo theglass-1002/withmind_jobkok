@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import "./ResumeCreate.css";
-
+import AISuggestArea from "@/pages/Resume/ResumeAISuggest";
 import BasicInfoSection, {
   type BasicInfo,
   type BasicErrors,
@@ -37,10 +37,10 @@ import ResumeSidebar, {
   type Status,
 } from "./ResumeSidebar/ResumeSidebar";
 
-import ic_star_gray700_20 from "@/assets/icons/size20/ic_star_gray700_20.png";
+
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { createResume } from "@/api/resume/resume.api";
+import { createResume, fetchResumeTitleSuggestions } from "@/api/resume/resume.api";
 import {
   CreateResumeRequest,
   isValidEmail,
@@ -48,6 +48,7 @@ import {
   mapEducationStatusToGraduatedYn,
   normalizeYm,
   ProfilePhotoFile,
+  ResumeTitleRequest,
 } from "@/api/resume/resume.types";
 import { Storage } from "@/shared/utils/StorageManager";
 import { uploadPhotoFile } from "@/api/fileUpload.api";
@@ -247,6 +248,10 @@ export default function ResumeCreate() {
     awardCerts: [],
     portfolios: [],
   });
+  const [showTitleSuggest, setShowTitleSuggest] = useState(false);
+  const [titleSuggestions, setTitleSuggestions] = useState<string[]>([]);
+  const [isTitleSuggestLoading, setIsTitleSuggestLoading] = useState(false);
+
   const [isLoading, setIsLoading] = useState(false);
   const [isDefaultResume, setIsDefaultResume] = useState(false);
   const [sidebarStatus, setSidebarStatus] =
@@ -256,6 +261,74 @@ export default function ResumeCreate() {
   useEffect(() => {
     setSidebarStatus(calcSectionStatus(form));
   }, [form]);
+
+
+  const handleClickTitleSuggest = async () => {
+    try {  
+      if (isTitleSuggestLoading) return;
+      console.log(form.careers[0]);
+      console.log(form.activities[0]);
+      if(form.careers[0].role==""||form.careers[0].position==""){
+        toast.info("경력 항목을 1개 이상 입력해 주세요.");
+        return;
+      }
+      if (form.activities.length===0) {
+        toast.info("활동·경험 항목을 1개 이상 입력해 주세요.");
+        return;
+      }
+  
+      setIsTitleSuggestLoading(true);
+  
+
+      const postion = form.desiredRoles.slice(0, 2).join(", ");
+  
+      const experiences = form.careers
+        .map((c) => {
+          const period = c.isCurrent
+            ? `${c.startDate} ~ 현재`
+            : `${c.startDate} ~ ${c.endDate || ""}`;
+          return `${c.company_name} / ${c.role} (${c.position}) / ${period}`;
+        })
+        .join("\n");
+
+      const activities = form.activities
+        .map((a) => {
+          const period = `${a.startDate} ~ ${a.endDate}`;
+          return `${a.activityType ?? ""} / ${a.activityName} / ${period}`;
+        })
+        .join("\n");
+  
+      const awards = form.awardCerts
+        .map((aw) => `${aw.kind ?? ""} / ${aw.title}`)
+        .join("\n");
+  
+      const payload: ResumeTitleRequest = {
+        postion,
+        experiences,
+        activities,
+        awards,
+      };
+  
+      console.log("🔍 AI 제목 추천 payload:", payload);
+  
+      const titles = await fetchResumeTitleSuggestions(payload);
+      console.log(titles);
+      if (!titles || titles.length === 0) {
+        toast.info("추천할 제목이 없습니다. 내용을 조금 더 채워보세요.");
+        return;
+      }
+  
+      setTitleSuggestions(titles);
+      setShowTitleSuggest(true);
+    } catch (error) {
+      console.error("❌ AI 제목 추천 실패:", error);
+      toast.error("AI 제목 추천 중 오류가 발생했습니다.");
+    } finally {
+      setIsTitleSuggestLoading(false);
+    }
+  };
+  
+  const handleCloseAISuggest = () => setShowTitleSuggest(false);
   
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // 경력 검증 헬퍼
@@ -993,7 +1066,14 @@ export default function ResumeCreate() {
                 </span>
               )}
             </div>
-            <div className="resume-create-page__assist">
+            <AISuggestArea
+               show={showTitleSuggest}
+               items={titleSuggestions}
+               hintText="더 정확한 문장 추천을 위해 (경력과 활동·경험) 항목을 먼저 입력해주세요."
+               onClickSuggest={handleClickTitleSuggest}
+               onClose={handleCloseAISuggest}
+              />
+            {/* <div className="resume-create-page__assist">
               <span className="resume-create-page__assist-text">
                 <img src={ic_star_gray700_20} alt="" />
                 더 적합한 문장을 추천을 위해 아래 항목들을 먼저 채워주세요.
@@ -1001,7 +1081,7 @@ export default function ResumeCreate() {
               <span className="ai-suggest-btn career-section__summary-ai-btn">
                 AI 문장 추천
               </span>
-            </div>
+            </div> */}
           </div>
 
           <BasicInfoSection

@@ -18,23 +18,45 @@ const MAX_SELECTED = 30;
 interface DesiredRoleSectionProps {
   value: string[];                     // 선택된 직무 텍스트 배열
   onChange: (roles: string[]) => void; // 선택 변경 시 호출
-  error?: string;                       // ✅ 에러 메시지 추가
+  error?: string;                      // 에러 메시지
+  isEdit?: boolean;                    // 🔥 추가: 수정 모드 여부
 }
 
-export default function DesiredRoleSection({ value, onChange, error }: DesiredRoleSectionProps) {
+export default function DesiredRoleSection({
+  value,
+  onChange,
+  error,
+  isEdit = false,   // 🔥 기본값: create 모드
+}: DesiredRoleSectionProps) {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState('');
 
-  
+  // 내부 선택 상태: "그룹|직무명" 형태로 저장
   const [selected, setSelected] = useState<Set<string>>(
     () => new Set(value.map((r) => `직접 입력|${r}`))
   );
 
   const menuRef = useRef<HTMLDivElement>(null);
 
+  // value 로부터 한 번만 동기화할지 체크용
+  const didSyncFromValueRef = useRef(false);
+
+  // 🔥 edit 모드일 때만, 부모 value(jobList → form.desiredRoles) 가 채워졌을 때 한 번만 selected 로 복사
+  useEffect(() => {
+    if (!isEdit) return;               // create 모드면 아예 동기화 안 함
+    if (!value || value.length === 0) return;
+    if (didSyncFromValueRef.current) return;
+
+    console.log('✅ DesiredRoleSection(edit): value 동기화', value);
+    setSelected(new Set(value.map((r) => `직접 입력|${r}`)));
+    didSyncFromValueRef.current = true;
+  }, [isEdit, value]);
+
+  // selected 가 바뀔 때마다 부모에 순수 role 텍스트 배열로 전달
   useEffect(() => {
     const roles = Array.from(selected).map((key) => key.split('|')[1]);
     onChange(roles);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected]);
 
   const flat: RoleItem[] = useMemo(() => {
@@ -57,7 +79,8 @@ export default function DesiredRoleSection({ value, onChange, error }: DesiredRo
     const k = (q ?? '').trim().toLowerCase();
     if (!k) return flat.slice(0, 20);
 
-    const toStr = (v: unknown) => (typeof v === 'string' ? v : String(v ?? ''));
+    const toStr = (v: unknown) =>
+      typeof v === 'string' ? v : String(v ?? '');
 
     return flat
       .filter((i) => {
@@ -121,7 +144,9 @@ export default function DesiredRoleSection({ value, onChange, error }: DesiredRo
     setSelected((prev) => {
       if (prev.has(key)) return prev;
       if (prev.size >= MAX_SELECTED) {
-        toast.success('최대 30개까지 선택가능합니다.', { toastId: 'role-limit' });
+        toast.success('최대 30개까지 선택가능합니다.', {
+          toastId: 'role-limit',
+        });
         return prev;
       }
       const next = new Set(prev);
@@ -143,11 +168,10 @@ export default function DesiredRoleSection({ value, onChange, error }: DesiredRo
           <span className="resume-create-page__hint">
             최대 {MAX_SELECTED}개까지 추가 가능합니다.
           </span>
-      
         </div>
         {error && (
-            <span className="resume-create-page__error">{error}</span>
-          )}
+          <span className="resume-create-page__error">{error}</span>
+        )}
       </div>
 
       {chips.length > 0 && (

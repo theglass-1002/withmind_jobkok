@@ -19,6 +19,13 @@ import ic_check_box_purple24 from "./size24/ic_check_box_purple24.png";
 import ic_close_gray500_20 from "./size20/ic_close_gray500_20.png";
 import ic_error_red100_20 from "@/assets/icons/size20/ic_error_red100_20.png";
 
+import ic_edit_gray900_20 from "@/assets/icons/size20/ic_edit_gray900_20.png";
+import ic_edit_cancle_gray900_20 from "@/assets/icons/size20/ic_edit_cancle_gray900_20.png";
+
+import ic_star_gray700_20 from "@/assets/icons/size20/ic_star_gray700_20.png";
+import ic_star_green_20 from "@/assets/icons/size20/ic_star_green_20.png";
+
+
 
 export const Icons = {
     jobkok_wordmark_gray900,
@@ -33,6 +40,10 @@ export const Icons = {
     ic_check_box_blank_gray400_24,
     ic_check_box_purple24,
     ic_close_gray500_20,
-    ic_error_red100_20
+    ic_error_red100_20,
+    ic_edit_gray900_20,
+    ic_edit_cancle_gray900_20,
+    ic_star_gray700_20,
+    ic_star_green_20
     
 };

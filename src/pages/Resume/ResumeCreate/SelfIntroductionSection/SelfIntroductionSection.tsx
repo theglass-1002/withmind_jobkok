@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./SelfIntroductionSection.css";
 
 import ic_add_purple_20 from "@/assets/icons/size20/ic_add_purple_20.png";
@@ -8,13 +8,15 @@ import Modal from "@/shared/components/modal/Modal";
 
 // 🔥 상위와 연결하기 위한 props 타입
 interface SelfIntroductionSectionProps {
-  value: string;                     // 현재 자기소개 내용
-  onChange: (content: string) => void; // 내용 변경 시 호출
+  value: string;                        // 현재 자기소개 내용
+  onChange: (content: string) => void;  // 내용 변경 시 호출
+  isEdit?: boolean;                     // 작성/수정 모드 구분
 }
 
 export default function SelfIntroductionSection({
   value,
   onChange,
+  isEdit = false,
 }: SelfIntroductionSectionProps) {
   const MAX_SUMMARY = 2000;
 
@@ -22,14 +24,29 @@ export default function SelfIntroductionSection({
   const [editing, setEditing] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  const summary = value;
+  const summary = value ?? "";
   const count = summary.length;
 
-  const startAdd = () => setIsAdding(true);
+  // 🔥 edit 모드 & 서버에서 내용이 있을 때, 처음에 자동으로 펼쳐주기
+  useEffect(() => {
+    if (!isEdit) return;
+    if (!summary.trim()) return;
+    // 수정 화면에서 내용이 이미 있으면 바로 섹션 오픈
+    setIsAdding(true);
+    // 처음엔 읽기 모드로 보여주고, 클릭하면 editing 시작
+    setEditing(false);
+  }, [isEdit, summary]);
+
+  const startAdd = () => {
+    setIsAdding(true);
+    // 새로 여는 경우엔 아직 내용 없으면 editing true로 둬도 되고,
+    // 일단 클릭하면 바로 텍스트영역 나오게 하려면 아래 주석 해제
+    // if (!summary.trim()) setEditing(true);
+  };
 
   const stopAdd = () => {
     setIsAdding(false);
-    onChange("");     // 🔥 내용도 같이 초기화
+    onChange(""); // 내용도 같이 초기화 (create/edit 공통 정책)
     setEditing(false);
   };
 
@@ -57,7 +74,7 @@ export default function SelfIntroductionSection({
 
   const onChangeSummary = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const v = e.target.value.slice(0, MAX_SUMMARY);
-    onChange(v);     // 🔥 로컬 state 대신 상위로 전달
+    onChange(v); // 상위 상태로 바로 전달
   };
 
   return (
@@ -65,12 +82,21 @@ export default function SelfIntroductionSection({
       <div className="resume-create-page__section-title resume-create-page__section-title--simple">
         <div className="section-title__row">
           <div className="section-title__left">
-            <div className="resume-create-page__section-title__heading">자기소개서</div>
+            <div className="resume-create-page__section-title__heading">
+              자기소개서
+            </div>
           </div>
           {isAdding ? (
-            <img src={ic_close_gray500_24} alt="닫기" onClick={handleClickClose} />
+            <img
+              src={ic_close_gray500_24}
+              alt="닫기"
+              onClick={handleClickClose}
+            />
           ) : (
-            <span className="resume-section-title__action--import" onClick={startAdd}>
+            <span
+              className="resume-section-title__action--import"
+              onClick={startAdd}
+            >
               <img src={ic_add_purple_20} alt="" />
               추가
             </span>
@@ -110,7 +136,9 @@ export default function SelfIntroductionSection({
                 onKeyDown={startEditing}
               >
                 {summary.trim().length > 0 ? (
-                  <div className="personal-section__summary-read">{summary}</div>
+                  <div className="personal-section__summary-read">
+                    {summary}
+                  </div>
                 ) : (
                   <ul className="personal-section__summary-tips">
                     <li className="personal-section__summary-tip">

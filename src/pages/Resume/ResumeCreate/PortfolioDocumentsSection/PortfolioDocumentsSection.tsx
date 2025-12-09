@@ -22,7 +22,7 @@ import ic_key_arrow_down_gray900_20 from "@/assets/icons/size20/ic_key_arrow_dow
 type SourceType = "file" | "url";
 
 export type PortfolioDocItem = {
-  id: string;
+  id?: string;
   source: SourceType;   // 파일 / URL
   title: string;        // (선택) 문서명
   file: File | null;    // 파일 모드일 때
@@ -30,7 +30,6 @@ export type PortfolioDocItem = {
   note?: string;        // (선택) 설명
 };
 
-// ✅ 포트폴리오 에러 타입 export
 export type PortfolioErrors = {
   file?: string;
   url?: string;
@@ -39,7 +38,7 @@ export type PortfolioErrors = {
 const makeId = () => Math.random().toString(36).slice(2, 10);
 const MAX_FILE_BYTES = 50 * 1024 * 1024; // 50MB
 
-// ✅ 아이템이 비어있는지 체크 (필수값만)
+// 아이템이 비어있는지 체크 (필수값만)
 const isItemEmpty = (item: PortfolioDocItem): boolean => {
   if (item.source === "file") {
     return !item.file;
@@ -48,33 +47,61 @@ const isItemEmpty = (item: PortfolioDocItem): boolean => {
   }
 };
 
-// 🔥 상위와 연동을 위한 props
+// 부모 value → 내부 items 로 옮길 때 id 및 기본값 보정
+const normalizeItemsFromValue = (value: PortfolioDocItem[]): PortfolioDocItem[] => {
+  if (!value || value.length === 0) return [];
+  return value.map((it) => ({
+    id: it.id ?? makeId(),
+    source: it.source ?? "file",
+    title: it.title ?? "",
+    file: it.file ?? null,
+    url: it.url ?? "",
+    note: it.note ?? "",
+  }));
+};
+
 interface PortfolioDocumentsSectionProps {
   value?: PortfolioDocItem[];
   onChange?: (items: PortfolioDocItem[]) => void;
-  errors?: PortfolioErrors[]; // ✅ 에러 배열 추가
-  onFocusAny?: () => void; // ✅ 포커스 시 에러 리셋
+  errors?: PortfolioErrors[];
+  onFocusAny?: () => void;
+  isEdit?: boolean; // 작성 / 수정 구분
 }
 
 export default function PortfolioDocumentsSection({
   value = [],
   onChange,
-  errors = [], // ✅ 기본값 빈 배열
+  errors = [],
   onFocusAny,
+  isEdit = false,
 }: PortfolioDocumentsSectionProps) {
   const [isAdding, setIsAdding] = useState(false);
 
-  // 🔥 초기값은 props.value에서 가져오고 이후에는 로컬 상태로 관리
-  const [items, setItems] = useState<PortfolioDocItem[]>(
-    () => (value.length > 0 ? value : [])
+  // 초기값은 props.value에서 가져오되, id 보정
+  const [items, setItems] = useState<PortfolioDocItem[]>(() =>
+    normalizeItemsFromValue(value)
   );
 
   const [showConfirm, setShowConfirm] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false); // ✅ 개별 삭제 모달
-  const [deleteTargetIndex, setDeleteTargetIndex] = useState<number | null>(null); // ✅ 삭제 대상 인덱스
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteTargetIndex, setDeleteTargetIndex] = useState<number | null>(null);
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
-  // 🔥 items가 바뀔 때마다 상위에 전달
+  // edit 모드일 때만 value → items 한 번만 세팅
+  const didSyncFromValueRef = useRef(false);
+  useEffect(() => {
+    if (!isEdit) return;
+    if (!value || value.length === 0) return;
+    if (didSyncFromValueRef.current) return;
+
+    console.log("✅ PortfolioDocumentsSection(edit): value 동기화", value);
+    const normalized = normalizeItemsFromValue(value);
+    setItems(normalized);
+    setIsAdding(true); // 수정 모드에서는 바로 카드 보이도록
+    didSyncFromValueRef.current = true;
+  }, [isEdit, value]);
+
+  // items가 바뀔 때마다 상위에 전달
   useEffect(() => {
     onChange?.(items);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -115,22 +142,19 @@ export default function PortfolioDocumentsSection({
     ]);
   };
 
-  // ✅ 삭제 버튼 클릭 핸들러
+  // 삭제 버튼 클릭
   const handleRemoveClick = (index: number) => {
     const item = items[index];
-    const isEmpty = isItemEmpty(item);
+    const empty = isItemEmpty(item);
 
-    if (isEmpty) {
-      // 입력된 내용이 없으면 즉시 삭제
+    if (empty) {
       performRemove(index);
     } else {
-      // 입력된 내용이 있으면 모달 띄우기
       setDeleteTargetIndex(index);
       setShowDeleteModal(true);
     }
   };
 
-  // ✅ 삭제 모달 - 예
   const handleConfirmItemDelete = () => {
     if (deleteTargetIndex !== null) {
       performRemove(deleteTargetIndex);
@@ -139,13 +163,11 @@ export default function PortfolioDocumentsSection({
     setDeleteTargetIndex(null);
   };
 
-  // ✅ 삭제 모달 - 계속 작성
   const handleCancelItemDelete = () => {
     setShowDeleteModal(false);
     setDeleteTargetIndex(null);
   };
 
-  // ✅ 실제 삭제 수행
   const performRemove = (index: number) => {
     setItems((prev) => {
       const next = [...prev];
@@ -229,23 +251,27 @@ export default function PortfolioDocumentsSection({
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
-  // ✅ 포커스 핸들러 (에러 리셋)
+  // 포커스 핸들러 (에러 리셋)
   const handleAnyFocus = () => {
     onFocusAny?.();
   };
-
 
   return (
     <div className="resume-create-page__section resume-create-page__section--portfolio-documents">
       <div className="resume-create-page__section-title resume-create-page__section-title--simple">
         <div className="section-title__row">
           <div className="section-title__left">
-            <div className="resume-create-page__section-title__heading">포트폴리오ㆍ기타 문서</div>
+            <div className="resume-create-page__section-title__heading">
+              포트폴리오ㆍ기타 문서
+            </div>
           </div>
           {isAdding ? (
             <img src={ic_close_gray500_24} alt="닫기" onClick={handleClickClose} />
           ) : (
-            <span className="resume-section-title__action--import" onClick={startAdd}>
+            <span
+              className="resume-section-title__action--import"
+              onClick={startAdd}
+            >
               <img src={ic_add_purple_20} alt="" />
               추가
             </span>
@@ -264,12 +290,11 @@ export default function PortfolioDocumentsSection({
               const canMoveUp = items.length > 1 && index > 0;
               const canMoveDown = items.length > 1 && index < items.length - 1;
 
-              // ✅ 현재 아이템의 에러 가져오기
               const itemErrors = errors[index] || {};
               const hasFileError = !!itemErrors.file;
               const hasUrlError = !!itemErrors.url;
 
-              console.log(`🔍 [포트폴리오 아이템 ${index}] errors:`, itemErrors);
+              const hasAnyFileDisplay = !!item.file || !!item.title?.trim();
 
               return (
                 <div className="portfolio-documents-section__item" key={item.id}>
@@ -307,7 +332,9 @@ export default function PortfolioDocumentsSection({
                           }
                           alt=""
                         />
-                        <span className="portfolio-documents__source-label">파일</span>
+                        <span className="portfolio-documents__source-label">
+                          파일
+                        </span>
                       </div>
 
                       <div
@@ -338,7 +365,9 @@ export default function PortfolioDocumentsSection({
                           }
                           alt=""
                         />
-                        <span className="portfolio-documents__source-label">URL</span>
+                        <span className="portfolio-documents__source-label">
+                          URL
+                        </span>
                       </div>
                     </div>
 
@@ -348,22 +377,24 @@ export default function PortfolioDocumentsSection({
                           파일 <em className="error_text_red">*</em>
                         </label>
 
-                        {/* 숨김 파일 input (아이템별 ref) */}
                         <input
                           type="file"
                           ref={(el) => {
-                            fileInputRefs.current[item.id] = el;
+                            fileInputRefs.current[item.id!] = el;
                           }}
                           style={{ display: "none" }}
                           accept=".pdf,.doc,.docx,.ppt,.pptx,.png,.jpg,.jpeg,.gif"
                           onChange={(e) => onFileChange(index, e)}
                         />
 
-                        {/* ✅ 파일 선택 영역 - 에러 상태 추가 */}
-                        <div className={`portfolio-documents__file`}>
+                        <div className="portfolio-documents__file">
                           <div
-                            className={`portfolio-documents__file-name ${hasFileError ? "error_box" : ""} ${
-                              item.file ? "" : "portfolio-documents__file-name--empty "
+                            className={`portfolio-documents__file-name ${
+                              hasFileError ? "error_box" : ""
+                            } ${
+                              hasAnyFileDisplay
+                                ? ""
+                                : "portfolio-documents__file-name--empty "
                             }`}
                           >
                             <img src={ic_folder_gray900_20} alt="" />
@@ -376,6 +407,11 @@ export default function PortfolioDocumentsSection({
                                   {formatBytes(item.file.size)}
                                 </span>
                               </>
+                            ) : item.title?.trim() ? (
+                              // 🔥 서버에서 내려온 기존 파일명/제목 표시
+                              <span className="portfolio-documents__file-text">
+                                {item.title}
+                              </span>
                             ) : (
                               <>선택된 파일이 없습니다</>
                             )}
@@ -386,13 +422,13 @@ export default function PortfolioDocumentsSection({
                             role="button"
                             tabIndex={0}
                             onClick={() => {
-                              openFilePicker(item.id);
+                              openFilePicker(item.id!);
                               handleAnyFocus();
                             }}
                             onKeyDown={(e) => {
                               if (e.key === "Enter" || e.key === " ") {
                                 e.preventDefault();
-                                openFilePicker(item.id);
+                                openFilePicker(item.id!);
                                 handleAnyFocus();
                               }
                             }}
@@ -427,7 +463,6 @@ export default function PortfolioDocumentsSection({
 
                   {/* 컨트롤: 위/아래/삭제 */}
                   <div className="portfolio-documents__controls">
-                    {/* 위로 */}
                     <span
                       className={[
                         "portfolio-documents__control-btn",
@@ -451,7 +486,6 @@ export default function PortfolioDocumentsSection({
                       />
                     </span>
 
-                    {/* 아래로 */}
                     <span
                       className={[
                         "portfolio-documents__control-btn",
@@ -475,7 +509,6 @@ export default function PortfolioDocumentsSection({
                       />
                     </span>
 
-                    {/* ✅ 삭제 - handleRemoveClick으로 변경 */}
                     <span
                       className="portfolio-documents__control-btn portfolio-documents__control--remove"
                       onClick={() => handleRemoveClick(index)}
@@ -517,7 +550,7 @@ export default function PortfolioDocumentsSection({
         onClose={handleCancelDelete}
       />
 
-      {/* ✅ 개별 아이템 삭제 모달 */}
+      {/* 개별 아이템 삭제 모달 */}
       <Modal
         open={showDeleteModal}
         title="입력된 내용을 전부 삭제하시겠습니까?"

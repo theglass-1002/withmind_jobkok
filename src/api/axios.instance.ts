@@ -14,6 +14,7 @@ import { logout } from "./auth.api";
 // ======================================
 declare module "axios" {
   export interface AxiosRequestConfig {
+    baseURL?: string;        
     requiresAuth?: boolean;
     _retry?: boolean;
   }
