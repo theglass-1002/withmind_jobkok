@@ -5,6 +5,7 @@ import FormInput from "@/shared/components/form/FormInput";
 import DateInline from "@/shared/components/form/DateInline";
 import Switch from "react-switch";
 import Modal from "@/shared/components/modal/Modal";
+import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
 
 import ic_star_gray700_20 from "@/assets/icons/size20/ic_star_gray700_20.png";
 import ic_star_green_20 from "@/assets/icons/size20/ic_star_green_20.png";
@@ -21,13 +22,13 @@ import ic_key_arrow_up_gray900_20 from "@/assets/icons/size20/ic_key_arrow_up_gr
 import ic_key_arrow_down_gray900_20 from "@/assets/icons/size20/ic_key_arrow_down_gray900_20.png";
 import ic_trash_gray900_20 from "@/assets/icons/size20/ic_trash_gray900_20.png";
 import ic_close_gray500_20 from "@/assets/icons/size20/ic_close_gray500_20.png";
-
 import "./CareerSection.css";
 
 import InlineMonthPicker from "@/shared/components/calendar/InlineMonthPicker";
 import { parseMonth, fmtMonth } from "@/shared/utils/util";
 import AISuggestArea from "@/pages/Resume/ResumeAISuggest";
 import { Icons } from "@/assets/icons";
+import { createExperience } from "@/api/resume/resume.api";
 
 const makeId = () => Math.random().toString(36).slice(2, 10);
 
@@ -108,9 +109,9 @@ export default function CareerSection({
 
   const didSyncFromValueRef = useRef(false);
 
-  // 🔥 edit 모드일 때만, 서버에서 온 value(careerList)로 한 번만 동기화
+  
   useEffect(() => {
-    if (!isEdit) return;                 // create 모드는 패스
+    if (!isEdit) return; // create 모드는 패스
     if (didSyncFromValueRef.current) return;
     if (!value || value.length === 0) return;
 
@@ -132,7 +133,9 @@ export default function CareerSection({
   // 이하 나머지 로직은 그대로
   const [showFreshModal, setShowFreshModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deleteTargetIndex, setDeleteTargetIndex] = useState<number | null>(null);
+  const [deleteTargetIndex, setDeleteTargetIndex] = useState<number | null>(
+    null
+  );
 
   const handleFreshCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const checked = e.target.checked;
@@ -327,7 +330,6 @@ export default function CareerSection({
   );
 }
 
-
 // ===== CareerItem 컴포넌트 =====
 function CareerItem({
   index,
@@ -424,16 +426,47 @@ function CareerItem({
 
   const [showAISuggest, setShowAISuggest] = useState(false);
   const [aiSuggestions, setAISuggestions] = useState<string[]>([]);
+  const [aiLoading, setAiLoading] = useState(false); // 🔥 AI 로딩 상태
 
-  const handleClickAISuggest = () => {
-    setAISuggestions([
-      "면접 분석 서비스 API 설계 및 FastAPI 기반 서버 구축",
-      "RabbitMQ, Redis 기반 비동기 영상 처리 파이프라인 설계",
-      "GCP Cloud Run + Cloud Tasks 구조 전환으로 처리 시간 35% 개선",
-      "서비스 응답 속도 1.2s → 0.6s 단축",
-      "GPU 서버 병목 제거로 모델 동시 실행 성능 2배 향상",
-    ]);
-    setShowAISuggest(true);
+  
+  const handleClickAISuggest = async () => {
+    if (!role && !(summary ?? "").trim()) {
+      alert("AI 추천을 받으려면 최소 직무 또는 담당 업무를 입력해 주세요.");
+      return;
+    }
+
+    try {
+      setAiLoading(true);
+      console.log('전송값',summary);
+      const res = await createExperience({
+        role_name:role, 
+        user_input: summary ?? "", 
+      });
+      
+      const { mode, bullets, missing_info } = res.data;
+      
+      if (mode === "NEED_MORE_INPUT") {
+        setAISuggestions(missing_info);
+        setShowAISuggest(true);
+        setEditing(true);
+      }
+
+      if (bullets && bullets.length > 0) {
+        setAISuggestions(bullets);
+         setShowAISuggest(true);
+         setEditing(true);
+      }
+      setAiLoading(false);
+    } catch (error) {
+      console.error(error);
+      alert(
+        error instanceof Error
+          ? error.message
+          : "AI 경력 문장 추천 중 오류가 발생했습니다."
+      );
+    } finally {
+      setAiLoading(false);
+    }
   };
 
   const handleCloseAISuggest = () => setShowAISuggest(false);
@@ -446,6 +479,9 @@ function CareerItem({
 
   return (
     <div className="career-section__item">
+    {aiLoading && (
+                 <LoadingOverlay isLoading={aiLoading}/>
+              )}
       <div className="career-section__fields">
         {/* 회사명 */}
         <FormField label={<>회사명 <em>*</em></>} className="in_icon">
@@ -684,6 +720,11 @@ function CareerItem({
                 <span>{(summary ?? "").length}</span>
                 <span className="max"> / 2000</span>
               </span>
+              {/* {aiLoading && (
+                <div className="career-section__ai-loading">
+                  AI가 문장을 생성하고 있습니다...
+                </div>
+              )} */}
             </div>
           ) : (
             <div
@@ -709,18 +750,21 @@ function CareerItem({
                 <span>{(summary ?? "").length}</span>
                 <span className="max"> / 2000</span>
               </span>
+              {/* {aiLoading && (
+                <div className="career-section__ai-loading">
+                  AI가 문장을 생성하고 있습니다...
+                </div>
+              )} */}
             </div>
           )}
 
           <AISuggestArea
             show={showAISuggest}
             items={aiSuggestions}
+            hintText="정확한 문장 추천을 위해 (직무와 담당 업무) 항목을 먼저 입력해주세요."
             onClickSuggest={handleClickAISuggest}
             onClose={handleCloseAISuggest}
-            onPick={handlePickSuggestion}
-            starIconGray={ic_star_gray700_20}
-            starIconGreen={ic_star_green_20}
-            closeIcon={ic_close_gray500_20}
+            wrapperClassName="resume-suggest__career"
           />
         </div>
       </div>

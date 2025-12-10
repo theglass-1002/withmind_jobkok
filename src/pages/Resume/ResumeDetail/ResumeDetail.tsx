@@ -50,6 +50,7 @@ import {
   mapRegionListToLocationItems,
   type ResumeDetailResponse,
 } from "@/api/resume/resume.types";
+import { logout } from "@/api/auth.api";
 
 const ALL_SECTIONS: SectionId[] = [
   "title",
@@ -306,8 +307,12 @@ export default function ResumeDetail() {
         }
       } catch (e) {
         if (!cancelled) {
-          console.error("이력서 상세 조회 실패:", e);
-          toast.error("이력서 정보를 불러오는 중 오류가 발생했습니다.");
+
+          if (e.code === 999) {
+           console.log("로그인만료");
+            logout();
+            navigate("/login");
+          }
         }
       } finally {
         if (!cancelled) {

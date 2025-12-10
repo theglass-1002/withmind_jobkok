@@ -7,9 +7,8 @@ import chevron_right_black from '@/assets/icons/chevron_right_black.png'; // 안
 import ic_close_gray500_20 from '@/assets/icons/size20/ic_close_gray500_20.png';
 import ic_search_gray900_20 from '@/assets/icons/size20/ic_search_gray900_20.png';
 import ic_clear_btn_gray400_20 from '@/assets/icons/size20/ic_clear_btn_gray400_20.png';
-
+import AISuggestArea from "@/pages/Resume/ResumeAISuggest";
 import SearchField from '@/shared/components/search/SearchField';
-import AiSuggestChips from '@/shared/components/ai/AiSuggestChips';
 
 type RoleItem = { group: string; role: string };
 const MAX_SELECTED = 30;
@@ -19,7 +18,12 @@ interface DesiredRoleSectionProps {
   value: string[];                     // 선택된 직무 텍스트 배열
   onChange: (roles: string[]) => void; // 선택 변경 시 호출
   error?: string;                      // 에러 메시지
-  isEdit?: boolean;                    // 🔥 추가: 수정 모드 여부
+  isEdit?: boolean;                    // 🔥 수정 모드 여부
+
+  aiShow?: boolean;
+  aiTags?: string[];
+  onClickAISuggest?: () => void;
+  onCloseAISuggest?: () => void;
 }
 
 export default function DesiredRoleSection({
@@ -27,6 +31,10 @@ export default function DesiredRoleSection({
   onChange,
   error,
   isEdit = false,   // 🔥 기본값: create 모드
+  aiShow = false,
+  aiTags = [],
+  onClickAISuggest,
+  onCloseAISuggest,
 }: DesiredRoleSectionProps) {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState('');
@@ -54,8 +62,8 @@ export default function DesiredRoleSection({
 
   // selected 가 바뀔 때마다 부모에 순수 role 텍스트 배열로 전달
   useEffect(() => {
-    const roles = Array.from(selected).map((key) => key.split('|')[1]);
-    onChange(roles);
+    const rolesArr = Array.from(selected).map((key) => key.split('|')[1]);
+    onChange(rolesArr);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected]);
 
@@ -238,10 +246,17 @@ export default function DesiredRoleSection({
           </div>
         )}
 
-        <AiSuggestChips
-          title="경력 및 학력 기반의 AI 추천 직무입니다."
-          tags={['PM', '풀스택 개발자']}
-          onTagClick={(tag) => addRole(tag)}
+        <AISuggestArea
+          show={aiShow}
+          items={aiTags}
+          onClickSuggest={onClickAISuggest}
+          onClose={onCloseAISuggest}
+          onPick={(tag) => addRole(tag)}
+          wrapperClassName="resume-suggest__role"
+          variant="chips"
+          hintText="더 정확한 직무 추천을 위해 (학력과 경력) 항목을 먼저 입력해 주세요."
+          triggerLabel="AI 직무 추천"
+          suggestResultTitle='경력 및 학력 기반의 AI 추천 직무입니다.'
         />
       </div>
     </div>

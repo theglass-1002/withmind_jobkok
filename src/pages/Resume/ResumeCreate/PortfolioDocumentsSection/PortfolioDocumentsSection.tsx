@@ -28,6 +28,10 @@ export type PortfolioDocItem = {
   file: File | null;    // 파일 모드일 때
   url: string;          // URL 모드일 때
   note?: string;        // (선택) 설명
+
+  filePath?: string | null;
+  fileIdx?: number | null;
+  
 };
 
 export type PortfolioErrors = {
@@ -57,6 +61,8 @@ const normalizeItemsFromValue = (value: PortfolioDocItem[]): PortfolioDocItem[] 
     file: it.file ?? null,
     url: it.url ?? "",
     note: it.note ?? "",
+    filePath: it.filePath ?? null,   // ✅ null로 맞춰주기
+    fileIdx: it.fileIdx ?? null,     // ✅ string 대신 null
   }));
 };
 

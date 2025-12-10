@@ -66,7 +66,6 @@ export default function ResumeList() {
       const list = await fetchResumeList();
       setResumeList(list);
     } catch (e: any) {
-      console.log(e);
       if (e.code === 999) {
         console.log("로그인만료");
         logout();

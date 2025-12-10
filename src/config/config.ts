@@ -1,4 +1,6 @@
-export const API_BASE_URL = "http://34.64.175.29:9090";
+export const API_BASE_URL = "https://api.jobkok.kr";
+
+//export const API_BASE_URL = "http://34.64.175.29:9090";
 export const AI_BASE_URL = "https://ai.api.jobkok.kr";
 
 export const LOCAL_BASE_URL = "http://localhost:5173/";

@@ -37,11 +37,21 @@ import ResumeSidebar, {
   type Status,
 } from "@/pages/Resume/ResumeSidebar/ResumeSidebar";
 
+import AISuggestArea from "@/pages/Resume/ResumeAISuggest";
+
 import ic_star_gray700_20 from "@/assets/icons/size20/ic_star_gray700_20.png";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import { createResume, fetchResumeDetail } from "@/api/resume/resume.api";
+import {
+  createResume,
+  fetchResumeDetail,
+  fetchResumeTitleSuggestions,
+  fetchResumePositionSuggestions,
+  fetchResumeHardSkillSuggestions,
+  fetchResumeSoftSkillSuggestions,
+  fetchResumeSelfIntro,
+} from "@/api/resume/resume.api";
 import {
   CreateResumeRequest,
   isValidEmail,
@@ -51,13 +61,19 @@ import {
   normalizeYm,
   ProfilePhotoFile,
   type ResumeDetailResponse,
+  ResumeTitleRequest,
+  ResumePositionRequest,
+  ResumeHardSkillRequest,
+  ResumeSoftSkillRequest,
+  ResumeSelfIntroRequest,
 } from "@/api/resume/resume.types";
 
 import { Storage } from "@/shared/utils/StorageManager";
 import { uploadPhotoFile } from "@/api/fileUpload.api";
 import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
 import { Icons } from "@/assets/icons";
-import Modal from "@/shared/components/modal/Modal"; // 🔥 취소 모달용
+import Modal from "@/shared/components/modal/Modal";
+import { logout } from "@/api/auth.api";
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 타입 정의
@@ -123,6 +139,21 @@ const initial: FormState = {
   selfIntro: "",
 };
 
+const mapCategoryToKind = (category?: string): AwardsCertItem["kind"] => {
+  switch (category) {
+    case "Certification":
+      return "Certification";
+    case "LanguageTest":
+      return "LanguageTest";
+    case "Award":
+      return "Award";
+    case "Etc":
+      return "Etc";
+    default:
+      return "Etc";
+  }
+};
+
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 상세 응답 → FormState 매핑
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -172,19 +203,21 @@ const mapDetailToFormState = (data: ResumeDetailResponse): FormState => {
       summary: a.description ?? "",
     })),
     awardCerts: (data.licenseList ?? []).map((l) => ({
-      kind: l.category ?? "",
+      kind: mapCategoryToKind(l.category),
       title: l.name ?? "",
       issuer: l.issuer ?? "",
       dateValue: l.acquiredYm ?? "",
       score: l.score ?? "",
     })),
     portfolios: (data.portfolioList ?? []).map((p, idx) => ({
-      id: idx,
+      id: String(p.order ?? idx),
       source: p.itemType === "FILE" ? "file" : "url",
       title: p.title ?? "",
       url: p.url ?? "",
       note: p.description ?? "",
-      file: undefined,
+      file: null,
+      filePath: p.filePath ?? null,
+      fileIdx: p.fileIdx ?? null,
     })),
     selfIntro:
       (data.selfIntroList && data.selfIntroList[0]?.content) || "",
@@ -272,7 +305,9 @@ const calcSectionStatus = (
     status.portfolio = "pending";
   } else {
     const valid = form.portfolios.every((p) =>
-      p.source === "file" ? !!p.file : !!p.url?.trim()
+      p.source === "file"
+        ? !!(p as any).file || !!(p as any).filePath
+        : !!p.url?.trim()
     );
     status.portfolio = valid ? "completed" : "pending";
   }
@@ -306,12 +341,37 @@ export default function ResumeEdit() {
     awardCerts: [],
     portfolios: [],
   });
+
+  // 🔥 AI 제목 추천 상태
+  const [showTitleSuggest, setShowTitleSuggest] = useState(false);
+  const [titleSuggestions, setTitleSuggestions] = useState<string[]>([]);
+
+  // 🔥 희망 직무 AI 추천 상태
+  const [showRoleSuggest, setShowRoleSuggest] = useState(false);
+  const [roleSuggestions, setRoleSuggestions] = useState<string[]>([]);
+  const [isRoleLoading, setIsRoleLoading] = useState(false);
+
+  // 🔥 하드 스킬 AI 추천 상태
+  const [showHardSkillSuggest, setShowHardSkillSuggest] = useState(false);
+  const [hardSkillSuggestions, setHardSkillSuggestions] = useState<string[]>([]);
+  const [isHardSkillLoading, setIsHardSkillLoading] = useState(false);
+
+  // 🔥 소프트 스킬 AI 추천 상태
+  const [showSoftSkillSuggest, setShowSoftSkillSuggest] = useState(false);
+  const [softSkillSuggestions, setSoftSkillSuggestions] = useState<string[]>([]);
+  const [isSoftSkillLoading, setIsSoftSkillLoading] = useState(false);
+
+  // 🔥 자기소개 AI 추천 상태
+  const [showSelfIntroSuggest, setShowSelfIntroSuggest] = useState(false);
+  const [selfIntroSuggestions, setSelfIntroSuggestions] = useState<string[]>([]);
+  const [isSelfIntroLoading, setIsSelfIntroLoading] = useState(false);
+
   const [isLoading, setIsLoading] = useState(false);
   const [isDefaultResume, setIsDefaultResume] = useState(false);
   const [sidebarStatus, setSidebarStatus] =
     useState<Partial<Record<SectionId, Status>>>({});
   const [isReady, setIsReady] = useState(!isEdit);
-  const [showCancelModal, setShowCancelModal] = useState(false); // 🔥 수정 취소 모달
+  const [showCancelModal, setShowCancelModal] = useState(false);
 
   // form 변경 시마다 사이드바 상태 갱신
   useEffect(() => {
@@ -335,18 +395,388 @@ export default function ResumeEdit() {
         setForm(mapped);
         setIsDefaultResume(data.isDefault);
         setIsReady(true);
-      } catch (err) {
-        console.error("❌ 이력서 상세 조회 실패:", err);
-        toast.error("이력서 정보를 불러오지 못했습니다.");
-        setIsReady(true);
+      } catch (err: any) {
+        if (err.code === 999) {
+          console.error("❌ 이력서 상세 조회 실패:", err);
+          setIsReady(true);
+          console.log("로그인만료");
+          logout();
+          navigate("/login");
+        } else {
+          console.error("❌ 이력서 상세 조회 실패:", err);
+          toast.error("이력서 정보를 불러오지 못했습니다.");
+          setIsReady(true);
+        }
       } finally {
         setIsLoading(false);
       }
     };
 
     loadDetail();
-  }, [isEdit, resumeId]);
+  }, [isEdit, resumeId, navigate]);
 
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // AI 제목 추천
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  const handleClickTitleSuggest = async () => {
+    try {
+      if (isLoading) return;
+      if (!form.careers[0] || form.careers.length === 0) {
+        toast.info("경력 항목을 1개 이상 입력해 주세요.");
+        return;
+      }
+      if (form.careers[0].role === "" || form.careers[0].position === "") {
+        toast.info("경력 항목을 1개 이상 입력해 주세요.");
+        return;
+      }
+      if (form.activities.length === 0) {
+        toast.info("활동·경험 항목을 1개 이상 입력해 주세요.");
+        return;
+      }
+
+      setIsLoading(true);
+
+      const position = form.desiredRoles.slice(0, 2).join(", ");
+      const experiences = form.careers
+        .map((c) => {
+          const summary = c.summary ? ` / ${c.summary}` : "";
+          return `${c.company_name} / ${c.role} (${c.position})${summary}`;
+        })
+        .join("\n");
+
+      const activities = form.activities
+        .map((a) => {
+          const period = `${a.startDate} ~ ${a.endDate}`;
+          return `${a.activityType ?? ""} / ${a.activityName} / ${period}`;
+        })
+        .join("\n");
+
+      const awards = form.awardCerts
+        .map((aw) => `${aw.kind ?? ""} / ${aw.title}`)
+        .join("\n");
+
+      const payload: ResumeTitleRequest = {
+        position,
+        experiences,
+        activities,
+        awards,
+      };
+
+      console.log(payload);
+      const titles = await fetchResumeTitleSuggestions(payload);
+      console.log(titles);
+      if (!titles || titles.length === 0) {
+        toast.info("추천할 제목이 없습니다. 내용을 조금 더 채워보세요.");
+        return;
+      }
+
+      setTitleSuggestions(titles);
+      setShowTitleSuggest(true);
+    } catch (error) {
+      console.error("AI 제목 추천 실패:", error);
+      toast.error("AI 제목 추천 중 오류가 발생했습니다.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCloseTitleSuggest = () => setShowTitleSuggest(false);
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // AI 희망 직무 추천
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  const handleClickRoleSuggest = async () => {
+    try {
+      if (isRoleLoading) return;
+
+      if (!form.careers || form.careers.length === 0) {
+        toast.info("경력 항목을 1개 이상 입력해 주세요.");
+        return;
+      }
+
+      if (!form.education || form.education.length === 0) {
+        toast.info("학력 항목을 1개 이상 입력해 주세요.");
+        return;
+      }
+
+      setIsRoleLoading(true);
+
+      const experiences = form.careers
+        .map((c) => {
+          const period = c.isCurrent
+            ? `${c.startDate} ~ 현재`
+            : `${c.startDate} ~ ${c.endDate || ""}`;
+          return `${c.company_name} / ${c.role} (${c.position}) / ${period}`;
+        })
+        .join("\n");
+
+      const educations = form.education
+        .map((e) => {
+          const period = `${e.startDate} ~ ${e.endDate}`;
+          return `${e.school_name} / ${e.major_degree ?? ""} / ${period}`;
+        })
+        .join("\n");
+
+      const activities = form.activities
+        .map((a) => {
+          const period = `${a.startDate} ~ ${a.endDate}`;
+          return `${a.activityType ?? ""} / ${a.activityName} / ${period}`;
+        })
+        .join("\n");
+
+      const awards = form.awardCerts
+        .map((aw) => `${aw.kind ?? ""} / ${aw.title}`)
+        .join("\n");
+
+      const payload: ResumePositionRequest = {
+        experiences,
+        educations,
+        activities,
+        awards,
+      };
+      console.log("AI 직무 추천 payload:", payload);
+      const positions = await fetchResumePositionSuggestions(payload);
+      if (!positions || positions.length === 0) {
+        toast.info("추천할 직무가 없습니다. 내용을 조금 더 채워보세요.");
+        return;
+      }
+
+      console.log("AI 직무 추천 결과:", positions);
+      setRoleSuggestions(positions);
+      setShowRoleSuggest(true);
+    } catch (error) {
+      console.error("AI 직무 추천 실패:", error);
+      toast.error("AI 직무 추천 중 오류가 발생했습니다.");
+    } finally {
+      setIsRoleLoading(false);
+    }
+  };
+
+  const handleCloseRoleSuggest = () => setShowRoleSuggest(false);
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // AI 하드 스킬 추천
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  const handleClickHardSkillSuggest = async () => {
+    try {
+      if (isHardSkillLoading) return;
+
+      if (!form.desiredRoles || form.desiredRoles.length === 0) {
+        toast.info("희망 직무를 1개 이상 입력해 주세요.");
+        return;
+      }
+      if (!form.careers[0] || form.careers.length === 0) {
+        toast.info("경력 항목을 1개 이상 입력해 주세요.");
+        return;
+      }
+      if (form.careers[0].role === "" || form.careers[0].position === "") {
+        toast.info("경력 항목을 1개 이상 입력해 주세요.");
+        return;
+      }
+
+      setIsHardSkillLoading(true);
+
+      const position = form.desiredRoles[0] ?? "";
+
+      const experiences = form.careers
+        .map((c) => {
+          const base = `${c.company_name} / ${c.role} (${c.position})`;
+          const extra = c.summary ? ` / ${c.summary}` : "";
+          return base + extra;
+        })
+        .join("\n");
+
+      const activities = form.activities
+        .map((a) => {
+          const base = `${a.activityType ?? ""} / ${a.activityName ?? ""}`;
+          const extra = a.summary ? ` / ${a.summary}` : "";
+          return base + extra;
+        })
+        .join("\n");
+
+      const awards = form.awardCerts
+        .map((aw) => `${aw.kind ?? ""} / ${aw.title ?? ""}`)
+        .join("\n");
+
+      const payload: ResumeHardSkillRequest = {
+        position,
+        experiences,
+        activities,
+        awards,
+      };
+
+      console.log("AI 하드 스킬 추천 payload:", payload);
+
+      const skills = await fetchResumeHardSkillSuggestions(payload);
+      console.log("AI 하드 스킬 추천 결과:", skills);
+
+      if (!skills || skills.length === 0) {
+        toast.info(
+          "추천할 하드 스킬이 없습니다. [경력] 담당 업무 내용을 조금 더 구체적으로 작성해 보세요."
+        );
+        return;
+      }
+
+      setHardSkillSuggestions(skills);
+      setShowHardSkillSuggest(true);
+    } catch (error: any) {
+      console.error("AI 하드 스킬 추천 실패:", error);
+      toast.info(
+        "추천할 하드 스킬이 없습니다. [경력] 담당 업무 내용을 조금 더 구체적으로 작성해 보세요."
+      );
+    } finally {
+      setIsHardSkillLoading(false);
+    }
+  };
+
+  const handleCloseHardSkillSuggest = () => setShowHardSkillSuggest(false);
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // AI 소프트 스킬 추천
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  const handleClickSoftSkillSuggest = async () => {
+    try {
+      if (isSoftSkillLoading) return;
+
+      if (!form.desiredRoles || form.desiredRoles.length === 0) {
+        toast.info("희망 직무를 1개 이상 입력해 주세요.");
+        return;
+      }
+      if (!form.careers[0] || form.careers.length === 0) {
+        toast.info("경력 항목을 1개 이상 입력해 주세요.");
+        return;
+      }
+
+      setIsSoftSkillLoading(true);
+
+      const position = form.desiredRoles[0] ?? "";
+
+      const experiences = form.careers
+        .map((c) => {
+          const extra = c.summary ? ` / ${c.summary}` : "";
+          return extra;
+        })
+        .join("\n");
+
+      const activities = form.activities
+        .map((a) => {
+          const extra = a.summary ? ` / ${a.summary}` : "";
+          return extra;
+        })
+        .join("\n");
+
+      const awards = form.awardCerts
+        .map((aw) => `${aw.kind ?? ""} / ${aw.title ?? ""}`)
+        .join("\n");
+
+      const payload: ResumeSoftSkillRequest = {
+        position,
+        experiences,
+        activities,
+        awards,
+      };
+
+      console.log("AI 소프트 스킬 추천 payload:", payload);
+
+      const skills = await fetchResumeSoftSkillSuggestions(payload);
+      console.log("AI 소프트 스킬 추천 결과:", skills);
+
+      if (!skills || skills.length === 0) {
+        toast.info(
+          "추천할 소프트 스킬이 없습니다. [경력] 담당 업무 내용을 조금 더 구체적으로 작성해 보세요."
+        );
+        return;
+      }
+
+      setSoftSkillSuggestions(skills);
+      setShowSoftSkillSuggest(true);
+    } catch (error: any) {
+      console.error("AI 소프트 스킬 추천 실패:", error);
+      toast.info(
+        "추천할 소프트 스킬이 없습니다. [경력] 담당 업무 내용을 조금 더 구체적으로 작성해 보세요."
+      );
+    } finally {
+      setIsSoftSkillLoading(false);
+    }
+  };
+
+  const handleCloseSoftSkillSuggest = () => setShowSoftSkillSuggest(false);
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // AI 자기소개 추천
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  const handleClickSelfIntroSuggest = async () => {
+    try {
+      if (isSelfIntroLoading) return;
+
+      if (!form.desiredRoles || form.desiredRoles.length === 0) {
+        toast.info("희망 직무를 1개 이상 입력해 주세요.");
+        return;
+      }
+      if (!form.careers || form.careers.length === 0) {
+        toast.info("경력 항목을 1개 이상 입력해 주세요.");
+        return;
+      }
+
+      setIsSelfIntroLoading(true);
+
+      const position = form.desiredRoles[0] ?? "";
+
+      const experiences = form.careers
+        .map((c) => {
+          const summary = c.summary ? `${c.summary}` : "";
+          return summary;
+        })
+        .join("\n");
+
+      const activities = form.activities
+        .map((a) => {
+          const period = `${a.startDate} ~ ${a.endDate}`;
+          const summary = a.summary ? ` / ${a.summary}` : "";
+          return `${a.activityType ?? ""} / ${a.activityName ?? ""} / ${period}${summary}`;
+        })
+        .join("\n");
+
+      const awards = form.awardCerts
+        .map((aw) => `${aw.kind ?? ""} / ${aw.title ?? ""}`)
+        .join("\n");
+
+      const payload: ResumeSelfIntroRequest = {
+        position,
+        experiences,
+        activities,
+        awards,
+      };
+
+      console.log("AI 자기소개 추천 payload:", payload);
+
+      const selfintro = await fetchResumeSelfIntro(payload);
+      console.log("AI 자기소개 추천 결과:", selfintro);
+
+      if (!selfintro) {
+        toast.info(
+          "추천할 자기소개 문장이 없습니다. [경력] 담당 업무 내용을 조금 더 구체적으로 작성해 보세요."
+        );
+        return;
+      }
+
+      setSelfIntroSuggestions([selfintro]);
+      setShowSelfIntroSuggest(true);
+    } catch (error) {
+      console.error("AI 자기소개 추천 실패:", error);
+      toast.info(
+        "추천할 자기소개 문장이 없습니다. [경력] 담당 업무 내용을 조금 더 구체적으로 작성해 보세요."
+      );
+    } finally {
+      setIsSelfIntroLoading(false);
+    }
+  };
+
+  const handleCloseSelfIntroSuggest = () => setShowSelfIntroSuggest(false);
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 검증/업데이트 헬퍼들
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   const buildCareerErrors = (careers: CareerInfo[]): CareerErrors[] =>
     careers.map((c) => {
       const ce: CareerErrors = {};
@@ -395,7 +825,7 @@ export default function ResumeEdit() {
     portfolios.map((item) => {
       const pe: PortfolioErrors = {};
       if (item.source === "file") {
-        if (!item.file) pe.file = "required";
+        if (!(item as any).file && !(item as any).filePath) pe.file = "required";
       } else {
         if (!item.url?.trim()) pe.url = "required";
       }
@@ -504,6 +934,9 @@ export default function ResumeEdit() {
   const resetPortfolioErrors = () =>
     setErrors((prev) => ({ ...prev, portfolios: [] }));
 
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 파일 업로드 함수
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   const handleFileSubmit = async (): Promise<ProfilePhotoFile | null> => {
     try {
       if (!form.photoFile) return null;
@@ -559,6 +992,9 @@ export default function ResumeEdit() {
     }
   };
 
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 검증 / 제출 / 임시저장
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   const validate = () => {
     const nextErr: typeof errors = {
       basic: {} as BasicErrors,
@@ -756,6 +1192,7 @@ export default function ResumeEdit() {
                     (r) => r.originalItem.id === p.id
                   );
 
+                  // 새 업로드된 파일이 있는 경우
                   if (uploadedResult?.uploadedFile) {
                     const u = uploadedResult.uploadedFile;
                     return {
@@ -778,7 +1215,23 @@ export default function ResumeEdit() {
                       },
                     };
                   }
+
+                  // 기존 FILE인데 새 업로드 없는 경우 → 기존 filePath 그대로 사용
+                  if ((p as any).filePath) {
+                    return {
+                      itemType: "FILE",
+                      title: p.title || `포트폴리오 문서 ${idx + 1}`,
+                      docName: p.title || "",
+                      url: null,
+                      fileRef: (p as any).filePath,
+                      description: p.note ?? "",
+                      sortOrder: idx + 1,
+                      portfolioFile: null,
+                    };
+                  }
                 }
+
+                // URL 타입
                 return {
                   itemType: "URL",
                   title: p.title || `포트폴리오 ${idx + 1}`,
@@ -805,7 +1258,7 @@ export default function ResumeEdit() {
             }
           : {}),
       };
-
+      console.log(payload);
       const result = await createResume(payload);
       console.log("✅ 이력서 등록/수정 성공:", result);
       toast.success(
@@ -937,6 +1390,19 @@ export default function ResumeEdit() {
                       },
                     };
                   }
+
+                  if ((p as any).filePath) {
+                    return {
+                      itemType: "FILE",
+                      title: p.title || `포트폴리오 문서 ${idx + 1}`,
+                      docName: p.title || "",
+                      url: null,
+                      fileRef: (p as any).filePath,
+                      description: p.note ?? "",
+                      sortOrder: idx + 1,
+                      portfolioFile: null,
+                    };
+                  }
                 }
                 return {
                   itemType: "URL",
@@ -977,7 +1443,7 @@ export default function ResumeEdit() {
 
   const isSubmitDisabled = !form.title.trim();
 
-  // 🔥 수정 취소 버튼 핸들러들
+  // 수정 취소 버튼 핸들러들
   const handleOpenCancelModal = () => {
     setShowCancelModal(true);
   };
@@ -1002,7 +1468,15 @@ export default function ResumeEdit() {
 
   return (
     <div className="resume-create-page edit">
-      <LoadingOverlay isLoading={isLoading} />
+      <LoadingOverlay
+        isLoading={
+          isLoading ||
+          isRoleLoading ||
+          isHardSkillLoading ||
+          isSoftSkillLoading ||
+          isSelfIntroLoading
+        }
+      />
       <div className="resume-controls-wrapper">
         <div className="resume-create-page__status">
           <div className="resume-detail__actions-left">
@@ -1060,15 +1534,14 @@ export default function ResumeEdit() {
                 </span>
               )}
             </div>
-            <div className="resume-create-page__assist">
-              <span className="resume-create-page__assist-text">
-                <img src={ic_star_gray700_20} alt="" />
-                더 적합한 문장을 추천을 위해 아래 항목들을 먼저 채워주세요.
-              </span>
-              <span className="ai-suggest-btn career-section__summary-ai-btn">
-                AI 문장 추천
-              </span>
-            </div>
+            <AISuggestArea
+              show={showTitleSuggest}
+              items={titleSuggestions}
+              hintText="더 정확한 문장 추천을 위해 (경력과 활동·경험) 항목을 먼저 입력해주세요."
+              onClickSuggest={handleClickTitleSuggest}
+              onClose={handleCloseTitleSuggest}
+              wrapperClassName="resume-suggest__title"
+            />
           </div>
 
           <BasicInfoSection
@@ -1110,18 +1583,30 @@ export default function ResumeEdit() {
             value={form.desiredRoles}
             onChange={updateDesiredRoles}
             error={errors.desiredRoles}
+            aiShow={showRoleSuggest}
+            aiTags={roleSuggestions}
+            onClickAISuggest={handleClickRoleSuggest}
+            onCloseAISuggest={handleCloseRoleSuggest}
           />
 
           <HardSkillSection
             isEdit={isEdit}
             value={form.hardSkills}
             onChange={updateHardSkills}
+            aiShow={showHardSkillSuggest}
+            aiTags={hardSkillSuggestions}
+            onClickAISuggest={handleClickHardSkillSuggest}
+            onCloseAISuggest={handleCloseHardSkillSuggest}
           />
 
           <SoftSkillsSection
             isEdit={isEdit}
             value={form.softSkills}
             onChange={updateSoftSkills}
+            aiShow={showSoftSkillSuggest}
+            aiTags={softSkillSuggestions}
+            onClickAISuggest={handleClickSoftSkillSuggest}
+            onCloseAISuggest={handleCloseSoftSkillSuggest}
           />
 
           <ActivitiesSection
@@ -1152,6 +1637,10 @@ export default function ResumeEdit() {
             isEdit={isEdit}
             value={form.selfIntro}
             onChange={updateSelfIntro}
+            aiShow={showSelfIntroSuggest}
+            aiItems={selfIntroSuggestions}
+            onClickAISuggest={handleClickSelfIntroSuggest}
+            onCloseAISuggest={handleCloseSelfIntroSuggest}
           />
 
           <MockInterviewAnalysisSection />
@@ -1163,6 +1652,7 @@ export default function ResumeEdit() {
           onToggleDefault={setIsDefaultResume}
         />
       </div>
+
       <Modal
         open={showCancelModal}
         title="수정사항을 저장하지 않고 취소하시겠습니까?"

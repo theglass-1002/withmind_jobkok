@@ -1,35 +1,46 @@
-import React, { useMemo, useState, useRef, useEffect } from 'react';
-import './SoftSkillsSection.css';
-import roles from '@/data/desired_roles.json';
-import { toast } from 'react-toastify';
+// src/pages/Resume/ResumeCreate/SoftSkillsSection/SoftSkillsSection.tsx
+import React, { useMemo, useState, useRef, useEffect } from "react";
+import "./SoftSkillsSection.css";
+import roles from "@/data/desired_roles.json";
+import { toast } from "react-toastify";
 
-import ic_search_gray900_20 from '@/assets/icons/size20/ic_search_gray900_20.png';
-import ic_clear_btn_gray400_20 from '@/assets/icons/size20/ic_clear_btn_gray400_20.png';
-import ic_error_gray500_20 from '@/assets/icons/size20/ic_error_gray500_20.png';
-import ic_add_purple_20 from '@/assets/icons/size20/ic_add_purple_20.png';
-import ic_close_gray500_24 from '@/assets/icons/size24/ic_close_gray500_24.png';
+import ic_search_gray900_20 from "@/assets/icons/size20/ic_search_gray900_20.png";
+import ic_clear_btn_gray400_20 from "@/assets/icons/size20/ic_clear_btn_gray400_20.png";
+import ic_error_gray500_20 from "@/assets/icons/size20/ic_error_gray500_20.png";
+import ic_add_purple_20 from "@/assets/icons/size20/ic_add_purple_20.png";
+import ic_close_gray500_24 from "@/assets/icons/size24/ic_close_gray500_24.png";
 
-import SearchField from '@/shared/components/search/SearchField';
-import AiSuggestChips from '@/shared/components/ai/AiSuggestChips';
+import SearchField from "@/shared/components/search/SearchField";
+import AISuggestArea from "@/pages/Resume/ResumeAISuggest";
 
 type RoleItem = { group: string; role: string };
 const MAX_SELECTED = 30;
 
-// 부모로 값 전달하고 싶을 때를 위한 선택적 props
+// 부모로 값/AI 상태 주고받는 props
 interface SoftSkillsSectionProps {
-  value?: string[];                  // 🔥 edit 시 초기 소프트 스킬 목록
+  value?: string[]; // edit 시 초기 소프트 스킬 목록
   onChange?: (skills: string[]) => void; // 선택된 소프트 스킬 텍스트 배열
-  isEdit?: boolean;                  // 🔥 수정 모드 여부
+  isEdit?: boolean;
+
+  // 🔥 AI 소프트 스킬 추천 (부모에서 내려줌 - HardSkillSection / DesiredRoleSection과 동일 패턴)
+  aiShow?: boolean;
+  aiTags?: string[];
+  onClickAISuggest?: () => void;
+  onCloseAISuggest?: () => void;
 }
 
 export default function SoftSkillsSection({
   value = [],
   onChange,
   isEdit = false,
+  aiShow = false,
+  aiTags = [],
+  onClickAISuggest,
+  onCloseAISuggest,
 }: SoftSkillsSectionProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [open, setOpen] = useState(false);
-  const [q, setQ] = useState('');
+  const [q, setQ] = useState("");
 
   // 내부 선택 상태: "그룹|스킬명" 형태로 저장
   const [selected, setSelected] = useState<Set<string>>(
@@ -44,8 +55,8 @@ export default function SoftSkillsSection({
   const stopAdd = () => {
     setIsAdding(false);
     setOpen(false);
-    setQ('');
-    // ❌ 선택된 소프트 스킬은 유지 (edit에서 초기값 날리는 거 방지)
+    setQ("");
+    // 선택된 소프트 스킬은 유지 (edit에서 초기값 날리는 거 방지)
   };
 
   // 🔥 edit 모드일 때만, 부모 value(softSkills) 로 한 번만 selected 세팅
@@ -54,19 +65,19 @@ export default function SoftSkillsSection({
     if (!value || value.length === 0) return;
     if (didSyncFromValueRef.current) return;
 
-    console.log('✅ SoftSkillsSection(edit): value 동기화', value);
+    console.log("✅ SoftSkillsSection(edit): value 동기화", value);
     setSelected(new Set(value.map((s) => `직접 입력|${s}`)));
     didSyncFromValueRef.current = true;
   }, [isEdit, value]);
 
   // 선택된 소프트 스킬 → 부모로 전달
   useEffect(() => {
-    const skills = Array.from(selected).map((key) => key.split('|')[1]);
+    const skills = Array.from(selected).map((key) => key.split("|")[1]);
     onChange?.(skills);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected]);
 
-  // roles JSON → 평탄화
+  // roles JSON → 평탄화 (직무/스킬 후보 재활용)
   const flat: RoleItem[] = useMemo(() => {
     const cats = (roles as any)?.categories as Array<{
       name: string;
@@ -84,10 +95,10 @@ export default function SoftSkillsSection({
 
   // 필터링
   const filtered = useMemo(() => {
-    const k = (q ?? '').trim().toLowerCase();
+    const k = (q ?? "").trim().toLowerCase();
     if (!k) return flat.slice(0, 20);
     const toStr = (v: unknown) =>
-      typeof v === 'string' ? v : String(v ?? '');
+      typeof v === "string" ? v : String(v ?? "");
     return flat
       .filter((i) => {
         const role = toStr(i.role).toLowerCase();
@@ -104,8 +115,8 @@ export default function SoftSkillsSection({
       if (!menuRef.current) return;
       if (!menuRef.current.contains(e.target as Node)) setOpen(false);
     };
-    document.addEventListener('pointerdown', onPointer);
-    return () => document.removeEventListener('pointerdown', onPointer);
+    document.addEventListener("pointerdown", onPointer);
+    return () => document.removeEventListener("pointerdown", onPointer);
   }, [open]);
 
   // 하이라이트
@@ -113,8 +124,8 @@ export default function SoftSkillsSection({
     const k = keyword.trim();
     if (!k) return text;
     const re = new RegExp(
-      `(${k.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\$&')})`,
-      'ig'
+      `(${k.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\$&")})`,
+      "ig"
     );
     return text.split(re).map((part, i) =>
       part.toLowerCase() === k.toLowerCase() ? (
@@ -130,7 +141,7 @@ export default function SoftSkillsSection({
   // 칩 뷰용
   const chips = useMemo(() => {
     return Array.from(selected).map((key) => {
-      const [group, role] = key.split('|');
+      const [group, role] = key.split("|");
       return { key, group, role };
     });
   }, [selected]);
@@ -144,16 +155,16 @@ export default function SoftSkillsSection({
   };
 
   const addRole = (item: RoleItem | string) => {
-    const roleText = typeof item === 'string' ? item.trim() : item.role;
+    const roleText = typeof item === "string" ? item.trim() : item.role;
     if (!roleText) return;
-    const group = typeof item === 'string' ? '직접 입력' : item.group;
+    const group = typeof item === "string" ? "직접 입력" : item.group;
     const key = `${group}|${roleText}`;
 
     setSelected((prev) => {
       if (prev.has(key)) return prev;
       if (prev.size >= MAX_SELECTED) {
-        toast.success('최대 30개까지 선택가능합니다.', {
-          toastId: 'soft-skill-limit',
+        toast.success("최대 30개까지 선택가능합니다.", {
+          toastId: "soft-skill-limit",
         });
         return prev;
       }
@@ -162,7 +173,7 @@ export default function SoftSkillsSection({
       return next;
     });
 
-    setQ('');
+    setQ("");
     setOpen(false);
   };
 
@@ -190,11 +201,7 @@ export default function SoftSkillsSection({
             </div>
           </div>
           {isAdding ? (
-            <img
-              src={ic_close_gray500_24}
-              alt="닫기"
-              onClick={stopAdd}
-            />
+            <img src={ic_close_gray500_24} alt="닫기" onClick={stopAdd} />
           ) : (
             <span
               className="resume-section-title__action--import"
@@ -216,9 +223,7 @@ export default function SoftSkillsSection({
         <div className="resume-create-page__selected">
           {chips.map((chip) => (
             <div key={chip.key} className="location-picker__chip">
-              <div className="location-picker__chip-body">
-                {chip.role}
-              </div>
+              <div className="location-picker__chip-body">{chip.role}</div>
               <span
                 className="location-picker__chip-close"
                 onClick={() => removeRole(chip.key)}
@@ -232,7 +237,7 @@ export default function SoftSkillsSection({
 
       <div
         className={`resume-create-page__section-body ${
-          isAdding ? '' : 'empty'
+          isAdding ? "" : "empty"
         }`}
       >
         {isAdding ? (
@@ -285,10 +290,17 @@ export default function SoftSkillsSection({
               </div>
             )}
 
-            <AiSuggestChips
-              title="경력 및 학력 기반의 AI 추천 소프트 스킬입니다."
-              tags={['리더십', '적응력']}
-              onTagClick={(tag) => addRole(tag)}
+            <AISuggestArea
+              show={aiShow}
+              items={aiTags}
+              onClickSuggest={onClickAISuggest}
+              onClose={onCloseAISuggest}
+              onPick={(tag) => addRole(tag)}
+              wrapperClassName="resume-suggest__hardskill"
+              variant="chips"
+              hintText="더 정확한 하드 스킬 추천을 위해 (희망 직무와 경력) 항목을 먼저 입력해 주세요."
+              triggerLabel="AI 소프트 스킬 추천"
+              suggestResultTitle="경력 및 직무 기반의 AI 추천 하드 스킬입니다."
             />
           </>
         ) : (

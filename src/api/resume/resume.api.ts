@@ -1,13 +1,15 @@
 // src/api/resume.api.ts
 
 import instance, { ApiResponse } from "@/api/axios.instance";
-import { CreateResumeRequest, CreateResumeResponse, ResumeDetailResponse, ResumeItem, ResumeTitleAIResponse, ResumeTitleRequest } from "./resume.types";
+import { CreateExperienceRequest, CreateExperienceResponse, CreateResumeRequest, CreateResumeResponse, ResumeDetailResponse, ResumeHardSkillRequest, ResumeHardSkillResponse, ResumeItem, ResumeListApiResponse, ResumePositionRequest, ResumePositionResponse, ResumeSelfIntroRequest, ResumeSelfIntroResponse, ResumeSoftSkillRequest, ResumeSoftSkillResponse, ResumeTitleAIResponse, ResumeTitleRequest } from "./resume.types";
 import { AI_BASE_URL } from "@/config/config";
 
 export async function fetchResumeList(): Promise<ResumeItem[]> {
-  // 백엔드 응답이 배열 그대로라면 이렇게:
-  const res = await instance.get<ResumeItem[]>("/api/resume/list");
-  return res.data;
+  const res = await instance.get<ResumeListApiResponse>("/api/resume/list");
+  const body = res.data;
+
+  // 방어적으로 list가 없으면 빈 배열 반환
+  return Array.isArray(body.list) ? body.list : [];
 }
 
 
@@ -55,7 +57,7 @@ export async function fetchResumeTitleSuggestions(
   );
 
   const body = res.data;
-  console.log("✅ AI 제목 추천 응답:", body);
+  console.log("AI 제목 추천 응답:", body);
 
   if (!body.success || !body.data) {
     const msg =
@@ -65,4 +67,169 @@ export async function fetchResumeTitleSuggestions(
   }
 
   return body.data.titles;
+}
+
+
+export async function createExperience(
+  payload: CreateExperienceRequest
+): Promise<CreateExperienceResponse> {
+  const res = await instance.post<CreateExperienceResponse>(
+    "/resume/experience",
+    payload,
+    {
+      baseURL: AI_BASE_URL, // AI 서버 URL
+      requiresAuth: false,
+      headers: {
+        accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  const body = res.data;
+
+  console.log("AI 경력 bullet 생성 응답:", body);
+
+  // 에러 처리
+  if (!body.success) {
+    const msg =
+      (body.error && (body.error.message || body.error.msg)) ||
+      "경력 Bullet 생성 중 오류가 발생했습니다.";
+
+    throw new Error(msg);
+  }
+
+  return body;
+}
+
+
+
+// --- AI 희망직무 추천 API ---
+export async function fetchResumePositionSuggestions(
+  payload: ResumePositionRequest
+): Promise<string[]> {
+  const res = await instance.post<ResumePositionResponse>(
+    "/resume/position",
+    payload,
+    {
+      baseURL: AI_BASE_URL,
+      requiresAuth: false,
+      headers: {
+        accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  const body = res.data;
+  console.log("AI 직무 추천 응답:", body);
+
+  if (!body.success || !body.data) {
+    const msg =
+      (body.error && (body.error.message || body.error.msg)) ||
+      "AI 직무 추천 중 오류가 발생했습니다.";
+    throw new Error(msg);
+  }
+
+  return body.data.positions;
+}
+
+export async function fetchResumeHardSkillSuggestions(
+  payload: ResumeHardSkillRequest
+): Promise<string[]> {
+  const res = await instance.post<ResumeHardSkillResponse>(
+    "/resume/skills/hard",
+    payload,
+    {
+      baseURL: AI_BASE_URL,
+      requiresAuth: false,
+      headers: {
+        accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  const body = res.data;
+
+
+  if (!body.success || !body.data) {
+    const msg =
+      (body.error?.message ||
+        body.error?.msg ||
+        "AI 하드 스킬 추천 중 오류가 발생했습니다.") +
+      (body.error?.details?.reason ? `\n${body.error.details.reason}` : "");
+
+    throw new Error(msg);
+  }
+
+  return body.data.skills;
+}
+
+
+
+export async function fetchResumeSoftSkillSuggestions(
+  payload: ResumeSoftSkillRequest
+): Promise<string[]> {
+  const res = await instance.post<ResumeSoftSkillResponse>(
+    "/resume/skills/soft",
+    payload,
+    {
+      baseURL: AI_BASE_URL,
+      requiresAuth: false,
+      headers: {
+        accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  const body = res.data;
+  console.log("🔥 AI 소프트 스킬 추천 응답:", body);
+
+  if (!body.success || !body.data) {
+    const msg =
+      (body.error?.message ||
+        body.error?.msg ||
+        "AI 소프트 스킬 추천 중 오류가 발생했습니다.") +
+      (body.error?.details?.reason ? `\n${body.error.details.reason}` : "");
+
+    throw new Error(msg);
+  }
+
+  return body.data.skills;
+}
+
+export async function fetchResumeSelfIntro(
+  payload: ResumeSelfIntroRequest
+): Promise<string> {
+  const res = await instance.post<ResumeSelfIntroResponse>(
+    "/resume/selfintro",
+    payload,
+    {
+      baseURL: AI_BASE_URL,
+      requiresAuth: false,
+      headers: {
+        accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  const body = res.data;
+  console.log("🔥 AI 자기소개서 응답:", body);
+
+  // 실패 처리
+  if (!body.success || !body.data) {
+    const msg =
+      (body.error?.message ||
+        body.error?.msg ||
+        "AI 자기소개서 생성 중 오류가 발생했습니다.") +
+      (body.error?.details?.reason ? `\n${body.error.details.reason}` : "");
+
+    throw new Error(msg);
+  }
+
+  // 성공 → 자기소개 문장 반환
+  return body.data.selfintro;
 }

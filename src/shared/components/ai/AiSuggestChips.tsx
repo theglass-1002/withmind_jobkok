@@ -6,9 +6,9 @@ import ic_add_btn_green_20 from '@/assets/icons/size20/ic_add_btn_green_20.png';
 import './AiSuggestChips.css';
 type Props = {
   /** 상단 문구 */
-  title: string;
+  title?: string;
   /** 표시할 태그들 (ex. ["pm", "풀스택 개발자"] 또는 ["css","javascript"]) */
-  tags: string[];
+  tags?: string[];
   /** 태그 클릭 시 콜백 (선택) */
   onTagClick?: (tag: string) => void;
   /** 태그 앞에 붙일 접두어 (기본 "+") */

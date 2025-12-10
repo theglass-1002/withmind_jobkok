@@ -1,16 +1,25 @@
 import locations from "@/data/locationsV2.json";
 
+
 export interface ResumeItem {
-    resumeIdx: number;
-    title: string;
-    hopeJobs: string;
-    careerPeriod: string;
-    educationSummary: string;
-    createdAt: string;
-    updatedAt: string;
-    isDefault: number; // 1: 기본 이력서, 0: 일반
-  }
-  
+  resumeIdx: number;
+  title: string;
+  hopeJobs: string | null;          // ← 백엔드에서 null 올 수 있으니까 null 허용
+  careerPeriod: string;
+  educationSummary: string;
+  createdAt: string;
+  updatedAt: string;
+  isDefault: number; // 1: 기본 이력서, 0: 일반
+}
+
+export interface ResumeListApiResponse {
+  page: number;
+  size: number;
+  totalCount: number;
+  list: ResumeItem[];
+}
+
+
   export interface Career {
     employmentType: string;
     companyName: string;
@@ -445,6 +454,7 @@ export const mapGraduatedYnToLabel = (
 
 
 
+
 // ResumeAwardsSection
 
 // "202108" -> "2021.08"
@@ -534,7 +544,7 @@ export function mapPortfolioListToPortfolioItems(
 
 // 요청 바디 타입 (API 스펙 그대로 - postion 오타 주의)
 export interface ResumeTitleRequest {
-  postion: string;      // 예: "디자이너"
+  position: string;      // 예: "디자이너"
   experiences: string;  // 예: "협업"
   activities: string;   // 예: "동아리 활동"
   awards: string;       // 예: "수상 내역"
@@ -555,3 +565,113 @@ export interface ResumeTitleAIResponse {
 }
 
 
+export interface CreateExperienceRequest {
+  role_name: string;   
+  user_input: string;
+}
+
+export interface CreateExperienceResponse {
+  success: boolean;
+  data: {
+    mode: "NEED_MORE_INPUT" | "DONE" | string;
+    bullets: string[];
+    missing_info: string[];
+  };
+  error: null | {
+    message?: string;
+    msg?: string;
+  };
+  meta: {
+    request_id: string;
+    timestamp: string;
+  };
+}
+
+
+// resume.types.ts
+
+export interface ResumePositionRequest {
+  experiences: string;
+  educations: string;
+  activities: string;
+  awards: string;
+}
+
+export interface ResumePositionResponse {
+  success: boolean;
+  data: {
+    positions: string[];
+  } | null;
+  error: {
+    message?: string;
+    msg?: string;
+  } | null;
+  meta?: any;
+}
+
+
+
+export interface ResumeHardSkillRequest {
+  position: string;
+  experiences: string;
+  activities: string;
+  awards: string;
+}
+
+export interface ResumeHardSkillResponse {
+  success: boolean;
+  data: {
+    skills: string[];
+  } | null;
+  error: {
+    code?: string;
+    message?: string;
+    msg?: string;
+    details?: any;
+  } | null;
+  meta?: any;
+}
+
+
+
+export interface ResumeSoftSkillRequest {
+  position: string;
+  experiences: string;
+  activities: string;
+  awards: string;
+}
+
+export interface ResumeSoftSkillResponse {
+  success: boolean;
+  data: {
+    skills: string[];
+  } | null;
+  error: {
+    code?: string;
+    message?: string;
+    msg?: string;
+    details?: any;
+  } | null;
+  meta?: any;
+}
+
+export interface ResumeSelfIntroRequest {
+  position: string;
+  experiences: string;
+  activities: string;
+  awards: string;
+}
+
+export interface ResumeSelfIntroResponse {
+  success: boolean;
+  data: {
+    selfintro: string;
+  } | null;
+  error: {
+    code?: string;
+    message?: string;
+    msg?: string;
+    details?: any;
+  } | null;
+  meta?: any;
+}

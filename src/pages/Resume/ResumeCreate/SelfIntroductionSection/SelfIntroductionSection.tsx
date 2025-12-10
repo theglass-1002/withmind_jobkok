@@ -1,3 +1,4 @@
+// src/pages/Resume/ResumeCreate/SelfIntroductionSection/SelfIntroductionSection.tsx
 import React, { useEffect, useState } from "react";
 import "./SelfIntroductionSection.css";
 
@@ -5,18 +6,29 @@ import ic_add_purple_20 from "@/assets/icons/size20/ic_add_purple_20.png";
 import ic_close_gray500_24 from "@/assets/icons/size24/ic_close_gray500_24.png";
 import ic_star_gray700_20 from "@/assets/icons/size20/ic_star_gray700_20.png";
 import Modal from "@/shared/components/modal/Modal";
+import AISuggestArea from "@/pages/Resume/ResumeAISuggest";
 
 // 🔥 상위와 연결하기 위한 props 타입
 interface SelfIntroductionSectionProps {
   value: string;                        // 현재 자기소개 내용
   onChange: (content: string) => void;  // 내용 변경 시 호출
   isEdit?: boolean;                     // 작성/수정 모드 구분
+
+  // ✅ AI 관련 (상위에서 내려줌)
+  aiShow?: boolean;
+  aiItems?: string[];
+  onClickAISuggest?: () => void;
+  onCloseAISuggest?: () => void;
 }
 
 export default function SelfIntroductionSection({
   value,
   onChange,
   isEdit = false,
+  aiShow = false,
+  aiItems = [],
+  onClickAISuggest,
+  onCloseAISuggest,
 }: SelfIntroductionSectionProps) {
   const MAX_SUMMARY = 2000;
 
@@ -39,8 +51,6 @@ export default function SelfIntroductionSection({
 
   const startAdd = () => {
     setIsAdding(true);
-    // 새로 여는 경우엔 아직 내용 없으면 editing true로 둬도 되고,
-    // 일단 클릭하면 바로 텍스트영역 나오게 하려면 아래 주석 해제
     // if (!summary.trim()) setEditing(true);
   };
 
@@ -76,6 +86,8 @@ export default function SelfIntroductionSection({
     const v = e.target.value.slice(0, MAX_SUMMARY);
     onChange(v); // 상위 상태로 바로 전달
   };
+
+ 
 
   return (
     <div className="resume-create-page__section resume-create-page__section--personal-statement">
@@ -152,16 +164,14 @@ export default function SelfIntroductionSection({
                 </span>
               </div>
             )}
-
-            <div className="resume-create-page__assist">
-              <span className="resume-create-page__assist-text">
-                <img src={ic_star_gray700_20} alt="" />
-                [AI 문장 추천]을 통해 간편하게 작성해 보세요.
-              </span>
-              <span className="ai-suggest-btn personal-section__summary-ai-btn">
-                AI 문장 추천
-              </span>
-            </div>
+            <AISuggestArea
+              show={aiShow}
+              items={aiItems}
+            hintText="더 정확한 하드 스킬 추천을 위해 (희망 직무와 경력) 항목을 먼저 입력해 주세요."
+              onClickSuggest={onClickAISuggest}
+              onClose={onCloseAISuggest}
+              wrapperClassName="resume-suggest__career"
+            />
           </div>
         ) : (
           <>자기소개서를 추가해 주세요.</>

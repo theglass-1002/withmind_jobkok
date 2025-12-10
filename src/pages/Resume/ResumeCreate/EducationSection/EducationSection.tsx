@@ -41,10 +41,7 @@ const blankItem = (): Education => ({
   status: '',
 });
 
-const initialItems = (values?: Education[]): Education[] =>
-  values && values.length > 0 ? values : [blankItem()];
-
-// 필수 입력값 기준으로 비어있는지 체크
+// ✅ 아이템이 비어있는지 체크 (필수 입력값만)
 const isItemEmpty = (item: Education): boolean => {
   return (
     !item.school_name?.trim() &&
@@ -58,7 +55,9 @@ interface EducationSectionProps {
   onChange: (list: Education[]) => void;
   onFocusAny?: () => void;
   errors?: EducationErrors[];
-  isEdit?: boolean; // 🔥 추가: 수정 모드 여부
+
+  // ✅ edit / create 모드 구분용
+  isEdit?: boolean;
 }
 
 export default function EducationSection({
@@ -66,42 +65,36 @@ export default function EducationSection({
   onChange,
   onFocusAny,
   errors = [],
-  isEdit = false, // 🔥 기본값: create 모드
+  isEdit = false,
 }: EducationSectionProps) {
-  const [items, setItems] = useState<Education[]>(() => initialItems(values));
+  // ✅ 초기화 시 values가 있으면 사용, 없으면 빈 아이템 하나
+  const [items, setItems] = useState<Education[]>(() =>
+    values && values.length > 0 ? values : [blankItem()]
+  );
 
-  // status(졸업 여부)를 표시용 gradType과 연결
   const [gradType, setGradType] = useState<(string | null)[]>(() =>
     values && values.length > 0 ? values.map((v) => v.status ?? null) : [null]
   );
 
   const [openedSelectIdx, setOpenedSelectIdx] = useState<number | null>(null);
 
-  // 모달 상태
+  // ✅ 모달 상태
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTargetIndex, setDeleteTargetIndex] = useState<number | null>(null);
 
-  const didSyncRef = useRef(false);
-
-  // 🔥 edit 모드일 때만, 부모 values(서버 데이터) → 내부 items/gradType 으로 한 번만 동기화
+  // ✅ edit 모드에서 서버에서 내려온 값으로 한 번만 동기화
+  const didSyncFromValueRef = useRef(false);
   useEffect(() => {
-    if (!isEdit) return;              // create 모드면 그냥 패스
-    if (didSyncRef.current) return;
+    if (!isEdit) return;                    // create 모드는 패스
+    if (didSyncFromValueRef.current) return;
+    if (!values || values.length === 0) return;
 
-    if (!values || values.length === 0) {
-      didSyncRef.current = true;
-      return;
-    }
+    const hasRealContent = values.some((v) => !isItemEmpty(v));
+    if (!hasRealContent) return;
 
-    // 내부가 "처음 1줄 + 완전 비어있는 상태"일 때만 덮어씀
-    const isInitialEmpty = items.length === 1 && isItemEmpty(items[0]);
-    if (!isInitialEmpty && didSyncRef.current) return;
-
-    console.log('✅ EducationSection(edit): values 동기화', values);
     setItems(values);
     setGradType(values.map((v) => v.status ?? null));
-    didSyncRef.current = true;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    didSyncFromValueRef.current = true;
   }, [isEdit, values]);
 
   const swap = <T,>(arr: T[], i: number, j: number) => {
@@ -111,12 +104,10 @@ export default function EducationSection({
   };
 
   const addItem = () => {
-    setItems((prev) => {
-      const next = [blankItem(), ...prev];
-      onChange(next);
-      return next;
-    });
-    setGradType((prev) => [null, ...prev]);
+    const next = [blankItem(), ...items];
+    setItems(next);
+    setGradType([null, ...gradType]);
+    onChange(next);
   };
 
   const handleRemoveClick = (idx: number) => {
@@ -147,43 +138,39 @@ export default function EducationSection({
   };
 
   const removeItem = (idx: number) => {
-    setItems((prev) => {
-      const next = prev.filter((_, i) => i !== idx);
-      const normalized = next.length === 0 ? [blankItem()] : next;
-      onChange(normalized);
-      return normalized;
-    });
-    setGradType((prev) =>
-      prev.length <= 1 ? prev : prev.filter((_, i) => i !== idx)
+    const next = items.filter((_, i) => i !== idx);
+    const normalized = next.length === 0 ? [blankItem()] : next;
+
+    setItems(normalized);
+    setGradType(
+      gradType.length <= 1 ? gradType : gradType.filter((_, i) => i !== idx)
     );
+    onChange(normalized);
   };
 
   const moveUp = (idx: number) => {
     if (idx <= 0) return;
-    setItems((prev) => {
-      const next = swap(prev, idx, idx - 1);
-      onChange(next);
-      return next;
-    });
-    setGradType((prev) => swap(prev, idx, idx - 1));
+    const next = swap(items, idx, idx - 1);
+
+    setItems(next);
+    setGradType(swap(gradType, idx, idx - 1));
+    onChange(next);
   };
 
   const moveDown = (idx: number) => {
     if (idx >= items.length - 1) return;
-    setItems((prev) => {
-      const next = swap(prev, idx, idx + 1);
-      onChange(next);
-      return next;
-    });
-    setGradType((prev) => swap(prev, idx, idx + 1));
+    const next = swap(items, idx, idx + 1);
+
+    setItems(next);
+    setGradType(swap(gradType, idx, idx + 1));
+    onChange(next);
   };
 
   const patchItem = (idx: number, patch: Partial<Education>) => {
-    setItems((prev) => {
-      const next = prev.map((it, i) => (i === idx ? { ...it, ...patch } : it));
-      onChange(next);
-      return next;
-    });
+    const next = items.map((it, i) => (i === idx ? { ...it, ...patch } : it));
+
+    setItems(next);
+    onChange(next);
   };
 
   return (
@@ -208,9 +195,7 @@ export default function EducationSection({
               setOpenedSelectIdx((o) => (o === idx ? null : idx))
             }
             onSelectGrad={(label) => {
-              setGradType((prev) =>
-                prev.map((v, i) => (i === idx ? label : v))
-              );
+              setGradType(gradType.map((v, i) => (i === idx ? label : v)));
               setOpenedSelectIdx(null);
               patchItem(idx, { status: label });
             }}
@@ -534,9 +519,7 @@ function EducationItem({
           aria-disabled={!canMoveUp}
         >
           <img
-            src={
-              canMoveUp ? ic_key_arrow_up_gray900_20 : ic_key_arrow_up_gray500_20
-            }
+            src={canMoveUp ? ic_key_arrow_up_gray900_20 : ic_key_arrow_up_gray500_20}
             alt=""
           />
         </span>

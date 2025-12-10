@@ -76,6 +76,13 @@
     line-height: 180%; /* 28.8px */
   }
 
+  .resume-suggest__title .resume-ai-suggest__item::before{
+    content: "ㆍ";
+    font-size: 17px;
+    
+    
+  }
+
   .resume-page__container {
     display: flex;
     padding: 52px 0px 100px 0px;

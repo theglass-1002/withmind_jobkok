@@ -1,3 +1,4 @@
+// src/pages/Resume/ResumeCreate/HardSkillSection/HardSkillSection.tsx
 import React, { useMemo, useState, useRef, useEffect } from 'react';
 import './HardSkillSection.css';
 import roles from '@/data/desired_roles.json';
@@ -10,22 +11,32 @@ import ic_add_purple_20 from '@/assets/icons/size20/ic_add_purple_20.png';
 import ic_close_gray500_24 from '@/assets/icons/size24/ic_close_gray500_24.png';
 
 import SearchField from '@/shared/components/search/SearchField';
-import AiSuggestChips from '@/shared/components/ai/AiSuggestChips';
+import AISuggestArea from "@/pages/Resume/ResumeAISuggest";
 
 type RoleItem = { group: string; role: string };
 const MAX_SELECTED = 30;
 
 // 부모와 값 주고받는 props
 interface HardSkillSectionProps {
-  value?: string[];                 // 🔥 (선택) 초기 하드스킬 목록 (edit에서 내려줌)
-  onChange?: (skills: string[]) => void; // 선택된 하드 스킬 텍스트 배열
-  isEdit?: boolean;                // 🔥 수정 모드 여부
+  value?: string[];                        // 초기 하드스킬 목록 (edit에서 내려줌)
+  onChange?: (skills: string[]) => void;   // 선택된 하드 스킬 텍스트 배열
+  isEdit?: boolean;                        // 수정 모드 여부
+
+  // 🔥 AI 하드스킬 추천 (부모에서 내려줌 - DesiredRoleSection과 동일 패턴)
+  aiShow?: boolean;
+  aiTags?: string[];
+  onClickAISuggest?: () => void;
+  onCloseAISuggest?: () => void;
 }
 
 export default function HardSkillSection({
   value = [],
   onChange,
   isEdit = false,
+  aiShow = false,
+  aiTags = [],
+  onClickAISuggest,
+  onCloseAISuggest,
 }: HardSkillSectionProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [open, setOpen] = useState(false);
@@ -45,10 +56,10 @@ export default function HardSkillSection({
     setIsAdding(false);
     setOpen(false);
     setQ('');
-    // ❌ selected 비우지 않음 (edit에서 초기값 날아가는 것 방지)
+    // selected는 유지 (edit에서 값 날아가는 것 방지)
   };
 
-  // 🔥 edit 모드일 때만, 부모 value(hardSkills) 로 한 번만 selected 세팅
+  // 🔥 edit 모드일 때 한 번만 value → selected 동기화
   useEffect(() => {
     if (!isEdit) return;
     if (!value || value.length === 0) return;
@@ -127,7 +138,7 @@ export default function HardSkillSection({
     );
   };
 
-  // 칩 뷰용
+  // 칩 뷰
   const chips = useMemo(() => {
     return Array.from(selected).map((key) => {
       const [group, role] = key.split('|');
@@ -284,10 +295,17 @@ export default function HardSkillSection({
               </div>
             )}
 
-            <AiSuggestChips
-              title="경력 및 학력 기반의 AI 추천 하드 스킬입니다."
-              tags={['CSS', 'JavaScript']}
-              onTagClick={(tag) => addRole(tag)}
+            <AISuggestArea
+              show={aiShow}
+              items={aiTags}
+              onClickSuggest={onClickAISuggest}
+              onClose={onCloseAISuggest}
+              onPick={(tag) => addRole(tag)}
+              wrapperClassName="resume-suggest__hardskill"
+              variant="chips"
+              hintText="더 정확한 하드 스킬 추천을 위해 (희망 직무와 경력) 항목을 먼저 입력해 주세요."
+              triggerLabel="AI 하드 스킬 추천"
+              suggestResultTitle="경력 및 직무 기반의 AI 추천 하드 스킬입니다."
             />
           </>
         ) : (
