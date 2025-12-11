@@ -154,29 +154,27 @@ export default function ResumeDetail() {
     }
   };
 
-  
   const handleToggleDefault = (checked: boolean) => {
     if (!resumeId) return;
     setNextDefaultState(checked);
     setShowDefaultModal(true);
   };
 
-
   const handleChangeDefaultResume = async () => {
     if (!resumeId || nextDefaultState === null) return;
     const numericId = Number(resumeId);
-  
+
     try {
       setIsLoading(true);
       const newValue: 0 | 1 = nextDefaultState ? 1 : 0;
-  
+
       const res = await updateDefaultResume(numericId, newValue);
       console.log("✅ 기본 이력서 변경 응답:", res);
       if (res.code !== 200) {
         throw new Error(res.msg || "기본 이력서 변경 실패");
       }
       setIsDefaultResume(nextDefaultState);
-  
+
       if (nextDefaultState) {
         toast.success("기본 이력서로 설정되었습니다.");
       } else {
@@ -191,16 +189,11 @@ export default function ResumeDetail() {
       setIsLoading(false);
     }
   };
-  
-
 
   const handleCancelDefaultResume = () => {
     setShowDefaultModal(false);
     setNextDefaultState(null);
-
   };
-
-
 
   const handleEdit = () => {
     if (!resumeId) return;
@@ -305,13 +298,15 @@ export default function ResumeDetail() {
           setResumeData(res);
           setIsDefaultResume(res.isDefault);
         }
-      } catch (e) {
+      } catch (e: any) {
         if (!cancelled) {
-
           if (e.code === 999) {
-           console.log("로그인만료");
+            console.log("로그인만료");
             logout();
             navigate("/login");
+          } else {
+            console.error("❌ 이력서 상세 조회 실패:", e);
+            toast.error("이력서 정보를 불러오지 못했습니다.");
           }
         }
       } finally {
@@ -326,7 +321,7 @@ export default function ResumeDetail() {
     return () => {
       cancelled = true;
     };
-  }, [resumeId]);
+  }, [resumeId, navigate]);
 
   useEffect(() => {
     if (resumeData) {
@@ -360,6 +355,12 @@ export default function ResumeDetail() {
         : undefined,
     })) ?? [];
 
+  // 🔥 birth, gender nullable 방어
+  const basicMeta =
+    resumeData.birth && resumeData.gender
+      ? formatMeta(resumeData.birth, resumeData.gender as "M" | "W")
+      : "";
+
   // 🔥 모달 타이틀 - 토글 방향에 따라 다르게
   const defaultModalTitle =
     nextDefaultState === false
@@ -383,7 +384,7 @@ export default function ResumeDetail() {
             <div className="resume-detail__content">
               <ResumeBasicInfo
                 name={resumeData.name}
-                meta={formatMeta(resumeData.birth, resumeData.gender)}
+                meta={basicMeta}
                 email={resumeData.email}
                 phone={resumeData.phone}
                 imageSrc={resumeData.profilePhotoFile?.filePath ?? ""}
@@ -512,7 +513,7 @@ export default function ResumeDetail() {
           <div className="resume-detail__content">
             <ResumeBasicInfo
               name={resumeData.name}
-              meta={formatMeta(resumeData.birth, resumeData.gender)}
+              meta={basicMeta}
               email={resumeData.email}
               phone={resumeData.phone}
               imageSrc={

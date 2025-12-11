@@ -18,6 +18,7 @@ import icon_copy from "@/assets/icons/icon_content_copy_gray900_20.png";
 import icon_download from "@/assets/icons/icon_download_gray900_20.png";
 import icon_trash from "@/assets/icons/icon_trash_red_20.png";
 import icon_btn_black from "@/assets/icons/ic_add_btn_gray900_20.png";
+import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
 import arrow_left from "@/assets/icons/keyboard_arrow_left.png";
 import arrow_right from "@/assets/icons/keyboard_arrow_right.png";
 import Pagination from "@/shared/components/Pagination";
@@ -33,6 +34,7 @@ export default function ResumeList() {
   const [page, setPage] = useState(1);
   const [activeTab, setActiveTab] = useState<ResumeTabKey>("all");
   const [resumeList, setResumeList] = useState<ResumeItem[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [openMenuId, setOpenMenuId] = useState<number | null>(null); // 열려 있는 메뉴의 resumeIdx
 
@@ -42,7 +44,8 @@ export default function ResumeList() {
     { label: "작성 중", value: "doing" },
   ];
 
-  const pageSize = 8;
+  // 🔥 페이지당 10개
+  const pageSize = 10;
 
   const handleToggleMenu = (resumeIdx: number) => {
     setOpenMenuId((prev) => (prev === resumeIdx ? null : resumeIdx));
@@ -60,26 +63,43 @@ export default function ResumeList() {
     navigate(`/resumes/${resumeIdx}`);
   };
 
-  // 이력서 리스트 가져오는 함수
-  const loadResumeList = async () => {
+  // 탭 → API status 값 매핑
+  // ALL 전체 / ING 임시저장 / DONE 완전저장
+  const getStatusParam = (tab: ResumeTabKey): string => {
+    if (tab === "doing") return "ING";   // 작성 중 (temp = Y)
+    if (tab === "done") return "DONE";   // 작성 완료 (temp = N)
+    return "ALL";                        // 전체
+  };
+
+  // 이력서 리스트 가져오는 함수 (페이지/탭 기준)
+  const loadResumeList = async (pageParam: number, tab: ResumeTabKey) => {
     try {
-      const list = await fetchResumeList();
+      setLoading(true);
+      const status = getStatusParam(tab);
+      const { list, totalCount } = await fetchResumeList(
+        pageParam,
+        pageSize,
+        status
+      );
       setResumeList(list);
+      setTotalCount(totalCount);
     } catch (e: any) {
       if (e.code === 999) {
         console.log("로그인만료");
         logout();
         navigate("/login");
+      } else {
+        console.error("❌ 이력서 리스트 조회 실패:", e);
       }
     } finally {
       setLoading(false);
     }
   };
 
-  // 마운트 시 리스트 조회
+  // 마운트 & page/activeTab 변경 시 리스트 조회
   useEffect(() => {
-    loadResumeList();
-  }, []);
+    loadResumeList(page, activeTab);
+  }, [page, activeTab]);
 
   // 메뉴 외부 클릭 시 닫기
   useEffect(() => {
@@ -100,15 +120,24 @@ export default function ResumeList() {
     };
   }, [openMenuId]);
 
-  // TODO: activeTab(전체/작성완료/작성중)에 따라 필터링 로직 추가
+  // 탭 변경 시 페이지 1로 리셋 + 리스트 재조회
+  const handleTabChange = (val: string | number) => {
+    const tab = val as ResumeTabKey;
+    setActiveTab(tab);
+    setPage(1); // 🔥 탭 바뀌면 페이징도 1페이지로 초기화
+  };
+
+  // 서버 페이징이므로 filteredList = resumeList
   const filteredList = resumeList;
 
-  const totalCount = filteredList.length;
-  const doneCount = filteredList.length; // 백엔드에서 상태 내려주면 조건으로 변경
-
+  // 현재 페이지 기준 작성완료 개수 (참고용)
+  const doneCount = filteredList.filter((item) => item.temp === "N").length;
   const totalPage = Math.max(1, Math.ceil(totalCount / pageSize));
-  const startIndex = (page - 1) * pageSize;
-  const pageItems = filteredList.slice(startIndex, startIndex + pageSize);
+  const pageItems = filteredList; // 이미 서버에서 pageSize 만큼 가져옴
+
+  if (loading) {
+    return <LoadingOverlay isLoading={true} />;
+  }
 
   return (
     <div className="resume-list-page__container">
@@ -148,7 +177,7 @@ export default function ResumeList() {
             <UiFilter
               options={filterOptions}
               value={activeTab}
-              onChange={(val) => setActiveTab(val as ResumeTabKey)}
+              onChange={handleTabChange}
               className="resume-list-page__tabs-group"
               itemClassName="resume-list-page__tab"
             />
@@ -205,6 +234,11 @@ export default function ResumeList() {
                         {item.isDefault === 1 && (
                           <span className="resume-item__tag on">
                             기본이력서
+                          </span>
+                        )}
+                        {item.temp === "Y" && (
+                          <span className="resume-item__tag writing">
+                            작성 중
                           </span>
                         )}
                       </div>

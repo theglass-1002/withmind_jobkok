@@ -1,6 +1,7 @@
+// src/shared/components/location-picker/ModalLocationPicker.tsx
 import React, { useState } from "react";
 
-import locationsJson from "@/data/locations.json";
+import locationsData from "@/data/locationsV2.json";
 
 import check_box_purple from "@/assets/icons/check_box_purple.png";
 import check_box_outline_blank_gray from "@/assets/icons/check_box_outline_blank_gray.png";
@@ -15,49 +16,55 @@ import "./ModalLocationPicker.css";
 // ---------------- 타입 & JSON 매핑 ----------------
 
 type District = {
-  key: string;
-  name: string;
+  key: string;   // ex) "11-230"
+  name: string;  // ex) "강남구"
 };
 
 type Region = {
-  key: string;
-  name: string;
-  all: string;
+  key: string;         // ex) "11"
+  name: string;        // ex) "서울"
+  all: string;         // ex) "서울 전체"
   districts: District[];
 };
 
-// JSON 원본 타입
-type RawRegion = {
-  name: string;
-  all: string;
-  districts: string[];
+// locationsV2.json 원본 타입
+type RawRegionV2 = {
+  code: string;   // "11"
+  name: string;   // "서울 전체"
+  children: {
+    code: string; // "11-230"
+    name: string; // "강남구"
+  }[];
 };
 
-type LocationsJson = {
-  nationwide: { label: string };
-  regions: RawRegion[];
+type ModalLocationPickerProps = {
+  // 적용 클릭 시 부모로 넘길 콜백
+  onApply?: (
+    selected: {
+      code: string;         // "11-230"
+      regionName: string;   // "서울"
+      districtName: string; // "강남구"
+    }[]
+  ) => void;
 };
-
-const toKey = (str: string) =>
-  str
-    .trim()
-    .replace(/\s+/g, "_")
-    .replace(/[^a-zA-Z0-9_가-힣]/g, "");
 
 // JSON → Region[] 변환
-const raw = locationsJson as LocationsJson;
+const RAW_REGIONS = locationsData as RawRegionV2[];
 
-const REGIONS: Region[] = raw.regions.map((region) => ({
-  key: toKey(region.name),
-  name: region.name,
-  all: region.all,
-  districts: region.districts.map((d) => ({
-    key: toKey(`${region.name}_${d}`),
-    name: d,
-  })),
-}));
+const REGIONS: Region[] = RAW_REGIONS.map((r) => {
+  const cityName = r.name.replace(/\s*전체$/, ""); // "서울 전체" -> "서울"
+  return {
+    key: r.code,      // 코드 사용
+    name: cityName,
+    all: r.name,      // 전체 라벨은 그대로 "서울 전체"
+    districts: r.children.map((d) => ({
+      key: d.code,    // ex) "11-230"
+      name: d.name,   // ex) "강남구"
+    })),
+  };
+});
 
-export default function ModalLocationPicker() {
+export default function ModalLocationPicker({ onApply }: ModalLocationPickerProps) {
   const [checkedRoles, setCheckedRoles] = useState<Set<string>>(new Set());
   const [activeRegionKey, setActiveRegionKey] = useState<string | null>(
     REGIONS[0]?.key ?? null
@@ -111,16 +118,28 @@ export default function ModalLocationPicker() {
     setActiveRegionKey(REGIONS[0]?.key ?? null);
   };
 
-  // 선택된 항목들 → 칩 데이터
+  // 선택된 항목들 → 칩 데이터 (UI용 & onApply용)
   const selectedChips = REGIONS.flatMap((region) =>
     region.districts
       .filter((d) => checkedRoles.has(d.key))
       .map((d) => ({
-        key: d.key,
-        regionName: region.name,
-        districtName: d.name,
+        key: d.key,              // 코드 ("11-230")
+        regionName: region.name, // "서울"
+        districtName: d.name,    // "강남구"
       }))
   );
+
+  const handleApply = () => {
+    if (onApply) {
+      onApply(
+        selectedChips.map((chip) => ({
+          code: chip.key,
+          regionName: chip.regionName,
+          districtName: chip.districtName,
+        }))
+      );
+    }
+  };
 
   const renderLeftColumn = () => (
     <div className="location-picker__column location-picker__column--left">
@@ -180,11 +199,11 @@ export default function ModalLocationPicker() {
               />
             </span>
             <span className="location-picker__role-label">
-              {activeRegion.all}
+              {activeRegion.all /* ex) "서울 전체" */}
             </span>
           </div>
 
-          {/* 개별 구 */}
+          {/* 개별 구/군 */}
           {activeRegion.districts.map((d) => (
             <div
               key={d.key}
@@ -260,7 +279,9 @@ export default function ModalLocationPicker() {
             </span>
             <span className="location-picker__reset-text">초기화</span>
           </div>
-          <span className="default_btn_black">적용</span>
+          <span className="default_btn_black" onClick={handleApply}>
+            적용
+          </span>
         </div>
       </div>
 

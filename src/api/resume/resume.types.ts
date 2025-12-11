@@ -10,6 +10,7 @@ export interface ResumeItem {
   createdAt: string;
   updatedAt: string;
   isDefault: number; // 1: 기본 이력서, 0: 일반
+  temp:string;
 }
 
 export interface ResumeListApiResponse {

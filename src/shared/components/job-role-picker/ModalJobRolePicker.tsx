@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 
-import desiredRolesJson from "@/data/desired_roles.json";
+import type { JobNode } from "@/api/job/job.types";
 
 import check_box_purple from "@/assets/icons/check_box_purple.png";
 import check_box_outline_blank_gray from "@/assets/icons/check_box_outline_blank_gray.png";
@@ -12,59 +12,74 @@ import ic_close_gray500_20 from "@/assets/icons/size20/ic_close_gray500_20.png";
 
 import "./ModalJobRolePicker.css";
 
-// ---------------- 타입 & JSON 매핑 ----------------
+// ---------------- 타입 ----------------
 
 type Role = {
-  key: string;
+  key: string; // roleId를 string으로
   label: string;
 };
 
 type Category = {
-  key: string;
-  title: string;
-  all: string;
+  key: string;   // categoryId를 string으로
+  title: string; // ex) "개발"
+  all: string;   // ex) "개발 전체"
   roles: Role[];
 };
 
-// JSON 원본 타입 (추정)
-type RawCategory = {
-  name: string;      // "개발", "디자인", "마케팅ㆍ광고" ...
-  all: string;       // "개발 전체" ...
-  roles: string[];   // ["서버 개발자", "프론트엔드 개발자", ...]
+type Props = {
+  jobTree: JobNode[];  // API에서 받은 전체 직무 트리
+  loading?: boolean;
+  error?: string | null;
+  onApply?: (
+    selected: {
+      categoryId: number;
+      categoryName: string;
+      roleId: number;
+      roleName: string;
+    }[]
+  ) => void;
 };
 
-type DesiredRolesJson = {
-  categories: RawCategory[];
-};
-
-const toKey = (str: string) =>
-  str
-    .trim()
-    .replace(/\s+/g, "_")
-    .replace(/[^a-zA-Z0-9_가-힣]/g, "");
-
-// JSON → Category[] 로 변환
-const raw = desiredRolesJson as DesiredRolesJson;
-
-const CATEGORIES: Category[] = raw.categories.map((cat) => ({
-  key: toKey(cat.name),
-  title: cat.name,
-  all: cat.all,
-  roles: cat.roles.map((roleLabel, index) => ({
-    key: `${toKey(cat.name)}_${index}`,
-    label: roleLabel,
-  })),
-}));
-
-export default function ModalJobRolePicker() {
-  const [allChecked, setAllChecked] = useState(false); // "카테고리 전체" 모드
+export default function ModalJobRolePicker({
+  jobTree,
+  loading,
+  error,
+  onApply,
+}: Props) {
+  const [allChecked, setAllChecked] = useState(false);
   const [checkedRoles, setCheckedRoles] = useState<Set<string>>(new Set());
-  const [activeCategoryKey, setActiveCategoryKey] = useState<string | null>(
-    CATEGORIES[0]?.key ?? null
-  );
+  const [activeCategoryKey, setActiveCategoryKey] = useState<string | null>(null);
+
+  // JobNode[] -> Category[] 변환
+  const categories: Category[] = useMemo(() => {
+    if (!jobTree || jobTree.length === 0) return [];
+
+    return jobTree
+      .filter((node) => node.depth === 0 && node.isActive)
+      .sort((a, b) => a.sortOrder - b.sortOrder)
+      .map((cat) => ({
+        key: String(cat.id),
+        title: cat.name,
+        all: `${cat.name} 전체`,
+        roles: (cat.children ?? [])
+          .filter((child) => child.isActive)
+          .sort((a, b) => a.sortOrder - b.sortOrder)
+          .map((child) => ({
+            key: String(child.id),
+            label: child.name,
+          })),
+      }));
+  }, [jobTree]);
+
+  // activeCategory 기본값 세팅
+  useEffect(() => {
+    if (!activeCategoryKey && categories.length > 0) {
+      setActiveCategoryKey(categories[0].key);
+    }
+  }, [categories, activeCategoryKey]);
 
   const activeCategory =
-    CATEGORIES.find((c) => c.key === activeCategoryKey) ?? CATEGORIES[0] ?? null;
+    categories.find((c) => c.key === activeCategoryKey) ?? categories[0] ?? null;
 
   const isOn = (key: string) => activeCategoryKey === key;
 
@@ -73,16 +88,17 @@ export default function ModalJobRolePicker() {
   };
 
   const onClickAll = () => {
-    // 기존 로직처럼: 전체 모드 켜면 개별 직무 선택은 클리어
     setAllChecked((prev) => {
       const next = !prev;
-      if (next) setCheckedRoles(new Set());
+      if (next) {
+        setCheckedRoles(new Set());
+      }
       return next;
     });
   };
 
   const onClickRole = (key: string) => {
-    setAllChecked(false); // 개별 선택 시 전체 모드는 해제
+    setAllChecked(false);
     setCheckedRoles((prev) => {
       const next = new Set(prev);
       next.has(key) ? next.delete(key) : next.add(key);
@@ -93,23 +109,70 @@ export default function ModalJobRolePicker() {
   const handleReset = () => {
     setAllChecked(false);
     setCheckedRoles(new Set());
-    setActiveCategoryKey(CATEGORIES[0]?.key ?? null);
+    setActiveCategoryKey(categories[0]?.key ?? null);
   };
 
-  // 카테고리별 선택된 직무 개수
+  // 카테고리별 선택 개수
   const getSelectedCount = (category: Category) =>
     category.roles.filter((r) => checkedRoles.has(r.key)).length;
 
   // 칩 데이터
-  const selectedChips = CATEGORIES.flatMap((category) =>
-    category.roles
-      .filter((r) => checkedRoles.has(r.key))
-      .map((r) => ({
-        key: r.key,
-        categoryTitle: category.title,
-        roleLabel: r.label,
+  const selectedChips =
+    categories.flatMap((category) =>
+      category.roles
+        .filter((r) => checkedRoles.has(r.key))
+        .map((r) => ({
+          key: r.key,
+          categoryId: Number(category.key),
+          categoryTitle: category.title,
+          roleId: Number(r.key),
+          roleLabel: r.label,
+        }))
+    ) ?? [];
+
+  // "적용" 버튼 클릭
+  const handleApply = () => {
+    if (!onApply) return;
+    onApply(
+      selectedChips.map((chip) => ({
+        categoryId: chip.categoryId,
+        categoryName: chip.categoryTitle,
+        roleId: chip.roleId,
+        roleName: chip.roleLabel,
       }))
-  );
+    );
+  };
+
+  // 로딩/에러/빈 상태 처리
+  if (loading) {
+    return (
+      <div className="job-role-picker job-role-picker--popup">
+        <div className="job-role-picker__loading">
+          직군·직무 정보를 불러오는 중입니다...
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="job-role-picker job-role-picker--popup">
+        <div className="job-role-picker__error">
+          직군·직무 정보를 불러오는 중 오류가 발생했습니다.
+          <br />
+          {error}
+        </div>
+      </div>
+    );
+  }
+
+  if (!activeCategory) {
+    return (
+      <div className="job-role-picker job-role-picker--popup">
+        <div className="job-role-picker__empty">표시할 직무 정보가 없습니다.</div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -118,7 +181,7 @@ export default function ModalJobRolePicker() {
           {/* 왼쪽: 카테고리 리스트 */}
           <div className="job-role-picker__column job-role-picker__column--left">
             <div className="job-role-picker__category_group">
-              {CATEGORIES.map((category) => {
+              {categories.map((category) => {
                 const selectedCount = getSelectedCount(category);
                 return (
                   <div
@@ -166,12 +229,12 @@ export default function ModalJobRolePicker() {
                   />
                 </span>
                 <span className="job-role-picker__role-label">
-                  {activeCategory?.all ?? "전체"}
+                  {activeCategory.all}
                 </span>
               </div>
 
               {/* 개별 직무 */}
-              {activeCategory?.roles.map((role) => (
+              {activeCategory.roles.map((role) => (
                 <div
                   key={role.key}
                   className={`job-role-picker__role ${
@@ -217,12 +280,13 @@ export default function ModalJobRolePicker() {
                     {chip.roleLabel}
                   </span>
                 </div>
-             
-                  <img
-                        className="job-role-picker__chip-close"
-                     onClick={() => onClickRole(chip.key)}
-                  src={ic_close_gray500_20} alt="" />
-            
+
+                <img
+                  className="job-role-picker__chip-close"
+                  onClick={() => onClickRole(chip.key)}
+                  src={ic_close_gray500_20}
+                  alt=""
+                />
               </div>
             ))}
           </div>
@@ -236,7 +300,9 @@ export default function ModalJobRolePicker() {
             </span>
             <span className="job-role-picker__reset-text">초기화</span>
           </div>
-          <span className="default_btn_black">적용</span>
+          <span className="default_btn_black" onClick={handleApply}>
+            적용
+          </span>
         </div>
       </div>
     </>

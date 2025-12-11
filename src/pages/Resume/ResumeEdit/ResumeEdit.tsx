@@ -342,6 +342,9 @@ export default function ResumeEdit() {
     portfolios: [],
   });
 
+  // 🔥 포트폴리오 원본 스냅샷
+  const [initialPortfolios, setInitialPortfolios] = useState<PortfolioDocItem[]>([]);
+
   // 🔥 AI 제목 추천 상태
   const [showTitleSuggest, setShowTitleSuggest] = useState(false);
   const [titleSuggestions, setTitleSuggestions] = useState<string[]>([]);
@@ -393,6 +396,7 @@ export default function ResumeEdit() {
         const mapped = mapDetailToFormState(data);
         console.log("📌 mapped form", mapped);
         setForm(mapped);
+        setInitialPortfolios(mapped.portfolios); // 원본 포폴 저장
         setIsDefaultResume(data.isDefault);
         setIsReady(true);
       } catch (err: any) {
@@ -416,7 +420,8 @@ export default function ResumeEdit() {
   }, [isEdit, resumeId, navigate]);
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // AI 제목 추천
+  // AI 제목 추천 / 희망 직무 / 하드 / 소프트 / 자기소개
+  // (위에서 만든 핸들러들 그대로 – 이미 있음)
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   const handleClickTitleSuggest = async () => {
     try {
@@ -482,9 +487,6 @@ export default function ResumeEdit() {
 
   const handleCloseTitleSuggest = () => setShowTitleSuggest(false);
 
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // AI 희망 직무 추천
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   const handleClickRoleSuggest = async () => {
     try {
       if (isRoleLoading) return;
@@ -554,9 +556,6 @@ export default function ResumeEdit() {
 
   const handleCloseRoleSuggest = () => setShowRoleSuggest(false);
 
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // AI 하드 스킬 추천
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   const handleClickHardSkillSuggest = async () => {
     try {
       if (isHardSkillLoading) return;
@@ -631,9 +630,6 @@ export default function ResumeEdit() {
 
   const handleCloseHardSkillSuggest = () => setShowHardSkillSuggest(false);
 
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // AI 소프트 스킬 추천
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   const handleClickSoftSkillSuggest = async () => {
     try {
       if (isSoftSkillLoading) return;
@@ -702,9 +698,6 @@ export default function ResumeEdit() {
 
   const handleCloseSoftSkillSuggest = () => setShowSoftSkillSuggest(false);
 
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // AI 자기소개 추천
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   const handleClickSelfIntroSuggest = async () => {
     try {
       if (isSelfIntroLoading) return;
@@ -959,37 +952,115 @@ export default function ResumeEdit() {
     }
   };
 
-  const handlePortfolioFilesSubmit = async () => {
-    try {
-      const fileItems = form.portfolios.filter(
-        (p) => p.source === "file" && p.file
-      );
-      if (fileItems.length === 0) return [];
+  const handlePortfolioFilesSubmit = async (): Promise<
+  Array<{
+    originalItem: PortfolioDocItem;
+    uploadedFile?: {
+      filePath: string;
+      originalName: string;
+      storedName: string;
+      sizeBytes: number;
+      contentType: string;
+    };
+  }>
+> => {
+  try {
+    const fileItems = form.portfolios.filter(
+      (p) => p.source === "file" && p.file
+    );
+    console.log("📤 업로드 대상 fileItems", fileItems);
+    if (fileItems.length === 0) return [];
 
-      const uploadPromises = fileItems.map(async (item) => {
-        if (!item.file) return { originalItem: item };
-
-        const { s3_key, finalUrl, uniqueFileName, originalFileName } =
-          await uploadPhotoFile(item.file, "resume/portfolio");
-
-        return {
-          originalItem: item,
-          uploadedFile: {
-            filePath: s3_key,
-            originalName: originalFileName,
-            storedName: uniqueFileName,
-            sizeBytes: item.file.size,
-            contentType: item.file.type,
-          },
+    const uploadPromises = fileItems.map(async (item) => {
+      if (!item.file) {
+        // 🔥 여기서도 uploadedFile 안 넘기는 대신 타입은 그대로 맞음
+        return { originalItem: item } as {
+          originalItem: PortfolioDocItem;
+          uploadedFile?: {
+            filePath: string;
+            originalName: string;
+            storedName: string;
+            sizeBytes: number;
+            contentType: string;
+          };
         };
+      }
+
+      const { s3_key, finalUrl, uniqueFileName, originalFileName } =
+        await uploadPhotoFile(item.file, "resume/portfolio");
+
+      const uploaded = {
+        originalItem: item,
+        uploadedFile: {
+          filePath: s3_key,
+          originalName: originalFileName,
+          storedName: uniqueFileName,
+          sizeBytes: item.file.size,
+          contentType: item.file.type,
+        },
+      };
+      console.log("📤 업로드 완료", uploaded);
+      return uploaded;
+    });
+
+    const results = await Promise.all(uploadPromises);
+    console.log("📤 handlePortfolioFilesSubmit 결과", results);
+    return results;
+  } catch (error) {
+    console.error("❌ 포트폴리오 파일 업로드 실패:", error);
+    toast.error("포트폴리오 파일 업로드 중 오류가 발생했습니다.");
+    throw error;
+  }
+};
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 포트폴리오 변경 여부 헬퍼
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  const isSamePortfolioItem = (original?: PortfolioDocItem, current?: PortfolioDocItem) => {
+    if (!original && !current) return true;
+    if (!original || !current) return false;
+
+    if (original.source !== current.source) return false;
+    if ((original.title ?? "") !== (current.title ?? "")) return false;
+    if ((original.note ?? "") !== (current.note ?? "")) return false;
+
+    if (original.source === "file") {
+      // 새 파일이 올라가 있으면 무조건 변경
+      if (current.file) return false;
+      const oPath = (original.filePath ?? "").trim();
+      const cPath = (current.filePath ?? "").trim();
+      return oPath === cPath;
+    } else {
+      const oUrl = (original.url ?? "").trim();
+      const cUrl = (current.url ?? "").trim();
+      return oUrl === cUrl;
+    }
+  };
+
+  const getChangedPortfolios = (): PortfolioDocItem[] => {
+    console.log("📦 initialPortfolios (원본)", initialPortfolios);
+    console.log("📦 currentPortfolios (현재)", form.portfolios);
+
+    const changed: PortfolioDocItem[] = [];
+
+    form.portfolios.forEach((p) => {
+      const original = initialPortfolios.find((o) => o.id === p.id);
+      const same = isSamePortfolioItem(original, p);
+
+      console.log("🔍 포폴 비교", {
+        id: p.id,
+        same,
+        original,
+        current: p,
       });
 
-      return await Promise.all(uploadPromises);
-    } catch (error) {
-      console.error("❌ 포트폴리오 파일 업로드 실패:", error);
-      toast.error("포트폴리오 파일 업로드 중 오류가 발생했습니다.");
-      throw error;
-    }
+      if (!same) {
+        changed.push(p);
+      }
+    });
+
+    console.log("✅ 변경된 포폴 only", changed);
+    return changed;
   };
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1112,6 +1183,9 @@ export default function ResumeEdit() {
       const profilePhotoFile = await handleFileSubmit();
       const portfolioFilesResults = await handlePortfolioFilesSubmit();
 
+      const changedPortfolios = getChangedPortfolios();
+      console.log("🚀 handleSubmit - changedPortfolios", changedPortfolios);
+
       const payload: CreateResumeRequest = {
         userIdx: Storage.getUserIdx(),
         isDefault: isDefaultResume ? 1 : 0,
@@ -1184,19 +1258,19 @@ export default function ResumeEdit() {
             }
           : {}),
 
-        ...(form.portfolios.length > 0
+        // 🔥 포트폴리오: changedPortfolios가 있을 때만 포함
+        ...(changedPortfolios.length > 0
           ? {
-              portfolios: form.portfolios.map((p, idx) => {
+              portfolios: changedPortfolios.map((p, idx) => {
                 if (p.source === "file") {
                   const uploadedResult = portfolioFilesResults.find(
                     (r) => r.originalItem.id === p.id
                   );
 
-                  // 새 업로드된 파일이 있는 경우
                   if (uploadedResult?.uploadedFile) {
                     const u = uploadedResult.uploadedFile;
                     return {
-                      itemType: "FILE",
+                      itemType: "FILE" as const,
                       title:
                         p.title ||
                         u.originalName ||
@@ -1216,14 +1290,16 @@ export default function ResumeEdit() {
                     };
                   }
 
-                  // 기존 FILE인데 새 업로드 없는 경우 → 기존 filePath 그대로 사용
-                  if ((p as any).filePath) {
+                  // changed에 들어왔는데 새 파일이 없고 filePath만 바뀐 케이스가 있으면
+                  // 여기서는 보호 차원에서 FILE 안 보내는 게 맞는데,
+                  // 일단은 기존 로직처럼 filePath만으로 보내고, 백엔드 에러 보면 튜닝
+                  if (p.filePath) {
                     return {
-                      itemType: "FILE",
+                      itemType: "FILE" as const,
                       title: p.title || `포트폴리오 문서 ${idx + 1}`,
                       docName: p.title || "",
                       url: null,
-                      fileRef: (p as any).filePath,
+                      fileRef: p.filePath,
                       description: p.note ?? "",
                       sortOrder: idx + 1,
                       portfolioFile: null,
@@ -1231,9 +1307,8 @@ export default function ResumeEdit() {
                   }
                 }
 
-                // URL 타입
                 return {
-                  itemType: "URL",
+                  itemType: "URL" as const,
                   title: p.title || `포트폴리오 ${idx + 1}`,
                   docName: p.url || "",
                   url: p.url,
@@ -1258,13 +1333,15 @@ export default function ResumeEdit() {
             }
           : {}),
       };
-      console.log(payload);
+
+      console.log("📨 최종 payload(handleSubmit)", payload);
       const result = await createResume(payload);
       console.log("✅ 이력서 등록/수정 성공:", result);
       toast.success(
         isEdit ? "이력서가 수정되었습니다!" : "이력서가 등록되었습니다!"
       );
       setIsLoading(false);
+      navigate(`/resumes/${resumeId}`);
     } catch (error) {
       console.error("❌ 이력서 등록 실패:", error);
       toast.error("이력서 등록 중 오류가 발생했습니다.");
@@ -1272,6 +1349,7 @@ export default function ResumeEdit() {
     }
   };
 
+  
   const handleTempSave = async () => {
     try {
       setIsLoading(true);
@@ -1287,6 +1365,9 @@ export default function ResumeEdit() {
       }
       const profilePhotoFile = await handleFileSubmit();
       const portfolioFilesResults = await handlePortfolioFilesSubmit();
+
+      const changedPortfolios = getChangedPortfolios();
+      console.log("🚀 handleTempSave - changedPortfolios", changedPortfolios);
 
       const payload: CreateResumeRequest = {
         userIdx: Storage.getUserIdx(),
@@ -1360,9 +1441,9 @@ export default function ResumeEdit() {
             }
           : {}),
 
-        ...(form.portfolios.length > 0
+        ...(changedPortfolios.length > 0
           ? {
-              portfolios: form.portfolios.map((p, idx) => {
+              portfolios: changedPortfolios.map((p, idx) => {
                 if (p.source === "file") {
                   const uploadedResult = portfolioFilesResults.find(
                     (r) => r.originalItem.id === p.id
@@ -1371,7 +1452,7 @@ export default function ResumeEdit() {
                   if (uploadedResult?.uploadedFile) {
                     const u = uploadedResult.uploadedFile;
                     return {
-                      itemType: "FILE",
+                      itemType: "FILE" as const,
                       title:
                         p.title ||
                         u.originalName ||
@@ -1391,13 +1472,13 @@ export default function ResumeEdit() {
                     };
                   }
 
-                  if ((p as any).filePath) {
+                  if (p.filePath) {
                     return {
-                      itemType: "FILE",
+                      itemType: "FILE" as const,
                       title: p.title || `포트폴리오 문서 ${idx + 1}`,
                       docName: p.title || "",
                       url: null,
-                      fileRef: (p as any).filePath,
+                      fileRef: p.filePath,
                       description: p.note ?? "",
                       sortOrder: idx + 1,
                       portfolioFile: null,
@@ -1405,7 +1486,7 @@ export default function ResumeEdit() {
                   }
                 }
                 return {
-                  itemType: "URL",
+                  itemType: "URL" as const,
                   title: p.title || `포트폴리오 ${idx + 1}`,
                   docName: p.url || "",
                   url: p.url,
@@ -1441,6 +1522,7 @@ export default function ResumeEdit() {
     }
   };
 
+
   const isSubmitDisabled = !form.title.trim();
 
   // 수정 취소 버튼 핸들러들
@@ -1450,10 +1532,11 @@ export default function ResumeEdit() {
 
   const handleConfirmCancel = () => {
     setShowCancelModal(false);
-    navigate("/resumes/");
+    console.log(resumeId);
+    navigate(`/resumes/${resumeId}`);
   };
 
-  const handleCancelCancel = () => {
+  const handleCancelEdit = () => {
     setShowCancelModal(false);
   };
 
@@ -1661,7 +1744,7 @@ export default function ResumeEdit() {
         cancelText="계속 작성"
         cancelClassName="btn_w_full default_btn_white"
         onConfirm={handleConfirmCancel}
-        onClose={handleCancelCancel}
+        onClose={handleCancelEdit}
       />
     </div>
   );

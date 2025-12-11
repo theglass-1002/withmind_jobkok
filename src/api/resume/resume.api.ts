@@ -1,19 +1,58 @@
-// src/api/resume.api.ts
-
+// src/api/resume/resume.api.ts
 import instance, { ApiResponse } from "@/api/axios.instance";
-import { CreateExperienceRequest, CreateExperienceResponse, CreateResumeRequest, CreateResumeResponse, ResumeDetailResponse, ResumeHardSkillRequest, ResumeHardSkillResponse, ResumeItem, ResumeListApiResponse, ResumePositionRequest, ResumePositionResponse, ResumeSelfIntroRequest, ResumeSelfIntroResponse, ResumeSoftSkillRequest, ResumeSoftSkillResponse, ResumeTitleAIResponse, ResumeTitleRequest } from "./resume.types";
+import {
+  CreateExperienceRequest,
+  CreateExperienceResponse,
+  CreateResumeRequest,
+  CreateResumeResponse,
+  ResumeDetailResponse,
+  ResumeHardSkillRequest,
+  ResumeHardSkillResponse,
+  ResumeItem,
+  ResumeListApiResponse,
+  ResumePositionRequest,
+  ResumePositionResponse,
+  ResumeSelfIntroRequest,
+  ResumeSelfIntroResponse,
+  ResumeSoftSkillRequest,
+  ResumeSoftSkillResponse,
+  ResumeTitleAIResponse,
+  ResumeTitleRequest,
+} from "./resume.types";
 import { AI_BASE_URL } from "@/config/config";
 
-export async function fetchResumeList(): Promise<ResumeItem[]> {
-  const res = await instance.get<ResumeListApiResponse>("/api/resume/list");
+// 🔥 페이징 + 상태 기반 이력서 리스트 조회
+// page: 1-based, size: 페이지당 개수, status: "ING" | "DONE" 등 (옵션)
+export async function fetchResumeList(
+  page: number,
+  size: number,
+  status?: string
+): Promise<{ list: ResumeItem[]; totalCount: number; page: number; size: number }> {
+  const res = await instance.get<ResumeListApiResponse>("/api/resume/list", {
+    params: {
+      page,   // 1페이지, 2페이지 ...
+      size,   // 10개씩
+      ...(status ? { status } : {}), // status 있으면만 붙이기
+    },
+  });
+
   const body = res.data;
 
-  // 방어적으로 list가 없으면 빈 배열 반환
-  return Array.isArray(body.list) ? body.list : [];
+  const list = Array.isArray(body.list) ? body.list : [];
+  const totalCount =
+    typeof body.totalCount === "number" ? body.totalCount : list.length;
+
+  return {
+    list,
+    totalCount,
+    page: body.page ?? page,
+    size: body.size ?? size,
+  };
 }
 
-
-export async function createResume(payload: CreateResumeRequest): Promise<CreateResumeResponse> {
+export async function createResume(
+  payload: CreateResumeRequest
+): Promise<CreateResumeResponse> {
   const res = await instance.post<CreateResumeResponse>(
     "/api/resume/create",
     payload
@@ -21,7 +60,9 @@ export async function createResume(payload: CreateResumeRequest): Promise<Create
   return res.data;
 }
 
-export async function fetchResumeDetail(resumeIdx: number): Promise<ResumeDetailResponse> {
+export async function fetchResumeDetail(
+  resumeIdx: number
+): Promise<ResumeDetailResponse> {
   const res = await instance.get<ResumeDetailResponse>(
     `/api/resume/detail/${resumeIdx}`
   );
@@ -33,22 +74,21 @@ export async function updateDefaultResume(
   isDefault: 0 | 1
 ): Promise<ApiResponse> {
   const res = await instance.put<ApiResponse>("/api/resume/update/default", {
-    resumeIdx,  
+    resumeIdx,
     isDefault,
   });
-  return res.data; 
+  return res.data;
 }
-
 
 export async function fetchResumeTitleSuggestions(
   payload: ResumeTitleRequest
 ): Promise<string[]> {
   const res = await instance.post<ResumeTitleAIResponse>(
-    "/resume/title",  
+    "/resume/title",
     payload,
     {
-      baseURL: AI_BASE_URL, 
-      requiresAuth: false,                 
+      baseURL: AI_BASE_URL,
+      requiresAuth: false,
       headers: {
         accept: "application/json",
         "Content-Type": "application/json",
@@ -68,7 +108,6 @@ export async function fetchResumeTitleSuggestions(
 
   return body.data.titles;
 }
-
 
 export async function createExperience(
   payload: CreateExperienceRequest
@@ -101,8 +140,6 @@ export async function createExperience(
 
   return body;
 }
-
-
 
 // --- AI 희망직무 추천 API ---
 export async function fetchResumePositionSuggestions(
@@ -152,7 +189,6 @@ export async function fetchResumeHardSkillSuggestions(
 
   const body = res.data;
 
-
   if (!body.success || !body.data) {
     const msg =
       (body.error?.message ||
@@ -165,8 +201,6 @@ export async function fetchResumeHardSkillSuggestions(
 
   return body.data.skills;
 }
-
-
 
 export async function fetchResumeSoftSkillSuggestions(
   payload: ResumeSoftSkillRequest
