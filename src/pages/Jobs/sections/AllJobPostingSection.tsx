@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Switch from "react-switch";
 
 import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
@@ -21,7 +22,9 @@ import ModalJobRolePicker from "@/shared/components/job-role-picker/ModalJobRole
 import ModalCareerRangePicker from "@/shared/components/career-range-picker/ModalCareerRangePicker";
 import ModalEducationPicker from "@/shared/components/education-picker/ModalEducationPicker";
 import ModalLocationPicker from "@/shared/components/location-picker/ModalLocationPicker";
-import ModalEmploymentTypePicker from "@/shared/components/employment-type-picker/ModalEmploymentTypePicker";
+import ModalEmploymentTypePicker, {
+  EmpOptionKey,
+} from "@/shared/components/employment-type-picker/ModalEmploymentTypePicker";
 import SortDropdown from "@/shared/components/sort-dropdown/SortDropdown";
 
 import JobPostingRow from "@/shared/components/job-posting-item/JobPostingRow";
@@ -32,16 +35,22 @@ import Pagination from "@/shared/components/Pagination";
 
 import { fetchJobTree, fetchJobList } from "@/api/job/job.api";
 import { JobNode, JobItem } from "@/api/job/job.types";
+import { logout } from "@/api/auth.api";
+
+type ChipKind = "role" | "career" | "education" | "location" | "employment";
 
 type Chip = {
   id: string;
-  group: string;
+  group?: string;
   role?: string;
+  kind?: ChipKind;
 };
 
 type FilterKey = "role" | "career" | "education" | "location" | "employment";
 
 export default function AllJobPostingSection() {
+  const navigate = useNavigate();
+
   const [page, setPage] = useState(1);
   const [resumeReco, setResumeReco] = useState(false); // 이력서 기반 추천 토글
   const [openFilter, setOpenFilter] = useState<FilterKey | null>(null);
@@ -52,12 +61,7 @@ export default function AllJobPostingSection() {
   const sortOptions = ["적합도순", "최신순", "인기순", "마감임박순"];
   const sizeSortOptions = ["15개씩", "30개씩", "45개씩"];
 
-  const [chips, setChips] = useState<Chip[]>([
-    { id: "1", group: "개발", role: "프론트엔드 개발자" },
-    { id: "2", group: "개발", role: "웹 개발자" },
-    { id: "3", group: "1~3년" },
-    { id: "4", group: "정규직" },
-  ]);
+  const [chips, setChips] = useState<Chip[]>([]);
 
   // 🔥 직군/직무 트리 상태 (API 응답)
   const [jobTree, setJobTree] = useState<JobNode[]>([]);
@@ -71,44 +75,79 @@ export default function AllJobPostingSection() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
-  // 직군/직무 트리 최초 로딩
+  // 🔥 초기 로딩 완료 여부
+  const [initialized, setInitialized] = useState(false);
+
+  // 🔥 화면 최초 진입 시: fetchJobList → fetchJobTree
   useEffect(() => {
-    const load = async () => {
+    const init = async () => {
       try {
         setJobLoading(true);
+        setJobsLoading(true);
         setJobError(null);
-        const data = await fetchJobTree();
-        console.log("🔥 jobTree:", data);
-        setJobTree(data);
+        setJobsError(null);
+
+        const size = parseInt(sizeSort, 10) || 15;
+        const { jobs, totalPages, totalCount } = await fetchJobList(page, size);
+        setJobs(jobs);
+        setTotalPages(totalPages);
+        setTotalCount(totalCount);
+
+        const tree = await fetchJobTree();
+        setJobTree(tree);
+
+        setInitialized(true);
       } catch (e: any) {
         console.error(e);
+
+        if (e?.code === 999) {
+          console.log("로그인만료");
+          logout();
+          navigate("/login");
+          return;
+        }
+
         setJobError(
-          e?.message || "직군/직무 정보를 불러오는 중 오류가 발생했습니다."
+          e?.message ||
+            "초기 로딩 중 직군/직무 정보를 불러오는 데 실패했습니다."
+        );
+        setJobsError(
+          e?.message ||
+            "초기 로딩 중 채용 공고를 불러오는 데 실패했습니다."
         );
       } finally {
         setJobLoading(false);
+        setJobsLoading(false);
       }
     };
-    load();
-  }, []);
 
-  // 공고 리스트 로딩 (화면 진입 시 + 페이지/사이즈 변경 시)
+    init();
+  }, [navigate]);
+
+  // 🔁 페이지/사이즈 변경 시: 공고 리스트만 다시 로딩
   useEffect(() => {
+    if (!initialized) return;
+
     const loadJobs = async () => {
       try {
         setJobsLoading(true);
         setJobsError(null);
 
-        // "15개씩" → 15
         const size = parseInt(sizeSort, 10) || 15;
-
         const { jobs, totalPages, totalCount } = await fetchJobList(page, size);
-        console.log("🔥 jobs:", jobs);
         setJobs(jobs);
         setTotalPages(totalPages);
         setTotalCount(totalCount);
       } catch (e: any) {
         console.error(e);
+
+        if (e?.code === 999) {
+          console.log("로그인만료");
+          logout();
+          navigate("/login");
+          return;
+        }
+
         setJobsError(
           e?.message || "채용 공고를 불러오는 중 오류가 발생했습니다."
         );
@@ -118,13 +157,14 @@ export default function AllJobPostingSection() {
     };
 
     loadJobs();
-  }, [page, sizeSort]);
+  }, [page, sizeSort, initialized, navigate]);
 
   const toggleFilter = (key: FilterKey) =>
     setOpenFilter((prev) => (prev === key ? null : key));
 
   const resetFilters = () => {
     setChips([]);
+    // TODO: 실제 필터 상태도 여기서 초기화할 수 있음
   };
 
   const removeChip = (id: string) => {
@@ -139,7 +179,101 @@ export default function AllJobPostingSection() {
     }[]
   ) => {
     console.log("📍 선택된 지역 목록:", selected);
-    // 필요하면 chips 갱신
+
+    const locationChips: Chip[] = selected.map((s) => ({
+      id: `loc-${s.code}`,
+      group: s.regionName,
+      role: s.districtName,
+      kind: "location",
+    }));
+
+    setChips((prev) => {
+      const others = prev.filter((chip) => chip.kind !== "location");
+      return [...others, ...locationChips];
+    });
+
+    setOpenFilter(null);
+  };
+
+const handleCareerApply = (range: { min: number; max: number }) => {
+  const { min, max } = range;
+
+  let label = "";
+  if (min === 0 && max === 1) label = "신입";
+  else if (min === 0 && max === 10) label = "경력전체";
+  else if (min === 0) label = `~${max}년`;
+  else if (max === 10) label = `${min}년 이상`;
+  else label = `${min}~${max}년`;
+
+  const careerChip: Chip = {
+    id: "career",
+    role: label,        // 🔥 이제 role만 저장
+    kind: "career",
+  };
+
+  setChips((prev) => {
+    const others = prev.filter((chip) => chip.kind !== "career");
+    return [...others, careerChip];
+  });
+
+  setOpenFilter(null);
+};
+
+
+  // 🔥 학력 피커 적용 콜백
+  const handleEducationApply = (selected: string[]) => {
+    console.log("🎓 선택된 학력 코드들:", selected);
+
+    const eduLabelMap: Record<string, string> = {
+      ANY: "학력 무관",
+      HS_OR_LESS: "고교 졸업 이하",
+      HS: "고등학교 졸업",
+      COLLEGE_2_3: "대학 졸업(2, 3년제)",
+      UNIV_4: "대학 졸업(4년제)",
+      MASTER: "대학원 석사 졸업",
+      PHD: "대학원 박사 졸업",
+    };
+
+    const eduChips: Chip[] = selected.map((key) => ({
+      id: `edu-${key}`,
+      group: "학력",
+      role: eduLabelMap[key] || key,
+      kind: "education",
+    }));
+
+    setChips((prev) => {
+      const others = prev.filter((chip) => chip.kind !== "education");
+      return [...others, ...eduChips];
+    });
+
+    setOpenFilter(null);
+  };
+
+  // 🔥 채용 유형 피커 적용 콜백
+  const handleEmploymentApply = (selected: EmpOptionKey[]) => {
+    console.log("💼 선택된 채용 유형:", selected);
+
+    const empLabelMap: Record<EmpOptionKey, string> = {
+      fullTime: "정규직",
+      contract: "계약직",
+      intern: "인턴",
+      militaryService: "병역특례",
+      foreigner: "외국인",
+      disability: "장애인",
+    };
+
+    const empChips: Chip[] = selected.map((key) => ({
+      id: `emp-${key}`,
+      group: "채용 유형",
+      role: empLabelMap[key],
+      kind: "employment",
+    }));
+
+    setChips((prev) => {
+      const others = prev.filter((chip) => chip.kind !== "employment");
+      return [...others, ...empChips];
+    });
+
     setOpenFilter(null);
   };
 
@@ -153,21 +287,21 @@ export default function AllJobPostingSection() {
     }[]
   ) => {
     const roleChips: Chip[] = selected.map((s) => ({
-      id: String(s.roleId),
-      group: s.categoryName, // ex) "개발"
-      role: s.roleName, // ex) "프론트엔드 개발자"
+      id: `role-${s.roleId}`,
+      group: s.categoryName,
+      role: s.roleName,
+      kind: "role",
     }));
 
     setChips((prev) => {
-      // 직무 관련 chip만 교체 → role 없는 것들(경력, 고용형태 등)은 유지
-      const others = prev.filter((chip) => !chip.role);
+      const others = prev.filter((chip) => chip.kind !== "role");
       return [...others, ...roleChips];
     });
 
     setOpenFilter(null);
   };
 
-  // ✅ 화면 진입 시: 직군/직무 + 공고 리스트 둘 다 아직 없고 로딩 중이면 전체 로딩 오버레이
+  // ✅ 초기 로딩 전체 오버레이
   if (
     (jobLoading || jobsLoading) &&
     !jobError &&
@@ -283,7 +417,7 @@ export default function AllJobPostingSection() {
                     onClick={(e) => e.stopPropagation()}
                     onTouchStart={(e) => e.stopPropagation()}
                   >
-                    <ModalCareerRangePicker />
+                    <ModalCareerRangePicker onApply={handleCareerApply} />
                   </div>
                 ) : null}
               </li>
@@ -312,7 +446,7 @@ export default function AllJobPostingSection() {
                     onClick={(e) => e.stopPropagation()}
                     onTouchStart={(e) => e.stopPropagation()}
                   >
-                    <ModalEducationPicker />
+                    <ModalEducationPicker onApply={handleEducationApply} />
                   </div>
                 ) : null}
               </li>
@@ -370,13 +504,17 @@ export default function AllJobPostingSection() {
                     onClick={(e) => e.stopPropagation()}
                     onTouchStart={(e) => e.stopPropagation()}
                   >
-                    <ModalEmploymentTypePicker />
+                    <ModalEmploymentTypePicker onApply={handleEmploymentApply} />
                   </div>
                 ) : null}
               </li>
             </ul>
           </div>
+        </div>
+      </div>
 
+        {/* 🔥 필터 칩 영역: chips가 1개 이상일 때만 표시 */}
+        {chips.length > 0 && (
           <div className="jobs-toolbar-container">
             <div className="jobs-toolbar__actions">
               <div
@@ -384,46 +522,60 @@ export default function AllJobPostingSection() {
                 onClick={resetFilters}
                 style={{ cursor: "pointer" }}
               >
-                <span>
+           
                   <img src={refresh_gray} alt="" />
-                </span>
+              
                 초기화
               </div>
 
               <div className="jobs-chips">
-                {chips.map((chip) => (
-                  <div key={chip.id} className="jobs-chips__item">
+              {chips.map((chip) => (
+                <div key={chip.id} className="jobs-chips__item">
+
+                  {/* group이 있을 때만 group 렌더링 */}
+                  {chip.group && (
                     <span className="job-role-picker__chip-group">
                       {chip.group}
                     </span>
-                    {chip.role && (
-                      <span className="job-role-picker__chip-role">
+                  )}
+
+                  {/* role은 항상 표시됨 */}
+                  {chip.role && (
+                    <span className="job-role-picker__chip-role">
+                      {/* group이 있을 때만 ">" 아이콘 표시 */}
+                      {chip.group && (
                         <span className="job-role-picker__chip-chevron">
                           <img src={chevron_right_black} alt="" />
                         </span>
-                        {chip.role}
-                      </span>
-                    )}
-                    <span
-                      className="job-role-picker__chip-close"
-                      onClick={() => removeChip(chip.id)}
-                      style={{ cursor: "pointer" }}
-                    >
-                      <img src={ic_close_gray500_20} alt="" />
+                      )}
+                      {chip.role}
                     </span>
-                  </div>
-                ))}
-              </div>
+                  )}
+
+                  {/* 삭제 버튼 */}
+                  <img
+                    className="job-role-picker__chip-close"
+                    onClick={() => removeChip(chip.id)}
+                    style={{ cursor: "pointer" }}
+                    src={ic_close_gray500_20}
+                    alt=""
+                  />
+                </div>
+              ))}
+            </div>
+
             </div>
           </div>
-        </div>
-      </div>
+        )}
 
-      {/* 채용 공고 리스트 영역 */}
+
       <div className="job-posting">
-        <div className="job-posting__ai-recommend">
-          이력서를 기반으로 AI가 103개의 추천 공고를 찾았어요!
-        </div>
+        {resumeReco && (
+          <div className="job-posting__ai-recommend">
+            이력서를 기반으로 AI가 {totalCount.toLocaleString()}개의 추천 공고를
+            찾았어요!
+          </div>
+        )}
 
         <div className="job-posting__container">
           <div className="job-posting__content">
@@ -486,16 +638,18 @@ export default function AllJobPostingSection() {
                 </div>
               </div>
             </div>
-
-            {/* TODO: JobPostingRow / JobPostingCard에 jobs props로 내려주는 구조면 더 좋음 */}
             {view === 1 ? (
-                <JobPostingCard
+              <JobPostingCard
                 jobs={jobs}
                 loading={jobsLoading}
                 isResumeBased={resumeReco}
               />
             ) : (
-              <JobPostingRow  jobs={jobs} loading={jobsLoading} />
+              <JobPostingRow
+                jobs={jobs}
+                loading={jobsLoading}
+                isResumeBased={resumeReco}
+              />
             )}
 
             {jobsError && (

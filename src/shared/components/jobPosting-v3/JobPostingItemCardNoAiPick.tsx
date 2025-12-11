@@ -10,32 +10,43 @@ import fire from "@/assets/icons/fire.png";
 import seed from "@/assets/icons/seed.png";
 import check_circle_purple from "@/assets/icons/check_circle_purple.png";
 
+import { getCareerLabel, getEducationLabel, getEmploymentTypeLabel, getLocationLabel, type JobItem } from "@/api/job/job.types";
+
 const DEFAULT_SUCCESS_MESSAGE = "지원 정보가 반영되었습니다.";
 const DEFAULT_INFO_MESSAGE = "기록을 해제했어요.";
 
 interface JobPostingItemCardNoAiPickProps {
-  appliedSuccessMessage?: string; // 지원 기록 시 성공 메시지
-  unappliedInfoMessage?: string; // 기록 해제 시 알림 메시지
+  appliedSuccessMessage?: string;
+  unappliedInfoMessage?: string;
 
-  /** 
+  /**
    * "지원한 포지션으로 기록하기" 영역 노출 여부
    * default: true (보여줌)
    */
   showAppliedSection?: boolean;
-  // job: JobPosting; // 실제 데이터를 받을 job prop을 추가할 수 있습니다.
+
+  /** 🔥 실제 공고 데이터 */
+  job?: JobItem;
 }
 
 export default function JobPostingItemCardNoAiPick({
   appliedSuccessMessage = DEFAULT_SUCCESS_MESSAGE,
   unappliedInfoMessage = DEFAULT_INFO_MESSAGE,
-  showAppliedSection = true, // 🔥 기본은 보이도록
+  showAppliedSection = true,
+  job,
 }: JobPostingItemCardNoAiPickProps) {
   const navigate = useNavigate();
-  const [bookMark, setBookMark] = useState<0 | 1>(0);
-  const [recordAsApplied, setRecordAsApplied] = useState<0 | 1>(0);
+  const [bookMark, setBookMark] = useState<0 | 1>(
+    (job.favorite as 0 | 1) ?? 0
+  );
+  const [recordAsApplied, setRecordAsApplied] = useState<0 | 1>(
+    (job.applied as 0 | 1) ?? 0
+  );
 
   const handleGoToJobPost = () => {
-    navigate("/jobs/13?title=밀리의서재");
+    navigate(
+      `/jobs/${job.id}?title=${encodeURIComponent(job.companyName ?? "")}`
+    );
   };
 
   const handleBookmarkToggle = (e: React.MouseEvent) => {
@@ -55,19 +66,28 @@ export default function JobPostingItemCardNoAiPick({
     }
   };
 
+  const loc = getLocationLabel(job.locationCode);
+  const career = getCareerLabel(job.annualFrom, job.annualTo);
+  const employmentType = getEmploymentTypeLabel(job.employmentType);
+  const edu = getEducationLabel(job.educationCode);
+
   return (
     <div className="job-posting__card" onClick={handleGoToJobPost}>
       <div className="job-card__header">
         <div className="job-posting__left">
-          <img className="job-posting__logo" src={mp_test_logo} alt="" />
+          <img
+            className="job-posting__logo"
+            src={job.companyLogoUrl || mp_test_logo}
+            alt={job.companyName}
+          />
           <div className="job-card__identity">
             <div className="job-card__byline">
-              <span className="job-posting__company">밀리의서재</span>
+              <span className="job-posting__company">{job.companyName}</span>
               <span className="job-posting__source-logo">
                 <img src={jobkorea} alt="" />
               </span>
             </div>
-            <span className="job-posting__role">프론트앤드 개발자</span>
+            <span className="job-posting__role">{job.name}</span>
           </div>
         </div>
         <span className="job-card__favorite">
@@ -86,11 +106,12 @@ export default function JobPostingItemCardNoAiPick({
           <div className="job-card__facts">
             <div className="job-posting__meta-items">
               <span className="job-posting__meta-item">
-                서울 마포구ㆍ신입 이상ㆍ대졸 이상
+                {loc}ㆍ{career}ㆍ{job.educationText}
               </span>
-              <span className="job-posting__meta-item">정규직ㆍ계약직</span>
             </div>
-            <span className="job-card__deadline">~2025.08.31(일)</span>
+            <span className="job-card__deadline">
+            {employmentType} ㆍ
+              {job.dueTime??"상시채용"}</span>
           </div>
         </div>
 
@@ -107,7 +128,6 @@ export default function JobPostingItemCardNoAiPick({
           </span>
         </div>
 
-        {/* 🔥 showAppliedSection 으로 노출 여부 제어 */}
         {showAppliedSection &&
           (recordAsApplied === 0 ? (
             <div className="job-card__control job-card__control--radio">

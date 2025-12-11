@@ -5,6 +5,7 @@ import {
   CreateExperienceResponse,
   CreateResumeRequest,
   CreateResumeResponse,
+  ResumeCheckResponse,
   ResumeDetailResponse,
   ResumeHardSkillRequest,
   ResumeHardSkillResponse,
@@ -79,6 +80,14 @@ export async function updateDefaultResume(
   });
   return res.data;
 }
+
+export async function fetchResumeCheck(): Promise<ResumeCheckResponse> {
+  const res = await instance.get<ResumeCheckResponse>("/api/resume/check", {
+  });
+
+  return res.data;
+}
+
 
 export async function fetchResumeTitleSuggestions(
   payload: ResumeTitleRequest

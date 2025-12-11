@@ -203,6 +203,12 @@ export interface ResumeListApiResponse {
   }
   
 
+// 이력서 존재 여부 체크 응답
+export interface ResumeCheckResponse {
+  exists: boolean;
+  resumeIdx: number | null;
+  title: string | null;
+}
 
 
 

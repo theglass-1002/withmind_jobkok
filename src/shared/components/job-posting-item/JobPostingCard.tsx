@@ -14,6 +14,7 @@ import check_circle_purple from "@/assets/icons/check_circle_purple.png";
 
 import "./JobPostingItem.css";
 import type { JobItem } from "@/api/job/job.types";
+import JobPostingItemCardNoAiPick from "@/shared/components/jobPosting-v3/JobPostingItemCardNoAiPick";
 
 type Props = {
   jobs: JobItem[];
@@ -106,6 +107,23 @@ export default function JobPostingCard({
     );
   }
 
+  // 🔥 이력서 기반이 아닌 경우 → NoAiPick 카드로 전부 렌더
+  if (!isResumeBased) {
+    return (
+      console.log('픽아님'),
+      <div className="job-posting__list job-posting__list--grid">
+        {jobs.map((job) => (
+          <JobPostingItemCardNoAiPick
+            key={job.id}
+            job={job}
+            showAppliedSection={false}
+          />
+        ))}
+      </div>
+    );
+  }
+
+  // 🔥 이력서 기반 추천인 경우 → AI 카드 + AI PICK
   return (
     <>
       <div className="job-posting__list job-posting__list--grid">
@@ -159,8 +177,7 @@ export default function JobPostingCard({
                   <div className="job-card__content">
                     <span className="job-posting__match job-posting__match--level">
                       <img src={green_star16x16} alt="" />
-                      {/* 필요하면 isResumeBased 여부로 문구 바꿀 수도 있음 */}
-                      {isResumeBased ? "AI 적합도 90%" : "AI 적합도 70%"}
+                      AI 적합도 90%
                     </span>
                     <div className="job-card__facts">
                       <div className="job-posting__meta-items">
@@ -209,8 +226,7 @@ export default function JobPostingCard({
                 </div>
 
                 <div className="job-card__sticker">
-                  {/* 예: 이력서 기반 추천일 때만 AI Pick 스티커 보여주기 */}
-                  {isResumeBased && <img src={ai_pick} alt="" />}
+                  <img src={ai_pick} alt="" />
                 </div>
               </div>
             </Link>

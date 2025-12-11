@@ -69,14 +69,27 @@
 }
 
 .jobs-toolbar{
+
     display: flex;
-    padding-top: 30px;
     flex-direction: column;
     align-items: center;
     gap: 52px;
     align-self: stretch;
-    border-bottom: 1px solid var(--gray-300, #E0E2E4);
+    /* border-bottom: 1px solid var(--gray-300, #E0E2E4); */
     background: var(--white-100, #FFF);
+    padding-top: 20px;
+    padding-bottom: 20px;
+
+    /* display: flex;
+   
+    flex-direction: column;
+    align-items: center;
+    gap: 52px;
+    align-self: stretch;
+  background: var(--white-100, #FFF);
+    /* border-bottom: 1px solid var(--gray-300, #E0E2E4);
+     */
+ 
 }
 
 
@@ -120,7 +133,7 @@
 
 .jobs-toolbar-container{
     width: 100%;
-    /* border-top: 1px solid var(--gray-300, #E0E2E4); */
+    border-top: 1px solid var(--gray-300, #E0E2E4);
     background: var(--gray-50, #F8F8F9);
 }
 
@@ -141,6 +154,9 @@
     padding: 8px 0;
     align-items: center;
     gap: 8px;
+    font-size: 16px;
+    color: var(--gray-700, #6F767E);
+
 }
 
 .jobs-chips{
@@ -284,6 +300,8 @@
     flex-direction: column;
     align-items: flex-start;
     align-self: stretch;
+    background: var(--gray-50, #F8F8F9);
+    border-top: 1px solid var(--gray-300, #E0E2E4);
 }
 
 .jobs .job-posting .job-posting__ai-recommend{

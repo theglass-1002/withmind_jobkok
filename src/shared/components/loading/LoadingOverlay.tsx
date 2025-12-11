@@ -4,7 +4,7 @@ import { Icons } from "@/assets/icons";
 
 
 type Props = {
-  isLoading: boolean;
+  isLoading?: boolean;
   isLogo?:boolean;
   text?: string;
   overlayClassName?: string;

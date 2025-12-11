@@ -14,15 +14,21 @@ import check_circle_purple from "@/assets/icons/check_circle_purple.png";
 
 import "./JobPostingItem.css";
 import type { JobItem } from "@/api/job/job.types";
+import JobPostingItemRowNoAiPick from "@/shared/components/jobPosting-v3/JobPostingItemRowNoAiPick";
 
 type Props = {
   jobs: JobItem[];
   loading?: boolean;
+  isResumeBased?: boolean; // 🔥 이력서 기반 추천 여부
 };
 
 type ToggleState = Record<number, 0 | 1>;
 
-export default function JobPostingRow({ jobs, loading }: Props) {
+export default function JobPostingRow({
+  jobs,
+  loading,
+  isResumeBased = false,
+}: Props) {
   const [bookmarks, setBookmarks] = useState<ToggleState>({});
   const [applied, setApplied] = useState<ToggleState>({});
 
@@ -103,6 +109,26 @@ export default function JobPostingRow({ jobs, loading }: Props) {
     );
   }
 
+  // 🔥 이력서 기반 추천이 아닌 경우 → No AI Pick Row 컴포넌트로 렌더링
+  if (!isResumeBased) {
+    return (
+      <div className="job-posting__list job-posting__list--row">
+        {jobs.map((job) => (
+          <div
+            key={job.id}
+            className="job-posting__item job-posting__item--row"
+          >
+            <JobPostingItemRowNoAiPick
+              job={job}
+              showAppliedSection={false} // 필요하면 true로
+            />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // 🔥 이력서 기반 추천인 경우 → 기존 AI Pick 있는 리스트 UI 유지
   return (
     <>
       <div className="job-posting__list job-posting__list--row">
@@ -140,7 +166,7 @@ export default function JobPostingRow({ jobs, loading }: Props) {
                         <div className="job-posting__meta">
                           <div className="job-posting__match job-posting__match--level">
                             <img src={green_star16x16} alt="" />
-                            AI 적합도 90%
+                            {isResumeBased ? "AI 적합도 90%" : "AI 적합도 70%"}
                           </div>
                           <div className="job-posting__meta-items">
                             <span className="job-posting__meta-item">
@@ -188,7 +214,7 @@ export default function JobPostingRow({ jobs, loading }: Props) {
                       </span>
                     </div>
                     <div className="job-posting__ai-pick">
-                      <img src={ai_pick} alt="" />
+                      {isResumeBased && <img src={ai_pick} alt="" />}
                     </div>
                   </div>
 
