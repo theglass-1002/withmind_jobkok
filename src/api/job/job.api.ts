@@ -1,6 +1,6 @@
 // src/api/job/job.api.ts
 import instance from "@/api/axios.instance";
-import type { JobNode, JobListApiResponse, JobItem, JobDetailApiResponse } from "./job.types";
+import type { JobNode, JobListApiResponse, JobItem, JobDetailApiResponse, JobFavoriteResponse } from "./job.types";
 
 // 직군/직무 트리
 export async function fetchJobTree(): Promise<JobNode[]> {
@@ -47,9 +47,15 @@ export async function fetchJobList(
 export async function fetchJobDetail(
   jobId: number
 ): Promise<JobDetailApiResponse> {
-  const res = await instance.get<JobDetailApiResponse>(`/auth/job/${jobId}`, {
-    requiresAuth: false, // X-API-Key만 쓰는 엔드포인트면 false 유지
-  });
-
+  const res = await instance.get<JobDetailApiResponse>(`/auth/job/${jobId}`);
+  console.log('red',res.data);
   return res.data;
+}
+
+export async function toggleJobFavorite(jobId: number): Promise<number> {
+  const res = await instance.post<JobFavoriteResponse>(
+    `/api/jobs/${jobId}/favorite`,
+  );
+
+  return res.data.resumeIdx;
 }

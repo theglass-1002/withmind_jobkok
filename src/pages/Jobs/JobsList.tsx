@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "rc-slider/assets/index.css";
-
 import Tabs from "@/shared/components/tabs/Tabs";
 import { useStickyTabs } from "@/shared/utils/util";
 import keyboard_arrow_right from "@/assets/icons/chevron_right_white.png";
@@ -8,12 +8,14 @@ import AllJobPostingSection from "@/pages/Jobs/sections/AllJobPostingSection";
 import M_AllJobPostingSection from "@/pages/Jobs/sections/M_AllJobPostingSection";
 import SavedJobPostingSection from "@/pages/Jobs/sections/SavedJobPostingSection";
 import M_SavedJobPostingSection from "@/pages/Jobs/sections/M_SavedJobPostingSection";
-
+import { logout } from "@/api/auth.api";
 import { fetchResumeCheck } from "@/api/resume/resume.api";
 
 import "./Jobs.css";
 
 export default function JobsList() {
+  const navigate = useNavigate();
+
   const [activeTab, setActiveTab] = useState<"all" | "saved">("all");
 
   // 🔥 이력서 존재 여부 상태
@@ -44,6 +46,14 @@ export default function JobsList() {
         setResumeExists(resumeCheck.exists);
       } catch (e) {
         console.error("이력서 존재 여부 확인 중 오류:", e);
+
+        if (e?.code === 999) {
+          console.log("로그인만료");
+          logout();
+          navigate("/login");
+          return;
+        }
+
         setResumeExists(false); // 오류 시 기본값 false
       }
     };
@@ -87,8 +97,6 @@ export default function JobsList() {
   return (
     <>
       <div className="jobs">
-
-        {/* 🔥 resumeExists === false 일 때만 보여줌 */}
         {resumeExists === false && (
           <div className="resume-promo-container" id="sticky-trigger">
             <div className="resume-promo">

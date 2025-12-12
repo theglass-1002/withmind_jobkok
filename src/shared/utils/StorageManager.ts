@@ -36,10 +36,7 @@ export class StorageManager {
     private removeItem(storage: Storage, key: string) {
       storage.removeItem(key);
     }
-  
-    // =====================================================
     //  local 우선 → 없으면 sessionStorage 조회
-    // =====================================================
     private getFromBoth<T = any>(key: string, defaultValue: T): T {
       const local = this.getItem<T | null>(localStorage, key, null);
       if (local !== null && local !== undefined) return local;
@@ -49,14 +46,8 @@ export class StorageManager {
   
       return defaultValue;
     }
-  
-    // =====================================================
-    //  set/remove 는 어디 저장할지 결정해서 사용
-    // =====================================================
-  
-    // --------------------------
+
     // ACCESS TOKEN (session 우선)
-    // --------------------------
     getAccessToken() {
       return this.getFromBoth<string>("accessToken", "");
     }
@@ -69,10 +60,7 @@ export class StorageManager {
       this.removeItem(localStorage, "accessToken");
       this.removeItem(sessionStorage, "accessToken");
     }
-  
-    // --------------------------
     // REFRESH TOKEN (local 우선)
-    // --------------------------
     getRefreshToken() {
       return this.getFromBoth<string>("refreshToken", "");
     }

@@ -21,12 +21,9 @@ export interface JobNode {
     parentId: number | null;
   }
   
-  // ======================
-// 🔥 공고 리스트 타입들
-// ======================
+  // 공고 리스트 타입들
 
 export type JobStatus = "active" | "closed" | "draft" | string;
-
 export type EmploymentType = "regular" | "contract" | "intern" | "parttime" | string;
 
 export interface JobItem {
@@ -90,6 +87,10 @@ export interface JobListApiResponse {
 export interface JobDetailApiResponse {
   userIdx: number | null;
   job: JobItem;
+}
+
+export interface JobFavoriteResponse {
+  resumeIdx: number;  // 서버에서 이력서 번호를 내려준다고 했으니까
 }
 
 export function getEducationLabel(code?: number | null): string {

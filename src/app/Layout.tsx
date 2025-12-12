@@ -287,11 +287,7 @@ export default function Layout({
           sortClassName={'mock-setting'}
           onSortChange={(handleSendActions)}
         />);
-      }
-      
-      
-      
-      
+      }   
     return null;
   }
 

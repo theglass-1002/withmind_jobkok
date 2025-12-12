@@ -18,14 +18,11 @@ export interface LoginRequest {
     password: string;
     deviceId: string;
   }
-
   export interface EmailCheckResponse {
     code: number;
     check: boolean;
     msg: string;
   }
-  
-
   export interface RegisterRequest {
     userId: string;
     password: string;
@@ -38,14 +35,11 @@ export interface LoginRequest {
     phone: string;
     email: string;
   }
-
-  
   export interface LoginUser {
     userName: string;
     userIdx: number;
     userId: string;
   }
-  
   export interface LoginResponse {
     code: number;
     tokenType: string;
@@ -53,7 +47,7 @@ export interface LoginRequest {
     token: string;
     refreshToken: string;
   }
- 
+
   export type RegisterResponse = ApiResponse<{
     userIdx: number;
   }>;
