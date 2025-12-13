@@ -1,12 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
-import check_box_purple from "@/assets/icons/check_box_purple.png";
-import check_box_outline_blank_gray from "@/assets/icons/check_box_outline_blank_gray.png";
-
-import chevron_right_black from "@/assets/icons/chevron_right_black.png";
-import chevron_right_gray_light from "@/assets/icons/chevron_right_gray_light.png";
 import refresh_black from "@/assets/icons/refresh_black.png";
-import ic_close_gray500_20 from "@/assets/icons/size20/ic_close_gray500_20.png";
 import "./ModalEmploymentTypePicker.css";
 
 export type EmpOptionKey =
@@ -18,27 +12,32 @@ export type EmpOptionKey =
   | "disability";
 
 interface ModalEmploymentTypePickerProps {
-  // 🔥 선택된 채용 유형 키 배열을 부모로 올려줌
   onApply?: (selected: EmpOptionKey[]) => void;
+
+  // ✅ 복원용
+  initialSelected?: EmpOptionKey[];
 }
 
 export default function ModalEmploymentTypePicker({
   onApply,
+  initialSelected = [],
 }: ModalEmploymentTypePickerProps) {
   const [selectedOptions, setSelectedOptions] = useState<Set<EmpOptionKey>>(
     new Set()
   );
+
+  // ✅ 모달 재오픈 시 복원
+  useEffect(() => {
+    setSelectedOptions(new Set(initialSelected));
+  }, [initialSelected]);
 
   const isSelected = (key: EmpOptionKey) => selectedOptions.has(key);
 
   const handleToggleOption = (key: EmpOptionKey) => {
     setSelectedOptions((prev) => {
       const next = new Set(prev);
-      if (next.has(key)) {
-        next.delete(key);
-      } else {
-        next.add(key);
-      }
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
       return next;
     });
   };
@@ -46,9 +45,7 @@ export default function ModalEmploymentTypePicker({
   const handleReset = () => setSelectedOptions(new Set());
 
   const handleApply = () => {
-    if (onApply) {
-      onApply(Array.from(selectedOptions));
-    }
+    onApply?.(Array.from(selectedOptions));
   };
 
   return (
@@ -60,25 +57,19 @@ export default function ModalEmploymentTypePicker({
             <span className="emp-type__title">고용형태</span>
             <div className="emp-type__list">
               <span
-                className={`emp-type__option ${
-                  isSelected("fullTime") ? "on" : ""
-                }`}
+                className={`emp-type__option ${isSelected("fullTime") ? "on" : ""}`}
                 onClick={() => handleToggleOption("fullTime")}
               >
                 정규직
               </span>
               <span
-                className={`emp-type__option ${
-                  isSelected("contract") ? "on" : ""
-                }`}
+                className={`emp-type__option ${isSelected("contract") ? "on" : ""}`}
                 onClick={() => handleToggleOption("contract")}
               >
                 계약직
               </span>
               <span
-                className={`emp-type__option ${
-                  isSelected("intern") ? "on" : ""
-                }`}
+                className={`emp-type__option ${isSelected("intern") ? "on" : ""}`}
                 onClick={() => handleToggleOption("intern")}
               >
                 인턴
@@ -90,25 +81,19 @@ export default function ModalEmploymentTypePicker({
             <span className="emp-type__title">기타사항</span>
             <div className="emp-type__list">
               <span
-                className={`emp-type__option ${
-                  isSelected("militaryService") ? "on" : ""
-                }`}
+                className={`emp-type__option ${isSelected("militaryService") ? "on" : ""}`}
                 onClick={() => handleToggleOption("militaryService")}
               >
                 병역특례
               </span>
               <span
-                className={`emp-type__option ${
-                  isSelected("foreigner") ? "on" : ""
-                }`}
+                className={`emp-type__option ${isSelected("foreigner") ? "on" : ""}`}
                 onClick={() => handleToggleOption("foreigner")}
               >
                 외국인
               </span>
               <span
-                className={`emp-type__option ${
-                  isSelected("disability") ? "on" : ""
-                }`}
+                className={`emp-type__option ${isSelected("disability") ? "on" : ""}`}
                 onClick={() => handleToggleOption("disability")}
               >
                 장애인
@@ -137,25 +122,19 @@ export default function ModalEmploymentTypePicker({
             <span className="emp-type__title">고용형태</span>
             <div className="emp-type__list">
               <span
-                className={`emp-type__option ${
-                  isSelected("fullTime") ? "on" : ""
-                }`}
+                className={`emp-type__option ${isSelected("fullTime") ? "on" : ""}`}
                 onClick={() => handleToggleOption("fullTime")}
               >
                 정규직
               </span>
               <span
-                className={`emp-type__option ${
-                  isSelected("contract") ? "on" : ""
-                }`}
+                className={`emp-type__option ${isSelected("contract") ? "on" : ""}`}
                 onClick={() => handleToggleOption("contract")}
               >
                 계약직
               </span>
               <span
-                className={`emp-type__option ${
-                  isSelected("intern") ? "on" : ""
-                }`}
+                className={`emp-type__option ${isSelected("intern") ? "on" : ""}`}
                 onClick={() => handleToggleOption("intern")}
               >
                 인턴
@@ -167,25 +146,19 @@ export default function ModalEmploymentTypePicker({
             <span className="emp-type__title">기타사항</span>
             <div className="emp-type__list">
               <span
-                className={`emp-type__option ${
-                  isSelected("militaryService") ? "on" : ""
-                }`}
+                className={`emp-type__option ${isSelected("militaryService") ? "on" : ""}`}
                 onClick={() => handleToggleOption("militaryService")}
               >
                 병역특례
               </span>
               <span
-                className={`emp-type__option ${
-                  isSelected("foreigner") ? "on" : ""
-                }`}
+                className={`emp-type__option ${isSelected("foreigner") ? "on" : ""}`}
                 onClick={() => handleToggleOption("foreigner")}
               >
                 외국인
               </span>
               <span
-                className={`emp-type__option ${
-                  isSelected("disability") ? "on" : ""
-                }`}
+                className={`emp-type__option ${isSelected("disability") ? "on" : ""}`}
                 onClick={() => handleToggleOption("disability")}
               >
                 장애인

@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useEffect } from "react";
+import { toast } from "react-toastify";
 
 import type { JobNode } from "@/api/job/job.types";
 
@@ -14,43 +15,64 @@ import "./ModalJobRolePicker.css";
 
 // ---------------- 타입 ----------------
 
-type Role = {
-  key: string; // roleId를 string으로
-  label: string;
-};
+type Role = { key: string; label: string };
 
 type Category = {
-  key: string;   // categoryId를 string으로
-  title: string; // ex) "개발"
-  all: string;   // ex) "개발 전체"
+  key: string;
+  title: string;
+  all: string;
   roles: Role[];
 };
 
+type SelectedItem = {
+  categoryId: number;
+  categoryName: string;
+  roleId: number; // ✅ 전체 = -1
+  roleName: string; // ✅ 전체 = "전체"
+};
+
 type Props = {
-  jobTree: JobNode[];  // API에서 받은 전체 직무 트리
+  jobTree: JobNode[];
   loading?: boolean;
   error?: string | null;
-  onApply?: (
-    selected: {
-      categoryId: number;
-      categoryName: string;
-      roleId: number;
-      roleName: string;
-    }[]
-  ) => void;
+  onApply?: (selected: SelectedItem[]) => void;
+
+  // ✅ 추가: 모달 재오픈 시 선택 복원용
+  initialSelected?: SelectedItem[];
 };
+
+type ChipView =
+  | {
+      kind: "all";
+      key: string;
+      categoryKey: string;
+      categoryId: number;
+      categoryTitle: string;
+      roleLabel: string; // "개발 전체"
+    }
+  | {
+      kind: "role";
+      key: string;
+      roleKey: string; // roleId string
+      categoryId: number;
+      categoryTitle: string;
+      roleId: number;
+      roleLabel: string;
+    };
 
 export default function ModalJobRolePicker({
   jobTree,
   loading,
   error,
   onApply,
+  initialSelected = [],
 }: Props) {
-  const [allChecked, setAllChecked] = useState(false);
+  const [allCheckedCategories, setAllCheckedCategories] = useState<Set<string>>(
+    new Set()
+  );
   const [checkedRoles, setCheckedRoles] = useState<Set<string>>(new Set());
   const [activeCategoryKey, setActiveCategoryKey] = useState<string | null>(null);
 
-  // JobNode[] -> Category[] 변환
   const categories: Category[] = useMemo(() => {
     if (!jobTree || jobTree.length === 0) return [];
 
@@ -71,7 +93,42 @@ export default function ModalJobRolePicker({
       }));
   }, [jobTree]);
 
-  // activeCategory 기본값 세팅
+  const roleToCategoryKey = useMemo(() => {
+    const m = new Map<string, string>();
+    categories.forEach((cat) => {
+      cat.roles.forEach((r) => {
+        m.set(r.key, cat.key);
+      });
+    });
+    return m;
+  }, [categories]);
+
+  // ✅ 초기 선택값 복원 (모달 재오픈 시)
+  useEffect(() => {
+    if (!categories.length) return;
+
+    const nextAll = new Set<string>();
+    const nextRoles = new Set<string>();
+    let nextActive: string | null = null;
+
+    const allPick = initialSelected.find((s) => s.roleId === -1);
+    if (allPick) {
+      const catKey = String(allPick.categoryId);
+      nextAll.add(catKey);
+      nextActive = catKey;
+    } else {
+      for (const s of initialSelected) {
+        if (s.roleId > 0) nextRoles.add(String(s.roleId));
+        if (!nextActive) nextActive = String(s.categoryId);
+      }
+    }
+
+    setAllCheckedCategories(nextAll);
+    setCheckedRoles(nextRoles);
+    setActiveCategoryKey(nextActive ?? categories[0].key);
+  }, [initialSelected, categories]);
+
+  // activeCategory 기본값 세팅(아무것도 없을 때만)
   useEffect(() => {
     if (!activeCategoryKey && categories.length > 0) {
       setActiveCategoryKey(categories[0].key);
@@ -87,63 +144,126 @@ export default function ModalJobRolePicker({
     setActiveCategoryKey(key);
   };
 
+  const isActiveCategoryAllChecked =
+    !!activeCategoryKey && allCheckedCategories.has(activeCategoryKey);
+
+  // ✅ 전체 선택: 항상 1개만 유지
   const onClickAll = () => {
-    setAllChecked((prev) => {
-      const next = !prev;
-      if (next) {
-        setCheckedRoles(new Set());
-      }
-      return next;
-    });
+    if (!activeCategory) return;
+
+    const catKey = activeCategory.key;
+    const isAlreadyOn = allCheckedCategories.has(catKey);
+
+    if (isAlreadyOn) {
+      const next = new Set(allCheckedCategories);
+      next.delete(catKey);
+      setAllCheckedCategories(next);
+      return;
+    }
+
+    const next = new Set<string>();
+    next.add(catKey);
+    setAllCheckedCategories(next);
+
+    // ✅ 전체 선택 시 개별 직무 선택은 전부 해제
+    setCheckedRoles(new Set());
   };
 
-  const onClickRole = (key: string) => {
-    setAllChecked(false);
-    setCheckedRoles((prev) => {
-      const next = new Set(prev);
-      next.has(key) ? next.delete(key) : next.add(key);
-      return next;
-    });
+  // ✅ 개별 직무: 최대 5개 제한 (전체 선택은 제한 없음)
+  const onClickRole = (roleKey: string) => {
+    const isAlreadyChecked = checkedRoles.has(roleKey);
+
+    if (!isAlreadyChecked && checkedRoles.size >= 5) {
+      toast("최대 5개까지 선택 가능합니다.");
+      return;
+    }
+
+    // ✅ role 선택하면 그 role이 속한 카테고리의 "전체"는 해제
+    const catKey = roleToCategoryKey.get(roleKey);
+    if (catKey && allCheckedCategories.has(catKey)) {
+      const nextAll = new Set(allCheckedCategories);
+      nextAll.delete(catKey);
+      setAllCheckedCategories(nextAll);
+    }
+
+    // ✅ role 토글
+    const next = new Set(checkedRoles);
+    if (isAlreadyChecked) next.delete(roleKey);
+    else next.add(roleKey);
+    setCheckedRoles(next);
+  };
+
+  // ✅ "전체 칩" 삭제
+  const removeAllChip = (categoryKey: string) => {
+    const next = new Set(allCheckedCategories);
+    next.delete(categoryKey);
+    setAllCheckedCategories(next);
   };
 
   const handleReset = () => {
-    setAllChecked(false);
+    setAllCheckedCategories(new Set());
     setCheckedRoles(new Set());
     setActiveCategoryKey(categories[0]?.key ?? null);
   };
 
-  // 카테고리별 선택 개수
-  const getSelectedCount = (category: Category) =>
-    category.roles.filter((r) => checkedRoles.has(r.key)).length;
+  const getSelectedCount = (category: Category) => {
+    if (allCheckedCategories.has(category.key)) return category.roles.length;
+    return category.roles.filter((r) => checkedRoles.has(r.key)).length;
+  };
 
-  // 칩 데이터
-  const selectedChips =
-    categories.flatMap((category) =>
-      category.roles
+  // ✅ 칩: 전체 선택이면 "개발 전체" 1개, 개별은 선택된 것만
+  const selectedChips: ChipView[] =
+    categories.flatMap((category) => {
+      if (allCheckedCategories.has(category.key)) {
+        return [
+          {
+            kind: "all",
+            key: `all-${category.key}`,
+            categoryKey: category.key,
+            categoryId: Number(category.key),
+            categoryTitle: category.title,
+            roleLabel: `${category.title} 전체`,
+          },
+        ];
+      }
+
+      return category.roles
         .filter((r) => checkedRoles.has(r.key))
         .map((r) => ({
-          key: r.key,
+          kind: "role",
+          key: `role-${r.key}`,
+          roleKey: r.key,
           categoryId: Number(category.key),
           categoryTitle: category.title,
           roleId: Number(r.key),
           roleLabel: r.label,
-        }))
-    ) ?? [];
+        }));
+    }) ?? [];
 
-  // "적용" 버튼 클릭
+  // ✅ 적용: "전체 선택"도 부모로 같이 넘김
   const handleApply = () => {
     if (!onApply) return;
-    onApply(
-      selectedChips.map((chip) => ({
+
+    const payload: SelectedItem[] = selectedChips.map((chip) => {
+      if (chip.kind === "all") {
+        return {
+          categoryId: chip.categoryId,
+          categoryName: chip.categoryTitle,
+          roleId: -1,
+          roleName: "전체",
+        };
+      }
+      return {
         categoryId: chip.categoryId,
         categoryName: chip.categoryTitle,
         roleId: chip.roleId,
         roleName: chip.roleLabel,
-      }))
-    );
+      };
+    });
+
+    onApply(payload);
   };
 
-  // 로딩/에러/빈 상태 처리
   if (loading) {
     return (
       <div className="job-role-picker job-role-picker--popup">
@@ -169,7 +289,9 @@ export default function ModalJobRolePicker({
   if (!activeCategory) {
     return (
       <div className="job-role-picker job-role-picker--popup">
-        <div className="job-role-picker__empty">표시할 직무 정보가 없습니다.</div>
+        <div className="job-role-picker__empty">
+          표시할 직무 정보가 없습니다.
+        </div>
       </div>
     );
   }
@@ -178,7 +300,6 @@ export default function ModalJobRolePicker({
     <>
       <div className="job-role-picker job-role-picker--popup">
         <div className="job-role-picker__body">
-          {/* 왼쪽: 카테고리 리스트 */}
           <div className="job-role-picker__column job-role-picker__column--left">
             <div className="job-role-picker__category_group">
               {categories.map((category) => {
@@ -208,20 +329,18 @@ export default function ModalJobRolePicker({
             </div>
           </div>
 
-          {/* 오른쪽: 직무 리스트 */}
           <div className="job-role-picker__column job-role-picker__column--right">
             <div className="job-role-picker__group job-role-picker__group--right">
-              {/* 카테고리 전체 */}
               <div
                 className={`job-role-picker__role job-role-picker__role--all ${
-                  allChecked ? "on" : ""
+                  isActiveCategoryAllChecked ? "on" : ""
                 }`}
                 onClick={onClickAll}
               >
                 <span className="job-role-picker__checkbox-wrap">
                   <img
                     src={
-                      allChecked
+                      isActiveCategoryAllChecked
                         ? check_box_purple
                         : check_box_outline_blank_gray
                     }
@@ -233,7 +352,6 @@ export default function ModalJobRolePicker({
                 </span>
               </div>
 
-              {/* 개별 직무 */}
               {activeCategory.roles.map((role) => (
                 <div
                   key={role.key}
@@ -261,7 +379,6 @@ export default function ModalJobRolePicker({
           </div>
         </div>
 
-        {/* 선택된 직무 칩 영역 */}
         <div className="job-role-picker__options">
           <span className="job-role-picker__options-note">
             ※ 옵션은 최대 5개까지 선택 가능합니다.
@@ -283,7 +400,10 @@ export default function ModalJobRolePicker({
 
                 <img
                   className="job-role-picker__chip-close"
-                  onClick={() => onClickRole(chip.key)}
+                  onClick={() => {
+                    if (chip.kind === "all") removeAllChip(chip.categoryKey);
+                    else onClickRole(chip.roleKey);
+                  }}
                   src={ic_close_gray500_20}
                   alt=""
                 />
@@ -292,7 +412,6 @@ export default function ModalJobRolePicker({
           </div>
         </div>
 
-        {/* 하단 버튼 */}
         <div className="job-role-picker__actions">
           <div className="default_btn_white" onClick={handleReset}>
             <span className="job-role-picker__reset-icon">

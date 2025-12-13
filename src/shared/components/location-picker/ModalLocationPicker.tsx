@@ -1,5 +1,6 @@
 // src/shared/components/location-picker/ModalLocationPicker.tsx
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { toast } from "react-toastify";
 
 import locationsData from "@/data/locationsV2.json";
 
@@ -37,15 +38,17 @@ type RawRegionV2 = {
   }[];
 };
 
+type SelectedLocation = {
+  code: string;         // "11-230" or "11"
+  regionName: string;   // "서울"
+  districtName: string; // "강남구" or "전체"
+};
+
 type ModalLocationPickerProps = {
-  // 적용 클릭 시 부모로 넘길 콜백
-  onApply?: (
-    selected: {
-      code: string;         // "11-230"
-      regionName: string;   // "서울"
-      districtName: string; // "강남구"
-    }[]
-  ) => void;
+  onApply?: (selected: SelectedLocation[]) => void;
+
+  // ✅ 복원용
+  initialSelected?: SelectedLocation[];
 };
 
 // JSON → Region[] 변환
@@ -54,18 +57,28 @@ const RAW_REGIONS = locationsData as RawRegionV2[];
 const REGIONS: Region[] = RAW_REGIONS.map((r) => {
   const cityName = r.name.replace(/\s*전체$/, ""); // "서울 전체" -> "서울"
   return {
-    key: r.code,      // 코드 사용
+    key: r.code,
     name: cityName,
-    all: r.name,      // 전체 라벨은 그대로 "서울 전체"
+    all: r.name,
     districts: r.children.map((d) => ({
-      key: d.code,    // ex) "11-230"
-      name: d.name,   // ex) "강남구"
+      key: d.code,
+      name: d.name,
     })),
   };
 });
 
-export default function ModalLocationPicker({ onApply }: ModalLocationPickerProps) {
-  const [checkedRoles, setCheckedRoles] = useState<Set<string>>(new Set());
+const MAX_LOCATION_COUNT = 5;
+
+export default function ModalLocationPicker({
+  onApply,
+  initialSelected = [],
+}: ModalLocationPickerProps) {
+  // ✅ 개별 구/군 선택
+  const [checkedDistricts, setCheckedDistricts] = useState<Set<string>>(new Set());
+
+  // ✅ “지역 전체” 선택은 1개만 허용
+  const [allSelectedRegionKey, setAllSelectedRegionKey] = useState<string | null>(null);
+
   const [activeRegionKey, setActiveRegionKey] = useState<string | null>(
     REGIONS[0]?.key ?? null
   );
@@ -79,90 +92,165 @@ export default function ModalLocationPicker({ onApply }: ModalLocationPickerProp
     setActiveRegionKey(key);
   };
 
-  // 현재 활성 지역이 전체 선택 상태인지
+  // ✅ 복원 로직 (모달 재오픈 시)
+  useEffect(() => {
+    if (!REGIONS.length) return;
+
+    // 전체 선택이 있으면 그걸로 복원
+    const allPick = initialSelected.find(
+      (x) => x.districtName === "전체" || (!x.code.includes("-") && x.code.length === 2)
+    );
+
+    if (allPick) {
+      const regionKey = allPick.code; // "11"
+      setAllSelectedRegionKey(regionKey);
+      setCheckedDistricts(new Set()); // 전체 선택이면 개별 비움
+      setActiveRegionKey(regionKey);
+      return;
+    }
+
+    // 개별 선택 복원
+    const nextSet = new Set<string>();
+    let firstRegionKey: string | null = null;
+
+    for (const s of initialSelected) {
+      if (s.code.includes("-")) {
+        nextSet.add(s.code);
+        if (!firstRegionKey) firstRegionKey = s.code.split("-")[0];
+      }
+    }
+
+    setAllSelectedRegionKey(null);
+    setCheckedDistricts(nextSet);
+    setActiveRegionKey(firstRegionKey ?? REGIONS[0]?.key ?? null);
+  }, [initialSelected]);
+
+  // ✅ 현재 활성 지역이 “전체 선택” 상태인지
   const isAllCheckedForActiveRegion =
-    !!activeRegion &&
-    activeRegion.districts.length > 0 &&
-    activeRegion.districts.every((d) => checkedRoles.has(d.key));
+    !!activeRegion && allSelectedRegionKey === activeRegion.key;
+
+  // ✅ 선택 개수(전체는 1개, 개별은 체크된 개수)
+  const selectedCount = (allSelectedRegionKey ? 1 : 0) + checkedDistricts.size;
 
   const onClickAll = () => {
     if (!activeRegion) return;
 
-    setCheckedRoles((prev) => {
-      const next = new Set(prev);
-      const allKeys = activeRegion.districts.map((d) => d.key);
-      const allSelected = allKeys.every((k) => next.has(k));
+    const regionKey = activeRegion.key;
+    const isAlreadyOn = allSelectedRegionKey === regionKey;
 
-      if (allSelected) {
-        // 이 지역의 구들만 해제
-        allKeys.forEach((k) => next.delete(k));
-      } else {
-        // 이 지역의 구들만 선택
-        allKeys.forEach((k) => next.add(k));
-      }
+    // 이미 전체 선택이면 해제
+    if (isAlreadyOn) {
+      setAllSelectedRegionKey(null);
+      return;
+    }
 
-      return next;
-    });
+    // ✅ 최대 5개 제한 (전체도 1개)
+    if (checkedDistricts.size >= MAX_LOCATION_COUNT) {
+      toast("최대 5개까지 선택 가능합니다.");
+      return;
+    }
+
+    // ✅ 전체 선택하면 개별 선택은 비움(서울 전체 칩 1개만 보이게)
+    setCheckedDistricts(new Set());
+
+    // ✅ 전체는 항상 1개만: 기존 전체 해제하고 현재만 선택
+    setAllSelectedRegionKey(regionKey);
   };
 
-  const onClickRole = (key: string) => {
-    setCheckedRoles((prev) => {
+  const onClickDistrict = (districtKey: string) => {
+    // ✅ “서울 전체” 켜져 있는데 다른 지역(경기 등) 클릭하면 전체 해제
+    if (allSelectedRegionKey) {
+      setAllSelectedRegionKey(null);
+    }
+
+    const isAlreadyChecked = checkedDistricts.has(districtKey);
+
+    // ✅ 새로 추가하려는 경우만 5개 제한
+    if (!isAlreadyChecked && checkedDistricts.size >= MAX_LOCATION_COUNT) {
+      toast("최대 5개까지 선택 가능합니다.");
+      return;
+    }
+
+    setCheckedDistricts((prev) => {
       const next = new Set(prev);
-      next.has(key) ? next.delete(key) : next.add(key);
+      if (next.has(districtKey)) next.delete(districtKey);
+      else next.add(districtKey);
       return next;
     });
   };
 
   const handleReset = () => {
-    setCheckedRoles(new Set());
+    setAllSelectedRegionKey(null);
+    setCheckedDistricts(new Set());
     setActiveRegionKey(REGIONS[0]?.key ?? null);
   };
 
-  // 선택된 항목들 → 칩 데이터 (UI용 & onApply용)
-  const selectedChips = REGIONS.flatMap((region) =>
-    region.districts
-      .filter((d) => checkedRoles.has(d.key))
-      .map((d) => ({
-        key: d.key,              // 코드 ("11-230")
-        regionName: region.name, // "서울"
-        districtName: d.name,    // "강남구"
-      }))
-  );
+  // ✅ 칩 데이터 (UI용 & onApply용)
+  const selectedChips = useMemo(() => {
+    // 1) 전체 선택이면 칩 1개만
+    if (allSelectedRegionKey) {
+      const r = REGIONS.find((x) => x.key === allSelectedRegionKey);
+      if (!r) return [];
+      return [
+        {
+          key: `all-${r.key}`,
+          code: r.key,               // "11"
+          regionName: r.name,        // "서울"
+          districtName: "전체",      // payload
+          displayLabel: r.all,       // "서울 전체"
+          isAll: true as const,
+        },
+      ];
+    }
+
+    // 2) 개별 선택 칩들
+    return REGIONS.flatMap((region) =>
+      region.districts
+        .filter((d) => checkedDistricts.has(d.key))
+        .map((d) => ({
+          key: d.key,                // "11-230"
+          code: d.key,
+          regionName: region.name,   // "서울"
+          districtName: d.name,      // "강남구"
+          displayLabel: d.name,
+          isAll: false as const,
+        }))
+    );
+  }, [allSelectedRegionKey, checkedDistricts]);
 
   const handleApply = () => {
-    if (onApply) {
-      onApply(
-        selectedChips.map((chip) => ({
-          code: chip.key,
-          regionName: chip.regionName,
-          districtName: chip.districtName,
-        }))
-      );
-    }
+    if (!onApply) return;
+
+    onApply(
+      selectedChips.map((chip) => ({
+        code: chip.code,
+        regionName: chip.regionName,
+        districtName: chip.districtName,
+      }))
+    );
   };
 
   const renderLeftColumn = () => (
     <div className="location-picker__column location-picker__column--left">
       <div className="location-picker__category_group">
         {REGIONS.map((region) => {
-          const selectedCount = region.districts.filter((d) =>
-            checkedRoles.has(d.key)
+          const countInRegion = region.districts.filter((d) =>
+            checkedDistricts.has(d.key)
           ).length;
+
+          const displayCount =
+            allSelectedRegionKey === region.key ? 1 : countInRegion;
 
           return (
             <div
               key={region.key}
-              className={`location-picker__category ${
-                isOn(region.key) ? "on" : ""
-              }`}
+              className={`location-picker__category ${isOn(region.key) ? "on" : ""}`}
               onClick={() => toggleCategory(region.key)}
             >
               <div className="location-picker__category-meta">
-                <span className="location-picker__category-title">
-                  {region.name}
-                </span>
+                <span className="location-picker__category-title">{region.name}</span>
                 <span className="location-picker__category-count">
-                  {selectedCount > 0 ? selectedCount : ""}
+                  {displayCount > 0 ? displayCount : ""}
                 </span>
               </div>
               <span className="location-picker__category-toggle">
@@ -198,24 +286,20 @@ export default function ModalLocationPicker({ onApply }: ModalLocationPickerProp
                 alt=""
               />
             </span>
-            <span className="location-picker__role-label">
-              {activeRegion.all /* ex) "서울 전체" */}
-            </span>
+            <span className="location-picker__role-label">{activeRegion.all}</span>
           </div>
 
           {/* 개별 구/군 */}
           {activeRegion.districts.map((d) => (
             <div
               key={d.key}
-              className={`location-picker__role ${
-                checkedRoles.has(d.key) ? "on" : ""
-              }`}
-              onClick={() => onClickRole(d.key)}
+              className={`location-picker__role ${checkedDistricts.has(d.key) ? "on" : ""}`}
+              onClick={() => onClickDistrict(d.key)}
             >
               <span className="location-picker__checkbox-wrap">
                 <img
                   src={
-                    checkedRoles.has(d.key)
+                    checkedDistricts.has(d.key)
                       ? check_box_purple
                       : check_box_outline_blank_gray
                   }
@@ -235,19 +319,31 @@ export default function ModalLocationPicker({ onApply }: ModalLocationPickerProp
       {selectedChips.map((chip) => (
         <div key={chip.key} className="location-picker__chip">
           <div className="location-picker__chip-body">
-            <span className="location-picker__chip-group">
-              {chip.regionName}
-            </span>
-            <span className="location-picker__chip-role">
-              <span className="location-picker__chip-chevron">
-                <img src={chevron_right_black} alt="" />
-              </span>
-              {chip.districtName}
-            </span>
+            {chip.isAll ? (
+              // ✅ 전체 선택이면 "서울 전체" 단독 표시
+              <span className="location-picker__chip-group">{chip.displayLabel}</span>
+            ) : (
+              <>
+                <span className="location-picker__chip-group">{chip.regionName}</span>
+                <span className="location-picker__chip-role">
+                  <span className="location-picker__chip-chevron">
+                    <img src={chevron_right_black} alt="" />
+                  </span>
+                  {chip.districtName}
+                </span>
+              </>
+            )}
           </div>
+
           <span
             className="location-picker__chip-close"
-            onClick={() => onClickRole(chip.key)}
+            onClick={() => {
+              if (chip.isAll) {
+                setAllSelectedRegionKey(null);
+              } else {
+                onClickDistrict(chip.code);
+              }
+            }}
           >
             <img src={ic_close_gray500_20} alt="" />
           </span>
@@ -267,7 +363,7 @@ export default function ModalLocationPicker({ onApply }: ModalLocationPickerProp
 
         <div className="location-picker__options">
           <span className="location-picker__options-note">
-            ※ 옵션은 최대 5개까지 선택 가능합니다.
+            ※ 옵션은 최대 5개까지 선택 가능합니다. 
           </span>
           {renderSelectedChips()}
         </div>
@@ -288,7 +384,7 @@ export default function ModalLocationPicker({ onApply }: ModalLocationPickerProp
       {/* 모바일 */}
       <div className="location-picker location-picker--popup mobile">
         <span className="location-picker__options-note">
-          ※ 지역 옵션은 최대 5개까지 선택 가능합니다.
+          ※ 지역 옵션은 최대 5개까지 선택 가능합니다. ({selectedCount}/{MAX_LOCATION_COUNT})
         </span>
         <div className="location-picker__body">
           {renderLeftColumn()}

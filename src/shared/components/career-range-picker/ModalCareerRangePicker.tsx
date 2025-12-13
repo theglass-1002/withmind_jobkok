@@ -1,30 +1,35 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import "rc-slider/assets/index.css";
 import Slider from "rc-slider";
-import Switch from "react-switch";
-import { NavLink } from "react-router-dom";
 
 import refresh_black from "@/assets/icons/refresh_black.png";
-import ic_close_gray500_20 from "@/assets/icons/size20/ic_close_gray500_20.png";
 
 import "./CareerRangePicker.css";
 
 interface ModalCareerRangePickerProps {
-  // 선택된 경력 범위를 부모로 올려주는 콜백
-  // min, max는 년 단위 (0 ~ 10)
   onApply?: (range: { min: number; max: number }) => void;
+
+  // ✅ 추가: 부모에서 내려주는 초기값(복원용)
+  initialRange?: { min: number; max: number } | null;
 }
 
 export default function ModalCareerRangePicker({
   onApply,
+  initialRange = null,
 }: ModalCareerRangePickerProps) {
   const MIN = 0;
-  const MAX = 10; // 0년 ~ 10+년
+  const MAX = 10;
 
   const clampPct = (p: number) => Math.max(0, Math.min(100, p));
   const pct = (v: number) => ((v - MIN) / (MAX - MIN)) * 100;
 
-  const [range, setRange] = useState<[number, number]>([0, 10]);
+  const [range, setRange] = useState<[number, number]>([MIN, MAX]);
+
+  // ✅ 모달 다시 열릴 때 선택값 복원
+  useEffect(() => {
+    if (!initialRange) return;
+    setRange([initialRange.min, initialRange.max]);
+  }, [initialRange?.min, initialRange?.max]);
 
   const minLabel = useMemo(
     () => (range[0] === 0 ? "신입" : range[0] === 10 ? "10" : `${range[0]}`),
@@ -85,6 +90,7 @@ export default function ModalCareerRangePicker({
             </div>
           </div>
         </div>
+
         <div className="btn_wrap career-range__actions">
           <div className="default_btn_white" onClick={handleReset}>
             <span className="job-role-picker__reset-icon">

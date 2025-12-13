@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Switch from "react-switch";
 
 import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
+import Modal from "@/shared/components/modal/Modal";
 
 import search from "@/assets/icons/size20/ic_search_gray900_20.png";
 import cancel from "@/assets/icons/size20/ic_cancel_gray400_20.png";
@@ -36,6 +37,7 @@ import Pagination from "@/shared/components/Pagination";
 import { fetchJobTree, fetchJobList } from "@/api/job/job.api";
 import { JobNode, JobItem } from "@/api/job/job.types";
 import { logout } from "@/api/auth.api";
+import { Icons } from "@/assets/icons";
 
 type ChipKind = "role" | "career" | "education" | "location" | "employment";
 
@@ -48,11 +50,27 @@ type Chip = {
 
 type FilterKey = "role" | "career" | "education" | "location" | "employment";
 
+type RoleSelectedItem = {
+  categoryId: number;
+  categoryName: string;
+  roleId: number;
+  roleName: string;
+};
+
+type LocationSelectedItem = {
+  code: string;
+  regionName: string;
+  districtName: string;
+};
+
 export default function AllJobPostingSection() {
   const navigate = useNavigate();
 
+  const [resumeModalOpen, setResumeModalOpen] = useState(false);
+
   const [page, setPage] = useState(1);
-  const [resumeReco, setResumeReco] = useState(false); // 이력서 기반 추천 토글
+  const [resumeReco, setResumeReco] = useState(false);
+
   const [openFilter, setOpenFilter] = useState<FilterKey | null>(null);
   const [sort, setSort] = useState("적합도순");
   const [sizeSort, setSizeSort] = useState("15개씩");
@@ -63,22 +81,29 @@ export default function AllJobPostingSection() {
 
   const [chips, setChips] = useState<Chip[]>([]);
 
-  // 🔥 직군/직무 트리 상태 (API 응답)
+  const [roleSelected, setRoleSelected] = useState<RoleSelectedItem[]>([]);
+  const [careerRange, setCareerRange] = useState<{ min: number; max: number }>({
+    min: 0,
+    max: 10,
+  });
+  const [educationSelected, setEducationSelected] = useState<string[]>([]);
+  const [locationSelected, setLocationSelected] = useState<LocationSelectedItem[]>([]);
+
+  // ✅ 채용유형 복원용
+  const [employmentSelected, setEmploymentSelected] = useState<EmpOptionKey[]>([]);
+
   const [jobTree, setJobTree] = useState<JobNode[]>([]);
   const [jobLoading, setJobLoading] = useState(false);
   const [jobError, setJobError] = useState<string | null>(null);
 
-  // 🔥 공고 리스트 상태 (API 응답)
   const [jobs, setJobs] = useState<JobItem[]>([]);
   const [jobsLoading, setJobsLoading] = useState(false);
   const [jobsError, setJobsError] = useState<string | null>(null);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
-  // 🔥 초기 로딩 완료 여부
   const [initialized, setInitialized] = useState(false);
 
-  // 🔥 화면 최초 진입 시: fetchJobList → fetchJobTree
   useEffect(() => {
     const init = async () => {
       try {
@@ -101,19 +126,16 @@ export default function AllJobPostingSection() {
         console.error(e);
 
         if (e?.code === 999) {
-          console.log("로그인만료");
           logout();
           navigate("/login");
           return;
         }
 
         setJobError(
-          e?.message ||
-            "초기 로딩 중 직군/직무 정보를 불러오는 데 실패했습니다."
+          e?.message || "초기 로딩 중 직군/직무 정보를 불러오는 데 실패했습니다."
         );
         setJobsError(
-          e?.message ||
-            "초기 로딩 중 채용 공고를 불러오는 데 실패했습니다."
+          e?.message || "초기 로딩 중 채용 공고를 불러오는 데 실패했습니다."
         );
       } finally {
         setJobLoading(false);
@@ -122,9 +144,8 @@ export default function AllJobPostingSection() {
     };
 
     init();
-  }, [navigate]);
+  }, [navigate, page, sizeSort]);
 
-  // 🔁 페이지/사이즈 변경 시: 공고 리스트만 다시 로딩
   useEffect(() => {
     if (!initialized) return;
 
@@ -142,15 +163,12 @@ export default function AllJobPostingSection() {
         console.error(e);
 
         if (e?.code === 999) {
-          console.log("로그인만료");
           logout();
           navigate("/login");
           return;
         }
 
-        setJobsError(
-          e?.message || "채용 공고를 불러오는 중 오류가 발생했습니다."
-        );
+        setJobsError(e?.message || "채용 공고를 불러오는 중 오류가 발생했습니다.");
       } finally {
         setJobsLoading(false);
       }
@@ -164,28 +182,26 @@ export default function AllJobPostingSection() {
 
   const resetFilters = () => {
     setChips([]);
-    // TODO: 실제 필터 상태도 여기서 초기화할 수 있음
+    setRoleSelected([]);
+    setCareerRange({ min: 0, max: 10 });
+    setEducationSelected([]);
+    setLocationSelected([]);
+    setEmploymentSelected([]); // ✅ 채용유형 초기화
   };
 
   const removeChip = (id: string) => {
     setChips((prev) => prev.filter((chip) => chip.id !== id));
   };
 
-  const handleLocationApply = (
-    selected: {
-      code: string;
-      regionName: string;
-      districtName: string;
-    }[]
-  ) => {
-    console.log("📍 선택된 지역 목록:", selected);
+  const handleLocationApply = (selected: LocationSelectedItem[]) => {
+    setLocationSelected(selected);
 
-    const locationChips: Chip[] = selected.map((s) => ({
-      id: `loc-${s.code}`,
-      group: s.regionName,
-      role: s.districtName,
-      kind: "location",
-    }));
+    const locationChips: Chip[] = selected.map((s) => {
+      if (s.districtName === "전체") {
+        return { id: `loc-${s.code}`, role: `${s.regionName} 전체`, kind: "location" };
+      }
+      return { id: `loc-${s.code}`, group: s.regionName, role: s.districtName, kind: "location" };
+    });
 
     setChips((prev) => {
       const others = prev.filter((chip) => chip.kind !== "location");
@@ -195,34 +211,29 @@ export default function AllJobPostingSection() {
     setOpenFilter(null);
   };
 
-const handleCareerApply = (range: { min: number; max: number }) => {
-  const { min, max } = range;
+  const handleCareerApply = (range: { min: number; max: number }) => {
+    setCareerRange(range);
 
-  let label = "";
-  if (min === 0 && max === 1) label = "신입";
-  else if (min === 0 && max === 10) label = "경력전체";
-  else if (min === 0) label = `~${max}년`;
-  else if (max === 10) label = `${min}년 이상`;
-  else label = `${min}~${max}년`;
+    const { min, max } = range;
+    let label = "";
+    if (min === 0 && max === 1) label = "신입";
+    else if (min === 0 && max === 10) label = "경력전체";
+    else if (min === 0) label = `~${max}년`;
+    else if (max === 10) label = `${min}년 이상`;
+    else label = `${min}~${max}년`;
 
-  const careerChip: Chip = {
-    id: "career",
-    role: label,        // 🔥 이제 role만 저장
-    kind: "career",
+    const careerChip: Chip = { id: "career", role: label, kind: "career" };
+
+    setChips((prev) => {
+      const others = prev.filter((chip) => chip.kind !== "career");
+      return [...others, careerChip];
+    });
+
+    setOpenFilter(null);
   };
 
-  setChips((prev) => {
-    const others = prev.filter((chip) => chip.kind !== "career");
-    return [...others, careerChip];
-  });
-
-  setOpenFilter(null);
-};
-
-
-  // 🔥 학력 피커 적용 콜백
   const handleEducationApply = (selected: string[]) => {
-    console.log("🎓 선택된 학력 코드들:", selected);
+    setEducationSelected(selected);
 
     const eduLabelMap: Record<string, string> = {
       ANY: "학력 무관",
@@ -249,9 +260,9 @@ const handleCareerApply = (range: { min: number; max: number }) => {
     setOpenFilter(null);
   };
 
-  // 🔥 채용 유형 피커 적용 콜백
+  // ✅ 채용유형 적용 + 복원용 저장
   const handleEmploymentApply = (selected: EmpOptionKey[]) => {
-    console.log("💼 선택된 채용 유형:", selected);
+    setEmploymentSelected(selected);
 
     const empLabelMap: Record<EmpOptionKey, string> = {
       fullTime: "정규직",
@@ -277,21 +288,14 @@ const handleCareerApply = (range: { min: number; max: number }) => {
     setOpenFilter(null);
   };
 
-  // 🔥 직군/직무 모달에서 "적용" 눌렀을 때 콜백
-  const handleRoleApply = (
-    selected: {
-      categoryId: number;
-      categoryName: string;
-      roleId: number;
-      roleName: string;
-    }[]
-  ) => {
-    const roleChips: Chip[] = selected.map((s) => ({
-      id: `role-${s.roleId}`,
-      group: s.categoryName,
-      role: s.roleName,
-      kind: "role",
-    }));
+  const handleRoleApply = (selected: RoleSelectedItem[]) => {
+    setRoleSelected(selected);
+
+    const roleChips: Chip[] = selected.map((s) => {
+      const isAll = s.roleId === -1 || s.roleName === "전체";
+      if (isAll) return { id: `role-all-${s.categoryId}`, role: `${s.categoryName} 전체`, kind: "role" };
+      return { id: `role-${s.roleId}`, group: s.categoryName, role: s.roleName, kind: "role" };
+    });
 
     setChips((prev) => {
       const others = prev.filter((chip) => chip.kind !== "role");
@@ -301,7 +305,6 @@ const handleCareerApply = (range: { min: number; max: number }) => {
     setOpenFilter(null);
   };
 
-  // ✅ 초기 로딩 전체 오버레이
   if (
     (jobLoading || jobsLoading) &&
     !jobError &&
@@ -312,16 +315,27 @@ const handleCareerApply = (range: { min: number; max: number }) => {
     return <LoadingOverlay />;
   }
 
+  const handleResumeRecoToggle = () => {
+    setResumeModalOpen(true);
+  };
+
+
+const roleChipCount = chips.filter((chip) => chip.kind === "role").length;
+const careerChipCount = chips.filter((chip) => chip.kind === "career").length;
+const careerRole = chips.find((chip) => chip.kind === "career")?.role;
+const educationChipCount = chips.filter((chip) => chip.kind === "education").length;
+const locationChipCount = chips.filter((chip) => chip.kind === "location").length;
+const employmentChipCount = chips.filter((chip) => chip.kind === "employment").length;
+
+
+
   return (
     <>
       <div className="jobs-toolbar">
         <div className="jobs-toolbar__search">
           <div className="panel-search">
             <img className="jobs-search__icon" src={search} alt="" />
-            <input
-              type="text"
-              placeholder="직무, 기업명, 지역등을 입력해주세요"
-            />
+            <input type="text" placeholder="직무, 기업명, 지역등을 입력해주세요" />
             <span className="jobs-search__clear_icon">
               <img src={cancel} alt="" />
             </span>
@@ -330,9 +344,7 @@ const handleCareerApply = (range: { min: number; max: number }) => {
           <div className="job-search-filters">
             <div className="job-search-filter job-search-filter--toggle">
               <div className="job-search-filter__label">
-                <span className="job-search-filter__text">
-                  이력서 기반 추천
-                </span>
+                <span className="job-search-filter__text">이력서 기반 추천</span>
                 <Tooltip
                   title="이력서 기반 추천이란?"
                   desc="등록된 기본 이력서를 기반으로, 적합한 채용 공고를 찾아주는 잡콕만의 AI 추천 서비스입니다. 적합도가 높은 공고에는 [AI Pick] 태그가 표시됩니다."
@@ -342,7 +354,7 @@ const handleCareerApply = (range: { min: number; max: number }) => {
               </div>
               <Switch
                 checked={resumeReco}
-                onChange={setResumeReco}
+                onChange={handleResumeRecoToggle}
                 onColor="#000000"
                 offColor="#E5E7EB"
                 onHandleColor="#FFFFFF"
@@ -357,154 +369,142 @@ const handleCareerApply = (range: { min: number; max: number }) => {
             </div>
 
             <ul className="job-search-filter-menu">
-              {/* 직군ㆍ직무 */}
               <li
-                className={`job-search-filter-menu__item ${
-                  openFilter === "role" ? "on" : ""
-                }`}
+                className={`job-search-filter-menu__item ${openFilter === "role" ? "on" : ""} ${roleChipCount > 0 ? "selected" : ""}`}
                 onClick={() => toggleFilter("role")}
-              >
-                <span className="job-search-filter-menu__label">
-                  직군ㆍ직무
-                </span>
-                <span className="job-search-filter-menu__icon">
-                  <img
+              > 
+                 <span className={`job-search-filter-menu__label`} >
+                    직군ㆍ직무{roleChipCount > 0 ? <span className="chip-label">{roleChipCount}</span> : <></>}
+                  </span>
+              
+                <img
                     src={
-                      openFilter === "role"
-                        ? arrow_drop_up_black
-                        : arrow_drop_down
+                      roleChipCount > 0
+                        ? openFilter === "role"
+                          ? Icons.ic_arrow_drop_down_white_24
+                          : Icons.ic_arrow_drop_down_white_24
+                        : openFilter === "role"
+                          ? arrow_drop_up_black
+                          : arrow_drop_down
                     }
                     alt=""
                   />
-                </span>
+            
+
                 {openFilter === "role" ? (
-                  <div
-                    onMouseDown={(e) => e.stopPropagation()}
-                    onClick={(e) => e.stopPropagation()}
-                    onTouchStart={(e) => e.stopPropagation()}
-                  >
-                    <ModalJobRolePicker
-                      jobTree={jobTree}
-                      loading={jobLoading}
-                      error={jobError}
-                      onApply={handleRoleApply}
-                    />
+                  <div onMouseDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()} onTouchStart={(e) => e.stopPropagation()}>
+                    <ModalJobRolePicker jobTree={jobTree} loading={jobLoading} error={jobError} onApply={handleRoleApply} initialSelected={roleSelected} />
                   </div>
                 ) : null}
               </li>
 
-              {/* 경력 */}
               <li
-                className={`job-search-filter-menu__item ${
-                  openFilter === "career" ? "on" : ""
-                }`}
+                className={`job-search-filter-menu__item ${openFilter === "career" ? "on" : ""} ${careerChipCount > 0 ? "selected" : ""}`}
                 onClick={() => toggleFilter("career")}
               >
-                <span className="job-search-filter-menu__label">경력</span>
-                <span className="job-search-filter-menu__icon">
-                  <img
+                <span className={`job-search-filter-menu__label`} >
+                경력{careerChipCount > 0 ? <span className="chip-label">{careerRole}</span> : <></>}
+                  </span>
+                <img
                     src={
-                      openFilter === "career"
-                        ? arrow_drop_up_black
-                        : arrow_drop_down
+                      careerChipCount > 0
+                        ? openFilter === "career"
+                          ? Icons.ic_arrow_drop_down_white_24
+                          : Icons.ic_arrow_drop_down_white_24
+                        : openFilter === "career"
+                          ? arrow_drop_up_black
+                          : arrow_drop_down
                     }
                     alt=""
                   />
-                </span>
                 {openFilter === "career" ? (
-                  <div
-                    onMouseDown={(e) => e.stopPropagation()}
-                    onClick={(e) => e.stopPropagation()}
-                    onTouchStart={(e) => e.stopPropagation()}
-                  >
-                    <ModalCareerRangePicker onApply={handleCareerApply} />
+                  <div onMouseDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()} onTouchStart={(e) => e.stopPropagation()}>
+                    <ModalCareerRangePicker onApply={handleCareerApply} initialRange={careerRange} />
                   </div>
                 ) : null}
               </li>
 
-              {/* 학력 */}
               <li
-                className={`job-search-filter-menu__item ${
-                  openFilter === "education" ? "on" : ""
-                }`}
+                className={`job-search-filter-menu__item ${openFilter === "education" ? "on" : ""} ${educationChipCount > 0 ? "selected" : ""}`}
                 onClick={() => toggleFilter("education")}
               >
-                <span className="job-search-filter-menu__label">학력</span>
-                <span className="job-search-filter-menu__icon">
-                  <img
+                {/* <span className="job-search-filter-menu__label">학력</span> */}
+                <span className={`job-search-filter-menu__label`} >
+                학력{educationChipCount > 0 ? <span className="chip-label">{educationChipCount}</span> : <></>}
+                  </span>
+                <img
                     src={
-                      openFilter === "education"
-                        ? arrow_drop_up_black
-                        : arrow_drop_down
+                      educationChipCount > 0
+                        ? openFilter === "education"
+                          ? Icons.ic_arrow_drop_down_white_24
+                          : Icons.ic_arrow_drop_down_white_24
+                        : openFilter === "education"
+                          ? arrow_drop_up_black
+                          : arrow_drop_down
                     }
                     alt=""
                   />
-                </span>
+                {/* <span className="job-search-filter-menu__icon">
+                  <img src={openFilter === "education" ? arrow_drop_up_black : arrow_drop_down} alt="" />
+                </span> */}
+
                 {openFilter === "education" ? (
-                  <div
-                    onMouseDown={(e) => e.stopPropagation()}
-                    onClick={(e) => e.stopPropagation()}
-                    onTouchStart={(e) => e.stopPropagation()}
-                  >
-                    <ModalEducationPicker onApply={handleEducationApply} />
+                  <div onMouseDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()} onTouchStart={(e) => e.stopPropagation()}>
+                    <ModalEducationPicker onApply={handleEducationApply} initialSelected={educationSelected} />
                   </div>
                 ) : null}
               </li>
 
-              {/* 지역 */}
               <li
-                className={`job-search-filter-menu__item ${
-                  openFilter === "location" ? "on" : ""
-                }`}
+                className={`job-search-filter-menu__item ${openFilter === "location" ? "on" : ""} ${locationChipCount > 0 ? "selected" : ""}`}
                 onClick={() => toggleFilter("location")}
               >
-                <span className="job-search-filter-menu__label">지역</span>
-                <span className="job-search-filter-menu__icon">
-                  <img
+                <span className={`job-search-filter-menu__label`} >
+                지역{locationChipCount > 0 ? <span className="chip-label">{locationChipCount}</span> : <></>}
+                  </span>
+                <img
                     src={
-                      openFilter === "location"
-                        ? arrow_drop_up_black
-                        : arrow_drop_down
+                      locationChipCount > 0
+                        ? openFilter === "location"
+                          ? Icons.ic_arrow_drop_down_white_24
+                          : Icons.ic_arrow_drop_down_white_24
+                        : openFilter === "location"
+                          ? arrow_drop_up_black
+                          : arrow_drop_down
                     }
                     alt=""
                   />
-                </span>
                 {openFilter === "location" ? (
-                  <div
-                    onMouseDown={(e) => e.stopPropagation()}
-                    onClick={(e) => e.stopPropagation()}
-                    onTouchStart={(e) => e.stopPropagation()}
-                  >
-                    <ModalLocationPicker onApply={handleLocationApply} />
+                  <div onMouseDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()} onTouchStart={(e) => e.stopPropagation()}>
+                    <ModalLocationPicker onApply={handleLocationApply} initialSelected={locationSelected} />
                   </div>
                 ) : null}
               </li>
-
-              {/* 채용 유형 */}
               <li
-                className={`job-search-filter-menu__item ${
-                  openFilter === "employment" ? "on" : ""
-                }`}
+                className={`job-search-filter-menu__item ${openFilter === "employment" ? "on" : ""}  ${employmentChipCount > 0 ? "selected" : ""}`}
                 onClick={() => toggleFilter("employment")}
               >
-                <span className="job-search-filter-menu__label">채용 유형</span>
-                <span className="job-search-filter-menu__icon">
+             <span className={`job-search-filter-menu__label`} >
+                채용 유형{employmentChipCount > 0 ? <span className="chip-label">{employmentChipCount}</span> : <></>}
+                  </span>
                   <img
                     src={
-                      openFilter === "employment"
-                        ? arrow_drop_up_black
-                        : arrow_drop_down
+                      employmentChipCount > 0
+                        ? openFilter === "employment"
+                          ? Icons.ic_arrow_drop_down_white_24
+                          : Icons.ic_arrow_drop_down_white_24
+                        : openFilter === "employment"
+                          ? arrow_drop_up_black
+                          : arrow_drop_down
                     }
                     alt=""
                   />
-                </span>
                 {openFilter === "employment" ? (
-                  <div
-                    onMouseDown={(e) => e.stopPropagation()}
-                    onClick={(e) => e.stopPropagation()}
-                    onTouchStart={(e) => e.stopPropagation()}
-                  >
-                    <ModalEmploymentTypePicker onApply={handleEmploymentApply} />
+                  <div onMouseDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()} onTouchStart={(e) => e.stopPropagation()}>
+                    <ModalEmploymentTypePicker
+                      onApply={handleEmploymentApply}
+                      initialSelected={employmentSelected} // ✅ 복원
+                    />
                   </div>
                 ) : null}
               </li>
@@ -513,36 +513,20 @@ const handleCareerApply = (range: { min: number; max: number }) => {
         </div>
       </div>
 
-        {/* 🔥 필터 칩 영역: chips가 1개 이상일 때만 표시 */}
-        {chips.length > 0 && (
-          <div className="jobs-toolbar-container">
-            <div className="jobs-toolbar__actions">
-              <div
-                className="jobs-actions__reset"
-                onClick={resetFilters}
-                style={{ cursor: "pointer" }}
-              >
-           
-                  <img src={refresh_gray} alt="" />
-              
-                초기화
-              </div>
+      {chips.length > 0 && (
+        <div className="jobs-toolbar-container">
+          <div className="jobs-toolbar__actions">
+            <div className="jobs-actions__reset" onClick={resetFilters} style={{ cursor: "pointer" }}>
+              <img src={refresh_gray} alt="" />
+              초기화
+            </div>
 
-              <div className="jobs-chips">
+            <div className="jobs-chips">
               {chips.map((chip) => (
                 <div key={chip.id} className="jobs-chips__item">
-
-                  {/* group이 있을 때만 group 렌더링 */}
-                  {chip.group && (
-                    <span className="job-role-picker__chip-group">
-                      {chip.group}
-                    </span>
-                  )}
-
-                  {/* role은 항상 표시됨 */}
+                  {chip.group && <span className="job-role-picker__chip-group">{chip.group}</span>}
                   {chip.role && (
                     <span className="job-role-picker__chip-role">
-                      {/* group이 있을 때만 ">" 아이콘 표시 */}
                       {chip.group && (
                         <span className="job-role-picker__chip-chevron">
                           <img src={chevron_right_black} alt="" />
@@ -551,8 +535,6 @@ const handleCareerApply = (range: { min: number; max: number }) => {
                       {chip.role}
                     </span>
                   )}
-
-                  {/* 삭제 버튼 */}
                   <img
                     className="job-role-picker__chip-close"
                     onClick={() => removeChip(chip.id)}
@@ -563,17 +545,14 @@ const handleCareerApply = (range: { min: number; max: number }) => {
                 </div>
               ))}
             </div>
-
-            </div>
           </div>
-        )}
-
+        </div>
+      )}
 
       <div className="job-posting">
         {resumeReco && (
           <div className="job-posting__ai-recommend">
-            이력서를 기반으로 AI가 {totalCount.toLocaleString()}개의 추천 공고를
-            찾았어요!
+            이력서를 기반으로 AI가 {totalCount.toLocaleString()}개의 추천 공고를 찾았어요!
           </div>
         )}
 
@@ -581,75 +560,27 @@ const handleCareerApply = (range: { min: number; max: number }) => {
           <div className="job-posting__content">
             <div className="job-posting__header">
               <span className="job-posting__count">
-                총{" "}
-                <p className="point-text-black">
-                  {totalCount.toLocaleString()}개
-                </p>
-                전체공고
+                총 <p className="point-text-black">{totalCount.toLocaleString()}개</p> 전체공고
               </span>
+
               <div className="job-posting__controls">
-                <SortDropdown
-                  value={sort}
-                  options={sortOptions}
-                  onChange={setSort}
-                  className="job-posting__sort"
-                />
-
-                <SortDropdown
-                  value={sizeSort}
-                  options={sizeSortOptions}
-                  onChange={setSizeSort}
-                  className="job-posting__sort"
-                />
-
-                <div
-                  className="job-posting__view-toggle"
-                  role="group"
-                  aria-label="보기 전환"
-                >
-                  <span
-                    className="job-posting__view-btn job-posting__view-btn--card"
-                    onClick={() => {
-                      setView(1);
-                    }}
-                    role="button"
-                    tabIndex={0}
-                  >
-                    {view === 1 ? (
-                      <img src={grid_black} alt="" />
-                    ) : (
-                      <img src={grid_gray} alt="" />
-                    )}
+                <SortDropdown value={sort} options={sortOptions} onChange={setSort} className="job-posting__sort" />
+                <SortDropdown value={sizeSort} options={sizeSortOptions} onChange={setSizeSort} className="job-posting__sort" />
+                <div className="job-posting__view-toggle" role="group" aria-label="보기 전환">
+                  <span className="job-posting__view-btn job-posting__view-btn--card" onClick={() => setView(1)} role="button" tabIndex={0}>
+                    {view === 1 ? <img src={grid_black} alt="" /> : <img src={grid_gray} alt="" />}
                   </span>
-                  <span
-                    className="job-posting__view-btn job-posting__view-btn--list job-posting__view-btn--active"
-                    onClick={() => {
-                      setView(0);
-                    }}
-                    role="button"
-                    tabIndex={0}
-                  >
-                    {view === 0 ? (
-                      <img src={row_black} alt="" />
-                    ) : (
-                      <img src={row_white} alt="" />
-                    )}
+                  <span className="job-posting__view-btn job-posting__view-btn--list job-posting__view-btn--active" onClick={() => setView(0)} role="button" tabIndex={0}>
+                    {view === 0 ? <img src={row_black} alt="" /> : <img src={row_white} alt="" />}
                   </span>
                 </div>
               </div>
             </div>
+
             {view === 1 ? (
-              <JobPostingCard
-                jobs={jobs}
-                loading={jobsLoading}
-                isResumeBased={resumeReco}
-              />
+              <JobPostingCard jobs={jobs} loading={jobsLoading} isResumeBased={resumeReco} />
             ) : (
-              <JobPostingRow
-                jobs={jobs}
-                loading={jobsLoading}
-                isResumeBased={resumeReco}
-              />
+              <JobPostingRow jobs={jobs} loading={jobsLoading} isResumeBased={resumeReco} />
             )}
 
             {jobsError && (
@@ -673,6 +604,20 @@ const handleCareerApply = (range: { min: number; max: number }) => {
           </div>
         </div>
       </div>
+
+      <Modal
+        open={resumeModalOpen}
+        title="이력서 기반 추천"
+        desc="해당 기능은 현재 개발 중입니다."
+        confirmText="확인"
+        showCancel={false}
+        confirmClassName="btn_w_full default_btn_black"
+        onConfirm={() => {
+          setResumeModalOpen(false);
+          setResumeReco(false);
+        }}
+        onClose={() => setResumeModalOpen(false)}
+      />
     </>
   );
 }

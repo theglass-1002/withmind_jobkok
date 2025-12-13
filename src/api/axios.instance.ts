@@ -23,10 +23,6 @@ declare module "axios" {
     _retry?: boolean;
   }
 }
-
-// =======================
-// axios 인스턴스 생성
-// =======================
 const instance = axios.create({
   baseURL: API_BASE_URL,
   headers: {

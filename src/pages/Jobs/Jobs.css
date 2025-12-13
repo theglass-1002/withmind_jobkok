@@ -216,7 +216,7 @@
     height: 44px;
     padding: 8px 12px 8px 20px;
     align-items: center;
-
+    gap: 8px;
     border-radius: 100px;
     border: 1px solid var(--gray-300, #E0E2E4);
     background: var(--white-100, #FFF);
@@ -224,9 +224,29 @@
 }
 
 .job-search-filter-menu .job-search-filter-menu__item.on{
-
   border: 1px solid var(--gray-900, #2A2D2F);
+}
 
+.job-search-filter-menu .job-search-filter-menu__item.selected{
+    color: var(--white-100, #FFF);
+    font-weight: 600;
+    border: 1px solid var(--gray-300, #E0E2E4);
+    background: var(--gray-900, #2A2D2F);
+    gap: 0px;
+}
+
+.job-search-filter-menu__label{
+    display: flex;
+    gap: 8px;
+}
+
+.job-search-filter-menu__item.selected .chip-label{
+    color: var(--gray-500, #9EA4AA);
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 20px; /* 125% */
 }
 
 .job-search-filter-menu .job-search-filter-menu__item .job-search-filter-menu__icon{

@@ -23,7 +23,6 @@ export async function fetchJobList(
   hasNext: boolean;
 }> {
   const res = await instance.get<JobListApiResponse>("/auth/jobs", {
-    requiresAuth: false,
     params: {
       page,
       size,
@@ -31,7 +30,6 @@ export async function fetchJobList(
   });
 
   const body = res.data;
-
   const jobs = Array.isArray(body.jobs) ? body.jobs : [];
 
   return {
@@ -56,6 +54,7 @@ export async function toggleJobFavorite(jobId: number): Promise<number> {
   const res = await instance.post<JobFavoriteResponse>(
     `/api/jobs/${jobId}/favorite`,
   );
+  console.log('즐겨찾기',res);
 
   return res.data.resumeIdx;
 }

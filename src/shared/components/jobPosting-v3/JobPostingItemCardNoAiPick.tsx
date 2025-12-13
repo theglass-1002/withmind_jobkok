@@ -10,7 +10,13 @@ import fire from "@/assets/icons/fire.png";
 import seed from "@/assets/icons/seed.png";
 import check_circle_purple from "@/assets/icons/check_circle_purple.png";
 
-import { getCareerLabel, getEducationLabel, getEmploymentTypeLabel, getLocationLabel, type JobItem } from "@/api/job/job.types";
+import {
+  getCareerLabel,
+  getEducationLabel,
+  getEmploymentTypeLabel,
+  getLocationLabel,
+  type JobItem,
+} from "@/api/job/job.types";
 
 const DEFAULT_SUCCESS_MESSAGE = "지원 정보가 반영되었습니다.";
 const DEFAULT_INFO_MESSAGE = "기록을 해제했어요.";
@@ -36,21 +42,22 @@ export default function JobPostingItemCardNoAiPick({
   job,
 }: JobPostingItemCardNoAiPickProps) {
   const navigate = useNavigate();
+
+  // ✅ job이 undefined여도 안전하게 기본값 0
   const [bookMark, setBookMark] = useState<0 | 1>(
-    (job.favorite as 0 | 1) ?? 0
+    ((job?.favorite as 0 | 1) ?? 0)
   );
   const [recordAsApplied, setRecordAsApplied] = useState<0 | 1>(
-    (job.applied as 0 | 1) ?? 0
+    ((job?.applied as 0 | 1) ?? 0)
   );
 
   const handleGoToJobPost = () => {
-    navigate(
-      `/jobs/${job.id}?title=${encodeURIComponent(job.companyName ?? "")}`
-    );
+    if (!job) return;
+    navigate(`/jobs/${job.id}?title=${encodeURIComponent(job.companyName ?? "")}`);
   };
 
   const handleBookmarkToggle = (e: React.MouseEvent) => {
-    e.stopPropagation(); // 카드 클릭 네비게이션 막기
+    e.stopPropagation();
     setBookMark((prev) => (prev === 0 ? 1 : 0));
     // TODO: 북마크 API 호출 자리
   };
@@ -59,12 +66,31 @@ export default function JobPostingItemCardNoAiPick({
     e.stopPropagation();
     setRecordAsApplied(next);
 
-    if (next === 1) {
-      toast.success(appliedSuccessMessage);
-    } else {
-      toast.info(unappliedInfoMessage);
-    }
+    if (next === 1) toast.success(appliedSuccessMessage);
+    else toast.info(unappliedInfoMessage);
   };
+
+  // ✅ job이 없으면 최소 렌더(에러 방지)
+  if (!job) {
+    return (
+      <div className="job-posting__card">
+        <div className="job-card__header">
+          <div className="job-posting__left">
+            <img className="job-posting__logo" src={mp_test_logo} alt="" />
+            <div className="job-card__identity">
+              <div className="job-card__byline">
+                <span className="job-posting__company">-</span>
+                <span className="job-posting__source-logo">
+                  <img src={jobkorea} alt="" />
+                </span>
+              </div>
+              <span className="job-posting__role">-</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const loc = getLocationLabel(job.locationCode);
   const career = getCareerLabel(job.annualFrom, job.annualTo);
@@ -78,7 +104,7 @@ export default function JobPostingItemCardNoAiPick({
           <img
             className="job-posting__logo"
             src={job.companyLogoUrl || mp_test_logo}
-            alt={job.companyName}
+            alt={job.companyName ?? ""}
           />
           <div className="job-card__identity">
             <div className="job-card__byline">
@@ -90,12 +116,13 @@ export default function JobPostingItemCardNoAiPick({
             <span className="job-posting__role">{job.name}</span>
           </div>
         </div>
+
         <span className="job-card__favorite">
-          {bookMark === 0 ? (
-            <img src={bookmark_inactive} onClick={handleBookmarkToggle} />
-          ) : (
-            <img src={bookmark_active_purple} onClick={handleBookmarkToggle} />
-          )}
+          <img
+            src={bookMark === 0 ? bookmark_inactive : bookmark_active_purple}
+            onClick={handleBookmarkToggle}
+            alt=""
+          />
         </span>
       </div>
 
@@ -106,12 +133,12 @@ export default function JobPostingItemCardNoAiPick({
           <div className="job-card__facts">
             <div className="job-posting__meta-items">
               <span className="job-posting__meta-item">
-                {loc}ㆍ{career}ㆍ{job.educationText}
+                {loc}ㆍ{career}ㆍ{job.educationText ?? edu}
               </span>
             </div>
             <span className="job-card__deadline">
-            {employmentType} ㆍ
-              {job.dueTime??"상시채용"}</span>
+              {employmentType} ㆍ {job.dueTime ?? "상시채용"}
+            </span>
           </div>
         </div>
 
@@ -134,7 +161,7 @@ export default function JobPostingItemCardNoAiPick({
               <div
                 className="radio_check_blank_gray"
                 onClick={(e) => handleRecordAsApplied(e, 1)}
-              ></div>
+              />
               지원한 포지션으로 기록하기
             </div>
           ) : (

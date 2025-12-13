@@ -17,18 +17,16 @@ import {
   getLocationLabel,
   type JobItem,
 } from "@/api/job/job.types";
+import { toggleJobFavorite } from "@/api/job/job.api";
+import { logout } from "@/api/auth.api";
 
 const DEFAULT_SUCCESS_MESSAGE = "지원 정보가 반영되었습니다.";
 const DEFAULT_INFO_MESSAGE = "기록을 해제했어요.";
 
 interface JobPostingItemRowNoAiPickProps {
-  appliedSuccessMessage?: string; // 지원 기록 시 성공 메시지
-  unappliedInfoMessage?: string; // 기록 해제 시 알림 메시지
-
-  /** "지원한 포지션으로 기록하기" 영역 노출 여부 (default: true) */
+  appliedSuccessMessage?: string;
+  unappliedInfoMessage?: string;
   showAppliedSection?: boolean;
-
-  /** 🔥 실제 공고 데이터 */
   job?: JobItem;
 }
 
@@ -39,34 +37,68 @@ export default function JobPostingItemRowNoAiPick({
   job,
 }: JobPostingItemRowNoAiPickProps) {
   const navigate = useNavigate();
+
+  // ✅ job이 undefined여도 안전하게 기본값 0
   const [bookMark, setBookMark] = useState<0 | 1>(
-    (job.favorite as 0 | 1) ?? 0
+    ((job?.favorite as 0 | 1) ?? 0)
   );
   const [recordAsApplied, setRecordAsApplied] = useState<0 | 1>(
-    (job.applied as 0 | 1) ?? 0
+    ((job?.applied as 0 | 1) ?? 0)
   );
 
   const handleGoToJobPost = () => {
-    navigate(
-      `/jobs/${job.id}?title=${encodeURIComponent(job.companyName ?? "")}`
-    );
+    if (!job) return;
+    navigate(`/jobs/${job.id}?title=${encodeURIComponent(job.companyName ?? "")}`);
   };
 
-  const handleBookmarkToggle = (e: React.MouseEvent) => {
-    e.stopPropagation(); // 카드 클릭 네비게이션 막기
-    setBookMark((prev) => (prev === 0 ? 1 : 0));
-    // TODO: 북마크 API 호출 자리
+  const handleBookmark = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!job) return;
+
+    try {
+      const resumeIdx = await toggleJobFavorite(job.id);
+      console.log("즐겨찾기 처리된 이력서 번호:", resumeIdx);
+      setBookMark((prev) => (prev === 0 ? 1 : 0));
+    } catch (e: any) {
+      if (e?.code === 999) {
+        console.log("로그인만료");
+        logout();
+        navigate("/login");
+        return;
+      }
+      toast.error("즐겨찾기 처리 중 오류가 발생했습니다.");
+    }
   };
 
   const handleRecordAsApplied = (e: React.MouseEvent, next: 0 | 1) => {
-    e.stopPropagation(); // 카드 클릭 네비게이션 막기
+    e.stopPropagation();
     setRecordAsApplied(next);
-    if (next === 1) {
-      toast.success(appliedSuccessMessage);
-    } else {
-      toast.info(unappliedInfoMessage);
-    }
+
+    if (next === 1) toast.success(appliedSuccessMessage);
+    else toast.info(unappliedInfoMessage);
   };
+
+  // ✅ job 없으면 렌더만 최소화 (에러 방지)
+  if (!job) {
+    return (
+      <div className="job-posting__card">
+        <div className="job-posting__row job-posting__row--top">
+          <div className="job-posting__left">
+            <img className="job-posting__logo" src={mp_test_logo} alt="" />
+            <div className="job-posting__details">
+              <div className="job-posting__title">
+                <span className="job-posting__company">-</span>
+                <span className="job-posting__role">-</span>
+              </div>
+            </div>
+          </div>
+          <div className="job-posting__right job-posting__favorite">
+            <img src={bookmark_inactive} alt="" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // ===== 메타 정보 가공 =====
   const loc = getLocationLabel(job.locationCode);
@@ -82,7 +114,7 @@ export default function JobPostingItemRowNoAiPick({
           <img
             className="job-posting__logo"
             src={job.companyLogoUrl || mp_test_logo}
-            alt={job.companyName}
+            alt={job.companyName ?? ""}
           />
           <div className="job-posting__details">
             <div className="job-posting__title">
@@ -94,30 +126,25 @@ export default function JobPostingItemRowNoAiPick({
               </span>
               <span className="job-posting__role">{job.name}</span>
             </div>
+
             <div className="job-posting__meta">
               <div className="job-posting__meta-items">
                 <span className="job-posting__meta-item">
                   {loc}ㆍ{career}ㆍ{edu}
                 </span>
-                <span className="job-posting__meta-item">
-                  {employmentType}
-                </span>
+                <span className="job-posting__meta-item">{employmentType}</span>
                 <span className="job-posting__meta-item">{due}</span>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="job-posting__right job-posting__favorite">
-          {bookMark === 0 ? (
-            <img onClick={handleBookmarkToggle} src={bookmark_inactive} alt="" />
-          ) : (
-            <img
-              onClick={handleBookmarkToggle}
-              src={bookmark_active_purple}
-              alt=""
-            />
-          )}
+        <div
+          className="job-posting__right job-posting__favorite"
+          onClick={handleBookmark}
+          style={{ cursor: "pointer" }}
+        >
+          <img src={bookMark === 1 ? bookmark_active_purple : bookmark_inactive} alt="" />
         </div>
       </div>
 
@@ -136,14 +163,13 @@ export default function JobPostingItemRowNoAiPick({
         </div>
       </div>
 
-    
       {showAppliedSection &&
         (recordAsApplied === 0 ? (
           <div className="job-card__control job-card__control--radio">
             <div
               className="radio_check_blank_gray"
               onClick={(e) => handleRecordAsApplied(e, 1)}
-            ></div>
+            />
             지원한 포지션으로 기록하기
           </div>
         ) : (

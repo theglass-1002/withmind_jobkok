@@ -300,7 +300,7 @@
   background: var(--white-100, #FFF);
   border: 1px solid var(--gray-300, #E0E2E4);
   cursor: pointer;
-  
+  align-self: stretch;
 }
 
 .job-posting__list--grid .job-posting__card:hover{
