@@ -108,9 +108,10 @@ export default function CameraTest({ testType, onNext, onFail }: CameraTestProps
         // }
         
         // 임시: 성공으로 설정 (테스트용)
-        setTestStatus('success');
+        //setTestStatus('success');
        
-        // 실패 테스트: setTestStatus('failed');
+        // 실패 테스트: 
+        setTestStatus('failed');
     };
 
     const handleRetry = () => {
@@ -173,6 +174,7 @@ export default function CameraTest({ testType, onNext, onFail }: CameraTestProps
             {testStatus === 'failed' && (
              <TestFailed onRetry={handleRetry} />
             )}
+            
              <div className="mock-settings__submit-btn-container">
                         <button className='default_btn_white radius'
                            onClick={() => navigate('/mock-interview/settings')}>

@@ -328,9 +328,6 @@ export default function MockAnalysisPage() {
     </div>
 
     <M_MockAnalysisPage/>
-
-
-
     </>
   );
 }

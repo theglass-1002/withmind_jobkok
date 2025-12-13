@@ -28,7 +28,6 @@ export default function TestFailed({ onRetry }: TestFailedProps) {
         <span className="env-test-result__detail">• 음성 인식이 정상적으로 이루어지지 않았습니다.</span>
     </div>
 
-    <button className="default_btn_white radius retry_btn" onClick={onRetry}>다시하기</button>
 </div>
   )
 }

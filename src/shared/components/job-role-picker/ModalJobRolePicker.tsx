@@ -212,34 +212,32 @@ export default function ModalJobRolePicker({
   };
 
   // ✅ 칩: 전체 선택이면 "개발 전체" 1개, 개별은 선택된 것만
-  const selectedChips: ChipView[] =
-    categories.flatMap((category) => {
-      if (allCheckedCategories.has(category.key)) {
-        return [
-          {
-            kind: "all",
-            key: `all-${category.key}`,
-            categoryKey: category.key,
-            categoryId: Number(category.key),
-            categoryTitle: category.title,
-            roleLabel: `${category.title} 전체`,
-          },
-        ];
-      }
-
-      return category.roles
-        .filter((r) => checkedRoles.has(r.key))
-        .map((r) => ({
-          kind: "role",
-          key: `role-${r.key}`,
-          roleKey: r.key,
+  const selectedChips: ChipView[] = categories.flatMap<ChipView>((category) => {
+    if (allCheckedCategories.has(category.key)) {
+      return [
+        {
+          kind: "all",
+          key: `all-${category.key}`,
+          categoryKey: category.key,
           categoryId: Number(category.key),
           categoryTitle: category.title,
-          roleId: Number(r.key),
-          roleLabel: r.label,
-        }));
-    }) ?? [];
+          roleLabel: `${category.title} 전체`,
+        },
+      ];
+    }
 
+    return category.roles
+      .filter((r) => checkedRoles.has(r.key))
+      .map<ChipView>((r) => ({
+        kind: "role",
+        key: `role-${r.key}`,
+        roleKey: r.key,
+        categoryId: Number(category.key),
+        categoryTitle: category.title,
+        roleId: Number(r.key),
+        roleLabel: r.label,
+      }));
+  });
   // ✅ 적용: "전체 선택"도 부모로 같이 넘김
   const handleApply = () => {
     if (!onApply) return;
