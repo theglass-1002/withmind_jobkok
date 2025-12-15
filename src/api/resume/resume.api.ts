@@ -19,6 +19,7 @@ import {
   ResumeSoftSkillResponse,
   ResumeTitleAIResponse,
   ResumeTitleRequest,
+  SkillAutoCompleteItem,
 } from "./resume.types";
 import { AI_BASE_URL } from "@/config/config";
 
@@ -275,4 +276,35 @@ export async function fetchResumeSelfIntro(
 
   // 성공 → 자기소개 문장 반환
   return body.data.selfintro;
+}
+
+
+// ✅ 하드 스킬 자동완성 (공개 GET)
+export async function fetchHardSkillAutoComplete(
+  q: string
+): Promise<SkillAutoCompleteItem[]> {
+  const res = await instance.get<SkillAutoCompleteItem[]>(
+    "/auth/skills/hard/auto-complete",
+    {
+      params: { q },
+      requiresAuth: false,
+    } as any
+  );
+
+  return res.data;
+}
+
+// ✅ 소프트 스킬 자동완성 (공개 GET)
+export async function fetchSoftSkillAutoComplete(
+  q: string
+): Promise<SkillAutoCompleteItem[]> {
+  const res = await instance.get<SkillAutoCompleteItem[]>(
+    "/auth/skills/soft/auto-complete",
+    {
+      params: { q },
+      requiresAuth: false,
+    } as any
+  );
+
+  return res.data;
 }

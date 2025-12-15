@@ -34,7 +34,7 @@ export default function AttitudeTabContent({
   gradeLabel = "자세 등급",
   analysisTitle = "자세 분석",
   selectedGrade = "미흡",
-  analysisText = <>전체 평균과 비교했을 때, 홍길동님의 자세는 양호합니다.</>,
+  analysisText = <>전체 평균과 비교했을 때, 정유리님의 자세는 양호합니다.</>,
   highlight = <>머리 ‘-1.234도’, 어깨 ‘-1.234도’, 좌우 움직임 ‘13회’</>,
   headers = ["", "머리 각도", "어깨 각도", "좌우 움직임"],
   rows = [

@@ -30,12 +30,12 @@ export default function M_MyPage() {
       avatarSrc: test_profile_img2,
       scoreText: "82점",
       roleText: "프론트개발자",
-      dateText: "2025.01.01",
+      dateText: "2025.12.10",
       statusText: "진행완료",
       statusState: "done",
       resumeLabelIconSrc: ic_task_gray900_18,
-      resumeText: "개발자 준비된 홍길동입니다.",
-      resumeDate: "2025.01.01",
+      resumeText: "개발자 준비된 정유리입니다.",
+      resumeDate: "2025.12.10",
       onClickView: () => {
         navigate(`/mock-interview/analysis/${1}`);
       },
@@ -47,12 +47,12 @@ export default function M_MyPage() {
       avatarSrc: test_profile_img2,
       scoreText: "82점",
       roleText: "프론트개발자",
-      dateText: "2025.01.01",
+      dateText: "2025.12.10",
       statusText: "진행 중",
       statusState: "doing",
       resumeLabelIconSrc: ic_task_gray900_18,
-      resumeText: "개발자 준비된 홍길동입니다.",
-      resumeDate: "2025.01.01",
+      resumeText: "개발자 준비된 정유리입니다.",
+      resumeDate: "2025.12.10",
       onClickView: () => {
         navigate(`/mock-interview/analysis/${2}`);
       },
@@ -64,12 +64,12 @@ export default function M_MyPage() {
       avatarSrc: test_profile_img2,
       scoreText: "82점",
       roleText: "프론트개발자",
-      dateText: "2025.01.01",
+      dateText: "2025.12.10",
       statusText: "진행완료",
       statusState: "done",
       resumeLabelIconSrc: ic_task_gray900_18,
-      resumeText: "개발자 준비된 홍길동입니다.",
-      resumeDate: "2025.01.01",
+      resumeText: "개발자 준비된 정유리입니다.",
+      resumeDate: "2025.12.10",
       onClickView: () => {
         navigate(`/mock-interview/analysis/${3}`);
       },
@@ -81,12 +81,12 @@ export default function M_MyPage() {
         avatarSrc: test_profile_img2,
         scoreText: "82점",
         roleText: "프론트개발자",
-        dateText: "2025.01.01",
+        dateText: "2025.12.10",
         statusText: "진행 중",
         statusState: "doing",
         resumeLabelIconSrc: ic_task_gray900_18,
-        resumeText: "성장하는 개발자, 준비된 홍길동입니다..",
-        resumeDate: "2025.01.01",
+        resumeText: "성장하는 기획자 정유리입니다..",
+        resumeDate: "2025.12.10",
         onClickView: () => {
           navigate(`/mock-interview/analysis/${4}`);
         },
@@ -150,11 +150,11 @@ export default function M_MyPage() {
 
         <div className="resume-card__body">
           <span className="resume-card__headline">
-            성장하는 개발자, 준비된 홍길동입니다.
+            성장하는 기획자 정유리입니다.
           </span>
           <div className="resume-card__meta">
             <span className="resume-card__date">2025.02.01</span>
-            <span className="resume-card__role">프론트엔드 개발자</span>
+            <span className="resume-card__role">프로젝트 기획자</span>
           </div>
         </div>
       </div>

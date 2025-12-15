@@ -11,7 +11,7 @@ import Tabs from "@/shared/components/tabs/Tabs";
 const initialProfile: UserProfile = {
   email: "hong1234@withmind.net",
   number: "010-1234-5678",
-  name: "홍길동",
+  name: "정유리",
   birth: "2000.01.01",
   gender: "m",
   certified: true,

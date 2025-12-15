@@ -1,26 +1,28 @@
 // src/pages/Resume/ResumeCreate/HardSkillSection/HardSkillSection.tsx
-import React, { useMemo, useState, useRef, useEffect } from 'react';
-import './HardSkillSection.css';
-import roles from '@/data/desired_roles.json';
-import { toast } from 'react-toastify';
+import React, { useMemo, useState, useRef, useEffect } from "react";
+import "./HardSkillSection.css";
+import { toast } from "react-toastify";
 
-import ic_search_gray900_20 from '@/assets/icons/size20/ic_search_gray900_20.png';
-import ic_clear_btn_gray400_20 from '@/assets/icons/size20/ic_clear_btn_gray400_20.png';
-import ic_error_gray500_20 from '@/assets/icons/size20/ic_error_gray500_20.png';
-import ic_add_purple_20 from '@/assets/icons/size20/ic_add_purple_20.png';
-import ic_close_gray500_24 from '@/assets/icons/size24/ic_close_gray500_24.png';
+import ic_search_gray900_20 from "@/assets/icons/size20/ic_search_gray900_20.png";
+import ic_clear_btn_gray400_20 from "@/assets/icons/size20/ic_clear_btn_gray400_20.png";
+import ic_error_gray500_20 from "@/assets/icons/size20/ic_error_gray500_20.png";
+import ic_add_purple_20 from "@/assets/icons/size20/ic_add_purple_20.png";
+import ic_close_gray500_24 from "@/assets/icons/size24/ic_close_gray500_24.png";
 
-import SearchField from '@/shared/components/search/SearchField';
+import SearchField from "@/shared/components/search/SearchField";
 import AISuggestArea from "@/pages/Resume/ResumeAISuggest";
 
-type RoleItem = { group: string; role: string };
+import { fetchHardSkillAutoComplete } from "@/api/resume/resume.api";
+import type { SkillAutoCompleteItem } from "@/api/resume/resume.types";
+
 const MAX_SELECTED = 30;
+const MIN_LENGTH = 1; // "일단"은 1글자부터(원하면 2로 바꾸면 됨)
 
 // 부모와 값 주고받는 props
 interface HardSkillSectionProps {
-  value?: string[];                        // 초기 하드스킬 목록 (edit에서 내려줌)
-  onChange?: (skills: string[]) => void;   // 선택된 하드 스킬 텍스트 배열
-  isEdit?: boolean;                        // 수정 모드 여부
+  value?: string[]; // 초기 하드스킬 목록 (edit에서 내려줌)
+  onChange?: (skills: string[]) => void; // 선택된 하드 스킬 텍스트 배열
+  isEdit?: boolean; // 수정 모드 여부
 
   // 🔥 AI 하드스킬 추천 (부모에서 내려줌 - DesiredRoleSection과 동일 패턴)
   aiShow?: boolean;
@@ -40,7 +42,10 @@ export default function HardSkillSection({
 }: HardSkillSectionProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [open, setOpen] = useState(false);
-  const [q, setQ] = useState('');
+  const [q, setQ] = useState("");
+
+  // ✅ API 자동완성 리스트
+  const [items, setItems] = useState<SkillAutoCompleteItem[]>([]);
 
   // 내부 선택 상태: "그룹|스킬명" 형태로 저장
   const [selected, setSelected] = useState<Set<string>>(
@@ -55,7 +60,8 @@ export default function HardSkillSection({
   const stopAdd = () => {
     setIsAdding(false);
     setOpen(false);
-    setQ('');
+    setQ("");
+    setItems([]);
     // selected는 유지 (edit에서 값 날아가는 것 방지)
   };
 
@@ -65,48 +71,17 @@ export default function HardSkillSection({
     if (!value || value.length === 0) return;
     if (didSyncFromValueRef.current) return;
 
-    console.log('✅ HardSkillSection(edit): value 동기화', value);
+    console.log("✅ HardSkillSection(edit): value 동기화", value);
     setSelected(new Set(value.map((s) => `직접 입력|${s}`)));
     didSyncFromValueRef.current = true;
   }, [isEdit, value]);
 
   // 선택된 하드 스킬 → 부모로 전달
   useEffect(() => {
-    const skills = Array.from(selected).map((key) => key.split('|')[1]);
+    const skills = Array.from(selected).map((key) => key.split("|")[1]);
     onChange?.(skills);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected]);
-
-  // roles JSON → 평탄화 (직무 json 재활용)
-  const flat: RoleItem[] = useMemo(() => {
-    const cats = (roles as any)?.categories as Array<{
-      name: string;
-      all?: string;
-      roles: string[];
-    }>;
-    if (!Array.isArray(cats)) return [];
-    const out: RoleItem[] = [];
-    for (const c of cats) {
-      if (c.all) out.push({ group: c.name, role: c.all });
-      for (const r of c.roles ?? []) out.push({ group: c.name, role: r });
-    }
-    return out;
-  }, []);
-
-  // 검색 필터링
-  const filtered = useMemo(() => {
-    const k = (q ?? '').trim().toLowerCase();
-    if (!k) return flat.slice(0, 20);
-    const toStr = (v: unknown) =>
-      typeof v === 'string' ? v : String(v ?? '');
-    return flat
-      .filter((i) => {
-        const role = toStr(i.role).toLowerCase();
-        const group = toStr(i.group).toLowerCase();
-        return role.includes(k) || group.includes(k);
-      })
-      .slice(0, 50);
-  }, [q, flat]);
 
   // 외부 클릭 시 드롭다운 닫기
   useEffect(() => {
@@ -115,17 +90,41 @@ export default function HardSkillSection({
       if (!menuRef.current) return;
       if (!menuRef.current.contains(e.target as Node)) setOpen(false);
     };
-    document.addEventListener('pointerdown', onPointer);
-    return () => document.removeEventListener('pointerdown', onPointer);
+    document.addEventListener("pointerdown", onPointer);
+    return () => document.removeEventListener("pointerdown", onPointer);
   }, [open]);
+
+  // ✅ q 바뀌면 자동완성 API 호출 (간단 버전: debounce 없음)
+  useEffect(() => {
+    const keyword = (q ?? "").trim();
+    if (!open) return;
+
+    if (keyword.length < MIN_LENGTH) {
+      setItems([]);
+      return;
+    }
+
+    (async () => {
+      try {
+        console.log("✅ 검색", keyword);
+        const data = await fetchHardSkillAutoComplete(keyword);
+        setItems(Array.isArray(data) ? data : []);
+        console.log("✅ 검색", keyword, data);
+      } catch (e) {
+        console.log("에러");
+        console.error("❌ hard auto-complete error:", e);
+        setItems([]);
+      }
+    })();
+  }, [q, open]);
 
   // 검색어 하이라이트
   const highlight = (text: string, keyword: string) => {
     const k = keyword.trim();
     if (!k) return text;
     const re = new RegExp(
-      `(${k.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\$&')})`,
-      'ig'
+      `(${k.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\$&")})`,
+      "ig"
     );
     return text.split(re).map((part, i) =>
       part.toLowerCase() === k.toLowerCase() ? (
@@ -141,7 +140,7 @@ export default function HardSkillSection({
   // 칩 뷰
   const chips = useMemo(() => {
     return Array.from(selected).map((key) => {
-      const [group, role] = key.split('|');
+      const [group, role] = key.split("|");
       return { key, group, role };
     });
   }, [selected]);
@@ -154,17 +153,19 @@ export default function HardSkillSection({
     });
   };
 
-  const addRole = (item: RoleItem | string) => {
-    const roleText = typeof item === 'string' ? item.trim() : item.role;
+  // ✅ 자동완성 아이템 / 직접입력 모두 추가
+  const addRole = (item: SkillAutoCompleteItem | string) => {
+    const roleText = typeof item === "string" ? item.trim() : item.name;
     if (!roleText) return;
-    const group = typeof item === 'string' ? '직접 입력' : item.group;
+
+    const group = "직접 입력";
     const key = `${group}|${roleText}`;
 
     setSelected((prev) => {
       if (prev.has(key)) return prev;
       if (prev.size >= MAX_SELECTED) {
-        toast.success('최대 30개까지 선택가능합니다.', {
-          toastId: 'hard-skill-limit',
+        toast.success("최대 30개까지 선택가능합니다.", {
+          toastId: "hard-skill-limit",
         });
         return prev;
       }
@@ -173,8 +174,9 @@ export default function HardSkillSection({
       return next;
     });
 
-    setQ('');
+    setQ("");
     setOpen(false);
+    setItems([]);
   };
 
   return (
@@ -185,11 +187,7 @@ export default function HardSkillSection({
             <div className="resume-create-page__section-title__heading">
               하드 스킬
               <span className="tooltip tooltip--top">
-                <img
-                  className="tooltip__trigger"
-                  src={ic_error_gray500_20}
-                  alt="툴팁"
-                />
+                <img className="tooltip__trigger" src={ic_error_gray500_20} alt="툴팁" />
                 <div className="tooltip__content" role="tooltip">
                   <span className="tooltip__title">하드 스킬이란?</span>
                   <span className="tooltip__desc">
@@ -199,22 +197,17 @@ export default function HardSkillSection({
               </span>
             </div>
           </div>
+
           {isAdding ? (
-            <img
-              src={ic_close_gray500_24}
-              alt="닫기"
-              onClick={stopAdd}
-            />
+            <img src={ic_close_gray500_24} alt="닫기" onClick={stopAdd} />
           ) : (
-            <span
-              className="resume-section-title__action--import"
-              onClick={startAdd}
-            >
+            <span className="resume-section-title__action--import" onClick={startAdd}>
               <img src={ic_add_purple_20} alt="" />
               추가
             </span>
           )}
         </div>
+
         {isAdding && (
           <span className="resume-create-page__hint">
             최대 {MAX_SELECTED}개까지 추가 가능합니다.
@@ -226,9 +219,7 @@ export default function HardSkillSection({
         <div className="resume-create-page__selected">
           {chips.map((chip) => (
             <div key={chip.key} className="location-picker__chip">
-              <div className="location-picker__chip-body">
-                {chip.role}
-              </div>
+              <div className="location-picker__chip-body">{chip.role}</div>
               <span
                 className="location-picker__chip-close"
                 onClick={() => removeRole(chip.key)}
@@ -240,11 +231,7 @@ export default function HardSkillSection({
         </div>
       )}
 
-      <div
-        className={`resume-create-page__section-body ${
-          isAdding ? '' : 'empty'
-        }`}
-      >
+      <div className={`resume-create-page__section-body ${isAdding ? "" : "empty"}`}>
         {isAdding ? (
           <>
             <SearchField
@@ -252,7 +239,10 @@ export default function HardSkillSection({
               id="hard-skill-search"
               value={q}
               placeholder="보유 하드 스킬을 입력해 주세요. (ex. Java, React)"
-              onChange={setQ}
+              onChange={(v) => {
+                setQ(v);
+                setOpen(true);
+              }}
               onSubmit={() => {}}
               onFocus={() => setOpen(true)}
               leftIconSrc={ic_search_gray900_20}
@@ -264,36 +254,29 @@ export default function HardSkillSection({
               <div className="hard-skills__dropdown" ref={menuRef}>
                 <div className="hard-skills__menu" role="listbox">
                   <ul className="hard-skills__list">
-                    {filtered.map((item, idx) => (
-                      <li
-                        key={`${item.group}-${item.role}-${idx}`}
-                        className="hard-skills__option"
-                        role="option"
-                        onClick={() => addRole(item)}
-                      >
-                        <span className="hard-skills__option-role">
-                          {highlight(item.role, q)}
-                        </span>
+                    {items.length > 0 &&
+                      items.map((item) => (
+                        <li
+                          key={item.id}
+                          className="hard-skills__option"
+                          role="option"
+                          onClick={() => addRole(item)}
+                        >
+                          <span className="hard-skills__option-role">
+                            {highlight(item.name, q)}
+                          </span>
+                        </li>
+                      ))}
+                    {q.trim().length >= MIN_LENGTH && items.length === 0 && (
+                      <li className="hard-skills__option" aria-disabled="true">
+                        추천 결과가 없습니다.
                       </li>
-                    ))}
+                    )}
                   </ul>
                 </div>
-
-                {q && (
-                  <div
-                    className="hard-skills__menu-footer"
-                    onClick={() => addRole(q)}
-                    role="button"
-                    tabIndex={0}
-                  >
-                    <span className="hard-skills__highlight">“{q}”</span>
-                    <span className="hard-skills__create-suffix">
-                      (으)로 직접 등록하기
-                    </span>
-                  </div>
-                )}
               </div>
             )}
+
 
             <AISuggestArea
               show={aiShow}

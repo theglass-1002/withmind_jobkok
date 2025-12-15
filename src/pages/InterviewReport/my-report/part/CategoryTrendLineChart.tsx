@@ -21,7 +21,7 @@
 // };
 
 // export interface CategoryTrendLineChartProps {
-//   labels?: string[];   // "2025.01.01" 형식
+//   labels?: string[];   // "2025.12.10" 형식
 //   height?: number;     // px
 //   tension?: number;    // 0 = 직선
 //   // 개별 전달(기존 방식)
@@ -218,7 +218,7 @@ type Series = {
 
 export interface CategoryTrendLineChartProps {
   className?: string;
-  labels?: string[];   // "2025.01.01" 형식
+  labels?: string[];   // "2025.12.10" 형식
   height?: number;     // px
   tension?: number;    // 0 = 직선
   multiLineLabels?: boolean; // true면 "YYYY\nMM.DD" 형식으로 2줄 표시

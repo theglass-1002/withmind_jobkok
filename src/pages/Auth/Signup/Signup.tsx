@@ -230,10 +230,10 @@ export default function Signup() {
     const regisData: RegisterRequest = {
       userId: trimmedEmail,
       password: trimmedPassword,
-      userName: "홍길동", // TODO: 본인인증에서 받은 실제 이름
+      userName: "정유리", // TODO: 본인인증에서 받은 실제 이름
       ci: "797979", // TODO: 본인인증에서 받은 실제 CI
       ciProvider: "pass",
-      realName: "홍길동", // TODO: 본인인증에서 받은 실제 이름
+      realName: "정유리", // TODO: 본인인증에서 받은 실제 이름
       birthdate: "19901231", // TODO: 본인인증에서 받은 실제 생년월일
       gender: selectedGender === 1 ? "M" : "W",
       phone: "01012345678", // TODO: 본인인증에서 받은 실제 전화번호
@@ -595,7 +595,7 @@ export default function Signup() {
             </label>
             <div className="input-row">
               <div className="data-group">
-                {isIdentityVerified ? "홍길동" : "본인 인증을 진행해 주세요."}
+                {isIdentityVerified ? "정유리" : "본인 인증을 진행해 주세요."}
               </div>
             </div>
           </div>

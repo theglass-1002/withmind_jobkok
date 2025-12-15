@@ -7,7 +7,7 @@ import { API_BASE_URL, LOCAL_BASE_URL } from "@/config/config";
   mTxId: "test_20230327",   // 테스트용 임의 값
   authHash: "...",          // (이건 백엔드에서 계산해주는 게 맞음)
   flgFixedUser: "Y",
-  userName: "홍길동",
+  userName: "정유리",
   userPhone: "01012345678",
   userBirth: "19901101",
   userHash: "...",          // 이것도 sha256 계산 결과

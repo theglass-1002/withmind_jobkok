@@ -31,7 +31,7 @@ const mockJobs: JobCardV2Item[] = [
     logoSrc: test_company_logo,
     company: "위드마인드",
     sourceLogoSrc: ic_saramin_18,
-    role: "프론트엔드 개발자",
+    role: "프로젝트 기획자",
     isBookmarked: true,
     matchPercent: 70,
     matchIconSrc: ic_star_green_18,
@@ -65,7 +65,7 @@ const mockJobs: JobCardV2Item[] = [
     logoSrc: test_company_logo,
     company: "넥스트웨이브",
     sourceLogoSrc: ic_saramin_18,
-    role: "웹 프론트엔드 개발자",
+    role: "웹 프로젝트 기획자",
     isBookmarked: false,
     matchPercent: 62,
     matchIconSrc: ic_star_green_18,
@@ -153,7 +153,7 @@ export default function MyReportResult() {
             alt=""
             aria-hidden="true"
           />
-          <span className="mock-interview-summary__daterange">2025.01.01~2025.01.10</span>
+          <span className="mock-interview-summary__daterange">2025.12.10~2025.01.10</span>
         </div>
         <SortDropdown
                       value={sort}
@@ -165,10 +165,10 @@ export default function MyReportResult() {
 
       <div className="mock-interview-summary__content">
         <MyReportKPIs
-          recentInterviewDate="2025.01.01"
+          recentInterviewDate="2025.12.10"
           totalCount={81}
           averageDuration="8분 24초"
-          bestDate="2025.01.01"
+          bestDate="2025.12.10"
           bestScore="100점"
         />
 
@@ -177,7 +177,7 @@ export default function MyReportResult() {
             score={82}
             average={72}
             max={100}
-            userName="홍길동님"
+            userName="정유리님"
             markLabel="면접우수 마크"
             topBadgeText="상위10%"
             secondaryBadges={["기본기 충실", "준비도 높음"]}
@@ -264,7 +264,7 @@ export default function MyReportResult() {
           />
         </div>
 
-        <div className="mock-interview-summary__panel mock-interview-summary__panel--jobs">
+        {/* <div className="mock-interview-summary__panel mock-interview-summary__panel--jobs">
           <JobMatchHistoryPanel
             titleIconSrc={ic_rocket_24}
             title="채용 공고 매칭 히스트리 TOP 5"
@@ -273,7 +273,7 @@ export default function MyReportResult() {
             onClickViewAll={() => {}}
             onToggleFavorite={handleToggleFavorite}
           />
-        </div>
+        </div> */}
       </div>
     </>
   );

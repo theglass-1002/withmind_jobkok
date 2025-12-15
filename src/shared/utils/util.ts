@@ -401,7 +401,7 @@ export type CareerItem = {
   isCurrent?: boolean; // true면 .current 클래스 추가
   tenure: string;      // 예: "(0년 0개월)"
   employment?: string; // 예: "정규직"
-  role?: string;       // 예: "프론트엔드 개발자"
+  role?: string;       // 예: "프로젝트 기획자"
   level?: string;      // 예: "매니저"
   bullets: string[];   // 예: ["• ...", "• ..."]
 };
@@ -469,4 +469,32 @@ export const scrollToTop = () => {
 };
 
 
+// ✅ webm -> thumbnail 생성 함수
+export function createVideoThumbnail(videoUrl: string, time = 1): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const video = document.createElement("video");
+    video.src = videoUrl;
+    video.muted = true;
+    video.playsInline = true;
+    video.preload = "metadata";
 
+    video.onloadedmetadata = () => {
+      const safeTime = Math.min(Math.max(time, 0), Math.max(video.duration - 0.1, 0));
+      video.currentTime = safeTime;
+    };
+
+    video.onseeked = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = video.videoWidth || 320;
+      canvas.height = video.videoHeight || 180;
+
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return reject(new Error("canvas ctx 없음"));
+
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL("image/png"));
+    };
+
+    video.onerror = () => reject(new Error("video load error"));
+  });
+}

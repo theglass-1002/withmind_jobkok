@@ -3,7 +3,7 @@ import React from "react";
 
 type ResumeDesiredRoleSectionProps = {
   label?: string;      // 기본: "희망 직무"
-  items: string[];     // 예: ["자바 개발자", "웹 개발자", "프론트엔드 개발자"]
+  items: string[];     // 예: ["자바 개발자", "웹 개발자", "프로젝트 기획자"]
 };
 
 export default function ResumeDesiredRoleSection({

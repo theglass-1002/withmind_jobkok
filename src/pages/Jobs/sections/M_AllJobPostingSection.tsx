@@ -40,7 +40,7 @@ export default function M_AllJobPostingSection() {
 
     // 칩 상태 관리
     const [chips, setChips] = useState<Chip[]>([
-      { id: '1', group: '개발', role: '프론트엔드 개발자' },
+      { id: '1', group: '개발', role: '프로젝트 기획자' },
       { id: '2', group: '개발', role: '웹 개발자' },
       { id: '3', group: '1~3년' },
       { id: '4', group: '정규직' }

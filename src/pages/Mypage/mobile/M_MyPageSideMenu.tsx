@@ -49,7 +49,7 @@ export default function M_MyPageSideMenu() {
                 <div className="user_info">
                   <div className="sidebar-user__header">
                   <div className="sidebar-user__details">
-                      <span className="user_name">홍길동 님(모바일)</span>
+                      <span className="user_name">정유리 님(모바일)</span>
                         <div className="user_contact">
                         <span>hong1234@withmind.net</span>
                         <span>010-1234-5678</span>

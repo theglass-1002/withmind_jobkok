@@ -98,7 +98,7 @@ export const router = createBrowserRouter([
 
 
 
-  { path: "/", element: <Layout><Home/></Layout>, errorElement: <Layout><NotFound /></Layout>},
+  { path: "/", element: <Layout><Home/></Layout>, errorElement: <Layout><Home /></Layout>},
   {path:"/linkview",element:<Layout><Linkview/></Layout>},
  
   { path: "/jobs", element: <Layout ><JobsList /></Layout>,

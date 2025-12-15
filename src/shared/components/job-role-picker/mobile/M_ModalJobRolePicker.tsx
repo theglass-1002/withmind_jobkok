@@ -33,7 +33,7 @@ export type SelectedRole = {
 type RawCategory = {
   name: string;      // "개발", "디자인", "마케팅·광고" 등
   all: string;       // "개발 전체" 이런 문자열일 수 있음 (지금은 안 씀)
-  roles: string[];   // ["서버 개발자", "프론트엔드 개발자", ...]
+  roles: string[];   // ["서버 개발자", "프로젝트 기획자", ...]
 };
 
 type DesiredRolesJson = {

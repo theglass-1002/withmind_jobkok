@@ -69,11 +69,11 @@ export default function MyPage() {
 
         <div className="resume-card__body">
           <span className="resume-card__headline">
-            성장하는 개발자, 준비된 홍길동입니다.
+            성장하는 기획자 정유리입니다.
           </span>
           <div className="resume-card__meta">
             <span className="resume-card__date">2025.02.01</span>
-            <span className="resume-card__role">프론트엔드 개발자</span>
+            <span className="resume-card__role">프로젝트 기획자</span>
           </div>
         </div>
       </div>
@@ -93,7 +93,7 @@ export default function MyPage() {
             <div className="content-left">
               <div className="interview-info">
                 <span className="score">82점</span>
-                <span className="job-type">프론트엔드 개발자</span>
+                <span className="job-type">프로젝트 기획자</span>
                 <div className="status-info">
                   <span className="status">진행완료</span>
                   <span className="date">2025.00.00</span>
@@ -102,7 +102,7 @@ export default function MyPage() {
               <div className="description">
                 <span>  <img src={done_file} alt="" /></span>
               
-              성장하는 개발자, 준비된 홍길동입니다.
+              성장하는 기획자 정유리입니다.
               </div>
             </div>
             <div className="content-right">
@@ -118,7 +118,7 @@ export default function MyPage() {
             <div className="content-left">
               <div className="interview-info">
                 <span className="score pending">진행 중</span>
-                <span className="job-type">프론트엔드 개발자</span>
+                <span className="job-type">프로젝트 기획자</span>
                 <div className="status-info">
                   <span className="status">진행 중</span>
                   <span className="date">2025.00.00</span>
@@ -127,7 +127,7 @@ export default function MyPage() {
               <div className="description">
               <span>  <img src={done_file} alt="" /></span>
              
-                성장하는 개발자, 준비된 홍길동입니다.성장하는 개발자, 준비된 홍길동입니다.
+                성장하는 기획자 정유리 입니다.
               </div>
             </div>
             <div className="content-right">

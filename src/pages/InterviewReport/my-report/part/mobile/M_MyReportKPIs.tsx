@@ -35,10 +35,10 @@ function KPIPairCard({ label, date, score }: KPIPairCardProps) {
 }
 
 export type M_MyReportKPIsProps = {
-  recentInterviewDate: string; // 예: "2025.01.01"
+  recentInterviewDate: string; // 예: "2025.12.10"
   totalCount: number;          // 예: 81
   averageDuration: string;     // 예: "8분 24초"
-  bestDate: string;            // 예: "2025.01.01"
+  bestDate: string;            // 예: "2025.12.10"
   bestScore: string;           // 예: "100점"
 };
 

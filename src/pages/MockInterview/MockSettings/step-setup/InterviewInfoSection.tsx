@@ -38,7 +38,7 @@ export default function InterviewInfoSection({
                     required
                     placeholder="이력서를 선택해 주세요."
                     options={[
-                        { value: '1', label: '프론트엔드 개발자 이력서' },
+                        { value: '1', label: '기획자 이력서' },
                         { value: '2', label: '백엔드 개발자 이력서' },
                     ]}                                
                     value={selectedResume}

@@ -31,7 +31,7 @@ const mockJobs = [
     logoSrc: test_company_logo,
     company: "위드마인드",
     sourceLogoSrc: ic_saramin_18,
-    role: "프론트엔드 개발자",
+    role: "프로젝트 기획자",
     isBookmarked: true,
     matchPercent: 70,
     matchIconSrc: ic_star_green_18,
@@ -164,17 +164,17 @@ export default function MockAnalysisPage() {
         <div className="mock-analysis__header_container">
         <MockAnalysisHeader
           title="분석결과"
-          date="2025.01.01 00:00"
+          date="2025.12.10 00:00"
           status="진행 완료"
           activeTab={activeTab} 
           metaRows={[
             [
-              { key: "이름", value: "홍길동" },
-              { key: "아이디", value: "abc" },
+              { key: "이름", value: "정유리" },
+              { key: "아이디", value: "withmind01" },
             ],
             [
-              { key: "희망직무", value: "개발자" },
-              { key: "선택 이력서", value: "성장하는 개발자" },
+              { key: "희망직무", value: "서비스 기획" },
+              { key: "선택 이력서", value: "성장하는 서비스 기획자" },
             ],
             [
               { key: "신뢰도", value: "중" },
@@ -224,14 +224,14 @@ export default function MockAnalysisPage() {
                   ],
                   max: 100,
                   left: {
-                    role: "개발직군",
+                    role: "기획직군",
                     rankText: "응시자 2,851명 중 7위",
                     badgeText: "상위 10%",
                     values: [50, 30, 20, 60, 92, 80, 70, 100, 50],
                     highlightScore: 38,
                   },
                   right: {
-                    role: "프론트엔드 직무",
+                    role: "기획직무",
                     rankText: "응시자 267명 중 17위",
                     badgeText: "상위 10%",
                     values: [50, 30, 20, 60, 92, 80, 70, 100, 50],
@@ -240,7 +240,7 @@ export default function MockAnalysisPage() {
                 }}
                 categorySummary={{
                   left: {
-                    scoreTitle: "홍길동님의 점수",
+                    scoreTitle: "정유리님의 점수",
                     scores: { attitude: 92, voice: 80, tension: 10, competence: 30 },
                     RadarChartComponent: KpiRadarChart,
                   },
@@ -251,28 +251,28 @@ export default function MockAnalysisPage() {
                         gradeText: "최우수",
                         gradeTone: "excellent",
                         description:
-                          "면접 과정에서 보인 의사소통능력과 문제해결능력은 매우 우수한 것으로 평가됩니다. 잘 이해하고 뛰어난 의사소통 기술을 보였으며, 문제의 핵심을 파악하고 해결책을 제시하는 등 전화 상담원으로서의 역량이 뛰어나다고 판단됩니다.",
+                          "문제 해결 능력과 직무 관련 역량이 비교적 우수하게 나타났습니다.",
                       },
                       {
                         label: "태도",
                         gradeText: "우수",
                         gradeTone: "good",
                         description:
-                          "면접 과정에서 보인 의사소통능력과 문제해결능력은 매우 우수한 것으로 평가됩니다. 잘 이해하고 뛰어난 의사소통 기술을 보였으며, 문제의 핵심을 파악하고 해결책을 제시하는 등 전화 상담원으로서의 역량이 뛰어나다고 판단됩니다.",
+                          "면접 과정에서 보인 의사소통능력과 문제해결능력은 매우 우수한 것으로 평가됩니다. 잘 이해하고 뛰어난 의사소통 기술을 보였으며, 문제의 핵심을 파악하고 해결책을 제시하는 등 전화 기획자로써 역량이 뛰어나다고 판단됩니다.",
                       },
                       {
                         label: "목소리",
                         gradeText: "보통",
                         gradeTone: "fair",
                         description:
-                          "면접 과정에서 보인 의사소통능력과 문제해결능력은 매우 우수한 것으로 평가됩니다. 잘 이해하고 뛰어난 의사소통 기술을 보였으며, 문제의 핵심을 파악하고 해결책을 제시하는 등 전화 상담원으로서의 역량이 뛰어나다고 판단됩니다.",
+                          "초반에 약간의 긴장감이 있었지만 점차 안정적으로 변했습니다. 소리 톤은 전반적으로 안정적이었으나 말 속도가 조금 빠른 편입니다.",
                       },
                       {
                         label: "긴장도",
                         gradeText: "보통",
                         gradeTone: "improvement",
                         description:
-                          "면접 과정에서 보인 의사소통능력과 문제해결능력은 매우 우수한 것으로 평가됩니다. 잘 이해하고 뛰어난 의사소통 기술을 보였으며, 문제의 핵심을 파악하고 해결책을 제시하는 등 전화 상담원으로서의 역량이 뛰어나다고 판단됩니다.",
+                          "전체적으로 안정적인 모의면접 수행 능력을 보여주었으며 답변의 구조가 명확합니다.",
                       },
                     ],
                   },
@@ -283,14 +283,14 @@ export default function MockAnalysisPage() {
                     label: "강점",
                     tags: ["효과적 의견 교환", "타인에 대한 신뢰"],
                     description:
-                      "홍길동님의 강점으로 두드러지는 점은 효과적인 의견 교환과 타인에 대한 신뢰입니다.",
+                      "정유리님의 강점으로 두드러지는 점은 효과적인 의견 교환과 타인에 대한 신뢰입니다.",
                   },
                   weakness: {
                     iconSrc: ic_weakness_circle_24,
                     label: "약점",
                     tags: ["의사소통 기술 활용", "타인 이해"],
                     description:
-                      "홍길동님은 효과적 의견교환 및 타인에 대한 신뢰가 다소 부족합니다.",
+                      "정유리님은 효과적 의견교환 및 타인에 대한 신뢰가 다소 부족합니다.",
                   },
                 }}
               />

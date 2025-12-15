@@ -27,7 +27,7 @@ export default function VoiceTabContent({
   gradeLabel = "목소리 톤 등급",
   analysisTitle = "목소리 톤 분석",
   selectedGrade = "보통",
-  analysisText = <>전체 평균과 비교했을 때, 홍길동님의 목소리 톤은 적절합니다.</>,
+  analysisText = <>전체 평균과 비교했을 때, 정유리님의 목소리 톤은 적절합니다.</>,
   highlight = <>평균 톤 '205 Hz', 변동폭 '중간', 안정성 '우수'</>,
   headers = ["", "낮은 저음", "저음", "중간", "고음", "높은 고음"],
   rows = [
@@ -42,7 +42,7 @@ export default function VoiceTabContent({
         <div className="detail-analysis__attitude-left">
           <span className="detail-analysis__metric-grade-label">
             <img src={ic_timeline_gray600_20} alt="" />
-            홍길동님의 목소리 톤
+            정유리님의 목소리 톤
           </span>
           <VoicePitchChart
             values={[220, 195, 210, 180, 195, 170, 180, 170, 195, 145, 180]}

@@ -48,7 +48,7 @@ const options: Opt[] = [
   { value: "chocolate", label: "Chocolate" },
   { value: "strawberry", label: "Strawberry" },
   { value: "vanilla", label: "Vanilla" },
-  { value: "frontend", label: "프론트엔드 개발자" },
+  { value: "frontend", label: "프로젝트 기획자" },
   { value: "backend", label: "백엔드 개발" },
   { value: "mobile", label: "모바일 앱 개발" },
   { value: "designer", label: "웹 디자이너" },
@@ -288,7 +288,7 @@ export default function Navbar({ titleText }: NavbarProps) {
                 <img src={Icons.ic_close_gray500_20} alt="" />
               </button>
               <button className="chip">
-                프론트엔드 개발자
+                프로젝트 기획자
                 <img src={Icons.ic_close_gray500_20} alt="" />
               </button>
             </div>
@@ -300,7 +300,7 @@ export default function Navbar({ titleText }: NavbarProps) {
             </header>
             <div className="chip-list">
               <button className="chip">프론트엔드</button>
-              <button className="chip">프론트엔드 개발자</button>
+              <button className="chip">프로젝트 기획자</button>
             </div>
           </section>
         </div>
@@ -409,7 +409,7 @@ export default function Navbar({ titleText }: NavbarProps) {
                 </header>
                 <div className="chip-list">
                   <button className="chip popular">프론트엔드</button>
-                  <button className="chip popular">프론트엔드 개발자</button>
+                  <button className="chip popular">프로젝트 기획자</button>
                 </div>
               </section>
             </>

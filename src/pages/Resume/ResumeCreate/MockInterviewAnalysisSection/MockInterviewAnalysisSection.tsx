@@ -35,9 +35,9 @@ export default function MockInterviewAnalysisSection() {
       {
         id: "1",
         score: "82점",
-        role: "프론트엔드 개발자",
-        date: "2025.01.01",
-        title: "성장하는 개발자, 준비된 홍길동입니다.",
+        role: "프로젝트 기획자",
+        date: "2025.12.10",
+        title: "성장하는 기획자 정유리입니다.",
         thumbSrc: test_profile_img,
         selectedBadge: "선택 이력서",
       },

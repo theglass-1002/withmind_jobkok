@@ -23,7 +23,15 @@ export default function MockSettings() {
     const [questions, setQuestions] = useState([
         { id: 1, isAiGenerated: true, customText: '' },
         { id: 2, isAiGenerated: true, customText: '' },
-        { id: 3, isAiGenerated: true, customText: '' },
+        { id: 4, isAiGenerated: true, customText: '' },
+        { id: 5, isAiGenerated: true, customText: '' },
+        { id: 6, isAiGenerated: true, customText: '' },
+        { id: 7, isAiGenerated: true, customText: '' },
+        { id: 8, isAiGenerated: true, customText: '' },
+        { id: 9, isAiGenerated: true, customText: '' },
+        { id: 10, isAiGenerated: true, customText: '' },
+        { id: 11, isAiGenerated: true, customText: '' },
+
     ]);
 
     // 모달 닫기
@@ -62,10 +70,10 @@ export default function MockSettings() {
                 </div>
                 <div className="mock-settings__submit-btn-container">
                  
-                <button className='mock-settings__submit-btn' disabled>    
+                {/* <button className='mock-settings__submit-btn' disabled>    
                         설정 완료
                         <img src={ic_chevron_right_gray700_24} alt="" />
-                        </button>
+                        </button> */}
               <button className='mock-settings__submit-btn on' onClick={handleNextStep}>    
                         설정 완료
                         <img src={ic_chevron_right_white_24} alt="" />

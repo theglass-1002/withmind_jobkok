@@ -49,7 +49,7 @@ export default function DetailAttitudeSection({
 
   const expressionHeaders = ["", "긍정", "부정", "무표정"];
   const expressionRows = [
-    { label: "홍길동 님", values: ["24%", "8%", "68%"] },
+    { label: "정유리 님", values: ["24%", "8%", "68%"] },
   ];
 
   return (
@@ -75,7 +75,7 @@ export default function DetailAttitudeSection({
               bodyAngle={0}
               analysisTitle="자세 분석"
               selectedGrade="보통"
-              analysisText="전체 평균과 비교했을 때, 홍길동님의 자세는 양호합니다"
+              analysisText="전체 평균과 비교했을 때, 정유리님의 자세는 양호합니다"
               highlight="머리 ‘-1.234도’, 어깨 ‘-1.234도’, 좌우 움직임 ‘13회"
               headers={attitudeHeaders}
               rows={attitudeRows}
@@ -87,7 +87,7 @@ export default function DetailAttitudeSection({
               gazeY={-10}
               analysisTitle="시선 분석"
               selectedGrade="미흡"
-              analysisText="대학 평균과 비교했을 때, 홍길동님의 시선 분포 정도는 우수합니다.홍길동님은 답변하는 동안 카메라를 바라보고 있었던"
+              analysisText="대학 평균과 비교했을 때, 정유리님의 시선 분포 정도는 우수합니다.정유리님은 답변하는 동안 카메라를 바라보고 있었던"
               highlight="시선의 위치 변화가 적습니다(안정적)."
             />
           ) : selectedQuestion === "gesture" ? (
@@ -95,7 +95,7 @@ export default function DetailAttitudeSection({
               gradeLabel="제스처 등급"
               analysisTitle="제스처 분석"
               selectedGrade="우수"
-              analysisText="전체 평균과 비교했을 때, 홍길동님의 제스처는 우수합니다. 홍길동님의 얼굴 주변 제스처를 취한 평균 횟수는 ‘5회’이며, 제스처를 유지한 평균 시간은 ‘64.3초’입니다."
+              analysisText="전체 평균과 비교했을 때, 정유리님의 제스처는 우수합니다. 정유리님의 얼굴 주변 제스처를 취한 평균 횟수는 ‘5회’이며, 제스처를 유지한 평균 시간은 ‘64.3초’입니다."
               headers={gestureHeaders}
               rows={gestureRows}
             />
@@ -105,7 +105,7 @@ export default function DetailAttitudeSection({
             bodyAngle={10}
             analysisTitle="표정 분석"
             selectedGrade="보통"
-            analysisText="전체 평균과 비교했을 때, 홍길동님의 자세는 양호합니다"
+            analysisText="전체 평균과 비교했을 때, 정유리님의 자세는 양호합니다"
             highlight="머리 ‘-1.234도’, 어깨 ‘-1.234도’, 좌우 움직임 ‘13회"
             headers={expressionHeaders}
             rows={expressionRows}

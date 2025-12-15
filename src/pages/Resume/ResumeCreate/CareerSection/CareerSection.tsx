@@ -179,7 +179,7 @@ export default function CareerSection({
       },
       {
         company_name: "케이티밀리의서재",
-        role: "프론트엔드 개발자",
+        role: "프로젝트 기획자",
         position: "시니어",
         summary: "웹 서비스 개발",
         employmentType: "계약직",

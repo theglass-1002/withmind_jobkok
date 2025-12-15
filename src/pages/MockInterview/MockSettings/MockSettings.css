@@ -143,6 +143,7 @@
 .mock-settings__exit-btn{
     display: flex;
     height: 64px;
+    width: 100%;
     padding: 20px 28px;
     justify-content: center;
     align-items: center;

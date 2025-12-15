@@ -32,7 +32,7 @@ export default function ResumeInterviewMatchPage({
        <SuggestionSection />
        <span className="print-page-break"></span>
        <QuestionSection />
-       <ResumeRecommendedJobsSection
+       {/* <ResumeRecommendedJobsSection
         title="이 이력서와 가장 잘 맞는 공고"
         titleIconSrc={ic_rocket_24}
         jobs={jobs}
@@ -40,7 +40,7 @@ export default function ResumeInterviewMatchPage({
         prevIconSrc={ic_keyboard_arrow_left_gray900_24}
         nextIconSrc={ic_keyboard_arrow_right_gray900_24}
         onToggleFavorite={onToggleFavorite}
-      />
+      /> */}
       </div>
     );
   }

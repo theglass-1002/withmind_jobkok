@@ -46,7 +46,7 @@ const careerItems: CareerItem[] = [
     isCurrent: true,
     tenure: "(0년 0개월)",
     employment: "정규직",
-    role: "프론트엔드 개발자",
+    role: "프로젝트 기획자",
     level: "매니저",
     bullets: commonBullets,
   },
@@ -57,7 +57,7 @@ const careerItems: CareerItem[] = [
     isCurrent: false,
     tenure: "(2년 3개월)",
     employment: "정규직",
-    role: "프론트엔드 개발자",
+    role: "프로젝트 기획자",
     level: "시니어",
     bullets: [
       "• React 기반 사내 Admin 대시보드 설계/구축",
@@ -83,7 +83,7 @@ export default function ResumeSection() {
   return (
     <div className="report-content">
       <span className="report-content__main-summary">
-        성장하는 개발자, 준비된 홍길동입니다.
+        성장하는 기획자 정유리입니다.
       </span>
 
       {/* ... AI 요약 박스 생략 ... */}
@@ -91,7 +91,7 @@ export default function ResumeSection() {
       <div className="resume-page__main">
         <div className="resume-detail__content">
           <ResumeBasicInfo
-            name="홍길동"
+            name="정유리"
             meta="2000년생(만 23세), 남성"
             email="hong1234@withmind.net"
             phone="010-1234-5678"
@@ -118,7 +118,7 @@ export default function ResumeSection() {
           <ResumeEducationSection items={educationItems} />
 
           <ResumeDesiredRoleSection
-            items={["자바 개발자", "웹 개발자", "프론트엔드 개발자"]}
+            items={["자바 개발자", "웹 개발자", "프로젝트 기획자"]}
           />
 
           <ResumeHardSkillsSection items={["자바", "피그마"]} />
@@ -158,14 +158,14 @@ export default function ResumeSection() {
               link: ic_link_gray900_20,
             }}
             items={[
-              { kind: "file", name: "홍길동_포트폴리오.pdf" },
+              { kind: "file", name: "정유리_포트폴리오.pdf" },
               { kind: "link", url: "https://interview.kr" },
             ]}
           />
 
           <ResumeSelfIntroSection
             text={
-              "5년 8개월차 JAVA 개발자 홍길동입니다. Spring Boot와 JPA를 활용한 백엔드 개발 및 API 설계 경험이 있으며, 성능 최적화와 데이터베이스 설계에 강점을 가지고 있습니다. 최근에는 MSA 및 CI/CD 구축을 통해 서비스 확장성과 자동화를 경험했습니다. 효율적인 시스템 개발과 문제 해결을 통해 성장하는 개발자가 되고 싶습니다."
+              "5년 8개월차 JAVA 개발자 정유리입니다. Spring Boot와 JPA를 활용한 백엔드 개발 및 API 설계 경험이 있으며, 성능 최적화와 데이터베이스 설계에 강점을 가지고 있습니다. 최근에는 MSA 및 CI/CD 구축을 통해 서비스 확장성과 자동화를 경험했습니다. 효율적인 시스템 개발과 문제 해결을 통해 성장하는 개발자가 되고 싶습니다."
             }
           />
 
@@ -175,7 +175,7 @@ export default function ResumeSection() {
             items={[
               {
                 title:
-                  "82점ㆍ프론트엔드 개발자ㆍ25.01.01 [성장하는 개발자, 준비된 홍길동입니다.]",
+                  "82점ㆍ프로젝트 기획자ㆍ25.01.01 [성장하는 기획자 정유리입니다.]",
               },
             ]}
           />

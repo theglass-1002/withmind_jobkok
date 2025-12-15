@@ -29,7 +29,7 @@ export default function GazeTabContent({
   gradeLabel = "시선 등급",
   analysisTitle = "시선 분석",
   selectedGrade = "보통",
-  analysisText = <>전체 평균과 비교했을 때, 홍길동님의 시선은 양호합니다.</>,
+  analysisText = <>전체 평균과 비교했을 때, 정유리님의 시선은 양호합니다.</>,
   highlight = <>정면 응시 ‘72%’, 시선 분산도 ‘낮음’, 눈 깜박임 ‘15회’</>,
 }: Props) {
   return (

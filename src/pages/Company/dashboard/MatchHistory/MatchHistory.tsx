@@ -59,7 +59,7 @@ export default function MatchHistory() {
             <div className='match-history-table__col match-history-table__col--action'>공백</div>                             
           </div>
           <div className='match-history-table__item match-history-table__row'>
-            <div className='match-history-table__col match-history-table__col--name'>홍길동</div>          
+            <div className='match-history-table__col match-history-table__col--name'>정유리</div>          
             <div className='match-history-table__col match-history-table__col--job'>2025년 상반기 ICT 인턴십 채용</div>
             <div className='match-history-table__col match-history-table__col--rate'>92%</div>
             <div className='match-history-table__col match-history-table__col--ai-status on'>
@@ -73,7 +73,7 @@ export default function MatchHistory() {
             </div>                             
           </div>
           <div className='match-history-table__item match-history-table__row'>
-            <div className='match-history-table__col match-history-table__col--name'>홍길동</div>          
+            <div className='match-history-table__col match-history-table__col--name'>정유리</div>          
             <div className='match-history-table__col match-history-table__col--job'>2025년 상반기 ICT 인턴십 채용</div>
             <div className='match-history-table__col match-history-table__col--rate'>92%</div>
             <div className='match-history-table__col match-history-table__col--ai-status on'>
@@ -87,7 +87,7 @@ export default function MatchHistory() {
             </div>                             
           </div>
           <div className='match-history-table__item match-history-table__row'>
-            <div className='match-history-table__col match-history-table__col--name'>홍길동</div>          
+            <div className='match-history-table__col match-history-table__col--name'>정유리</div>          
             <div className='match-history-table__col match-history-table__col--job'>2025년 상반기 ICT 인턴십 채용</div>
             <div className='match-history-table__col match-history-table__col--rate'>92%</div>
             <div className='match-history-table__col match-history-table__col--ai-status on'>

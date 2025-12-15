@@ -6,13 +6,14 @@
 
 .company-dashboard__main{
     width: 80%;
-    height: 1080px;
+    /* height: 1080px;
+   */
     overflow: auto;
 }
 
 .company-dashboard__sidebar{
     width: 20%;
-    height: 1080px;
+    /* height: 1080px; */
     border-right: 1px solid var(---gray-400, #C8CCCF);
     background: var(---gray-800, #3A3E42);
 }

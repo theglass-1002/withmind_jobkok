@@ -26,7 +26,7 @@ export default function GestureTabContent({
   gradeLabel = "제스처 등급",
   analysisTitle = "제스처 분석",
   selectedGrade = "보통",
-  analysisText = <>전체 평균과 비교했을 때, 홍길동님의 제스처 사용은 적절합니다.</>,
+  analysisText = <>전체 평균과 비교했을 때, 정유리님의 제스처 사용은 적절합니다.</>,
   highlight = <>손 제스처 빈도 ‘5회’, 다양도 ‘중간’, 동기화 ‘보통’</>,
   headers = ["", "손 제스처 빈도", "제스처 다양도", "동기화"],
   rows = [

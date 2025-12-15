@@ -359,7 +359,7 @@ export type CareerItem = {
   isCurrent?: boolean; // true면 .current 클래스 추가
   tenure: string;      // 예: "(0년 0개월)"
   employment?: string; // 예: "정규직"
-  role?: string;       // 예: "프론트엔드 개발자"
+  role?: string;       // 예: "프로젝트 기획자"
   level?: string;      // 예: "매니저"
   bullets: string[];   // 예: ["• ...", "• ..."]
 };
@@ -491,7 +491,7 @@ export const mapLicenseListToAwardItems = (
 
 export type PortfolioFileItem = {
   kind: "file";
-  name: string; // 예: "홍길동_포트폴리오.pdf"
+  name: string; // 예: "정유리_포트폴리오.pdf"
   iconSrc?: string; // 없으면 defaultIcons.file 사용
   filePath?:string;
 };
@@ -682,3 +682,12 @@ export interface ResumeSelfIntroResponse {
   } | null;
   meta?: any;
 }
+
+// resume.types.ts (맨 아래 아무데나 추가)
+
+export type SkillAutoCompleteItem = {
+  id: number;
+  name: string;
+  type: "HARD" | "SOFT";
+};
+

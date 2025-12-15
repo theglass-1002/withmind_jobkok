@@ -161,7 +161,7 @@ export default function M_JobDetail() {
                 <div className="job-detail__company-logo">
                   <img src={withmind_logo80} alt="" /></div>
                 <div className="job-detail__company-desc">
-                  <span className="job-detail__title">프론트엔드 개발자</span>
+                  <span className="job-detail__title">프로젝트 기획자</span>
                   <span className="job-detail__company-meta">위드마인드ㆍ서울</span>
                 </div>
               </div>
@@ -177,7 +177,7 @@ export default function M_JobDetail() {
               <div className="job-detail__ai-item">
                 <span className="job-detail__ai-term">분석 요약</span>
                 <span className="job-detail__ai-desc">
-                  홍길동 지원자는 Jetpack, Firebase, Kotlin 기술 경험을 보유하고 있으며, 모바일 앱 개발 분야에 대한 높은 이해도를 보여줍니다.
+                  정유리 지원자는 Jetpack, Firebase, Kotlin 기술 경험을 보유하고 있으며, 모바일 앱 개발 분야에 대한 높은 이해도를 보여줍니다.
                 </span>
               </div>
 

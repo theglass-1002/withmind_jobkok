@@ -32,7 +32,7 @@ export default function MyPageSideMenu() {
       <aside className="mypage__sidebar" aria-label="마이페이지 메뉴">
               <nav className="sidemenu">
                 <div className="user_info">
-                    <span className="user_name">홍길동 님</span>
+                    <span className="user_name">정유리 님</span>
                     <div className="user_contact">
                     <span>hong1234@withmind.net</span>
                     <span>010-1234-5678</span>

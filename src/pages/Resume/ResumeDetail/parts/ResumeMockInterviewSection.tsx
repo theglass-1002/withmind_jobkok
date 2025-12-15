@@ -2,7 +2,7 @@
 import React from "react";
 
 type MockReportItem = {
-  title: string;        // 예: "82점ㆍ프론트엔드 개발자ㆍ25.01.01 [...]"
+  title: string;        // 예: "82점ㆍ프로젝트 기획자ㆍ25.01.01 [...]"
   iconSrc?: string;     // 없으면 defaultIcon 사용
 };
 

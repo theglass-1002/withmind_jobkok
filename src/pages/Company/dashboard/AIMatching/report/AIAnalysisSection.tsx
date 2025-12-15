@@ -27,7 +27,7 @@ const mockJobs = [
     logoSrc: test_company_logo,
     company: "위드마인드",
     sourceLogoSrc: ic_saramin_18,
-    role: "프론트엔드 개발자",
+    role: "프로젝트 기획자",
     isBookmarked: true,
     matchPercent: 70,
     matchIconSrc: ic_star_green_18,
@@ -137,12 +137,12 @@ export default function AIAnalysisSection() {
     <div className="mock-analysis__inner page-summary">
       <MockAnalysisHeader
         title="분석결과"
-        date="2025.01.01 00:00"
+        date="2025.12.10 00:00"
         status="진행 완료"
         activeTab={activeTab} 
         metaRows={[
           [
-            { key: "이름", value: "홍길동" },
+            { key: "이름", value: "정유리" },
             { key: "아이디", value: "abc" },
           ],
           [
@@ -231,7 +231,7 @@ export default function AIAnalysisSection() {
               }}
               categorySummary={{
                 left: {
-                  scoreTitle: "홍길동님의 점수",
+                  scoreTitle: "정유리님의 점수",
                   scores: { attitude: 92, voice: 80, tension: 10, competence: 30 },
                   RadarChartComponent: KpiRadarChart,
                 },
@@ -274,14 +274,14 @@ export default function AIAnalysisSection() {
                   label: "강점",
                   tags: ["효과적 의견 교환", "타인에 대한 신뢰"],
                   description:
-                    "홍길동님의 강점으로 두드러지는 점은 효과적인 의견 교환과 타인에 대한 신뢰입니다.",
+                    "정유리님의 강점으로 두드러지는 점은 효과적인 의견 교환과 타인에 대한 신뢰입니다.",
                 },
                 weakness: {
                   iconSrc: ic_weakness_circle_24,
                   label: "약점",
                   tags: ["의사소통 기술 활용", "타인 이해"],
                   description:
-                    "홍길동님은 효과적 의견교환 및 타인에 대한 신뢰가 다소 부족합니다.",
+                    "정유리님은 효과적 의견교환 및 타인에 대한 신뢰가 다소 부족합니다.",
                 },
               }}
             />

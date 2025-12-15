@@ -1,4 +1,3 @@
-// src/pages/MockInterview/MockInterviewLive.tsx
 import React, { useEffect, useRef, useState } from "react";
 import "./MockInterviewLive.css";
 import SettingsSidebar from "@/pages/MockInterview/MockSettings/components/SettingsSidebar";
@@ -7,11 +6,33 @@ import LiveThinkingSection from "@/pages/MockInterview/MockInterviewLive/compone
 import LiveAnswerSection from "@/pages/MockInterview/MockInterviewLive/components/LiveAnswerSection";
 
 const THINKING_SECONDS = 15;
-
 type Phase = "thinking" | "answering";
+
+const QUESTIONS = [
+  // 1. 자기소개 및 지원 동기
+  { stage: "자기소개 및 지원 동기", question: "1분 동안 본인을 간단히 소개해 주세요." },
+  { stage: "자기소개 및 지원 동기", question: "위드마인드에 지원하게 된 동기는 무엇인가요?" },
+  { stage: "자기소개 및 지원 동기", question: "지원한 직무를 선택하게 된 계기는 무엇인가요?" },
+
+  // 2. 직무 질문
+  { stage: "직무 질문", question: "서비스 기획에서 가장 중요하다고 생각하는 역량은 무엇인가요?" },
+  { stage: "직무 질문", question: "요구사항을 정리하고 우선순위를 정할 때 어떤 기준을 사용하나요?" },
+  { stage: "직무 질문", question: "기획 과정에서 개발자·디자이너와 의견이 다를 때 어떻게 조율하나요?" },
+
+  // 3. 이력서 기반 질문
+  { stage: "이력서 기반 질문", question: "이력서에 작성한 프로젝트 중 가장 기억에 남는 경험은 무엇인가요?" },
+  { stage: "이력서 기반 질문", question: "해당 프로젝트에서 본인이 맡았던 역할과 기여도를 설명해 주세요." },
+  { stage: "이력서 기반 질문", question: "프로젝트 진행 중 가장 어려웠던 점과 이를 해결한 방법은 무엇이었나요?" },
+
+  // 4. 채용 공고 기반 질문
+  { stage: "채용 공고 기반 질문", question: "해당 채용 공고에서 가장 중요하다고 생각한 요구사항은 무엇인가요?" },
+  { stage: "채용 공고 기반 질문", question: "우리 팀에 합류한다면 어떤 부분에서 빠르게 기여할 수 있을까요?" },
+  { stage: "채용 공고 기반 질문", question: "입사 후 3개월 동안 달성하고 싶은 목표는 무엇인가요?" },
+] as const;
 
 export default function MockInterviewLive() {
   const [phase, setPhase] = useState<Phase>("thinking");
+  const [qIndex, setQIndex] = useState(0);
 
   const [timeLeft, setTimeLeft] = useState(THINKING_SECONDS);
   const [running, setRunning] = useState(true);
@@ -19,6 +40,8 @@ export default function MockInterviewLive() {
   const startTsRef = useRef<number>(0);
 
   const progress = Math.min(1, Math.max(0, (THINKING_SECONDS - timeLeft) / THINKING_SECONDS));
+  const current = QUESTIONS[qIndex];
+  const isLast = qIndex === QUESTIONS.length - 1;
 
   useEffect(() => {
     if (phase !== "thinking" || !running) return;
@@ -36,7 +59,7 @@ export default function MockInterviewLive() {
       } else {
         rafRef.current = null;
         setRunning(false);
-        setPhase("answering"); // ① 15초 종료 → 답변시간으로 전환
+        setPhase("answering");
       }
     };
 
@@ -57,12 +80,18 @@ export default function MockInterviewLive() {
   };
 
   const handleStartAnswer = () => {
-    setPhase("answering"); // ② ‘답변 시작’ 클릭 → 답변시간으로 전환
+    setPhase("answering");
   };
 
+  // ✅ 답변 종료 → 다음 질문으로
   const handleAnswerEnd = () => {
-    // 답변 종료 후의 다음 동작을 여기서 처리 (예: 다음 질문으로, 결과 저장 등)
-    // 예시: 다음 질문의 생각시간으로 다시 시작
+    const last = qIndex >= QUESTIONS.length - 1;
+    if (last) {
+      // 마지막 질문은 LiveAnswerSection에서 완료 다이얼로그 처리
+      return;
+    }
+
+    setQIndex((prev) => prev + 1);
     handleThinkingRestart();
   };
 
@@ -72,8 +101,8 @@ export default function MockInterviewLive() {
 
       {phase === "thinking" && (
         <LiveThinkingSection
-          title="자기소개 및 지원 동기ㆍ질문 1"
-          question="위드마인드에 지원한 동기는 무엇입니까?"
+          title={`${current.stage}ㆍ질문 ${qIndex + 1}`}
+          question={current.question}
           timeLeft={timeLeft}
           progress={progress}
           running={running}
@@ -85,6 +114,12 @@ export default function MockInterviewLive() {
 
       {phase === "answering" && (
         <LiveAnswerSection
+          onEnd={() => {
+            // 답변 끝나면 다음 질문으로 넘어가고, UI를 다시 thinking으로
+            setPhase("thinking");
+            handleAnswerEnd();
+          }}
+          isLast={isLast}
         />
       )}
 

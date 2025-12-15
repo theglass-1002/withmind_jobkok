@@ -29,7 +29,7 @@ export default function TensionContent({
   gradeLabel = "목소리 톤 등급",
   analysisTitle = "목소리 톤 분석",
   selectedGrade = "보통",
-  analysisText = <>전체 평균과 비교했을 때, 홍길동님의 목소리 톤은 적절합니다.</>,
+  analysisText = <>전체 평균과 비교했을 때, 정유리님의 목소리 톤은 적절합니다.</>,
   highlight = <>평균 톤 '205 Hz', 변동폭 '중간', 안정성 '우수'</>,
   headers = ["", "낮은 저음", "저음", "중간", "고음", "높은 고음"],
   rows = [
@@ -48,7 +48,7 @@ export default function TensionContent({
          <div className="detail-analysis__tension-header">
          <span className="detail-analysis__metric-grade-label">
             <img src={ic_timeline_gray600_20} alt="" />
-              홍길동님의 응답 긴장도
+              정유리님의 응답 긴장도
             </span>
             <span className="detail-analysis__tension-summary">
             질문 5에서 가장 긴장하였고, 질문 2에서 가장 긴장도가 낮았던 것으로 확인됩니다.</span>
