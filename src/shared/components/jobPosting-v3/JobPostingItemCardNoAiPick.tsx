@@ -17,6 +17,8 @@ import {
   getLocationLabel,
   type JobItem,
 } from "@/api/job/job.types";
+import { toggleJobFavorite } from "@/api/job/job.api";
+import { logout } from "@/api/auth.api";
 
 const DEFAULT_SUCCESS_MESSAGE = "지원 정보가 반영되었습니다.";
 const DEFAULT_INFO_MESSAGE = "기록을 해제했어요.";
@@ -56,11 +58,38 @@ export default function JobPostingItemCardNoAiPick({
     navigate(`/jobs/${job.id}?title=${encodeURIComponent(job.companyName ?? "")}`);
   };
 
-  const handleBookmarkToggle = (e: React.MouseEvent) => {
+  const handleBookmarkToggle = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    setBookMark((prev) => (prev === 0 ? 1 : 0));
-    // TODO: 북마크 API 호출 자리
+    if (!job) return;
+  
+    const prev = bookMark;                 // 0 | 1
+    const isFavorite = prev === 1;         // 현재 즐겨찾기 여부
+    const next: 0 | 1 = isFavorite ? 0 : 1;
+  
+    try {
+      // ✅ UI 먼저 반영 (optimistic)
+      setBookMark(next);
+  
+      // ✅ 서버 반영: 현재가 favorite면 삭제, 아니면 추가
+      await toggleJobFavorite(job.id, isFavorite);
+  
+      toast.success(next === 1 ? "즐겨찾기에 추가되었습니다." : "즐겨찾기가 해제되었습니다.");
+    } catch (e: any) {
+      console.error(e);
+  
+      // 실패 시 롤백
+      setBookMark(prev);
+  
+      if (e?.code === 999) {
+        logout();
+        navigate("/login");
+        return;
+      }
+  
+      toast.error("즐겨찾기 처리 중 오류가 발생했습니다.");
+    }
   };
+  
 
   const handleRecordAsApplied = (e: React.MouseEvent, next: 0 | 1) => {
     e.stopPropagation();

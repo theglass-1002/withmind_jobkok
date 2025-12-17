@@ -1,7 +1,5 @@
-// src/pages/Resume/ResumeCreate/SoftSkillsSection/SoftSkillsSection.tsx
 import React, { useMemo, useState, useRef, useEffect } from "react";
 import "./SoftSkillsSection.css";
-import roles from "@/data/desired_roles.json";
 import { toast } from "react-toastify";
 
 import ic_search_gray900_20 from "@/assets/icons/size20/ic_search_gray900_20.png";
@@ -13,16 +11,17 @@ import ic_close_gray500_24 from "@/assets/icons/size24/ic_close_gray500_24.png";
 import SearchField from "@/shared/components/search/SearchField";
 import AISuggestArea from "@/pages/Resume/ResumeAISuggest";
 
-type RoleItem = { group: string; role: string };
-const MAX_SELECTED = 30;
+import { fetchSoftSkillAutoComplete } from "@/api/resume/resume.api";
+import type { SkillAutoCompleteItem } from "@/api/resume/resume.types";
 
-// 부모로 값/AI 상태 주고받는 props
+const MAX_SELECTED = 30;
+const MIN_LENGTH = 1;
+
 interface SoftSkillsSectionProps {
-  value?: string[]; // edit 시 초기 소프트 스킬 목록
-  onChange?: (skills: string[]) => void; // 선택된 소프트 스킬 텍스트 배열
+  value?: string[];
+  onChange?: (skills: string[]) => void;
   isEdit?: boolean;
 
-  // 🔥 AI 소프트 스킬 추천 (부모에서 내려줌 - HardSkillSection / DesiredRoleSection과 동일 패턴)
   aiShow?: boolean;
   aiTags?: string[];
   onClickAISuggest?: () => void;
@@ -42,7 +41,10 @@ export default function SoftSkillsSection({
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
 
-  // 내부 선택 상태: "그룹|스킬명" 형태로 저장
+  // ✅ API 자동완성 결과
+  const [items, setItems] = useState<SkillAutoCompleteItem[]>([]);
+
+  // 내부 선택 상태: "직접 입력|스킬명"
   const [selected, setSelected] = useState<Set<string>>(
     () => new Set(value.map((s) => `직접 입력|${s}`))
   );
@@ -56,10 +58,10 @@ export default function SoftSkillsSection({
     setIsAdding(false);
     setOpen(false);
     setQ("");
-    // 선택된 소프트 스킬은 유지 (edit에서 초기값 날리는 거 방지)
+    setItems([]);
   };
 
-  // 🔥 edit 모드일 때만, 부모 value(softSkills) 로 한 번만 selected 세팅
+  // 🔥 edit 모드에서 한번만 value -> selected 동기화
   useEffect(() => {
     if (!isEdit) return;
     if (!value || value.length === 0) return;
@@ -70,45 +72,14 @@ export default function SoftSkillsSection({
     didSyncFromValueRef.current = true;
   }, [isEdit, value]);
 
-  // 선택된 소프트 스킬 → 부모로 전달
+  // 선택값 -> 부모 전달
   useEffect(() => {
     const skills = Array.from(selected).map((key) => key.split("|")[1]);
     onChange?.(skills);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected]);
 
-  // roles JSON → 평탄화 (직무/스킬 후보 재활용)
-  const flat: RoleItem[] = useMemo(() => {
-    const cats = (roles as any)?.categories as Array<{
-      name: string;
-      all?: string;
-      roles: string[];
-    }>;
-    if (!Array.isArray(cats)) return [];
-    const out: RoleItem[] = [];
-    for (const c of cats) {
-      if (c.all) out.push({ group: c.name, role: c.all });
-      for (const r of c.roles ?? []) out.push({ group: c.name, role: r });
-    }
-    return out;
-  }, []);
-
-  // 필터링
-  const filtered = useMemo(() => {
-    const k = (q ?? "").trim().toLowerCase();
-    if (!k) return flat.slice(0, 20);
-    const toStr = (v: unknown) =>
-      typeof v === "string" ? v : String(v ?? "");
-    return flat
-      .filter((i) => {
-        const role = toStr(i.role).toLowerCase();
-        const group = toStr(i.group).toLowerCase();
-        return role.includes(k) || group.includes(k);
-      })
-      .slice(0, 50);
-  }, [q, flat]);
-
-  // 외부 클릭 시 닫기
+  // 바깥 클릭 시 닫기
   useEffect(() => {
     if (!open) return;
     const onPointer = (e: PointerEvent) => {
@@ -118,6 +89,28 @@ export default function SoftSkillsSection({
     document.addEventListener("pointerdown", onPointer);
     return () => document.removeEventListener("pointerdown", onPointer);
   }, [open]);
+
+  // ✅ q 바뀌면 자동완성 API 호출
+  useEffect(() => {
+    const keyword = (q ?? "").trim();
+    if (!open) return;
+
+    if (keyword.length < MIN_LENGTH) {
+      setItems([]);
+      return;
+    }
+
+    (async () => {
+      try {
+        console.log("✅ Soft 검색", keyword);
+        const data = await fetchSoftSkillAutoComplete(keyword);
+        setItems(Array.isArray(data) ? data : []);
+      } catch (e) {
+        console.error("❌ soft auto-complete error:", e);
+        setItems([]);
+      }
+    })();
+  }, [q, open]);
 
   // 하이라이트
   const highlight = (text: string, keyword: string) => {
@@ -138,7 +131,7 @@ export default function SoftSkillsSection({
     );
   };
 
-  // 칩 뷰용
+  // 칩 리스트
   const chips = useMemo(() => {
     return Array.from(selected).map((key) => {
       const [group, role] = key.split("|");
@@ -154,10 +147,12 @@ export default function SoftSkillsSection({
     });
   };
 
-  const addRole = (item: RoleItem | string) => {
-    const roleText = typeof item === "string" ? item.trim() : item.role;
+  // ✅ 자동완성 아이템 / 직접입력 모두 추가
+  const addRole = (item: SkillAutoCompleteItem | string) => {
+    const roleText = typeof item === "string" ? item.trim() : item.name;
     if (!roleText) return;
-    const group = typeof item === "string" ? "직접 입력" : item.group;
+
+    const group = "직접 입력";
     const key = `${group}|${roleText}`;
 
     setSelected((prev) => {
@@ -175,6 +170,7 @@ export default function SoftSkillsSection({
 
     setQ("");
     setOpen(false);
+    setItems([]);
   };
 
   return (
@@ -185,33 +181,27 @@ export default function SoftSkillsSection({
             <div className="resume-create-page__section-title__heading">
               소프트 스킬
               <span className="tooltip tooltip--top">
-                <img
-                  className="tooltip__trigger"
-                  src={ic_error_gray500_20}
-                  alt="툴팁"
-                />
+                <img className="tooltip__trigger" src={ic_error_gray500_20} alt="툴팁" />
                 <div className="tooltip__content" role="tooltip">
                   <span className="tooltip__title">소프트 스킬이란?</span>
                   <span className="tooltip__desc">
-                    업무를 효과적으로 수행하고 다른 사람들과 협력하는 데
-                    필요한 개인의 역량, 특성, 태도 등을 의미합니다.
+                    협업, 커뮤니케이션, 문제 해결 등 업무를 효과적으로 수행하는 데 필요한 역량을 의미합니다.
                   </span>
                 </div>
               </span>
             </div>
           </div>
+
           {isAdding ? (
             <img src={ic_close_gray500_24} alt="닫기" onClick={stopAdd} />
           ) : (
-            <span
-              className="resume-section-title__action--import"
-              onClick={startAdd}
-            >
+            <span className="resume-section-title__action--import" onClick={startAdd}>
               <img src={ic_add_purple_20} alt="" />
               추가
             </span>
           )}
         </div>
+
         {isAdding && (
           <span className="resume-create-page__hint">
             최대 {MAX_SELECTED}개까지 추가 가능합니다.
@@ -235,19 +225,18 @@ export default function SoftSkillsSection({
         </div>
       )}
 
-      <div
-        className={`resume-create-page__section-body ${
-          isAdding ? "" : "empty"
-        }`}
-      >
+      <div className={`resume-create-page__section-body ${isAdding ? "" : "empty"}`}>
         {isAdding ? (
           <>
             <SearchField
               className="resume-search"
               id="soft-skill-search"
               value={q}
-              placeholder="보유 소프트 스킬을 입력해 주세요. (ex. 팀워크, 리더십)"
-              onChange={setQ}
+              placeholder="보유 소프트 스킬을 입력해 주세요. (ex. 커뮤니케이션, 협업)"
+              onChange={(v) => {
+                setQ(v);
+                setOpen(true);
+              }}
               onSubmit={() => {}}
               onFocus={() => setOpen(true)}
               leftIconSrc={ic_search_gray900_20}
@@ -259,22 +248,30 @@ export default function SoftSkillsSection({
               <div className="soft-skills__dropdown" ref={menuRef}>
                 <div className="soft-skills__menu" role="listbox">
                   <ul className="soft-skills__list">
-                    {filtered.map((item, idx) => (
-                      <li
-                        key={`${item.group}-${item.role}-${idx}`}
-                        className="soft-skills__option"
-                        role="option"
-                        onClick={() => addRole(item)}
-                      >
-                        <span className="soft-skills__option-role">
-                          {highlight(item.role, q)}
-                        </span>
+                    {items.length > 0 &&
+                      items.map((item) => (
+                        <li
+                          key={item.id}
+                          className="soft-skills__option"
+                          role="option"
+                          onClick={() => addRole(item)}
+                        >
+                          <span className="soft-skills__option-role">
+                            {highlight(item.name, q)}
+                          </span>
+                        </li>
+                      ))}
+
+                    {q.trim().length >= MIN_LENGTH && items.length === 0 && (
+                      <li className="soft-skills__option" aria-disabled="true">
+                        추천 결과가 없습니다.
                       </li>
-                    ))}
+                    )}
                   </ul>
                 </div>
 
-                {q && (
+                {/* ✅ 직접 등록하기 (HardSkillSection에는 없던 UX, Soft에만 넣고 싶으면 유지) */}
+                {q.trim().length >= MIN_LENGTH && (
                   <div
                     className="soft-skills__menu-footer"
                     onClick={() => addRole(q)}
@@ -296,11 +293,11 @@ export default function SoftSkillsSection({
               onClickSuggest={onClickAISuggest}
               onClose={onCloseAISuggest}
               onPick={(tag) => addRole(tag)}
-              wrapperClassName="resume-suggest__hardskill"
+              wrapperClassName="resume-suggest__softskill"
               variant="chips"
-              hintText="더 정확한 하드 스킬 추천을 위해 (희망 직무와 경력) 항목을 먼저 입력해 주세요."
+              hintText="더 정확한 소프트 스킬 추천을 위해 (희망 직무와 경력) 항목을 먼저 입력해 주세요."
               triggerLabel="AI 소프트 스킬 추천"
-              suggestResultTitle="경력 및 직무 기반의 AI 추천 하드 스킬입니다."
+              suggestResultTitle="경력 및 직무 기반의 AI 추천 소프트 스킬입니다."
             />
           </>
         ) : (

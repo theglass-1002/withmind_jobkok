@@ -62,6 +62,14 @@ export async function createResume(
   return res.data;
 }
 
+export async function updateResume(
+  resumeIdx: number,
+  payload: CreateResumeRequest
+): Promise<ApiResponse> {
+  const res = await instance.put<ApiResponse>(`/api/resume/update/${resumeIdx}`, payload);
+  return res.data; // ✅ { code: 200, msg: "success" }
+}
+
 export async function fetchResumeDetail(
   resumeIdx: number
 ): Promise<ResumeDetailResponse> {

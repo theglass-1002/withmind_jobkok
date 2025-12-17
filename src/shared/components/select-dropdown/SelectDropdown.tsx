@@ -51,8 +51,7 @@ export default function SelectDropdown({
           ${isOpen ? 'open' : ''} 
           ${errorText||errorIconSrc ? 'error' : ''} 
           ${disabled ? 'disabled' : ''}`}
-        onClick={() => !disabled && setIsOpen(!isOpen)}
-      >
+        onClick={() => !disabled && setIsOpen(!isOpen)}>
         <span className="select-dropdown__placeholder">
           {selectedOption?.label || placeholder}
         </span>

@@ -46,7 +46,7 @@ import {
   fetchResumePositionSuggestions,
   fetchResumeHardSkillSuggestions,
   fetchResumeSoftSkillSuggestions,
-  fetchResumeSelfIntro, // ✅ 자기소개 AI
+  fetchResumeSelfIntro, //
 } from "@/api/resume/resume.api";
 import {
   CreateResumeRequest,
@@ -1168,6 +1168,7 @@ export default function ResumeCreate() {
       console.log("✅ 이력서 등록 성공:", result);
       console.log("✅ 이력서 등록 Payload:", payload);
       toast.success("이력서가 등록되었습니다!");
+      navigate(`/resumes/${result}`);
       setIsLoading(false);
     } catch (error) {
       console.error("❌ 이력서 등록 실패:", error);
@@ -1197,7 +1198,8 @@ export default function ResumeCreate() {
 
       const payload: CreateResumeRequest = {
         userIdx: Storage.getUserIdx(),
-        isDefault: isDefaultResume ? 1 : 0,
+        isDefault: 0,
+        // isDefault: isDefaultResume ? 1 : 0,
         temp: "Y",
         title: form.title,
         name: form.basic.name,
@@ -1326,12 +1328,16 @@ export default function ResumeCreate() {
       };
 
       console.log("✅ 이력서 임시 저장 payload:", payload);
+      const result = await createResume(payload);
+      console.log("✅ 이력서 임시저장 성공:", result);
       setIsLoading(false);
       toast.success("임시 저장되었습니다.");
+      navigate(`/resumes/`);
     } catch (error) {
       setIsLoading(false);
       console.error("❌ 이력서 임시 저장 실패:", error);
       toast.error("이력서 등록 중 오류가 발생했습니다.");
+      navigate(`/resumes/`);
     }
   };
 

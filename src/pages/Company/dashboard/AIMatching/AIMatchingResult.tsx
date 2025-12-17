@@ -65,25 +65,25 @@ export default function AIMatchingResult() {
             <div className="talent-list__col talent-list__col--name"><span>정유리</span></div>
             
             <div className="talent-list__col talent-list__col--info">
-                <span className="talent-list__summary">30대 초반ㆍ경력 5년 8개월</span>
+                <span className="talent-list__summary">20대 후반ㆍ경력 2년</span>
                 <div className="talent-list__detail-item">
                     <span className="talent-list__detail-label">학력 사항</span>
-                    <span className="talent-list__detail-value">서울대학교 컴퓨터공학과</span>
+                    <span className="talent-list__detail-value">경기대학교 경영학과</span>
                 </div>
                 
                 <div className="talent-list__detail-item">
                     <span className="talent-list__detail-label">희망 직무</span>
-                    <span className="talent-list__detail-value">웹 개발, 기술 기획, 웹 기획, UX 디자인</span>
+                    <span className="talent-list__detail-value">기술 기획, 웹 기획, UX 디자인</span>
                 </div>
             </div>
             
             <div className="talent-list__col talent-list__col--ai-status">
                 <span className="talent-list__status-text on">공개</span></div>
             <div className="talent-list__col talent-list__col--rate"><span className="talent-list__rate-value">92%</span></div>
-            <div className="talent-list__col talent-list__col--date"><span className="talent-list__date-value">2025.02.10</span></div>
+            <div className="talent-list__col talent-list__col--date"><span className="talent-list__date-value">2025.12.10</span></div>
             <div className="talent-list__col talent-list__col--action">
              <button className='default_btn_white'
-             onClick={()=>{navigate('/company/ai-matching/report')}}
+             onClick={()=>{navigate('/company/ai-matching/report/1')}}
              >자세히 보기 <img src={ic_arrow_up_right_gray900_20} alt="" /></button>
             </div>
         </div>
@@ -99,17 +99,17 @@ export default function AIMatchingResult() {
                 
                 <div className="talent-list__detail-item">
                     <span className="talent-list__detail-label">희망 직무</span>
-                    <span className="talent-list__detail-value">웹 개발, 기술 기획, 웹 기획, UX 디자인</span>
+                    <span className="talent-list__detail-value">서버 개발, 백앤드</span>
                 </div>
             </div>
             
             <div className="talent-list__col talent-list__col--ai-status">
             <span className="talent-list__status-text on">공개</span></div>
-            <div className="talent-list__col talent-list__col--rate"><span className="talent-list__rate-value">92%</span></div>
-            <div className="talent-list__col talent-list__col--date"><span className="talent-list__date-value">2025.02.10</span></div>
+            <div className="talent-list__col talent-list__col--rate"><span className="talent-list__rate-value">60%</span></div>
+            <div className="talent-list__col talent-list__col--date"><span className="talent-list__date-value">2025.11.13</span></div>
             <div className="talent-list__col talent-list__col--action">
              <button className='default_btn_white'
-             onClick={()=>{navigate('/company/ai-matching/report')}}
+             onClick={()=>{navigate('/company/ai-matching/report/2')}}
              >자세히 보기 <img src={ic_arrow_up_right_gray900_20} alt="" /></button>
             </div>
         </div>
@@ -117,25 +117,25 @@ export default function AIMatchingResult() {
             <div className="talent-list__col talent-list__col--name"><span>임서하</span></div>
             
             <div className="talent-list__col talent-list__col--info">
-                <span className="talent-list__summary">30대 초반ㆍ경력 5년 8개월</span>
+                <span className="talent-list__summary">30대 초반ㆍ경력 3년 1개월</span>
                 <div className="talent-list__detail-item">
                     <span className="talent-list__detail-label">학력 사항</span>
-                    <span className="talent-list__detail-value">서울대학교 컴퓨터공학과</span>
+                    <span className="talent-list__detail-value">가천대학교 컴퓨터공학과</span>
                 </div>
                 
                 <div className="talent-list__detail-item">
                     <span className="talent-list__detail-label">희망 직무</span>
-                    <span className="talent-list__detail-value">웹 개발, 기술 기획, 웹 기획, UX 디자인</span>
+                    <span className="talent-list__detail-value">웹 개발, 프론트엔드</span>
                 </div>
             </div>
             
             <div className="talent-list__col talent-list__col--ai-status">
             <span className="talent-list__status-text on">공개</span></div>
-            <div className="talent-list__col talent-list__col--rate"><span className="talent-list__rate-value">92%</span></div>
-            <div className="talent-list__col talent-list__col--date"><span className="talent-list__date-value">2025.02.10</span></div>
+            <div className="talent-list__col talent-list__col--rate"><span className="talent-list__rate-value">80%</span></div>
+            <div className="talent-list__col talent-list__col--date"><span className="talent-list__date-value">2025.12.05</span></div>
             <div className="talent-list__col talent-list__col--action">
              <button className='default_btn_white'
-             onClick={()=>{navigate('/company/ai-matching/report')}}
+             onClick={()=>{navigate('/company/ai-matching/report/3')}}
              >자세히 보기 <img src={ic_arrow_up_right_gray900_20} alt="" /></button>
             </div>
         </div>

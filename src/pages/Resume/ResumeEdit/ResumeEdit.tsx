@@ -51,6 +51,7 @@ import {
   fetchResumeHardSkillSuggestions,
   fetchResumeSoftSkillSuggestions,
   fetchResumeSelfIntro,
+  updateResume,
 } from "@/api/resume/resume.api";
 import {
   CreateResumeRequest,
@@ -110,6 +111,19 @@ export type AwardsCertErrors = {
 export type PortfolioErrors = {
   file?: string;
   url?: string;
+};
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 유틸리티: CloudFront URL에서 순수 S3 경로 추출
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const extractS3Path = (url: string): string => {
+  if (!url) return "";
+  // CloudFront URL이면 순수 경로만 추출
+  if (url.includes(".cloudfront.net/")) {
+    return url.split(".cloudfront.net/")[1];
+  }
+  // 이미 순수 경로면 그대로 반환
+  return url;
 };
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -216,9 +230,13 @@ const mapDetailToFormState = (data: ResumeDetailResponse): FormState => {
       url: p.url ?? "",
       note: p.description ?? "",
       file: null,
-      filePath: p.filePath ?? null,
+      filePath: p.filePath ? extractS3Path(p.filePath) : null, // 🔥 CloudFront URL → 순수 경로
       fileIdx: p.fileIdx ?? null,
-    })),
+      // 🔥 백엔드 재전송을 위해 파일 메타 정보 저장
+      sizeBytes: (p as any).sizeBytes ?? 0,
+      contentType: (p as any).contentType ?? "",
+      storedName: (p as any).storedName ?? "",
+    } as any)),
     selfIntro:
       (data.selfIntroList && data.selfIntroList[0]?.content) || "",
   };
@@ -342,9 +360,6 @@ export default function ResumeEdit() {
     portfolios: [],
   });
 
-  // 🔥 포트폴리오 원본 스냅샷
-  const [initialPortfolios, setInitialPortfolios] = useState<PortfolioDocItem[]>([]);
-
   // 🔥 AI 제목 추천 상태
   const [showTitleSuggest, setShowTitleSuggest] = useState(false);
   const [titleSuggestions, setTitleSuggestions] = useState<string[]>([]);
@@ -396,7 +411,6 @@ export default function ResumeEdit() {
         const mapped = mapDetailToFormState(data);
         console.log("📌 mapped form", mapped);
         setForm(mapped);
-        setInitialPortfolios(mapped.portfolios); // 원본 포폴 저장
         setIsDefaultResume(data.isDefault);
         setIsReady(true);
       } catch (err: any) {
@@ -421,7 +435,6 @@ export default function ResumeEdit() {
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // AI 제목 추천 / 희망 직무 / 하드 / 소프트 / 자기소개
-  // (위에서 만든 핸들러들 그대로 – 이미 있음)
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   const handleClickTitleSuggest = async () => {
     try {
@@ -953,114 +966,63 @@ export default function ResumeEdit() {
   };
 
   const handlePortfolioFilesSubmit = async (): Promise<
-  Array<{
-    originalItem: PortfolioDocItem;
-    uploadedFile?: {
-      filePath: string;
-      originalName: string;
-      storedName: string;
-      sizeBytes: number;
-      contentType: string;
-    };
-  }>
-> => {
-  try {
-    const fileItems = form.portfolios.filter(
-      (p) => p.source === "file" && p.file
-    );
-    console.log("📤 업로드 대상 fileItems", fileItems);
-    if (fileItems.length === 0) return [];
-
-    const uploadPromises = fileItems.map(async (item) => {
-      if (!item.file) {
-        // 🔥 여기서도 uploadedFile 안 넘기는 대신 타입은 그대로 맞음
-        return { originalItem: item } as {
-          originalItem: PortfolioDocItem;
-          uploadedFile?: {
-            filePath: string;
-            originalName: string;
-            storedName: string;
-            sizeBytes: number;
-            contentType: string;
-          };
-        };
-      }
-
-      const { s3_key, finalUrl, uniqueFileName, originalFileName } =
-        await uploadPhotoFile(item.file, "resume/portfolio");
-
-      const uploaded = {
-        originalItem: item,
-        uploadedFile: {
-          filePath: s3_key,
-          originalName: originalFileName,
-          storedName: uniqueFileName,
-          sizeBytes: item.file.size,
-          contentType: item.file.type,
-        },
+    Array<{
+      originalItem: PortfolioDocItem;
+      uploadedFile?: {
+        filePath: string;
+        originalName: string;
+        storedName: string;
+        sizeBytes: number;
+        contentType: string;
       };
-      console.log("📤 업로드 완료", uploaded);
-      return uploaded;
-    });
+    }>
+  > => {
+    try {
+      const fileItems = form.portfolios.filter(
+        (p) => p.source === "file" && p.file
+      );
+      console.log("📤 업로드 대상 fileItems", fileItems);
+      if (fileItems.length === 0) return [];
 
-    const results = await Promise.all(uploadPromises);
-    console.log("📤 handlePortfolioFilesSubmit 결과", results);
-    return results;
-  } catch (error) {
-    console.error("❌ 포트폴리오 파일 업로드 실패:", error);
-    toast.error("포트폴리오 파일 업로드 중 오류가 발생했습니다.");
-    throw error;
-  }
-};
+      const uploadPromises = fileItems.map(async (item) => {
+        if (!item.file) {
+          return { originalItem: item } as {
+            originalItem: PortfolioDocItem;
+            uploadedFile?: {
+              filePath: string;
+              originalName: string;
+              storedName: string;
+              sizeBytes: number;
+              contentType: string;
+            };
+          };
+        }
 
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 포트폴리오 변경 여부 헬퍼
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  const isSamePortfolioItem = (original?: PortfolioDocItem, current?: PortfolioDocItem) => {
-    if (!original && !current) return true;
-    if (!original || !current) return false;
+        const { s3_key, finalUrl, uniqueFileName, originalFileName } =
+          await uploadPhotoFile(item.file, "resume/portfolio");
 
-    if (original.source !== current.source) return false;
-    if ((original.title ?? "") !== (current.title ?? "")) return false;
-    if ((original.note ?? "") !== (current.note ?? "")) return false;
-
-    if (original.source === "file") {
-      // 새 파일이 올라가 있으면 무조건 변경
-      if (current.file) return false;
-      const oPath = (original.filePath ?? "").trim();
-      const cPath = (current.filePath ?? "").trim();
-      return oPath === cPath;
-    } else {
-      const oUrl = (original.url ?? "").trim();
-      const cUrl = (current.url ?? "").trim();
-      return oUrl === cUrl;
-    }
-  };
-
-  const getChangedPortfolios = (): PortfolioDocItem[] => {
-    console.log("📦 initialPortfolios (원본)", initialPortfolios);
-    console.log("📦 currentPortfolios (현재)", form.portfolios);
-
-    const changed: PortfolioDocItem[] = [];
-
-    form.portfolios.forEach((p) => {
-      const original = initialPortfolios.find((o) => o.id === p.id);
-      const same = isSamePortfolioItem(original, p);
-
-      console.log("🔍 포폴 비교", {
-        id: p.id,
-        same,
-        original,
-        current: p,
+        const uploaded = {
+          originalItem: item,
+          uploadedFile: {
+            filePath: s3_key,
+            originalName: originalFileName,
+            storedName: uniqueFileName,
+            sizeBytes: item.file.size,
+            contentType: item.file.type,
+          },
+        };
+        console.log("📤 업로드 완료", uploaded);
+        return uploaded;
       });
 
-      if (!same) {
-        changed.push(p);
-      }
-    });
-
-    console.log("✅ 변경된 포폴 only", changed);
-    return changed;
+      const results = await Promise.all(uploadPromises);
+      console.log("📤 handlePortfolioFilesSubmit 결과", results);
+      return results;
+    } catch (error) {
+      console.error("❌ 포트폴리오 파일 업로드 실패:", error);
+      toast.error("포트폴리오 파일 업로드 중 오류가 발생했습니다.");
+      throw error;
+    }
   };
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1179,12 +1141,17 @@ export default function ResumeEdit() {
         return;
       }
 
+      if (isEdit && !resumeId) {
+        toast.error("잘못된 접근입니다.");
+        return;
+      }
+
       setIsLoading(true);
+
       const profilePhotoFile = await handleFileSubmit();
       const portfolioFilesResults = await handlePortfolioFilesSubmit();
 
-      const changedPortfolios = getChangedPortfolios();
-      console.log("🚀 handleSubmit - changedPortfolios", changedPortfolios);
+      console.log("🚀 handleSubmit - 전체 portfolios", form.portfolios);
 
       const payload: CreateResumeRequest = {
         userIdx: Storage.getUserIdx(),
@@ -1233,9 +1200,7 @@ export default function ResumeEdit() {
               activities: form.activities.map((act) => ({
                 category: act.activityType ?? "교내활동",
                 activityTitle: act.activityName,
-                startYm: act.startDate
-                  ? normalizeYm(act.startDate)
-                  : "1999-09-09",
+                startYm: act.startDate ? normalizeYm(act.startDate) : "1999-09-09",
                 endYm: act.endDate ? normalizeYm(act.endDate) : "1999-09-09",
                 description: act.summary,
                 linkUrl: "https://github.com/user",
@@ -1258,10 +1223,9 @@ export default function ResumeEdit() {
             }
           : {}),
 
-        // 🔥 포트폴리오: changedPortfolios가 있을 때만 포함
-        ...(changedPortfolios.length > 0
+        ...(form.portfolios.length > 0
           ? {
-              portfolios: changedPortfolios.map((p, idx) => {
+              portfolios: form.portfolios.map((p, idx) => {
                 if (p.source === "file") {
                   const uploadedResult = portfolioFilesResults.find(
                     (r) => r.originalItem.id === p.id
@@ -1271,10 +1235,7 @@ export default function ResumeEdit() {
                     const u = uploadedResult.uploadedFile;
                     return {
                       itemType: "FILE" as const,
-                      title:
-                        p.title ||
-                        u.originalName ||
-                        `포트폴리오 문서 ${idx + 1}`,
+                      title: u.originalName,
                       docName: u.originalName,
                       url: null,
                       fileRef: u.filePath,
@@ -1290,19 +1251,44 @@ export default function ResumeEdit() {
                     };
                   }
 
-                  // changed에 들어왔는데 새 파일이 없고 filePath만 바뀐 케이스가 있으면
-                  // 여기서는 보호 차원에서 FILE 안 보내는 게 맞는데,
-                  // 일단은 기존 로직처럼 filePath만으로 보내고, 백엔드 에러 보면 튜닝
                   if (p.filePath) {
+                    const cleanPath = extractS3Path(p.filePath); // 🔥 CloudFront URL 제거
+                    const storedName = (p as any).storedName || cleanPath.split('/').pop() || "";
+                    const sizeBytes = (p as any).sizeBytes || 1048576;
+                    const contentType = (p as any).contentType || (() => {
+                      const extension = storedName.split('.').pop()?.toLowerCase() || "";
+                      const contentTypeMap: Record<string, string> = {
+                        'pdf': 'application/pdf',
+                        'doc': 'application/msword',
+                        'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                        'xls': 'application/vnd.ms-excel',
+                        'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                        'ppt': 'application/vnd.ms-powerpoint',
+                        'pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                        'jpg': 'image/jpeg',
+                        'jpeg': 'image/jpeg',
+                        'png': 'image/png',
+                        'gif': 'image/gif',
+                        'txt': 'text/plain',
+                      };
+                      return contentTypeMap[extension] || 'application/octet-stream';
+                    })();
+                    
                     return {
                       itemType: "FILE" as const,
                       title: p.title || `포트폴리오 문서 ${idx + 1}`,
                       docName: p.title || "",
                       url: null,
-                      fileRef: p.filePath,
+                      fileRef: cleanPath, // 🔥 순수 경로 사용
                       description: p.note ?? "",
                       sortOrder: idx + 1,
-                      portfolioFile: null,
+                      portfolioFile: {
+                        filePath: cleanPath, // 🔥 순수 경로 사용
+                        originalName: p.title || storedName,
+                        storedName: storedName,
+                        sizeBytes: sizeBytes,
+                        contentType: contentType,
+                      },
                     };
                   }
                 }
@@ -1335,21 +1321,24 @@ export default function ResumeEdit() {
       };
 
       console.log("📨 최종 payload(handleSubmit)", payload);
-      const result = await createResume(payload);
-      console.log("✅ 이력서 등록/수정 성공:", result);
-      toast.success(
-        isEdit ? "이력서가 수정되었습니다!" : "이력서가 등록되었습니다!"
-      );
-      setIsLoading(false);
-      navigate(`/resumes/${resumeId}`);
+
+      const res = await updateResume(Number(resumeId), payload);
+      console.log("이력서 수정", res);
+      if (res.code === 200) {
+        setIsLoading(false);
+        toast.success("이력서가 수정되었습니다!");
+        navigate(`/resumes/${resumeId}`);
+      } else {
+        toast.error(res.msg || "이력서 수정에 실패했습니다.");
+      }
     } catch (error) {
-      console.error("❌ 이력서 등록 실패:", error);
-      toast.error("이력서 등록 중 오류가 발생했습니다.");
+      console.error("❌ 이력서 저장 실패:", error);
+      toast.error("이력서 저장 중 오류가 발생했습니다.");
+    } finally {
       setIsLoading(false);
     }
   };
 
-  
   const handleTempSave = async () => {
     try {
       setIsLoading(true);
@@ -1366,12 +1355,12 @@ export default function ResumeEdit() {
       const profilePhotoFile = await handleFileSubmit();
       const portfolioFilesResults = await handlePortfolioFilesSubmit();
 
-      const changedPortfolios = getChangedPortfolios();
-      console.log("🚀 handleTempSave - changedPortfolios", changedPortfolios);
+      console.log("🚀 handleTempSave - 전체 portfolios", form.portfolios);
 
       const payload: CreateResumeRequest = {
         userIdx: Storage.getUserIdx(),
-        isDefault: isDefaultResume ? 1 : 0,
+        isDefault: 0,
+        // isDefault: isDefaultResume ? 1 : 0,
         temp: "Y",
         title: form.title,
         name: form.basic.name,
@@ -1441,9 +1430,9 @@ export default function ResumeEdit() {
             }
           : {}),
 
-        ...(changedPortfolios.length > 0
+        ...(form.portfolios.length > 0
           ? {
-              portfolios: changedPortfolios.map((p, idx) => {
+              portfolios: form.portfolios.map((p, idx) => {
                 if (p.source === "file") {
                   const uploadedResult = portfolioFilesResults.find(
                     (r) => r.originalItem.id === p.id
@@ -1453,10 +1442,7 @@ export default function ResumeEdit() {
                     const u = uploadedResult.uploadedFile;
                     return {
                       itemType: "FILE" as const,
-                      title:
-                        p.title ||
-                        u.originalName ||
-                        `포트폴리오 문서 ${idx + 1}`,
+                      title: u.originalName,
                       docName: u.originalName,
                       url: null,
                       fileRef: u.filePath,
@@ -1473,15 +1459,43 @@ export default function ResumeEdit() {
                   }
 
                   if (p.filePath) {
+                    const cleanPath = extractS3Path(p.filePath); // 🔥 CloudFront URL 제거
+                    const storedName = (p as any).storedName || cleanPath.split('/').pop() || "";
+                    const sizeBytes = (p as any).sizeBytes || 1048576;
+                    const contentType = (p as any).contentType || (() => {
+                      const extension = storedName.split('.').pop()?.toLowerCase() || "";
+                      const contentTypeMap: Record<string, string> = {
+                        'pdf': 'application/pdf',
+                        'doc': 'application/msword',
+                        'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                        'xls': 'application/vnd.ms-excel',
+                        'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                        'ppt': 'application/vnd.ms-powerpoint',
+                        'pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                        'jpg': 'image/jpeg',
+                        'jpeg': 'image/jpeg',
+                        'png': 'image/png',
+                        'gif': 'image/gif',
+                        'txt': 'text/plain',
+                      };
+                      return contentTypeMap[extension] || 'application/octet-stream';
+                    })();
+
                     return {
                       itemType: "FILE" as const,
                       title: p.title || `포트폴리오 문서 ${idx + 1}`,
                       docName: p.title || "",
                       url: null,
-                      fileRef: p.filePath,
+                      fileRef: cleanPath, // 🔥 순수 경로 사용
                       description: p.note ?? "",
                       sortOrder: idx + 1,
-                      portfolioFile: null,
+                      portfolioFile: {
+                        filePath: cleanPath, // 🔥 순수 경로 사용
+                        originalName: p.title || storedName,
+                        storedName: storedName,
+                        sizeBytes: sizeBytes,
+                        contentType: contentType,
+                      },
                     };
                   }
                 }
@@ -1513,19 +1527,21 @@ export default function ResumeEdit() {
       };
 
       console.log("✅ 이력서 임시 저장 payload:", payload);
+      const result = await createResume(payload);
+      console.log("✅ 이력서 임시저장 성공:", result);
       setIsLoading(false);
       toast.success("임시 저장되었습니다.");
+      navigate(`/resumes/`);
     } catch (error) {
       setIsLoading(false);
       console.error("❌ 이력서 임시 저장 실패:", error);
       toast.error("이력서 등록 중 오류가 발생했습니다.");
+      navigate(`/resumes/`);
     }
   };
 
-
   const isSubmitDisabled = !form.title.trim();
 
-  // 수정 취소 버튼 핸들러들
   const handleOpenCancelModal = () => {
     setShowCancelModal(true);
   };
@@ -1540,7 +1556,6 @@ export default function ResumeEdit() {
     setShowCancelModal(false);
   };
 
-  // 상세 데이터가 아직 준비 안 됐을 때는 폼 렌더하지 않고 로딩만
   if (!isReady) {
     return (
       <div className="resume-create-page">

@@ -110,7 +110,7 @@ export default function MockAnalysisPage() {
   const [activeTab, setActiveTab] = useState<TabKey>("overview");
   const [jobs, setJobs] = useState(mockJobs);
   const location = useLocation();
-  const score = 40;
+  const score = 92;
   const tabItems: { key: TabKey; label: React.ReactNode }[] = [
     { key: "overview", label: "종합 분석" },
     { key: "detail", label: "상세 분석" },

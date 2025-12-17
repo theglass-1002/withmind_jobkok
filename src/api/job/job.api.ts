@@ -1,5 +1,5 @@
 // src/api/job/job.api.ts
-import instance from "@/api/axios.instance";
+import instance, { getAccessToken } from "@/api/axios.instance";
 import type { JobNode, JobListApiResponse, JobItem, JobDetailApiResponse, JobFavoriteResponse } from "./job.types";
 
 // 직군/직무 트리
@@ -22,7 +22,10 @@ export async function fetchJobList(
   totalPages: number;
   hasNext: boolean;
 }> {
+  //console.log(getAccessToken()?"true":"fals");
   const res = await instance.get<JobListApiResponse>("/auth/jobs", {
+
+    requiresAuth: getAccessToken()?true:false,
     params: {
       page,
       size,
@@ -50,11 +53,34 @@ export async function fetchJobDetail(
   return res.data;
 }
 
-export async function toggleJobFavorite(jobId: number): Promise<number> {
+export async function addJobFavorite(jobId: number): Promise<number> {
   const res = await instance.post<JobFavoriteResponse>(
-    `/api/jobs/${jobId}/favorite`,
+    `/api/jobs/${jobId}/favorite`
   );
-  console.log('즐겨찾기',res);
-
   return res.data.resumeIdx;
+}
+
+
+export async function removeJobFavorite(jobId: number): Promise<void> {
+  const res = await instance.delete(
+    `/api/jobs/${jobId}/favorite`
+  );
+
+  console.log("❌ 즐겨찾기 제거", res.data);
+}
+
+export async function toggleJobFavorite(
+  jobId: number,
+  isFavorite: boolean
+): Promise<void | number> {
+  
+  console.log(isFavorite);
+  if (isFavorite) {
+  
+    // 이미 즐겨찾기 → 제거
+    return removeJobFavorite(jobId);
+  } else {
+    // 즐겨찾기 아님 → 추가
+    return addJobFavorite(jobId);
+  }
 }

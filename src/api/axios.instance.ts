@@ -31,10 +31,10 @@ const instance = axios.create({
 });
 
 //  Access Token 가져오는 함수
-const getAccessToken = () => sessionStorage.getItem("accessToken")??localStorage.getItem("accessToken");
+export const getAccessToken = () => sessionStorage.getItem("accessToken")??localStorage.getItem("accessToken");
 
 //  Refresh Token 가져오기
-const getRefreshToken = () => sessionStorage.getItem("refreshToken")??localStorage.getItem("refreshToken");
+export const getRefreshToken = () => sessionStorage.getItem("refreshToken")??localStorage.getItem("refreshToken");
 
 // =======================
 // 공통 베이스 응답

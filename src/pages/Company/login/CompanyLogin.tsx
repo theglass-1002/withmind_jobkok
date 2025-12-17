@@ -1,81 +1,98 @@
-import React, { useState } from 'react'
+import React, { useState } from 'react';
 import { useNavigate } from "react-router-dom";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 import ic_visibility_gray700_20 from "@/assets/icons/size20/ic_visibility_gray700_20.png";
 import ic_visibility_off_gray700_20 from "@/assets/icons/size20/ic_visibility_off_gray700_20.png";
 import "./CompanyLogin.css";
 
-
 export default function CompanyLogin() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [userId, setUserId] = useState("");
+  const [password, setPassword] = useState("");
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
+  const togglePasswordVisibility = () => setShowPassword(prev => !prev);
+
+  const handleLogin = () => {
+    if (userId === "company_tester01" && password === "company_tester01") {
+      navigate("/company/ai-matching");
+    } else {
+      toast.info("아이디 및 비밀번호를 확인해주세요.", {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: true,
+      });
+    }
   };
-  
+
   return (
     <div className="company-login">
-      <span className="company-login__logo">잡콕_기업</span>
+      {/* ✅ 여기서만 토스트 띄우기 */}
+      <ToastContainer
+        className="app-toast"
+        position="top-center"
+        autoClose={2000}
+        newestOnTop
+        hideProgressBar
+        closeOnClick
+        pauseOnFocusLoss
+        pauseOnHover
+        draggable
+        theme="light"
+      />
+
+      <span className="company-login__logo">잡콕 기업</span>
+
       <div className="company-login__container">
         <div className="company-login__title">로그인</div>
+
         <div className="company-login__form">
           <div className="company-login__field">
             <label className="company-login__label">아이디</label>
             <div className="company-login__input-wrapper">
-              <input 
+              <input
                 className="company-login__input"
-                type="text" 
-                placeholder='아이디를 입력해 주세요.' 
-                name="" 
-                id="" 
+                type="text"
+                placeholder="아이디를 입력해 주세요."
+                value={userId}
+                onChange={(e) => setUserId(e.target.value)}
               />
             </div>
           </div>
+
           <div className="company-login__field">
             <label className="company-login__label">비밀번호</label>
             <div className="company-login__input-wrapper">
-              <input 
+              <input
                 className="company-login__input"
                 type={showPassword ? "text" : "password"}
-                placeholder='비밀번호를 입력해 주세요.' 
-                name="" 
-                id="" 
+                placeholder="비밀번호를 입력해 주세요."
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
-              <img 
+              <img
                 className="company-login__toggle-password"
                 src={showPassword ? ic_visibility_off_gray700_20 : ic_visibility_gray700_20}
-                alt={showPassword ? "비밀번호 숨기기" : "비밀번호 보기"}
+                alt="비밀번호 토글"
                 onClick={togglePasswordVisibility}
               />
             </div>
           </div>
-          <div className="company-login__options">
-            <div className="company-login__remember">
-              <input type="checkbox" name="" id="" />
-              아이디 기억하기
-            </div>
-            <div className="company-login__links">
-              <span className="company-login__link">아이디 찾기</span>
-              <span className="company-login__link">비밀번호 찾기</span>
-            </div>
-          </div>
         </div>
+
         <div className="company-login__signup">
           <span className="company-login__signup-text">아직 회원이 아니세요?</span>
-          <span 
-            className="company-login__signup-link"
-            onClick={() => { navigate('/company/signup') }}
-          >
+          <span className="company-login__signup-link" onClick={() => navigate('/company/signup')}>
             회원가입
           </span>
         </div>
-        <button 
-          className='default_btn_gray_400'
-          onClick={() => { navigate('/company') }}
-        >
+
+        <button className="default_btn_gray_400" onClick={handleLogin}>
           로그인
         </button>
       </div>
     </div>
-  )
+  );
 }

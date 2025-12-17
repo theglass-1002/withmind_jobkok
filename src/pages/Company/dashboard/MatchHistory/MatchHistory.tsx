@@ -7,6 +7,7 @@ import ic_arrow_up_right_gray900_20 from "@/assets/icons/size20/ic_arrow_up_righ
 
 import "./MatchHistory.css";
 export default function MatchHistory() {
+  const navigate = useNavigate();
   return (
     <>
     <div className="company-dashboard-page">
@@ -56,46 +57,52 @@ export default function MatchHistory() {
             <div className='match-history-table__col match-history-table__col--rate'>적합률</div>
             <div className='match-history-table__col match-history-table__col--ai-status'>AI 면접</div>
             <div className='match-history-table__col match-history-table__col--date'>등록일</div>
-            <div className='match-history-table__col match-history-table__col--action'>공백</div>                             
+            <div className='match-history-table__col match-history-table__col--action'></div>                             
           </div>
           <div className='match-history-table__item match-history-table__row'>
             <div className='match-history-table__col match-history-table__col--name'>정유리</div>          
-            <div className='match-history-table__col match-history-table__col--job'>2025년 상반기 ICT 인턴십 채용</div>
+            <div className='match-history-table__col match-history-table__col--job'>직방 Development Manager</div>
             <div className='match-history-table__col match-history-table__col--rate'>92%</div>
             <div className='match-history-table__col match-history-table__col--ai-status on'>
               <span>공개</span>
             </div>
-            <div className='match-history-table__col match-history-table__col--date'>2025.02.10</div>
+            <div className='match-history-table__col match-history-table__col--date'>2025.12.10</div>
             <div className='match-history-table__col match-history-table__col--action'>
-              <button className='match-history-table__action-button default_btn_white'>자세히 보기
+              <button className='match-history-table__action-button default_btn_white'
+                   onClick={()=>{navigate('/company/ai-matching/report/1')}}
+              >자세히 보기
               <img src={ic_arrow_up_right_gray900_20} alt="" />
               </button>
             </div>                             
           </div>
           <div className='match-history-table__item match-history-table__row'>
-            <div className='match-history-table__col match-history-table__col--name'>정유리</div>          
-            <div className='match-history-table__col match-history-table__col--job'>2025년 상반기 ICT 인턴십 채용</div>
-            <div className='match-history-table__col match-history-table__col--rate'>92%</div>
+            <div className='match-history-table__col match-history-table__col--name'>이택진</div>          
+            <div className='match-history-table__col match-history-table__col--job'>직방 backend developer</div>
+            <div className='match-history-table__col match-history-table__col--rate'>60%</div>
             <div className='match-history-table__col match-history-table__col--ai-status on'>
               <span>공개</span>
             </div>
-            <div className='match-history-table__col match-history-table__col--date'>2025.02.10</div>
+            <div className='match-history-table__col match-history-table__col--date'>2025.11.13</div>
             <div className='match-history-table__col match-history-table__col--action'>
-              <button className='match-history-table__action-button default_btn_white'>자세히 보기
+              <button className='match-history-table__action-button default_btn_white'
+                   onClick={()=>{navigate('/company/ai-matching/report/2')}}
+              >자세히 보기
               <img src={ic_arrow_up_right_gray900_20} alt="" />
               </button>
             </div>                             
           </div>
           <div className='match-history-table__item match-history-table__row'>
-            <div className='match-history-table__col match-history-table__col--name'>정유리</div>          
-            <div className='match-history-table__col match-history-table__col--job'>2025년 상반기 ICT 인턴십 채용</div>
-            <div className='match-history-table__col match-history-table__col--rate'>92%</div>
+            <div className='match-history-table__col match-history-table__col--name'>임서하</div>          
+            <div className='match-history-table__col match-history-table__col--job'>직방 full stack developer/퍼블리셔</div>
+            <div className='match-history-table__col match-history-table__col--rate'>80%</div>
             <div className='match-history-table__col match-history-table__col--ai-status on'>
               <span>공개</span>
             </div>
-            <div className='match-history-table__col match-history-table__col--date'>2025.02.10</div>
+            <div className='match-history-table__col match-history-table__col--date'>2025.12.05</div>
             <div className='match-history-table__col match-history-table__col--action'>
-              <button className='match-history-table__action-button default_btn_white'>자세히 보기
+              <button className='match-history-table__action-button default_btn_white'
+                   onClick={()=>{navigate('/company/ai-matching/report/3')}}
+              >자세히 보기
               <img src={ic_arrow_up_right_gray900_20} alt="" />
               </button>
             </div>                             

@@ -231,8 +231,8 @@ export default function Signup() {
       userId: trimmedEmail,
       password: trimmedPassword,
       userName: "정유리", // TODO: 본인인증에서 받은 실제 이름
-      ci: "797979", // TODO: 본인인증에서 받은 실제 CI
-      ciProvider: "pass",
+      ci: "008118", // TODO: 본인인증에서 받은 실제 CI
+      ciProvider: "passs",
       realName: "정유리", // TODO: 본인인증에서 받은 실제 이름
       birthdate: "19901231", // TODO: 본인인증에서 받은 실제 생년월일
       gender: selectedGender === 1 ? "M" : "W",
@@ -252,7 +252,7 @@ export default function Signup() {
       logout(); //로그인 초기화
       const e = error as ApiErrorResponse;
       console.log("에러코드:", e.code);
-   
+      console.log(e);
       if(e.code==400){
         return toast.error("존재하는 계정입니다.");
       }else{

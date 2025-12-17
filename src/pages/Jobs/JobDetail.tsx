@@ -97,16 +97,24 @@ export default function JobDetail() {
 
   const handleBookmark = async () => {
     if (!job) return;
-  
+
+    const next = !bookMark; // next=true면 추가 상태, false면 해제 상태
+
     try {
-      const resumeIdx = await toggleJobFavorite(job.id);
-      console.log(" 즐겨찾기 처리된 이력서 번호:", resumeIdx);
-          
+      // optimistic update (즉시 UI 반영)
+      setBookMark(next);
+
+      // 현재 bookMark가 true면 "해제" API, false면 "추가" API
+      await toggleJobFavorite(job.id, bookMark);
+
+      toast.success(next ? "즐겨찾기에 추가되었습니다." : "즐겨찾기가 해제되었습니다.");
+    } catch (e: any) {
+      console.error("즐겨찾기 처리 오류:", e);
+
+      // 실패 시 롤백
       setBookMark((prev) => !prev);
-      // toast 같은 것도 여기서
-    } catch (e) {
+
       if (e?.code === 999) {
-        console.log("로그인만료");
         logout();
         navigate("/login");
         return;

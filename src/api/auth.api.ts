@@ -4,6 +4,8 @@ import instance from "@/api/axios.instance";
 
 import {
   EmailCheckResponse,
+  KakaoOauthLoginRequest,
+  KakaoOauthLoginResponse,
   LoginRequest,
   LoginResponse,
   RegisterRequest,
@@ -126,6 +128,26 @@ const body = JSON.stringify({
   return {
     kakaoToken: data,
   };
+}
+
+export async function kakaoOauthLogin(
+  payload: KakaoOauthLoginRequest
+): Promise<KakaoOauthLoginResponse> {
+  const body = {
+    authorizationCode: payload.authorizationCode,
+    redirectUri: KAKAO_REDIRECT_URI,
+    deviceId: payload.deviceId,
+  };
+
+  const res = await instance.post<KakaoOauthLoginResponse>(
+    "/auth/oauth/kakao/login",
+    body,
+    { requiresAuth: false } as any
+  );
+  console.log(res);
+
+  console.log('보낸값',body);
+  return res.data;
 }
 
 

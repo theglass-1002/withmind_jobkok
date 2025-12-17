@@ -54,12 +54,23 @@ export default function JobPostingItemRowNoAiPick({
   const handleBookmark = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!job) return;
-
+  
+    // 현재 상태 (0/1)
+    const isFavorite = bookMark === 1;
+    const next: 0 | 1 = isFavorite ? 0 : 1;
+  
     try {
-      const resumeIdx = await toggleJobFavorite(job.id);
-      console.log("즐겨찾기 처리된 이력서 번호:", resumeIdx);
-      setBookMark((prev) => (prev === 0 ? 1 : 0));
+      // ✅ UI 먼저 반영(optimistic)
+      setBookMark(next);
+  
+      // ✅ 토글 API: 현재가 favorite면 삭제, 아니면 추가
+      await toggleJobFavorite(job.id, isFavorite);
+  
+      toast.success(next === 1 ? "즐겨찾기에 추가되었습니다." : "즐겨찾기가 해제되었습니다.");
     } catch (e: any) {
+      // 실패하면 롤백
+      setBookMark(bookMark);
+  
       if (e?.code === 999) {
         console.log("로그인만료");
         logout();
@@ -69,6 +80,7 @@ export default function JobPostingItemRowNoAiPick({
       toast.error("즐겨찾기 처리 중 오류가 발생했습니다.");
     }
   };
+  
 
   const handleRecordAsApplied = (e: React.MouseEvent, next: 0 | 1) => {
     e.stopPropagation();

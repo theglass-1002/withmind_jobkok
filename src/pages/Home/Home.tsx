@@ -218,7 +218,7 @@ export default function Home() {
           fetchJobTree(),
           fetchJobList(1, 10),
         ]);
-
+        
         if (!alive) return;
 
         setJobTree(tree as any);
@@ -227,6 +227,7 @@ export default function Home() {
         console.log("[Home] fetchJobTree:", tree);
         console.log("[Home] fetchJobList:", list);
       } catch (e: any) {
+        console.log(e);
         if (!alive) return;
         console.error("[Home] API error:", e);
         setErrorMsg(e?.message ?? "홈 데이터 로딩 실패");

@@ -1,6 +1,6 @@
-//export const API_BASE_URL = "https://api.jobkok.kr";
+export const API_BASE_URL = "https://api.jobkok.kr";
 
-export const API_BASE_URL = "http://34.64.175.29:9090";
+//export const API_BASE_URL = "http://34.64.175.29:9090";
 export const AI_BASE_URL = "https://ai.api.jobkok.kr";
 
 export const LOCAL_BASE_URL = "http://localhost:5173/";
@@ -18,3 +18,6 @@ export const KAKAO_REST_API_KEY = "aff22010dc842b57d737fc236ba46676";
 
 //export const KAKAO_REDIRECT_URI = "http://localhost:5173";
 export const KAKAO_REDIRECT_URI = "http://localhost:5173/auth/oauth/kakao/callback";
+
+
+export const GOOGLE_REDIRECT_URI = "https://api.jobkok.kr/auth/oauth/google/callback";

@@ -107,9 +107,9 @@ export default function OverviewPage({
         const qzGroupParam = query.get("qzGroup");
         const qzGroup = qzGroupParam ? Number(qzGroupParam) : 1;
 
-        const data = await fetchInterviewReport(qzGroup);
+       // const data = await fetchInterviewReport(qzGroup);
 
-        console.log("fetchInterviewReport response:", data);
+      //  console.log("fetchInterviewReport response:", data);
       } catch (err) {
         console.error("fetchInterviewReport error:", err);
       } finally {

@@ -7,7 +7,7 @@ type Props = {
   meta: string;
   email: string;
   phone: string;
-  imageSrc: string;
+  imageSrc?: string;
 };
 
 export default function ResumeBasicInfo({

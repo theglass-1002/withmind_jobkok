@@ -222,41 +222,77 @@ const Login: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    // 콜백 경로인지 확인
-    console.log(location.pathname);
-
-    if (location.pathname === "/auth/oauth/naver/callback") {
-      const query = new URLSearchParams(location.search);
-      const code = query.get("code");
-      const stateFromNaver = query.get("state");
-      const error = query.get("error");
-      console.log("code", code);
-      console.log("state", stateFromNaver);
-      console.log("error", error);
-      console.log("deviceId", deviceId());
-    } else if (location.pathname === "/auth/oauth/kakao/callback") {
-      const query = new URLSearchParams(location.search);
-      const code = query.get("code");
-      const state = query.get("state");
-      const error = query.get("error");
-      if (!code || error) {
+    const handleOAuthCallback = async () => {
+      try {
+        console.log("콜백 경로:", location.pathname);
+  
+        // =====================
+        // 네이버 콜백
+        // =====================
+        if (location.pathname === "/auth/oauth/naver/callback") {
+          const query = new URLSearchParams(location.search);
+          const code = query.get("code");
+          const state = query.get("state");
+          const error = query.get("error");
+  
+          console.log("naver code:", code);
+          console.log("naver state:", state);
+          console.log("naver error:", error);
+          console.log("deviceId:", deviceId());
+  
+          if (!code || error) {
+            throw new Error("네이버 로그인 실패");
+          }
+  
+          // TODO: 네이버 로그인 API 연결
+          return;
+        }
+  
+        // =====================
+        // 카카오 콜백
+        // =====================
+        if (location.pathname === "/auth/oauth/kakao/callback") {
+          const query = new URLSearchParams(location.search);
+          const code = query.get("code");
+          const state = query.get("state");
+          const error = query.get("error");
+  
+          if (!code || error) {
+            throw new Error("카카오 로그인 실패");
+          }
+  
+          console.log("kakao code:", code);
+          console.log("kakao state:", state);
+  
+          const { kakaoToken } = await loginWithKakao(
+            code,
+            state!,
+            deviceId()
+          );
+  
+          console.log("카카오 SNS가입여부체크:", kakaoToken);
+  
+          // ✅ 동의 화면으로 이동 (값 전달)
+          navigate("/socialConsent?snsType=kakao", {
+            state: {
+              snsAuth: kakaoToken,
+            },
+          });
+  
+          return;
+        }
+      } catch (err) {
+        console.error("❌ OAuth 콜백 처리 실패:", err);
+  
+        // 공통 에러 처리
+        toast.error("소셜 로그인 중 오류가 발생했습니다.");
         navigate("/login");
-        return;
       }
-      (async () => {
-        console.log("code", code);
-        console.log("state", state);
-        const { kakaoToken } = await loginWithKakao(
-          code,
-          state,
-          deviceId()
-        );
-        console.log("카카오 SNS가입여부체크:", kakaoToken);
-        //동의화면
-        navigate("/socialConsent?snsType=kakao");
-      })();
-    }
+    };
+  
+    handleOAuthCallback();
   }, [location.pathname, location.search, navigate]);
+  
 
   return (
     <div className="login-page">

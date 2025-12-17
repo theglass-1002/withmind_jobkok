@@ -12,6 +12,7 @@ import ic_play_arrow_white_48 from "@/assets/icons/size48/ic_play_arrow_white_48
 import ic_info_white_20 from "@/assets/icons/size20/ic_info_white_20.png";
 import ic_download_white_20 from "@/assets/icons/size20/ic_download_white_20.png";
 
+// ✅ 기본 비디오 (fallback)
 import interview_video_02 from "@/assets/testImg/interview_video_02.webm";
 
 type Props = {
@@ -19,6 +20,7 @@ type Props = {
   title?: string;
   titleIconSrc?: string;
   description?: string;
+  videoSrc?: string; // ✅ 비디오 URL prop
 };
 
 export default function DetailCompetenceSection({
@@ -26,13 +28,18 @@ export default function DetailCompetenceSection({
   title,
   titleIconSrc,
   description = "면접 과정에서 보인 의사소통 능력과 문제해결 능력은 우수하다고 평가됩니다.",
+  videoSrc, // ✅ 비디오 받기
 }: Props) {
   const location = useLocation();
   const isPrintMode = new URLSearchParams(location.search).has("printViewr");
 
+  // ✅ videoSrc가 없으면 기본 비디오 사용
+  const currentVideoSrc = videoSrc || interview_video_02;
+
   useEffect(() => {
     console.log("DetailCompetenceSection - 프린트 모드:", isPrintMode);
-  }, [isPrintMode]);
+    console.log("DetailCompetenceSection - 비디오 소스:", currentVideoSrc);
+  }, [isPrintMode, currentVideoSrc]);
 
   const DEFAULT_FILTERS: UiFilterOption[] = [
     { label: "질문 1", value: "q1" },
@@ -125,10 +132,10 @@ export default function DetailCompetenceSection({
   };
 
   const WORDS: Record<string, { common: string[]; habit: string[] }> = {
-    q1: { common: ["디자인", "MVP", "협업", "지표"], habit: [ "그러니까"] },
-    q2: { common: ["리팩토링", "최적화", "번들", "성능", "도입"], habit: [ "뭐랄까", "약간"] },
+    q1: { common: ["디자인", "MVP", "협업", "지표"], habit: ["그러니까"] },
+    q2: { common: ["리팩토링", "최적화", "번들", "성능", "도입"], habit: ["뭐랄까", "약간"] },
     q3: { common: ["문제정의", "원인분석", "가설", "실험", "회고"], habit: [] },
-    default: { common: ["키워드", "사례", "성과"], habit: [ "아니"] },
+    default: { common: ["키워드", "사례", "성과"], habit: ["아니"] },
   };
 
   const [selectedQuestion, setSelectedQuestion] = useState<string>(DEFAULT_FILTERS[0].value);
@@ -155,14 +162,12 @@ export default function DetailCompetenceSection({
     try {
       await v.play();
     } catch (e) {
-      // 사용자가 클릭했는데도 play가 막히면 여기 찍힘
       console.error("video play error:", e);
     }
   };
 
   const handleVideoPause = () => {
-    // 원하는 UX에 따라 pause하면 다시 blur 켤지 결정 가능
-    // 여기서는 "pause해도 blur 유지 안 함"으로 둠
+    // pause 시 블러 유지 안 함
   };
 
   const handleVideoEnded = () => {
@@ -263,10 +268,10 @@ export default function DetailCompetenceSection({
               <div className="detail-analysis__question-detail">
                 <div className="detail-analysis__question-main">
                   <div className="detail-analysis__video" style={{ position: "relative" }}>
-                  <video
+                    <video
                       ref={videoRef}
                       className="detail-analysis__video-thumbnail"
-                      src={interview_video_02}
+                      src={currentVideoSrc} // ✅ 동적 비디오 소스 사용!
                       muted
                       playsInline
                       preload="metadata"
@@ -277,17 +282,16 @@ export default function DetailCompetenceSection({
                         if (v.paused) {
                           v.play();
                         } else {
-                          v.pause(); // 원하면 제거 가능
+                          v.pause();
                         }
                       }}
                       style={{
                         filter: "blur(8px) brightness(0.7)",
                         transform: "scale(1.03)",
                         width: "100%",
-                        cursor: "pointer", // 클릭 가능 UX
+                        cursor: "pointer",
                       }}
                     />
-
 
                     {/* ✅ 블러 상태에서만 재생 버튼 오버레이 */}
                     {isBlurred && (

@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import "./CompanyDashboard.css";
 import CompanyDashboardSidebar from "./components/CompanyDashboardSidebar";
-// Guide, AIMatching 등은 라우팅 설정 파일에서 import되므로 이 파일에서 제거했습니다.
+import { ToastContainer } from 'react-toastify'; 
+import { SlideDown } from '@/shared/lib/toastConfig';
 
 type TabKey = "이용안내" | "AI 인재 매칭" | "매칭 히스토리" | "통계" | "이용권";
 
@@ -92,6 +93,20 @@ export default function CompanyDashboard() {
       <div className="company-dashboard__main">
           <Outlet />
       </div>
+           
+      <ToastContainer
+          className="app-toast"
+          position="top-center"
+          transition={SlideDown}
+          autoClose={2000}
+          newestOnTop
+          hideProgressBar
+          closeOnClick
+          pauseOnFocusLoss
+          pauseOnHover
+          draggable
+          theme="light"
+        />
     </div>
   );
 }

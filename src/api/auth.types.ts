@@ -58,3 +58,16 @@ export interface LoginRequest {
   //   data?: any;
   // }
   
+  export type KakaoOauthLoginRequest = {
+    authorizationCode: string;
+    redirectUri?: string; // 안 넘기면 config 값 사용
+    deviceId: string;
+  };
+  
+  export type KakaoOauthLoginResponse = {
+    accessToken?: string;
+    refreshToken?: string;
+    userIdx?: number;
+    userName?: string;
+    // 백엔드 응답 스펙에 맞게 필요한 필드 추가
+  };

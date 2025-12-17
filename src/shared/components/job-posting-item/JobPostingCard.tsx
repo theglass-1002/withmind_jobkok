@@ -110,7 +110,6 @@ export default function JobPostingCard({
   // 🔥 이력서 기반이 아닌 경우 → NoAiPick 카드로 전부 렌더
   if (!isResumeBased) {
     return (
-      console.log('픽아님'),
       <div className="job-posting__list job-posting__list--grid">
         {jobs.map((job) => (
           <JobPostingItemCardNoAiPick

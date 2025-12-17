@@ -133,6 +133,11 @@ export const router = createBrowserRouter([
     element: <Layout showHeader="desktop-only" showFooter="desktop-only" showBottomNav={false}><Login /></Layout> 
   },
 
+  { 
+    path: "/auth/oauth/google/callback", 
+    element: <Layout showHeader="desktop-only" showFooter="desktop-only" showBottomNav={false}><Login /></Layout> 
+  },
+
   { path: "/signup", element:<Layout showFooter="desktop-only" showBottomNav={false}> <Signup/></Layout> },
   {
     path: "/inicisSuccess",
@@ -201,9 +206,9 @@ export const router = createBrowserRouter([
         path: "pricing", 
         element: <Pricing /> 
       },
-      { 
-        path: "ai-matching/report", 
-        element: <AIReport /> 
+      {
+        path: "ai-matching/report/:id",
+        element: <AIReport />
       }
     ] 
   },
