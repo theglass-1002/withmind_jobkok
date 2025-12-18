@@ -417,9 +417,7 @@ line-height: 20px; /* 125% */
 
 
 .job-recos{
-  display: none;
-  /* display: flex;
-  */
+  display: flex; 
   padding: 52px 0px;
   flex-direction: column;
   align-items: center;

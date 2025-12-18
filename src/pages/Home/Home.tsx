@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import Select, { components, type OptionProps } from "react-select";
 import { useNavigate } from "react-router-dom";
 
 import ic_search_white_24 from "@/assets/icons/size24/ic_search_white_24.png";
@@ -26,12 +25,18 @@ import headphones_icon from "@/assets/icons/category_icons/headphones_icon.png";
 import shield_icon from "@/assets/icons/category_icons/shield_icon.png";
 
 import { fetchJobTree, fetchJobList } from "@/api/job/job.api";
-
-import "./Home.css";
 import { JobNode } from "@/api/job/job.types";
+import { logout } from "@/api/auth/auth.api";
 
-type Opt = { value: string; label: string };
+import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
+import "./Home.css";
 
+type AutoItem = {
+  label: string; // 화면 표시 텍스트
+  kind: "category" | "job"; // 구분 (원하면 스타일링/이동 분기 가능)
+  categoryId?: number | string; // 필요시
+  jobId?: number | string; // 필요시
+};
 
 function highlightSubstring(label: string, query: string) {
   if (!query) return label;
@@ -40,71 +45,63 @@ function highlightSubstring(label: string, query: string) {
   const parts: React.ReactNode[] = [];
   let lastIndex = 0;
   let m: RegExpExecArray | null;
+
   while ((m = re.exec(label)) !== null) {
-    const start = m.index,
-      end = start + m[0].length;
-    if (start > lastIndex)
+    const start = m.index;
+    const end = start + m[0].length;
+
+    if (start > lastIndex) {
       parts.push(
         <span key={lastIndex + "n"}>{label.slice(lastIndex, start)}</span>
       );
+    }
+
     parts.push(
       <span key={start + "h"} className="select-highlight">
         {label.slice(start, end)}
       </span>
     );
+
     lastIndex = end;
   }
-  if (lastIndex < label.length)
+
+  if (lastIndex < label.length) {
     parts.push(<span key={lastIndex + "t"}>{label.slice(lastIndex)}</span>);
+  }
+
   return <>{parts}</>;
 }
-
-const Option = (props: OptionProps<Opt, false>) => {
-  const q = (props.selectProps as any).inputValue as string;
-  return (
-    <components.Option {...props}>
-      {highlightSubstring(props.label as string, q)}
-    </components.Option>
-  );
-};
 
 // ✅ name 매칭을 위한 정규화(· / ㆍ, 공백, 하이픈 등 차이 흡수)
 function normalizeCategoryName(name: string) {
   return name
     .trim()
     .toLowerCase()
-    .replace(/\s+/g, "") // 공백 제거
-    .replace(/[·ㆍ]/g, "") // 가운데 점 제거
-    .replace(/[–—-]/g, "") // 하이픈 제거
-    .replace(/[&]/g, "and"); // 혹시 모를 & 처리
+    .replace(/\s+/g, "")
+    .replace(/[·ㆍ]/g, "")
+    .replace(/[–—-]/g, "")
+    .replace(/[&]/g, "and");
 }
 
 export default function Home() {
   const navigate = useNavigate();
+
+  // 검색
   const [inputValue, setInputValue] = useState("");
-  const [isSearchExecuted, setIsSearchExecuted] = useState(false);
+  const [openAuto, setOpenAuto] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
 
-  // ✅ 홈 진입 시 API 데이터 저장
+  // 데이터
   const [jobTree, setJobTree] = useState<JobNode[]>([]);
-  const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const onInputChange = (val: string) => {
-    setInputValue(val);
-    return val;
-  };
-
   const handleMovePage = (type: string) => {
-    if (type == "resume") {
-      navigate(`/resumes/create`);
-    } else if (type == "interview") {
-      navigate(`/mock-interview-report`);
-    }
+    if (type === "resume") navigate("/resumes/create");
+    if (type === "interview") navigate("/mock-interview-report");
   };
 
-  // ✅ 기존 CATEGORIES는 "아이콘 매핑 테이블"로만 사용
+  // ✅ 아이콘 매핑 테이블
   const CATEGORIES = [
     { key: "dev", name: "개발", icon: code_icon },
     { key: "design", name: "디자인", icon: palette_icon },
@@ -128,71 +125,128 @@ export default function Home() {
     { key: "information-security", name: "정보 보호", icon: shield_icon },
   ];
 
-  // ✅ name -> icon 매핑 Map 생성
+  // ✅ name -> icon 매핑
   const iconMap = useMemo(() => {
     const m = new Map<string, string>();
-    CATEGORIES.forEach((c) => {
-      m.set(normalizeCategoryName(c.name), c.icon);
-    });
+    CATEGORIES.forEach((c) => m.set(normalizeCategoryName(c.name), c.icon));
     return m;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ✅ depth=0만 뽑아서 직군 카테고리로 사용(정렬까지)
+  const getCategoryIcon = (name: string) => {
+    const normalized = normalizeCategoryName(name);
+    return iconMap.get(normalized) ?? code_icon;
+  };
+
+  // ✅ depth=0 카테고리만
   const topCategories = useMemo(() => {
     return jobTree
       .filter((n) => n.depth === 0 && n.isActive !== false)
       .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
   }, [jobTree]);
 
-  const getCategoryIcon = (name: string) => {
-    const normalized = normalizeCategoryName(name);
-    return iconMap.get(normalized) ?? code_icon; // 매칭 실패 시 기본 아이콘
-  };
+  // ✅ 자동완성용 flat 리스트 만들기 (카테고리 + 직무)
+  const autoItems: AutoItem[] = useMemo(() => {
+    const out: AutoItem[] = [];
+    if (!Array.isArray(jobTree)) return out;
 
-  const options: Opt[] = [
-    { value: "chocolate", label: "Chocolate" },
-    { value: "strawberry", label: "Strawberry" },
-    { value: "vanilla", label: "Vanilla" },
-    { value: "strawberry2", label: "Strawberry" },
-    { value: "vanilla2", label: "Vanilla" },
-    { value: "strawberry3", label: "Strawberry" },
-    { value: "vanilla3", label: "Vanilla" },
-    { value: "strawberry2", label: "Strawberry" },
-    { value: "vanilla2", label: "Vanilla" },
-    { value: "strawberry3", label: "Strawberry" },
-    { value: "vanilla3", label: "Vanilla" },
-    { value: "strawberry2", label: "Strawberry" },
-    { value: "vanilla2", label: "Vanilla" },
-    { value: "strawberry3", label: "Strawberry" },
-    { value: "vanilla3", label: "Vanilla" },
-    { value: "vanilla3", label: "Vanilla" },
-    { value: "vanilla3", label: "Vanilla" },
-    { value: "vanilla3", label: "Vanilla" },
-  ];
+    const topSorted = [...jobTree].sort(
+      (a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)
+    );
 
-  const handleSearch = () => {
-    if (inputValue.trim()) {
-      setIsSearchExecuted(true);
-      console.log(`검색 실행: ${inputValue}`);
-    } else {
-      setIsSearchExecuted(false);
-      console.log("검색어가 없어 드롭다운을 닫습니다.");
+    for (const parent of topSorted) {
+      if (parent?.isActive === false) continue;
+      if (!parent?.name) continue;
+
+      // 카테고리도 검색 대상에 포함
+      out.push({
+        label: parent.name,
+        kind: "category",
+        categoryId: parent.id,
+      });
+
+      const childrenSorted = Array.isArray(parent.children)
+        ? [...parent.children].sort(
+            (a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)
+          )
+        : [];
+
+      for (const child of childrenSorted) {
+        if (child?.isActive === false) continue;
+        if (!child?.name) continue;
+
+        out.push({
+          label: child.name,
+          kind: "job",
+          categoryId: parent.id,
+          jobId: child.id,
+        });
+      }
     }
+
+    return out;
+  }, [jobTree]);
+
+  // ✅ 입력값 기반 필터
+  const filteredAuto = useMemo(() => {
+    const q = (inputValue ?? "").trim().toLowerCase();
+    if (!q) return autoItems.slice(0, 10);
+
+    return autoItems
+      .filter((item) => item.label.toLowerCase().includes(q))
+      .slice(0, 10);
+  }, [inputValue, autoItems]);
+
+  // 검색 실행(아이콘 클릭/Enter)
+  const handleSearch = () => {
+    const keyword = inputValue.trim();
+    if (!keyword) {
+      setOpenAuto(false);
+      return;
+    }
+
+    setOpenAuto(false);
+
+    // ✅ 원하는 방식으로 전달
+    // 1) state로 전달
+    navigate("/jobs", { state: { activeTab: "all", keyword } });
+
+    // 2) querystring이 필요하면 이렇게:
+    // navigate(`/jobs?keyword=${encodeURIComponent(keyword)}`);
   };
 
-  // ✅ 카테고리 클릭 시: 어떤 직군 선택했는지 콘솔 로그
-  // const handleClickCategory = (cat: JobNode) => {
-  //   // console.log("[선택한 직군]", {
-  //   //   id: cat.id,
-  //   //   name: cat.name,
-  //   //   depth: cat.depth,
-  //   //   sortOrder: cat.sortOrder,
-  //   //   childrenCount: cat.children?.length ?? 0,
-  //   //   children: cat.children, // 필요하면 제거
-  //   // });
-    
-  // };
+  // 자동완성 선택
+  const handlePickAuto = (item: AutoItem) => {
+    setInputValue(item.label);
+    setOpenAuto(false);
+    console.log("[Home] 자동완성 선택:", {
+      kind: item.kind,
+      label: item.label,
+      categoryId: item.categoryId,
+      jobId: item.jobId,
+    });
+  
+    // ✅ 클릭 시 바로 이동시키고 싶으면:
+    // - 직무(job)면 jobId로 필터
+    // - 카테고리(category)면 categoryId로 필터
+    if (item.kind === "category" && item.categoryId != null) {
+      navigate("/jobs", {
+        state: { activeTab: "all", categoryId: item.categoryId },
+      });
+      return;
+    }
+
+    // job
+    if (item.jobId != null) {
+      navigate("/jobs", {
+        state: { activeTab: "all", jobId: item.jobId, categoryId: item.categoryId },
+      });
+      return;
+    }
+
+    // fallback: 키워드 검색
+    navigate("/jobs", { state: { activeTab: "all", keyword: item.label } });
+  };
 
   const handleClickCategory = (cat: JobNode) => {
     navigate("/jobs", {
@@ -200,12 +254,12 @@ export default function Home() {
         activeTab: "all",
         categoryId: cat.id,
         childrenCount: cat.children?.length ?? 0,
-        children: cat.children, // 필요하면 제거
+        children: cat.children,
       },
     });
   };
 
-  // ✅ Home 들어오자마자 API 실행
+  // ✅ Home 진입 시 API 실행 (둘 다 끝날 때까지 로딩)
   useEffect(() => {
     let alive = true;
 
@@ -214,23 +268,18 @@ export default function Home() {
         setLoading(true);
         setErrorMsg(null);
 
-        const [tree, list] = await Promise.all([
+        const [tree] = await Promise.all([
           fetchJobTree(),
           fetchJobList(1, 10),
         ]);
-        
-        if (!alive) return;
 
+        if (!alive) return;
         setJobTree(tree as any);
-        setJobs(list.jobs as any);
-
-        console.log("[Home] fetchJobTree:", tree);
-        console.log("[Home] fetchJobList:", list);
       } catch (e: any) {
-        console.log(e);
         if (!alive) return;
-        console.error("[Home] API error:", e);
         setErrorMsg(e?.message ?? "홈 데이터 로딩 실패");
+        logout();
+        navigate("/login");
       } finally {
         if (!alive) return;
         setLoading(false);
@@ -240,46 +289,40 @@ export default function Home() {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [navigate]);
 
+  // ✅ 스크롤 + 외부 클릭 감지 + 자동완성 닫기
   useEffect(() => {
-    // 1. 스크롤 로직
     const masthead = document.querySelector(".masthead");
-    if (masthead) {
-      const onScroll = () => {
-        const scrollTop = window.scrollY;
-        if (scrollTop > 50) masthead.classList.remove("masthead-transparent");
-        else masthead.classList.add("masthead-transparent");
-      };
-      masthead.classList.add("masthead-transparent");
-      window.addEventListener("scroll", onScroll);
+    if (!masthead) return;
 
-      // 클린업 함수
-      const removeScrollListener = () => {
-        window.removeEventListener("scroll", onScroll);
-        masthead.classList.remove("masthead-transparent");
-      };
+    const onScroll = () => {
+      const scrollTop = window.scrollY;
+      if (scrollTop > 50) masthead.classList.remove("masthead-transparent");
+      else masthead.classList.add("masthead-transparent");
+    };
 
-      // 2. 외부 클릭 감지 로직
-      function handleClickOutside(event: MouseEvent) {
-        if (
-          searchRef.current &&
-          !searchRef.current.contains(event.target as Node)
-        ) {
-          setIsSearchExecuted(false);
-        }
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setOpenAuto(false);
       }
-      document.addEventListener("mousedown", handleClickOutside);
+    };
 
-      return () => {
-        removeScrollListener();
-        document.removeEventListener("mousedown", handleClickOutside);
-      };
-    }
-  }, [searchRef]);
+    masthead.classList.add("masthead-transparent");
+    window.addEventListener("scroll", onScroll);
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      document.removeEventListener("mousedown", handleClickOutside);
+      masthead.classList.remove("masthead-transparent");
+    };
+  }, []);
 
   return (
     <div className="home">
+      <LoadingOverlay isLoading={loading} isLogo text="홈 데이터를 불러오는 중..." />
+
       <div className="hero">
         <header className="hero-head">
           <div className="text">
@@ -288,62 +331,73 @@ export default function Home() {
               <h1>이제, 잡콕에서 검색만 하세요!</h1>
             </span>
 
-            {loading && <p style={{ marginTop: 8 }}>로딩중...</p>}
-            {errorMsg && (
-              <p style={{ marginTop: 8, color: "red" }}>{errorMsg}</p>
-            )}
+            {errorMsg && <p style={{ marginTop: 8, color: "red" }}>{errorMsg}</p>}
           </div>
 
+          {/* ✅ 자동완성 검색 */}
           <div className="search" ref={searchRef}>
             <input
               type="text"
               placeholder="직무, 기업명, 지역 등을 검색해 보세요."
               className="search-bar__input"
               value={inputValue}
+              onFocus={() => {
+                if (inputValue.trim()) setOpenAuto(true);
+              }}
               onChange={(e) => {
-                const value = e.target.value;
-                setInputValue(value);
-                if (value.trim() === "") {
-                  setIsSearchExecuted(false);
-                }
+                const v = e.target.value;
+                setInputValue(v);
+                setOpenAuto(!!v.trim());
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleSearch();
+                if (e.key === "Escape") setOpenAuto(false);
               }}
             />
+
             <span
               className="search-icon-wrap"
               onClick={handleSearch}
               tabIndex={0}
               onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  handleSearch();
-                }
+                if (e.key === "Enter" || e.key === " ") handleSearch();
               }}
             >
               <img src={ic_search_white_24} alt="" />
             </span>
 
-            {isSearchExecuted && (
+            {openAuto && (
               <div className="search-results-dropdown">
                 <div className="search-results-dropdown__list">
-                  {options
-                    .filter((opt) =>
-                      opt.label.toLowerCase().includes(inputValue.toLowerCase())
-                    )
-                    .slice(0, 10)
-                    .map((option, index) => (
-                      <span
-                        key={index}
-                        className="search-results-dropdown__item"
-                      >
-                        {highlightSubstring(option.label, inputValue)}
-                      </span>
-                    ))}
+                  {/* 결과 없음 */}
+                  {inputValue.trim() && filteredAuto.length === 0 && (
+                    <span className="search-results-dropdown__item search-results-dropdown__item--disabled">
+                      추천 결과가 없습니다.
+                    </span>
+                  )}
+
+                  {/* 결과 */}
+                  {filteredAuto.map((item) => (
+                    <span
+                      key={`${item.kind}-${item.categoryId ?? "x"}-${item.jobId ?? "x"}-${item.label}`}
+                      className="search-results-dropdown__item"
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => handlePickAuto(item)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") handlePickAuto(item);
+                      }}
+                    >
+                      {highlightSubstring(item.label, inputValue)}
+                    </span>
+                  ))}
                 </div>
               </div>
             )}
           </div>
         </header>
 
-        {/* ✅ 여기부터: fetchJobTree 기반으로 카테고리 렌더링 */}
+        {/* ✅ 카테고리 */}
         <div className="categories">
           {topCategories.map((cat) => (
             <div
@@ -353,9 +407,7 @@ export default function Home() {
               role="button"
               tabIndex={0}
               onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  handleClickCategory(cat);
-                }
+                if (e.key === "Enter" || e.key === " ") handleClickCategory(cat);
               }}
             >
               <span className="icon">
@@ -367,6 +419,7 @@ export default function Home() {
         </div>
       </div>
 
+      {/* 배너 */}
       <div className="banner-slider-container">
         <div className="banner-slider-track">
           <div className="home-cta-banner resume">
@@ -378,12 +431,7 @@ export default function Home() {
                 AI 기반의 문장 및 키워드 추천 기능으로 간편하게 작성하세요.
               </span>
             </div>
-            <button
-              className="default_btn_white"
-              onClick={() => {
-                handleMovePage("resume");
-              }}
-            >
+            <button className="default_btn_white" onClick={() => handleMovePage("resume")}>
               이력서 작성 바로하기
             </button>
           </div>
@@ -397,12 +445,7 @@ export default function Home() {
                 면접 시뮬레이션ㆍ이력서 및 직무 기반 맞춤 질문ㆍ분석 리포트ㆍ결과 기반 피드백까지 전부 모았어요.
               </span>
             </div>
-            <button
-              className="default_btn_white"
-              onClick={() => {
-                handleMovePage("interview");
-              }}
-            >
+            <button className="default_btn_white" onClick={() => handleMovePage("interview")}>
               AI 모의면접 바로하기
             </button>
           </div>
@@ -412,12 +455,7 @@ export default function Home() {
       <div className="banner-slider-container mobile">
         <div className="banner-slider-track">
           <div className="home-cta-banner resume">
-            <div
-              className="banner-content"
-              onClick={() => {
-                handleMovePage("/m-create");
-              }}
-            >
+            <div className="banner-content" onClick={() => handleMovePage("resume")}>
               <span className="banner-title">
                 이력서 작성하고 잡콕의 모든 서비스를 경험해 보세요.
               </span>
@@ -428,12 +466,7 @@ export default function Home() {
           </div>
 
           <div className="home-cta-banner interview">
-            <div
-              className="banner-content"
-              onClick={() => {
-                handleMovePage("interview");
-              }}
-            >
+            <div className="banner-content" onClick={() => handleMovePage("interview")}>
               <span className="banner-title">
                 실전보다 더 실전같은 AI 모의면접으로 면접 준비 끝!
               </span>

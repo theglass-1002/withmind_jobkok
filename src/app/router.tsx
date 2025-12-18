@@ -144,7 +144,7 @@ export const router = createBrowserRouter([
     element: <InicisSuccess />,
   },
 
-  { path: "/socialConsent", element:<Layout showFooter="desktop-only" showBottomNav={false}> <SocialConsent/></Layout> },
+  { path: "/social-consent", element:<Layout showFooter="desktop-only" showBottomNav={false}> <SocialConsent/></Layout> },
   { path: "/recovery", element: <Layout showFooter="desktop-only" showBottomNav={false}><Recovery/></Layout> },
   { path: "/mypage", 
     element: <Layout screen="Mypage" ><MyPageLayout/></Layout>,

@@ -1,4 +1,3 @@
-// Login.tsx
 import React, {
   useState,
   useMemo,
@@ -8,6 +7,7 @@ import React, {
   useEffect,
 } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 import ic_visibility_gray700_20 from "@/assets/icons/size20/ic_visibility_gray700_20.png";
 import ic_visibility_off_gray700_20 from "@/assets/icons/size20/ic_visibility_off_gray700_20.png";
@@ -23,23 +23,27 @@ import error_Item from "@/assets/icons/error_Item.png";
 import "./Login.css";
 import { Icons } from "@/assets/icons";
 
-import { deviceId, parseJwt, stripAllWhitespace } from "@/shared/utils/util";
-import {
-  buildKakaoAuthUrl,
-  buildNaverLoginUrl,
-  loginUser,
-  loginWithKakao,
-  logout,
-} from "@/api/auth.api";
-import { LoginRequest } from "@/api/auth.types";
+import { deviceId, stripAllWhitespace } from "@/shared/utils/util";
+import { loginUser, logout } from "@/api/auth/auth.api";
+import { LoginRequest } from "@/api/auth/auth.types";
 import { ApiErrorResponse } from "@/api/axios.instance";
-import { toast } from "react-toastify";
+
+import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
+
+import {
+  PROVIDERS,
+  findProviderByPath,
+  createState,
+  type ProviderKey,
+} from "./oauthProviders";
 
 const REMEMBER_ID_KEY = "rememberId";
 
 const Login: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
+
+  const [isLoading, setIsLoading] = useState(false);
 
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -48,10 +52,9 @@ const Login: React.FC = () => {
 
   const [emailErrorType, setEmailErrorType] = useState<number>(0);
   const [passwordErrorType, setPasswordErrorType] = useState<number>(0);
-  const [loginStatus, setLoginStatus] = useState<string | null>(null);
+
   const passwordType = showPassword ? "text" : "password";
 
-  // 처음 진입 시 저장된 아이디가 있으면 불러오기
   useEffect(() => {
     const savedId = localStorage.getItem(REMEMBER_ID_KEY);
     if (savedId) {
@@ -90,26 +93,18 @@ const Login: React.FC = () => {
     (e: ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
       setEmail(value);
-
-      // 아이디 기억하기가 켜져 있으면 localStorage도 함께 업데이트
-      if (remember) {
-        localStorage.setItem(REMEMBER_ID_KEY, value);
-      }
+      if (remember) localStorage.setItem(REMEMBER_ID_KEY, value);
     },
     [remember]
   );
 
-  const handlePasswordChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      setPassword(e.target.value);
-    },
-    []
-  );
+  const handlePasswordChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value);
+  }, []);
 
   const handleClearEmail = useCallback(() => {
     setEmailErrorType(0);
     setEmail("");
-    // 아이디 기억하기 중에 지우면 저장된 값도 삭제
     localStorage.removeItem(REMEMBER_ID_KEY);
     setRemember(false);
   }, []);
@@ -123,24 +118,28 @@ const Login: React.FC = () => {
     setShowPassword((prev) => !prev);
   }, []);
 
-  // 아이디 기억하기 토글
   const handleToggleRemember = useCallback(() => {
     setRemember((prev) => {
       const next = !prev;
-
-      if (next && email) {
-        // 켜질 때 현재 이메일 저장
-        localStorage.setItem(REMEMBER_ID_KEY, email);
-      }
-
-      if (!next) {
-        // 꺼질 때 저장된 이메일 삭제
-        localStorage.removeItem(REMEMBER_ID_KEY);
-      }
-
+      if (next && email) localStorage.setItem(REMEMBER_ID_KEY, email);
+      if (!next) localStorage.removeItem(REMEMBER_ID_KEY);
       return next;
     });
   }, [email]);
+
+  const saveLoginTokens = useCallback((data: {
+    accessToken: string;
+    refreshToken: string;
+    userName: string;
+    userId: string;
+    userIdx: number | string;
+  }) => {
+    localStorage.setItem("accessToken", data.accessToken);
+    localStorage.setItem("refreshToken", data.refreshToken);
+    localStorage.setItem("userName", data.userName);
+    localStorage.setItem("userId", data.userId);
+    localStorage.setItem("userIdx", String(data.userIdx));
+  }, []);
 
   const handleLogin = async (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -148,6 +147,7 @@ const Login: React.FC = () => {
     let hasError = false;
     const trimmedEmail = stripAllWhitespace(email);
     const trimmedPassword = stripAllWhitespace(password);
+
     if (!trimmedEmail.trim()) {
       setEmailErrorType(1);
       hasError = true;
@@ -164,138 +164,138 @@ const Login: React.FC = () => {
 
     if (hasError) return;
 
-    // 실제 로그인 API 호출
-    console.log("로그인 시도:", trimmedEmail, trimmedPassword);
-
+    setIsLoading(true);
     try {
       const loginRequest: LoginRequest = {
         userId: trimmedEmail,
         password: trimmedPassword,
         deviceId: deviceId(),
       };
-      const result = await loginUser(loginRequest);
-      console.log("로그인 결과", result);
-      console.log("리플", result.refreshToken);
-      if (result.code === 200) {
-        localStorage.setItem("accessToken", result.token);
-        localStorage.setItem("refreshToken", result.refreshToken);
-        localStorage.setItem("userName", result.user.userName);
-        localStorage.setItem("userId", result.user.userId);
-        localStorage.setItem("userIdx", String(result.user.userIdx));
 
-        // remember 상태에 따라 아이디 저장/삭제
-        if (remember) {
-          localStorage.setItem(REMEMBER_ID_KEY, trimmedEmail);
-        } else {
-          localStorage.removeItem(REMEMBER_ID_KEY);
-        }
+      const result = await loginUser(loginRequest);
+      console.log("[Login] 일반 로그인 응답:", result);
+
+      if (result.code === 200) {
+        saveLoginTokens({
+          accessToken: result.token,
+          refreshToken: result.refreshToken,
+          userName: result.user.userName,
+          userId: result.user.userId,
+          userIdx: result.user.userIdx,
+        });
+
+        if (remember) localStorage.setItem(REMEMBER_ID_KEY, trimmedEmail);
+        else localStorage.removeItem(REMEMBER_ID_KEY);
 
         setPasswordErrorType(0);
-        // TODO: 로그인 성공 후 이동할 경로
-         navigate("/");
+        navigate("/");
       }
     } catch (error) {
       const e = error as ApiErrorResponse;
       logout();
+      console.error("[Login] 일반 로그인 에러:", e);
 
-      if (e.code == 401) {
-        setPasswordErrorType(3);
-      }
+      if (e.code === 401) setPasswordErrorType(3);
+      else toast.error("로그인 중 오류가 발생했습니다.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleKakaoLogin = useCallback(() => {
-    const state = encodeURIComponent(
-      Math.random().toString(36).substring(2, 15)
-    );
-    const url = buildKakaoAuthUrl(state);
+  const startOAuth = useCallback((providerKey: ProviderKey) => {
+    const p = PROVIDERS[providerKey];
+    if (!p?.buildAuthUrl) {
+      toast.info("현재 해당 소셜 로그인은 준비 중입니다.");
+      return;
+    }
+
+    setIsLoading(true);
+    const state = createState();
+    const url = p.buildAuthUrl(state);
     window.location.href = url;
   }, []);
 
-  const handleNaverLogin = useCallback(() => {
-    const state = encodeURIComponent(
-      Math.random().toString(36).substring(2, 15)
-    );
-
-    const url = buildNaverLoginUrl(state);
-    window.location.href = url;
-  }, []);
+  const handleKakaoLogin = useCallback(() => startOAuth("kakao"), [startOAuth]);
+  const handleNaverLogin = useCallback(() => startOAuth("naver"), [startOAuth]);
+  const handleGoogleLogin = useCallback(() => startOAuth("google"), [startOAuth]);
 
   useEffect(() => {
-    const handleOAuthCallback = async () => {
+    const provider = findProviderByPath(location.pathname);
+    if (!provider) return;
+
+    const run = async () => {
+      setIsLoading(true);
       try {
-        console.log("콜백 경로:", location.pathname);
-  
-        // =====================
-        // 네이버 콜백
-        // =====================
-        if (location.pathname === "/auth/oauth/naver/callback") {
-          const query = new URLSearchParams(location.search);
-          const code = query.get("code");
-          const state = query.get("state");
-          const error = query.get("error");
-  
-          console.log("naver code:", code);
-          console.log("naver state:", state);
-          console.log("naver error:", error);
-          console.log("deviceId:", deviceId());
-  
-          if (!code || error) {
-            throw new Error("네이버 로그인 실패");
-          }
-  
-          // TODO: 네이버 로그인 API 연결
+        if (!provider.precheck || !provider.loginWithPreauth) {
+          toast.info("현재 해당 소셜 로그인은 준비 중입니다.");
+          navigate("/login");
           return;
         }
-  
-        // =====================
-        // 카카오 콜백
-        // =====================
-        if (location.pathname === "/auth/oauth/kakao/callback") {
-          const query = new URLSearchParams(location.search);
-          const code = query.get("code");
-          const state = query.get("state");
-          const error = query.get("error");
-  
-          if (!code || error) {
-            throw new Error("카카오 로그인 실패");
-          }
-  
-          console.log("kakao code:", code);
-          console.log("kakao state:", state);
-  
-          const { kakaoToken } = await loginWithKakao(
+
+        const query = new URLSearchParams(location.search);
+        const code = query.get("code");
+        const state = query.get("state") ?? "";
+        const err = query.get("error");
+        const errDesc = query.get("error_description");
+
+        if (!code || err) {
+          console.error("[Login] OAuth callback error:", {
+            provider: provider.key,
+            err,
+            errDesc,
             code,
-            state!,
-            deviceId()
-          );
-  
-          console.log("카카오 SNS가입여부체크:", kakaoToken);
-  
-          // ✅ 동의 화면으로 이동 (값 전달)
-          navigate("/socialConsent?snsType=kakao", {
-            state: {
-              snsAuth: kakaoToken,
-            },
+            state,
           });
-  
-          return;
+          throw new Error("소셜 로그인 실패");
         }
-      } catch (err) {
-        console.error("❌ OAuth 콜백 처리 실패:", err);
-  
-        // 공통 에러 처리
+
+        const did = deviceId();
+
+        const precheckRes = await provider.precheck(code, state, did);
+        console.log(`[Login] ${provider.key} precheck 응답:`, precheckRes);
+
+        if (precheckRes.exists && !precheckRes.needTerms) {
+          const loginRes = await provider.loginWithPreauth({
+            preauthToken: precheckRes.preauthToken,
+            termsAgreed: true,
+            deviceId: did,
+          });
+
+          console.log(`[Login] ${provider.key} login(preauth) 응답:`, loginRes);
+
+          if (loginRes?.code === 200) {
+            saveLoginTokens({
+              accessToken: loginRes.tokens.accessToken,
+              refreshToken: loginRes.tokens.refreshToken,
+              userName: loginRes.user.userName,
+              userId: loginRes.user.userId,
+              userIdx: loginRes.user.idx,
+            });
+
+            navigate("/");
+            return;
+          }
+        }
+
+        navigate(`/social-consent?snsType=${provider.key}`, {
+          state: { snsAuth: precheckRes },
+        });
+      } catch (e) {
+        console.error("[Login] 소셜 로그인 처리 에러:", e);
         toast.error("소셜 로그인 중 오류가 발생했습니다.");
         navigate("/login");
+      } finally {
+        setIsLoading(false);
       }
     };
-  
-    handleOAuthCallback();
-  }, [location.pathname, location.search, navigate]);
-  
+
+    run();
+  }, [location.pathname, location.search, navigate, saveLoginTokens]);
 
   return (
     <div className="login-page">
+      <LoadingOverlay isLoading={isLoading} isLogo text="처리 중..." />
+
       <h1 className="login-title">로그인</h1>
 
       <form className="login-card">
@@ -309,6 +309,7 @@ const Login: React.FC = () => {
                 value={email}
                 onChange={handleEmailChange}
                 required
+                disabled={isLoading}
               />
               <img src={cancel} onClick={handleClearEmail} alt="" />
             </div>
@@ -323,6 +324,7 @@ const Login: React.FC = () => {
                 value={email}
                 onChange={handleEmailChange}
                 required
+                disabled={isLoading}
               />
               <img src={cancel} onClick={handleClearEmail} alt="" />
               <img src={error_Item} alt="" />
@@ -344,12 +346,9 @@ const Login: React.FC = () => {
                 className="form-input"
                 type={passwordType}
                 required
+                disabled={isLoading}
               />
-              <img
-                src={cancel}
-                onClick={handleClearPassword}
-                alt="비밀번호 지우기"
-              />
+              <img src={cancel} onClick={handleClearPassword} alt="비밀번호 지우기" />
               <img
                 src={
                   showPassword
@@ -374,12 +373,9 @@ const Login: React.FC = () => {
                 className="form-input"
                 type={passwordType}
                 required
+                disabled={isLoading}
               />
-              <img
-                src={cancel}
-                onClick={handleClearPassword}
-                alt="비밀번호 지우기"
-              />
+              <img src={cancel} onClick={handleClearPassword} alt="비밀번호 지우기" />
               <img
                 src={
                   showPassword
@@ -400,13 +396,17 @@ const Login: React.FC = () => {
             className="btn_w_full default_btn_black"
             type="submit"
             onClick={handleLogin}
+            disabled={isLoading}
           >
             로그인
           </button>
         </div>
 
         <div className="form-meta">
-          <span className="remember" onClick={handleToggleRemember}>
+          <span
+            className="remember"
+            onClick={isLoading ? undefined : handleToggleRemember}
+          >
             <img
               src={
                 remember
@@ -427,17 +427,20 @@ const Login: React.FC = () => {
       <div className="oauth">
         <span
           className="oauth-buttons__button oauth-buttons__button--kakao"
-          onClick={handleKakaoLogin}
+          onClick={isLoading ? undefined : handleKakaoLogin}
         >
           <img src={Icons.ic_kakao_login_20} alt="" /> 카카오로 시작하기
         </span>
         <span
           className="oauth-buttons__button oauth-buttons__button--naver"
-          onClick={handleNaverLogin}
+          onClick={isLoading ? undefined : handleNaverLogin}
         >
           <img src={Icons.ic_naver_login_20} alt="" /> 네이버로 시작하기
         </span>
-        <span className="oauth-buttons__button oauth-buttons__button--google">
+        <span
+          className="oauth-buttons__button oauth-buttons__button--google"
+          onClick={isLoading ? undefined : handleGoogleLogin}
+        >
           <img src={Icons.ic_google_login_20} alt="" /> Google로 시작하기
         </span>
       </div>
@@ -447,15 +450,20 @@ const Login: React.FC = () => {
           className="login_btn"
           src={m_kakao_login52}
           alt=""
-          onClick={handleKakaoLogin}
+          onClick={isLoading ? undefined : handleKakaoLogin}
         />
         <img
           className="login_btn"
           src={m_naver_login52}
           alt=""
-          onClick={handleNaverLogin}
+          onClick={isLoading ? undefined : handleNaverLogin}
         />
-        <img className="login_btn" src={m_google_login52} alt="" />
+        <img
+          className="login_btn"
+          src={m_google_login52}
+          alt=""
+          onClick={isLoading ? undefined : handleGoogleLogin}
+        />
       </div>
 
       <NavLink to="/signup" className="auth-signup-wrap">

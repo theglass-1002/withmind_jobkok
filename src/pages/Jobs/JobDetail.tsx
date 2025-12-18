@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import chevron_left from "@/assets/icons/chevron_left.png";
 import text_jobkorea_logo from "@/assets/icons/company_logos/text_jobkorea_logo.png";
 import arrow_up_right from "@/assets/icons/arrow-up-right.png";
-import { logout } from "@/api/auth.api";
+import { logout } from "@/api/auth/auth.api";
 import withmind_logo80 from "@/assets/icons/company_logos/withmind_logo80.png";
 import blank_bookmark_black from "@/assets/icons/size24/ic_bookmark_gray900_24.png";
 import bookmark_active_purple from "@/assets/icons/size24/ic_bookmark_active_purple24.png";

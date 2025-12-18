@@ -50,7 +50,7 @@ import {
   mapRegionListToLocationItems,
   type ResumeDetailResponse,
 } from "@/api/resume/resume.types";
-import { logout } from "@/api/auth.api";
+import { logout } from "@/api/auth/auth.api";
 
 const ALL_SECTIONS: SectionId[] = [
   "title",

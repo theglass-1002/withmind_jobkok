@@ -8,7 +8,7 @@ import AllJobPostingSection from "@/pages/Jobs/sections/AllJobPostingSection";
 import M_AllJobPostingSection from "@/pages/Jobs/sections/M_AllJobPostingSection";
 import SavedJobPostingSection from "@/pages/Jobs/sections/SavedJobPostingSection";
 import M_SavedJobPostingSection from "@/pages/Jobs/sections/M_SavedJobPostingSection";
-import { logout } from "@/api/auth.api";
+import { logout } from "@/api/auth/auth.api";
 import { fetchResumeCheck } from "@/api/resume/resume.api";
 
 import "./Jobs.css";

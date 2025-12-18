@@ -74,7 +74,7 @@ import { uploadPhotoFile } from "@/api/fileUpload.api";
 import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
 import { Icons } from "@/assets/icons";
 import Modal from "@/shared/components/modal/Modal";
-import { logout } from "@/api/auth.api";
+import { logout } from "@/api/auth/auth.api";
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 타입 정의

@@ -15,6 +15,10 @@ import check_circle_purple from "@/assets/icons/check_circle_purple.png";
 import "./JobPostingItem.css";
 import type { JobItem } from "@/api/job/job.types";
 import JobPostingItemCardNoAiPick from "@/shared/components/jobPosting-v3/JobPostingItemCardNoAiPick";
+import JobPostingItemCardAiPick from "@/shared/components/jobPosting-v3/JobPostingItemCardAiPick";
+
+
+
 
 type Props = {
   jobs: JobItem[];
@@ -125,7 +129,16 @@ export default function JobPostingCard({
   // 🔥 이력서 기반 추천인 경우 → AI 카드 + AI PICK
   return (
     <>
-      <div className="job-posting__list job-posting__list--grid">
+       <div className="job-posting__list job-posting__list--grid">
+        {jobs.map((job) => (
+          <JobPostingItemCardAiPick
+            key={job.id}
+            job={job}
+            showAppliedSection={false}
+          />
+        ))}
+      </div>
+      {/* <div className="job-posting__list job-posting__list--grid">
         {jobs.map((job) => {
           const isBookmarked = bookmarks[job.id] === 1;
           const isApplied = applied[job.id] === 1;
@@ -231,7 +244,7 @@ export default function JobPostingCard({
             </Link>
           );
         })}
-      </div>
+      </div> */}
     </>
   );
 }

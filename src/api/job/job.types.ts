@@ -73,6 +73,7 @@ export interface JobItem {
   employmentType: EmploymentType;
   educationCode: number | null;
   educationText: string | null;
+  aiPick:boolean;
 }
 export interface JobListApiResponse {
   page: number;

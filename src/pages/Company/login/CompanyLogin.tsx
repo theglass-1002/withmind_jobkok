@@ -16,7 +16,7 @@ export default function CompanyLogin() {
   const togglePasswordVisibility = () => setShowPassword(prev => !prev);
 
   const handleLogin = () => {
-    if (userId === "company_tester01" && password === "company_tester01") {
+    if (userId === "company_tester01" && password === "1") {
       navigate("/company/ai-matching");
     } else {
       toast.info("아이디 및 비밀번호를 확인해주세요.", {

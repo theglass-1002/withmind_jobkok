@@ -15,6 +15,9 @@ import check_circle_purple from "@/assets/icons/check_circle_purple.png";
 import "./JobPostingItem.css";
 import type { JobItem } from "@/api/job/job.types";
 import JobPostingItemRowNoAiPick from "@/shared/components/jobPosting-v3/JobPostingItemRowNoAiPick";
+import JobPostingItemRowAiPick from "@/shared/components/jobPosting-v3/JobPostingItemRowAiPick";
+
+
 
 type Props = {
   jobs: JobItem[];
@@ -131,7 +134,20 @@ export default function JobPostingRow({
   // 🔥 이력서 기반 추천인 경우 → 기존 AI Pick 있는 리스트 UI 유지
   return (
     <>
-      <div className="job-posting__list job-posting__list--row">
+   <div className="job-posting__list job-posting__list--row">
+        {jobs.map((job) => (
+          <div
+            key={job.id}
+            className="job-posting__item job-posting__item--row"
+          >
+            <JobPostingItemRowAiPick
+              job={job}
+              showAppliedSection={false} // 필요하면 true로
+            />
+          </div>
+        ))}
+      </div>
+      {/* <div className="job-posting__list job-posting__list--row">
         {jobs.map((job) => {
           const isBookmarked = bookmarks[job.id] === 1;
           const isApplied = applied[job.id] === 1;
@@ -240,7 +256,7 @@ export default function JobPostingRow({
             </div>
           );
         })}
-      </div>
+      </div> */}
     </>
   );
 }

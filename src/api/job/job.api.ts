@@ -24,8 +24,7 @@ export async function fetchJobList(
 }> {
   //console.log(getAccessToken()?"true":"fals");
   const res = await instance.get<JobListApiResponse>("/auth/jobs", {
-
-    requiresAuth: getAccessToken()?true:false,
+    requiresAuth: false,
     params: {
       page,
       size,

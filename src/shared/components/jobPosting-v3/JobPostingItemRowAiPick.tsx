@@ -9,6 +9,8 @@ import jobkorea from "@/assets/icons/company_logos/jobkorea.png";
 import fire from "@/assets/icons/fire.png";
 import seed from "@/assets/icons/seed.png";
 import ic_check_circle_purple_20 from "@/assets/icons/size20/ic_check_circle_purple_20.png";
+import ai_pick from "@/assets/icons/ai_pick.png";
+import green_star16x16 from "@/assets/icons/green_star16x16.png";
 
 import {
   getCareerLabel,
@@ -23,19 +25,19 @@ import { logout } from "@/api/auth/auth.api";
 const DEFAULT_SUCCESS_MESSAGE = "지원 정보가 반영되었습니다.";
 const DEFAULT_INFO_MESSAGE = "기록을 해제했어요.";
 
-interface JobPostingItemRowNoAiPickProps {
+interface JobPostingItemRowAiPickProps {
   appliedSuccessMessage?: string;
   unappliedInfoMessage?: string;
   showAppliedSection?: boolean;
   job?: JobItem;
 }
 
-export default function JobPostingItemRowNoAiPick({
+export default function JobPostingItemRowAiPick({
   appliedSuccessMessage = DEFAULT_SUCCESS_MESSAGE,
   unappliedInfoMessage = DEFAULT_INFO_MESSAGE,
   showAppliedSection = true,
   job,
-}: JobPostingItemRowNoAiPickProps) {
+}: JobPostingItemRowAiPickProps) {
   const navigate = useNavigate();
 
   // ✅ job이 undefined여도 안전하게 기본값 0
@@ -140,6 +142,9 @@ export default function JobPostingItemRowNoAiPick({
             </div>
 
             <div className="job-posting__meta">
+            <div className="job-posting__match job-posting__match--level">
+              <img src={green_star16x16} alt="" /> AI 적합도 90%
+                </div>
               <div className="job-posting__meta-items">
                 <span className="job-posting__meta-item">
                   {loc}ㆍ{career}ㆍ{edu}
@@ -173,6 +178,9 @@ export default function JobPostingItemRowNoAiPick({
             마감임박!
           </span>
         </div>
+        <div className="job-posting__ai-pick">
+          <img src={ai_pick} alt="" />
+         </div>
       </div>
 
       {showAppliedSection &&

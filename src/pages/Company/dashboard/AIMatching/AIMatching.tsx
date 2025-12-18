@@ -13,7 +13,7 @@ import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
 export default function AIMatching() {
   const navigate = useNavigate();
 
-  const [jobUrl, setJobUrl] = useState("");
+  const [jobUrl, setJobUrl] = useState("https://jobkok.kr/jobs/17");
   const [isLoading, setIsLoading] = useState(false);
   const [showResult, setShowResult] = useState(false);
 
@@ -21,7 +21,7 @@ export default function AIMatching() {
 
   // ✅ 허용되는 URL(정확히 일치해야 함)
   const VALID_URL =
-    "https://www.wanted.co.kr/wd/317089?client_id=d2tvri42hzQ8uYOG10D8N1Mh";
+    "https://jobkok.kr/jobs/17";
 
   useEffect(() => {
     return () => {

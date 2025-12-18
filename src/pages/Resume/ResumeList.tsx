@@ -23,7 +23,7 @@ import arrow_left from "@/assets/icons/keyboard_arrow_left.png";
 import arrow_right from "@/assets/icons/keyboard_arrow_right.png";
 import Pagination from "@/shared/components/Pagination";
 import { fetchResumeList } from "@/api/resume/resume.api";
-import { logout } from "@/api/auth.api";
+import { logout } from "@/api/auth/auth.api";
 import { formatDate } from "@/shared/utils/util";
 import { ResumeItem } from "@/api/resume/resume.types";
 

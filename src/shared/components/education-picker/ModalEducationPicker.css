@@ -1,5 +1,47 @@
 
-.education-picker--popup{
+
+.education-picker__popup{
+    /* width: 460px;
+    display: flex;
+    top: 150%;
+    left: 0px;
+    position: absolute;
+    background-color: gray;
+    flex-direction: column;
+    align-items: flex-start;
+    border-radius: 6px;
+    border: 1px solid var(--gray-300, #E0E2E4);
+    background: var(--white-100, #FFF);
+    box-shadow: 0 0 24px 0 rgba(42, 45, 47, 0.16);
+    overflow: hidden;
+    color: var(--gray-900, #2A2D2F);
+    text-overflow: ellipsis;
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; 
+    z-index: 10; */
+
+}
+
+.education-picker__popup.mobile{
+    display: none;
+}
+
+.job-role-picker__header{
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    gap: 12px;
+    align-self: stretch;
+    background: var(--white-100, #FFF);
+}
+.education-picker__checkbox-wrap{
+    cursor: pointer;
+}
+
+.education-picker__popup {
     width: 460px;
     display: flex;
     top: 150%;
@@ -21,23 +63,6 @@
     font-weight: 400;
     line-height: 20px; /* 125% */
     z-index: 10;
-
-}
-
-.education-picker--popup.mobile{
-    display: none;
-}
-
-.job-role-picker__header{
-    display: flex;
-    align-items: center;
-    padding: 20px;
-    gap: 12px;
-    align-self: stretch;
-    background: var(--white-100, #FFF);
-}
-.education-picker__checkbox-wrap{
-    cursor: pointer;
 }
 
 .education-picker__body{
@@ -321,7 +346,7 @@ align-items: center;
 @media (max-width: 760px) {
     body{
 
-        .education-picker--popup.mobile{
+        .education-picker__popup.mobile{
             display: flex;
             position: static;
             width: 100%;
@@ -332,7 +357,7 @@ align-items: center;
         }
         
 
-        .education-picker--popup{
+        .education-picker__popup{
             display: none;
         }
 

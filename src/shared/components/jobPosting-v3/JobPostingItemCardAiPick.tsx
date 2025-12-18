@@ -9,6 +9,8 @@ import jobkorea from "@/assets/icons/company_logos/jobkorea.png";
 import fire from "@/assets/icons/fire.png";
 import seed from "@/assets/icons/seed.png";
 import check_circle_purple from "@/assets/icons/check_circle_purple.png";
+import ai_pick from "@/assets/icons/ai_pick.png";
+import green_star16x16 from "@/assets/icons/green_star16x16.png";
 
 import {
   getCareerLabel,
@@ -23,7 +25,7 @@ import { logout } from "@/api/auth/auth.api";
 const DEFAULT_SUCCESS_MESSAGE = "지원 정보가 반영되었습니다.";
 const DEFAULT_INFO_MESSAGE = "기록을 해제했어요.";
 
-interface JobPostingItemCardNoAiPickProps {
+interface JobPostingItemCardAiPickProps {
   appliedSuccessMessage?: string;
   unappliedInfoMessage?: string;
 
@@ -37,12 +39,12 @@ interface JobPostingItemCardNoAiPickProps {
   job?: JobItem;
 }
 
-export default function JobPostingItemCardNoAiPick({
+export default function JobPostingItemCardAiPick({
   appliedSuccessMessage = DEFAULT_SUCCESS_MESSAGE,
   unappliedInfoMessage = DEFAULT_INFO_MESSAGE,
   showAppliedSection = true,
   job,
-}: JobPostingItemCardNoAiPickProps) {
+}: JobPostingItemCardAiPickProps) {
   const navigate = useNavigate();
 
   // ✅ job이 undefined여도 안전하게 기본값 0
@@ -102,7 +104,7 @@ export default function JobPostingItemCardNoAiPick({
   // ✅ job이 없으면 최소 렌더(에러 방지)
   if (!job) {
     return (
-      <div className="job-posting__card">
+      <div className="job-posting__card ai-pick">
         <div className="job-card__header">
           <div className="job-posting__left">
             <img className="job-posting__logo" src={mp_test_logo} alt="" />
@@ -127,7 +129,7 @@ export default function JobPostingItemCardNoAiPick({
   const edu = getEducationLabel(job.educationCode);
 
   return (
-    <div className="job-posting__card" onClick={handleGoToJobPost}>
+    <div className="job-posting__card ai-pick" onClick={handleGoToJobPost}>
       <div className="job-card__header">
         <div className="job-posting__left">
           <img
@@ -159,6 +161,10 @@ export default function JobPostingItemCardNoAiPick({
 
       <div className="job-card__body">
         <div className="job-card__content">
+        <span className="job-posting__match job-posting__match--level">
+                      <img src={green_star16x16} alt="" />
+                      AI 적합도 90%
+                    </span>
           <div className="job-card__facts">
             <div className="job-posting__meta-items">
               <span className="job-posting__meta-item">
@@ -183,7 +189,9 @@ export default function JobPostingItemCardNoAiPick({
             마감임박!
           </span>
         </div>
-
+        <div className="job-card__sticker">
+                  <img src={ai_pick} alt="" />
+                </div>
         {showAppliedSection &&
           (recordAsApplied === 0 ? (
             <div className="job-card__control job-card__control--radio">

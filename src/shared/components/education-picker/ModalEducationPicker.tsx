@@ -74,7 +74,7 @@ export default function ModalEducationPicker({
   return (
     <>
       {/* PC */}
-      <div className="education-picker education-picker--popup">
+      <div className="education-picker education-picker__popup">
         <div className="education-picker__body">
           <div className="education-picker__column education-picker__column--left">
             {EDUCATION_OPTIONS_LEFT.map((opt) => (

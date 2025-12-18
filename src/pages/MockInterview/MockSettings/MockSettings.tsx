@@ -75,7 +75,7 @@ export default function MockSettings() {
 
     const ok = validateSubmitRequired();
     if (!ok) {
-      toast.info("필수 항목을 먼저 입력해 주세요.");
+      //toast.info("필수 항목을 먼저 입력해 주세요.");
       return; // ❌ 다음 단계 이동 막기
     }
 

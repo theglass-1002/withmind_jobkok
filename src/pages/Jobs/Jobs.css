@@ -210,6 +210,8 @@
     gap: 16px;
 }
 
+.education-picker__popup{}
+
 .job-search-filter-menu .job-search-filter-menu__item{
     position: relative;
     display: flex;

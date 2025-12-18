@@ -5,7 +5,7 @@ import axios, {
   AxiosRequestHeaders,
 } from "axios";
 import { API_BASE_URL } from "@/config/config";
-import { logout } from "./auth.api";
+import { logout } from "./auth/auth.api";
 
 // ======================================
 // axios 타입 확장: requiresAuth, _retry 추가

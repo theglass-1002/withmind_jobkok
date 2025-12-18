@@ -82,7 +82,7 @@ box-shadow: 0 0 20px 0 rgba(42, 45, 47, 0.04);
   padding: 36px;
   flex-direction: column;
   align-items: flex-start;
-  gap: 36px;
+  gap: 30px;
   flex: 1 0 0;
   background: var(--white-100, #FFF);
   overflow: auto;
@@ -110,6 +110,11 @@ box-shadow: 0 0 20px 0 rgba(42, 45, 47, 0.04);
   display: flex;
   align-items: flex-start;
   align-self: stretch;
+  cursor: pointer;
+}
+
+.search-results-dropdown__item:hover{
+  background: var(--gray-50, #F8F8F9);
 }
 
 .hero .hero-head .search .select_box .select_box__control {

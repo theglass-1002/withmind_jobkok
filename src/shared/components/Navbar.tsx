@@ -12,7 +12,7 @@ import ic_arrow_back_ios_gray900_20 from "@/assets/icons/size20/ic_arrow_back_io
 import ic_search_gray900_20 from "@/assets/icons/size20/ic_search_gray900_20.png";
 
 // ✅ 로그인 유틸
-import { isLoggedIn, logout } from "@/api/auth.api";
+import { isLoggedIn, logout } from "@/api/auth/auth.api";
 import { Logger } from "html2canvas/dist/types/core/logger";
 
 // ===============================================

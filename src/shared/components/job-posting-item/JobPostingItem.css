@@ -80,6 +80,7 @@
 }
 .job-posting__item--row .job-posting__row--bottom {
   /* 로고(56) + 간격(20) */
+  justify-content: space-between;
   padding-left: calc(56px + var(--gap-lg));
   align-items: center;
 }
@@ -301,6 +302,12 @@
   border: 1px solid var(--gray-300, #E0E2E4);
   cursor: pointer;
   align-self: stretch;
+}
+
+.job-posting__list--grid .job-posting__card.ai-pick{
+  border-radius: 6px;
+border: 1px solid var(--ai-100, #15D078);
+background: var(--white-100, #FFF);
 }
 
 .job-posting__list--grid .job-posting__card:hover{
