@@ -95,6 +95,7 @@ export default function CompanyDashboard() {
       </div>
            
       <ToastContainer
+          limit={2}
           className="app-toast"
           position="top-center"
           transition={SlideDown}

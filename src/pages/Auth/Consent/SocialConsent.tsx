@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect, useCallback } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 
 import ic_turn_right_gray400_22x21 from "@/assets/icons/ic_turn_right_gray400_22x21.png";
@@ -8,6 +8,7 @@ import { deviceId } from "@/shared/utils/util";
 import {
   kakaoLoginWithPreauth,
   naverLoginWithPreauth,
+  googleLoginWithPreauth,
 } from "@/api/auth/auth.api";
 
 import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
@@ -48,7 +49,7 @@ type ProviderConfig = {
 const PROVIDERS: Record<ProviderKey, ProviderConfig> = {
   kakao: { key: "kakao", loginWithPreauth: kakaoLoginWithPreauth as any },
   naver: { key: "naver", loginWithPreauth: naverLoginWithPreauth as any },
-  google: { key: "google" }, // 추후 googleLoginWithPreauth 연결
+  google: { key: "google", loginWithPreauth: googleLoginWithPreauth as any },
 };
 
 function parseProviderKey(v: string | null): ProviderKey | null {
@@ -154,7 +155,6 @@ const SocialConsent: React.FC = () => {
   const saveLoginTokens = (loginRes: LoginRes) => {
     localStorage.setItem("accessToken", loginRes.tokens.accessToken);
     localStorage.setItem("refreshToken", loginRes.tokens.refreshToken);
-
     localStorage.setItem("userName", loginRes.user.userName);
     localStorage.setItem("userId", loginRes.user.userId);
     localStorage.setItem("userIdx", String(loginRes.user.idx));
@@ -255,9 +255,6 @@ const SocialConsent: React.FC = () => {
                   만 14세 이상
                 </span>
               </label>
-              <Link className="consent-item__view" to="">
-                보기
-              </Link>
             </div>
 
             <div className="consent-item">
@@ -273,9 +270,14 @@ const SocialConsent: React.FC = () => {
                   유료 서비스 이용약관 동의
                 </span>
               </label>
-              <Link className="consent-item__view" to="">
+              <a
+                href="/paid-service-terms"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="consent-item__view"
+              >
                 보기
-              </Link>
+              </a>
             </div>
 
             <div className="consent-item">
@@ -291,9 +293,14 @@ const SocialConsent: React.FC = () => {
                   이용약관 동의
                 </span>
               </label>
-              <Link className="consent-item__view" to="">
+              <a
+                href="/terms"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="consent-item__view"
+              >
                 보기
-              </Link>
+              </a>
             </div>
 
             <div className="consent-item">
@@ -309,9 +316,14 @@ const SocialConsent: React.FC = () => {
                   개인정보 수집 및 이용 동의
                 </span>
               </label>
-              <Link className="consent-item__view" to="">
+              <a
+                href="/privacy-consent"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="consent-item__view"
+              >
                 보기
-              </Link>
+              </a>
             </div>
 
             <div className="consent-item--optional">
@@ -328,9 +340,14 @@ const SocialConsent: React.FC = () => {
                     이벤트 및 서비스 안내 수신 동의
                   </span>
                 </label>
-                <Link className="consent-item__view" to="/terms/marketing">
+                <a
+                  href="/marketing-consent"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="consent-item__view"
+                >
                   보기
-                </Link>
+                </a>
               </div>
 
               <div className="consent-item__options">

@@ -29,8 +29,9 @@ export default function CompanyLogin() {
 
   return (
     <div className="company-login">
-      {/* ✅ 여기서만 토스트 띄우기 */}
+ 
       <ToastContainer
+        limit={2}
         className="app-toast"
         position="top-center"
         autoClose={2000}

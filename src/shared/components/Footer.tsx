@@ -15,12 +15,20 @@ export default function Footer() {
         </div>
         <div className="wrap" aria-label="푸터">
           <ul className="footer-links">
-            <li><Link to="/about">회사소개</Link></li>
-            <li><Link to="/terms">이용약관</Link></li>
-            <li><Link to="/privacy">개인정보처리방침</Link></li>
-            <li><Link to="/notices">공지사항</Link></li>
-            <li><Link to="/support">고객지원</Link></li>
-            <li><Link to="/manual">매뉴얼</Link></li>
+            <li><a href="https://withmind.net/" target="_blank" rel="noopener noreferrer">회사소개</a></li>
+            <li>
+              <a href="/terms" target="_blank" rel="noopener noreferrer">
+                이용약관
+              </a>
+            </li>
+            <li>
+              <a href="/privacy-policy" target="_blank" rel="noopener noreferrer">
+                개인정보처리방침
+              </a>
+            </li>
+            <li><Link to="/mypage/support/notices">공지사항</Link></li>
+            <li><Link to="/mypage/support/faq">고객지원</Link></li>
+            {/* <li><Link to="/manual">매뉴얼</Link></li> */}
           </ul>
           <div className="info_wrap">
             <div>
@@ -49,12 +57,20 @@ export default function Footer() {
 
           <div className="wrap" aria-label="푸터">
           <ul className="footer-links">
-            <li><Link to="/about">회사소개</Link></li>
-            <li><Link to="/terms">이용약관</Link></li>
-            <li><Link to="/privacy">개인정보처리방침</Link></li>
-            <li><Link to="/notices">공지사항</Link></li>
-            <li><Link to="/support">고객지원</Link></li>
-            <li><Link to="/manual">매뉴얼</Link></li>
+            <li><a href="https://withmind.net/" target="_blank" rel="noopener noreferrer">회사소개</a></li>
+            <li>
+              <a href="/terms" target="_blank" rel="noopener noreferrer">
+                이용약관
+              </a>
+            </li>
+            <li>
+              <a href="/privacy-policy" target="_blank" rel="noopener noreferrer">
+                개인정보처리방침
+              </a>
+            </li>
+            <li><Link to="/mypage/support/notices">공지사항</Link></li>
+            <li><Link to="/mypage/support/faq">고객지원</Link></li>
+            {/* <li><Link to="/manual">매뉴얼</Link></li> */}
           </ul>
           <div className="info_wrap">
             <div>

@@ -498,3 +498,12 @@ export function createVideoThumbnail(videoUrl: string, time = 1): Promise<string
     video.onerror = () => reject(new Error("video load error"));
   });
 }
+
+export const extractJobId = (url: string): string | null => {
+  try {
+    const match = url.match(/\/jobs\/(\d+)/);
+    return match ? match[1] : null;
+  } catch {
+    return null;
+  }
+};

@@ -143,8 +143,7 @@ instance.interceptors.response.use(
           }
         );
 
-        console.log('토큰갱신 함수요청44');
-        console.log('토큰갱신 함수요청55',refreshResponse);
+
         const newAccessToken = (refreshResponse.data as any).token;
         const newRefreshToken = (refreshResponse.data as any).refreshToken;
         localStorage.setItem("accessToken",newAccessToken);

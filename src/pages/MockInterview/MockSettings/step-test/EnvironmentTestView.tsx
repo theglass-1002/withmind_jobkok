@@ -1,6 +1,6 @@
-// EnvironmentTestView.tsx
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+
 import SettingsSidebar from "@/pages/MockInterview/MockSettings/components/SettingsSidebar";
 import SettingsPanel from "@/pages/MockInterview/MockSettings/components/SettingsPanel";
 import TestIntro from "./components/TestIntro";
@@ -8,19 +8,34 @@ import CameraTest from "./components/CameraTest";
 import "./EnvironmentTestView.css";
 import ic_chevron_left_gray900_24 from "@/assets/icons/size24/ic_chevron_left_gray900_24.png";
 import ic_chevron_right_gray700_24 from "@/assets/icons/size24/ic_chevron_right_gray700_24.png";
-
-// ✅ 모달 컴포넌트 경로 맞게 수정
 import Modal from "@/shared/components/modal/Modal";
+
+type LocationState = {
+  interviewRes?: any;
+  resumeIdx?: number;
+  jobId?: number;
+  desiredJob?: string;
+  jobPostingUrl?: string;
+};
 
 export default function EnvironmentTestView() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const state = (location.state || {}) as LocationState;
+
   const [testStep, setTestStep] = useState<"intro" | "camera1" | "camera2" | "complete" | "failed">("intro");
   const [showDialog, setShowDialog] = useState(true);
-
-  // ✅ 나가기 확인 모달
   const [showExitConfirm, setShowExitConfirm] = useState(false);
 
-  // ✅ "나가기" 요청(사이드패널 X/나가기 버튼 등) → 모달만 띄움
+  useEffect(() => {
+    console.log("EnvironmentTestView location.state:", state);
+    console.log("interviewRes:", state.interviewRes);
+    console.log("resumeIdx:", state.resumeIdx);
+    console.log("jobId:", state.jobId);
+    console.log("desiredJob:", state.desiredJob);
+    console.log("jobPostingUrl:", state.jobPostingUrl);
+  }, [state]);
+
   const handleExitRequest = () => {
     setShowExitConfirm(true);
   };
@@ -29,13 +44,11 @@ export default function EnvironmentTestView() {
     setShowExitConfirm(false);
   };
 
-  // ✅ 모달에서 확인 누르면 이동
   const handleConfirmExit = () => {
     setShowExitConfirm(false);
-    navigate("/mock-interview-report"); // 원하는 경로로 변경 가능
+    navigate("/mock-interview-report");
   };
 
-  // ✅ "이전으로" 버튼도 동일하게 모달 띄우게
   const handleBackClick = () => {
     setShowExitConfirm(true);
   };
@@ -47,7 +60,6 @@ export default function EnvironmentTestView() {
 
   return (
     <>
-      {/* ✅ 나가기 확인 모달 */}
       <Modal
         open={showExitConfirm}
         title="환경 테스트를 종료하시겠습니까?"
@@ -94,7 +106,11 @@ export default function EnvironmentTestView() {
           </div>
         </div>
 
-        <SettingsPanel onExit={handleExitRequest} />
+        <SettingsPanel 
+        onExit={handleExitRequest} 
+        activeStep={2}
+        interviewState={state}
+        />
 
         {showDialog && testStep === "intro" && (
           <>
@@ -105,7 +121,6 @@ export default function EnvironmentTestView() {
           </>
         )}
 
-        {/* 모바일 */}
         <div className="mock-settings-page mobile environment">
           <div className="mock-settings__content">
             <div className="mock-settings__content-inner">

@@ -350,11 +350,7 @@ const Login: React.FC = () => {
               />
               <img src={cancel} onClick={handleClearPassword} alt="비밀번호 지우기" />
               <img
-                src={
-                  showPassword
-                    ? ic_visibility_off_gray700_20
-                    : ic_visibility_gray700_20
-                }
+                src={showPassword ? ic_visibility_off_gray700_20 : ic_visibility_gray700_20}
                 onClick={togglePasswordVisibility}
                 alt=""
               />
@@ -377,11 +373,7 @@ const Login: React.FC = () => {
               />
               <img src={cancel} onClick={handleClearPassword} alt="비밀번호 지우기" />
               <img
-                src={
-                  showPassword
-                    ? ic_visibility_off_gray700_20
-                    : ic_visibility_gray700_20
-                }
+                src={showPassword ? ic_visibility_off_gray700_20 : ic_visibility_gray700_20}
                 onClick={togglePasswordVisibility}
                 alt=""
               />
@@ -403,10 +395,7 @@ const Login: React.FC = () => {
         </div>
 
         <div className="form-meta">
-          <span
-            className="remember"
-            onClick={isLoading ? undefined : handleToggleRemember}
-          >
+          <span className="remember" onClick={isLoading ? undefined : handleToggleRemember}>
             <img
               src={
                 remember
@@ -446,24 +435,9 @@ const Login: React.FC = () => {
       </div>
 
       <div className="oauth mobile">
-        <img
-          className="login_btn"
-          src={m_kakao_login52}
-          alt=""
-          onClick={isLoading ? undefined : handleKakaoLogin}
-        />
-        <img
-          className="login_btn"
-          src={m_naver_login52}
-          alt=""
-          onClick={isLoading ? undefined : handleNaverLogin}
-        />
-        <img
-          className="login_btn"
-          src={m_google_login52}
-          alt=""
-          onClick={isLoading ? undefined : handleGoogleLogin}
-        />
+        <img className="login_btn" src={m_kakao_login52} alt="" onClick={isLoading ? undefined : handleKakaoLogin} />
+        <img className="login_btn" src={m_naver_login52} alt="" onClick={isLoading ? undefined : handleNaverLogin} />
+        <img className="login_btn" src={m_google_login52} alt="" onClick={isLoading ? undefined : handleGoogleLogin} />
       </div>
 
       <NavLink to="/signup" className="auth-signup-wrap">

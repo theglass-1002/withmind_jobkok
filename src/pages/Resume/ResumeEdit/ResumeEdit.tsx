@@ -480,9 +480,9 @@ export default function ResumeEdit() {
         awards,
       };
 
-      console.log(payload);
+      console.log('보내는 페이로드',payload);
       const titles = await fetchResumeTitleSuggestions(payload);
-      console.log(titles);
+      console.log('결과값',titles);
       if (!titles || titles.length === 0) {
         toast.info("추천할 제목이 없습니다. 내용을 조금 더 채워보세요.");
         return;

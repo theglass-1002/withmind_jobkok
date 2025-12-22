@@ -321,6 +321,7 @@ export default function Layout({
         {shouldShowBottomNav && <BottomNav />}
         
         <ToastContainer
+          limit={2}
           className="app-toast"
           position="top-center"
           transition={SlideDown}

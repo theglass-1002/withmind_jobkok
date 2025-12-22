@@ -1,4 +1,4 @@
-import { ApiResponse } from "./axios.instance";
+import { ApiResponse } from "@/api/axios.instance";
 
 export interface LoginRequest {
   userId: string;
@@ -57,7 +57,7 @@ export type OAuthPrecheckProfile = {
 
 export type OAuthPrecheckResponse = {
   code: number;
-  provider: "kakao" | "naver" | string;
+  provider: "kakao" | "naver" | "google" | string;
   exists: boolean;
   needTerms: boolean;
   suggestedUserId?: string;
@@ -67,6 +67,7 @@ export type OAuthPrecheckResponse = {
   msg?: string;
 };
 
+
 export type OAuthLoginWithPreauthRequest = {
   preauthToken: string;
   termsAgreed: boolean;
@@ -75,7 +76,7 @@ export type OAuthLoginWithPreauthRequest = {
 
 export type OAuthLoginWithPreauthResponse = {
   code: number;
-  provider: "kakao" | "naver" | string;
+  provider: "kakao" | "naver" | "google" | string;
   linked: boolean;
   msg: string;
   tokens: {
@@ -99,6 +100,13 @@ export type NaverPrecheckRequest = OAuthPrecheckRequest;
 export type NaverPrecheckResponse = OAuthPrecheckResponse;
 export type NaverLoginWithPreauthRequest = OAuthLoginWithPreauthRequest;
 export type NaverLoginWithPreauthResponse = OAuthLoginWithPreauthResponse;
+
+
+export type GooglePrecheckRequest = OAuthPrecheckRequest;
+export type GooglePrecheckResponse = OAuthPrecheckResponse;
+export type GoogleLoginWithPreauthRequest = OAuthLoginWithPreauthRequest;
+export type GoogleLoginWithPreauthResponse = OAuthLoginWithPreauthResponse;
+
 
 export interface InicisHashRequest {
   userName: string;

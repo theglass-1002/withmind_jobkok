@@ -48,7 +48,6 @@ export async function fetchJobDetail(
   jobId: number
 ): Promise<JobDetailApiResponse> {
   const res = await instance.get<JobDetailApiResponse>(`/auth/job/${jobId}`);
-  console.log('red',res.data);
   return res.data;
 }
 

@@ -765,9 +765,6 @@ export default function Signup() {
                 만 14세 이상
               </span>
             </label>
-            <Link className="consent-item__view" to={""}>
-              보기
-            </Link>
           </div>
 
           <div className="consent-item">
@@ -782,9 +779,14 @@ export default function Signup() {
                 유료 서비스 이용약관 동의
               </span>
             </label>
-            <Link className="consent-item__view" to={""}>
+            <a 
+              href="/paid-service-terms" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="consent-item__view"
+            >
               보기
-            </Link>
+            </a>
           </div>
 
           <div className="consent-item">
@@ -799,9 +801,14 @@ export default function Signup() {
                 이용약관 동의
               </span>
             </label>
-            <Link className="consent-item__view" to={""}>
+              <a 
+              href="/terms" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="consent-item__view"
+            >
               보기
-            </Link>
+            </a>
           </div>
 
           <div className="consent-item">
@@ -816,9 +823,14 @@ export default function Signup() {
                 개인정보 수집 및 이용 동의
               </span>
             </label>
-            <Link className="consent-item__view" to={""}>
+            <a 
+              href="/privacy-consent" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="consent-item__view"
+            >
               보기
-            </Link>
+            </a>
           </div>
 
           <div className="consent-item--optional">
@@ -834,9 +846,14 @@ export default function Signup() {
                   이벤트 및 서비스 안내 수신 동의
                 </span>
               </label>
-              <Link className="consent-item__view" to="/terms/marketing">
+              <a 
+                href="/marketing-consent" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="consent-item__view"
+              >
                 보기
-              </Link>
+              </a>
             </div>
 
             <div className="consent-item__options">

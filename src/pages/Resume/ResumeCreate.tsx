@@ -342,7 +342,7 @@ export default function ResumeCreate() {
         activities,
         awards,
       };
-
+    
       const titles = await fetchResumeTitleSuggestions(payload);
       if (!titles || titles.length === 0) {
         toast.info("추천할 제목이 없습니다. 내용을 조금 더 채워보세요.");
@@ -352,6 +352,7 @@ export default function ResumeCreate() {
       setTitleSuggestions(titles);
       setShowTitleSuggest(true);
     } catch (error) {
+
       console.error("AI 제목 추천 실패:", error);
       toast.error("AI 제목 추천 중 오류가 발생했습니다.");
     } finally {
@@ -1347,7 +1348,6 @@ export default function ResumeCreate() {
   const isSubmitDisabled = !form.title.trim();
 
   return (
-    console.log(isDefaultResume),
     <div className="resume-create-page">
       <LoadingOverlay
         isLoading={

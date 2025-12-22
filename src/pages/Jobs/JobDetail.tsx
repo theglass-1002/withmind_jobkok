@@ -37,6 +37,7 @@ import {
 import { fetchResumeCheck } from "@/api/resume/resume.api";
 
 import "./JobDetail.css";
+import { REAL_BASE_URL } from "@/config/config";
 
 export default function JobDetail() {
   const navigate = useNavigate();
@@ -125,13 +126,19 @@ export default function JobDetail() {
   };
 
   const handleCopyLink = () => {
-    if (!job?.url) {
+  
+    if (!window.location.pathname) {
       toast.error("복사할 링크가 없습니다.");
       return;
     }
   
+    const cleanUrl =
+    REAL_BASE_URL + window.location.pathname;
+   
+    console.log(cleanUrl);
+  
     navigator.clipboard
-      .writeText(job.url)
+      .writeText(cleanUrl)
       .then(() => {
         toast.success("공고 링크가 복사되었습니다.");
       })

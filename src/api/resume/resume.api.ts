@@ -113,7 +113,7 @@ export async function fetchResumeTitleSuggestions(
       },
     }
   );
-
+  console.log("AI 제목 추천 응답:", res);
   const body = res.data;
   console.log("AI 제목 추천 응답:", body);
 

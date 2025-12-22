@@ -14,6 +14,10 @@ import {
   NaverPrecheckResponse,
   NaverLoginWithPreauthRequest,
   NaverLoginWithPreauthResponse,
+  GooglePrecheckRequest,
+  GooglePrecheckResponse,
+  GoogleLoginWithPreauthRequest,
+  GoogleLoginWithPreauthResponse,
 } from "./auth.types";
 
 import {
@@ -21,6 +25,8 @@ import {
   KAKAO_REST_API_KEY,
   NAVER_CLIENT_ID,
   NAVER_REDIRECT_URI,
+  GOOGLE_CLIENT_ID,
+  GOOGLE_REDIRECT_URI,
 } from "@/config/config";
 
 export async function checkEmailDuplicate(email: string): Promise<EmailCheckResponse> {
@@ -59,17 +65,12 @@ export const isLoggedIn = () => !!localStorage.getItem("accessToken");
 export const logout = () => {
   try {
     sessionStorage.clear();
-  } catch (e) {
-    // ignore
-  }
+  } catch (_) {}
 
   try {
     localStorage.clear();
-  } catch (e) {
-    // ignore
-  }
+  } catch (_) {}
 };
-
 
 export function buildKakaoAuthUrl(state: string) {
   return (
@@ -85,6 +86,20 @@ export function buildNaverLoginUrl(state: string) {
     `https://nid.naver.com/oauth2.0/authorize?response_type=code` +
     `&client_id=${NAVER_CLIENT_ID}` +
     `&redirect_uri=${encodeURIComponent(NAVER_REDIRECT_URI)}` +
+    `&state=${state}`
+  );
+}
+
+export function buildGoogleAuthUrl(state: string) {
+  const scope = encodeURIComponent("openid email profile");
+  return (
+    `https://accounts.google.com/o/oauth2/v2/auth?response_type=code` +
+    `&client_id=${encodeURIComponent(GOOGLE_CLIENT_ID)}` +
+    `&redirect_uri=${encodeURIComponent(GOOGLE_REDIRECT_URI)}` +
+    `&scope=${scope}` +
+    `&include_granted_scopes=true` +
+    `&access_type=offline` +
+    `&prompt=consent` +
     `&state=${state}`
   );
 }
@@ -152,6 +167,43 @@ export async function naverLoginWithPreauth(
 ): Promise<NaverLoginWithPreauthResponse> {
   const res = await instance.post<NaverLoginWithPreauthResponse>(
     "/auth/oauth/naver/login",
+    {
+      preauthToken: payload.preauthToken,
+      termsAgreed: payload.termsAgreed,
+      deviceId: payload.deviceId,
+    },
+    { requiresAuth: false } as any
+  );
+
+  return res.data;
+}
+
+export async function googlePrecheck(
+  authorizationCode: string,
+  state: string,
+  deviceId: string
+): Promise<GooglePrecheckResponse> {
+  const body: GooglePrecheckRequest = {
+    authorizationCode,
+    redirectUri: GOOGLE_REDIRECT_URI,
+    state,
+    deviceId,
+  };
+
+  const res = await instance.post<GooglePrecheckResponse>(
+    "/auth/oauth/google/precheck",
+    body,
+    { requiresAuth: false } as any
+  );
+
+  return res.data;
+}
+
+export async function googleLoginWithPreauth(
+  payload: GoogleLoginWithPreauthRequest
+): Promise<GoogleLoginWithPreauthResponse> {
+  const res = await instance.post<GoogleLoginWithPreauthResponse>(
+    "/auth/oauth/google/login",
     {
       preauthToken: payload.preauthToken,
       termsAgreed: payload.termsAgreed,

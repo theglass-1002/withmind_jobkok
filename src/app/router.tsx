@@ -74,6 +74,11 @@ import MatchHistory from "@/pages/Company/dashboard/MatchHistory/MatchHistory";
 import Statistics from "@/pages/Company/dashboard/Statistics/Statistics";
 import Pricing from "@/pages/Company/dashboard/Pricing/Pricing";
 import AIReport from "@/pages/Company/dashboard/AIMatching/report/AIReport";
+import Terms from "@/pages/Docs/Terms";
+import PrivacyPolicy from "@/pages/Docs/PrivacyPolicy";
+import PrivacyConsent from "@/pages/Docs/PrivacyConsent";
+import MarketingConsent from "@/pages/Docs/MarketingConsent";
+import PaidServiceTerms from "@/pages/Docs/PaidServiceTerms";
 
 
 
@@ -175,9 +180,17 @@ export const router = createBrowserRouter([
   { path: "/mock-interview/environment-test", element: <EnvironmentTestView/> },
   { path: "/mock-interview/mock-interview-live", element: <MockInterviewLive/> },
 
-  
+
   { path: "/company/login", element: <CompanyLogin/> },
   { path: "/company/signup", element: <CompanySignup/> },
+  
+  { path: "/terms", element: <Terms/> },
+  { path: "/privacy-policy", element: <PrivacyPolicy/> },
+  { path: "/privacy-consent", element: <PrivacyConsent/> },
+  { path: "/marketing-consent", element: <MarketingConsent/> },
+  { path: "/paid-service-terms", element: <PaidServiceTerms/> },
+
+
   { 
     path: "/company", 
     element: <CompanyDashboard />, // 레이아웃
