@@ -26,6 +26,8 @@ import ic_arrow_drop_down_white_24 from "@/assets/icons/size24/ic_arrow_drop_dow
 import ic_star_gray700_20 from "@/assets/icons/size20/ic_star_gray700_20.png";
 import ic_star_green_20 from "@/assets/icons/size20/ic_star_green_20.png";
 
+import ic_weakness_circle_24 from "@/assets/icons/size24/ic_weakness_circle_24.png";
+import ic_strength_circle_24 from "@/assets/icons/size24/ic_strength_circle_24.png";
 
 
 export const Icons = {
@@ -46,6 +48,8 @@ export const Icons = {
     ic_edit_cancle_gray900_20,
     ic_star_gray700_20,
     ic_star_green_20,
-    ic_arrow_drop_down_white_24
+    ic_arrow_drop_down_white_24,
+    ic_weakness_circle_24,
+    ic_strength_circle_24
     
 };

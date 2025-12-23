@@ -18,7 +18,7 @@ import { fetchJobDetail } from "@/api/job/job.api";
 
 import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
 import type { InterviewQuestionsRequest } from "@/api/interview/interview.types";
-import { fetchInterviewQuestions } from "@/api/interview/interview.api";
+import { fetchEnvTestSpeech, fetchInterviewQuestions } from "@/api/interview/interview.api";
 import { logout } from "@/api/auth/auth.api";
 
 type InterviewInfoErrors = {
@@ -112,6 +112,8 @@ export default function MockSettings() {
 
       const resumeDetail = await fetchResumeDetail(resumeIdxNum);
       const jobDetail = await fetchJobDetail(jobIdNum);
+      const envSpeech = await fetchEnvTestSpeech();
+      console.log("envTestSpeech:", envSpeech);
 
       const payload: InterviewQuestionsRequest = {
         resume: JSON.stringify(resumeDetail),
@@ -119,12 +121,16 @@ export default function MockSettings() {
       };
 
       const interviewRes = await fetchInterviewQuestions(payload);
+      console.log("resumeDetail:", resumeDetail);
+      console.log("jobDetail:", jobDetail);
       console.log("interviewRes:", interviewRes);
 
       navigate("/mock-interview/environment-test", {
         state: {
+          envSpeech,
           interviewRes,
-          resumeIdx: resumeIdxNum,
+          jobDetail,
+          resumeDetail,
           jobId: jobIdNum,
           desiredJob,
           jobPostingUrl,

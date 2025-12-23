@@ -20,6 +20,7 @@ import LoadingOverlay from "@/shared/components/loading/LoadingOverlay"; // ✅ 
 
 import "./overviewPage.css";
 import { fetchInterviewReport } from "@/api/report/report.api";
+import { InterviewReportResponse } from "@/api/report/report.types";
 
 // --------------------------------------------------
 // Type Definitions
@@ -91,7 +92,7 @@ export default function OverviewPage({
 }: Props) {
   const contentRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
-
+  const [report, setReport] = useState<InterviewReportResponse | null>(null);
   const [loading, setLoading] = useState(false);
 
   // ✅ 1) OverviewPage 진입 시 통신
@@ -107,9 +108,9 @@ export default function OverviewPage({
         const qzGroupParam = query.get("qzGroup");
         const qzGroup = qzGroupParam ? Number(qzGroupParam) : 1;
 
-       // const data = await fetchInterviewReport(qzGroup);
-
-      //  console.log("fetchInterviewReport response:", data);
+        const data = await fetchInterviewReport(qzGroup);
+        setReport(data);
+        console.log("fetchInterviewReport response:", data);
       } catch (err) {
         console.error("fetchInterviewReport error:", err);
       } finally {
@@ -168,13 +169,19 @@ export default function OverviewPage({
           left={categorySummary.left}
           right={categorySummary.right}
         />
-
-        <AiSummarySection
+         <AiSummarySection
           title="AI 분석 요약 섹션"
           titleIconSrc={ic_laptop_24}
           strength={aiSummary.strength}
           weakness={aiSummary.weakness}
+          report={report}
         />
+        {/* <AiSummarySection
+          title="AI 분석 요약 섹션"
+          titleIconSrc={ic_laptop_24}
+          strength={aiSummary.strength}
+          weakness={aiSummary.weakness}
+        /> */}
 
         {/* 필요하면 다시 켜면 됨 */}
         {/* <ResumeRecommendedJobsSection

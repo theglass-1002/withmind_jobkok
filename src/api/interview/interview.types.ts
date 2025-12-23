@@ -41,3 +41,12 @@ export type InterviewQuestionsResponse = {
     timestamp: string; // ISO string
   };
 };
+
+export type EnvTestSpeechResponse =
+  | string
+  | {
+      success?: boolean;
+      data?: string;
+      message?: string;
+      error?: any;
+    };

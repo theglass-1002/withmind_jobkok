@@ -1,3 +1,5 @@
+import { InterviewReportResponse } from "@/api/report/report.types";
+import { Icons } from "@/assets/icons";
 import React from "react";
 
 type TagItem = string;
@@ -18,13 +20,14 @@ type WeaknessProps = {
 
 type Props = {
   /** 섹션 제목 */
-  title: string;
+  title?: string;
   /** 타이틀 아이콘 */
   titleIconSrc?: string;
   /** 좌측 강점 정보 */
-  strength: StrengthProps;
+  strength?: StrengthProps;
   /** 우측 약점 정보 */
-  weakness: WeaknessProps;
+  weakness?: WeaknessProps;
+  report: InterviewReportResponse | null;
 };
 
 export default function AiSummarySection({
@@ -32,7 +35,11 @@ export default function AiSummarySection({
   titleIconSrc,
   strength,
   weakness,
+  report
 }: Props) {
+  console.log(report);
+  const powerKeywords = report?.powerKeywords;
+
   return (
     <div className="analysis-section mock-analysis-overview__ai-summary">
       <span className="analysis-section__title">
@@ -41,12 +48,11 @@ export default function AiSummarySection({
       </span>
 
       <div className="analysis-section__body">
-        {/* LEFT: 강점 */}
         <div className="analysis-section__left">
           <div className="analysis-strength__head">
             <div className="analysis-strength__label">
-              {strength.iconSrc && <img src={strength.iconSrc} alt="" />}
-              {strength.label}
+            <img src={Icons.ic_strength_circle_24} alt="" />
+             강점
             </div>
             <div className="analysis-strength__tags">
               {strength.tags.map((tag, i) => (
@@ -66,9 +72,9 @@ export default function AiSummarySection({
         <div className="analysis-section__right">
           <div className="analysis-weakness__head">
             <div className="analysis-weakness__label">
-              {weakness.iconSrc && <img src={weakness.iconSrc} alt="" />}
-              {weakness.label}
-            </div>
+             <img src={Icons.ic_weakness_circle_24} alt="" />
+              약점
+              </div>
             <div className="analysis-weakness__tags">
               {weakness.tags.map((tag, i) => (
                 <span key={i} className="analysis-tag analysis-tag--weakness">

@@ -11,8 +11,10 @@ import ic_chevron_right_gray700_24 from "@/assets/icons/size24/ic_chevron_right_
 import Modal from "@/shared/components/modal/Modal";
 
 type LocationState = {
+  envSpeech?:string;
   interviewRes?: any;
-  resumeIdx?: number;
+  jobDetail?: any;
+  resumeDetail:any;
   jobId?: number;
   desiredJob?: string;
   jobPostingUrl?: string;
@@ -29,11 +31,6 @@ export default function EnvironmentTestView() {
 
   useEffect(() => {
     console.log("EnvironmentTestView location.state:", state);
-    console.log("interviewRes:", state.interviewRes);
-    console.log("resumeIdx:", state.resumeIdx);
-    console.log("jobId:", state.jobId);
-    console.log("desiredJob:", state.desiredJob);
-    console.log("jobPostingUrl:", state.jobPostingUrl);
   }, [state]);
 
   const handleExitRequest = () => {
@@ -79,7 +76,8 @@ export default function EnvironmentTestView() {
       />
 
       <div className="mock-settings-page environment">
-        <SettingsSidebar activeStep={2} onStepChange={() => {}} />
+        <SettingsSidebar activeStep={2}
+        onStepChange={() => {}} />
 
         <div className="mock-settings__content">
           <div className="mock-settings__content-inner">
@@ -98,6 +96,7 @@ export default function EnvironmentTestView() {
 
             {testStep === "camera1" && (
               <CameraTest
+                speechText={state.envSpeech}
                 testType="camera"
                 onNext={() => setTestStep("camera2")}
                 onFail={() => setTestStep("failed")}
