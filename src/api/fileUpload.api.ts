@@ -40,19 +40,13 @@ export async function getPreSignedUrl(
   folderPath?: string,
   callType: "media" | "video" = "video"
 ): Promise<PreSignedUrlResponse> {
-  console.log('callType',callType);
-
   try {
- 
       const res = await instance.post<PreSignedUrlResponse>("/api/file/getPreUrl", {
         callType,
         fileName,
         folderPath,
       });
-      console.log('응답값 getpreurl',res.data);
       return res.data;
-    
- 
   } catch (error) {
     console.error("❌ Pre-signed URL 요청 실패:", error);
     throw error;
@@ -78,9 +72,9 @@ export async function uploadFileToS3(presignedUrl: string, file: File): Promise<
     const response = await axios.put(presignedUrl, file, {
       headers: { "Content-Type": file.type },
     });
-    console.log("✅ S3 파일 업로드 성공:", response.status);
+    console.log(" S3 파일 업로드 성공:", response.status);
   } catch (error) {
-    console.error("❌ S3 파일 업로드 실패:", error);
+    console.error(" S3 파일 업로드 실패:", error);
     throw error;
   }
 }
@@ -156,13 +150,8 @@ export async function uploadInterviewTestVideo(
   try {
     const uniqueFileName = generateUniqueFileName(originalFileName);
     const file = blobToFile(videoBlob, uniqueFileName);
-
-    const finalFolderPath = joinPath(folderPath, uniqueFileName);
-    console.log('전송 어떻게 보내는지 ',uniqueFileName);
-    const preSignedData = await getPreSignedUrl(uniqueFileName, "video");
-    console.log('비디오2',preSignedData);
+    const preSignedData = await getPreSignedUrl(uniqueFileName,folderPath ,"video");
     const awsData = await getAwsPresignedUrl(preSignedData.presignedUrlApi);
-    console.log('비디오3',awsData);
     await uploadFileToS3(awsData.presigned_url, file);
 
     const finalUrl = preSignedData.awsFrontUrlStr || "";

@@ -50,3 +50,23 @@ export type EnvTestSpeechResponse =
       message?: string;
       error?: any;
     };
+
+  /**
+ * 환경 테스트 분석 요청
+ * - file_url: 업로드된 영상 접근용 URL
+ * - speech: 읽은 문장
+ */
+export type EnvTestAnalyzeRequest = {
+  file_url: string;
+  speech: string;
+};
+
+/**
+ * 환경 테스트 분석 응답
+ */
+export type EnvTestAnalyzeResponse = {
+  status: number;        // 200
+  message: "pass" | "fail"|"nopass";
+  faceCheck: number;    
+  soundCheck: number;    
+};

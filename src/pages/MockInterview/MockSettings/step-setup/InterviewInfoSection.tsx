@@ -106,14 +106,14 @@ export default function InterviewInfoSection({
     console.log("자식(InterviewInfoSection)에서 선택한 값:", value);
 
     const selected = resumeOptions.find((opt) => opt.value === value);
-    console.log("자식에서 선택한 옵션 객체:", selected);
+
 
     onResumeChange(value);
   };
 
   return (
     <>
-      <LoadingOverlay isLoading={isLoading} text="이력서를 불러오는 중입니다..." />
+      <LoadingOverlay isLoading={isLoading} text="영상을 분석하고 있습니다..." isLogo={true}  />
 
       <div className="mock-settings__section">
         <div className="mock-settings__section-header">

@@ -55,6 +55,24 @@ export default function EnvironmentTestView() {
     setTestStep("camera1");
   };
 
+  const handleStartMockInterviewLive = () => {
+    console.log("모의면접 시작하기 클릭 - 전달할 state:", state);
+    console.log("envSpeech:", state.envSpeech);
+    console.log("interviewRes:", state.interviewRes);
+    console.log("jobDetail:", state.jobDetail);
+    console.log("resumeDetail:", state.resumeDetail);
+    console.log("jobId:", state.jobId);
+    console.log("desiredJob:", state.desiredJob);
+    console.log("jobPostingUrl:", state.jobPostingUrl);
+  
+    navigate("/mock-interview/mock-interview-live", {
+      state: {
+        ...state, // ✅ 받은 state 그대로 전달
+      },
+    });
+  };
+  
+
   return (
     <>
       <Modal
@@ -98,7 +116,7 @@ export default function EnvironmentTestView() {
               <CameraTest
                 speechText={state.envSpeech}
                 testType="camera"
-                onNext={() => setTestStep("camera2")}
+                onStartInterview={handleStartMockInterviewLive}
                 onFail={() => setTestStep("failed")}
               />
             )}
@@ -139,7 +157,7 @@ export default function EnvironmentTestView() {
               {testStep === "camera1" && (
                 <CameraTest
                   testType="camera"
-                  onNext={() => setTestStep("camera2")}
+                  onStartInterview={handleStartMockInterviewLive}
                   onFail={() => setTestStep("failed")}
                 />
               )}

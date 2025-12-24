@@ -175,7 +175,7 @@ export default function MockSettings() {
 
   return (
     <>
-      <LoadingOverlay isLoading={isSubmitting} />
+      <LoadingOverlay isLoading={isSubmitting} text="질문을 생성 중입니다..." />
 
       <div className="mock-settings-page">
         <div className="mock-settings-page_container">

@@ -1,5 +1,7 @@
 import instance from "@/api/axios.instance"; // 너희 프로젝트 axios instance 경로에 맞게 수정
 import type {
+  EnvTestAnalyzeRequest,
+  EnvTestAnalyzeResponse,
   EnvTestSpeechResponse,
   InterviewQuestionsRequest,
   InterviewQuestionsResponse,
@@ -52,4 +54,23 @@ export async function fetchEnvTestSpeech(): Promise<string> {
 
   // 3) 예외 케이스
   return "안녕하세요, 반갑습니다.";
+}
+
+export async function fetchEnvTestAnalyze(
+  payload: EnvTestAnalyzeRequest
+): Promise<EnvTestAnalyzeResponse> {
+  const res = await instance.post<EnvTestAnalyzeResponse>(
+    "/",
+    payload,
+    {
+      baseURL: "https://test.interview.api.withmind.net",
+      requiresAuth: false,
+      headers: {
+        accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  return res.data;
 }
