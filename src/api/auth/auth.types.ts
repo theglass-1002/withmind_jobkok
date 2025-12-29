@@ -128,3 +128,35 @@ export interface VerifiedUserInfo {
   birth: string;
   ci: string;
 }
+
+export interface InicisParams {
+  mid: string;
+
+  reqSvcCd: string;
+  mTxId: string;
+  authHash: string;
+  flgFixedUser: string;
+  userName: string;
+  userPhone: string;
+  userBirth: string;
+  userHash: string;
+  reservedMsg: string;
+  directAgency: string;
+  successUrl: string;
+  failUrl: string;
+}
+
+export interface SaInitResponse {
+  status: number;          // 200
+  mid: string;             // "Thhamncoms"
+  mtxId: string;           // "mtxId_..."
+  reqSvcCd: string;        // "01"
+  reqDateTime: string;     // "20251229091825"
+  authHash: string;        // "3207..."
+  reservedMsg: string;     // "isUseToken=N"
+  flgFixedUser: string;    // "N" | "Y"
+  authUrl: string;         // "https://stg-auth.inicis.com/api/authRequest"
+  resultUrl: string;       // "https://stg-auth.inicis.com/api/authResult"
+  callbackUrl: string;     // "http://34.64.175.29:9090/auth/sa/callback"
+  returnUrl: string;       // "http://localhost:3000/inicis/callback"
+}

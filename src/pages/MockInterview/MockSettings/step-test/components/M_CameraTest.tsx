@@ -204,7 +204,7 @@ export default function M_CameraTest({ testType, onNext, onFail }: M_CameraTestP
                 
                 {testStatus === 'failed' && (
                     <>
-                        <TestFailed onRetry={handleRetry} />
+                        <TestFailed />
                         <div className="env-test-result_btn-container">
                     <button className="default_btn_white radius back_btn" onClick={()=>{}}>
                             <img src={ic_keyboard_arrow_left_gray900_24} alt="" />

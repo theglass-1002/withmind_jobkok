@@ -145,7 +145,7 @@ export const router = createBrowserRouter([
 
   { path: "/signup", element:<Layout showFooter="desktop-only" showBottomNav={false}> <Signup/></Layout> },
   {
-    path: "/inicisSuccess",
+    path: "/inicis/callback",  // ✅ 프론트 경로로 변경!
     element: <InicisSuccess />,
   },
 

@@ -18,6 +18,7 @@ import {
   GooglePrecheckResponse,
   GoogleLoginWithPreauthRequest,
   GoogleLoginWithPreauthResponse,
+  SaInitResponse,
 } from "./auth.types";
 
 import {
@@ -215,15 +216,28 @@ export async function googleLoginWithPreauth(
   return res.data;
 }
 
-export async function getInicisHash(
-  userName: string,
-  userPhone: string,
-  userBirth: string
-): Promise<InicisHashResponse> {
-  const res = await instance.get<InicisHashResponse>("/api/auth/inicis/hash", {
-    params: { userName, userPhone, userBirth },
-    requiresAuth: false,
-  } as any);
 
+
+
+export async function saInit(): Promise<SaInitResponse> {
+  const res = await instance.post<SaInitResponse>(
+    "/auth/sa/init",
+    {}, // body
+    { requiresAuth: false } as any // config
+  );
   return res.data;
 }
+
+
+// export async function getInicisHash(
+//   userName: string,
+//   userPhone: string,
+//   userBirth: string
+// ): Promise<InicisHashResponse> {
+//   const res = await instance.get<InicisHashResponse>("/api/auth/inicis/hash", {
+//     params: { userName, userPhone, userBirth },
+//     requiresAuth: false,
+//   } as any);
+
+//   return res.data;
+// }
