@@ -1,60 +1,327 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 import "./MockInterviewLive.css";
+
 import SettingsSidebar from "@/pages/MockInterview/MockSettings/components/SettingsSidebar";
 import LiveSidePanel from "@/pages/MockInterview/MockInterviewLive/components/LiveSidePanel";
 import LiveThinkingSection from "@/pages/MockInterview/MockInterviewLive/components/LiveThinkingSection";
 import LiveAnswerSection from "@/pages/MockInterview/MockInterviewLive/components/LiveAnswerSection";
 
+import { InterviewQuestion, InterviewQuestionsResponse } from "@/types/interview";
+import { uploadJobInterviewVideo } from "@/api/fileUpload.api";
+import { fetchInterviewFollowup } from "@/api/interview/interview.api";
+
+import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
+
 const THINKING_SECONDS = 15;
 type Phase = "thinking" | "answering";
 
-const QUESTIONS = [
-  // 1. 자기소개 및 지원 동기
-  { stage: "자기소개 및 지원 동기", question: "1분 동안 본인을 간단히 소개해 주세요." },
-  { stage: "자기소개 및 지원 동기", question: "위드마인드에 지원하게 된 동기는 무엇인가요?" },
-  { stage: "자기소개 및 지원 동기", question: "지원한 직무를 선택하게 된 계기는 무엇인가요?" },
+type LiveQuestion = {
+  stage: string;
+  question: string;
+  order: number;
+  type: string;
+  difficulty: string;
+  answerHint?: string;
+};
 
-  // 2. 직무 질문
-  { stage: "직무 질문", question: "서비스 기획에서 가장 중요하다고 생각하는 역량은 무엇인가요?" },
-  { stage: "직무 질문", question: "요구사항을 정리하고 우선순위를 정할 때 어떤 기준을 사용하나요?" },
-  { stage: "직무 질문", question: "기획 과정에서 개발자·디자이너와 의견이 다를 때 어떻게 조율하나요?" },
-
-  // 3. 이력서 기반 질문
-  { stage: "이력서 기반 질문", question: "이력서에 작성한 프로젝트 중 가장 기억에 남는 경험은 무엇인가요?" },
-  { stage: "이력서 기반 질문", question: "해당 프로젝트에서 본인이 맡았던 역할과 기여도를 설명해 주세요." },
-  { stage: "이력서 기반 질문", question: "프로젝트 진행 중 가장 어려웠던 점과 이를 해결한 방법은 무엇이었나요?" },
-
-  // 4. 채용 공고 기반 질문
-  { stage: "채용 공고 기반 질문", question: "해당 채용 공고에서 가장 중요하다고 생각한 요구사항은 무엇인가요?" },
-  { stage: "채용 공고 기반 질문", question: "우리 팀에 합류한다면 어떤 부분에서 빠르게 기여할 수 있을까요?" },
-  { stage: "채용 공고 기반 질문", question: "입사 후 3개월 동안 달성하고 싶은 목표는 무엇인가요?" },
-] as const;
+type FollowupQuestion = { text: string; reason: string } | null;
 
 export default function MockInterviewLive() {
+  const location = useLocation();
+
+  const [isUploading, setIsUploading] = useState(false);
+
+  useEffect(() => {
+    console.log("[MockInterviewLive] location.state:", location.state);
+  }, [location.state]);
+
+  const interviewRes: InterviewQuestionsResponse | null = useMemo(() => {
+    const state = location.state as any;
+    return state?.interviewRes ?? null;
+  }, [location.state]);
+
+  const apiQuestions: InterviewQuestion[] = useMemo(() => {
+    if (!interviewRes?.success || !interviewRes.data) return [];
+    return interviewRes.data.questions ?? [];
+  }, [interviewRes]);
+
+  const baseQuestions: LiveQuestion[] = useMemo(() => {
+    const typeToStage = (type: string) => {
+      switch (type) {
+        case "EXPERIENCE":
+          return "경험 질문";
+        case "TECHNICAL":
+          return "기술 질문";
+        case "BEHAVIORAL":
+          return "인성 질문";
+        case "ETC":
+        default:
+          return "기타 질문";
+      }
+    };
+
+    const mapped =
+      apiQuestions.length > 0
+        ? [...apiQuestions]
+            .sort((a, b) => a.order - b.order)
+            .map((q) => ({
+              stage: `${typeToStage(q.type)} · ${q.difficulty}`,
+              question: q.text,
+              order: q.order,
+              type: q.type,
+              difficulty: q.difficulty,
+              answerHint: q.answer_hint,
+            }))
+        : [
+            {
+              stage: "알림",
+              question: "질문 데이터를 불러오지 못했습니다.",
+              order: 1,
+              type: "ETC",
+              difficulty: "EASY",
+            },
+          ];
+
+    return mapped;
+  }, [apiQuestions]);
+
+  const [followUpMap, setFollowUpMap] = useState<Record<number, LiveQuestion>>({});
+
+  const effectiveQuestions: LiveQuestion[] = useMemo(() => {
+    const out: LiveQuestion[] = [];
+
+    for (let i = 0; i < baseQuestions.length; i++) {
+      const q = baseQuestions[i];
+      out.push(q);
+
+      const fu = followUpMap[q.order];
+      if (fu) {
+        out.push(fu);
+
+        const nextBase = baseQuestions[i + 1];
+        if (nextBase) {
+          out.push({
+            stage: "SKIP",
+            question: "",
+            order: nextBase.order,
+            type: "SKIP",
+            difficulty: nextBase.difficulty,
+          });
+          i += 1;
+        }
+      }
+    }
+
+    return out;
+  }, [baseQuestions, followUpMap]);
+
   const [phase, setPhase] = useState<Phase>("thinking");
   const [qIndex, setQIndex] = useState(0);
 
   const [timeLeft, setTimeLeft] = useState(THINKING_SECONDS);
   const [running, setRunning] = useState(true);
+
   const rafRef = useRef<number | null>(null);
   const startTsRef = useRef<number>(0);
 
-  const progress = Math.min(1, Math.max(0, (THINKING_SECONDS - timeLeft) / THINKING_SECONDS));
-  const current = QUESTIONS[qIndex];
-  const isLast = qIndex === QUESTIONS.length - 1;
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordedChunksRef = useRef<BlobPart[]>([]);
+  const [isRecording, setIsRecording] = useState(false);
 
+  useEffect(() => {
+    const cur = effectiveQuestions[qIndex];
+    if (!cur) return;
+    if (cur.type !== "SKIP") return;
+
+    setQIndex((prev) => {
+      const next = prev + 1;
+      return next >= effectiveQuestions.length ? prev : next;
+    });
+  }, [effectiveQuestions, qIndex]);
+
+  const isCurrentFollowup = useMemo(() => {
+    const cur = effectiveQuestions[qIndex];
+    return cur?.type === "FOLLOWUP";
+  }, [effectiveQuestions, qIndex]);
+
+  const uploadRecordedFile = async (videoBlob: Blob, meta: { qIndex: number }) => {
+    const cur = effectiveQuestions[meta.qIndex];
+    if (!cur) return { uploadResult: null, followupRes: null };
+    if (cur.type === "SKIP") return { uploadResult: null, followupRes: null };
+
+    const questionText = cur.question;
+    const isFollowupNow = cur.type === "FOLLOWUP";
+
+    setIsUploading(true);
+
+    try {
+      let uploadResult: any;
+      try {
+        uploadResult = await uploadJobInterviewVideo(videoBlob, "interview");
+        console.log("[uploadRecordedFile] uploadResult:", uploadResult);
+        console.log("[uploadRecordedFile] finalUrl:", uploadResult?.finalUrl);
+      } catch (err) {
+        console.error("[uploadRecordedFile] video upload failed:", err);
+        return { uploadResult: null, followupRes: null };
+      }
+
+      if (isFollowupNow) {
+        console.log("[uploadRecordedFile] current is followup; skip followup API.");
+        return { uploadResult, followupRes: null };
+      }
+
+      const alreadyHasFollowup = !!followUpMap[cur.order];
+      if (alreadyHasFollowup) {
+        console.log("[uploadRecordedFile] followup already exists for order:", cur.order);
+        return { uploadResult, followupRes: null };
+      }
+
+      const payload = { question: questionText, file_url: uploadResult.finalUrl };
+
+      let followupRes: any;
+      try {
+        followupRes = await fetchInterviewFollowup(payload);
+        console.log("[uploadRecordedFile] followupRes:", followupRes);
+      } catch (err) {
+        console.error("[uploadRecordedFile] followup API failed, keep original flow:", err);
+        return { uploadResult, followupRes: null };
+      }
+
+      const fu: FollowupQuestion = followupRes?.data?.follow_up_question ?? null;
+      if (!fu) {
+        console.log("[uploadRecordedFile] follow_up_question is null");
+        return { uploadResult, followupRes };
+      }
+
+      const followupLive: LiveQuestion = {
+        stage: "꼬리 질문",
+        question: fu.text,
+        order: cur.order + 0.01,
+        type: "FOLLOWUP",
+        difficulty: cur.difficulty,
+        answerHint: fu.reason,
+      };
+
+      setFollowUpMap((prev) => ({ ...prev, [cur.order]: followupLive }));
+      console.log("[uploadRecordedFile] followup inserted for order:", cur.order, followupLive);
+
+      return { uploadResult, followupRes };
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const startRecording = async () => {
+    if (isRecording) return;
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      mediaStreamRef.current = stream;
+      recordedChunksRef.current = [];
+
+      const mimeCandidates = [
+        "video/webm;codecs=vp9,opus",
+        "video/webm;codecs=vp8,opus",
+        "video/webm",
+      ];
+      const mimeType = mimeCandidates.find((m) => MediaRecorder.isTypeSupported(m)) || "";
+
+      const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+      mediaRecorderRef.current = recorder;
+
+      recorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) recordedChunksRef.current.push(e.data);
+      };
+
+      recorder.onstart = () => {
+        setIsRecording(true);
+        console.log("[Recorder] start");
+      };
+
+      recorder.onerror = (e) => {
+        console.error("[Recorder] error:", e);
+      };
+
+      recorder.onstop = () => {
+        setIsRecording(false);
+        console.log("[Recorder] stop");
+      };
+
+      recorder.start();
+    } catch (err) {
+      console.error("[Recorder] start failed:", err);
+    }
+  };
+
+  const stopRecordingAndUpload = async () => {
+    const recorder = mediaRecorderRef.current;
+    if (!recorder) {
+      console.warn("[Recorder] stop requested but recorder is null");
+      return;
+    }
+
+    const blob = await new Promise<Blob>((resolve, reject) => {
+      const onStop = () => {
+        try {
+          const mimeType = recorder.mimeType || "video/webm;codecs=vp8,opus";
+          resolve(new Blob(recordedChunksRef.current, { type: mimeType }));
+        } catch (e) {
+          reject(e);
+        }
+      };
+
+      recorder.addEventListener("stop", onStop, { once: true });
+
+      try {
+        recorder.stop();
+      } catch (e) {
+        recorder.removeEventListener("stop", onStop);
+        reject(e);
+      }
+    });
+
+    mediaStreamRef.current?.getTracks().forEach((t) => t.stop());
+    mediaStreamRef.current = null;
+    mediaRecorderRef.current = null;
+
+    await uploadRecordedFile(blob, { qIndex });
+  };
+
+  useEffect(() => {
+    if (qIndex >= effectiveQuestions.length) setQIndex(0);
+  }, [effectiveQuestions.length, qIndex]);
+
+  const current = effectiveQuestions[qIndex] ?? baseQuestions[0];
+
+  const visibleIsLast = (() => {
+    for (let i = qIndex + 1; i < effectiveQuestions.length; i++) {
+      if (effectiveQuestions[i].type !== "SKIP") return false;
+    }
+    return true;
+  })();
+
+  const progress = Math.min(1, Math.max(0, (THINKING_SECONDS - timeLeft) / THINKING_SECONDS));
+
+  // --------- 핵심: 15초 고정 타이머 (timeLeft 의존성 제거) ---------
   useEffect(() => {
     if (phase !== "thinking" || !running) return;
 
+    // thinking 시작할 때마다 무조건 15초로 고정
+    startTsRef.current = performance.now();
+    setTimeLeft(THINKING_SECONDS);
+
     const totalMs = THINKING_SECONDS * 1000;
-    startTsRef.current = performance.now() - (THINKING_SECONDS - timeLeft) * 1000;
 
     const tick = (now: number) => {
       const elapsed = now - startTsRef.current;
       const remainMs = Math.max(0, totalMs - elapsed);
-      setTimeLeft(Math.ceil(remainMs / 1000));
+      const nextLeft = Math.ceil(remainMs / 1000);
 
-      if (remainMs > 0) {
+      setTimeLeft(nextLeft);
+
+      if (remainMs > 0 && phase === "thinking" && running) {
         rafRef.current = requestAnimationFrame(tick);
       } else {
         rafRef.current = null;
@@ -64,10 +331,42 @@ export default function MockInterviewLive() {
     };
 
     rafRef.current = requestAnimationFrame(tick);
+
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
     };
-  }, [phase, running, timeLeft]);
+    // ✅ timeLeft 제거가 핵심
+  }, [phase, running]);
+  // ---------------------------------------------------------------
+
+  useEffect(() => {
+    if (phase !== "answering") return;
+
+    const cur = effectiveQuestions[qIndex];
+    if (cur?.type === "SKIP") {
+      setPhase("thinking");
+      setQIndex((prev) => Math.min(prev + 1, effectiveQuestions.length - 1));
+      return;
+    }
+
+    startRecording();
+
+    return () => {
+      try {
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+          mediaRecorderRef.current.stop();
+        }
+      } catch {}
+
+      mediaStreamRef.current?.getTracks().forEach((t) => t.stop());
+      mediaStreamRef.current = null;
+      mediaRecorderRef.current = null;
+      recordedChunksRef.current = [];
+      setIsRecording(false);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase]);
 
   const handleThinkingRestart = () => {
     setTimeLeft(THINKING_SECONDS);
@@ -83,25 +382,25 @@ export default function MockInterviewLive() {
     setPhase("answering");
   };
 
-  // ✅ 답변 종료 → 다음 질문으로
-  const handleAnswerEnd = () => {
-    const last = qIndex >= QUESTIONS.length - 1;
-    if (last) {
-      // 마지막 질문은 LiveAnswerSection에서 완료 다이얼로그 처리
-      return;
-    }
-
-    setQIndex((prev) => prev + 1);
-    handleThinkingRestart();
+  const advanceToNextVisibleQuestion = () => {
+    setQIndex((prev) => {
+      let next = prev + 1;
+      while (next < effectiveQuestions.length && effectiveQuestions[next].type === "SKIP") {
+        next += 1;
+      }
+      return next >= effectiveQuestions.length ? prev : next;
+    });
   };
 
   return (
     <div className="mock-interview-live">
+      <LoadingOverlay isLoading={isUploading} />
+
       <SettingsSidebar activeStep={3} onStepChange={() => {}} />
 
-      {phase === "thinking" && (
+      {phase === "thinking" && current.type !== "SKIP" && (
         <LiveThinkingSection
-          title={`${current.stage}ㆍ질문 ${qIndex + 1}`}
+          title={`질문 ${current.order}`}
           question={current.question}
           timeLeft={timeLeft}
           progress={progress}
@@ -112,18 +411,28 @@ export default function MockInterviewLive() {
         />
       )}
 
-      {phase === "answering" && (
+      {phase === "answering" && current.type !== "SKIP" && (
         <LiveAnswerSection
-          onEnd={() => {
-            // 답변 끝나면 다음 질문으로 넘어가고, UI를 다시 thinking으로
+          isLast={visibleIsLast}
+          onEnd={async () => {
+            if (isUploading) return;
+
+            await stopRecordingAndUpload();
+
             setPhase("thinking");
-            handleAnswerEnd();
+
+            if (!visibleIsLast) {
+              advanceToNextVisibleQuestion();
+              handleThinkingRestart();
+            }
           }}
-          isLast={isLast}
         />
       )}
 
-      <LiveSidePanel />
+      <LiveSidePanel
+        currentIndex={qIndex}
+        totalCount={effectiveQuestions.filter((q) => q.type !== "SKIP").length}
+      />
     </div>
   );
 }

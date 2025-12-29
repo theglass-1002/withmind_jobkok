@@ -1,43 +1,54 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import ic_logout_white_24 from "@/assets/icons/size24/ic_logout_white_24.png";
 import ic_progress_intro from "@/assets/progress/ic_progress_intro.png";
 import ic_close_white_24 from "@/assets/icons/size24/ic_close_white_24.png";
 
-// ✅ 실제 Modal 컴포넌트 경로에 맞게 수정
 import Modal from "@/shared/components/modal/Modal";
 
 type LiveSidePanelProps = {
   activeStep?: number;
   onExit?: () => void;
+
+  currentIndex?: number; // 0-based
+  totalCount?: number;   // 전체 질문 수
 };
 
-export default function LiveSidePanel({ activeStep, onExit }: LiveSidePanelProps) {
+export default function LiveSidePanel({
+  activeStep,
+  onExit,
+  currentIndex = 0,
+  totalCount = 0,
+}: LiveSidePanelProps) {
   const navigate = useNavigate();
-
   const [showConfirm, setShowConfirm] = useState(false);
 
-  // ✅ "나가기" 버튼을 눌렀을 때: 바로 이동 X, 모달만 띄움
-  const handleExitClick = () => {
-    setShowConfirm(true);
-  };
+  const handleExitClick = () => setShowConfirm(true);
+  const handleCloseConfirm = () => setShowConfirm(false);
 
-  const handleCloseConfirm = () => {
-    setShowConfirm(false);
-  };
-
-  // ✅ 모달에서 "나가기" 눌렀을 때 실제 이동
   const handleConfirmExit = () => {
     setShowConfirm(false);
     navigate("/mock-interview-report");
   };
 
-  // ✅ 모바일 상단 X도 동일하게 모달 띄우기
   const handleMobileCloseClick = () => {
     setShowConfirm(true);
-    onExit?.(); // (원하면 이 줄 제거: 지금은 기존 동작 유지)
+    onExit?.();
   };
+
+  // ✅ 진행률 계산
+  const safeTotal = Math.max(0, totalCount);
+  const safeCurrent = Math.min(Math.max(0, currentIndex), Math.max(0, safeTotal - 1));
+
+  const displayCurrent = safeTotal > 0 ? safeCurrent + 1 : 0;
+  const progressRatio = safeTotal > 0 ? (displayCurrent / safeTotal) : 0;
+
+  // 퍼센트 문자열
+  const progressWidth = useMemo(() => {
+    const pct = Math.max(0, Math.min(1, progressRatio)) * 100;
+    return `${pct}%`;
+  }, [progressRatio]);
 
   return (
     <>
@@ -100,14 +111,20 @@ export default function LiveSidePanel({ activeStep, onExit }: LiveSidePanelProps
             </div>
           </div>
 
+          {/* ✅ 진행 현황 */}
           <div className="mock-interview__progress">
             <div className="mock-interview__progress-header">
               <span className="mock-interview__progress-label">진행 현황</span>
-              <span className="mock-interview__progress-count">질문 1 / 12</span>
+              <span className="mock-interview__progress-count">
+                질문 {displayCurrent} / {safeTotal}
+              </span>
             </div>
 
             <div className="mock-interview__progress-bar">
-              <span className="mock-interview__progress-fill"></span>
+              <span
+                className="mock-interview__progress-fill"
+                style={{ width: progressWidth }}
+              />
             </div>
           </div>
         </div>
@@ -178,14 +195,20 @@ export default function LiveSidePanel({ activeStep, onExit }: LiveSidePanelProps
             </div>
           </div>
 
+          {/* ✅ 진행 현황 */}
           <div className="mock-interview__progress">
             <div className="mock-interview__progress-header">
               <span className="mock-interview__progress-label">진행 현황</span>
-              <span className="mock-interview__progress-count">질문 1 / 12</span>
+              <span className="mock-interview__progress-count">
+                질문 {displayCurrent} / {safeTotal}
+              </span>
             </div>
 
             <div className="mock-interview__progress-bar">
-              <span className="mock-interview__progress-fill"></span>
+              <span
+                className="mock-interview__progress-fill"
+                style={{ width: progressWidth }}
+              />
             </div>
           </div>
         </div>

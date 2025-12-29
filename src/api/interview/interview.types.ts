@@ -1,9 +1,6 @@
-export type InterviewQuestionType =
-  | "EXPERIENCE"
-  | "TECHNICAL"
-  | "BEHAVIORAL"
-  | "ETC";
+// interview.types.ts
 
+export type InterviewQuestionType = "EXPERIENCE" | "TECHNICAL" | "BEHAVIORAL" | "ETC";
 export type InterviewDifficulty = "EASY" | "MEDIUM" | "HARD";
 
 export type InterviewQuestion = {
@@ -35,7 +32,7 @@ export type InterviewQuestionsData = {
 export type InterviewQuestionsResponse = {
   success: boolean;
   data: InterviewQuestionsData | null;
-  error: any; // 서버 스펙 맞춰서 좁혀도 됨
+  error: any;
   meta: {
     request_id: string;
     timestamp: string; // ISO string
@@ -51,7 +48,7 @@ export type EnvTestSpeechResponse =
       error?: any;
     };
 
-  /**
+/**
  * 환경 테스트 분석 요청
  * - file_url: 업로드된 영상 접근용 URL
  * - speech: 읽은 문장
@@ -65,8 +62,47 @@ export type EnvTestAnalyzeRequest = {
  * 환경 테스트 분석 응답
  */
 export type EnvTestAnalyzeResponse = {
-  status: number;        // 200
-  message: "pass" | "fail"|"nopass";
-  faceCheck: number;    
-  soundCheck: number;    
+  status: number; // 200
+  message: "pass" | "fail" | "nopass";
+  faceCheck: number;
+  soundCheck: number;
+};
+
+/**
+ * 꼬리질문(답변 평가 + follow-up question 생성) 요청/응답
+ */
+export type InterviewFollowupRequest = {
+  question: string;
+  file_url: string;
+};
+
+export type InterviewEvaluationLevel = "POOR" | "FAIR" | "GOOD" | "EXCELLENT";
+
+export type InterviewFollowupEvaluation = {
+  level: InterviewEvaluationLevel;
+  score: number;
+  is_sufficient: boolean;
+  no_experience: boolean;
+  comment: string;
+};
+
+export type InterviewFollowupQuestion = {
+  text: string;
+  reason: string;
+};
+
+
+export type InterviewFollowupData = {
+  evaluation: InterviewFollowupEvaluation;
+  follow_up_question: InterviewFollowupQuestion | null;
+};
+
+export type InterviewFollowupResponse = {
+  success: boolean;
+  data: InterviewFollowupData | null;
+  error: any;
+  meta: {
+    request_id: string;
+    timestamp: string; // ISO string
+  };
 };

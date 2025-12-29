@@ -112,7 +112,6 @@ export default function JobPostingRow({
     );
   }
 
-  // 🔥 이력서 기반 추천이 아닌 경우 → No AI Pick Row 컴포넌트로 렌더링
   if (!isResumeBased) {
     return (
       <div className="job-posting__list job-posting__list--row">

@@ -67,7 +67,7 @@ export default function EnvironmentTestView() {
   
     navigate("/mock-interview/mock-interview-live", {
       state: {
-        ...state, // ✅ 받은 state 그대로 전달
+        ...state, // 받은 state 그대로 전달
       },
     });
   };

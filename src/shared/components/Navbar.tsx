@@ -188,9 +188,7 @@ export default function Navbar({ titleText }: NavbarProps) {
             </li>
           </ul>
 
-          {/* 로그인 여부에 따른 분기 */}
           {loggedIn ? (
-            // ---------------- 로그인 상태 ----------------
             <div className="login_on">
               <span
                 className="icon-btn"

@@ -6,19 +6,32 @@ export default function InicisSuccess() {
 
   useEffect(() => {
     console.log("[InicisSuccess] 콜백 도착");
-
-    // 백엔드에서 쿼리 파라미터로 전달한 값 파싱
-    const success = searchParams.get("success") === "true";
-    
+  
+    console.log(
+      "[InicisSuccess] 전체 쿼리 파라미터:",
+      Object.fromEntries(searchParams.entries())
+    );
+  
+    const successParam = searchParams.get("success");
+    console.log("[InicisSuccess] success raw:", successParam);
+  
+    const success = successParam === "true";
+  
     if (success) {
       const name = searchParams.get("name") || "";
       const phone = searchParams.get("phone") || "";
       const birth = searchParams.get("birth") || "";
       const ci = searchParams.get("ci") || "";
-
-      console.log("본인인증 성공 데이터:", { name, phone, birth, ci });
-
-      // 부모창으로 메시지 전송
+  
+      console.log("[InicisSuccess] 본인인증 성공 데이터:", {
+        name,
+        phone,
+        birth,
+        ci,
+      });
+  
+      console.log("[InicisSuccess] window.opener:", window.opener);
+  
       if (window.opener) {
         window.opener.postMessage(
           {
@@ -27,37 +40,15 @@ export default function InicisSuccess() {
           },
           window.location.origin
         );
-
-        console.log("부모창으로 메시지 전송 완료");
-        
-        // 팝업 닫기
-        setTimeout(() => {
-         // window.close();
-        }, 500);
-      } else {
-        console.warn("window.opener가 없습니다. 팝업이 아닌 창에서 열렸습니다.");
+  
+        console.log("[InicisSuccess] 부모창으로 메시지 전송 완료");
       }
     } else {
-      // 실패 처리
       const error = searchParams.get("error") || "알 수 없는 오류";
-      console.error("본인인증 실패:", error);
-
-      if (window.opener) {
-        window.opener.postMessage(
-          {
-            type: "INICIS_AUTH_FAIL",
-            error,
-          },
-          window.location.origin
-        );
-
-        setTimeout(() => {
-         // window.close();
-        }, 500);
-      }
+      console.error("[InicisSuccess] 본인인증 실패:", error);
     }
   }, [searchParams]);
-
+  
   return (
     <div style={{ 
       padding: 24, 

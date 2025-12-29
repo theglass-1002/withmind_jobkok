@@ -20,7 +20,6 @@ import {
 } from "@/api/auth/auth.api";
 import { ApiErrorResponse } from "@/api/axios.instance";
 import { RegisterRequest, VerifiedUserInfo, InicisParams } from "@/api/auth/auth.types";
-import { IsDev, LOCAL_BASE_URL, REAL_BASE_URL } from "@/config/config";
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -41,7 +40,6 @@ export default function Signup() {
 
   const [verifiedUserInfo, setVerifiedUserInfo] = useState<VerifiedUserInfo | null>(null);
   const [inicisParams, setInicisParams] = useState<InicisParams | null>(null);
-  const [shouldSubmitForm, setShouldSubmitForm] = useState(false);
 
   const [selectedGender, setSelectedGender] = useState(1);
 
@@ -64,13 +62,16 @@ export default function Signup() {
     );
   }, [isOver14, isPaidTermsAgreed, isTermsAgreed, isPrivacyAgreed, isEmailConsent, isPushConsent]);
 
+  // 이니시스 본인인증 완료 후 팝업에서 보낸 메시지를 수신하는 리스너
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
+      // 보안: 같은 origin에서 온 메시지만 허용
       if (event.origin !== window.location.origin) {
         console.warn("허용되지 않은 origin:", event.origin);
         return;
       }
 
+      // 본인인증 성공 메시지 처리
       if (event.data.type === 'INICIS_AUTH_SUCCESS') {
         const { name, phone, birth, ci } = event.data.data;
 
@@ -87,26 +88,6 @@ export default function Signup() {
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
   }, []);
-
-  useEffect(() => {
-    if (!shouldSubmitForm || !inicisParams || !saFormRef.current) return;
-
-    const form = saFormRef.current;
-    form.target = "sa_popup";
-    form.method = "POST";
-    form.action = "https://sa.inicis.com/auth";
-    
-    console.log("폼 제출:", form.action);
-    console.log("폼 데이터:", {
-      mid: inicisParams.mid,
-      mTxId: inicisParams.mTxId,
-      successUrl: inicisParams.successUrl
-    });
-    
-    form.submit();
-    
-    setShouldSubmitForm(false);
-  }, [shouldSubmitForm, inicisParams]);
 
   const handleDuplicateCheck = async () => {
     if (!email) {
@@ -308,55 +289,113 @@ export default function Signup() {
     setIsConfirmPasswordVisible(!isConfirmPasswordVisible);
   };
 
-  const handleVerification = async () => {
-    try {
-      console.log("1. saInit 호출...");
-      const init = await saInit();
-      console.log("2. saInit 응답:", init);
-       const baseUrl = IsDev ? "http://localhost:5173" : REAL_BASE_URL;
-       const callbackUrl = `${baseUrl}/inicis/callback`;
-      const userName = "";
-      const userPhone = "";
-      const userBirth = "";
- 
+// 본인인증 버튼 클릭 핸들러 (JSP callSa 함수와 동일한 플로우)
+const handleVerification = async () => {
+  try {
+    console.log("=== 본인인증 프로세스 시작 ===");
+    console.log("1. saInit API 호출");
+    const init = await saInit();
+    console.log("2. saInit 응답 수신:", init);
 
-      const params = {
-        mid: init.mid,
-        reqSvcCd: init.reqSvcCd,
-        mTxId: init.mtxId,
-        authHash: init.authHash,
-        flgFixedUser: init.flgFixedUser,
-        userName,
-        userPhone,
-        userBirth,
-        userHash: "",
-        reservedMsg: init.reservedMsg ?? "isUseToken=N",
-        directAgency: "",
-        successUrl: callbackUrl,
-        failUrl: callbackUrl,
-         //successUrl: init.callbackUrl,
-         //failUrl: init.callbackUrl,
-      };
+    // 테스트용 사용자 정보 (실제로는 빈 값으로 사용자가 직접 입력)
+    const userName = "홍길동";
+    const userPhone = "01012345678";
+    const userBirth = "19901101";
 
-      console.log("3. 팝업 열기");
-      const popup = openAuthPopup();
-      if (!popup) {
-        alert("팝업이 차단되었습니다. 브라우저 팝업 허용을 확인해 주세요.");
+    // 이니시스에 전송할 파라미터 설정
+    const params: InicisParams = {
+      mid: init.mid,
+      reqSvcCd: init.reqSvcCd,
+      mTxId: init.mtxId,
+      authHash: init.authHash,
+      flgFixedUser: init.flgFixedUser,
+      userName,
+      userPhone,
+      userBirth,
+      userHash: "",
+      reservedMsg: init.reservedMsg ?? "isUseToken=N",
+      directAgency: "",
+      successUrl: init.callbackUrl,  // 백엔드 콜백 URL
+      failUrl: init.callbackUrl,
+    };
+
+    console.log("3. 생성된 파라미터:", params);
+    console.log("   - mid:", params.mid);
+    console.log("   - mTxId:", params.mTxId);
+    console.log("   - authHash:", params.authHash);
+    console.log("   - successUrl:", params.successUrl);
+    console.log("   - failUrl:", params.failUrl);
+
+    console.log("4. State 업데이트 (폼 렌더링)");
+    setInicisParams(params);
+
+    console.log("5. 팝업 열기");
+    const popup = openAuthPopup();
+    
+    if (!popup) {
+      console.error("팝업이 차단되었습니다!");
+      alert("팝업이 차단되었습니다. 브라우저 팝업 허용을 확인해 주세요.");
+      return;
+    }
+    
+    console.log("6. 팝업 열림 성공");
+    console.log("   - 팝업 현재 URL:", popup.location.href);
+    console.log("   - 팝업 이름:", popup.name);
+
+    console.log("7. 폼 제출 준비 (requestAnimationFrame)");
+    // requestAnimationFrame: 브라우저가 다음 프레임을 렌더링하기 직전에 실행
+    // React의 state 업데이트가 DOM에 반영된 후 폼을 제출하도록 보장
+    requestAnimationFrame(() => {
+      console.log("8. requestAnimationFrame 실행");
+      
+      if (!saFormRef.current) {
+        console.error("❌ 폼 ref가 없습니다!");
+        console.log("   - inicisParams 존재:", !!inicisParams);
         return;
       }
 
-      console.log("4. State 업데이트");
-      setInicisParams(params);
-
-      console.log("5. 폼 제출 트리거");
-      setTimeout(() => {
-        setShouldSubmitForm(true);
-      }, 150);
+      const form = saFormRef.current;
+      console.log("9. 폼 ref 확인 완료");
+      console.log("   - 폼 name:", form.name);
+      console.log("   - 폼 elements 개수:", form.elements.length);
       
-    } catch (error) {
-      console.error("본인인증 준비 실패:", error);
-    }
-  };
+      // 폼 설정
+      form.target = "sa_popup";  // 폼 제출 결과를 팝업 창에 표시
+      form.method = "POST";
+      form.action = "https://sa.inicis.com/auth";  // 이니시스 본인인증 URL
+
+      console.log("10. 폼 설정 완료");
+      console.log("   - form.target:", form.target);
+      console.log("   - form.method:", form.method);
+      console.log("   - form.action:", form.action);
+      
+      // 모든 hidden 필드 출력
+      console.log("11. 폼 필드 값 확인:");
+      for (let i = 0; i < form.elements.length; i++) {
+        const elem = form.elements[i] as HTMLInputElement;
+        console.log(`   - ${elem.name}: ${elem.value}`);
+      }
+
+      console.log("12. 폼 제출 실행!");
+      form.submit();
+      
+      setTimeout(() => {
+        try {
+          console.log("13. 폼 제출 완료 (0.5초 후)");
+          console.log("   - 팝업 URL:", popup.location.href);
+        } catch (e) {
+          // CORS 에러는 무시 (팝업이 다른 도메인으로 이동했다는 의미)
+          console.log(e);
+          console.log("   - 팝업이 이니시스 도메인으로 이동함 (CORS 제한으로 URL 확인 불가)");
+        }
+      }, 500);
+    });
+    
+  } catch (error) {
+    console.error("❌ 본인인증 준비 실패:", error);
+    toast.error("본인인증을 시작할 수 없습니다.");
+  }
+};
 
   const emailErrorMessage = useMemo(() => {
     switch (emailErrorType) {
@@ -871,7 +910,25 @@ export default function Signup() {
         </div>
       </div>
 
-      {inicisParams && (
+      {/* 이니시스 본인인증 폼 - JSP의 saForm과 동일 */}
+      {/* inicisParams가 있을 때만 렌더링 (조건부 렌더링) */}
+      <form ref={saFormRef} name="saForm" style={{ display: "none" }}>
+  <input type="hidden" name="mid" value={inicisParams?.mid || ""} />
+  <input type="hidden" name="reqSvcCd" value={inicisParams?.reqSvcCd || ""} />
+  <input type="hidden" name="identifier" value="테스트서명입니다." />
+  <input type="hidden" name="mTxId" value={inicisParams?.mTxId || ""} />
+  <input type="hidden" name="authHash" value={inicisParams?.authHash || ""} />
+  <input type="hidden" name="flgFixedUser" value={inicisParams?.flgFixedUser || ""} />
+  <input type="hidden" name="userName" value={inicisParams?.userName || ""} />
+  <input type="hidden" name="userPhone" value={inicisParams?.userPhone || ""} />
+  <input type="hidden" name="userBirth" value={inicisParams?.userBirth || ""} />
+  <input type="hidden" name="userHash" value={inicisParams?.userHash || ""} />
+  <input type="hidden" name="reservedMsg" value={inicisParams?.reservedMsg || ""} />
+  <input type="hidden" name="directAgency" value={inicisParams?.directAgency || ""} />
+  <input type="hidden" name="successUrl" value={inicisParams?.successUrl || ""} />
+  <input type="hidden" name="failUrl" value={inicisParams?.failUrl || ""} />
+</form>
+      {/* {inicisParams && (
         <form ref={saFormRef} name="saForm" style={{ display: "none" }}>
           <input type="hidden" name="mid" value={inicisParams.mid} />
           <input type="hidden" name="reqSvcCd" value={inicisParams.reqSvcCd} />
@@ -887,7 +944,7 @@ export default function Signup() {
           <input type="hidden" name="successUrl" value={inicisParams.successUrl} />
           <input type="hidden" name="failUrl" value={inicisParams.failUrl} />
         </form>
-      )}
+      )} */}
     </div>
   );
 }

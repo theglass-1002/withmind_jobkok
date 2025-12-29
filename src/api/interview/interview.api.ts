@@ -1,13 +1,16 @@
-import instance from "@/api/axios.instance"; // 너희 프로젝트 axios instance 경로에 맞게 수정
+// interview.api.ts
+
+import instance from "@/api/axios.instance";
 import type {
   EnvTestAnalyzeRequest,
   EnvTestAnalyzeResponse,
   EnvTestSpeechResponse,
   InterviewQuestionsRequest,
   InterviewQuestionsResponse,
+  InterviewFollowupRequest,
+  InterviewFollowupResponse,
 } from "./interview.types";
 import { AI_BASE_URL } from "@/config/config";
-
 
 export async function fetchInterviewQuestions(
   payload: InterviewQuestionsRequest
@@ -16,7 +19,7 @@ export async function fetchInterviewQuestions(
     "/interview/questions",
     payload,
     {
-      baseURL:AI_BASE_URL,
+      baseURL: AI_BASE_URL,
       requiresAuth: false,
       headers: {
         accept: "application/json",
@@ -24,7 +27,6 @@ export async function fetchInterviewQuestions(
       },
     }
   );
-
   return res.data;
 }
 
@@ -45,7 +47,7 @@ export async function fetchEnvTestSpeech(): Promise<string> {
 
   const data = res.data;
 
-  // 1) 문자열로 바로 오는 경우: "소중한 대화였습니다, 고맙습니다."
+  // 1) 문자열로 바로 오는 경우
   if (typeof data === "string") return data;
 
   // 2) 객체 형태로 오는 경우
@@ -59,14 +61,33 @@ export async function fetchEnvTestSpeech(): Promise<string> {
 export async function fetchEnvTestAnalyze(
   payload: EnvTestAnalyzeRequest
 ): Promise<EnvTestAnalyzeResponse> {
-  const res = await instance.post<EnvTestAnalyzeResponse>(
-    "/",
+  const res = await instance.post<EnvTestAnalyzeResponse>("/", payload, {
+    baseURL: "https://test.interview.api.withmind.net",
+    requiresAuth: false,
+    headers: {
+      accept: "application/json",
+      "Content-Type": "application/json",
+    },
+  });
+
+  return res.data;
+}
+
+/**
+ * 꼬리질문 API
+ * POST /interview/followup
+ * baseURL: AI_BASE_URL (예: https://ai.api.jobkok.kr)
+ */
+export async function fetchInterviewFollowup(
+  payload: InterviewFollowupRequest
+): Promise<InterviewFollowupResponse> {
+  const res = await instance.post<InterviewFollowupResponse>(
+    "/interview/followup",
     payload,
     {
-      baseURL: "https://test.interview.api.withmind.net",
+      baseURL: AI_BASE_URL,
       requiresAuth: false,
       headers: {
-        accept: "application/json",
         "Content-Type": "application/json",
       },
     }

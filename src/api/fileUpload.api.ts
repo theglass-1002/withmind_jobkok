@@ -164,20 +164,17 @@ export async function uploadInterviewTestVideo(
       originalFileName,
     };
   } catch (error) {
-    console.error("❌ 환경테스트 비디오 업로드 실패:", error);
+    console.error(" 환경테스트 비디오 업로드 실패:", error);
     throw error;
   }
 }
 
-/**
- * 실제 면접 영상 업로드(기업면접 본건)
- * 기본 folderPath = "jobkok/<파일명>"
- * - 필요하면 호출하는 쪽에서 folderPath를 원하는 값으로 덮어쓰기 가능
- */
+
+
 export async function uploadJobInterviewVideo(
   videoBlob: Blob,
-  originalFileName: string = "interview.webm",
-  folderPath: string = "jobkok"
+  originalFileName: string = "env_test.webm",
+  folderPath: string = "interview"
 ): Promise<{
   s3_key: string;
   finalUrl: string;
@@ -185,14 +182,9 @@ export async function uploadJobInterviewVideo(
   originalFileName: string;
 }> {
   try {
-
-    //https://d3oz4mcjf9zx2l.cloudfront.net/interviewTest/env_test_644_20251223172951.webm
     const uniqueFileName = generateUniqueFileName(originalFileName);
     const file = blobToFile(videoBlob, uniqueFileName);
-
-    const finalFolderPath = joinPath(folderPath, uniqueFileName);
-
-    const preSignedData = await getPreSignedUrl(uniqueFileName, finalFolderPath, "video");
+    const preSignedData = await getPreSignedUrl(uniqueFileName,folderPath ,"video");
     const awsData = await getAwsPresignedUrl(preSignedData.presignedUrlApi);
     await uploadFileToS3(awsData.presigned_url, file);
 
@@ -206,7 +198,48 @@ export async function uploadJobInterviewVideo(
       originalFileName,
     };
   } catch (error) {
-    console.error("❌ 면접 비디오 업로드 실패:", error);
+    console.error("모의면접 영상 업로드 실패:", error);
     throw error;
   }
 }
+/**
+ * 실제 면접 영상 업로드(기업면접 본건)
+ * 기본 folderPath = "jobkok/<파일명>"
+ * - 필요하면 호출하는 쪽에서 folderPath를 원하는 값으로 덮어쓰기 가능
+ */
+// export async function uploadJobInterviewVideo(
+//   videoBlob: Blob,
+//   originalFileName: string = "interview.webm",
+//   folderPath: string = "jobkok"
+// ): Promise<{
+//   s3_key: string;
+//   finalUrl: string;
+//   uniqueFileName: string;
+//   originalFileName: string;
+// }> {
+//   try {
+
+//     //https://d3oz4mcjf9zx2l.cloudfront.net/interviewTest/env_test_644_20251223172951.webm
+//     const uniqueFileName = generateUniqueFileName(originalFileName);
+//     const file = blobToFile(videoBlob, uniqueFileName);
+
+//     const finalFolderPath = joinPath(folderPath, uniqueFileName);
+
+//     const preSignedData = await getPreSignedUrl(uniqueFileName, finalFolderPath, "video");
+//     const awsData = await getAwsPresignedUrl(preSignedData.presignedUrlApi);
+//     await uploadFileToS3(awsData.presigned_url, file);
+
+//     const finalUrl = preSignedData.awsFrontUrlStr || "";
+//     const filePath = resolveFilePath(finalUrl, awsData.s3_key);
+
+//     return {
+//       s3_key: filePath,
+//       finalUrl,
+//       uniqueFileName,
+//       originalFileName,
+//     };
+//   } catch (error) {
+//     console.error("❌ 면접 비디오 업로드 실패:", error);
+//     throw error;
+//   }
+// }

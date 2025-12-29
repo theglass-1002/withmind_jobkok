@@ -112,7 +112,7 @@ export default function AllJobPostingSection() {
 
         const size = parseInt(sizeSort, 10) || 15;
         const { jobs, totalPages, totalCount } = await fetchJobList(page, size);
-
+        
         setAllJobs(jobs);
         setJobs(resumeReco ? jobs.filter((j) => j.aiPick === true) : jobs);
 
@@ -121,7 +121,7 @@ export default function AllJobPostingSection() {
 
         const tree = await fetchJobTree();
         setJobTree(tree);
-
+        console.log('공고리스트',jobs);
         setInitialized(true);
       } catch (e: any) {
         console.error(e);
