@@ -315,21 +315,14 @@ const handleVerification = async () => {
       userHash: "",
       reservedMsg: init.reservedMsg ?? "isUseToken=N",
       directAgency: "",
-      successUrl: init.callbackUrl,  // 백엔드 콜백 URL
-      failUrl: init.callbackUrl,
+      successUrl: init.returnUrl,  // 백엔드 콜백 URL
+      failUrl: init.returnUrl,
     };
 
-    console.log("3. 생성된 파라미터:", params);
-    console.log("   - mid:", params.mid);
-    console.log("   - mTxId:", params.mTxId);
-    console.log("   - authHash:", params.authHash);
-    console.log("   - successUrl:", params.successUrl);
-    console.log("   - failUrl:", params.failUrl);
 
-    console.log("4. State 업데이트 (폼 렌더링)");
     setInicisParams(params);
 
-    console.log("5. 팝업 열기");
+
     const popup = openAuthPopup();
     
     if (!popup) {
@@ -359,10 +352,14 @@ const handleVerification = async () => {
       console.log("   - 폼 name:", form.name);
       console.log("   - 폼 elements 개수:", form.elements.length);
       
-      // 폼 설정
-      form.target = "sa_popup";  // 폼 제출 결과를 팝업 창에 표시
-      form.method = "POST";
-      form.action = "https://sa.inicis.com/auth";  // 이니시스 본인인증 URL
+      form.target = "sa_popup";
+      form.setAttribute("method", "post"); // 또는 form.method = "POST";
+      form.setAttribute("action", "https://sa.inicis.com/auth");
+
+      // // 폼 설정
+      // form.target = "sa_popup";  // 폼 제출 결과를 팝업 창에 표시
+      // form.method = "POST";
+      // form.action = "https://sa.inicis.com/auth";  // 이니시스 본인인증 URL
 
       console.log("10. 폼 설정 완료");
       console.log("   - form.target:", form.target);
@@ -392,7 +389,7 @@ const handleVerification = async () => {
     });
     
   } catch (error) {
-    console.error("❌ 본인인증 준비 실패:", error);
+    console.error("본인인증 준비 실패:", error);
     toast.error("본인인증을 시작할 수 없습니다.");
   }
 };
@@ -913,21 +910,21 @@ const handleVerification = async () => {
       {/* 이니시스 본인인증 폼 - JSP의 saForm과 동일 */}
       {/* inicisParams가 있을 때만 렌더링 (조건부 렌더링) */}
       <form ref={saFormRef} name="saForm" style={{ display: "none" }}>
-  <input type="hidden" name="mid" value={inicisParams?.mid || ""} />
-  <input type="hidden" name="reqSvcCd" value={inicisParams?.reqSvcCd || ""} />
-  <input type="hidden" name="identifier" value="테스트서명입니다." />
-  <input type="hidden" name="mTxId" value={inicisParams?.mTxId || ""} />
-  <input type="hidden" name="authHash" value={inicisParams?.authHash || ""} />
-  <input type="hidden" name="flgFixedUser" value={inicisParams?.flgFixedUser || ""} />
-  <input type="hidden" name="userName" value={inicisParams?.userName || ""} />
-  <input type="hidden" name="userPhone" value={inicisParams?.userPhone || ""} />
-  <input type="hidden" name="userBirth" value={inicisParams?.userBirth || ""} />
-  <input type="hidden" name="userHash" value={inicisParams?.userHash || ""} />
-  <input type="hidden" name="reservedMsg" value={inicisParams?.reservedMsg || ""} />
-  <input type="hidden" name="directAgency" value={inicisParams?.directAgency || ""} />
-  <input type="hidden" name="successUrl" value={inicisParams?.successUrl || ""} />
-  <input type="hidden" name="failUrl" value={inicisParams?.failUrl || ""} />
-</form>
+      <input type="hidden" name="mid" value={inicisParams?.mid || ""} />
+      <input type="hidden" name="reqSvcCd" value={inicisParams?.reqSvcCd || ""} />
+      <input type="hidden" name="identifier" value="테스트서명입니다." />
+      <input type="hidden" name="mTxId" value={inicisParams?.mTxId || ""} />
+      <input type="hidden" name="authHash" value={inicisParams?.authHash || ""} />
+      <input type="hidden" name="flgFixedUser" value={inicisParams?.flgFixedUser || ""} />
+      <input type="hidden" name="userName" value={inicisParams?.userName || ""} />
+      <input type="hidden" name="userPhone" value={inicisParams?.userPhone || ""} />
+      <input type="hidden" name="userBirth" value={inicisParams?.userBirth || ""} />
+      <input type="hidden" name="userHash" value={inicisParams?.userHash || ""} />
+      <input type="hidden" name="reservedMsg" value={inicisParams?.reservedMsg || ""} />
+      <input type="hidden" name="directAgency" value={inicisParams?.directAgency || ""} />
+      <input type="hidden" name="successUrl" value={inicisParams?.successUrl || ""} />
+      <input type="hidden" name="failUrl" value={inicisParams?.failUrl || ""} />
+    </form>
       {/* {inicisParams && (
         <form ref={saFormRef} name="saForm" style={{ display: "none" }}>
           <input type="hidden" name="mid" value={inicisParams.mid} />

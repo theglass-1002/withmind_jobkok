@@ -218,6 +218,7 @@ export async function googleLoginWithPreauth(
 
 
 
+//https://api.jobkok.kr/auth/sa/init
 
 export async function saInit(): Promise<SaInitResponse> {
   const res = await instance.post<SaInitResponse>(
@@ -225,6 +226,7 @@ export async function saInit(): Promise<SaInitResponse> {
     {}, // body
     { requiresAuth: false } as any // config
   );
+  console.log(res);
   return res.data;
 }
 

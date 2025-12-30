@@ -7,7 +7,7 @@ import LiveSidePanel from "@/pages/MockInterview/MockInterviewLive/components/Li
 import LiveThinkingSection from "@/pages/MockInterview/MockInterviewLive/components/LiveThinkingSection";
 import LiveAnswerSection from "@/pages/MockInterview/MockInterviewLive/components/LiveAnswerSection";
 
-import { InterviewQuestion, InterviewQuestionsResponse } from "@/types/interview";
+import { InterviewQuestion, InterviewQuestionsResponse } from "@/api/interview/interview.types";
 import { uploadJobInterviewVideo } from "@/api/fileUpload.api";
 import { fetchInterviewFollowup } from "@/api/interview/interview.api";
 
