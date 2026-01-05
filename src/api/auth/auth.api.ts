@@ -21,6 +21,10 @@ import {
   SaInitResponse,
   SaConfirmResponse,
   SaConfirmRequest,
+  FindIdResponse,
+  FindIdRequest,
+  IssueTempPasswordResponse,
+  IssueTempPasswordRequest,
 } from "./auth.types";
 
 import {
@@ -240,6 +244,37 @@ export async function saConfirm(txId: string): Promise<SaConfirmResponse> {
     {
       requiresAuth: false,
       // X-API-Key가 필요하면 여기서 주입 가능
+      // headers: { "X-API-Key": import.meta.env.VITE_SA_API_KEY ?? "" },
+    } as any
+  );
+
+  return res.data;
+}
+
+export async function findIdByCi(ci: string): Promise<FindIdResponse> {
+  const body: FindIdRequest = { ci };
+
+  const res = await instance.post<FindIdResponse>(
+    "/auth/find-id",
+    body,
+    { requiresAuth: false } as any
+  );
+
+  return res.data;
+}
+
+
+export async function issueTempPasswordLocal(
+  userId: string,
+  ci: string
+): Promise<IssueTempPasswordResponse> {
+  const body: IssueTempPasswordRequest = { userId, ci };
+
+  const res = await instance.post<IssueTempPasswordResponse>(
+    "/auth/password/issue-temp-local",
+    body,
+    {
+      requiresAuth: false,
       // headers: { "X-API-Key": import.meta.env.VITE_SA_API_KEY ?? "" },
     } as any
   );

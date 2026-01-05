@@ -173,5 +173,32 @@ export interface SaConfirmResponse {
   userName: string;
   userPhone: string;
   userBirth: string;
-  userSex: string;    // "" 일 수도
+  userSex: string;    // 
+}
+
+// auth.types.ts
+
+export interface FindIdRequest {
+  ci: string;
+}
+
+
+export interface FindIdResponse {
+  code: number;      // 200
+  userIds: string[]; // [] 또는 ["glass.xcx@gmail.com", ...]
+}
+
+// auth.types.ts
+
+export interface IssueTempPasswordRequest {
+  userId: string;
+  ci: string;
+}
+
+export interface IssueTempPasswordResponse {
+  code: number;              // 200 or 500 ...
+  msg: string;               // "TEMP_PASSWORD_ISSUED" | "INTERNAL_SERVER_ERROR" ...
+  userIdx?: number;          // 성공 시
+  tempPassword?: string;     // 성공 시
+  message?: string;          // 실패 시(서버가 내려주는 경우)
 }
