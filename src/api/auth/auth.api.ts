@@ -228,7 +228,6 @@ export async function saInit(): Promise<SaInitResponse> {
     {}, // body
     { requiresAuth: false } as any // config
   );
-  console.log(res);
   return res.data;
 }
 

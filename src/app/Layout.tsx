@@ -60,8 +60,7 @@ export default function Layout({
   };
   
   useEffect(() => {
-    scrollToTop();  // ← 여기!
-    console.log('스크롤위로');
+    scrollToTop();  
   }, [location.pathname]);
 
   useEffect(() => {
