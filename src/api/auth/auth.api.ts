@@ -19,6 +19,8 @@ import {
   GoogleLoginWithPreauthRequest,
   GoogleLoginWithPreauthResponse,
   SaInitResponse,
+  SaConfirmResponse,
+  SaConfirmRequest,
 } from "./auth.types";
 
 import {
@@ -230,6 +232,21 @@ export async function saInit(): Promise<SaInitResponse> {
   return res.data;
 }
 
+export async function saConfirm(txId: string): Promise<SaConfirmResponse> {
+  const body: SaConfirmRequest = { txId };
+
+  const res = await instance.post<SaConfirmResponse>(
+    "/auth/sa/confirm",
+    body,
+    {
+      requiresAuth: false,
+      // X-API-Key가 필요하면 여기서 주입 가능
+      // headers: { "X-API-Key": import.meta.env.VITE_SA_API_KEY ?? "" },
+    } as any
+  );
+
+  return res.data;
+}
 
 // export async function getInicisHash(
 //   userName: string,

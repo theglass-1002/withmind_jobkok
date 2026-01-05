@@ -1,72 +1,72 @@
-import React from 'react'
-import { useNavigate } from 'react-router-dom'; // useNavigate 훅 import
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
 import JobPostingItemCardNoAiPick from "@/shared/components/jobPosting-v3/JobPostingItemCardNoAiPick";
 import JobPostingItemRowNoAiPick from "@/shared/components/jobPosting-v3/JobPostingItemRowNoAiPick";
 import Pagination from "@/shared/components/Pagination";
-import ic_keyboard_arrow_left_gray700_20 from '@/assets/icons/size20/ic_keyboard_arrow_left_gray700_20.png';
-import ic_keyboard_arrow_right_gray700_20 from '@/assets/icons/size20/ic_keyboard_arrow_right_gray700_20.png';
+
+import ic_keyboard_arrow_left_gray700_20 from "@/assets/icons/size20/ic_keyboard_arrow_left_gray700_20.png";
+import ic_keyboard_arrow_right_gray700_20 from "@/assets/icons/size20/ic_keyboard_arrow_right_gray700_20.png";
+
+import type { JobItem } from "@/api/job/job.types";
 
 interface AllSavedJobsListProps {
-    viewType: 'row' | 'card';
+  viewType: "row" | "card";
+  jobs?: JobItem[];
+
+  page?: number;
+  totalPages?: number;
+  onChangePage?: (p: number) => void;
 }
 
-export default function AllSavedJobsList({ viewType }: AllSavedJobsListProps) {
+export default function AllSavedJobsList({
+  viewType,
+  jobs = [],            // ✅ 기본값: undefined면 빈 배열
+  page = 1,             // ✅ 기본값
+  totalPages = 1,       // ✅ 기본값
+  onChangePage = () => {}, // ✅ 기본값
+}: AllSavedJobsListProps) {
+  const navigate = useNavigate();
 
+  useEffect(() => {
+  }, [jobs]);
 
-const navigate = useNavigate();
-
-
-const handleGoToJobs = () => {
-  navigate('/jobs'); // '/jobs' 경로로 이동
-};
+  const handleGoToJobs = () => {
+    navigate("/jobs");
+  };
 
   return (
     <>
-    {viewType=='card'?
-     <div className={`saved-jobs__content-area ${viewType} job-posting__list--grid`}>
-        <JobPostingItemCardNoAiPick
-        appliedSuccessMessage='지원 정보가 반영되었습니다.'
-        />
-           <JobPostingItemCardNoAiPick
-        appliedSuccessMessage='지원 정보가 반영되었습니다.'
-        />
-           <JobPostingItemCardNoAiPick
-        appliedSuccessMessage='지원 정보가 반영되었습니다.'
-        />
-           <JobPostingItemCardNoAiPick
-        appliedSuccessMessage='지원 정보가 반영되었습니다.'
-        />
-           <JobPostingItemCardNoAiPick
-        appliedSuccessMessage='지원 정보가 반영되었습니다.'
-        />
-    </div>
-    :<div className= {`saved-jobs__content-area ${viewType} job-posting__item job-posting__item--row`}>
-     <JobPostingItemRowNoAiPick
-        appliedSuccessMessage='지원 정보가 반영되었습니다.'
-     />
-    </div>}
-    <Pagination
-        current={1}
-        total={30}
-        onChange={()=>{}}
+      {viewType === "card" ? (
+        <div className={`saved-jobs__content-area ${viewType} job-posting__list--grid`}>
+          {jobs.map((job, idx) => (
+            <JobPostingItemCardNoAiPick
+              key={(job as any).jobId ?? (job as any).id ?? `${idx}`}
+              job={job}
+              appliedSuccessMessage="지원 정보가 반영되었습니다."
+            />
+          ))}
+        </div>
+      ) : (
+        <div className={`saved-jobs__content-area ${viewType} job-posting__item job-posting__item--row`}>
+          {jobs.map((job, idx) => (
+            <JobPostingItemRowNoAiPick
+              key={(job as any).jobId ?? (job as any).id ?? `${idx}`}
+              job={job}
+              appliedSuccessMessage="지원 정보가 반영되었습니다."
+            />
+          ))}
+        </div>
+      )}
+
+      <Pagination
+        current={page}
+        total={totalPages}
+        onChange={onChangePage}
         pageWindow={5}
         prevIcon={<img src={ic_keyboard_arrow_left_gray700_20} alt="" aria-hidden="true" />}
         nextIcon={<img src={ic_keyboard_arrow_right_gray700_20} alt="" aria-hidden="true" />}
       />
     </>
-  )
+  );
 }
-
-
-//     <div className="saved-jobs__content-empty-area">
-//     <div className="jobs-empty-state">
-//      <span className="empty-state__title">저장한 공고가 없습니다.</span>
-//       <span className="empty-state__desc">관심 있는 채용 공고를 저장하고, 지원 정보도 함께 관리해 보세요.</span>
-//            </div>
-//            <button 
-//         className="default_btn_white empty-state__cta"
-//         onClick={handleGoToJobs} 
-//         >
-//            채용 공고 보러 가기
-//      </button>
-//    </div>

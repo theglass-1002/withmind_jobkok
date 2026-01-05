@@ -131,7 +131,6 @@ export interface VerifiedUserInfo {
 
 export interface InicisParams {
   mid: string;
-
   reqSvcCd: string;
   mTxId: string;
   authHash: string;
@@ -149,7 +148,7 @@ export interface InicisParams {
 export interface SaInitResponse {
   status: number;          // 200
   mid: string;             // "Thhamncoms"
-  mtxId: string;           // "mtxId_..."
+  txId: string;           // "mtxId_..."
   reqSvcCd: string;        // "01"
   reqDateTime: string;     // "20251229091825"
   authHash: string;        // "3207..."
@@ -159,4 +158,20 @@ export interface SaInitResponse {
   resultUrl: string;       // "https://stg-auth.inicis.com/api/authResult"
   callbackUrl: string;     // "http://34.64.175.29:9090/auth/sa/callback"
   returnUrl: string;       // "http://localhost:3000/inicis/callback"
+}
+
+export interface SaConfirmRequest {
+  txId: string;
+}
+
+export interface SaConfirmResponse {
+  status: number;     // 200
+  verified: boolean;  // true
+  message: string;    // "OK"
+  saToken: string;
+  ci: string;
+  userName: string;
+  userPhone: string;
+  userBirth: string;
+  userSex: string;    // "" 일 수도
 }

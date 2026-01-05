@@ -18,7 +18,7 @@ export default function JobsList() {
 
   const [activeTab, setActiveTab] = useState<"all" | "saved">("all");
 
-  // 🔥 이력서 존재 여부 상태
+  // 이력서 존재 여부 상태
   const [resumeExists, setResumeExists] = useState<boolean | null>(null);
 
   const isTabsSticky = useStickyTabs(
@@ -47,12 +47,12 @@ export default function JobsList() {
       } catch (e) {
         console.error("이력서 존재 여부 확인 중 오류:", e);
 
-        if (e?.code === 999) {
-          console.log("로그인만료");
-          logout();
-          navigate("/login");
-          return;
-        }
+        // if (e?.code === 999) {
+        //   console.log("로그인만료");
+        //   logout();
+        //   navigate("/login");
+        //   return;
+        // }
 
         setResumeExists(false); // 오류 시 기본값 false
       }

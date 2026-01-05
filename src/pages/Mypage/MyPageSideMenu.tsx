@@ -44,7 +44,8 @@ export default function MyPageSideMenu() {
                 </div>
                 <ul className="sidemenu__list">
                   {GROUPS.map(g=>(
-                    <li key={g.id} className="sidemenu__group">
+                    console.log(g),
+                    <li key={g.id} className={`sidemenu__group ${g.id}`}>
                     <span className="sidemenu__group-label">{g.label}</span>
                      <ul className="sidemenu__sublist">
                       {g.items.map(it => (

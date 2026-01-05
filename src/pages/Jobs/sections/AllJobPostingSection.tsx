@@ -91,9 +91,9 @@ export default function AllJobPostingSection() {
   const [jobLoading, setJobLoading] = useState(false);
   const [jobError, setJobError] = useState<string | null>(null);
 
-  // ✅ 원본 공고(서버에서 받은 그대로)
+  //  원본 공고(서버에서 받은 그대로)
   const [allJobs, setAllJobs] = useState<JobItem[]>([]);
-  // ✅ 화면에 뿌릴 공고(토글에 따라 필터링)
+  //  화면에 뿌릴 공고(토글에 따라 필터링)
   const [jobs, setJobs] = useState<JobItem[]>([]);
   const [jobsLoading, setJobsLoading] = useState(false);
   const [jobsError, setJobsError] = useState<string | null>(null);

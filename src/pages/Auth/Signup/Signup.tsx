@@ -16,6 +16,7 @@ import {
   checkEmailDuplicate, 
   logout, 
   registerUser,
+  saConfirm,
   saInit
 } from "@/api/auth/auth.api";
 import { ApiErrorResponse } from "@/api/axios.instance";
@@ -64,30 +65,89 @@ export default function Signup() {
 
   // 이니시스 본인인증 완료 후 팝업에서 보낸 메시지를 수신하는 리스너
   useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      // 보안: 같은 origin에서 온 메시지만 허용
-      if (event.origin !== window.location.origin) {
-        console.warn("허용되지 않은 origin:", event.origin);
+    console.log("[INICIS] message listener 등록됨");
+  
+    const allowedOrigins = new Set([
+      window.location.origin,   // https://jobkok.kr
+      "https://api.jobkok.kr",
+    ]);
+  
+    const handleMessage = async (event: MessageEvent) => {
+
+  
+      if (!allowedOrigins.has(event.origin)) {
+        console.warn("[INICIS] 허용되지 않은 origin", event.origin);
         return;
       }
-
-      // 본인인증 성공 메시지 처리
-      if (event.data.type === 'INICIS_AUTH_SUCCESS') {
-        const { name, phone, birth, ci } = event.data.data;
-
-        console.log("본인인증 성공:", { name, phone, birth, ci });
-
+  
+      if (event.data?.type === "SA_RESULT") {
+        const { resultCode, txId } = event.data;
+  
+        if (resultCode !== "0000") {
+          toast.error("본인인증에 실패했습니다.");
+          return;
+        }
+  
+        console.log("[INICIS] SA_RESULT 성공, saConfirm 호출", txId);
+  
+        try {
+         
+          const confirmRes = await saConfirm(txId);
+  
+          console.log("[INICIS] saConfirm 응답", confirmRes);
+  
+          if (!confirmRes.verified) {
+            toast.error("본인인증 검증에 실패했습니다.");
+            return;
+          }
+  
+          /**  3. 최종 인증 성공 처리 */
+          setIsIdentityVerified(true);
+          setIdentityVerifiedError(false);
+          setVerifiedUserInfo({
+            name: confirmRes.userName,
+            phone: confirmRes.userPhone,
+            birth: confirmRes.userBirth,
+            ci: confirmRes.ci,
+          });
+  
+          toast.success(`${confirmRes.userName}님, 본인인증이 완료되었습니다!`);
+        } catch (e) {
+          console.error("[INICIS] saConfirm 에러", e);
+          toast.error("본인인증 확인 중 오류가 발생했습니다.");
+        }
+  
+        return;
+      }
+  
+      /** (이제 거의 안 씀, 백엔드가 직접 쏘는 경우 대비) */
+      if (event.data?.type === "INICIS_AUTH_SUCCESS") {
+        const { name, phone, birth, ci } = event.data.data || {};
+  
         setIsIdentityVerified(true);
         setIdentityVerifiedError(false);
         setVerifiedUserInfo({ name, phone, birth, ci });
-
+  
         toast.success(`${name}님, 본인인증이 완료되었습니다!`);
+        return;
       }
-    };
+  
+      if (event.data?.type === "INICIS_AUTH_FAIL") {
+        toast.error("본인인증에 실패했습니다.");
+        return;
+      }
 
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
+    };
+  
+    window.addEventListener("message", handleMessage);
+  
+    return () => {
+      console.log("[INICIS] message listener 제거됨");
+      window.removeEventListener("message", handleMessage);
+    };
   }, []);
+  
+  
 
   const handleDuplicateCheck = async () => {
     if (!email) {
@@ -306,7 +366,7 @@ const handleVerification = async () => {
     const params: InicisParams = {
       mid: init.mid,
       reqSvcCd: init.reqSvcCd,
-      mTxId: init.mtxId,
+      mTxId: init.txId ?? init.txId ?? "", 
       authHash: init.authHash,
       flgFixedUser: init.flgFixedUser,
       userName,

@@ -10,10 +10,10 @@ export async function fetchJobTree(): Promise<JobNode[]> {
   return res.data;
 }
 
-
 export async function fetchJobList(
   page: number,
-  size: number
+  size: number,
+  options?: { sort?: string; tabs?: string }
 ): Promise<{
   jobs: JobItem[];
   page: number;
@@ -23,11 +23,8 @@ export async function fetchJobList(
   hasNext: boolean;
 }> {
   const res = await instance.get<JobListApiResponse>("/auth/jobs", {
-    requiresAuth: getAccessToken()?true:false,
-    params: {
-      page,
-      size,
-    },
+    requiresAuth: !!getAccessToken(),
+    params: { page, size, ...options },
   });
 
   const body = res.data;
@@ -42,6 +39,38 @@ export async function fetchJobList(
     hasNext: body.hasNext ?? false,
   };
 }
+
+// export async function fetchJobList(
+//   page: number,
+//   size: number
+// ): Promise<{
+//   jobs: JobItem[];
+//   page: number;
+//   size: number;
+//   totalCount: number;
+//   totalPages: number;
+//   hasNext: boolean;
+// }> {
+//   const res = await instance.get<JobListApiResponse>("/auth/jobs", {
+//     requiresAuth: getAccessToken()?true:false,
+//     params: {
+//       page,
+//       size,
+//     },
+//   });
+
+//   const body = res.data;
+//   const jobs = Array.isArray(body.jobs) ? body.jobs : [];
+
+//   return {
+//     jobs,
+//     page: body.page ?? page,
+//     size: body.size ?? size,
+//     totalCount: body.totalCount ?? jobs.length,
+//     totalPages: body.totalPages ?? 1,
+//     hasNext: body.hasNext ?? false,
+//   };
+// }
 
 export async function fetchJobDetail(
   jobId: number
