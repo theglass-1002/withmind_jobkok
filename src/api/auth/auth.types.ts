@@ -202,3 +202,15 @@ export interface IssueTempPasswordResponse {
   tempPassword?: string;     // 성공 시
   message?: string;          // 실패 시(서버가 내려주는 경우)
 }
+
+export interface MyInfo {
+  phone: string;
+  userName: string;
+  userId: string;
+  idx: number;
+}
+
+export interface FetchMyInfoResponse {
+  code: number; // 200
+  user: MyInfo;
+}

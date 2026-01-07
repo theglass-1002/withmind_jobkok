@@ -25,6 +25,7 @@ import {
   FindIdRequest,
   IssueTempPasswordResponse,
   IssueTempPasswordRequest,
+  FetchMyInfoResponse,
 } from "./auth.types";
 
 import {
@@ -277,6 +278,18 @@ export async function issueTempPasswordLocal(
       requiresAuth: false,
       // headers: { "X-API-Key": import.meta.env.VITE_SA_API_KEY ?? "" },
     } as any
+  );
+
+  return res.data;
+}
+
+/**
+ * 내 정보 가져오기
+ * GET /api/user/me
+ */
+export async function fetchMyInfo(): Promise<FetchMyInfoResponse> {
+  const res = await instance.get<FetchMyInfoResponse>(
+    "/api/user/me",
   );
 
   return res.data;

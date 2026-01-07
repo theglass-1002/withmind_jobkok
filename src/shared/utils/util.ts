@@ -507,3 +507,27 @@ export const extractJobId = (url: string): string | null => {
     return null;
   }
 };
+
+/**
+ * 휴대폰 번호 포맷팅
+ * 01040965625 → 010-4096-5625
+ */
+export function formatPhoneNumber(phone?: string): string {
+  if (!phone) return "";
+
+  const onlyNumber = phone.replace(/\D/g, "");
+
+  // 010XXXXXXXX (11자리)
+  if (onlyNumber.length === 11) {
+    return onlyNumber.replace(/(\d{3})(\d{4})(\d{4})/, "$1-$2-$3");
+  }
+
+  // 010XXXXXXX (10자리, 예외)
+  if (onlyNumber.length === 10) {
+    return onlyNumber.replace(/(\d{3})(\d{3})(\d{4})/, "$1-$2-$3");
+  }
+
+  // 그 외는 원본 그대로
+  return phone;
+}
+

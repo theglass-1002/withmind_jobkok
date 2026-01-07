@@ -173,8 +173,9 @@ background: var(--white-100, #FFF);
 
 
 .mypage__body .sidemenu .user_info .usercard__plan{
+    display: none;
     margin: 0;                    
-    display: inline-flex;
+    /* display: inline-flex; */
     align-items: center;       
     gap: 8px;
     color: var(--green-100, #1EC280);
@@ -1195,11 +1196,14 @@ line-height: 180%; /* 28.8px */
  }
 
  .mp-section .job-list{
-    /* display: flex; */
     align-items: center;
     gap: 20px;
     align-self: stretch;
     grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    width: auto;
+    flex-wrap: nowrap;
+    overflow: auto;
  }
 
  .job_submission_banner{

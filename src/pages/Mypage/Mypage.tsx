@@ -71,13 +71,14 @@ export default function MyPage() {
                 key={(job as any).jobId ?? (job as any).id ?? `${idx}`}
                 job={job}
                 appliedSuccessMessage="지원 정보가 반영되었습니다."
+                showAppliedSection={false}
               />
             ))}
         </ul>
       </section>
 
       {/* 배너 */}
-      <div className="job_submission_banner">
+      <div className="job_submission_banner"   onClick={() => navigate("support/report-job")} >
         <img className="job_submission_banner__image" src={mp_banner} alt="" />
         <span className="job_submission_banner__headline">
           아직 등록되지 않은 공고가 있다면 알려주세요!

@@ -180,6 +180,7 @@
   .resume-location{
     display: flex;
     height: 52px;
+  
     padding: 16px 20px;
     justify-content: center;
     align-items: center;

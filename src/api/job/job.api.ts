@@ -110,3 +110,11 @@ export async function toggleJobFavorite(
     return addJobFavorite(jobId);
   }
 }
+
+export async function markJobApplied(jobId: number): Promise<void> {
+  await instance.post(`/api/jobs/${jobId}/applied`, null as any);
+}
+
+export async function unmarkJobApplied(jobId: number): Promise<void> {
+  await instance.delete(`/api/jobs/${jobId}/applied` as any);
+}

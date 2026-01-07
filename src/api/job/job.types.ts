@@ -26,29 +26,34 @@ export interface JobNode {
 export type JobStatus = "active" | "closed" | "draft" | string;
 export type EmploymentType = "regular" | "contract" | "intern" | "parttime" | string;
 
+
 export interface JobItem {
+  /** 공고 id */
   id: number;
 
+  /** 직무 카테고리 */
   categoryId: number;
   categoryName: string;
 
+  /** 회사 */
   companyId: number;
   companyName: string;
   companyLogoUrl: string | null;
   companyDescription: string | null;
   companyUrl: string | null;
 
-  status: JobStatus;
+  /** 공고 상태 */
+  status: JobStatus; // "active" 같은 값
 
-
+  /** 연차/경력(응답 기준: annualFrom/annualTo) */
   annualFrom: number | null;
   annualTo: number | null;
 
-  career: string | null;        // "5~10년" 같은 표시용 문자열일 수 있음
-  careerFrom: number | null;    // 최소 경력 (년)
-  careerTo: number | null;      // 최대 경력 (년)
+  /** 마감 시간(없으면 null) */
+  dueTime: string | null;
 
-  name: string;                 // 공고 제목
+  /** 공고 제목/내용 */
+  name: string;
   intro: string | null;
   mainTasks: string | null;
   requirements: string | null;
@@ -56,25 +61,42 @@ export interface JobItem {
   benefits: string | null;
   hireRounds: string | null;
 
+  /** 원문 링크 */
   url: string | null;
 
-  createdAt: string;
-  updatedAt: string;
+  /** 경력 필드(응답에 null로 내려옴 → 유지) */
+  career: string | null;
+  careerFrom: number | null;
+  careerTo: number | null;
 
-  // 마감 정보 (없으면 상시)
-  dueTime: string | null;
+  /** 생성/수정일 */
+  createdAt: string;  // "2025-12-01T14:56:54"
+  updatedAt: string;  // "2026-01-06T16:35:44"
 
-  favorite: number;             // 0 or 1
-  applied: number;              // 0 or 1
+  /** 저장/지원 여부 (0/1) */
+  favorite: 0 | 1;
+  applied: 0 | 1;
 
+  /** 지역 */
   locationCode: string | null;
   location: string | null;
 
-  employmentType: EmploymentType;
+  /** 고용형태 / 학력 */
+  employmentType: EmploymentType; // "regular"
   educationCode: number | null;
   educationText: string | null;
-  aiPick:boolean;
+
+  /** 태그/조회수 */
+  companyTags: string[] | null;   // 응답은 null이었음 (배열 가능성 대비)
+  viewCount: number;
+
+  /** AI 추천 / 최근 본 공고 */
+  aiPick: boolean;
+  recentViewed: 0 | 1;
+  recentViewedAt: string | null;
 }
+
+
 export interface JobListApiResponse {
   page: number;
   size: number;
@@ -93,6 +115,12 @@ export interface JobDetailApiResponse {
 export interface JobFavoriteResponse {
   resumeIdx: number;  // 서버에서 이력서 번호를 내려준다고 했으니까
 }
+
+export interface JobAppliedResponse {
+  code?: number;
+  msg?: string;
+}
+
 
 export function getEducationLabel(code?: number | null): string {
   switch (code) {
@@ -168,3 +196,4 @@ export function getCareerLabel(from?: number | null, to?: number | null): string
   // 기타 예외 처리
   return "경력 무관";
 }
+

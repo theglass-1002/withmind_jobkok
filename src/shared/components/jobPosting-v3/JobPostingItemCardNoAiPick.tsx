@@ -17,7 +17,13 @@ import {
   getLocationLabel,
   type JobItem,
 } from "@/api/job/job.types";
-import { toggleJobFavorite } from "@/api/job/job.api";
+
+import {
+  toggleJobFavorite,
+  markJobApplied,
+  unmarkJobApplied,
+} from "@/api/job/job.api";
+
 import { logout } from "@/api/auth/auth.api";
 
 const DEFAULT_SUCCESS_MESSAGE = "지원 정보가 반영되었습니다.";
@@ -26,14 +32,9 @@ const DEFAULT_INFO_MESSAGE = "기록을 해제했어요.";
 interface JobPostingItemCardNoAiPickProps {
   appliedSuccessMessage?: string;
   unappliedInfoMessage?: string;
-
-  /**
-   * "지원한 포지션으로 기록하기" 영역 노출 여부
-   * default: true (보여줌)
-   */
   showAppliedSection?: boolean;
 
-  /** 🔥 실제 공고 데이터 */
+  /** 실제 공고 데이터 */
   job?: JobItem;
 }
 
@@ -45,13 +46,8 @@ export default function JobPostingItemCardNoAiPick({
 }: JobPostingItemCardNoAiPickProps) {
   const navigate = useNavigate();
 
-  // ✅ job이 undefined여도 안전하게 기본값 0
-  const [bookMark, setBookMark] = useState<0 | 1>(
-    ((job?.favorite as 0 | 1) ?? 0)
-  );
-  const [recordAsApplied, setRecordAsApplied] = useState<0 | 1>(
-    ((job?.applied as 0 | 1) ?? 0)
-  );
+  const [bookMark, setBookMark] = useState<0 | 1>(((job?.favorite as 0 | 1) ?? 0));
+  const [recordAsApplied, setRecordAsApplied] = useState<0 | 1>(((job?.applied as 0 | 1) ?? 0));
 
   const handleGoToJobPost = () => {
     if (!job) return;
@@ -61,45 +57,74 @@ export default function JobPostingItemCardNoAiPick({
   const handleBookmarkToggle = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!job) return;
-  
-    const prev = bookMark;                 // 0 | 1
-    const isFavorite = prev === 1;         // 현재 즐겨찾기 여부
+
+    const prev = bookMark;
+    const isFavorite = prev === 1;
     const next: 0 | 1 = isFavorite ? 0 : 1;
-  
+
     try {
-      // ✅ UI 먼저 반영 (optimistic)
+      // optimistic
       setBookMark(next);
-  
-      // ✅ 서버 반영: 현재가 favorite면 삭제, 아니면 추가
+
       await toggleJobFavorite(job.id, isFavorite);
-  
+
       toast.success(next === 1 ? "즐겨찾기에 추가되었습니다." : "즐겨찾기가 해제되었습니다.");
-    } catch (e: any) {
-      console.error(e);
-  
-      // 실패 시 롤백
+    } catch (err: any) {
+      console.error(err);
+
+      // rollback
       setBookMark(prev);
-  
-      if (e?.code === 999) {
+
+      if (err?.code === 999) {
         logout();
         navigate("/login");
         return;
       }
-  
+
       toast.error("즐겨찾기 처리 중 오류가 발생했습니다.");
     }
   };
-  
 
-  const handleRecordAsApplied = (e: React.MouseEvent, next: 0 | 1) => {
+  /**
+   * ✅ 지원 기록 토글
+   * next === 1 → 기록하기(POST)
+   * next === 0 → 기록해제(DELETE)
+   */
+  const handleRecordAsApplied = async (e: React.MouseEvent, next: 0 | 1) => {
     e.stopPropagation();
+    if (!job) return;
+
+    const prev = recordAsApplied;
+    if (prev === next) return;
+
+    // optimistic
     setRecordAsApplied(next);
 
-    if (next === 1) toast.success(appliedSuccessMessage);
-    else toast.info(unappliedInfoMessage);
+    try {
+      if (next === 1) {
+        await markJobApplied(job.id);
+        toast.success(appliedSuccessMessage);
+      } else {
+        await unmarkJobApplied(job.id);
+        toast.info(unappliedInfoMessage);
+      }
+    } catch (err: any) {
+      console.error(err);
+
+      // rollback
+      setRecordAsApplied(prev);
+
+      if (err?.code === 999) {
+        logout();
+        navigate("/login");
+        return;
+      }
+
+      toast.error("지원 기록 처리 중 오류가 발생했습니다.");
+    }
   };
 
-  // ✅ job이 없으면 최소 렌더(에러 방지)
+  // job 없으면 최소 렌더(에러 방지)
   if (!job) {
     return (
       <div className="job-posting__card">

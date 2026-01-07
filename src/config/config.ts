@@ -1,4 +1,4 @@
-export const IsDev = false;
+export const IsDev = true;
 
 export const LOCAL_BASE_URL = "http://localhost:5173";
 export const REAL_BASE_URL  = "https://jobkok.kr";
