@@ -1,0 +1,78 @@
+
+.mp-section .saved .job-posting__card,
+.mp-section .recent .job-posting__card
+{
+    width: 259px;
+    height: 208px;
+    gap: 20px;
+}
+
+.mp-section .saved .job-posting__card .job-posting__left
+.mp-section .recent .job-posting__card .job-posting__left
+{
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+}
+
+.mp-section .saved .job-posting__card .job-card__header,
+.mp-section .recent .job-posting__card .job-card__header {
+    justify-content: space-between;
+}
+
+
+.mp-section .saved .job-posting__card .job-card__header .job-posting__logo,
+.mp-section .recent .job-posting__card .job-card__header .job-posting__logo
+{
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    aspect-ratio: 1/1;
+    border-radius: 4px;
+    border: 1px solid var(--gray-300, #E0E2E4);
+    background: var(--white-100, #FFF);
+}
+
+.mp-section .saved .job-posting__card .job-card__body .job-card__title-group,
+.mp-section .recent .job-posting__card .job-card__body .job-card__title-group
+{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 8px;
+}
+.mp-section .saved .job-posting__card .job-card__body .job-card__title-group .job-posting__company,
+.mp-section .recent .job-posting__card .job-card__body .job-card__title-group .job-posting__company
+{
+ font-size: 14px;
+}
+
+.mp-section .saved .job-posting__card .job-card__body .job-card__info-group,
+.mp-section .recent .job-posting__card .job-card__body .job-card__info-group
+{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--gray-700, #6F767E);
+    font-family: Pretendard;
+}
+
+
+.mp-section .saved .job-posting__card .job-card__body .job-posting__role,
+.mp-section .recent .job-posting__card .job-card__body .job-posting__role
+{
+    max-width: 100%;   
+    white-space: nowrap;    
+    overflow: hidden;       
+    text-overflow: ellipsis; 
+}
+.mp-section .saved .job-posting__card .job-card__body .job-posting__meta-item,
+.mp-section .recent .job-posting__card .job-card__body .job-posting__meta-item {
+    display: block;         
+    max-width: 100%;        
+    white-space: nowrap;    
+    overflow: hidden;       
+    text-overflow: ellipsis; 
+  }

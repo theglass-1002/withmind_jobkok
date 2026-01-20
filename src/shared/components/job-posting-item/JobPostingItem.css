@@ -60,7 +60,6 @@
   width: 100%;
   padding: 24px;
   cursor: pointer;
-  border-bottom: 1px solid var(--gray-300, #E0E2E4);
   background: var(--white-100, #FFF);
 }
 
@@ -131,6 +130,8 @@
 .job-posting__item--row .job-posting__company,
 .job-posting__list--grid .job-posting__company
 {
+  color: var(--gray-700, #6F767E);
+  font-size: 14px;
   display: flex;
   gap: var(--gap-xs);
   font-family: var(--font-base);
@@ -160,6 +161,10 @@
     font-style: normal;
     font-weight: 600;
     line-height: 22px; /* 122.222% */
+
+    max-width: 100%;
+    white-space: nowrap;
+
 }
 
 /* === Meta === */
@@ -267,7 +272,7 @@
   gap: 6px;
   border-radius: 4px;
   background: var(--gray-100, #F2F3F4);
-  font: 500 12px/16px var(--font-base);
+  font-size: 14px;
   color: #333;
 }
 
@@ -296,7 +301,7 @@
   padding: 20px;
   flex-direction: column;
   align-items: flex-start;
-  gap: 10px;
+  gap: 20px;
   flex-shrink: 0;
   border-radius: 6px;
   background: var(--white-100, #FFF);
@@ -307,8 +312,8 @@
 
 .job-posting__list--grid .job-posting__card.ai-pick{
   border-radius: 6px;
-border: 1px solid var(--ai-100, #15D078);
-background: var(--white-100, #FFF);
+  border: 1px solid var(--ai-100, #15D078);
+  background: var(--white-100, #FFF);
 }
 
 .job-posting__list--grid .job-posting__card:hover{
@@ -320,7 +325,6 @@ background: var(--gray-50, #F8F8F9);
   align-items: flex-start;
   gap: 16px;
   align-self: stretch;
-  height: 100%;
 }
 
 .job-posting__list--grid .job-posting__left{
@@ -328,9 +332,15 @@ background: var(--gray-50, #F8F8F9);
   align-items: center;
   gap: 16px;
   flex: 1 0 0;
+  max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .job-posting__list--grid .job-card__favorite{
+ height: 24px;
+ width: 24px;
  cursor: pointer;
 }
 
@@ -348,8 +358,11 @@ background: var(--gray-50, #F8F8F9);
 }
 
 .job-posting__list--grid .job-card__identity{
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   display: flex;
-  padding: 4px 0;
   flex-direction: column;
   align-items: flex-start;
   gap: 8px;
@@ -424,7 +437,7 @@ background: var(--gray-50, #F8F8F9);
     background: var(--gray-50, #F8F8F9);
     color: var(--gray-900, #2A2D2F);
     font-family: Pretendard;
-    font-size: 17px;
+    font-size: 16px;
     font-style: normal;
     font-weight: 400;
     line-height: 20px; /* 125% */

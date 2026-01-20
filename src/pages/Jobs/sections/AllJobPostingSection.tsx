@@ -45,6 +45,7 @@ type Chip = {
   group?: string;
   role?: string;
   kind?: ChipKind;
+  
 };
 
 type FilterKey = "role" | "career" | "education" | "location" | "employment";
@@ -149,38 +150,45 @@ export default function AllJobPostingSection() {
 
   useEffect(() => {
     if (!initialized) return;
-
+  
     const loadJobs = async () => {
       try {
         setJobsLoading(true);
-        setJobsError(null);
-
+  
         const size = parseInt(sizeSort, 10) || 15;
-        const { jobs, totalPages, totalCount } = await fetchJobList(page, size);
-
-        setAllJobs(jobs);
-        setJobs(resumeReco ? jobs.filter((j) => j.aiPick === true) : jobs);
-
+        const roleIds = roleSelected.map((r) =>
+          r.roleId === 0 ? r.categoryId : r.roleId
+        );
+  
+        const params: any = {
+          sort,
+          categoryId: roleIds.length ? roleIds : undefined,
+        };
+  
+        const { jobs, totalPages, totalCount } =
+          await fetchJobList(page, size, params);
+        setJobs(resumeReco ? jobs.filter((j) => j.aiPick) : jobs);
         setTotalPages(totalPages);
         setTotalCount(totalCount);
-      } catch (e: any) {
-        console.error(e);
-
-        if (e?.code === 999) {
-          logout();
-          navigate("/login");
-          return;
-        }
-
-        setJobsError(e?.message || "채용 공고를 불러오는 중 오류가 발생했습니다.");
       } finally {
         setJobsLoading(false);
       }
     };
-
+  
     loadJobs();
-  }, [page, sizeSort, resumeReco, initialized, navigate]);
-
+  }, [
+    initialized,
+    page,
+    sizeSort,
+    sort,
+    resumeReco,
+    roleSelected,
+    careerRange,
+    educationSelected,
+    locationSelected,
+    employmentSelected,
+  ]);
+  
   const toggleFilter = (key: FilterKey) =>
     setOpenFilter((prev) => (prev === key ? null : key));
 
@@ -225,7 +233,7 @@ export default function AllJobPostingSection() {
     else if (min === 0) label = `~${max}년`;
     else if (max === 10) label = `${min}년 이상`;
     else label = `${min}~${max}년`;
-
+    console.log('경력',range);
     const careerChip: Chip = { id: "career", role: label, kind: "career" };
 
     setChips((prev) => {
@@ -233,6 +241,7 @@ export default function AllJobPostingSection() {
       return [...others, careerChip];
     });
 
+    console.log('경력',careerChip);
     setOpenFilter(null);
   };
 
@@ -304,11 +313,10 @@ export default function AllJobPostingSection() {
       const others = prev.filter((chip) => chip.kind !== "role");
       return [...others, ...roleChips];
     });
-
     setOpenFilter(null);
   };
 
-  // ✅ 모달 없이 토글만 + 즉시 필터 적용
+  // 모달 없이 토글만 + 즉시 필터 적용
   const handleResumeRecoToggle = (checked: boolean) => {
     setResumeReco(checked);
     setPage(1);

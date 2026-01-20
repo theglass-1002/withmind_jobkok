@@ -103,7 +103,7 @@ export default function ModalJobRolePicker({
     return m;
   }, [categories]);
 
-  // ✅ 초기 선택값 복원 (모달 재오픈 시)
+  //  초기 선택값 복원 (모달 재오픈 시)
   useEffect(() => {
     if (!categories.length) return;
 
@@ -247,13 +247,14 @@ export default function ModalJobRolePicker({
         return {
           categoryId: chip.categoryId,
           categoryName: chip.categoryTitle,
-          roleId: -1,
+          roleId: 0,
           roleName: "전체",
         };
       }
       return {
         categoryId: chip.categoryId,
         categoryName: chip.categoryTitle,
+        
         roleId: chip.roleId,
         roleName: chip.roleLabel,
       };
