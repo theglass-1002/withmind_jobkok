@@ -111,7 +111,7 @@ export default function JobPostingCard({
     );
   }
 
-  // 🔥 이력서 기반이 아닌 경우 → NoAiPick 카드로 전부 렌더
+  //  이력서 기반이 아닌 경우 → NoAiPick 카드로 전부 렌더
   if (!isResumeBased) {
     return (
       <div className="job-posting__list job-posting__list--grid">

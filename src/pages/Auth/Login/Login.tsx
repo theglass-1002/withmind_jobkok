@@ -294,7 +294,7 @@ const Login: React.FC = () => {
 
   return (
     <div className="login-page">
-      <LoadingOverlay isLoading={isLoading} isLogo text="처리 중..." />
+      <LoadingOverlay isLoading={isLoading} isLogo />
 
       <h1 className="login-title">로그인</h1>
 

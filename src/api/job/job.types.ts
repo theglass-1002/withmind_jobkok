@@ -25,7 +25,7 @@ export interface JobNode {
 
 export type JobStatus = "active" | "closed" | "draft" | string;
 export type EmploymentType = "regular" | "contract" | "intern" | "parttime" | string;
-
+export type EmploymentEtc = "military" | "disabled" | "foreigner" | string;
 
 export interface JobItem {
   /** 공고 id */
@@ -83,6 +83,7 @@ export interface JobItem {
 
   /** 고용형태 / 학력 */
   employmentType: EmploymentType; // "regular"
+  employmentEtc: EmploymentEtc; // "regular"
   educationCode: number | null;
   educationText: string | null;
 
@@ -196,4 +197,19 @@ export function getCareerLabel(from?: number | null, to?: number | null): string
   // 기타 예외 처리
   return "경력 무관";
 }
+
+
+export const SORT_CODE_MAP: Record<string, string> = {
+  "오래된순": "old",
+  "최신순": "latest",
+  "마감임박순": "closing",
+  "인기순": "popular",
+  "적합도순": "maching", // 준비중이면 우선 보내거나, 아래에서 막기
+};
+
+export const SIZE_MAP: Record<string, number> = {
+  "15개씩": 15,
+  "30개씩": 30,
+  "45개씩": 45,
+};
 

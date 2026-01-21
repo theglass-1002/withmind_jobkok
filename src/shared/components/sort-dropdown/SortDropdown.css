@@ -48,13 +48,13 @@
 .sort-control__label{
     display: flex; 
     align-items: center;
+    gap: 4px;
 }
 
 .sort-control__label::after{
     content: ''; 
     width: 24px;
     height: 24px;
-    background-image: ('');
     background: url("/src/assets/icons/size24/ic_arrow_drop_down_gray500_24.png") center / contain no-repeat;
 
 }

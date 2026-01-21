@@ -73,10 +73,10 @@ export default function ModalLocationPicker({
   onApply,
   initialSelected = [],
 }: ModalLocationPickerProps) {
-  // ✅ 개별 구/군 선택
+  //  개별 구/군 선택
   const [checkedDistricts, setCheckedDistricts] = useState<Set<string>>(new Set());
 
-  // ✅ “지역 전체” 선택은 1개만 허용
+  //  “지역 전체” 선택은 1개만 허용
   const [allSelectedRegionKey, setAllSelectedRegionKey] = useState<string | null>(null);
 
   const [activeRegionKey, setActiveRegionKey] = useState<string | null>(
@@ -92,7 +92,7 @@ export default function ModalLocationPicker({
     setActiveRegionKey(key);
   };
 
-  // ✅ 복원 로직 (모달 재오픈 시)
+  // 복원 로직 (모달 재오픈 시)
   useEffect(() => {
     if (!REGIONS.length) return;
 
@@ -144,28 +144,28 @@ export default function ModalLocationPicker({
       return;
     }
 
-    // ✅ 최대 5개 제한 (전체도 1개)
+    //  최대 5개 제한 (전체도 1개)
     if (checkedDistricts.size >= MAX_LOCATION_COUNT) {
       toast("최대 5개까지 선택 가능합니다.");
       return;
     }
 
-    // ✅ 전체 선택하면 개별 선택은 비움(서울 전체 칩 1개만 보이게)
+    //  전체 선택하면 개별 선택은 비움(서울 전체 칩 1개만 보이게)
     setCheckedDistricts(new Set());
 
-    // ✅ 전체는 항상 1개만: 기존 전체 해제하고 현재만 선택
+    //  전체는 항상 1개만: 기존 전체 해제하고 현재만 선택
     setAllSelectedRegionKey(regionKey);
   };
 
   const onClickDistrict = (districtKey: string) => {
-    // ✅ “서울 전체” 켜져 있는데 다른 지역(경기 등) 클릭하면 전체 해제
+    //  “서울 전체” 켜져 있는데 다른 지역(경기 등) 클릭하면 전체 해제
     if (allSelectedRegionKey) {
       setAllSelectedRegionKey(null);
     }
 
     const isAlreadyChecked = checkedDistricts.has(districtKey);
 
-    // ✅ 새로 추가하려는 경우만 5개 제한
+    // 새로 추가하려는 경우만 5개 제한
     if (!isAlreadyChecked && checkedDistricts.size >= MAX_LOCATION_COUNT) {
       toast("최대 5개까지 선택 가능합니다.");
       return;

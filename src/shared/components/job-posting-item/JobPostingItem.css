@@ -61,6 +61,12 @@
   padding: 24px;
   cursor: pointer;
   background: var(--white-100, #FFF);
+ 
+}
+
+.saved-jobs__content-area .job-posting__card {
+  border-bottom: 1px solid var(--gray-300, #E0E2E4);
+
 }
 
 .job-posting__item--row .job-posting__card:hover {

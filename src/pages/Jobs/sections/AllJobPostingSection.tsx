@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Switch from "react-switch";
 
@@ -22,9 +22,7 @@ import ModalJobRolePicker from "@/shared/components/job-role-picker/ModalJobRole
 import ModalCareerRangePicker from "@/shared/components/career-range-picker/ModalCareerRangePicker";
 import ModalEducationPicker from "@/shared/components/education-picker/ModalEducationPicker";
 import ModalLocationPicker from "@/shared/components/location-picker/ModalLocationPicker";
-import ModalEmploymentTypePicker, {
-  EmpOptionKey,
-} from "@/shared/components/employment-type-picker/ModalEmploymentTypePicker";
+import ModalEmploymentTypePicker from "@/shared/components/employment-type-picker/ModalEmploymentTypePicker";
 import SortDropdown from "@/shared/components/sort-dropdown/SortDropdown";
 
 import JobPostingRow from "@/shared/components/job-posting-item/JobPostingRow";
@@ -33,19 +31,31 @@ import JobPostingCard from "@/shared/components/job-posting-item/JobPostingCard"
 import Tooltip from "@/shared/components/tooltip/Tooltip";
 import Pagination from "@/shared/components/Pagination";
 
-import { fetchJobTree, fetchJobList } from "@/api/job/job.api";
-import { JobNode, JobItem } from "@/api/job/job.types";
+import {
+  fetchJobTree,
+  fetchJobList,
+  toCareerParam,
+  educationKeyToCode,
+  toEducationCodeParam,
+  LocationSelectedItem,
+  toLocationCodeParam,
+  EmpOptionKey,
+  EMPLOYMENT_TYPE_KEYS,
+  EMPLOYMENT_ETC_KEYS,
+} from "@/api/job/job.api";
+import { JobNode, JobItem, SORT_CODE_MAP, SIZE_MAP } from "@/api/job/job.types";
 import { logout } from "@/api/auth/auth.api";
 import { Icons } from "@/assets/icons";
+import JobEmptyResult from "@/shared/components/empty/job/JobEmptyResult";
 
-type ChipKind = "role" | "career" | "education" | "location" | "employment";
+type ChipKind = "role" | "career" | "education" | "location" | "employmentType" | "employmentEtc";
 
 type Chip = {
   id: string;
   group?: string;
   role?: string;
   kind?: ChipKind;
-  
+  value?: string;
 };
 
 type FilterKey = "role" | "career" | "education" | "location" | "employment";
@@ -55,12 +65,6 @@ type RoleSelectedItem = {
   categoryName: string;
   roleId: number;
   roleName: string;
-};
-
-type LocationSelectedItem = {
-  code: string;
-  regionName: string;
-  districtName: string;
 };
 
 export default function AllJobPostingSection() {
@@ -92,9 +96,7 @@ export default function AllJobPostingSection() {
   const [jobLoading, setJobLoading] = useState(false);
   const [jobError, setJobError] = useState<string | null>(null);
 
-  //  원본 공고(서버에서 받은 그대로)
   const [allJobs, setAllJobs] = useState<JobItem[]>([]);
-  //  화면에 뿌릴 공고(토글에 따라 필터링)
   const [jobs, setJobs] = useState<JobItem[]>([]);
   const [jobsLoading, setJobsLoading] = useState(false);
   const [jobsError, setJobsError] = useState<string | null>(null);
@@ -103,26 +105,15 @@ export default function AllJobPostingSection() {
 
   const [initialized, setInitialized] = useState(false);
 
+  // 초기 진입 시 필터 트리(직군/직무)만 로딩
   useEffect(() => {
     const init = async () => {
       try {
         setJobLoading(true);
-        setJobsLoading(true);
         setJobError(null);
-        setJobsError(null);
-
-        const size = parseInt(sizeSort, 10) || 15;
-        const { jobs, totalPages, totalCount } = await fetchJobList(page, size);
-        
-        setAllJobs(jobs);
-        setJobs(resumeReco ? jobs.filter((j) => j.aiPick === true) : jobs);
-
-        setTotalPages(totalPages);
-        setTotalCount(totalCount);
 
         const tree = await fetchJobTree();
         setJobTree(tree);
-        console.log('공고리스트',jobs);
         setInitialized(true);
       } catch (e: any) {
         console.error(e);
@@ -133,65 +124,113 @@ export default function AllJobPostingSection() {
           return;
         }
 
-        setJobError(
-          e?.message || "초기 로딩 중 직군/직무 정보를 불러오는 데 실패했습니다."
-        );
-        setJobsError(
-          e?.message || "초기 로딩 중 채용 공고를 불러오는 데 실패했습니다."
-        );
+        setJobError(e?.message || "초기 로딩 중 직군/직무 정보를 불러오는 데 실패했습니다.");
       } finally {
         setJobLoading(false);
-        setJobsLoading(false);
       }
     };
 
     init();
-  }, [navigate, page, sizeSort, resumeReco]);
+  }, [navigate]);
 
+  // 현재 필터가 하나라도 적용되어 있는지 판단
+  const hasFilters = useMemo(() => {
+    const hasRole = roleSelected.length > 0;
+    const hasCareer = careerRange.min !== 0 || careerRange.max !== 10;
+    const hasEducation = educationSelected.length > 0;
+    const hasLocation = locationSelected.length > 0;
+    const hasEmployment = employmentSelected.length > 0;
+    return hasRole || hasCareer || hasEducation || hasLocation || hasEmployment;
+  }, [
+    roleSelected.length,
+    careerRange.min,
+    careerRange.max,
+    educationSelected.length,
+    locationSelected.length,
+    employmentSelected.length,
+  ]);
+
+  // 공고 리스트 로딩(무필터/필터 공통). 중복 호출 방지를 위해 한 곳에서만 fetchJobList 호출
   useEffect(() => {
     if (!initialized) return;
-  
     const loadJobs = async () => {
       try {
         setJobsLoading(true);
-  
-        const size = parseInt(sizeSort, 10) || 15;
-        const roleIds = roleSelected.map((r) =>
-          r.roleId === 0 ? r.categoryId : r.roleId
-        );
-  
-        const params: any = {
-          sort,
-          categoryId: roleIds.length ? roleIds : undefined,
-        };
-  
-        const { jobs, totalPages, totalCount } =
-          await fetchJobList(page, size, params);
-        setJobs(resumeReco ? jobs.filter((j) => j.aiPick) : jobs);
+        setJobsError(null);
+
+        const size = SIZE_MAP[sizeSort] ?? 15;
+        console.log('머지',size);
+        const sortCode = SORT_CODE_MAP[sort] ?? "latest";
+        
+        const roleIds = roleSelected.map((r) => (r.roleId === 0 ? r.categoryId : r.roleId));
+        const career = toCareerParam(careerRange);
+        const educationCode = toEducationCodeParam(educationSelected);
+        const locationCode = toLocationCodeParam(locationSelected);
+
+        const employmentType = employmentSelected
+          .filter((k) => EMPLOYMENT_TYPE_KEYS.includes(k))
+          .join(",");
+
+        const employmentEtc = employmentSelected
+          .filter((k) => EMPLOYMENT_ETC_KEYS.includes(k))
+          .join(",");
+
+          const params: any = {
+            sort: sortCode,   // ✅ sortCode -> sort
+          };
+
+        if (hasFilters) {
+          params.categoryId = roleIds.length ? roleIds : undefined;
+          params.career = career;
+          params.educationCode = educationCode;
+          params.locationCode = locationCode;
+          params.employmentType = employmentType || undefined;
+          params.employmentEtc = employmentEtc || undefined;
+        }
+
+        const { jobs, totalPages, totalCount } = await fetchJobList(page, size, params);
+        console.log(size);    
+        console.log('가져온 갯수',jobs.length);      
+        console.log('옵션',params);  
+        setAllJobs(jobs);
+        setJobs(resumeReco ? jobs.filter((j) => j.aiPick === true) : jobs);
         setTotalPages(totalPages);
         setTotalCount(totalCount);
+      } catch (e: any) {
+        console.error(e);
+
+        if (e?.code === 999) {
+          logout();
+          navigate("/login");
+          return;
+        }
+
+        setJobsError(e?.message || "공고를 불러오는 데 실패했습니다.");
       } finally {
         setJobsLoading(false);
       }
     };
-  
+
     loadJobs();
   }, [
     initialized,
+    navigate,
     page,
     sizeSort,
     sort,
     resumeReco,
+    hasFilters,
     roleSelected,
     careerRange,
     educationSelected,
     locationSelected,
     employmentSelected,
   ]);
-  
-  const toggleFilter = (key: FilterKey) =>
-    setOpenFilter((prev) => (prev === key ? null : key));
 
+  // 필터 메뉴 토글
+  const toggleFilter = (key: FilterKey) => setOpenFilter((prev) => (prev === key ? null : key));
+
+  // 필터 전체 초기화
   const resetFilters = () => {
     setChips([]);
     setRoleSelected([]);
@@ -199,20 +238,53 @@ export default function AllJobPostingSection() {
     setEducationSelected([]);
     setLocationSelected([]);
     setEmploymentSelected([]);
+    setOpenFilter(null);
+    setPage(1);
   };
 
-  const removeChip = (id: string) => {
-    setChips((prev) => prev.filter((chip) => chip.id !== id));
+  // 칩 제거 시 해당 필터 상태도 함께 제거하고 1페이지로 이동
+  const removeChip = (chip: Chip) => {
+    setChips((prev) => prev.filter((c) => c.id !== chip.id));
+
+    switch (chip.kind) {
+      case "role":
+        setRoleSelected((prev) =>
+          prev.filter(
+            (r) => `role-${r.roleId}` !== chip.id && `role-all-${r.categoryId}` !== chip.id
+          )
+        );
+        break;
+
+      case "career":
+        setCareerRange({ min: 0, max: 10 });
+        break;
+
+      case "education":
+        setEducationSelected((prev) => prev.filter((e) => `edu-${e}` !== chip.id));
+        break;
+
+      case "location":
+        setLocationSelected((prev) => prev.filter((l) => l.code !== chip.id));
+        break;
+
+      case "employmentType":
+      case "employmentEtc":
+        setEmploymentSelected((prev) => prev.filter((e) => e !== chip.value));
+        break;
+    }
+
+    setPage(1);
   };
 
+  // 지역 필터 적용
   const handleLocationApply = (selected: LocationSelectedItem[]) => {
     setLocationSelected(selected);
 
     const locationChips: Chip[] = selected.map((s) => {
       if (s.districtName === "전체") {
-        return { id: `loc-${s.code}`, role: `${s.regionName} 전체`, kind: "location" };
+        return { id: `${s.code}`, role: `${s.regionName} 전체`, kind: "location" };
       }
-      return { id: `loc-${s.code}`, group: s.regionName, role: s.districtName, kind: "location" };
+      return { id: `${s.code}`, group: s.regionName, role: s.districtName, kind: "location" };
     });
 
     setChips((prev) => {
@@ -220,9 +292,11 @@ export default function AllJobPostingSection() {
       return [...others, ...locationChips];
     });
 
+    setPage(1);
     setOpenFilter(null);
   };
 
+  // 경력 필터 적용
   const handleCareerApply = (range: { min: number; max: number }) => {
     setCareerRange(range);
 
@@ -233,18 +307,24 @@ export default function AllJobPostingSection() {
     else if (min === 0) label = `~${max}년`;
     else if (max === 10) label = `${min}년 이상`;
     else label = `${min}~${max}년`;
-    console.log('경력',range);
-    const careerChip: Chip = { id: "career", role: label, kind: "career" };
+
+    const careerChip: Chip = {
+      id: "career",
+      role: label,
+      kind: "career",
+      value: toCareerParam(range),
+    };
 
     setChips((prev) => {
       const others = prev.filter((chip) => chip.kind !== "career");
       return [...others, careerChip];
     });
 
-    console.log('경력',careerChip);
+    setPage(1);
     setOpenFilter(null);
   };
 
+  // 학력 필터 적용
   const handleEducationApply = (selected: string[]) => {
     setEducationSelected(selected);
 
@@ -263,6 +343,7 @@ export default function AllJobPostingSection() {
       group: "학력",
       role: eduLabelMap[key] || key,
       kind: "education",
+      value: educationKeyToCode[key],
     }));
 
     setChips((prev) => {
@@ -270,9 +351,11 @@ export default function AllJobPostingSection() {
       return [...others, ...eduChips];
     });
 
+    setPage(1);
     setOpenFilter(null);
   };
 
+  // 채용유형 필터 적용
   const handleEmploymentApply = (selected: EmpOptionKey[]) => {
     setEmploymentSelected(selected);
 
@@ -285,21 +368,28 @@ export default function AllJobPostingSection() {
       disability: "장애인",
     };
 
-    const empChips: Chip[] = selected.map((key) => ({
-      id: `emp-${key}`,
-      group: "채용 유형",
-      role: empLabelMap[key],
-      kind: "employment",
-    }));
+    const empChips: Chip[] = selected.map((key) => {
+      const isType = EMPLOYMENT_TYPE_KEYS.includes(key);
+      return {
+        id: key,
+        role: empLabelMap[key],
+        kind: isType ? "employmentType" : "employmentEtc",
+        value: key,
+      };
+    });
 
     setChips((prev) => {
-      const others = prev.filter((chip) => chip.kind !== "employment");
+      const others = prev.filter(
+        (chip) => chip.kind !== "employmentType" && chip.kind !== "employmentEtc"
+      );
       return [...others, ...empChips];
     });
 
+    setPage(1);
     setOpenFilter(null);
   };
 
+  // 직군/직무 필터 적용
   const handleRoleApply = (selected: RoleSelectedItem[]) => {
     setRoleSelected(selected);
 
@@ -313,14 +403,15 @@ export default function AllJobPostingSection() {
       const others = prev.filter((chip) => chip.kind !== "role");
       return [...others, ...roleChips];
     });
+
+    setPage(1);
     setOpenFilter(null);
   };
 
-  // 모달 없이 토글만 + 즉시 필터 적용
+  // 이력서 기반 추천 토글
   const handleResumeRecoToggle = (checked: boolean) => {
     setResumeReco(checked);
     setPage(1);
-    setJobs(checked ? allJobs.filter((j) => j.aiPick === true) : allJobs);
   };
 
   if (
@@ -338,7 +429,9 @@ export default function AllJobPostingSection() {
   const careerRole = chips.find((chip) => chip.kind === "career")?.role;
   const educationChipCount = chips.filter((chip) => chip.kind === "education").length;
   const locationChipCount = chips.filter((chip) => chip.kind === "location").length;
-  const employmentChipCount = chips.filter((chip) => chip.kind === "employment").length;
+  const employmentChipCount = chips.filter(
+    (chip) => chip.kind === "employmentType" || chip.kind === "employmentEtc"
+  ).length;
 
   return (
     <>
@@ -388,24 +481,11 @@ export default function AllJobPostingSection() {
               >
                 <span className="job-search-filter-menu__label">
                   직군ㆍ직무
-                  {roleChipCount > 0 ? (
-                    <span className="chip-label">{roleChipCount}</span>
-                  ) : null}
+                  {roleChipCount > 0 ? <span className="chip-label">{roleChipCount}</span> : null}
                 </span>
-
-                <img
-                  src={
-                    roleChipCount > 0
-                      ? Icons.ic_arrow_drop_down_white_24
-                      : openFilter === "role"
-                      ? arrow_drop_up_black
-                      : arrow_drop_down
-                  }
-                  alt=""
-                />
-
                 {openFilter === "role" ? (
                   <div
+                    className="job-filter__popup"
                     onMouseDown={(e) => e.stopPropagation()}
                     onClick={(e) => e.stopPropagation()}
                     onTouchStart={(e) => e.stopPropagation()}
@@ -432,19 +512,9 @@ export default function AllJobPostingSection() {
                   {careerChipCount > 0 ? <span className="chip-label">{careerRole}</span> : null}
                 </span>
 
-                <img
-                  src={
-                    careerChipCount > 0
-                      ? Icons.ic_arrow_drop_down_white_24
-                      : openFilter === "career"
-                      ? arrow_drop_up_black
-                      : arrow_drop_down
-                  }
-                  alt=""
-                />
-
                 {openFilter === "career" ? (
                   <div
+                    className="job-filter__popup"
                     onMouseDown={(e) => e.stopPropagation()}
                     onClick={(e) => e.stopPropagation()}
                     onTouchStart={(e) => e.stopPropagation()}
@@ -465,19 +535,9 @@ export default function AllJobPostingSection() {
                   {educationChipCount > 0 ? <span className="chip-label">{educationChipCount}</span> : null}
                 </span>
 
-                <img
-                  src={
-                    educationChipCount > 0
-                      ? Icons.ic_arrow_drop_down_white_24
-                      : openFilter === "education"
-                      ? arrow_drop_up_black
-                      : arrow_drop_down
-                  }
-                  alt=""
-                />
-
                 {openFilter === "education" ? (
                   <div
+                    className="job-filter__popup"
                     onMouseDown={(e) => e.stopPropagation()}
                     onClick={(e) => e.stopPropagation()}
                     onTouchStart={(e) => e.stopPropagation()}
@@ -498,19 +558,9 @@ export default function AllJobPostingSection() {
                   {locationChipCount > 0 ? <span className="chip-label">{locationChipCount}</span> : null}
                 </span>
 
-                <img
-                  src={
-                    locationChipCount > 0
-                      ? Icons.ic_arrow_drop_down_white_24
-                      : openFilter === "location"
-                      ? arrow_drop_up_black
-                      : arrow_drop_down
-                  }
-                  alt=""
-                />
-
                 {openFilter === "location" ? (
                   <div
+                    className="job-filter__popup"
                     onMouseDown={(e) => e.stopPropagation()}
                     onClick={(e) => e.stopPropagation()}
                     onTouchStart={(e) => e.stopPropagation()}
@@ -528,24 +578,12 @@ export default function AllJobPostingSection() {
               >
                 <span className="job-search-filter-menu__label">
                   채용 유형
-                  {employmentChipCount > 0 ? (
-                    <span className="chip-label">{employmentChipCount}</span>
-                  ) : null}
+                  {employmentChipCount > 0 ? <span className="chip-label">{employmentChipCount}</span> : null}
                 </span>
-
-                <img
-                  src={
-                    employmentChipCount > 0
-                      ? Icons.ic_arrow_drop_down_white_24
-                      : openFilter === "employment"
-                      ? arrow_drop_up_black
-                      : arrow_drop_down
-                  }
-                  alt=""
-                />
 
                 {openFilter === "employment" ? (
                   <div
+                    className="job-filter__popup"
                     onMouseDown={(e) => e.stopPropagation()}
                     onClick={(e) => e.stopPropagation()}
                     onTouchStart={(e) => e.stopPropagation()}
@@ -583,7 +621,7 @@ export default function AllJobPostingSection() {
                   )}
                   <img
                     className="job-role-picker__chip-close"
-                    onClick={() => removeChip(chip.id)}
+                    onClick={() => removeChip(chip)}
                     style={{ cursor: "pointer" }}
                     src={ic_close_gray500_20}
                     alt=""
@@ -607,15 +645,18 @@ export default function AllJobPostingSection() {
             <div className="job-posting__header">
               <span className="job-posting__count">
                 총{" "}
-                <p className="point-text-black">
-                  {(resumeReco ? jobs.length : totalCount).toLocaleString()}개
-                </p>{" "}
+                <p className="point-text-black">{(resumeReco ? jobs.length : totalCount).toLocaleString()}개</p>{" "}
                 전체공고
               </span>
 
               <div className="job-posting__controls">
                 <SortDropdown value={sort} options={sortOptions} onChange={setSort} className="job-posting__sort" />
-                <SortDropdown value={sizeSort} options={sizeSortOptions} onChange={setSizeSort} className="job-posting__sort" />
+                <SortDropdown
+                  value={sizeSort}
+                  options={sizeSortOptions}
+                  onChange={setSizeSort}
+                  className="job-posting__sort"
+                />
 
                 <div className="job-posting__view-toggle" role="group" aria-label="보기 전환">
                   <span
@@ -638,7 +679,9 @@ export default function AllJobPostingSection() {
               </div>
             </div>
 
-            {view === 1 ? (
+            {jobs.length === 0 ? (
+              <JobEmptyResult />
+            ) : view === 1 ? (
               <JobPostingCard jobs={jobs} loading={jobsLoading} isResumeBased={resumeReco} />
             ) : (
               <JobPostingRow jobs={jobs} loading={jobsLoading} isResumeBased={resumeReco} />

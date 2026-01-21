@@ -222,7 +222,7 @@ const SocialConsent: React.FC = () => {
 
   return (
     <div className="consent-page">
-      <LoadingOverlay isLoading={isLoading} isLogo text="처리 중..." />
+      <LoadingOverlay isLoading={isLoading} isLogo  />
 
       <div className="consent-contatiner">
         <h1 className="signup-title">회원 가입</h1>

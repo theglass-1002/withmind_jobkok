@@ -49,7 +49,8 @@ export default function SortDropdown({
             <span
               key={opt}
               className="sort-control__option"
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 onChange(opt);
                 setOpen(false);
               }}

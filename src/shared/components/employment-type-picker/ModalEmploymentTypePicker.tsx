@@ -2,19 +2,14 @@ import React, { useEffect, useState } from "react";
 
 import refresh_black from "@/assets/icons/refresh_black.png";
 import "./ModalEmploymentTypePicker.css";
+import { EmpOptionKey } from "@/api/job/job.api";
 
-export type EmpOptionKey =
-  | "fullTime"
-  | "contract"
-  | "intern"
-  | "militaryService"
-  | "foreigner"
-  | "disability";
+
 
 interface ModalEmploymentTypePickerProps {
   onApply?: (selected: EmpOptionKey[]) => void;
 
-  // ✅ 복원용
+  //  복원용
   initialSelected?: EmpOptionKey[];
 }
 
@@ -26,7 +21,7 @@ export default function ModalEmploymentTypePicker({
     new Set()
   );
 
-  // ✅ 모달 재오픈 시 복원
+  //  모달 재오픈 시 복원
   useEffect(() => {
     setSelectedOptions(new Set(initialSelected));
   }, [initialSelected]);
