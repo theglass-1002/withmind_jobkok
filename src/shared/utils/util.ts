@@ -460,7 +460,7 @@ export const isValidEmail = (email: string): boolean => {
 export const formatDate = (dt?: string) => {
   if (!dt) return "";
   const [date] = dt.split(" "); // "2025-12-03"
-  return date.replace(/-/g, ".") + ".";
+  return date.replace(/-/g, ".") + "";
 };
 
 export const scrollToTop = () => {
@@ -469,7 +469,7 @@ export const scrollToTop = () => {
 };
 
 
-// ✅ webm -> thumbnail 생성 함수
+
 export function createVideoThumbnail(videoUrl: string, time = 1): Promise<string> {
   return new Promise((resolve, reject) => {
     const video = document.createElement("video");

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -34,6 +34,10 @@ interface JobPostingItemRowNoAiPickProps {
   unappliedInfoMessage?: string;
   showAppliedSection?: boolean;
   job?: JobItem;
+  onUnfavorite?: (jobId: number) => void;
+  onUnapplied?: (jobId: number) => void;
+  onAppliedChanged?: (jobId: number, nextApplied: 0 | 1) => void;
+  onFavoriteChanged?: (jobId: number, nextFavorite: 0 | 1) => void;
 }
 
 export default function JobPostingItemRowNoAiPick({
@@ -41,11 +45,27 @@ export default function JobPostingItemRowNoAiPick({
   unappliedInfoMessage = DEFAULT_INFO_MESSAGE,
   showAppliedSection = true,
   job,
+  onUnfavorite = () => {},
+  onUnapplied = () => {},
+  onAppliedChanged = () => {},
+  onFavoriteChanged = () => {},
 }: JobPostingItemRowNoAiPickProps) {
   const navigate = useNavigate();
 
-  const [bookMark, setBookMark] = useState<0 | 1>(((job?.favorite as 0 | 1) ?? 0));
-  const [recordAsApplied, setRecordAsApplied] = useState<0 | 1>(((job?.applied as 0 | 1) ?? 0));
+  const [bookMark, setBookMark] = useState<0 | 1>(
+    ((job?.favorite as 0 | 1) ?? 0)
+  );
+  const [recordAsApplied, setRecordAsApplied] = useState<0 | 1>(
+    ((job?.applied as 0 | 1) ?? 0)
+  );
+
+  useEffect(() => {
+    setBookMark(((job?.favorite as 0 | 1) ?? 0));
+  }, [job?.favorite, job?.id]);
+
+  useEffect(() => {
+    setRecordAsApplied(((job?.applied as 0 | 1) ?? 0));
+  }, [job?.applied, job?.id]);
 
   const handleGoToJobPost = () => {
     if (!job) return;
@@ -63,7 +83,15 @@ export default function JobPostingItemRowNoAiPick({
     try {
       setBookMark(next);
       await toggleJobFavorite(job.id, isFavorite);
-      toast.success(next === 1 ? "즐겨찾기에 추가되었습니다." : "즐겨찾기가 해제되었습니다.");
+      toast.success(
+        next === 1 ? "즐겨찾기에 추가되었습니다." : "즐겨찾기가 해제되었습니다."
+      );
+
+      onFavoriteChanged(job.id, next);
+
+      if (next === 0) {
+        onUnfavorite(job.id);
+      }
     } catch (err: any) {
       console.error(err);
       setBookMark(prev);
@@ -78,11 +106,6 @@ export default function JobPostingItemRowNoAiPick({
     }
   };
 
-  /**
-   *  지원 기록 토글
-   * - next === 1 : 기록하기 (POST)
-   * - next === 0 : 해제하기 (DELETE)
-   */
   const handleRecordAsApplied = async (e: React.MouseEvent, next: 0 | 1) => {
     e.stopPropagation();
     if (!job) return;
@@ -90,21 +113,22 @@ export default function JobPostingItemRowNoAiPick({
     const prev = recordAsApplied;
     if (prev === next) return;
 
-    // optimistic
     setRecordAsApplied(next);
 
     try {
       if (next === 1) {
         await markJobApplied(job.id);
         toast.success(appliedSuccessMessage);
+        onAppliedChanged(job.id, 1);
       } else {
         await unmarkJobApplied(job.id);
         toast.info(unappliedInfoMessage);
+        onAppliedChanged(job.id, 0);
+        onUnapplied(job.id);
       }
     } catch (err: any) {
       console.error(err);
 
-      // rollback
       setRecordAsApplied(prev);
 
       if (err?.code === 999) {
@@ -117,7 +141,6 @@ export default function JobPostingItemRowNoAiPick({
     }
   };
 
-  // job 없으면 최소 렌더(에러 방지)
   if (!job) {
     return (
       <div className="job-posting__card">
@@ -139,7 +162,6 @@ export default function JobPostingItemRowNoAiPick({
     );
   }
 
-  // 메타 정보 가공
   const loc = getLocationLabel(job.locationCode);
   const career = getCareerLabel(job.annualFrom, job.annualTo);
   const edu = getEducationLabel(job.educationCode);
@@ -183,7 +205,10 @@ export default function JobPostingItemRowNoAiPick({
           onClick={handleBookmark}
           style={{ cursor: "pointer" }}
         >
-          <img src={bookMark === 1 ? bookmark_active_purple : bookmark_inactive} alt="" />
+          <img
+            src={bookMark === 1 ? bookmark_active_purple : bookmark_inactive}
+            alt=""
+          />
         </div>
       </div>
 

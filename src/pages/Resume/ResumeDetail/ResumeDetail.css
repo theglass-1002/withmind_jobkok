@@ -196,6 +196,7 @@
     font-style: normal;
     font-weight: 400;
     line-height: 20px; /* 125% */
+    white-space: nowrap;
   }
 
   .resume-location__district{
@@ -205,6 +206,7 @@
     font-style: normal;
     font-weight: 400;
     line-height: 20px; 
+    white-space: nowrap;
 }
 
 /* resume-career */

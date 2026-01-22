@@ -125,7 +125,7 @@ export default function OverviewPage({
     };
   }, [location.search]);
 
-  // ✅ 2) printViewr 플래그에 따른 body class 처리 (버그 수정 버전)
+  //  printViewr 플래그에 따른 body class 처리 (버그 수정 버전)
   useEffect(() => {
     const query = new URLSearchParams(location.search);
     const isPrintMode = query.has("printViewr");
@@ -143,7 +143,7 @@ export default function OverviewPage({
 
   return (
     <>
-      <LoadingOverlay isLoading={loading} text="리포트를 불러오는 중입니다" isLogo />
+      <LoadingOverlay isLoading={loading} isLogo />
 
       <div className="mock-analysis-report__content" ref={contentRef}>
         <KpiOverviewSection

@@ -13,47 +13,73 @@ import type { JobItem } from "@/api/job/job.types";
 interface AllSavedJobsListProps {
   viewType: "row" | "card";
   jobs?: JobItem[];
-
   page?: number;
   totalPages?: number;
   onChangePage?: (p: number) => void;
+  onUnfavorite?: (jobId: number) => void;
+  onAppliedChanged?: (jobId: number, nextApplied: 0 | 1) => void;
+  onFavoriteChanged?: (jobId: number, nextFavorite: 0 | 1) => void;
 }
 
 export default function AllSavedJobsList({
   viewType,
-  jobs = [],            // ✅ 기본값: undefined면 빈 배열
-  page = 1,             // ✅ 기본값
-  totalPages = 1,       // ✅ 기본값
-  onChangePage = () => {}, // ✅ 기본값
+  jobs = [],
+  page = 1,
+  totalPages = 1,
+  onChangePage = () => {},
+  onUnfavorite = () => {},
+  onAppliedChanged = () => {},
+  onFavoriteChanged = () => {},
 }: AllSavedJobsListProps) {
   const navigate = useNavigate();
 
-  useEffect(() => {
-  }, [jobs]);
+  useEffect(() => {}, [jobs]);
 
   const handleGoToJobs = () => {
-    navigate("/jobs");
+    navigate("/jobs", { state: { activeTab: "all" } });
   };
+
+  if (!jobs || jobs.length === 0) {
+    return (
+      <div className="saved-jobs__content-empty-area completed">
+        <div className="jobs-empty-state">
+          <span className="empty-state__title">아직 지원한 공고가 없습니다.</span>
+          <span className="empty-state__desc">
+            관심 있는 채용 공고를 저장하고, 지원 정보도 함께 관리해 보세요.
+          </span>
+        </div>
+        <button className="default_btn_white" onClick={handleGoToJobs}>
+          채용 공고 보러 가기
+        </button>
+      </div>
+    );
+  }
 
   return (
     <>
       {viewType === "card" ? (
         <div className={`saved-jobs__content-area ${viewType} job-posting__list--grid`}>
-          {jobs.map((job, idx) => (
+          {jobs.map((job) => (
             <JobPostingItemCardNoAiPick
-              key={(job as any).jobId ?? (job as any).id ?? `${idx}`}
+              key={job.id}
               job={job}
               appliedSuccessMessage="지원 정보가 반영되었습니다."
+              onUnfavorite={onUnfavorite}
+              onAppliedChanged={onAppliedChanged}
+              onFavoriteChanged={onFavoriteChanged}
             />
           ))}
         </div>
       ) : (
         <div className={`saved-jobs__content-area ${viewType} job-posting__item job-posting__item--row`}>
-          {jobs.map((job, idx) => (
+          {jobs.map((job) => (
             <JobPostingItemRowNoAiPick
-              key={(job as any).jobId ?? (job as any).id ?? `${idx}`}
+              key={job.id}
               job={job}
               appliedSuccessMessage="지원 정보가 반영되었습니다."
+              onUnfavorite={onUnfavorite}
+              onAppliedChanged={onAppliedChanged}
+              onFavoriteChanged={onFavoriteChanged}
             />
           ))}
         </div>

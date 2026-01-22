@@ -60,7 +60,6 @@ export async function removeJobFavorite(jobId: number): Promise<void> {
     `/api/jobs/${jobId}/favorite`
   );
 
-  console.log("❌ 즐겨찾기 제거", res.data);
 }
 
 export async function toggleJobFavorite(
@@ -68,7 +67,7 @@ export async function toggleJobFavorite(
   isFavorite: boolean
 ): Promise<void | number> {
   
-  console.log(isFavorite);
+
   if (isFavorite) {
   
     // 이미 즐겨찾기 → 제거

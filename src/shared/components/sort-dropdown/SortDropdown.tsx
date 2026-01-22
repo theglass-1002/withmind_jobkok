@@ -32,7 +32,6 @@ export default function SortDropdown({
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
-
   return (
     <div
       className={`sort-control ${className}`}

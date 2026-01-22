@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "rc-slider/assets/index.css";
 import Tabs from "@/shared/components/tabs/Tabs";
 import { useStickyTabs } from "@/shared/utils/util";
@@ -15,10 +15,10 @@ import "./Jobs.css";
 
 export default function JobsList() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [activeTab, setActiveTab] = useState<"all" | "saved">("all");
 
-  // 이력서 존재 여부 상태
   const [resumeExists, setResumeExists] = useState<boolean | null>(null);
 
   const isTabsSticky = useStickyTabs(
@@ -37,12 +37,21 @@ export default function JobsList() {
   };
 
   useEffect(() => {
+    const state = location.state as { activeTab?: "all" | "saved" } | null;
+    const incomingTab = state?.activeTab;
+
+    if (incomingTab === "all" || incomingTab === "saved") {
+      setActiveTab(incomingTab);
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location.state, location.pathname, navigate]);
+
+  useEffect(() => {
     const checkResume = async () => {
       try {
         const resumeCheck = await fetchResumeCheck();
         console.log("📝 resumeCheck.exists:", resumeCheck.exists);
 
-        // 존재 여부 저장
         setResumeExists(resumeCheck.exists);
       } catch (e) {
         console.error("이력서 존재 여부 확인 중 오류:", e);
@@ -54,14 +63,13 @@ export default function JobsList() {
         //   return;
         // }
 
-        setResumeExists(false); // 오류 시 기본값 false
+        setResumeExists(false);
       }
     };
 
     checkResume();
   }, []);
 
-  // 🔥 스크롤 이벤트
   useEffect(() => {
     const masthead = document.querySelector(".masthead");
     const searchToolbar = document.querySelector(".jobs-toolbar__search");
@@ -136,9 +144,7 @@ export default function JobsList() {
           tabs={tabItems}
           active={activeTab}
           onChange={handleTabClick}
-          className={`jobs-tabs default_tabs ${
-            isTabsSticky ? "is-sticky" : ""
-          }`}
+          className={`jobs-tabs default_tabs ${isTabsSticky ? "is-sticky" : ""}`}
           itemClassName="jobs-tab"
           activeClassName="on"
         />

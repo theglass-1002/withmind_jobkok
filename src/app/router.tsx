@@ -46,7 +46,7 @@ import InquiryEdit from "@/pages/Mypage/Support/Inquiry/InquiryEdit";
 import NoticeList from "@/pages/Mypage/Support/Notices/NoticeList";
 import NoticeDetail from "@/pages/Mypage/Support/Notices/NoticeDetail";
 import ReportJob from "@/pages/Mypage/Support/ReportJob/ReportJob";
-
+import RecentJobsList from "@/pages/Jobs/RecentJobs/RecentJobsList";
 
 
 import PurchaseLayout from "@/pages/Purchase/PurchaseLayout";
@@ -145,12 +145,14 @@ export const router = createBrowserRouter([
 
   { path: "/signup", element:<Layout showFooter="desktop-only" showBottomNav={false}> <Signup/></Layout> },
   {
-    path: "/inicis/callback",  // ✅ 프론트 경로로 변경!
+    path: "/inicis/callback",  //  프론트 경로로 변경!
     element: <InicisSuccess />,
   },
 
   { path: "/social-consent", element:<Layout showFooter="desktop-only" showBottomNav={false}> <SocialConsent/></Layout> },
   { path: "/recovery", element: <Layout showFooter="desktop-only" showBottomNav={false}><Recovery/></Layout> },
+  { path: "/recent-jobs", element: <Layout showFooter="desktop-only" showBottomNav={false}><RecentJobsList/></Layout> },
+  
   { path: "/mypage", 
     element: <Layout screen="Mypage" ><MyPageLayout/></Layout>,
       children:[

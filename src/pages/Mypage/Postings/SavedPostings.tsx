@@ -7,13 +7,12 @@ import SortDropdown from "@/shared/components/sort-dropdown/SortDropdown";
 import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
 
 import { fetchJobList } from "@/api/job/job.api";
-import type { JobItem } from "@/api/job/job.types";
+import { SIZE_MAP, SORT_CODE_MAP, type JobItem } from "@/api/job/job.types";
 
 import ic_grid_view_gray900_20 from "@/assets/icons/size20/ic_grid_view_gray900_20.png";
 import ic_grid_view_gray400_20 from "@/assets/icons/size20/ic_grid_view_gray400_20.png";
 import ic_list_view_gray400_20 from "@/assets/icons/size20/ic_list_view_gray400_20.png";
 import ic_list_view_gray900_20 from "@/assets/icons/size20/ic_list_view_gray900_20.png";
-import ic_arrow_drop_down_gray500_24 from "@/assets/icons/size24/ic_arrow_drop_down_gray500_24.png";
 
 import "./SavedPostings.css";
 import "@/shared/components/job-posting-item/JobPostingItem.css";
@@ -27,24 +26,24 @@ const filters = [
 type FilterValue = "all" | "done" | "before";
 type ViewType = "row" | "card";
 
+
+
 export default function SavedPostings() {
   const [currentFilter, setCurrentFilter] = useState<FilterValue>("all");
   const [currentView, setCurrentView] = useState<ViewType>("card");
 
-  // 정렬 UI는 유지하되, 서버 파라미터 매핑은 일단 인기순으로 고정(원하면 매핑도 붙여줄게)
   const [sortLabel, setSortLabel] = useState("인기순");
-  const sortOptions = ["적합도순", "최신순", "인기순", "마감임박순"];
+  const sortOptions =["오래된순", "적합도순", "최신순", "인기순", "마감임박순"];
 
-  // 페이징
+  const [sizeLabel, setSizeLabel] = useState("15개씩");
+  const sizeOptions = ["15개씩", "30개씩", "45개씩"];
+
   const [page, setPage] = useState(1);
-  const size = 15;
 
-  // 데이터
   const [jobs, setJobs] = useState<JobItem[]>([]);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
-  // 로딩
   const [isLoading, setIsLoading] = useState(false);
 
   const handleFilterChange = (newValue: string) => {
@@ -56,33 +55,57 @@ export default function SavedPostings() {
     setCurrentView(type);
   };
 
-  // 저장한 공고: favorites (현재는 all에서만 호출)
-  useEffect(() => {
-    if (currentFilter !== "all") return;
+  const handleUnfavorite = (jobId: number) => {
+    setJobs((prev) => prev.filter((j) => j.id !== jobId));
+    setTotalCount((prev) => Math.max(0, prev - 1));
+  };
 
+  const handleUnapplied = (jobId: number) => {
+    setJobs((prev) => prev.filter((j) => j.id !== jobId));
+    setTotalCount((prev) => Math.max(0, prev - 1));
+  };
+
+  const handleAppliedChanged = (jobId: number, nextApplied: 0 | 1) => {
+    setJobs((prev) =>
+      prev.map((j) => (j.id === jobId ? ({ ...j, applied: nextApplied } as JobItem) : j))
+    );
+  };
+
+  const handleFavoriteChanged = (jobId: number, nextFavorite: 0 | 1) => {
+    setJobs((prev) =>
+      prev.map((j) => (j.id === jobId ? ({ ...j, favorite: nextFavorite } as JobItem) : j))
+    );
+  };
+
+  useEffect(() => {
     const run = async () => {
       try {
         setIsLoading(true);
 
-        const result = await fetchJobList(page, size, {
-          sort: "popular",
-          tabs: "favorites",
-        });
+        const sortCode = SORT_CODE_MAP[sortLabel] ?? "popular";
+        const size = SIZE_MAP[sizeLabel] ?? 15;
 
-        console.log("[SavedPostings] favorites jobs:", result.jobs);
-        console.log("[SavedPostings] meta:", {
-          page: result.page,
-          size: result.size,
-          totalCount: result.totalCount,
-          totalPages: result.totalPages,
-          hasNext: result.hasNext,
-        });
+        const tabs = "favorites";
+
+        const applied =
+          currentFilter === "done"
+            ? 1
+            : currentFilter === "before"
+            ? 0
+            : undefined;
+
+        const params =
+          applied === undefined
+            ? { sort: sortCode, tabs }
+            : { sort: sortCode, tabs, applied };
+
+        const result = await fetchJobList(page, size, params);
 
         setJobs(result.jobs ?? []);
         setTotalPages(result.totalPages ?? 1);
         setTotalCount(result.totalCount ?? 0);
       } catch (err) {
-        console.error("[SavedPostings] favorites fetch failed:", err);
+        console.error("[SavedPostings] fetch failed:", err);
         setJobs([]);
         setTotalPages(1);
         setTotalCount(0);
@@ -92,7 +115,7 @@ export default function SavedPostings() {
     };
 
     run();
-  }, [currentFilter, page]);
+  }, [currentFilter, page, sortLabel, sizeLabel]);
 
   return (
     <div className="mypage__content-area saved-jobs-page">
@@ -115,29 +138,43 @@ export default function SavedPostings() {
               <SortDropdown
                 value={sortLabel}
                 options={sortOptions}
-                onChange={setSortLabel}
+                onChange={(val) => {
+                  setSortLabel(val);
+                  setPage(1);
+                }}
                 className="job-posting__sort"
               />
             </div>
 
             <div className="control__page-size">
-              <span className="control__label">15개씩</span>
-              <img
-                src={ic_arrow_drop_down_gray500_24}
-                alt="개수 변경 아이콘"
-                className="control__icon"
+              <SortDropdown
+                value={sizeLabel}
+                options={sizeOptions}
+                onChange={(val) => {
+                  setSizeLabel(val);
+                  setPage(1);
+                }}
+                className="job-posting__sort"
               />
             </div>
 
             <div className="control__view-toggle">
               <img
-                src={currentView === "card" ? ic_grid_view_gray900_20 : ic_grid_view_gray400_20}
+                src={
+                  currentView === "card"
+                    ? ic_grid_view_gray900_20
+                    : ic_grid_view_gray400_20
+                }
                 onClick={() => handleViewToggle("card")}
                 alt="그리드 보기"
                 className="toggle__icon toggle__grid"
               />
               <img
-                src={currentView === "row" ? ic_list_view_gray900_20 : ic_list_view_gray400_20}
+                src={
+                  currentView === "row"
+                    ? ic_list_view_gray900_20
+                    : ic_list_view_gray400_20
+                }
                 onClick={() => handleViewToggle("row")}
                 alt="리스트 보기"
                 className="toggle__icon toggle__list"
@@ -162,11 +199,40 @@ export default function SavedPostings() {
             page={page}
             totalPages={totalPages}
             onChangePage={setPage}
+            onUnfavorite={handleUnfavorite}
+            onAppliedChanged={handleAppliedChanged}
+            onFavoriteChanged={handleFavoriteChanged}
           />
         ) : currentFilter === "done" ? (
-          <CompletedJobsList />
+          <CompletedJobsList
+            viewType={currentView}
+            jobs={jobs}
+            page={page}
+            totalPages={totalPages}
+            onChangePage={setPage}
+            onUnapplied={handleUnapplied}
+            onUnfavorite={handleUnfavorite}
+            onAppliedChanged={handleAppliedChanged}
+            onFavoriteChanged={handleFavoriteChanged}
+          />
         ) : (
-          <BeforeJobsList />
+          <BeforeJobsList
+            viewType={currentView}
+            jobs={jobs}
+            page={page}
+            totalPages={totalPages}
+            onChangePage={setPage}
+            onUnfavorite={handleUnfavorite}
+            onUnapplied={handleUnapplied}
+            onAppliedChanged={(jobId, nextApplied) => {
+              handleAppliedChanged(jobId, nextApplied);
+              if (nextApplied === 1) {
+                setJobs((prev) => prev.filter((j) => j.id !== jobId));
+                setTotalCount((prev) => Math.max(0, prev - 1));
+              }
+            }}
+            onFavoriteChanged={handleFavoriteChanged}
+          />
         )}
       </div>
     </div>

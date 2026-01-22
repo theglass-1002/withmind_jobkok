@@ -159,7 +159,6 @@ export default function AllJobPostingSection() {
         setJobsError(null);
 
         const size = SIZE_MAP[sizeSort] ?? 15;
-        console.log('머지',size);
         const sortCode = SORT_CODE_MAP[sort] ?? "latest";
         
         const roleIds = roleSelected.map((r) => (r.roleId === 0 ? r.categoryId : r.roleId));
@@ -176,7 +175,7 @@ export default function AllJobPostingSection() {
           .join(",");
 
           const params: any = {
-            sort: sortCode,   // ✅ sortCode -> sort
+            sort: sortCode,   //  sortCode -> sort
           };
 
         if (hasFilters) {
@@ -189,9 +188,6 @@ export default function AllJobPostingSection() {
         }
 
         const { jobs, totalPages, totalCount } = await fetchJobList(page, size, params);
-        console.log(size);    
-        console.log('가져온 갯수',jobs.length);      
-        console.log('옵션',params);  
         setAllJobs(jobs);
         setJobs(resumeReco ? jobs.filter((j) => j.aiPick === true) : jobs);
         setTotalPages(totalPages);

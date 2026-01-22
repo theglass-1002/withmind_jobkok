@@ -58,7 +58,7 @@ export default function ResumeList() {
     setOpenMenuId(null);
   };
 
-  // 🔥 리스트 아이템 클릭 시 상세 화면 이동
+  // 리스트 아이템 클릭 시 상세 화면 이동
   const handleItemClick = (resumeIdx: number) => {
     navigate(`/resumes/${resumeIdx}`);
   };

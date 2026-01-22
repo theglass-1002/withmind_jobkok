@@ -16,60 +16,90 @@ import { JobItem } from "@/api/job/job.types";
 import MypageJobCard from "@/shared/components/mypage-job-card/MypageJobCard";
 import { logout } from "@/api/auth/auth.api";
 
+import { fetchResumeList } from "@/api/resume/resume.api";
+import type { ResumeItem } from "@/api/resume/resume.types";
+import { formatDate } from "@/shared/utils/util";
+
 export default function MyPage() {
   const navigate = useNavigate();
 
   const [savedJobs, setSavedJobs] = useState<JobItem[]>([]);
-  const [loadingSaved, setLoadingSaved] = useState(false);
-
   const [recentJobs, setRecentJobs] = useState<JobItem[]>([]);
-  const [loadingRecent, setLoadingRecent] = useState(false);
+  const [defaultResume, setDefaultResume] = useState<ResumeItem | null>(null);
 
-  const isLoading = loadingSaved || loadingRecent;
+  const [isLoading, setIsLoading] = useState(false);
+  const [isAllFailed, setIsAllFailed] = useState(false);
 
   useEffect(() => {
-    const loadSavedJobs = async () => {
+    let isMounted = true;
+
+    const run = async () => {
+      setIsLoading(true);
+      setIsAllFailed(false);
+
+      let successCount = 0;
+
       try {
-        setLoadingSaved(true);
-        const res = await fetchJobList(1, 3, { tabs: "favorites" });
-        setSavedJobs((res.jobs ?? []).slice(0, 3));
-      } catch (e: any) {
-        if (e?.code === 999) {
-          logout();
-          navigate("/login");
-          return;
+        try {
+          const favoritesRes = await fetchJobList(1, 3, { tabs: "favorites" });
+          if (!isMounted) return;
+          setSavedJobs((favoritesRes.jobs ?? []).slice(0, 3));
+          successCount += 1;
+        } catch (e: any) {
+          if (e?.code === 999) {
+            logout();
+            navigate("/login");
+            return;
+          }
+          if (!isMounted) return;
+          setSavedJobs([]);
+          console.error("[MyPage] 저장한 공고 조회 실패", e);
         }
-        console.error("[MyPage] 저장한 공고 조회 실패", e);
-        setSavedJobs([]);
+
+        try {
+          const recentRes = await fetchJobList(1, 3, { tabs: "recent" });
+          if (!isMounted) return;
+          setRecentJobs((recentRes.jobs ?? []).slice(0, 3));
+          successCount += 1;
+        } catch (e: any) {
+          if (e?.code === 999) {
+            logout();
+            navigate("/login");
+            return;
+          }
+          if (!isMounted) return;
+          setRecentJobs([]);
+          console.error("[MyPage] 최근 본 공고 조회 실패", e);
+        }
+
+        try {
+          const resumeRes = await fetchResumeList(1, 1, undefined, 1);
+          if (!isMounted) return;
+          setDefaultResume((resumeRes.list ?? [])[0] ?? null);
+          successCount += 1;
+          console.log(resumeRes);
+        } catch (e: any) {
+          if (e?.code === 999) {
+            logout();
+            navigate("/login");
+            return;
+          }
+          if (!isMounted) return;
+          setDefaultResume(null);
+          console.error("[MyPage] 기본 이력서 조회 실패", e);
+        }
       } finally {
-        setLoadingSaved(false);
+        if (!isMounted) return;
+        setIsAllFailed(successCount === 0);
+        setIsLoading(false);
       }
     };
 
-    loadSavedJobs();
-  }, [navigate]);
+    run();
 
-  useEffect(() => {
-    const loadRecentJobs = async () => {
-      try {
-        setLoadingRecent(true);
-        const res = await fetchJobList(1, 3, { tabs: "recent" });
-        
-        setRecentJobs((res.jobs ?? []).slice(0, 3));
-      } catch (e: any) {
-        if (e?.code === 999) {
-          logout();
-          navigate("/login");
-          return;
-        }
-        console.error("[MyPage] 최근 본 공고 조회 실패", e);
-        setRecentJobs([]);
-      } finally {
-        setLoadingRecent(false);
-      }
+    return () => {
+      isMounted = false;
     };
-
-    loadRecentJobs();
   }, [navigate]);
 
   const visibleSavedJobs = useMemo(() => savedJobs.slice(0, 3), [savedJobs]);
@@ -80,6 +110,12 @@ export default function MyPage() {
       {isLoading && <LoadingOverlay />}
 
       <div className="mypage_main no-bg-flag">
+        {isAllFailed && (
+          <div className="mypage__error-banner">
+            데이터를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.
+          </div>
+        )}
+
         <section className="mp-section">
           <header className="mypage__content-header row">
             <span>
@@ -91,14 +127,14 @@ export default function MyPage() {
           </header>
 
           <ul className="job-list saved job-posting__list--grid">
-            {!loadingSaved && visibleSavedJobs.length === 0 && (
+            {!isLoading && visibleSavedJobs.length === 0 && (
               <li className="empty">저장한 공고가 없습니다.</li>
             )}
 
-            {!loadingSaved &&
-              visibleSavedJobs.map((job, idx) => (
+            {!isLoading &&
+              visibleSavedJobs.map((job) => (
                 <MypageJobCard
-                  key={(job as any).jobId ?? (job as any).id ?? `${idx}`}
+                  key={job.id}
                   job={job}
                   appliedSuccessMessage="지원 정보가 반영되었습니다."
                   showAppliedSection={false}
@@ -134,14 +170,14 @@ export default function MyPage() {
           </header>
 
           <ul className="job-list recent job-posting__list--grid">
-            {!loadingRecent && visibleRecentJobs.length === 0 && (
+            {!isLoading && visibleRecentJobs.length === 0 && (
               <li className="empty">최근 본 공고가 없습니다.</li>
             )}
 
-            {!loadingRecent &&
-              visibleRecentJobs.map((job, idx) => (
+            {!isLoading &&
+              visibleRecentJobs.map((job) => (
                 <MypageJobCard
-                  key={(job as any).jobId ?? (job as any).id ?? `recent-${idx}`}
+                  key={job.id}
                   job={job}
                   appliedSuccessMessage="지원 정보가 반영되었습니다."
                   showAppliedSection={false}
@@ -167,11 +203,15 @@ export default function MyPage() {
 
             <div className="resume-card__body">
               <span className="resume-card__headline">
-                성장하는 기획자 정유리입니다.
+                {defaultResume?.title ?? "기본 이력서가 없습니다."}
               </span>
               <div className="resume-card__meta">
-                <span className="resume-card__date">2025.02.01</span>
-                <span className="resume-card__role">프로젝트 기획자</span>
+                <span className="resume-card__date">
+                {formatDate(defaultResume?.createdAt)}
+                </span>
+                <span className="resume-card__role">
+                  {defaultResume?.hopeJobs ?? ""}
+                </span>
               </div>
             </div>
           </div>
