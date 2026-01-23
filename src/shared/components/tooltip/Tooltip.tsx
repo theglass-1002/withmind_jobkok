@@ -1,5 +1,5 @@
+import { Icons } from "@/assets/icons";
 import React from "react";
-import ic_error_gray500_20 from "@/assets/icons/size20/ic_error_gray500_20.png";
 
 
 
@@ -21,7 +21,7 @@ type TooltipProps = {
 };
 
 export default function Tooltip({
-  iconElement=<img src={ic_error_gray500_20} alt="" />,
+  iconElement=<img src={Icons.ic_error_gray500_20} alt="" />,
   title,
   desc,
   position = "top",

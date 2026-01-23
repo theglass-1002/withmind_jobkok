@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import "./Navbar.css";
 import { Icons } from "@/assets/icons";
@@ -7,8 +7,15 @@ import ic_arrow_back_ios_gray900_20 from "@/assets/icons/size20/ic_arrow_back_io
 import ic_search_gray900_20 from "@/assets/icons/size20/ic_search_gray900_20.png";
 
 import { isLoggedIn, logout } from "@/api/auth/auth.api";
+import { fetchJobTree } from "@/api/job/job.api";
+import { JobNode } from "@/api/job/job.types";
 
-type Opt = { value: string; label: string };
+type AutoItem = {
+  label: string;
+  kind: "category" | "job";
+  categoryId?: number | string;
+  jobId?: number | string;
+};
 
 function highlightSubstring(label: string, query: string): React.ReactNode {
   if (!query) return label;
@@ -36,17 +43,6 @@ function highlightSubstring(label: string, query: string): React.ReactNode {
   return <>{parts}</>;
 }
 
-const options: Opt[] = [
-  { value: "chocolate", label: "Chocolate" },
-  { value: "strawberry", label: "Strawberry" },
-  { value: "vanilla", label: "Vanilla" },
-  { value: "frontend", label: "프로젝트 기획자" },
-  { value: "backend", label: "백엔드 개발" },
-  { value: "mobile", label: "모바일 앱 개발" },
-  { value: "designer", label: "웹 디자이너" },
-  { value: "pm", label: "프로젝트 매니저" },
-];
-
 interface NavbarProps {
   titleText?: string;
 }
@@ -57,7 +53,10 @@ export default function Navbar({ titleText }: NavbarProps) {
   const [loggedIn, setLoggedIn] = useState(false);
 
   const [inputValue, setInputValue] = useState("");
-  const [isSearchExecuted, setIsSearchExecuted] = useState(false);
+  const [inputValueDesktop, setInputValueDesktop] = useState("");
+  const [openAutoDesktop, setOpenAutoDesktop] = useState(false);
+
+  const [jobTree, setJobTree] = useState<JobNode[]>([]);
 
   const mypageRef = useRef<HTMLDivElement | null>(null);
   const searchPanelRef = useRef<HTMLDivElement | null>(null);
@@ -66,13 +65,72 @@ export default function Navbar({ titleText }: NavbarProps) {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const autoItems: AutoItem[] = useMemo(() => {
+    const out: AutoItem[] = [];
+    if (!Array.isArray(jobTree)) return out;
+
+    const topSorted = [...jobTree].sort(
+      (a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)
+    );
+
+    for (const parent of topSorted) {
+      if (parent?.isActive === false) continue;
+      if (!parent?.name) continue;
+
+      out.push({
+        label: parent.name,
+        kind: "category",
+        categoryId: parent.id,
+      });
+
+      const childrenSorted = Array.isArray(parent.children)
+        ? [...parent.children].sort(
+            (a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)
+          )
+        : [];
+
+      for (const child of childrenSorted) {
+        if (child?.isActive === false) continue;
+        if (!child?.name) continue;
+
+        out.push({
+          label: child.name,
+          kind: "job",
+          categoryId: parent.id,
+          jobId: child.id,
+        });
+      }
+    }
+
+    return out;
+  }, [jobTree]);
+
+  const filteredAutoDesktop = useMemo(() => {
+    const q = (inputValueDesktop ?? "").trim().toLowerCase();
+    if (!q) return autoItems.slice(0, 10);
+
+    return autoItems
+      .filter((item) => item.label.toLowerCase().includes(q))
+      .slice(0, 10);
+  }, [inputValueDesktop, autoItems]);
+
+  const filteredAutoMobile = useMemo(() => {
+    const q = (inputValue ?? "").trim().toLowerCase();
+    if (!q) return autoItems.slice(0, 10);
+
+    return autoItems
+      .filter((item) => item.label.toLowerCase().includes(q))
+      .slice(0, 10);
+  }, [inputValue, autoItems]);
+
   const toggleSearch = () => {
     setSearchOpen((prev) => {
       const next = !prev;
       if (next) {
         setMypageMenuOpen(false);
-        setIsSearchExecuted(false);
         setInputValue("");
+        setInputValueDesktop("");
+        setOpenAutoDesktop(false);
       }
       return next;
     });
@@ -86,14 +144,65 @@ export default function Navbar({ titleText }: NavbarProps) {
     });
   };
 
-  const handleSearch = () => {
-    if (inputValue.trim()) {
-      setIsSearchExecuted(true);
-      console.log(`Navbar 검색 실행: ${inputValue}`);
-    } else {
-      setIsSearchExecuted(false);
-      console.log("검색어가 없어 드롭다운 닫음");
+  const handleSearchDesktop = () => {
+    const keyword = inputValueDesktop.trim();
+    if (!keyword) {
+      setOpenAutoDesktop(false);
+      return;
     }
+    setOpenAutoDesktop(false);
+    setSearchOpen(false);
+    navigate("/jobs", { state: { activeTab: "all", keyword } });
+  };
+
+  const handleSearchMobile = () => {
+    const keyword = inputValue.trim();
+    if (!keyword) return;
+    setSearchOpen(false);
+    navigate("/jobs", { state: { activeTab: "all", keyword } });
+  };
+
+  const handlePickAutoDesktop = (item: AutoItem) => {
+    setInputValueDesktop(item.label);
+    setOpenAutoDesktop(false);
+    setSearchOpen(false);
+
+    if (item.kind === "category" && item.categoryId != null) {
+      navigate("/jobs", {
+        state: { activeTab: "all", categoryId: item.categoryId },
+      });
+      return;
+    }
+
+    if (item.jobId != null) {
+      navigate("/jobs", {
+        state: { activeTab: "all", jobId: item.jobId, categoryId: item.categoryId },
+      });
+      return;
+    }
+
+    navigate("/jobs", { state: { activeTab: "all", keyword: item.label } });
+  };
+
+  const handlePickAutoMobile = (item: AutoItem) => {
+    setInputValue(item.label);
+    setSearchOpen(false);
+
+    if (item.kind === "category" && item.categoryId != null) {
+      navigate("/jobs", {
+        state: { activeTab: "all", categoryId: item.categoryId },
+      });
+      return;
+    }
+
+    if (item.jobId != null) {
+      navigate("/jobs", {
+        state: { activeTab: "all", jobId: item.jobId, categoryId: item.categoryId },
+      });
+      return;
+    }
+
+    navigate("/jobs", { state: { activeTab: "all", keyword: item.label } });
   };
 
   const handleLogout = () => {
@@ -104,6 +213,13 @@ export default function Navbar({ titleText }: NavbarProps) {
 
   useEffect(() => {
     setLoggedIn(isLoggedIn());
+
+    fetchJobTree()
+      .then((tree) => setJobTree(tree as JobNode[]))
+      .catch((err) => console.error("Failed to fetch job tree:", err));
+  }, []);
+
+  useEffect(() => {
     if (!mypageMenuOpen && !SearchOpen) return;
 
     const handleClickOutside = (event: MouseEvent) => {
@@ -124,7 +240,8 @@ export default function Navbar({ titleText }: NavbarProps) {
           if (!(target.closest(".icon-btn") && (target.closest(".login_on") || target.closest(".login_off")))) {
             setSearchOpen(false);
             setInputValue("");
-            setIsSearchExecuted(false);
+            setInputValueDesktop("");
+            setOpenAutoDesktop(false);
           }
         }
       }
@@ -246,36 +363,93 @@ export default function Navbar({ titleText }: NavbarProps) {
         <div className="panel-body" ref={searchPanelDesktopRef}>
           <div className="panel-search">
             <img className="jobs-search__icon" src={Icons.ic_search_gray900_20} alt="" />
-            <input type="text" placeholder="직무, 기업명, 지역등을 입력해주세요" />
-            <img className="jobs-search__clear_icon" src={Icons.ic_cancel_gray400_20} alt="" />
+            <input
+              type="text"
+              placeholder="직무, 기업명, 지역등을 입력해주세요"
+              value={inputValueDesktop}
+              onChange={(e) => {
+                const v = e.target.value;
+                setInputValueDesktop(v);
+                setOpenAutoDesktop(!!v.trim());
+              }}
+              onFocus={() => {
+                if (inputValueDesktop.trim()) setOpenAutoDesktop(true);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleSearchDesktop();
+                if (e.key === "Escape") setOpenAutoDesktop(false);
+              }}
+            />
+            {inputValueDesktop && (
+              <img
+                className="jobs-search__clear_icon"
+                src={Icons.ic_cancel_gray400_20}
+                alt=""
+                onClick={() => {
+                  setInputValueDesktop("");
+                  setOpenAutoDesktop(false);
+                }}
+                style={{ cursor: "pointer" }}
+              />
+            )}
           </div>
 
-          <section className="panel-section">
-            <header className="section-head">
-              <span className="section-title">최근 검색어</span>
-              <button className="section-action">전체 삭제</button>
-            </header>
-            <div className="chip-list">
-              <button className="chip">
-                프론트엔드
-                <img src={Icons.ic_close_gray500_20} alt="" />
-              </button>
-              <button className="chip">
-                프로젝트 기획자
-                <img src={Icons.ic_close_gray500_20} alt="" />
-              </button>
+          {openAutoDesktop && (
+            <div className="search-results-dropdown">
+              <div className="search-results-dropdown__list">
+                {inputValueDesktop.trim() && filteredAutoDesktop.length === 0 && (
+                  <span className="search-results-dropdown__item search-results-dropdown__item--disabled">
+                    추천 결과가 없습니다.
+                  </span>
+                )}
+                {filteredAutoDesktop.map((item) => (
+                  <span
+                    key={`${item.kind}-${item.categoryId ?? "x"}-${item.jobId ?? "x"}-${item.label}`}
+                    className="search-results-dropdown__item"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => handlePickAutoDesktop(item)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") handlePickAutoDesktop(item);
+                    }}
+                  >
+                    {highlightSubstring(item.label, inputValueDesktop)}
+                  </span>
+                ))}
+              </div>
             </div>
-          </section>
+          )}
 
-          <section className="panel-section">
-            <header className="section-head">
-              <span className="section-title">인기 키워드</span>
-            </header>
-            <div className="chip-list">
-              <button className="chip">프론트엔드</button>
-              <button className="chip">프로젝트 기획자</button>
-            </div>
-          </section>
+          {!openAutoDesktop && (
+            <>
+              <section className="panel-section">
+                <header className="section-head">
+                  <span className="section-title">최근 검색어</span>
+                  <button className="section-action">전체 삭제</button>
+                </header>
+                <div className="chip-list">
+                  <button className="chip">
+                    프론트엔드
+                    <img src={Icons.ic_close_gray500_20} alt="" />
+                  </button>
+                  <button className="chip">
+                    프로젝트 기획자
+                    <img src={Icons.ic_close_gray500_20} alt="" />
+                  </button>
+                </div>
+              </section>
+
+              <section className="panel-section">
+                <header className="section-head">
+                  <span className="section-title">인기 키워드</span>
+                </header>
+                <div className="chip-list">
+                  <button className="chip">프론트엔드</button>
+                  <button className="chip">프로젝트 기획자</button>
+                </div>
+              </section>
+            </>
+          )}
         </div>
       </div>
 
@@ -285,7 +459,6 @@ export default function Navbar({ titleText }: NavbarProps) {
             <img
               onClick={() => {
                 toggleSearch();
-                setIsSearchExecuted(false);
                 setInputValue("");
               }}
               src={ic_arrow_back_ios_gray900_20}
@@ -294,31 +467,19 @@ export default function Navbar({ titleText }: NavbarProps) {
             />
             <div className="panel-search">
               <img className="panel-search__icon" src={ic_search_gray900_20} alt="검색" />
-
               <input
                 type="text"
                 placeholder="직무, 기업명, 지역등을 입력해주세요"
                 value={inputValue}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setInputValue(value);
-                  if (value.trim() !== "") {
-                    setIsSearchExecuted(true);
-                  } else {
-                    setIsSearchExecuted(false);
-                  }
-                }}
+                onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") handleSearch();
+                  if (e.key === "Enter") handleSearchMobile();
                 }}
                 className="panel-search__input"
               />
               {inputValue && (
                 <img
-                  onClick={() => {
-                    setInputValue("");
-                    setIsSearchExecuted(false);
-                  }}
+                  onClick={() => setInputValue("")}
                   className="panel-search__clear-icon"
                   src={Icons.ic_cancel_gray400_20}
                   alt="검색어 지우기"
@@ -327,22 +488,31 @@ export default function Navbar({ titleText }: NavbarProps) {
             </div>
           </div>
 
-          {isSearchExecuted && inputValue && (
+          {inputValue.trim() ? (
             <div className="search-results-dropdown-mobile">
               <div className="search-results-dropdown__list">
-                {options
-                  .filter((opt) => opt.label.toLowerCase().includes(inputValue.toLowerCase()))
-                  .slice(0, 10)
-                  .map((option, index) => (
-                    <span key={index} className="search-results-dropdown__item">
-                      {highlightSubstring(option.label, inputValue)}
-                    </span>
-                  ))}
+                {filteredAutoMobile.length === 0 && (
+                  <span className="search-results-dropdown__item search-results-dropdown__item--disabled">
+                    추천 결과가 없습니다.
+                  </span>
+                )}
+                {filteredAutoMobile.map((item) => (
+                  <span
+                    key={`${item.kind}-${item.categoryId ?? "x"}-${item.jobId ?? "x"}-${item.label}`}
+                    className="search-results-dropdown__item"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => handlePickAutoMobile(item)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") handlePickAutoMobile(item);
+                    }}
+                  >
+                    {highlightSubstring(item.label, inputValue)}
+                  </span>
+                ))}
               </div>
             </div>
-          )}
-
-          {(!isSearchExecuted || !inputValue) && (
+          ) : (
             <>
               <section className="panel-section">
                 <header className="section-head">

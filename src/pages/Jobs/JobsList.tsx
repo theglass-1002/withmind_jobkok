@@ -50,19 +50,11 @@ export default function JobsList() {
     const checkResume = async () => {
       try {
         const resumeCheck = await fetchResumeCheck();
-        console.log("📝 resumeCheck.exists:", resumeCheck.exists);
+        console.log("resumeCheck.exists:", resumeCheck.exists);
 
         setResumeExists(resumeCheck.exists);
       } catch (e) {
         console.error("이력서 존재 여부 확인 중 오류:", e);
-
-        // if (e?.code === 999) {
-        //   console.log("로그인만료");
-        //   logout();
-        //   navigate("/login");
-        //   return;
-        // }
-
         setResumeExists(false);
       }
     };
@@ -148,7 +140,21 @@ export default function JobsList() {
           itemClassName="jobs-tab"
           activeClassName="on"
         />
-
+      {resumeExists === false && (
+            <div className="resume-promo-container">
+            <div className="resume-promo">
+            <span className="resume-promo__text">
+              이력서 작성하고 나에게 맞는 AI 공고 추천을 받아보세요.
+            </span>
+            <a className="resume-promo__action" href="/resumes/m-create">
+              <span className="resume-promo__label">이력서 작성하기</span>
+              <span className="resume-promo__icon">
+              <img  src={keyboard_arrow_right} alt="" />
+              </span>
+          </a>
+          </div>
+        </div>
+        )}
         {activeTab === "all" ? (
           <M_AllJobPostingSection />
         ) : (

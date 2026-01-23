@@ -130,7 +130,7 @@ export default function JobPostingRow({
     );
   }
 
-  // 🔥 이력서 기반 추천인 경우 → 기존 AI Pick 있는 리스트 UI 유지
+  //  이력서 기반 추천인 경우 → 기존 AI Pick 있는 리스트 UI 유지
   return (
     <>
    <div className="job-posting__list job-posting__list--row">
@@ -146,116 +146,6 @@ export default function JobPostingRow({
           </div>
         ))}
       </div>
-      {/* <div className="job-posting__list job-posting__list--row">
-        {jobs.map((job) => {
-          const isBookmarked = bookmarks[job.id] === 1;
-          const isApplied = applied[job.id] === 1;
-          const jobLink = `/jobs/${job.id}?title=${encodeURIComponent(
-            job.companyName
-          )}`;
-
-          return (
-            <div
-              key={job.id}
-              className="job-posting__item job-posting__item--row"
-            >
-              <Link to={jobLink}>
-                <div className="job-posting__card">
-                  <div className="job-posting__row job-posting__row--top">
-                    <div className="job-posting__left">
-                      <img
-                        className="job-posting__logo"
-                        src={job.companyLogoUrl || mp_test_logo}
-                        alt={job.companyName}
-                      />
-                      <div className="job-posting__details">
-                        <div className="job-posting__title">
-                          <span className="job-posting__company">
-                            {job.companyName}
-                            <span className="job-posting__source-logo">
-                              <img src={jobkorea} alt="" />
-                            </span>
-                          </span>
-                          <span className="job-posting__role">{job.name}</span>
-                        </div>
-                        <div className="job-posting__meta">
-                          <div className="job-posting__match job-posting__match--level">
-                            <img src={green_star16x16} alt="" />
-                            {isResumeBased ? "AI 적합도 90%" : "AI 적합도 70%"}
-                          </div>
-                          <div className="job-posting__meta-items">
-                            <span className="job-posting__meta-item">
-                              {formatMetaText(job)}
-                            </span>
-                            <span className="job-posting__meta-item">
-                              {formatEmploymentType(job.employmentType)}
-                            </span>
-                            <span className="job-posting__meta-item">
-                              상시 채용
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="job-posting__right job-posting__favorite">
-                      {isBookmarked ? (
-                        <img
-                          onClick={(e) => handleBookmark(e, job.id, 0)}
-                          src={bookmark_active_purple}
-                          alt=""
-                        />
-                      ) : (
-                        <img
-                          onClick={(e) => handleBookmark(e, job.id, 1)}
-                          src={bookmark_inactive}
-                          alt=""
-                        />
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="job-posting__row job-posting__row--bottom">
-                    <div className="job-posting__badges">
-                      <span className="job-posting__badge">
-                        <span>
-                          <img src={seed} alt="" />
-                        </span>
-                        여유있는근무제!
-                      </span>
-                      <span className="job-posting__badge job-posting__badge--urgent">
-                        <img src={fire} alt="" />
-                        마감임박!
-                      </span>
-                    </div>
-                    <div className="job-posting__ai-pick">
-                      {isResumeBased && <img src={ai_pick} alt="" />}
-                    </div>
-                  </div>
-
-                  {isApplied ? (
-                    <div
-                      className="job-card__control job-card__control--radio on"
-                      onClick={(e) => handleRecordAsApplied(e, job.id, 0)}
-                    >
-                      <img src={check_circle_purple} alt="" />
-                      지원한 포지션으로 기록하기
-                    </div>
-                  ) : (
-                    <div
-                      className="job-card__control job-card__control--radio"
-                      onClick={(e) => handleRecordAsApplied(e, job.id, 1)}
-                    >
-                      <div className="radio_check_blank_gray" />
-                      지원한 포지션으로 기록하기
-                    </div>
-                  )}
-                </div>
-              </Link>
-            </div>
-          );
-        })}
-      </div> */}
     </>
   );
 }

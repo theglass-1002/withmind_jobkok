@@ -177,7 +177,7 @@ export default function JobPostingItemCardNoAiPick({
             <div className="job-card__byline">
               <span className="job-posting__company">{job.companyName}</span>
               <span className="job-posting__source-logo">
-                <img src={jobkorea} alt="" />
+              <img src={job.companyLogoUrl} alt="" />
               </span>
             </div>
             <span className="job-posting__role">{job.name}</span>

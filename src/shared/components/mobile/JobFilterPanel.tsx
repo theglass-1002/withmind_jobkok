@@ -1,7 +1,5 @@
-// src/pages/.../JobFilterPanel.tsx
 import React, { useEffect, useState } from "react";
 import "./JobFilterPanel.css";
-import desiredRolesJson from "@/data/desired_roles.json";
 
 import Tabs from "@/shared/components/tabs/Tabs";
 import M_ModalJobRolePicker, { SelectedRole } from "@/shared/components/job-role-picker/mobile/M_ModalJobRolePicker";
@@ -14,61 +12,81 @@ import ic_replay_gray900_20 from "@/assets/icons/size20/ic_replay_gray900_20.png
 import chevron_right_black from '@/assets/icons/chevron_right_black.png';
 import ic_close_gray500_20 from '@/assets/icons/size20/ic_close_gray500_20.png';
 
+import { fetchJobTree } from "@/api/job/job.api";
+import { JobNode } from "@/api/job/job.types";
+
 type FilterType = "role" | "career" | "education" | "location" | "employment";
 
 interface JobFilterPanelProps {
   filterType?: FilterType;
+  totalCount?: number;
   onClose?: () => void;
-  onApply?: (filters: any) => void; // 필터 적용 시 콜백
-  onReset?: () => void; // 초기화 시 콜백
+  onApply?: (filters: any) => void;
+  onReset?: () => void;
 }
 
 export default function JobFilterPanel({ 
   filterType, 
+  totalCount = 0,
   onClose,
   onApply,
   onReset,
 }: JobFilterPanelProps) {
   const [activeTab, setActiveTab] = useState<FilterType>(filterType ?? "role");
-  
-  // 직군·직무 선택값
   const [selectedRoles, setSelectedRoles] = useState<SelectedRole[]>([]);
 
-  // 직군·직무 선택값 변경 핸들러
+  const [jobTree, setJobTree] = useState<JobNode[]>([]);
+  const [jobLoading, setJobLoading] = useState(false);
+  const [jobError, setJobError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const init = async () => {
+      try {
+        setJobLoading(true);
+        setJobError(null);
+        const tree = await fetchJobTree();
+        setJobTree(tree);
+      } catch (e: any) {
+        console.error("[JobFilterPanel] fetchJobTree 에러:", e);
+        setJobError(e?.message || "직군/직무 정보를 불러오는 데 실패했습니다.");
+      } finally {
+        setJobLoading(false);
+      }
+    };
+
+    init();
+  }, []);
+
   const handleRoleChange = (roles: SelectedRole[]) => {
-    console.log("📝 JobFilterPanel에서 받은 선택값:", roles);
     setSelectedRoles(roles);
   };
 
-  // 직군·직무 초기화 핸들러
+  const handleRoleApply = (roles: SelectedRole[]) => {
+    console.log("[JobFilterPanel] M_ModalJobRolePicker 적용하기 클릭");
+    console.log("[JobFilterPanel] 선택된 직군/직무:", roles);
+    setSelectedRoles(roles);
+  };
+
   const handleRoleReset = () => {
-    console.log("🔄 직군·직무 초기화");
     setSelectedRoles([]);
   };
 
-  // 칩 삭제 (부모에서도 삭제 가능)
   const handleRemoveChip = (roleKey: string) => {
-    console.log("🗑️ 부모에서 칩 삭제:", roleKey);
     setSelectedRoles(prev => prev.filter(role => role.roleKey !== roleKey));
   };
 
-  // X 버튼 (닫기) 클릭
   const handleClose = () => {
-    console.log("🚪 필터 패널 닫기");
     if (onClose) onClose();
   };
 
-  // 초기화 버튼 클릭
   const handleReset = () => {
-    console.log("🔄 필터 초기화");
     setSelectedRoles([]);
     if (onReset) onReset();
   };
 
-  // 적용 버튼 클릭
   const handleApply = () => {
-    console.log("✅ 필터 적용");
-    console.log("✅ 선택된 직군·직무:", selectedRoles);
+    console.log("[JobFilterPanel] 공고 보기 클릭 - totalCount:", totalCount);
+    console.log("[JobFilterPanel] 최종 선택된 필터:", { roles: selectedRoles });
     if (onApply) onApply({ roles: selectedRoles });
     if (onClose) onClose();
   };
@@ -82,7 +100,6 @@ export default function JobFilterPanel({
   ];
 
   const handleTabClick = (key: string) => {
-    console.log("📑 탭 변경:", key);
     setActiveTab(key as FilterType);
   };
 
@@ -91,7 +108,11 @@ export default function JobFilterPanel({
       case "role":
         return (
           <M_ModalJobRolePicker 
-            onChange={handleRoleChange} 
+            jobTree={jobTree}
+            loading={jobLoading}
+            error={jobError}
+            onChange={handleRoleChange}
+            onApply={handleRoleApply}
             onReset={handleRoleReset}
           />
         );
@@ -108,7 +129,6 @@ export default function JobFilterPanel({
     }
   };
 
-  // 🔒 패널 열려 있는 동안 body 스크롤 막기
   useEffect(() => {
     const original = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -117,7 +137,6 @@ export default function JobFilterPanel({
     };
   }, []);
 
-  // ESC 키로 닫기
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -130,7 +149,6 @@ export default function JobFilterPanel({
 
   return (
     <div className="job-filter-panel__overlay">
-      {/* 배경 클릭으로 닫기 */}
       <div
         className="job-filter-panel__backdrop"
         onClick={handleClose}
@@ -158,7 +176,6 @@ export default function JobFilterPanel({
           <span></span>
         </header>
 
-        {/* 탭 */}
         <Tabs
           tabs={tabItems}
           active={activeTab}
@@ -168,14 +185,11 @@ export default function JobFilterPanel({
           activeClassName="on"
         />
 
-        {/* 내용 */}
         <div className="job-filter-panel__content">
           {renderContent()}
         </div>
 
-        {/* 바텀 (고정) */}
         <div className="job-filter-panel__footer">
-          {/* 선택된 칩 표시 */}
           <div className="job-filter-panel__selected-chips">
             {selectedRoles.length > 0 ? (
               <div className="jobs-chips">
@@ -204,7 +218,6 @@ export default function JobFilterPanel({
             )}
           </div>
 
-          {/* 버튼 */}
           <div className="btn_wrap">
             <button 
               className="btn_w_full default_btn_white" 
@@ -218,7 +231,7 @@ export default function JobFilterPanel({
               type="button"
               onClick={handleApply}
             >
-              공고 보기
+              {totalCount.toLocaleString()}개 공고 보기
             </button>
           </div>
         </div>

@@ -27,12 +27,39 @@ import ic_search_gray900_20 from "@/assets/icons/size20/ic_search_gray900_20.svg
 import ic_cancel_gray400_20 from  "@/assets/icons/size20/ic_cancel_gray400_20.svg";
 import ic_close_gray500_20 from "./size20/ic_close_gray500_20.png";
 import ic_error_red100_20 from "@/assets/icons/size20/ic_error_red100_20.png";
+import ic_error_gray500_20 from "@/assets/icons/size20/ic_error_gray500_20.svg";
 import ic_edit_gray900_20 from "@/assets/icons/size20/ic_edit_gray900_20.png";
 import ic_edit_cancle_gray900_20 from "@/assets/icons/size20/ic_edit_cancle_gray900_20.png";
 import ic_star_gray700_20 from "@/assets/icons/size20/ic_star_gray700_20.png";
 import ic_star_green_20 from "@/assets/icons/size20/ic_star_green_20.png";
+import ic_filter_gray900_20 from "@/assets/icons/size20/ic_filter_gray900_20.svg";
+import ic_refresh_gray900_16 from "@/assets/icons/size20/ic_refresh_gray900_16.svg";
+import code_icon_40px from "@/assets/icons/category_icons/code_icon_40px.svg";
 
+import palette_icon_40px from "@/assets/icons/category_icons/palette_icon_40px.svg";
+import megaphone_icon_40px from "@/assets/icons/category_icons/megaphone_icon_40px.svg";
+import briefcase_icon_40px from "@/assets/icons/category_icons/briefcase_icon_40px.svg";
+import handshake_icon_40px from "@/assets/icons/category_icons/handshake_icon_40px.svg";
+import wrench_icon_40px from "@/assets/icons/category_icons/wrench_icon_40px.svg";
+import users_icon_40px from "@/assets/icons/category_icons/users_icon_40px.svg";
+import factory_icon_40px from "@/assets/icons/category_icons/factory_icon_40px.svg";
+import hard_hat_icon_40px from "@/assets/icons/category_icons/hard_hat_icon_40px.svg";
 
+import health_icon_40px from "@/assets/icons/category_icons/health_icon_40px.svg";
+import video_icon_40px from "@/assets/icons/category_icons/video_icon_40px.svg";
+import gamepad_icon_40px from "@/assets/icons/category_icons/gamepad_icon_40px.svg";
+import dollar_sign_icon_40px from "@/assets/icons/category_icons/dollar_sign_icon_40px.svg";
+
+import globe_icon_40px from "@/assets/icons/category_icons/globe_icon_40px.svg";
+import scale_icon_40px from "@/assets/icons/category_icons/scale_icon_40px.svg";
+import graduation_cap_icon_40px from "@/assets/icons/category_icons/graduation_cap_icon_40px.svg";
+
+import chef_hat_icon_40px from "@/assets/icons/category_icons/chef_hat_icon_40px.svg";
+
+import heart_icon_40px from "@/assets/icons/category_icons/heart_icon_40px.svg";
+
+import headphones_icon_40px from "@/assets/icons/category_icons/headphones_icon_40px.svg";
+import shield_icon_40px from "@/assets/icons/category_icons/shield_icon_40px.svg";
 
 
 export const Icons = {
@@ -57,8 +84,31 @@ export const Icons = {
     ic_edit_cancle_gray900_20,
     ic_star_gray700_20,
     ic_star_green_20,
+    ic_filter_gray900_20,
+    ic_error_gray500_20,
+    ic_refresh_gray900_16,
     ic_arrow_drop_down_white_24,
     ic_weakness_circle_24,
-    ic_strength_circle_24
-    
+    ic_strength_circle_24,
+    code_icon_40px,
+    palette_icon_40px,
+    megaphone_icon_40px,
+    briefcase_icon_40px,
+    handshake_icon_40px,
+    wrench_icon_40px,
+    users_icon_40px,
+    factory_icon_40px,
+    hard_hat_icon_40px,
+    health_icon_40px,
+    video_icon_40px,
+    gamepad_icon_40px,
+    dollar_sign_icon_40px,
+    globe_icon_40px,
+    scale_icon_40px,
+    graduation_cap_icon_40px,
+    chef_hat_icon_40px,
+    heart_icon_40px,
+    headphones_icon_40px,
+    shield_icon_40px
+
 };

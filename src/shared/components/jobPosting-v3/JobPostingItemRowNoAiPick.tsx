@@ -169,6 +169,7 @@ export default function JobPostingItemRowNoAiPick({
   const due = job.dueTime ?? "상시 채용";
 
   return (
+    <>
     <div className="job-posting__card" onClick={handleGoToJobPost}>
       <div className="job-posting__row job-posting__row--top">
         <div className="job-posting__left">
@@ -247,5 +248,88 @@ export default function JobPostingItemRowNoAiPick({
           </div>
         ))}
     </div>
+
+
+    <div className="job-posting__card mobile" onClick={handleGoToJobPost}>
+      <div className="job-posting__row job-posting__row--top">
+        <div className="job-posting__left">
+          <img
+            className="job-posting__logo"
+            src={job.companyLogoUrl || mp_test_logo}
+            alt={job.companyName ?? ""}
+          />
+          <div className="job-posting__details">
+            <div className="job-posting__title">
+              <span className="job-posting__company">
+                {job.companyName}
+                <span className="job-posting__source-logo">
+                <img src={job.companyLogoUrl} alt="" />
+                </span>
+              </span>
+              <span className="job-posting__role">{job.name}</span>
+            </div>
+
+      
+          </div>
+        </div>
+
+        <div
+          className="job-posting__right job-posting__favorite"
+          onClick={handleBookmark}
+          style={{ cursor: "pointer" }}
+        >
+          <img
+            src={bookMark === 1 ? bookmark_active_purple : bookmark_inactive}
+            alt=""
+          />
+        </div>
+      </div>
+      <div className="job-posting__meta">
+              <div className="job-posting__meta-items">
+                <span className="job-posting__meta-item">
+                  {loc}ㆍ{career}ㆍ{edu}
+                </span>
+                <span className="job-posting__meta-item">{employmentType}</span>
+              </div>
+              <span className="job-posting__meta-item">{due}</span>
+              
+            </div>
+      <div className="job-posting__row job-posting__row--bottom">
+        <div className="job-posting__badges">
+          <span className="job-posting__badge">
+            <span>
+              <img src={seed} alt="" />
+            </span>
+            여유있는근무제!
+          </span>
+          <span className="job-posting__badge job-posting__badge--urgent">
+            <img src={fire} alt="" />
+            마감임박!
+          </span>
+        </div>
+      </div>
+
+      {showAppliedSection &&
+        (recordAsApplied === 0 ? (
+          <div className="job-card__control job-card__control--radio">
+            <div
+              className="radio_check_blank_gray"
+              onClick={(e) => handleRecordAsApplied(e, 1)}
+            />
+            지원한 포지션으로 기록하기
+          </div>
+        ) : (
+          <div className="job-card__control job-card__control--radio on">
+            <img
+              onClick={(e) => handleRecordAsApplied(e, 0)}
+              src={ic_check_circle_purple_20}
+              alt=""
+            />
+            지원한 포지션으로 기록하기
+          </div>
+        ))}
+    </div>
+    
+    </>
   );
 }

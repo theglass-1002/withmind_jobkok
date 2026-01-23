@@ -126,7 +126,7 @@ export default function JobPostingCard({
     );
   }
 
-  // 🔥 이력서 기반 추천인 경우 → AI 카드 + AI PICK
+  //  이력서 기반 추천인 경우 → AI 카드 + AI PICK
   return (
     <>
        <div className="job-posting__list job-posting__list--grid">
@@ -138,113 +138,6 @@ export default function JobPostingCard({
           />
         ))}
       </div>
-      {/* <div className="job-posting__list job-posting__list--grid">
-        {jobs.map((job) => {
-          const isBookmarked = bookmarks[job.id] === 1;
-          const isApplied = applied[job.id] === 1;
-          const jobLink = `/jobs/${job.id}?title=${encodeURIComponent(
-            job.companyName
-          )}`;
-
-          return (
-            <Link key={job.id} to={jobLink}>
-              <div className="job-posting__card">
-                <div className="job-card__header">
-                  <div className="job-posting__left">
-                    <img
-                      className="job-posting__logo"
-                      src={job.companyLogoUrl || mp_test_logo}
-                      alt={job.companyName}
-                    />
-                    <div className="job-card__identity">
-                      <div className="job-card__byline">
-                        <span className="job-posting__company">
-                          {job.companyName}
-                        </span>
-                        <span className="job-posting__source-logo">
-                          <img src={jobkorea} alt="" />
-                        </span>
-                      </div>
-                      <span className="job-posting__role">{job.name}</span>
-                    </div>
-                  </div>
-                  <span className="job-card__favorite">
-                    {isBookmarked ? (
-                      <img
-                        src={bookmark_active_purple}
-                        onClick={(e) => handleBookmark(e, job.id, 0)}
-                      />
-                    ) : (
-                      <img
-                        src={bookmark_inactive}
-                        onClick={(e) => handleBookmark(e, job.id, 1)}
-                      />
-                    )}
-                  </span>
-                </div>
-
-                <div className="job-card__divider"></div>
-
-                <div className="job-card__body">
-                  <div className="job-card__content">
-                    <span className="job-posting__match job-posting__match--level">
-                      <img src={green_star16x16} alt="" />
-                      AI 적합도 90%
-                    </span>
-                    <div className="job-card__facts">
-                      <div className="job-posting__meta-items">
-                        <span className="job-posting__meta-item">
-                          {formatMetaText(job)}
-                        </span>
-                        <span className="job-posting__meta-item">
-                          {formatEmploymentType(job.employmentType)}
-                        </span>
-                      </div>
-                      <span className="job-card__deadline">
-                        ~2025.08.31(일)
-                      </span>
-                    </div>
-                  </div>
-                  <div className="job-posting__badges">
-                    <span className="job-posting__badge">
-                      <span>
-                        <img src={seed} alt="" />
-                      </span>
-                      여유있는근무제!
-                    </span>
-                    <span className="job-posting__badge job-posting__badge--urgent">
-                      <img src={fire} alt="" />
-                      마감임박!
-                    </span>
-                  </div>
-
-                  {isApplied ? (
-                    <div
-                      className="job-card__control job-card__control--radio on"
-                      onClick={(e) => handleRecordAsApplied(e, job.id, 0)}
-                    >
-                      <img src={check_circle_purple} alt="" />
-                      지원한 포지션으로 기록하기
-                    </div>
-                  ) : (
-                    <div
-                      className="job-card__control job-card__control--radio"
-                      onClick={(e) => handleRecordAsApplied(e, job.id, 1)}
-                    >
-                      <div className="radio_check_blank_gray" />
-                      지원한 포지션으로 기록하기
-                    </div>
-                  )}
-                </div>
-
-                <div className="job-card__sticker">
-                  <img src={ai_pick} alt="" />
-                </div>
-              </div>
-            </Link>
-          );
-        })}
-      </div> */}
     </>
   );
 }

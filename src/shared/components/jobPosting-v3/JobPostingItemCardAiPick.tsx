@@ -141,7 +141,7 @@ export default function JobPostingItemCardAiPick({
             <div className="job-card__byline">
               <span className="job-posting__company">{job.companyName}</span>
               <span className="job-posting__source-logo">
-                <img src={jobkorea} alt="" />
+                <img src={job.companyLogoUrl} alt="" />
               </span>
             </div>
             <span className="job-posting__role">{job.name}</span>
@@ -162,7 +162,7 @@ export default function JobPostingItemCardAiPick({
       <div className="job-card__body">
         <div className="job-card__content">
         <span className="job-posting__match job-posting__match--level">
-                      <img src={green_star16x16} alt="" />
+                    
                       AI 적합도 90%
                     </span>
           <div className="job-card__facts">
