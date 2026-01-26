@@ -351,6 +351,7 @@ align-items: center;
             display: flex;
             flex-direction: column;
             padding:0px;
+            height: 100%;
         }
     
         .job-role-picker__role{

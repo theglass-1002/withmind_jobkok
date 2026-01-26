@@ -8,13 +8,13 @@ import "./CareerRangePicker.css";
 
 interface ModalCareerRangePickerProps {
   onApply?: (range: { min: number; max: number }) => void;
-
-  // ✅ 추가: 부모에서 내려주는 초기값(복원용)
+  onChange?: (range: { min: number; max: number }) => void;
   initialRange?: { min: number; max: number } | null;
 }
 
 export default function ModalCareerRangePicker({
   onApply,
+  onChange,
   initialRange = null,
 }: ModalCareerRangePickerProps) {
   const MIN = 0;
@@ -25,7 +25,6 @@ export default function ModalCareerRangePicker({
 
   const [range, setRange] = useState<[number, number]>([MIN, MAX]);
 
-  // ✅ 모달 다시 열릴 때 선택값 복원
   useEffect(() => {
     if (!initialRange) return;
     setRange([initialRange.min, initialRange.max]);
@@ -40,7 +39,20 @@ export default function ModalCareerRangePicker({
     [range]
   );
 
-  const handleReset = () => setRange([MIN, MAX]);
+  const handleRangeChange = (v: number | number[]) => {
+    const newRange = v as [number, number];
+    setRange(newRange);
+    if (onChange) {
+      onChange({ min: newRange[0], max: newRange[1] });
+    }
+  };
+
+  const handleReset = () => {
+    setRange([MIN, MAX]);
+    if (onChange) {
+      onChange({ min: MIN, max: MAX });
+    }
+  };
 
   const handleApplyClick = () => {
     if (onApply) {
@@ -57,8 +69,8 @@ export default function ModalCareerRangePicker({
               {range[0] === 0
                 ? range[1] === 10
                   ? "경력전체"
-                  : `${minLabel}~${maxLabel}년`
-                : `${minLabel}~${maxLabel}년`}
+                  : `${minLabel} ~ ${maxLabel}년`
+                : `${minLabel}년 ~ ${maxLabel}년`}
             </span>
           </div>
 
@@ -72,7 +84,7 @@ export default function ModalCareerRangePicker({
               allowCross={false}
               pushable={1}
               value={range}
-              onChange={(v) => setRange(v as [number, number])}
+              onChange={handleRangeChange}
             />
             <div
               className="career-range-follow right career-range__label career-range__label--min"

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { toast } from "react-toastify";
 
 import check_box_purple from "@/assets/icons/check_box_purple.png";
@@ -41,11 +41,13 @@ interface M_ModalJobRolePickerProps {
   onReset?: () => void;
 }
 
+const EMPTY_ARRAY: SelectedRole[] = [];
+
 export default function M_ModalJobRolePicker({
   jobTree,
   loading,
   error,
-  value = [],
+  value,
   onChange,
   onApply,
   onReset,
@@ -55,7 +57,7 @@ export default function M_ModalJobRolePicker({
   const [selectedRoles, setSelectedRoles] = useState<Set<string>>(new Set());
   const [allCheckedCategories, setAllCheckedCategories] = useState<Set<string>>(new Set());
 
-  const syncingFromValueRef = useRef(false);
+  const safeValue = value ?? EMPTY_ARRAY;
 
   const categories: Category[] = useMemo(() => {
     if (!jobTree || jobTree.length === 0) return [];
@@ -76,16 +78,6 @@ export default function M_ModalJobRolePicker({
       }));
   }, [jobTree]);
 
-  const roleToCategoryKey = useMemo(() => {
-    const m = new Map<string, string>();
-    categories.forEach((cat) => {
-      cat.roles.forEach((r) => {
-        m.set(r.key, cat.key);
-      });
-    });
-    return m;
-  }, [categories]);
-
   const getSelectedRoleDetailsFromSets = (
     rolesSet: Set<string>,
     allSet: Set<string>
@@ -97,7 +89,7 @@ export default function M_ModalJobRolePicker({
         result.push({
           categoryKey: category.key,
           categoryTitle: category.title,
-          roleKey: `${category.key}`,
+          roleKey: category.key,
           roleLabel: `${category.title} 전체`,
         });
       } else {
@@ -121,17 +113,17 @@ export default function M_ModalJobRolePicker({
     return getSelectedRoleDetailsFromSets(selectedRoles, allCheckedCategories);
   };
 
-  const areSetsEqual = (a: Set<string>, b: Set<string>) => {
-    if (a.size !== b.size) return false;
-    for (const v of a) if (!b.has(v)) return false;
-    return true;
-  };
-
   useEffect(() => {
+    if (safeValue.length === 0) {
+      setAllCheckedCategories(new Set());
+      setSelectedRoles(new Set());
+      return;
+    }
+
     const nextAll = new Set<string>();
     const nextRoles = new Set<string>();
 
-    value.forEach((item) => {
+    safeValue.forEach((item) => {
       if (item.roleLabel.endsWith(" 전체") || item.roleKey === item.categoryKey) {
         nextAll.add(item.categoryKey);
       } else {
@@ -139,25 +131,9 @@ export default function M_ModalJobRolePicker({
       }
     });
 
-    const needUpdate =
-      !areSetsEqual(nextAll, allCheckedCategories) || !areSetsEqual(nextRoles, selectedRoles);
-
-    if (!needUpdate) return;
-
-    syncingFromValueRef.current = true;
     setAllCheckedCategories(nextAll);
     setSelectedRoles(nextRoles);
-  }, [value, categories]);
-
-  useEffect(() => {
-    if (syncingFromValueRef.current) {
-      syncingFromValueRef.current = false;
-      return;
-    }
-
-    const details = getSelectedRoleDetails();
-    if (onChange) onChange(details);
-  }, [selectedRoles, allCheckedCategories, categories]);
+  }, [safeValue]);
 
   const handleCategoryClick = (category: Category) => {
     setSelectedCategory(category);
@@ -169,81 +145,83 @@ export default function M_ModalJobRolePicker({
     setSelectedCategory(null);
   };
 
-  const handleAllToggle = (selectedRole: Category) => {
+  const handleAllToggle = () => {
     if (!selectedCategory) return;
-  
+
     const categoryKey = selectedCategory.key;
     const isAlreadyOn = allCheckedCategories.has(categoryKey);
-  
-    if (isAlreadyOn) {
-      const nextAll = new Set(allCheckedCategories);
-      nextAll.delete(categoryKey);
-  
-      setAllCheckedCategories(nextAll);
-  
-      if (onChange) {
-        const details = getSelectedRoleDetailsFromSets(selectedRoles, nextAll);
-        onChange(details);
-      }
-      return;
-    }
-  
-    const nextAll = new Set<string>();
-    nextAll.add(categoryKey);
-  
-    const nextRoles = new Set<string>();
-  
-    setAllCheckedCategories(nextAll);
-    setSelectedRoles(nextRoles);
-  
-    if (onChange) {
-      const details = getSelectedRoleDetailsFromSets(nextRoles, nextAll);
-      onChange(details);
-    }
-  };
-  
 
-  const handleRoleToggle = (role: Role) => {
-    if (!selectedCategory) return;
-  
-    if (allCheckedCategories.size > 0) {
-      toast("최대 5개까지 선택 가능합니다.");
-      return;
-    }
-  
-    const nextRoles = new Set(selectedRoles);
-  
-    if (nextRoles.has(role.key)) {
-      nextRoles.delete(role.key);
+    let nextAll: Set<string>;
+    let nextRoles: Set<string>;
+
+    if (isAlreadyOn) {
+      nextAll = new Set(allCheckedCategories);
+      nextAll.delete(categoryKey);
+      nextRoles = selectedRoles;
     } else {
-      if (nextRoles.size >= 5) {
+      const totalCount = allCheckedCategories.size + selectedRoles.size;
+      if (totalCount >= 5) {
         toast("최대 5개까지 선택 가능합니다.");
         return;
       }
-      nextRoles.add(role.key);
+
+      nextAll = new Set([categoryKey]);
+      nextRoles = new Set<string>();
     }
-  
+
+    setAllCheckedCategories(nextAll);
     setSelectedRoles(nextRoles);
-  
+
     if (onChange) {
-      const details = getSelectedRoleDetailsFromSets(nextRoles, allCheckedCategories);
-      onChange(details);
+      onChange(getSelectedRoleDetailsFromSets(nextRoles, nextAll));
     }
   };
-  
+
+  const handleRoleToggle = (role: Role) => {
+    if (!selectedCategory) return;
+
+    const nextRoles = new Set(selectedRoles);
+    let nextAll = allCheckedCategories;
+
+    if (nextRoles.has(role.key)) {
+      nextRoles.delete(role.key);
+    } else {
+      if (allCheckedCategories.size > 0) {
+        nextAll = new Set<string>();
+        setAllCheckedCategories(nextAll);
+      }
+
+      const totalCount = nextAll.size + nextRoles.size;
+      if (totalCount >= 5) {
+        toast("최대 5개까지 선택 가능합니다.");
+        return;
+      }
+
+      nextRoles.add(role.key);
+    }
+
+    setSelectedRoles(nextRoles);
+
+    if (onChange) {
+      onChange(getSelectedRoleDetailsFromSets(nextRoles, nextAll));
+    }
+  };
 
   const handleRemoveChip = (roleKey: string) => {
-    if (roleKey.startsWith("all-")) {
-      const categoryKey = roleKey.replace("all-", "");
-      const next = new Set(allCheckedCategories);
-      next.delete(categoryKey);
-      setAllCheckedCategories(next);
+    let nextAll = new Set(allCheckedCategories);
+    let nextRoles = new Set(selectedRoles);
+
+    const isCategory = categories.some((c) => c.key === roleKey);
+    if (isCategory) {
+      nextAll.delete(roleKey);
+      setAllCheckedCategories(nextAll);
     } else {
-      setSelectedRoles((prev) => {
-        const next = new Set(prev);
-        next.delete(roleKey);
-        return next;
-      });
+      nextRoles.delete(roleKey);
+      setSelectedRoles(nextRoles);
+    }
+
+    if (onChange) {
+      onChange(getSelectedRoleDetailsFromSets(nextRoles, nextAll));
     }
   };
 
@@ -252,14 +230,17 @@ export default function M_ModalJobRolePicker({
     setAllCheckedCategories(new Set());
     setCurrentView("category");
     setSelectedCategory(null);
-    if (onReset) onReset();
+
+    if (onChange) {
+      onChange([]);
+    }
+    if (onReset) {
+      onReset();
+    }
   };
 
   const handleApply = () => {
     const details = getSelectedRoleDetails();
-
-    console.log("allCheckedCategories:", Array.from(allCheckedCategories));
-    console.log("selectedRoles:", Array.from(selectedRoles));
 
     if (onApply) {
       onApply(details);
@@ -304,133 +285,129 @@ export default function M_ModalJobRolePicker({
   }
 
   return (
-    <>
-      <div className="job-role-picker job-role-picker--popup">
-        <span className="job-role-picker__options-note">
-          ※ 직군ㆍ직무 옵션은 최대 5개까지 선택 가능합니다.
-        </span>
-        <div className="job-role-picker__body">
-          {currentView === "category" ? (
-            <div className="job-role-picker__column job-role-picker__column--left">
-              <div className="job-role-picker__category_group">
-                {categories.map((category) => {
-                  const selectedCount = getSelectedCount(category);
+    <div className="job-role-picker job-role-picker--popup">
+      <span className="job-role-picker__options-note">
+        ※ 직군ㆍ직무 옵션은 최대 5개까지 선택 가능합니다.
+      </span>
+      <div className="job-role-picker__body">
+        {currentView === "category" ? (
+          <div className="job-role-picker__column job-role-picker__column--left">
+            <div className="job-role-picker__category_group">
+              {categories.map((category) => {
+                const selectedCount = getSelectedCount(category);
 
-                  return (
-                    <div
-                      key={category.key}
-                      className="job-role-picker__category"
-                      onClick={() => handleCategoryClick(category)}
-                    >
-                      <div className="job-role-picker__category-meta">
-                        <span className="job-role-picker__category-title">{category.title}</span>
-                        <span className="job-role-picker__category-count">
-                          {selectedCount > 0 ? selectedCount : ""}
-                        </span>
-                      </div>
-                      <span className="job-role-picker__category-toggle">
-                        <img src={chevron_right_gray_light} alt="" />
+                return (
+                  <div
+                    key={category.key}
+                    className="job-role-picker__category"
+                    onClick={() => handleCategoryClick(category)}
+                  >
+                    <div className="job-role-picker__category-meta">
+                      <span className="job-role-picker__category-title">{category.title}</span>
+                      <span className="job-role-picker__category-count">
+                        {selectedCount > 0 ? selectedCount : ""}
                       </span>
                     </div>
-                  );
-                })}
-              </div>
+                    <span className="job-role-picker__category-toggle">
+                      <img src={chevron_right_gray_light} alt="" />
+                    </span>
+                  </div>
+                );
+              })}
             </div>
-          ) : (
-            <div className="job-role-picker__column job-role-picker__column--right">
-              <div className="job-role-picker__detail-header">
-                <img
-                  src={ic_arrow_back_ios_gray900_20}
-                  alt="뒤로"
-                  className="job-role-picker__back-icon"
-                  onClick={handleBack}
-                  style={{ cursor: "pointer" }}
-                />
-                <span className="job-role-picker__detail-title">{selectedCategory?.title}</span>
-                <span></span>
+          </div>
+        ) : (
+          <div className="job-role-picker__column job-role-picker__column--right">
+            <div className="job-role-picker__detail-header">
+              <img
+                src={ic_arrow_back_ios_gray900_20}
+                alt="뒤로"
+                className="job-role-picker__back-icon"
+                onClick={handleBack}
+                style={{ cursor: "pointer" }}
+              />
+              <span className="job-role-picker__detail-title">{selectedCategory?.title}</span>
+              <span></span>
+            </div>
+
+            <div className="job-role-picker__group job-role-picker__group--right">
+              <div
+                className={`job-role-picker__role job-role-picker__role--all ${
+                  allCheckedCategories.has(selectedCategory?.key ?? "") ? "on" : ""
+                }`}
+                onClick={handleAllToggle}
+              >
+                <span className="job-role-picker__checkbox-wrap">
+                  <img
+                    src={
+                      allCheckedCategories.has(selectedCategory?.key ?? "")
+                        ? check_box_purple
+                        : check_box_outline_blank_gray
+                    }
+                    alt=""
+                  />
+                </span>
+                <span className="job-role-picker__role-label">{selectedCategory?.title} 전체</span>
               </div>
 
-              <div className="job-role-picker__group job-role-picker__group--right">
+              {selectedCategory?.roles.map((role) => (
                 <div
-                  className={`job-role-picker__role job-role-picker__role--all ${
-                    allCheckedCategories.has(selectedCategory?.key ?? "") ? "on" : ""
-                  }`}
-                  onClick={() => handleAllToggle(selectedCategory as Category)}
+                  key={role.key}
+                  className={`job-role-picker__role ${selectedRoles.has(role.key) ? "on" : ""}`}
+                  onClick={() => handleRoleToggle(role)}
                 >
                   <span className="job-role-picker__checkbox-wrap">
                     <img
                       src={
-                        allCheckedCategories.has(selectedCategory?.key ?? "")
+                        selectedRoles.has(role.key)
                           ? check_box_purple
                           : check_box_outline_blank_gray
                       }
                       alt=""
                     />
                   </span>
-                  <span className="job-role-picker__role-label">{selectedCategory?.title} 전체</span>
+                  <span className="job-role-picker__role-label">{role.label}</span>
                 </div>
+              ))}
+            </div>
 
-                {selectedCategory?.roles.map((role) => (
-                  <div
-                    key={role.key}
-                    className={`job-role-picker__role ${selectedRoles.has(role.key) ? "on" : ""}`}
-                    onClick={() => handleRoleToggle(role)}
-                  >
-                    <span className="job-role-picker__checkbox-wrap">
-                      <img
-                        src={
-                          selectedRoles.has(role.key)
-                            ? check_box_purple
-                            : check_box_outline_blank_gray
-                        }
-                        alt=""
-                      />
-                    </span>
-                    <span className="job-role-picker__role-label">{role.label}</span>
+            <div className="job-filter-panel__footer">
+              <div className="job-filter-panel__selected-chips">
+                {selectedRoleDetails.length > 0 && (
+                  <div className="jobs-chips">
+                    {selectedRoleDetails.map((role) => (
+                      <div key={role.roleKey} className="jobs-chips__item">
+                        <span className="job-role-picker__chip-group">{role.categoryTitle}</span>
+                        <span className="job-role-picker__chip-role">
+                          <span className="job-role-picker__chip-chevron">
+                            <img src={chevron_right_black} alt="" />
+                          </span>
+                          {role.roleLabel}
+                        </span>
+                        <img
+                          onClick={() => handleRemoveChip(role.roleKey)}
+                          style={{ cursor: "pointer" }}
+                          src={ic_close_gray500_20}
+                          alt=""
+                        />
+                      </div>
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
 
-              <div className="job-filter-panel__footer">
-                <div className="job-filter-panel__selected-chips">
-                  {selectedRoleDetails.length > 0 ? (
-                    <div className="jobs-chips">
-                      {selectedRoleDetails.map((role) => (
-                        <div key={role.roleKey} className="jobs-chips__item">
-                          <span className="job-role-picker__chip-group">{role.categoryTitle}</span>
-                          <span className="job-role-picker__chip-role">
-                            <span className="job-role-picker__chip-chevron">
-                              <img src={chevron_right_black} alt="" />
-                            </span>
-                            {role.roleLabel}
-                          </span>
-                          <img
-                            onClick={() => handleRemoveChip(role.roleKey)}
-                            style={{ cursor: "pointer" }}
-                            src={ic_close_gray500_20}
-                            alt=""
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <></>
-                  )}
-                </div>
-
-                <div className="btn_wrap">
-                  <button className="btn_w_full default_btn_white" type="button" onClick={handleReset}>
-                    <img src={ic_replay_gray900_20} alt="" /> 초기화
-                  </button>
-                  <button className="btn_w_full default_btn_black" type="button" onClick={handleApply}>
-                    적용하기
-                  </button>
-                </div>
+              <div className="btn_wrap">
+                <button className="btn_w_full default_btn_white" type="button" onClick={handleReset}>
+                  <img src={ic_replay_gray900_20} alt="" /> 초기화
+                </button>
+                <button className="btn_w_full default_btn_black" type="button" onClick={handleApply}>
+                  적용하기
+                </button>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
-    </>
+    </div>
   );
 }

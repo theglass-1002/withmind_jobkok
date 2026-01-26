@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 
 import check_box_purple from "@/assets/icons/check_box_purple.png";
@@ -11,8 +11,7 @@ import "./ModalEducationPicker.css";
 
 interface ModalEducationPickerProps {
   onApply?: (selected: string[]) => void;
-
-  // ✅ 복원용
+  onChange?: (selected: string[]) => void;
   initialSelected?: string[];
 }
 
@@ -31,36 +30,52 @@ const EDUCATION_OPTIONS_RIGHT = [
 
 const MAX_EDU_COUNT = 5;
 
+const areSetsEqual = (a: Set<string>, b: Set<string>) => {
+  if (a.size !== b.size) return false;
+  for (const v of a) if (!b.has(v)) return false;
+  return true;
+};
+
 export default function ModalEducationPicker({
   onApply,
+  onChange,
   initialSelected = [],
 }: ModalEducationPickerProps) {
   const [checkedRoles, setCheckedRoles] = useState<Set<string>>(new Set());
 
-  // ✅ 모달 재오픈 시 선택 복원
-  useEffect(() => {
-    setCheckedRoles(new Set(initialSelected));
+  const initialSelectedKey = useMemo(() => {
+    return [...initialSelected].sort().join("|");
   }, [initialSelected]);
+
+  useEffect(() => {
+    const next = new Set(initialSelected);
+    setCheckedRoles((prev) => (areSetsEqual(prev, next) ? prev : next));
+  }, [initialSelectedKey]);
+
+  const emitChange = (nextSet: Set<string>) => {
+    if (onChange) onChange(Array.from(nextSet));
+  };
 
   const onClickRole = (key: string) => {
     const isAlreadyChecked = checkedRoles.has(key);
 
-    // ✅ 5개 제한 (추가 시만)
     if (!isAlreadyChecked && checkedRoles.size >= MAX_EDU_COUNT) {
       toast("최대 5개까지 선택 가능합니다.");
       return;
     }
 
-    setCheckedRoles((prev) => {
-      const next = new Set(prev);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
-      return next;
-    });
+    const next = new Set(checkedRoles);
+    if (next.has(key)) next.delete(key);
+    else next.add(key);
+
+    setCheckedRoles(next);
+    emitChange(next);
   };
 
   const handleReset = () => {
-    setCheckedRoles(new Set());
+    const next = new Set<string>();
+    setCheckedRoles(next);
+    emitChange(next);
   };
 
   const handleApply = () => {
@@ -73,7 +88,6 @@ export default function ModalEducationPicker({
 
   return (
     <>
-      {/* PC */}
       <div className="education-picker education-picker__popup">
         <div className="education-picker__body">
           <div className="education-picker__column education-picker__column--left">
@@ -124,10 +138,7 @@ export default function ModalEducationPicker({
                 <div className="education-picker__chip-body">
                   <span className="education-picker__chip-group">{opt.label}</span>
                 </div>
-                <span
-                  className="education-picker__chip-close"
-                  onClick={() => onClickRole(opt.key)}
-                >
+                <span className="education-picker__chip-close" onClick={() => onClickRole(opt.key)}>
                   <img src={ic_close_gray500_20} alt="" />
                 </span>
               </div>
@@ -145,6 +156,46 @@ export default function ModalEducationPicker({
           <span className="default_btn_black" onClick={handleApply}>
             적용
           </span>
+        </div>
+      </div>
+
+      <div className="education-picker education-picker__popup mobile">
+        <div className="education-picker__body">
+          <div className="education-picker__column education-picker__column--left">
+            {EDUCATION_OPTIONS_LEFT.map((opt) => (
+              <div
+                key={opt.key}
+                className={`job-role-picker__role ${checkedRoles.has(opt.key) ? "on" : ""}`}
+                onClick={() => onClickRole(opt.key)}
+              >
+                <span className="job-role-picker__checkbox-wrap">
+                  <img
+                    src={checkedRoles.has(opt.key) ? check_box_purple : check_box_outline_blank_gray}
+                    alt=""
+                  />
+                </span>
+                <span className="job-role-picker__role-label">{opt.label}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="education-picker__column education-picker__column--right">
+            {EDUCATION_OPTIONS_RIGHT.map((opt) => (
+              <div
+                key={opt.key}
+                className={`job-role-picker__role ${checkedRoles.has(opt.key) ? "on" : ""}`}
+                onClick={() => onClickRole(opt.key)}
+              >
+                <span className="job-role-picker__checkbox-wrap">
+                  <img
+                    src={checkedRoles.has(opt.key) ? check_box_purple : check_box_outline_blank_gray}
+                    alt=""
+                  />
+                </span>
+                <span className="job-role-picker__role-label">{opt.label}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </>
