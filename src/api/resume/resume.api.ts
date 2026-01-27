@@ -23,7 +23,7 @@ import {
 } from "./resume.types";
 import { AI_BASE_URL } from "@/config/config";
 
-// 🔥 페이징 + 상태 기반 이력서 리스트 조회
+// 페이징 + 상태 기반 이력서 리스트 조회
 // page: 1-based, size: 페이지당 개수, status: "ING" | "DONE" 등 (옵션)
 export async function fetchResumeList(
   page: number,
@@ -62,12 +62,22 @@ export async function createResume(
   return res.data;
 }
 
+
+
+
 export async function updateResume(
   resumeIdx: number,
   payload: CreateResumeRequest
 ): Promise<ApiResponse> {
   const res = await instance.put<ApiResponse>(`/api/resume/update/${resumeIdx}`, payload);
-  return res.data; // ✅ { code: 200, msg: "success" }
+  return res.data;
+}
+
+export async function deleteResume(
+  resumeIdx: number
+): Promise<ApiResponse> {
+  const res = await instance.delete<ApiResponse>(`/api/resume/delete/${resumeIdx}`);
+  return res.data;
 }
 
 export async function fetchResumeDetail(

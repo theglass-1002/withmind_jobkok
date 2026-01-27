@@ -2,54 +2,82 @@ import React, { useEffect, useMemo, useState } from "react";
 import "./JobFilterPanel.css";
 
 import Tabs from "@/shared/components/tabs/Tabs";
-import M_ModalJobRolePicker, {
-  SelectedRole,
-} from "@/shared/components/job-role-picker/mobile/M_ModalJobRolePicker";
+import M_ModalJobRolePicker, { SelectedRole } from "@/shared/components/job-role-picker/mobile/M_ModalJobRolePicker";
 import ModalCareerRangePicker from "@/shared/components/career-range-picker/ModalCareerRangePicker";
 import ModalEducationPicker from "@/shared/components/education-picker/ModalEducationPicker";
-import ModalLocationPicker, {
-  SelectedLocation,
-} from "@/shared/components/location-picker/ModalLocationPicker";
+import ModalLocationPicker, { SelectedLocation } from "@/shared/components/location-picker/ModalLocationPicker";
 import ModalEmploymentTypePicker from "@/shared/components/employment-type-picker/ModalEmploymentTypePicker";
 import ic_close_gray900_24 from "@/assets/icons/size24/ic_close_gray900_24.png";
 import ic_replay_gray900_20 from "@/assets/icons/size20/ic_replay_gray900_20.png";
 import chevron_right_black from "@/assets/icons/chevron_right_black.png";
 import ic_close_gray500_20 from "@/assets/icons/size20/ic_close_gray500_20.png";
 
-import { fetchJobTree } from "@/api/job/job.api";
-import { JobNode } from "@/api/job/job.types";
-import { EmpOptionKey } from "@/api/job/job.api";
+import {
+  fetchJobTree,
+  fetchJobList,
+  toCareerParam,
+  toEducationCodeParam,
+  toLocationCodeParam,
+  EMPLOYMENT_TYPE_KEYS,
+  EMPLOYMENT_ETC_KEYS,
+  EmpOptionKey,
+} from "@/api/job/job.api";
+import { JobNode, SIZE_MAP, SORT_CODE_MAP } from "@/api/job/job.types";
 
 type FilterType = "role" | "career" | "education" | "location" | "employment";
+
+export type AppliedFilters = {
+  roles: SelectedRole[];
+  career: { min: number; max: number };
+  education: string[];
+  location: SelectedLocation[];
+  employment: EmpOptionKey[];
+};
 
 interface JobFilterPanelProps {
   filterType?: FilterType;
   totalCount?: number;
+  initialFilters?: AppliedFilters;
   onClose?: () => void;
-  onApply?: (filters: any) => void;
+  onApply?: (filters: AppliedFilters) => void;
   onReset?: () => void;
 }
 
 export default function JobFilterPanel({
   filterType,
   totalCount = 0,
+  initialFilters,
   onClose,
   onApply,
   onReset,
 }: JobFilterPanelProps) {
   const [activeTab, setActiveTab] = useState<FilterType>(filterType ?? "role");
-  const [selectedRoles, setSelectedRoles] = useState<SelectedRole[]>([]);
-  const [careerRange, setCareerRange] = useState<{ min: number; max: number }>({
-    min: 0,
-    max: 10,
-  });
-  const [educationSelected, setEducationSelected] = useState<string[]>([]);
-  const [locationSelected, setLocationSelected] = useState<SelectedLocation[]>([]);
-  const [employmentSelected, setEmploymentSelected] = useState<EmpOptionKey[]>([]);
+  const [selectedRoles, setSelectedRoles] = useState<SelectedRole[]>(initialFilters?.roles ?? []);
+  const [careerRange, setCareerRange] = useState<{ min: number; max: number }>(
+    initialFilters?.career ?? { min: 0, max: 10 }
+  );
+  const [educationSelected, setEducationSelected] = useState<string[]>(initialFilters?.education ?? []);
+  const [locationSelected, setLocationSelected] = useState<SelectedLocation[]>(initialFilters?.location ?? []);
+  const [employmentSelected, setEmploymentSelected] = useState<EmpOptionKey[]>(initialFilters?.employment ?? []);
 
   const [jobTree, setJobTree] = useState<JobNode[]>([]);
   const [jobLoading, setJobLoading] = useState(false);
   const [jobError, setJobError] = useState<string | null>(null);
+
+  const [dynamicTotalCount, setDynamicTotalCount] = useState<number>(totalCount);
+
+  useEffect(() => {
+    setDynamicTotalCount(totalCount);
+  }, [totalCount]);
+
+  useEffect(() => {
+    if (!initialFilters) return;
+    setSelectedRoles(initialFilters.roles ?? []);
+    setCareerRange(initialFilters.career ?? { min: 0, max: 10 });
+    setEducationSelected(initialFilters.education ?? []);
+    setLocationSelected(initialFilters.location ?? []);
+    setEmploymentSelected(initialFilters.employment ?? []);
+  }, [initialFilters]);
 
   useEffect(() => {
     const init = async () => {
@@ -68,6 +96,10 @@ export default function JobFilterPanel({
 
     init();
   }, []);
+
+  useEffect(() => {
+    setActiveTab(filterType ?? "role");
+  }, [filterType]);
 
   const careerLabel = useMemo(() => {
     const { min, max } = careerRange;
@@ -109,31 +141,70 @@ export default function JobFilterPanel({
     disability: "장애인",
   };
 
-  const buildFilterPayload = () => ({
-    roles: selectedRoles,
-    career: careerRange,
-    education: educationSelected,
-    location: locationSelected,
-    employment: employmentSelected,
-  });
+  const hasFilters = useMemo(() => {
+    const hasRole = selectedRoles.length > 0;
+    const hasCareer = careerRange.min !== 0 || careerRange.max !== 10;
+    const hasEducation = educationSelected.length > 0;
+    const hasLocation = locationSelected.length > 0;
+    const hasEmployment = employmentSelected.length > 0;
+    return hasRole || hasCareer || hasEducation || hasLocation || hasEmployment;
+  }, [
+    selectedRoles.length,
+    careerRange.min,
+    careerRange.max,
+    educationSelected.length,
+    locationSelected.length,
+    employmentSelected.length,
+  ]);
 
-  const fetchCountByFilters = async (payload: any) => {
-    console.log("[JobFilterPanel] filter changed -> API payload:", payload);
+  const fetchCountByFilters = async () => {
+    try {
+      const roleIds = selectedRoles.map((r) =>
+        r.roleKey === r.categoryKey ? Number(r.categoryKey) : Number(r.roleKey)
+      );
+
+      const career = toCareerParam(careerRange);
+      const educationCode = toEducationCodeParam(educationSelected);
+      const locationCode = toLocationCodeParam(locationSelected);
+
+      const employmentType = employmentSelected
+        .filter((k) => EMPLOYMENT_TYPE_KEYS.includes(k))
+        .join(",");
+
+      const employmentEtc = employmentSelected
+        .filter((k) => EMPLOYMENT_ETC_KEYS.includes(k))
+        .join(",");
+
+      const size = SIZE_MAP["15개씩"] ?? 15;
+      const sortCode = SORT_CODE_MAP["최신순"] ?? "latest";
+
+      const params: any = {
+        sort: sortCode,
+      };
+
+      if (hasFilters) {
+        params.categoryId = roleIds.length ? roleIds : undefined;
+        params.career = career;
+        params.educationCode = educationCode;
+        params.locationCode = locationCode;
+        params.employmentType = employmentType || undefined;
+        params.employmentEtc = employmentEtc || undefined;
+      }
+
+      const { totalCount: nextTotalCount } = await fetchJobList(1, size, params);
+      setDynamicTotalCount(nextTotalCount);
+    } catch (e) {
+      console.error("[JobFilterPanel] fetchCountByFilters error:", e);
+    }
   };
 
   useEffect(() => {
-    const payload = buildFilterPayload();
-
     const t = setTimeout(() => {
-      fetchCountByFilters(payload);
+      fetchCountByFilters();
     }, 250);
 
     return () => clearTimeout(t);
-  }, [selectedRoles, careerRange, educationSelected, locationSelected, employmentSelected]);
-
-  const handleRoleChange = (roles: SelectedRole[]) => {
-    setSelectedRoles(roles);
-  };
+  }, [selectedRoles, careerRange, educationSelected, locationSelected, employmentSelected, hasFilters]);
 
   const handleRoleApply = (roles: SelectedRole[]) => {
     setSelectedRoles(roles);
@@ -226,12 +297,12 @@ export default function JobFilterPanel({
       case "role":
         return (
           <M_ModalJobRolePicker
-          jobTree={jobTree}
-          loading={jobLoading}
-          error={jobError}
-          value={selectedRoles}
-          onApply={handleRoleApply}
-          onReset={handleRoleReset}
+            jobTree={jobTree}
+            loading={jobLoading}
+            error={jobError}
+            value={selectedRoles}
+            onApply={handleRoleApply}
+            onReset={handleRoleReset}
           />
         );
       case "career":
@@ -436,7 +507,7 @@ export default function JobFilterPanel({
               <img src={ic_replay_gray900_20} alt="" /> 초기화
             </button>
             <button className="btn_w_full default_btn_black" type="button" onClick={handleApply}>
-              {totalCount.toLocaleString()}개 공고 보기
+              {dynamicTotalCount.toLocaleString()}개 공고 보기
             </button>
           </div>
         </div>

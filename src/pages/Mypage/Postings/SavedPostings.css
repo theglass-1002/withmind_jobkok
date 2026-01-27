@@ -203,7 +203,7 @@ saved-jobs__content-area */
             width: 100%;
         }
         .saved-jobs__main-container .job-posting__list--grid{
-            width: auto;
+            width: 100%;
             gap: 0px;
             border-top: 1px solid var(--gray-300, #E0E2E4);
             

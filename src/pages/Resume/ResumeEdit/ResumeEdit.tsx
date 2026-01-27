@@ -1486,11 +1486,11 @@ export default function ResumeEdit() {
                       title: p.title || `포트폴리오 문서 ${idx + 1}`,
                       docName: p.title || "",
                       url: null,
-                      fileRef: cleanPath, // 🔥 순수 경로 사용
+                      fileRef: cleanPath, // 순수 경로 사용
                       description: p.note ?? "",
                       sortOrder: idx + 1,
                       portfolioFile: {
-                        filePath: cleanPath, // 🔥 순수 경로 사용
+                        filePath: cleanPath, //  순수 경로 사용
                         originalName: p.title || storedName,
                         storedName: storedName,
                         sizeBytes: sizeBytes,
@@ -1531,7 +1531,7 @@ export default function ResumeEdit() {
       console.log("✅ 이력서 임시저장 성공:", result);
       setIsLoading(false);
       toast.success("임시 저장되었습니다.");
-      navigate(`/resumes/`);
+     // navigate(`/resumes/`);
     } catch (error) {
       setIsLoading(false);
       console.error("❌ 이력서 임시 저장 실패:", error);

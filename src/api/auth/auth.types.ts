@@ -204,10 +204,12 @@ export interface IssueTempPasswordResponse {
 }
 
 export interface MyInfo {
-  phone: string;
-  userName: string;
+  birthdate:string;
+  gender:string;
+  idx: string;
+  phone:string;
   userId: string;
-  idx: number;
+  userName: string;
 }
 
 export interface FetchMyInfoResponse {

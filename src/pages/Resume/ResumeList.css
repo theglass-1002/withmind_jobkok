@@ -396,10 +396,15 @@ box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.08);
     line-height: 20px; /* 125% */
 }
 
+.resume-list-page__body .job-posting__pagination{
+    display: flex;
+    width: 100%;
+}   
+
 @media (max-width: 760px) {
     body{
         .resume-list-page{
-            padding: 36px 0 0 0;
+            padding: 36px 0 20px 0;
             gap: 20px;
             background: var(--gray-50, #F8F8F9);
         }
@@ -461,6 +466,7 @@ box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.08);
         .resume-list-page__grid{
             width: 100%;
             flex-direction: column;
+            gap: 20px;
         }
         .resume-list-page__item{
             width: 100%;
@@ -497,5 +503,11 @@ box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.08);
            .create_resumes.mobile{
                display: flex;
            }
+
+          .resume-item__menu{
+            right: -20px;
+          }   
+
+       
     }
 }

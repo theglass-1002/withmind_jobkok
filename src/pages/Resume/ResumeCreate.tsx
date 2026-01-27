@@ -46,7 +46,7 @@ import {
   fetchResumePositionSuggestions,
   fetchResumeHardSkillSuggestions,
   fetchResumeSoftSkillSuggestions,
-  fetchResumeSelfIntro, //
+  fetchResumeSelfIntro,
 } from "@/api/resume/resume.api";
 import {
   CreateResumeRequest,
@@ -59,15 +59,15 @@ import {
   ResumePositionRequest,
   ResumeHardSkillRequest,
   ResumeSoftSkillRequest,
-  ResumeSelfIntroRequest, // ✅ 자기소개 Request 타입
+  ResumeSelfIntroRequest,
 } from "@/api/resume/resume.types";
 import { Storage } from "@/shared/utils/StorageManager";
 import { uploadPhotoFile } from "@/api/fileUpload.api";
 import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
+import { fetchMyInfo, logout } from "@/api/auth/auth.api";
+import { formatPhone } from "@/shared/utils/validators";
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 타입 정의
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 type FormState = {
   title: string;
   basic: BasicInfo;
@@ -85,7 +85,6 @@ type FormState = {
   selfIntro: string;
 };
 
-// 활동 에러 타입
 export type ActivityErrors = {
   activityType?: string;
   activityName?: string;
@@ -93,21 +92,16 @@ export type ActivityErrors = {
   endDate?: string;
 };
 
-// 수상·자격증 에러 타입
 export type AwardsCertErrors = {
   kind?: string;
   title?: string;
 };
 
-// 포트폴리오 에러 타입
 export type PortfolioErrors = {
   file?: string;
   url?: string;
 };
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 초기값
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const initial: FormState = {
   title: "",
   basic: {
@@ -132,31 +126,24 @@ const initial: FormState = {
   selfIntro: "",
 };
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 섹션 완료 상태 계산 (Sidebar용)
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const calcSectionStatus = (
   form: FormState
 ): Partial<Record<SectionId, Status>> => {
   const status: Partial<Record<SectionId, Status>> = {};
 
-  // 1) 제목
   status.title = form.title.trim() ? "completed" : "pending";
 
-  // 2) 기본정보
   const { name, birth, gender, email, phone } = form.basic;
   status.basic =
     name.trim() && birth.trim() && gender && email.trim() && phone.trim()
       ? "completed"
       : "pending";
 
-  // 3) 지역
   status.location =
     form.location.nationwide || form.location.selectedCodes.length > 0
       ? "completed"
       : "pending";
 
-  // 4) 경력 (신입이면 자동 completed)
   if (form.isFreshGraduate) {
     status.career = "completed";
   } else {
@@ -174,7 +161,6 @@ const calcSectionStatus = (
     status.career = valid ? "completed" : "pending";
   }
 
-  // 5) 학력
   const validEdu =
     form.education.length > 0 &&
     form.education.every(
@@ -186,16 +172,10 @@ const calcSectionStatus = (
     );
   status.education = validEdu ? "completed" : "pending";
 
-  // 6) 희망직무
   status.desiredRole = form.desiredRoles.length > 0 ? "completed" : "pending";
-
-  // 7) 하드 스킬
   status.hardSkills = form.hardSkills.length > 0 ? "completed" : "pending";
-
-  // 8) 소프트 스킬
   status.softSkills = form.softSkills.length > 0 ? "completed" : "pending";
 
-  // 9) 활동ㆍ경험
   if (form.activities.length === 0) {
     status.activities = "pending";
   } else {
@@ -211,17 +191,13 @@ const calcSectionStatus = (
     status.activities = valid ? "completed" : "pending";
   }
 
-  // 10) 수상ㆍ자격증
   if (form.awardCerts.length === 0) {
     status.awards = "pending";
   } else {
-    const valid = form.awardCerts.every(
-      (a) => a.kind && a.title?.trim()
-    );
+    const valid = form.awardCerts.every((a) => a.kind && a.title?.trim());
     status.awards = valid ? "completed" : "pending";
   }
 
-  // 11) 포트폴리오
   if (form.portfolios.length === 0) {
     status.portfolio = "pending";
   } else {
@@ -231,10 +207,7 @@ const calcSectionStatus = (
     status.portfolio = valid ? "completed" : "pending";
   }
 
-  // 12) 자기소개
   status.selfIntro = form.selfIntro.trim() ? "completed" : "pending";
-
-  // 13) 모의면접 (백엔드 결과 연동 전까지는 pending)
   status.mockInterview = "pending";
 
   return status;
@@ -264,22 +237,18 @@ export default function ResumeCreate() {
   const [showTitleSuggest, setShowTitleSuggest] = useState(false);
   const [titleSuggestions, setTitleSuggestions] = useState<string[]>([]);
 
-  // 🔥 희망 직무 AI 추천 상태
   const [showRoleSuggest, setShowRoleSuggest] = useState(false);
   const [roleSuggestions, setRoleSuggestions] = useState<string[]>([]);
   const [isRoleLoading, setIsRoleLoading] = useState(false);
 
-  // 🔥 하드 스킬 AI 추천 상태
   const [showHardSkillSuggest, setShowHardSkillSuggest] = useState(false);
   const [hardSkillSuggestions, setHardSkillSuggestions] = useState<string[]>([]);
   const [isHardSkillLoading, setIsHardSkillLoading] = useState(false);
 
-  // 🔥 소프트 스킬 AI 추천 상태
   const [showSoftSkillSuggest, setShowSoftSkillSuggest] = useState(false);
   const [softSkillSuggestions, setSoftSkillSuggestions] = useState<string[]>([]);
   const [isSoftSkillLoading, setIsSoftSkillLoading] = useState(false);
 
-  // 🔥 자기소개 AI 추천 상태
   const [showSelfIntroSuggest, setShowSelfIntroSuggest] = useState(false);
   const [selfIntroSuggestions, setSelfIntroSuggestions] = useState<string[]>([]);
   const [isSelfIntroLoading, setIsSelfIntroLoading] = useState(false);
@@ -289,14 +258,56 @@ export default function ResumeCreate() {
   const [sidebarStatus, setSidebarStatus] =
     useState<Partial<Record<SectionId, Status>>>({});
 
-  // form 이 바뀔 때마다 사이드바 상태 업데이트
+    useEffect(() => {
+      const initMyInfo = async () => {
+        try {
+          const res = await fetchMyInfo();
+          console.log("[ResumeCreate] fetchMyInfo:", res);
+    
+          const u = res.user;
+    
+          const birth =
+            typeof u.birthdate === "string" && u.birthdate.length === 8
+              ? `${u.birthdate.slice(0, 4)}-${u.birthdate.slice(4, 6)}-${u.birthdate.slice(6, 8)}`
+              : "";
+    
+          const gender =
+            u.gender === "M"
+              ? "male"
+              : u.gender === "W"
+              ? "female"
+              : null;
+
+         const phone = formatPhone(u.phone??"");
+    
+          setForm((prev) => ({
+            ...prev,
+            basic: {
+              ...prev.basic,
+              name: u.userName ?? "",
+              email: u.userId ?? "",
+              phone:phone,
+              birth,
+              gender,
+            },
+          }));
+        } catch (e: any) {
+          console.error("[ResumeCreate] fetchMyInfo error:", e);
+          if (e?.code === 999) {
+            logout();
+            navigate("/login");
+          }
+        }
+      };
+    
+      initMyInfo();
+    }, [navigate]);
+    
+
   useEffect(() => {
     setSidebarStatus(calcSectionStatus(form));
   }, [form]);
 
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // AI 제목 추천
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   const handleClickTitleSuggest = async () => {
     try {
       if (isLoading) return;
@@ -342,7 +353,7 @@ export default function ResumeCreate() {
         activities,
         awards,
       };
-    
+
       const titles = await fetchResumeTitleSuggestions(payload);
       if (!titles || titles.length === 0) {
         toast.info("추천할 제목이 없습니다. 내용을 조금 더 채워보세요.");
@@ -352,7 +363,6 @@ export default function ResumeCreate() {
       setTitleSuggestions(titles);
       setShowTitleSuggest(true);
     } catch (error) {
-
       console.error("AI 제목 추천 실패:", error);
       toast.error("AI 제목 추천 중 오류가 발생했습니다.");
     } finally {
@@ -362,9 +372,6 @@ export default function ResumeCreate() {
 
   const handleCloseAISuggest = () => setShowTitleSuggest(false);
 
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // AI 희망 직무 추천
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   const handleClickRoleSuggest = async () => {
     try {
       if (isRoleLoading) return;
@@ -434,9 +441,6 @@ export default function ResumeCreate() {
 
   const handleCloseRoleSuggest = () => setShowRoleSuggest(false);
 
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // AI 하드 스킬 추천
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   const handleClickHardSkillSuggest = async () => {
     try {
       if (isHardSkillLoading) return;
@@ -511,9 +515,6 @@ export default function ResumeCreate() {
 
   const handleCloseHardSkillSuggest = () => setShowHardSkillSuggest(false);
 
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // AI 소프트 스킬 추천
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   const handleClickSoftSkillSuggest = async () => {
     try {
       if (isSoftSkillLoading) return;
@@ -582,9 +583,6 @@ export default function ResumeCreate() {
 
   const handleCloseSoftSkillSuggest = () => setShowSoftSkillSuggest(false);
 
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // AI 자기소개 추천
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   const handleClickSelfIntroSuggest = async () => {
     try {
       if (isSelfIntroLoading) return;
@@ -604,9 +602,6 @@ export default function ResumeCreate() {
 
       const experiences = form.careers
         .map((c) => {
-          const period = c.isCurrent
-            ? `${c.startDate} ~ 현재`
-            : `${c.startDate} ~ ${c.endDate || ""}`;
           const summary = c.summary ? ` / ${c.summary}` : "";
           return `${summary}`;
         })
@@ -638,8 +633,7 @@ export default function ResumeCreate() {
 
       if (!selfintro) {
         toast.info(
-           "추천할 자기소개 문장이 없습니다. [경력] 담당 업무 내용을 조금 더 구체적으로 작성해 보세요."
-
+          "추천할 자기소개 문장이 없습니다. [경력] 담당 업무 내용을 조금 더 구체적으로 작성해 보세요."
         );
         return;
       }
@@ -647,13 +641,10 @@ export default function ResumeCreate() {
       setSelfIntroSuggestions([selfintro]);
       setShowSelfIntroSuggest(true);
     } catch (error) {
-      
       console.error("AI 자기소개 추천 실패:", error);
       toast.info(
         "추천할 자기소개 문장이 없습니다. [경력] 담당 업무 내용을 조금 더 구체적으로 작성해 보세요."
-
-     );
-      //toast.error("AI 자기소개 추천 중 오류가 발생했습니다.");
+      );
     } finally {
       setIsSelfIntroLoading(false);
     }
@@ -661,9 +652,6 @@ export default function ResumeCreate() {
 
   const handleCloseSelfIntroSuggest = () => setShowSelfIntroSuggest(false);
 
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 경력 검증 헬퍼
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   const buildCareerErrors = (careers: CareerInfo[]): CareerErrors[] => {
     return careers.map((c) => {
       const ce: CareerErrors = {};
@@ -677,9 +665,6 @@ export default function ResumeCreate() {
     });
   };
 
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 학력 검증 헬퍼
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   const buildEducationErrors = (educations: Education[]): EducationErrors[] => {
     return educations.map((e) => {
       const ee: EducationErrors = {};
@@ -693,9 +678,6 @@ export default function ResumeCreate() {
     });
   };
 
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 활동 검증 헬퍼
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   const buildActivityErrors = (activities: ActivityItem[]): ActivityErrors[] =>
     activities.map((act) => {
       const ae: ActivityErrors = {};
@@ -706,9 +688,6 @@ export default function ResumeCreate() {
       return ae;
     });
 
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 수상·자격증 검증 헬퍼
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   const buildAwardCertErrors = (
     awardCerts: AwardsCertItem[]
   ): AwardsCertErrors[] =>
@@ -719,9 +698,6 @@ export default function ResumeCreate() {
       return ace;
     });
 
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 포트폴리오 검증 헬퍼
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   const buildPortfolioErrors = (
     portfolios: PortfolioDocItem[]
   ): PortfolioErrors[] =>
@@ -735,9 +711,6 @@ export default function ResumeCreate() {
       return pe;
     });
 
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // Update 함수들
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   const updateBasic = (patch: Partial<BasicInfo>) =>
     setForm((prev) => ({ ...prev, basic: { ...prev.basic, ...patch } }));
 
@@ -825,24 +798,12 @@ export default function ResumeCreate() {
   const updateSelfIntro = (content: string) =>
     setForm((prev) => ({ ...prev, selfIntro: content }));
 
-  const resetBasicErrors = () =>
-    setErrors((prev) => ({ ...prev, basic: {} }));
+  const resetBasicErrors = () => setErrors((prev) => ({ ...prev, basic: {} }));
+  const resetEducationErrors = () => setErrors((prev) => ({ ...prev, education: [] }));
+  const resetActivityErrors = () => setErrors((prev) => ({ ...prev, activities: [] }));
+  const resetAwardCertErrors = () => setErrors((prev) => ({ ...prev, awardCerts: [] }));
+  const resetPortfolioErrors = () => setErrors((prev) => ({ ...prev, portfolios: [] }));
 
-  const resetEducationErrors = () =>
-    setErrors((prev) => ({ ...prev, education: [] }));
-
-  const resetActivityErrors = () =>
-    setErrors((prev) => ({ ...prev, activities: [] }));
-
-  const resetAwardCertErrors = () =>
-    setErrors((prev) => ({ ...prev, awardCerts: [] }));
-
-  const resetPortfolioErrors = () =>
-    setErrors((prev) => ({ ...prev, portfolios: [] }));
-
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 파일 업로드 함수
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   const handleFileSubmit = async (): Promise<ProfilePhotoFile | null> => {
     try {
       if (!form.photoFile) return null;
@@ -918,17 +879,14 @@ export default function ResumeCreate() {
       portfolios: [],
     };
 
-    // 1) 이력서 제목
     if (!form.title.trim()) {
       nextErr.title = "여기 이력서 제목을 입력해 주세요.";
     }
 
-    // 2) 희망 근무 지역
     if (!form.location.nationwide && form.location.selectedCodes.length === 0) {
       nextErr.location = "1개 이상 추가해 주세요.";
     }
 
-    // 3) 기본정보
     const basicErr: BasicErrors = {};
     if (!form.basic.name.trim()) basicErr.name = "이름을 입력해 주세요.";
     if (!form.basic.birth.trim()) basicErr.birth = "생년월일을 입력해 주세요.";
@@ -943,12 +901,10 @@ export default function ResumeCreate() {
     if (!form.basic.phone.trim()) basicErr.phone = "연락처를 입력해 주세요.";
     nextErr.basic = basicErr;
 
-    // 4) 경력 (신입이 아닐 때만)
     if (!form.isFreshGraduate) {
       nextErr.careers = buildCareerErrors(form.careers);
     }
 
-    // 5) 학력 (항상 최소 한 줄 기준으로 검증)
     const educationsToValidate =
       form.education.length > 0
         ? form.education
@@ -964,22 +920,18 @@ export default function ResumeCreate() {
     const eduErrs = buildEducationErrors(educationsToValidate);
     nextErr.education = eduErrs;
 
-    // 6) 희망직무
     if (form.desiredRoles.length === 0) {
       nextErr.desiredRoles = "1개 이상 추가해 주세요.";
     }
 
-    // 7) 활동
     if (form.activities.length > 0) {
       nextErr.activities = buildActivityErrors(form.activities);
     }
 
-    // 8) 수상·자격증
     if (form.awardCerts.length > 0) {
       nextErr.awardCerts = buildAwardCertErrors(form.awardCerts);
     }
 
-    // 9) 포트폴리오
     if (form.portfolios.length > 0) {
       nextErr.portfolios = buildPortfolioErrors(form.portfolios);
     }
@@ -993,8 +945,7 @@ export default function ResumeCreate() {
       !form.isFreshGraduate &&
       nextErr.careers &&
       nextErr.careers.some((ce) => Object.keys(ce).length > 0);
-    const hasEduError =
-      eduErrs && eduErrs.some((ee) => Object.keys(ee).length > 0);
+    const hasEduError = eduErrs && eduErrs.some((ee) => Object.keys(ee).length > 0);
     const hasDesiredRolesError = !!nextErr.desiredRoles;
     const hasActivityError =
       form.activities.length > 0 &&
@@ -1075,9 +1026,7 @@ export default function ResumeCreate() {
               activities: form.activities.map((act) => ({
                 category: act.activityType ?? "교내활동",
                 activityTitle: act.activityName,
-                startYm: act.startDate
-                  ? normalizeYm(act.startDate)
-                  : "1999-09-09",
+                startYm: act.startDate ? normalizeYm(act.startDate) : "1999-09-09",
                 endYm: act.endDate ? normalizeYm(act.endDate) : "1999-09-09",
                 description: act.summary,
                 linkUrl: "https://github.com/user",
@@ -1091,9 +1040,7 @@ export default function ResumeCreate() {
                 category: mapAwardsKindToCategoryLabel(item.kind),
                 name: item.title,
                 issuer: item.issuer ?? "",
-                acquiredYm: item.dateValue
-                  ? normalizeYm(item.dateValue)!.replace("-", "")
-                  : "",
+                acquiredYm: item.dateValue ? normalizeYm(item.dateValue)!.replace("-", "") : "",
                 licenseNo: item.score ?? "",
                 note: "",
               })),
@@ -1112,10 +1059,7 @@ export default function ResumeCreate() {
                     const u = uploadedResult.uploadedFile;
                     return {
                       itemType: "FILE",
-                      title:
-                        p.title ||
-                        u.originalName ||
-                        `포트폴리오 문서 ${idx + 1}`,
+                      title: p.title || u.originalName || `포트폴리오 문서 ${idx + 1}`,
                       docName: u.originalName,
                       url: null,
                       fileRef: u.filePath,
@@ -1178,9 +1122,6 @@ export default function ResumeCreate() {
     }
   };
 
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 임시저장
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   const handleTempSave = async () => {
     try {
       setIsLoading(true);
@@ -1200,7 +1141,6 @@ export default function ResumeCreate() {
       const payload: CreateResumeRequest = {
         userIdx: Storage.getUserIdx(),
         isDefault: 0,
-        // isDefault: isDefaultResume ? 1 : 0,
         temp: "Y",
         title: form.title,
         name: form.basic.name,
@@ -1245,9 +1185,7 @@ export default function ResumeCreate() {
               activities: form.activities.map((act) => ({
                 category: act.activityType ?? "교내활동",
                 activityTitle: act.activityName,
-                startYm: act.startDate
-                  ? normalizeYm(act.startDate)
-                  : "1999-09-09",
+                startYm: act.startDate ? normalizeYm(act.startDate) : "1999-09-09",
                 endYm: act.endDate ? normalizeYm(act.endDate) : "1999-09-09",
                 description: act.summary,
                 linkUrl: "https://github.com/user",
@@ -1261,9 +1199,7 @@ export default function ResumeCreate() {
                 category: mapAwardsKindToCategoryLabel(item.kind),
                 name: item.title,
                 issuer: item.issuer ?? "",
-                acquiredYm: item.dateValue
-                  ? normalizeYm(item.dateValue)!.replace("-", "")
-                  : "",
+                acquiredYm: item.dateValue ? normalizeYm(item.dateValue)!.replace("-", "") : "",
                 licenseNo: item.score ?? "",
                 note: "",
               })),
@@ -1282,10 +1218,7 @@ export default function ResumeCreate() {
                     const u = uploadedResult.uploadedFile;
                     return {
                       itemType: "FILE",
-                      title:
-                        p.title ||
-                        u.originalName ||
-                        `포트폴리오 문서 ${idx + 1}`,
+                      title: p.title || u.originalName || `포트폴리오 문서 ${idx + 1}`,
                       docName: u.originalName,
                       url: null,
                       fileRef: u.filePath,
@@ -1342,9 +1275,6 @@ export default function ResumeCreate() {
     }
   };
 
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // Render
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   const isSubmitDisabled = !form.title.trim();
 
   return (
@@ -1364,9 +1294,7 @@ export default function ResumeCreate() {
             임시저장
           </span>
           <span
-            className={`default_btn_black ${
-              isSubmitDisabled ? "disabled" : ""
-            }`}
+            className={`default_btn_black ${isSubmitDisabled ? "disabled" : ""}`}
             onClick={handleSubmit}
             aria-disabled={isSubmitDisabled}
           >
@@ -1377,13 +1305,10 @@ export default function ResumeCreate() {
 
       <div className="resume-create-page__container">
         <div className="resume-create-page__main">
-          {/* 제목 */}
           <div className="resume-create-page__section resume-create-page__section--title">
             <div className="resume-create-page__field">
               <input
-                className={`resume-create-page__label ${
-                  errors.title ? "error" : ""
-                }`}
+                className={`resume-create-page__label ${errors.title ? "error" : ""}`}
                 type="text"
                 value={form.title}
                 onChange={(e) =>
@@ -1402,9 +1327,7 @@ export default function ResumeCreate() {
                 }}
               />
               {errors.title && (
-                <span className="resume-create-page__error">
-                  {errors.title}
-                </span>
+                <span className="resume-create-page__error">{errors.title}</span>
               )}
             </div>
             <AISuggestArea

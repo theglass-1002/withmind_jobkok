@@ -73,7 +73,7 @@ export default function MyPage() {
         }
 
         try {
-          const resumeRes = await fetchResumeList(1, 1, undefined, 1);
+          const resumeRes = await fetchResumeList(1, 1);
           if (!isMounted) return;
           setDefaultResume((resumeRes.list ?? [])[0] ?? null);
           successCount += 1;

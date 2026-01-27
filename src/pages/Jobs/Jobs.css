@@ -272,6 +272,7 @@
     gap: 8px;
 }
 
+
 .job-search-filter-menu__item.selected .chip-label{
     color: var(--gray-500, #9EA4AA);
     font-family: Pretendard;
@@ -636,9 +637,23 @@
         justify-content: space-between;
         padding:20px;
      }
-     
+     .job-search-filter-menu__item.selected .job-search-filter-menu__label{
+        gap: 0px;
+     }
+     .job-search-filter-menu__count{
+        color: var(--gray-500, #9EA4AA);
+        font-size: 14px;
+        font-weight: 400;
+        margin-left: 8px;
+    }
+    
      .job-search-filter-menu__item .job-search-filter-menu__label{
         font-size: 14px;
+        gap: 2px;
+     }
+
+     .job-search-filter-menu .job-search-filter-menu__item.selected .job-search-filter-menu__label::after{
+        margin-left: 2px;
      }
 
      .jobs .job-posting .job-posting__ai-recommend{
@@ -719,7 +734,7 @@
     .jobs .job-posting .job-posting__card .job-card__body .job-card__control{
         display: none;
     }
-    .job-posting__pagination{
+    .job-posting__container .job-posting__pagination{
         width: 100%;
         display: flex;
         padding: 20px 20px 36px 20px;

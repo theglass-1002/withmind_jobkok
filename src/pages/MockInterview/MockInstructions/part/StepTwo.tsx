@@ -18,8 +18,6 @@ export default function StepTwo({ onPrev }: StepTwoProps) {
         <div className="mock-instructions__progress-bar step_two">
             <span></span>
         </div>
-      <div className="step_two">
-     
         <div className="mock-instructions__content">
           <div className="mock-instructions__header">
               <span className="mock-instructions__step-label">안내사항 2/2</span>
@@ -66,16 +64,13 @@ export default function StepTwo({ onPrev }: StepTwoProps) {
                   </div>
                   <div className="mock-interview-scene">
                     <img src={video_interview_time} alt="화상 면접 배경" className="interview-background" />
-                    <div className="interview-foreground-container">
-                        <img src={video_interview} alt="화상 면접 메인" className="interview-foreground" />
-                    </div>
+                    <img src={video_interview} alt="화상 면접 메인" className="interview-foreground" />
                     <img src={arrow_curve_down} alt="화면 전환 화살표" className="arrow-up-left" />
                     <img src={arrow_curve_down} alt="화면 전환 화살표" className="arrow-down-right" />
                 </div>
               </div>
           </div>
         </div>
-      </div>
       <div className="btn_wrap">
              <button className="default_btn_white radius" onClick={onPrev}>
                <img src={ic_keyboard_arrow_left_gray900_24} alt="" />

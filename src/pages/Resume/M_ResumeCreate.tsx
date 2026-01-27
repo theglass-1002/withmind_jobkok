@@ -192,6 +192,15 @@ export default function M_ResumeCreate() {
               )}
             </div>
             <div className="resume-create-page__assist">
+            <span className="resume-create-page__assist-text">
+              <img className="ai-suggest-icon" src={ic_star_gray700_20} alt="" />
+              더 적합한 문장 추천을 위해 아래 항목들을 먼저 채워주세요.
+              <span className="ai-suggest-btn career-section__summary-ai-btn">
+                AI 문장 추천
+              </span>
+            </span>
+          </div>
+            {/* <div className="resume-create-page__assist">
               <span className="resume-create-page__assist-text">
                 <img className="ai-suggest-icon" src={ic_star_gray700_20} alt="" />
                 더 적합한 문장을 추천을 위해 아래 항목들을 먼저 채워주세요.
@@ -200,7 +209,7 @@ export default function M_ResumeCreate() {
               </span>
               </span>
            
-            </div>
+            </div> */}
           </div>
           <M_BasicInfoSection
             values={form.basic}

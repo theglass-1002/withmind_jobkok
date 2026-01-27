@@ -671,6 +671,10 @@ mock-settings--step-2 */
         .environment .mock-settings__content{
             height: 100%;
         }
+
+        .mock-settings__section-title{
+            font-size: 18px;
+        }
         .mock-settings--step-1 .mock-settings__content-inner{
             flex-direction: column;
             height: 100%;

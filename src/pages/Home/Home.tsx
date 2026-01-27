@@ -118,7 +118,7 @@ export default function Home() {
 
   const getCategoryIcon = (name: string) => {
     const normalized = normalizeCategoryName(name);
-    return iconMap.get(normalized) ?? code_icon;
+    return iconMap.get(normalized) ?? Icons.code_icon_40px;
   };
 
   // ✅ depth=0 카테고리만
