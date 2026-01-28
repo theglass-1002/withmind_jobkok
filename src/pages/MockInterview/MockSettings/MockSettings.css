@@ -1,18 +1,19 @@
 .mock-settings-page{
+    width: 100%;
     display: flex;
-    justify-content: space-between;
     align-items: flex-start;
     background: var(--gray-200, #EBECED);
     height: 100vh;
     justify-content: center;
 }
 .mock-settings-page_container{
-    /* display: flex;
-    height: 100%; */
+
+    max-width: 1920px;
+    width: 100%;
 
     display: flex;
     height: 100%;
-    width: 100%;
+ 
 }
 
 .mock-settings__sidebar{
@@ -178,6 +179,7 @@
 .mock-settings__panel .mock-settings__submit-btn-container{
     background: var(--gray-900, #2A2D2F);
 }
+
 
 .mock-settings__exit-btn{
     display: flex;
@@ -446,6 +448,9 @@
     background: var(--gray-700, #6F767E);
     box-shadow: 0 -12px 24px 0 rgba(42, 45, 47, 0.12);
 }
+.mock-settings__submit-btn-container .default_btn_white{
+    padding: 20px 28px 20px 20px;
+}
 
 .mock-settings__submit-btn{
     display: flex;
@@ -663,7 +668,7 @@ mock-settings--step-2 */
         .mock-settings-page{
             height: auto;
             flex-direction: column;
-            padding: 70px 0px 120px 0px;
+            padding: 64px 0px 120px 0px;
         }
         .mock-settings__content{
         
@@ -677,20 +682,58 @@ mock-settings--step-2 */
         }
         .mock-settings--step-1 .mock-settings__content-inner{
             flex-direction: column;
+            padding: 20px;
             height: 100%;
-         
             overflow: visible;
             gap: 20px;
         }
         .mock-settings__section{
             width: 100%;
         }
+
+        .mock-settings__section-description{
+            font-size: 14px;
+        }
     
+        .mock-settings__section-header{
+            gap: 12px;
+        }
+        .mock-settings__section-body{
+           
+            gap: 24px;
+        }
+
         .mock-settings__section-header,
         .mock-settings__section-body,
         .mock-settings__question-list{
             padding: 24px 20px;
+            
         }
+
+        .mock-settings__section-body .select-dropdown{
+            gap: 12px;
+        }
+
+        .mock-settings__section-body .select-dropdown .select-dropdown__control{
+            height: 48px;
+        }
+
+        .mock-settings__section-body .select-dropdown .select-dropdown__menu{
+            top: 90px;
+        }
+        .mock-settings__section-body .field{
+            gap: 12px;
+        }
+
+
+        .mock-settings__section-notice{
+            padding: 20px;
+            gap: 12px;
+        }
+        .mock-settings__notice-text{
+            font-size: 14px;
+        }
+
         .mock-settings--step-1 .mock-settings__submit-btn-container{
             position: fixed;
             bottom: 0px;
@@ -706,6 +749,16 @@ mock-settings--step-2 */
             border-bottom: 1px solid var(--gray-300, #E0E2E4);
             background: var(--white-100, #FFF);
         }
+
+        .mock-settings__question-header .mock-settings__control-label{
+            font-size: 14px;
+        }
+
+        .mock-settings__question-header .mock-settings__control-label img{
+            width: 18px;
+            height: 18px;
+        }
+
         .mock-settings__question-description{
             padding: 16px;
         }
@@ -775,46 +828,84 @@ mock-settings--step-2 */
         }
 
         .env-guide__slides{
-            width: 100%;
+            width: 87%;
         }
 
         .env-guide__slide{
             width: 100%;
         }
+        .env-guide__item-number{
+            font-size: 16px;
+        }
         .env-guide__item{
-            /* width: 100%;
-            padding: 0px; */
-            width: 95%;
-            padding: 0px;
+            width: 260px;
+            height: 342px;
+            gap: 16px;
             padding: 16px;
         }
-        .env-guide__text-group{
-            width: 95%;
-        }
+    
         .env-guide__item-title{
             display: flex;
             flex-direction: column;
             align-items: start;
             font-size: 16px;
+            gap: 8px;
         }
         .env-guide__item-desc{
             font-size: 14px;
+            width: 80%;
+            height: 42px;
         }
      
         .env-guide__image-box{
-            width: 100%;
-        }
-        .env-guide__image-box img{
-            height: auto;
-            width: 100%;
-         
+            height: 228px;
+            width: 228px;
+            border-radius: 4px;
         }
 
+        .env-guide__slide.first .env-guide__image-box{
+            background-repeat: no-repeat;      
+            background-position: top center;
+            background-image: url("/src/assets/testImg/env_guide_face_position.png")
+        }
+
+        .env-guide__slide.second .env-guide__image-box{
+            background-repeat: no-repeat;     
+            background-position: top center;
+            background-image: url("/src/assets/testImg/env_guide_voice_level.png")
+        }
+
+       
         .env-guide__description{
             font-size: 18px;
             width: 100%;
             text-align: start;
             line-height: 22px;
         }
+        .modal.m-settings{
+            padding: 32px 20px 20px 20px;
+        }
+        .modal.m-settings .modal__header{
+
+        }
+
+        .modal.m-settings .modal__header .modal__title{
+            font-size: 18px;
+        }
+        .modal.m-settings .modal__header .modal__desc{
+            font-size: 14px;
+            line-height: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .env-guide__start-btn{
+            height: 56px;
+            padding: 20px 24px;
+            font-size: 16px;
+        }
+
+       
     }
 }

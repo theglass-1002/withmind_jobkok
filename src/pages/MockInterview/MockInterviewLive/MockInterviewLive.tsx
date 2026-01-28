@@ -394,6 +394,7 @@ export default function MockInterviewLive() {
 
   return (
     <div className="mock-interview-live">
+     <div className="mock-interview-live-page_container">
       <LoadingOverlay isLoading={isUploading} />
 
       <SettingsSidebar activeStep={3} onStepChange={() => {}} />
@@ -433,6 +434,8 @@ export default function MockInterviewLive() {
         currentIndex={qIndex}
         totalCount={effectiveQuestions.filter((q) => q.type !== "SKIP").length}
       />
+      </div>
+
     </div>
   );
 }

@@ -16,12 +16,15 @@ export default function MockInstructions() {
     };
 
     return (
+      <div className="mock-page">
       <div className="mock-instructions-page">
-        {currentStep === 1 ? (
-          <StepOne onNext={handleNext} />
-        ) : (
-          <StepTwo onPrev={handlePrev} />
-        )}
+          {currentStep === 1 ? (
+            <StepOne onNext={handleNext} />
+          ) : (
+            <StepTwo onPrev={handlePrev} />
+          )}
+        </div>
       </div>
+  
     );
 }

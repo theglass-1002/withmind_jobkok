@@ -30,13 +30,11 @@ export default function StepOne({ onNext }: StepOneProps) {
           <div className="mock-instructions__cards">
               <div className="mock-instructions__card">
                   <div className="mock-instructions__card-text">
-                      <div className="mock-instructions__card-title">
-                        <img className='mock-instructions__card-title_icon' src={ic_how_to_reg_white_30} alt="" />
+                      <div className="mock-instructions__card-title posture">
                         단정한 상태와 올바른 자세를 유지해 주세요.</div>
                       <span className="mock-instructions__card-description">얼굴과 어깨가 화면에 잘 보이도록 해 주세요.</span>
                   </div>
-                  <div className="mock-instructions__card-image">
-                       <img className="mock-instructions__card-img" src={test_profile_img_530} alt="" />
+                  <div className="mock-instructions__card-image posture">
                       <span className="mock-instructions__card-badge mock-instructions__card-badge--left">
                         <span className="mock-instructions__card-badge-text">올바른 자세로!</span>
                     </span>
@@ -44,13 +42,13 @@ export default function StepOne({ onNext }: StepOneProps) {
               </div>
               <div className="mock-instructions__card">
                   <div className="mock-instructions__card-text">
-                      <div className="mock-instructions__card-title">
-                      <img className='mock-instructions__card-title_icon' src={ic_tv_signin_white_30} alt="" />
+                      <div className="mock-instructions__card-title single">
+                   
                         화면에는 지원자 한 분만 나오도록 해 주세요.</div>
                       <span className="mock-instructions__card-description">다른 사람이 함께 보이지 않도록 유의해 주세요.</span>
                   </div>
-                  <div className="mock-instructions__card-image">
-                  <img className="mock-instructions__card-img" src={mock_interview_screen} alt="" />
+                  <div className="mock-instructions__card-image single">
+                  {/* <img className="mock-instructions__card-img" src={mock_interview_screen} alt="" /> */}
                       <span className="mock-instructions__card-badge mock-instructions__card-badge--right">
                       <span className="mock-instructions__card-badge-text">화면엔 한 명만!</span>
                       </span>
@@ -64,7 +62,7 @@ export default function StepOne({ onNext }: StepOneProps) {
             <img src={ic_logout_white_24} alt="" />
             나가기
           </button>
-          <button className="default_btn_white radius" onClick={onNext}>
+          <button className="default_btn_white radius next" onClick={onNext}>
             다음으로
             <img src={ic_keyboard_arrow_right_gray900_24} alt="" />
           </button>

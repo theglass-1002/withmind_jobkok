@@ -18,7 +18,7 @@ export default function StepTwo({ onPrev }: StepTwoProps) {
         <div className="mock-instructions__progress-bar step_two">
             <span></span>
         </div>
-        <div className="mock-instructions__content">
+        <div className="mock-instructions__content step_two">
           <div className="mock-instructions__header">
               <span className="mock-instructions__step-label">안내사항 2/2</span>
               <span className="mock-instructions__title">면접은 다음과 같이 진행됩니다.</span>

@@ -1,6 +1,6 @@
 // M_EnvironmentTestView.tsx
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useLayoutContext } from '@/app/LayoutContext';
 import SettingsSidebar from '@/pages/MockInterview/MockSettings/components/SettingsSidebar';
 import SettingsPanel from '@/pages/MockInterview/MockSettings/components/SettingsPanel';
@@ -13,11 +13,21 @@ import ic_mic_white_24x32 from "@/assets/icons/size24/ic_mic_white_24x32.png";
 import Modal from "@/shared/components/modal/Modal";
 
 
-
+type LocationState = {
+    envSpeech?:string;
+    interviewRes?: any;
+    jobDetail?: any;
+    resumeDetail:any;
+    jobId?: number;
+    desiredJob?: string;
+    jobPostingUrl?: string;
+  };
 
 export default function M_EnvironmentTestView() {
+    const location = useLocation();
     const { actionType, resetAction } = useLayoutContext();
     const [activeStep, setActiveStep] = useState(2);
+    const state = (location.state || {}) as LocationState;
     const [showSettingsPanel, setShowSettingsPanel] = useState(false); 
     const [showConfirm, setShowConfirm] = useState(false);
     const navigate = useNavigate();
@@ -26,9 +36,7 @@ export default function M_EnvironmentTestView() {
 
 
     useEffect(() => {
-        console.log(actionType);
-        console.log('dpd');
-        console.log(showSettingsPanel);
+        console.log("EnvironmentTestView location.state:", state);
         if (!actionType) return;   
         if (actionType === "view_status") {
              setShowSettingsPanel(true);
@@ -74,7 +82,14 @@ export default function M_EnvironmentTestView() {
                          </div>   
                         </>
                     )}
-                   {testStep === 'camera1' && <M_CameraTest testType="camera" onNext={() => setTestStep('camera2')} onFail={() => setTestStep('failed')} />}
+                      {testStep === 'camera1' && (
+                        <M_CameraTest
+                            speechText={state.envSpeech}
+                            testType="camera"
+                            onNext={() => setTestStep('camera2')}
+                            onFail={() => setTestStep('failed')}
+                        />
+                        )}
                 </div>
               
             </div>

@@ -356,6 +356,18 @@
     border:none;
 }
 
+.env-test-result_btn-container .btn-retry-test{
+    display: flex;
+    height: 64px;
+    padding: 20px 28px;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    border-radius: 100px;
+    background: var(--ai-100, linear-gradient(90deg, #15D078 0%, #4BD1C8 100%));
+    font-size: 18px;
+}
+
 /* 모바일: 760px 이하 */
 @media (max-width: 760px) {
     body{
@@ -503,6 +515,15 @@
         .env-test-result--error .env-test-result__description em
         {
             font-size: 14px;
+        }
+        .env-test-result_btn-container .btn-retry-test{
+            display: flex;
+            height: 56px;
+            padding: 20px 24px;
+            justify-content: center;
+            align-items: center;
+            gap: 4px;
+         
         }
      
     }

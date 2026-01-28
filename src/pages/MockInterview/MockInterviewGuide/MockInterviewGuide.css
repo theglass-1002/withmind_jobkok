@@ -149,6 +149,10 @@
         .mock-interview-guide-page{
 
         }
+        .guide-background-deco{
+            height: auto;
+            width: auto;
+        }
         .guide-content-area{
             padding: 24px 20px;
             gap: 80px;
