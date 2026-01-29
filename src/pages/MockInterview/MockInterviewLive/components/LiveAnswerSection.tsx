@@ -9,8 +9,8 @@ import ic_cheer_white_48 from "@/assets/icons/size48/ic_cheer_white_48.png";
 const ANSWER_SECONDS = 90;
 
 type Props = {
-  onEnd?: () => void; // ✅ 추가: 답변 종료 시 부모에게 알림(다음 질문으로)
-  isLast?: boolean;   // ✅ 선택: 마지막 질문이면 종료 다이얼로그
+  onEnd?: () => void; //  추가: 답변 종료 시 부모에게 알림(다음 질문으로)
+  isLast?: boolean;   //  선택: 마지막 질문이면 종료 다이얼로그
 };
 
 export default function LiveAnswerSection({ onEnd, isLast = false }: Props) {
@@ -119,7 +119,7 @@ export default function LiveAnswerSection({ onEnd, isLast = false }: Props) {
     setRunning(false);
     stopCamera();
 
-    // ✅ 마지막 질문이면 완료 다이얼로그, 아니면 다음 질문
+    //  마지막 질문이면 완료 다이얼로그, 아니면 다음 질문
     if (isLast) {
       setShowCompleteDialog(true);
     } else {
@@ -199,7 +199,7 @@ export default function LiveAnswerSection({ onEnd, isLast = false }: Props) {
         </div>
       </div>
 
-      {/* ✅ 마지막 질문일 때만 완료 다이얼로그 */}
+      {/*  마지막 질문일 때만 완료 다이얼로그 */}
       {showCompleteDialog && (
         <div className="mock-interview-dialog">
           <div className="mock-interview-dialog__header">

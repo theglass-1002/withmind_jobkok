@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import ic_logout_white_24 from "@/assets/icons/size24/ic_logout_white_24.png";
@@ -11,8 +11,8 @@ type LiveSidePanelProps = {
   activeStep?: number;
   onExit?: () => void;
 
-  currentIndex?: number; // 0-based
-  totalCount?: number;   // 전체 질문 수
+  currentIndex?: number;
+  totalCount?: number;
 };
 
 export default function LiveSidePanel({
@@ -23,6 +23,10 @@ export default function LiveSidePanel({
 }: LiveSidePanelProps) {
   const navigate = useNavigate();
   const [showConfirm, setShowConfirm] = useState(false);
+
+  useEffect(() => {
+    console.log("[LiveSidePanel] props:", { activeStep, currentIndex, totalCount });
+  }, [activeStep, currentIndex, totalCount]);
 
   const handleExitClick = () => setShowConfirm(true);
   const handleCloseConfirm = () => setShowConfirm(false);
@@ -37,18 +41,26 @@ export default function LiveSidePanel({
     onExit?.();
   };
 
-  // ✅ 진행률 계산
   const safeTotal = Math.max(0, totalCount);
   const safeCurrent = Math.min(Math.max(0, currentIndex), Math.max(0, safeTotal - 1));
 
   const displayCurrent = safeTotal > 0 ? safeCurrent + 1 : 0;
-  const progressRatio = safeTotal > 0 ? (displayCurrent / safeTotal) : 0;
+  const progressRatio = safeTotal > 0 ? displayCurrent / safeTotal : 0;
 
-  // 퍼센트 문자열
   const progressWidth = useMemo(() => {
     const pct = Math.max(0, Math.min(1, progressRatio)) * 100;
     return `${pct}%`;
   }, [progressRatio]);
+
+  useEffect(() => {
+    console.log("[LiveSidePanel] progress:", {
+      safeTotal,
+      safeCurrent,
+      displayCurrent,
+      progressRatio,
+      progressWidth,
+    });
+  }, [safeTotal, safeCurrent, displayCurrent, progressRatio, progressWidth]);
 
   return (
     <>
@@ -63,7 +75,6 @@ export default function LiveSidePanel({
         onClose={handleCloseConfirm}
       />
 
-      {/* PC */}
       <div className="mock-interview__sidepanel">
         <div className="mock-interview__sidepanel-section info">
           <span className="mock-interview__sidepanel-title">면접 정보</span>
@@ -111,7 +122,6 @@ export default function LiveSidePanel({
             </div>
           </div>
 
-          {/* ✅ 진행 현황 */}
           <div className="mock-interview__progress">
             <div className="mock-interview__progress-header">
               <span className="mock-interview__progress-label">진행 현황</span>
@@ -121,10 +131,7 @@ export default function LiveSidePanel({
             </div>
 
             <div className="mock-interview__progress-bar">
-              <span
-                className="mock-interview__progress-fill"
-                style={{ width: progressWidth }}
-              />
+              <span className="mock-interview__progress-fill" style={{ width: progressWidth }} />
             </div>
           </div>
         </div>
@@ -137,7 +144,6 @@ export default function LiveSidePanel({
         </div>
       </div>
 
-      {/* Mobile */}
       <div className="mock-interview__sidepanel mobile">
         <div className="mock-interview__sidepanel-section info">
           <div className="mock-settings__panel-header">
@@ -195,7 +201,6 @@ export default function LiveSidePanel({
             </div>
           </div>
 
-          {/* ✅ 진행 현황 */}
           <div className="mock-interview__progress">
             <div className="mock-interview__progress-header">
               <span className="mock-interview__progress-label">진행 현황</span>
@@ -205,10 +210,7 @@ export default function LiveSidePanel({
             </div>
 
             <div className="mock-interview__progress-bar">
-              <span
-                className="mock-interview__progress-fill"
-                style={{ width: progressWidth }}
-              />
+              <span className="mock-interview__progress-fill" style={{ width: progressWidth }} />
             </div>
           </div>
         </div>

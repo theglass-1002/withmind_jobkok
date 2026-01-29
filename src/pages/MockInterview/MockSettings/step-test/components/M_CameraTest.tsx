@@ -1,5 +1,5 @@
-import { useNavigate } from "react-router-dom";
 import React, { useEffect, useRef, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import face_outline_guide from "@/assets/testImg/face_outline_guide.png";
 import ic_mic_white_24x32 from "@/assets/icons/size24/ic_mic_white_24x32.png";
 import ic_keyboard_arrow_left_gray900_24 from "@/assets/icons/size24/ic_keyboard_arrow_left_gray900_24.png";
@@ -13,9 +13,9 @@ import { fetchEnvTestAnalyze } from "@/api/interview/interview.api";
 
 type M_CameraTestProps = {
   testType: "camera" | "mask";
-  onNext: () => void;
   onFail: () => void;
   speechText?: string;
+  onStartInterview: () => void;
 };
 
 type TestStatus = "testing" | "success" | "failed";
@@ -35,9 +35,9 @@ const DEFAULT_SPEECH_TEXT = "안녕하세요, 반갑습니다.";
 
 export default function M_CameraTest({
   testType,
-  onNext,
   onFail,
   speechText = DEFAULT_SPEECH_TEXT,
+  onStartInterview,
 }: M_CameraTestProps) {
   const navigate = useNavigate();
 
@@ -375,10 +375,7 @@ export default function M_CameraTest({
                 <img src={ic_keyboard_arrow_left_gray900_24} alt="" />
               </button>
 
-              <button
-                className="btn_w_full mock-instructions__btn--primary radius"
-                onClick={() => navigate("/mock-interview/m-mock-interview-live")}
-              >
+              <button className="btn_w_full mock-instructions__btn--primary radius" onClick={onStartInterview}>
                 모의면접 시작하기
                 <img src={ic_chevron_right_white_24} alt="" />
               </button>
@@ -403,7 +400,7 @@ export default function M_CameraTest({
                     <img src={ic_keyboard_arrow_left_gray900_24} alt="" />
                   </button>
                   <button className="btn_w_full default_btn_white radius" onClick={handleRetry}>
-                    환경 테스트 다시하기
+                    테스트 다시하기
                   </button>
                 </>
               ) : (
@@ -411,7 +408,7 @@ export default function M_CameraTest({
                   <button className="btn_w_full default_btn_white radius" onClick={handleViewVideo}>
                     테스트 영상 확인하기
                   </button>
-                  <button className="btn_w_full radius btn-retry-test" onClick={handleRetry}>
+                  <button className="btn_w_full btn-retry-test radius" onClick={handleRetry}>
                     테스트 다시하기
                   </button>
                 </>

@@ -411,12 +411,14 @@
       width: 100%;
       flex-direction: column-reverse;
       padding: 20px;
+      gap: 16px
     }
     .mock-interview-dialog__header{
       padding-top: 50%;
     }
     .mock-interview-dialog__actions button{
       width: 100%;
+      font-size: 16px;
     }
     .mock-interview-dialog__title{
       font-size: 18px;

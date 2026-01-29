@@ -501,12 +501,15 @@ export function createVideoThumbnail(videoUrl: string, time = 1): Promise<string
 
 export const extractJobId = (url: string): string | null => {
   try {
-    const match = url.match(/\/jobs\/(\d+)/);
+    const trimmed = (url ?? "").trim();
+    if (!trimmed) return null; // 비어 있으면 null
+    const match = trimmed.match(/\/jobs\/(\d+)/);
     return match ? match[1] : null;
   } catch {
     return null;
   }
 };
+
 
 /**
  * 휴대폰 번호 포맷팅

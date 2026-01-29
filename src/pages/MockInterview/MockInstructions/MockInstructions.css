@@ -675,6 +675,9 @@
             height: 20px;
             width: 20px;
         }
+        .mock-instructions__btn--primary{
+            height: 56px;
+        }
 
     }
 }

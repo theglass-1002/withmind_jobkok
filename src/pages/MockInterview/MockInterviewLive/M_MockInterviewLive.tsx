@@ -1,118 +1,424 @@
 // src/pages/MockInterview/M_MockInterviewLive.tsx
-import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from 'react-router-dom';
-import { useLayoutContext } from '@/app/LayoutContext';
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useLayoutContext } from "@/app/LayoutContext";
 import "./MockInterviewLive.css";
-import SettingsSidebar from "@/pages/MockInterview/MockSettings/components/SettingsSidebar";
+
 import LiveSidePanel from "@/pages/MockInterview/MockInterviewLive/components/LiveSidePanel";
 import LiveThinkingSection from "@/pages/MockInterview/MockInterviewLive/components/LiveThinkingSection";
 import LiveAnswerSection from "@/pages/MockInterview/MockInterviewLive/components/LiveAnswerSection";
 import Modal from "@/shared/components/modal/Modal";
+import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
+
+import { uploadJobInterviewVideo } from "@/api/fileUpload.api";
+import { fetchInterviewFollowup } from "@/api/interview/interview.api";
 
 const THINKING_SECONDS = 15;
 
 type Phase = "thinking" | "answering";
 
+type LocationState = {
+  envSpeech?: string;
+  interviewRes?: any;
+  jobDetail?: any;
+  resumeDetail?: any;
+  jobId?: number;
+  desiredJob?: string;
+  jobPostingUrl?: string;
+};
+
+type LiveQuestion = {
+  title: string;
+  question: string;
+  order: number;
+  type: string;
+  difficulty?: string;
+};
+
+type FollowupQuestion = { text: string; reason: string } | null;
+
 export default function M_MockInterviewLive() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { actionType, resetAction } = useLayoutContext();
+
+  const state = (location.state || {}) as LocationState;
+
+  const [isUploading, setIsUploading] = useState(false);
+
   const [phase, setPhase] = useState<Phase>("thinking");
   const [timeLeft, setTimeLeft] = useState(THINKING_SECONDS);
   const [running, setRunning] = useState(true);
+
   const rafRef = useRef<number | null>(null);
   const startTsRef = useRef<number>(0);
-  const [showLivesPanel, setShowLivesPanel] = useState(false); 
+
+  const [showLivesPanel, setShowLivesPanel] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+
+  const [qIndex, setQIndex] = useState(0);
+
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordedChunksRef = useRef<BlobPart[]>([]);
+  const [isRecording, setIsRecording] = useState(false);
+
+  useEffect(() => {
+    console.log("M_MockInterviewLive location.state:", state);
+    console.log("envSpeech:", state.envSpeech);
+    console.log("interviewRes:", state.interviewRes);
+    console.log("jobDetail:", state.jobDetail);
+    console.log("resumeDetail:", state.resumeDetail);
+    console.log("jobId:", state.jobId);
+    console.log("desiredJob:", state.desiredJob);
+    console.log("jobPostingUrl:", state.jobPostingUrl);
+  }, [state]);
+
+  const baseQuestions: LiveQuestion[] = useMemo(() => {
+    const res = state?.interviewRes;
+    const apiQuestions = res?.success ? res?.data?.questions : null;
+
+    if (Array.isArray(apiQuestions) && apiQuestions.length > 0) {
+      const sorted = [...apiQuestions].sort((a, b) => (a?.order ?? 0) - (b?.order ?? 0));
+      return sorted.map((q: any, idx: number) => ({
+        title: `질문 ${q?.order ?? idx + 1}`,
+        question: String(q?.text ?? ""),
+        order: Number(q?.order ?? idx + 1),
+        type: String(q?.type ?? "ETC"),
+        difficulty: String(q?.difficulty ?? "EASY"),
+      }));
+    }
+
+    return [
+      {
+        title: "질문 1",
+        question: "질문 데이터를 불러오지 못했습니다.",
+        order: 1,
+        type: "ETC",
+        difficulty: "EASY",
+      },
+    ];
+  }, [state]);
+
+  const [followUpMap, setFollowUpMap] = useState<Record<number, LiveQuestion>>({});
+
+  const effectiveQuestions: LiveQuestion[] = useMemo(() => {
+    const out: LiveQuestion[] = [];
+
+    for (let i = 0; i < baseQuestions.length; i++) {
+      const q = baseQuestions[i];
+      out.push(q);
+
+      const fu = followUpMap[q.order];
+      if (fu) {
+        out.push(fu);
+
+        const nextBase = baseQuestions[i + 1];
+        if (nextBase) {
+          out.push({
+            title: "",
+            question: "",
+            order: nextBase.order,
+            type: "SKIP",
+            difficulty: nextBase.difficulty,
+          });
+          i += 1;
+        }
+      }
+    }
+
+    return out;
+  }, [baseQuestions, followUpMap]);
+
+  useEffect(() => {
+    console.log("mapped questions:", effectiveQuestions);
+  }, [effectiveQuestions]);
+
+  useEffect(() => {
+    const cur = effectiveQuestions[qIndex];
+    if (!cur) return;
+    if (cur.type !== "SKIP") return;
+
+    setQIndex((prev) => {
+      const next = prev + 1;
+      return next >= effectiveQuestions.length ? prev : next;
+    });
+  }, [effectiveQuestions, qIndex]);
+
+  useEffect(() => {
+    if (qIndex >= effectiveQuestions.length) setQIndex(0);
+  }, [effectiveQuestions.length, qIndex]);
+
+  const current = effectiveQuestions[qIndex] ?? baseQuestions[0];
+
+  const visibleIsLast = (() => {
+    for (let i = qIndex + 1; i < effectiveQuestions.length; i++) {
+      if (effectiveQuestions[i].type !== "SKIP") return false;
+    }
+    return true;
+  })();
+
+  const totalVisibleCount = useMemo(() => {
+    return effectiveQuestions.filter((q) => q.type !== "SKIP").length;
+  }, [effectiveQuestions]);
+
+  const currentVisibleIndex = useMemo(() => {
+    if (totalVisibleCount <= 0) return 0;
+
+    const visibleList = effectiveQuestions.filter((q) => q.type !== "SKIP");
+    const cur = effectiveQuestions[qIndex];
+    if (!cur || cur.type === "SKIP") return 0;
+
+    const idx = visibleList.findIndex((v) => v.order === cur.order && v.type === cur.type);
+    return idx >= 0 ? idx : 0;
+  }, [effectiveQuestions, qIndex, totalVisibleCount]);
+
   const progress = Math.min(1, Math.max(0, (THINKING_SECONDS - timeLeft) / THINKING_SECONDS));
 
-  // actionType 처리 (별도 useEffect)
   useEffect(() => {
     if (!actionType) return;
-    
+
     if (actionType === "view_status") {
       setShowLivesPanel(true);
     } else if (actionType === "exit") {
       setShowConfirm(true);
     }
-    
+
     resetAction?.();
   }, [actionType, resetAction]);
 
-  // 타이머 로직 (별도 useEffect)
   useEffect(() => {
     if (phase !== "thinking" || !running) return;
 
+    startTsRef.current = performance.now();
+    setTimeLeft(THINKING_SECONDS);
+
     const totalMs = THINKING_SECONDS * 1000;
-    startTsRef.current = performance.now() - (THINKING_SECONDS - timeLeft) * 1000;
 
     const tick = (now: number) => {
       const elapsed = now - startTsRef.current;
       const remainMs = Math.max(0, totalMs - elapsed);
-      const newTimeLeft = Math.ceil(remainMs / 1000);
-      
-      setTimeLeft(newTimeLeft);
+      const nextLeft = Math.ceil(remainMs / 1000);
 
-      if (remainMs > 0) {
+      setTimeLeft(nextLeft);
+
+      if (remainMs > 0 && phase === "thinking" && running) {
         rafRef.current = requestAnimationFrame(tick);
       } else {
-        console.log("⏰ 생각시간 종료 → 답변시간으로 전환");
         rafRef.current = null;
         setRunning(false);
-        setPhase("answering"); // ✅ 15초 종료 → 답변시간으로 전환
+        setPhase("answering");
       }
     };
 
     rafRef.current = requestAnimationFrame(tick);
-    
+
     return () => {
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
-        rafRef.current = null;
-      }
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
     };
-  }, [phase, running]); // ✅ timeLeft 제거!
+  }, [phase, running]);
 
   const handleThinkingRestart = () => {
-    console.log("🔄 생각시간 재시작");
     setTimeLeft(THINKING_SECONDS);
     setRunning(true);
     setPhase("thinking");
   };
 
   const handleThinkingStop = () => {
-    console.log("⏸️ 생각시간 일시정지");
     setRunning(false);
   };
 
   const handleStartAnswer = () => {
-    console.log("🎤 답변 시작 버튼 클릭 → 답변시간으로 전환");
-    setPhase("answering"); // ② '답변 시작' 클릭 → 답변시간으로 전환
+    setPhase("answering");
   };
 
-  const handleAnswerEnd = () => {
-    console.log("✅ 답변 종료 → 다음 질문으로");
-    // 답변 종료 후의 다음 동작을 여기서 처리 (예: 다음 질문으로, 결과 저장 등)
-    // 예시: 다음 질문의 생각시간으로 다시 시작
-    handleThinkingRestart();
+  const advanceToNextVisibleQuestion = () => {
+    setQIndex((prev) => {
+      let next = prev + 1;
+      while (next < effectiveQuestions.length && effectiveQuestions[next].type === "SKIP") {
+        next += 1;
+      }
+      return next >= effectiveQuestions.length ? prev : next;
+    });
   };
+
+  const uploadRecordedFile = async (videoBlob: Blob, meta: { qIndex: number }) => {
+    const cur = effectiveQuestions[meta.qIndex];
+    if (!cur) return { uploadResult: null, followupRes: null };
+    if (cur.type === "SKIP") return { uploadResult: null, followupRes: null };
+
+    const questionText = cur.question;
+    const isFollowupNow = cur.type === "FOLLOWUP";
+
+    setIsUploading(true);
+
+    try {
+      let uploadResult: any;
+      try {
+        uploadResult = await uploadJobInterviewVideo(videoBlob, "interview");
+        console.log("[uploadRecordedFile] uploadResult:", uploadResult);
+        console.log("[uploadRecordedFile] finalUrl:", uploadResult?.finalUrl);
+      } catch (err) {
+        console.error("[uploadRecordedFile] video upload failed:", err);
+        return { uploadResult: null, followupRes: null };
+      }
+
+      if (isFollowupNow) {
+        return { uploadResult, followupRes: null };
+      }
+
+      const alreadyHasFollowup = !!followUpMap[cur.order];
+      if (alreadyHasFollowup) {
+        return { uploadResult, followupRes: null };
+      }
+
+      const payload = { question: questionText, file_url: uploadResult.finalUrl };
+
+      let followupRes: any;
+      try {
+        followupRes = await fetchInterviewFollowup(payload);
+        console.log("[uploadRecordedFile] followupRes:", followupRes);
+      } catch (err) {
+        console.error("[uploadRecordedFile] followup API failed:", err);
+        return { uploadResult, followupRes: null };
+      }
+
+      const fu: FollowupQuestion = followupRes?.data?.follow_up_question ?? null;
+      if (!fu) return { uploadResult, followupRes };
+
+      const followupLive: LiveQuestion = {
+        title: "꼬리 질문",
+        question: fu.text,
+        order: cur.order + 0.01,
+        type: "FOLLOWUP",
+        difficulty: cur.difficulty,
+      };
+
+      setFollowUpMap((prev) => ({ ...prev, [cur.order]: followupLive }));
+      return { uploadResult, followupRes };
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const startRecording = async () => {
+    if (isRecording) return;
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      mediaStreamRef.current = stream;
+      recordedChunksRef.current = [];
+
+      const mimeCandidates = [
+        "video/webm;codecs=vp9,opus",
+        "video/webm;codecs=vp8,opus",
+        "video/webm",
+      ];
+      const mimeType = mimeCandidates.find((m) => MediaRecorder.isTypeSupported(m)) || "";
+
+      const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+      mediaRecorderRef.current = recorder;
+
+      recorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) recordedChunksRef.current.push(e.data);
+      };
+
+      recorder.onstart = () => {
+        setIsRecording(true);
+      };
+
+      recorder.onstop = () => {
+        setIsRecording(false);
+      };
+
+      recorder.start();
+    } catch (err) {
+      console.error("[Recorder] start failed:", err);
+    }
+  };
+
+  const stopRecordingAndUpload = async () => {
+    const recorder = mediaRecorderRef.current;
+    if (!recorder) return;
+
+    const blob = await new Promise<Blob>((resolve, reject) => {
+      const onStop = () => {
+        try {
+          const mimeType = recorder.mimeType || "video/webm;codecs=vp8,opus";
+          resolve(new Blob(recordedChunksRef.current, { type: mimeType }));
+        } catch (e) {
+          reject(e);
+        }
+      };
+
+      recorder.addEventListener("stop", onStop, { once: true });
+
+      try {
+        recorder.stop();
+      } catch (e) {
+        recorder.removeEventListener("stop", onStop);
+        reject(e);
+      }
+    });
+
+    mediaStreamRef.current?.getTracks().forEach((t) => t.stop());
+    mediaStreamRef.current = null;
+    mediaRecorderRef.current = null;
+
+    await uploadRecordedFile(blob, { qIndex });
+  };
+
+  useEffect(() => {
+    if (phase !== "answering") return;
+
+    const cur = effectiveQuestions[qIndex];
+    if (cur?.type === "SKIP") {
+      setPhase("thinking");
+      setQIndex((prev) => Math.min(prev + 1, effectiveQuestions.length - 1));
+      return;
+    }
+
+    startRecording();
+
+    return () => {
+      try {
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+          mediaRecorderRef.current.stop();
+        }
+      } catch {}
+
+      mediaStreamRef.current?.getTracks().forEach((t) => t.stop());
+      mediaStreamRef.current = null;
+      mediaRecorderRef.current = null;
+      recordedChunksRef.current = [];
+      setIsRecording(false);
+    };
+  }, [phase, qIndex, effectiveQuestions]);
 
   const handleConfirmExit = () => {
-    console.log("🚪 모의면접 중단");
     setShowConfirm(false);
-    navigate('/'); // 원하는 경로로 이동
+    navigate("/");
   };
-  
+
   const handleCloseConfirm = () => setShowConfirm(false);
 
   return (
     <div className="mock-interview-live mobile">
-      {/* <SettingsSidebar activeStep={3} onStepChange={() => {}} /> */}
-      {showLivesPanel && <LiveSidePanel onExit={() => { setShowLivesPanel(false) }} />}
-      
-      {phase === "thinking" && (
+      <LoadingOverlay isLoading={isUploading} />
+
+      {showLivesPanel && (
+        <LiveSidePanel
+          onExit={() => setShowLivesPanel(false)}
+          currentIndex={currentVisibleIndex}
+          totalCount={totalVisibleCount}
+        />
+      )}
+
+      {phase === "thinking" && current.type !== "SKIP" && (
         <LiveThinkingSection
-          title="자기소개 및 지원 동기ㆍ질문 1"
-          question="위드마인드에 지원한 동기는 무엇입니까?"
+          title={current.title}
+          question={current.question}
           timeLeft={timeLeft}
           progress={progress}
           running={running}
@@ -122,16 +428,31 @@ export default function M_MockInterviewLive() {
         />
       )}
 
-      {phase === "answering" && (
-        <LiveAnswerSection />
+      {phase === "answering" && current.type !== "SKIP" && (
+        <LiveAnswerSection
+          isLast={visibleIsLast}
+          onEnd={async () => {
+            if (isUploading) return;
+
+            await stopRecordingAndUpload();
+
+            setPhase("thinking");
+
+            if (!visibleIsLast) {
+              advanceToNextVisibleQuestion();
+              handleThinkingRestart();
+            }
+          }}
+        />
       )}
-      
-      <Modal 
+
+      <Modal
         open={showConfirm}
         title="모의면접을 중단하시겠습니까?"
         desc={
           <>
-            해당 모의면접에 사용된 이용권은 차감되지 않으며,<br/>
+            해당 모의면접에 사용된 이용권은 차감되지 않으며,
+            <br />
             [모의면접 - 모의면접 내역] 페이지에서 이어서 진행할 수 있습니다.
           </>
         }
@@ -139,7 +460,7 @@ export default function M_MockInterviewLive() {
         confirmClassName="btn_w_full default_btn_red radius"
         cancelText="취소"
         cancelClassName="btn_w_full default_btn_gray_100 radius"
-        onConfirm={handleConfirmExit} 
+        onConfirm={handleConfirmExit}
         onClose={handleCloseConfirm}
       />
     </div>

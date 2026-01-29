@@ -472,6 +472,28 @@
     /* pointer-events: none; */
 }
 
+.mock-settings__submit-btn.off::after{
+    content: "";
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    background-image: url("/src/assets/icons/size24/ic_chevron_right_gray700_24.png");
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+}
+
+.mock-settings__submit-btn.on::after{
+    content: "";
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    background-image: url("/src/assets/icons/size24/ic_chevron_right_white_24.png");
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+}
+
 .mock-settings--step-1 .mock-settings__submit-btn-container{
     display: flex;
     flex-direction: row;

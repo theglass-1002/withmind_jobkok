@@ -156,11 +156,7 @@ export default function InterviewInfoSection({
           </FormField>
 
           <FormField
-            label={
-              <>
-                채용 공고 링크(URL) <em>*</em>
-              </>
-            }
+            label={<>채용 공고 링크(URL)</>}
             className={`in_icon ${urlError ? "error" : ""}`}
           >
             <FormInput
@@ -171,10 +167,17 @@ export default function InterviewInfoSection({
               invalid={!!urlError}
               placeholder="https://"
             />
-            <span className="mock-settings__field-hint">
-              지원하려는 공고의 URL을 입력하시면, 해당 공고에 맞춘 질문을 구성해 드립니다.
+
+            <span
+              className="mock-settings__field-hint"
+              style={urlError ? { color: "#E53935" } : undefined}
+            >
+              {urlError
+                ? "올바른 채용 공고 URL이 아닙니다."
+                : "지원하려는 공고의 URL을 입력하시면, 해당 공고에 맞춘 질문을 구성해 드립니다."}
             </span>
           </FormField>
+
         </div>
       </div>
     </>

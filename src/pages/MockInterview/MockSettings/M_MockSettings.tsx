@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLayoutContext } from "@/app/LayoutContext";
 import "./MockSettings.css";
@@ -7,7 +7,6 @@ import InterviewInfoSection from "./step-setup/InterviewInfoSection";
 import QuestionSettingsSection from "./step-setup/QuestionSettingsSection";
 import SettingsPanel from "@/pages/MockInterview/MockSettings/components/SettingsPanel";
 import { toast } from "react-toastify";
-import ic_chevron_right_white_24 from "@/assets/icons/size24/ic_chevron_right_white_24.png";
 import Modal from "@/shared/components/modal/Modal";
 import { extractJobId } from "@/shared/utils/util";
 import { fetchResumeDetail } from "@/api/resume/resume.api";
@@ -52,6 +51,10 @@ export default function M_MockSettings() {
     { id: 11, isAiGenerated: true, customText: "" },
   ]);
 
+  const isFormReady = useMemo(() => {
+    return !!selectedResume.trim() && !!desiredJob.trim();
+  }, [selectedResume, desiredJob]);
+
   useEffect(() => {
     if (!actionType) return;
 
@@ -63,15 +66,14 @@ export default function M_MockSettings() {
 
     resetAction?.();
   }, [actionType, resetAction]);
-  const handleCloseQuestionFailModal = () => setIsQuestionFailModalOpen(false);
 
+  const handleCloseQuestionFailModal = () => setIsQuestionFailModalOpen(false);
 
   const validateSubmitRequired = (): boolean => {
     const next: InterviewInfoErrors = {};
 
     if (!selectedResume.trim()) next.selectedResume = "이력서를 선택해 주세요.";
     if (!desiredJob.trim()) next.desiredJob = "희망 직무를 입력해 주세요.";
-    if (!jobPostingUrl.trim()) next.jobPostingUrl = "채용 공고 링크(URL)을 입력해 주세요.";
 
     setInfoErrors(next);
     return Object.keys(next).length === 0;
@@ -90,6 +92,7 @@ export default function M_MockSettings() {
 
   const handleNextStep = async () => {
     if (isSubmitting) return;
+
     const ok = validateSubmitRequired();
     if (!ok) {
       setShowSubmitErrors(true);
@@ -99,42 +102,44 @@ export default function M_MockSettings() {
     setShowSubmitErrors(false);
     setInfoErrors({});
 
-    const jobIdStr = extractJobId(jobPostingUrl);
-    if (!jobIdStr) {
-      toast.error("올바른 채용 공고 URL이 아닙니다.");
+    const trimmedUrl = jobPostingUrl.trim();
+    const jobIdStr = extractJobId(trimmedUrl);
+
+    if (trimmedUrl && !jobIdStr) {
+      setInfoErrors({
+        jobPostingUrl: "올바른 채용 공고 URL이 아닙니다.",
+      });
+      setShowSubmitErrors(true);
       return;
     }
 
     const resumeIdxNum = Number(selectedResume);
-    const jobIdNum = Number(jobIdStr);
+    const jobIdNum = jobIdStr ? Number(jobIdStr) : null;
 
     if (Number.isNaN(resumeIdxNum)) {
       toast.error("이력서 ID가 올바르지 않습니다.");
       return;
     }
 
-    if (Number.isNaN(jobIdNum)) {
+    if (jobIdNum !== null && Number.isNaN(jobIdNum)) {
       toast.error("공고 ID가 올바르지 않습니다.");
       return;
     }
 
     try {
-        setIsSubmitting(true);
-        const resumeDetail = await fetchResumeDetail(resumeIdxNum);
-        const jobDetail = await fetchJobDetail(jobIdNum);
-        const envSpeech = await fetchEnvTestSpeech();
-        console.log("envTestSpeech:", envSpeech);
-        const payload: InterviewQuestionsRequest = {
-            resume: JSON.stringify(resumeDetail),
-            job_posting: JSON.stringify(jobDetail),
-          };
+      setIsSubmitting(true);
 
-       const interviewRes = await fetchInterviewQuestions(payload);
-       console.log("resumeDetail:", resumeDetail);
-       console.log("jobDetail:", jobDetail);
-       console.log("interviewRes:", interviewRes);
-       console.log('다음페이지'); 
-      // navigate('/mock-interview/m-environment-test');
+      const resumeDetail = await fetchResumeDetail(resumeIdxNum);
+      const jobDetail = jobIdNum !== null ? await fetchJobDetail(jobIdNum) : null;
+      const envSpeech = await fetchEnvTestSpeech();
+
+      const payload: InterviewQuestionsRequest = {
+        resume: JSON.stringify(resumeDetail),
+        job_posting: jobDetail ? JSON.stringify(jobDetail) : null,
+      };
+
+      const interviewRes = await fetchInterviewQuestions(payload);
+
       navigate("/mock-interview/m-environment-test", {
         state: {
           envSpeech,
@@ -147,20 +152,17 @@ export default function M_MockSettings() {
         },
       });
     } catch (e: any) {
-        console.error("설정 완료 처리 중 오류:", e);
-  
-        if (e?.code === 999) {
-          logout();
-          navigate("/login");
-          return;
-        }
-  
-        setIsQuestionFailModalOpen(true);
-      } finally {
-        setIsSubmitting(false);
+      if (e?.code === 999) {
+        logout();
+        navigate("/login");
+        return;
       }
-    };
-  
+
+      setIsQuestionFailModalOpen(true);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const step1Props = {
     selectedResume,
@@ -186,64 +188,68 @@ export default function M_MockSettings() {
 
   return (
     <>
-    <LoadingOverlay isLoading={isSubmitting} />
-    <div className="mock-settings-page">
-      {showSettingsPanel && (
-        <SettingsPanel activeStep={activeStep} onExit={handleExitRequest} />
-      )}
+      <LoadingOverlay isLoading={isSubmitting} />
 
-      <div className={`mock-settings__content mock-settings--step-${activeStep}`}>
-        <div className="mock-settings__content-inner">
-          <InterviewInfoSection {...step1Props} />
-          <QuestionSettingsSection {...step1Props} />
+      <div className="mock-settings-page">
+        {showSettingsPanel && <SettingsPanel activeStep={activeStep} onExit={handleExitRequest} />}
+
+        <div className={`mock-settings__content mock-settings--step-${activeStep}`}>
+          <div className="mock-settings__content-inner">
+            <InterviewInfoSection {...step1Props} />
+            <QuestionSettingsSection {...step1Props} />
+          </div>
+
+          <div className="mock-settings__submit-btn-container">
+            <button
+              className={`btn_w_full mock-settings__submit-btn ${isFormReady ? "on" : "off"}`}
+              onClick={handleNextStep}
+              disabled={!isFormReady || isSubmitting}
+            >
+              설정 완료
+            </button>
+          </div>
         </div>
 
-        <div className="mock-settings__submit-btn-container">
-          <button className="btn_w_full mock-settings__submit-btn on" onClick={handleNextStep}>
-            설정 완료
-            <img src={ic_chevron_right_white_24} alt="" />
-          </button>
-        </div>
+        <Modal
+          open={showConfirm}
+          title="모의면접을 중단하시겠습니까?"
+          desc={
+            <>
+              해당 모의면접에 사용된 이용권은 차감되지 않으며,
+              <br />
+              [모의면접 - 모의면접 내역] 페이지에서 이어서 진행할 수 있습니다.
+            </>
+          }
+          confirmText="나가기"
+          confirmClassName="btn_w_full default_btn_red radius"
+          cancelText="취소"
+          cancelClassName="btn_w_full default_btn_gray_100 radius"
+          onConfirm={handleConfirmExit}
+          onClose={handleCloseConfirm}
+        />
       </div>
 
       <Modal
-        open={showConfirm}
-        title="모의면접을 중단하시겠습니까?"
+        className="m-settings"
+        open={isQuestionFailModalOpen}
+        title="질문 생성에 실패하였습니다."
         desc={
           <>
-            해당 모의면접에 사용된 이용권은 차감되지 않으며,
+            입력하신 URL이 잘못되었거나 해당 페이지에 접근할 수 없습니다.
             <br />
-            [모의면접 - 모의면접 내역] 페이지에서 이어서 진행할 수 있습니다.
+            채용 공고 페이지 주소를 다시 확인해 주세요.
+            <br />
+            <span style={{ color: "red" }}>
+              ※ 채용 공고가 이미지로만 등록된 경우에는 질문을 생성할 수 없습니다.
+            </span>
           </>
         }
-        confirmText="나가기"
-        confirmClassName="btn_w_full default_btn_red radius"
-        cancelText="취소"
-        cancelClassName="btn_w_full default_btn_gray_100 radius"
-        onConfirm={handleConfirmExit}
-        onClose={handleCloseConfirm}
+        confirmText="확인"
+        confirmClassName="btn_w_full default_btn_black radius"
+        showCancel={false}
+        onConfirm={handleCloseQuestionFailModal}
+        onClose={handleCloseQuestionFailModal}
       />
-    </div>
-    <Modal  
-            className="m-settings"
-            open={isQuestionFailModalOpen}
-            title="질문 생성에 실패하였습니다."
-            desc={
-              <>
-                입력하신 URL이 잘못되었거나 해당 페이지에 접근할 수 없습니다.
-                <br />
-                채용 공고 페이지 주소를 다시 확인해 주세요.
-                <br />
-                <span  style={{ color: "red" }}>
-                  ※ 채용 공고가 이미지로만 등록된 경우에는 질문을 생성할 수 없습니다.
-                </span>
-              </>
-            }
-            confirmText="확인"
-            confirmClassName="btn_w_full default_btn_black radius"
-            showCancel={false}
-            onConfirm={handleCloseQuestionFailModal}
-          />
     </>
   );
 }

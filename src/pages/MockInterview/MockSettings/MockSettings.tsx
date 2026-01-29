@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./MockSettings.css";
 
@@ -8,7 +8,6 @@ import SettingsPanel from "./components/SettingsPanel";
 import InterviewInfoSection from "./step-setup/InterviewInfoSection";
 import QuestionSettingsSection from "./step-setup/QuestionSettingsSection";
 
-import ic_chevron_right_white_24 from "@/assets/icons/size24/ic_chevron_right_white_24.png";
 import Modal from "@/shared/components/modal/Modal";
 import { toast } from "react-toastify";
 import { extractJobId } from "@/shared/utils/util";
@@ -55,12 +54,15 @@ export default function MockSettings() {
     { id: 11, isAiGenerated: true, customText: "" },
   ]);
 
+  const isFormReady = useMemo(() => {
+    return !!selectedResume.trim() && !!desiredJob.trim();
+  }, [selectedResume, desiredJob]);
+
   const validateSubmitRequired = (): boolean => {
     const next: InterviewInfoErrors = {};
 
     if (!selectedResume.trim()) next.selectedResume = "이력서를 선택해 주세요.";
     if (!desiredJob.trim()) next.desiredJob = "희망 직무를 입력해 주세요.";
-    if (!jobPostingUrl.trim()) next.jobPostingUrl = "채용 공고 링크(URL)을 입력해 주세요.";
 
     setInfoErrors(next);
     return Object.keys(next).length === 0;
@@ -88,21 +90,26 @@ export default function MockSettings() {
     setShowSubmitErrors(false);
     setInfoErrors({});
 
-    const jobIdStr = extractJobId(jobPostingUrl);
-    if (!jobIdStr) {
-      toast.error("올바른 채용 공고 URL이 아닙니다.");
+    const trimmedUrl = jobPostingUrl.trim();
+    const jobIdStr = extractJobId(trimmedUrl);
+
+    if (trimmedUrl && !jobIdStr) {
+      setInfoErrors({
+        jobPostingUrl: "올바른 채용 공고 URL이 아닙니다.",
+      });
+      setShowSubmitErrors(true);
       return;
     }
 
     const resumeIdxNum = Number(selectedResume);
-    const jobIdNum = Number(jobIdStr);
+    const jobIdNum = jobIdStr ? Number(jobIdStr) : null;
 
     if (Number.isNaN(resumeIdxNum)) {
       toast.error("이력서 ID가 올바르지 않습니다.");
       return;
     }
 
-    if (Number.isNaN(jobIdNum)) {
+    if (jobIdNum !== null && Number.isNaN(jobIdNum)) {
       toast.error("공고 ID가 올바르지 않습니다.");
       return;
     }
@@ -111,19 +118,15 @@ export default function MockSettings() {
       setIsSubmitting(true);
 
       const resumeDetail = await fetchResumeDetail(resumeIdxNum);
-      const jobDetail = await fetchJobDetail(jobIdNum);
+      const jobDetail = jobIdNum !== null ? await fetchJobDetail(jobIdNum) : null;
       const envSpeech = await fetchEnvTestSpeech();
-      console.log("envTestSpeech:", envSpeech);
 
       const payload: InterviewQuestionsRequest = {
         resume: JSON.stringify(resumeDetail),
-        job_posting: JSON.stringify(jobDetail),
+        job_posting: jobDetail ? JSON.stringify(jobDetail) : null,
       };
 
       const interviewRes = await fetchInterviewQuestions(payload);
-      console.log("resumeDetail:", resumeDetail);
-      console.log("jobDetail:", jobDetail);
-      console.log("interviewRes:", interviewRes);
 
       navigate("/mock-interview/environment-test", {
         state: {
@@ -137,8 +140,6 @@ export default function MockSettings() {
         },
       });
     } catch (e: any) {
-      console.error("설정 완료 처리 중 오류:", e);
-
       if (e?.code === 999) {
         logout();
         navigate("/login");
@@ -189,12 +190,11 @@ export default function MockSettings() {
 
             <div className="mock-settings__submit-btn-container">
               <button
-                className="mock-settings__submit-btn on"
+                className={`mock-settings__submit-btn ${isFormReady ? "on" : "off"}`}
                 onClick={handleNextStep}
-                disabled={isSubmitting}
+                disabled={!isFormReady || isSubmitting}
               >
                 설정 완료
-                <img src={ic_chevron_right_white_24} alt="" />
               </button>
             </div>
           </div>
