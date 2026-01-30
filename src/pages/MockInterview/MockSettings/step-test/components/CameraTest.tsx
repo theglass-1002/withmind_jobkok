@@ -170,7 +170,7 @@ export default function CameraTest({
       } catch (error) {
         console.error("카메라 접근 오류:", error);
         if (devOverrideRef.current) return;
-
+        
         setFailureCode(3);
         setTestStatus("failed");
         onFail();

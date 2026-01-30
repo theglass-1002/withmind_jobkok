@@ -62,7 +62,36 @@ import headphones_icon_40px from "@/assets/icons/category_icons/headphones_icon_
 import shield_icon_40px from "@/assets/icons/category_icons/shield_icon_40px.svg";
 
 
+
+
+import interview_step_custom_all_1 from "@/assets/progress/interview_step_custom_all_1.svg";
+import interview_step_custom_all_2 from "@/assets/progress/interview_step_custom_all_2.svg";
+
+import ic_interview_step_custom_none_1 from "@/assets/progress/ic_interview_step_custom_none_1.svg";
+import ic_interview_step_custom_none_2 from "@/assets/progress/ic_interview_step_custom_none_2.svg";
+import ic_interview_step_custom_none_3 from "@/assets/progress/ic_interview_step_custom_none_3.svg";
+import ic_interview_step_custom_none_4 from "@/assets/progress/ic_interview_step_custom_none_4.svg";
+
+import ic_interview_step_custom_some_1 from "@/assets/progress/ic_interview_step_custom_some_1.svg";
+import ic_interview_step_custom_some_2 from "@/assets/progress/ic_interview_step_custom_some_2.svg";
+import ic_interview_step_custom_some_3 from "@/assets/progress/ic_interview_step_custom_some_3.svg";
+import ic_interview_step_custom_some_4 from "@/assets/progress/ic_interview_step_custom_some_4.svg";
+import ic_interview_step_custom_some_5 from "@/assets/progress/ic_interview_step_custom_some_5.svg";
+
+
+
 export const Icons = {
+    interview_step_custom_all_1,
+    interview_step_custom_all_2,
+    ic_interview_step_custom_none_1,
+    ic_interview_step_custom_none_2,
+    ic_interview_step_custom_none_3,
+    ic_interview_step_custom_none_4,
+    ic_interview_step_custom_some_1,
+    ic_interview_step_custom_some_2,
+    ic_interview_step_custom_some_3,
+    ic_interview_step_custom_some_4,
+    ic_interview_step_custom_some_5,
     jobkok_wordmark_gray900,
     jobkok_wordmark_gray400,
     jobkok_logo_purple,

@@ -53,13 +53,14 @@ export default function QuestionSettingsSection({
                 </span>
             </div>
             <div className="mock-settings__question-list">
-                {questions.map((question) => (
-                    <QuestionItem
-                        key={question.id}
-                        question={question}
-                        onToggle={handleToggleAi}
-                        onTextChange={handleCustomTextChange}
-                    />
+            {questions.map((question) => (
+                <QuestionItem
+                    key={question.id}
+                    question={question}
+                    questions={questions}
+                    onToggle={handleToggleAi}
+                    onTextChange={handleCustomTextChange}
+                />
                 ))}
             </div>
         </div>

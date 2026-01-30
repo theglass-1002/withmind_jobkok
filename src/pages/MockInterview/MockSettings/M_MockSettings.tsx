@@ -2,13 +2,16 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLayoutContext } from "@/app/LayoutContext";
 import "./MockSettings.css";
+
 import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
 import InterviewInfoSection from "./step-setup/InterviewInfoSection";
 import QuestionSettingsSection from "./step-setup/QuestionSettingsSection";
 import SettingsPanel from "@/pages/MockInterview/MockSettings/components/SettingsPanel";
+
 import { toast } from "react-toastify";
 import Modal from "@/shared/components/modal/Modal";
 import { extractJobId } from "@/shared/utils/util";
+
 import { fetchResumeDetail } from "@/api/resume/resume.api";
 import { fetchJobDetail } from "@/api/job/job.api";
 import { fetchEnvTestSpeech, fetchInterviewQuestions } from "@/api/interview/interview.api";
@@ -20,6 +23,26 @@ type InterviewInfoErrors = {
   desiredJob?: string;
   jobPostingUrl?: string;
 };
+
+type LocalQuestion = {
+  id: number;
+  isAiGenerated: boolean;
+  customText: string;
+};
+
+type InterviewQuestionLike = {
+  order?: number;
+  text: string;
+  type: string;
+  difficulty: string;
+  related_items?: any[];
+  answer_hint?: string;
+};
+
+type InterviewStageStatus = 0 | 1 | 2;
+// 0: 유저 질문 전부 작성(API 스킵)
+// 1: 유저 질문 일부 작성(1개 이상, API 호출 + 교체)
+// 2: 유저 질문 미작성(0개, API 호출 그대로)
 
 export default function M_MockSettings() {
   const navigate = useNavigate();
@@ -38,7 +61,7 @@ export default function M_MockSettings() {
   const [infoErrors, setInfoErrors] = useState<InterviewInfoErrors>({});
   const [isQuestionFailModalOpen, setIsQuestionFailModalOpen] = useState(false);
 
-  const [questions, setQuestions] = useState([
+  const [questions, setQuestions] = useState<LocalQuestion[]>([
     { id: 1, isAiGenerated: true, customText: "" },
     { id: 2, isAiGenerated: true, customText: "" },
     { id: 4, isAiGenerated: true, customText: "" },
@@ -126,6 +149,17 @@ export default function M_MockSettings() {
       return;
     }
 
+    const totalQuestionCount = questions.length;
+
+    const userWrittenTexts = questions
+      .filter((q) => !q.isAiGenerated && q.customText.trim().length > 0)
+      .map((q) => q.customText.trim());
+
+    const writtenQuestionCount = userWrittenTexts.length;
+
+    console.log(`[M_MockSettings] 질문 작성 현황: ${writtenQuestionCount} / ${totalQuestionCount}`);
+    if (writtenQuestionCount > 0) console.log("[M_MockSettings] 직접 작성한 질문들:", userWrittenTexts);
+
     try {
       setIsSubmitting(true);
 
@@ -133,12 +167,115 @@ export default function M_MockSettings() {
       const jobDetail = jobIdNum !== null ? await fetchJobDetail(jobIdNum) : null;
       const envSpeech = await fetchEnvTestSpeech();
 
+      const introQuestion: InterviewQuestionLike = {
+        order: 0,
+        text: "본인의 강점과 지원 동기가 무엇인가요?",
+        type: "INFORMATION",
+        difficulty: "EASY",
+        related_items: [],
+        answer_hint: "본인의 핵심 강점과 해당 회사에 지원한 이유를 중심으로 설명해 주세요.",
+      };
+
       const payload: InterviewQuestionsRequest = {
         resume: JSON.stringify(resumeDetail),
         job_posting: jobDetail ? JSON.stringify(jobDetail) : null,
       };
 
-      const interviewRes = await fetchInterviewQuestions(payload);
+      const allCustomFilled =
+        questions.length > 0 &&
+        questions.every((q) => !q.isAiGenerated && q.customText.trim().length > 0);
+
+      const interviewStageStatus: InterviewStageStatus = allCustomFilled
+        ? 0
+        : writtenQuestionCount > 0
+        ? 1
+        : 2;
+
+      if (allCustomFilled) {
+        console.log("[M_MockSettings] 유저 질문 전부 작성 완료 -> 질문 생성 API 호출 스킵");
+
+        const mergedQuestions: InterviewQuestionLike[] = [
+          { ...introQuestion, order: 1 },
+          ...questions.map((q, idx) => ({
+            order: idx + 2,
+            text: q.customText.trim(),
+            type: "CUSTOM",
+            difficulty: "EASY",
+            related_items: [],
+            answer_hint: "",
+          })),
+        ];
+
+        const interviewRes = {
+          success: true,
+          data: {
+            questions: mergedQuestions,
+          },
+        };
+
+        navigate("/mock-interview/m-environment-test", {
+          state: {
+            envSpeech,
+            interviewRes,
+            jobDetail,
+            resumeDetail,
+            jobId: jobIdNum,
+            desiredJob,
+            jobPostingUrl,
+            interviewStageStatus,
+          },
+        });
+
+        return;
+      }
+
+      console.log(
+        `[M_MockSettings] 유저 질문 ${
+          writtenQuestionCount > 0 ? "일부 작성" : "미작성"
+        } -> 질문 생성 API 호출 (status=${interviewStageStatus})`
+      );
+
+      const interviewResRaw: any = await fetchInterviewQuestions(payload);
+
+      let apiList: InterviewQuestionLike[] = [];
+
+      if (Array.isArray(interviewResRaw)) {
+        apiList = interviewResRaw as InterviewQuestionLike[];
+      } else if (interviewResRaw?.data?.questions && Array.isArray(interviewResRaw.data.questions)) {
+        apiList = interviewResRaw.data.questions as InterviewQuestionLike[];
+      }
+
+      const apiMergedWithIntro: InterviewQuestionLike[] = [introQuestion, ...apiList].map((q, idx) => ({
+        ...q,
+        order: idx + 1,
+      }));
+
+      const replaced = [...apiMergedWithIntro];
+
+      const replaceCount = Math.min(userWrittenTexts.length, Math.max(0, replaced.length - 1));
+
+      for (let i = 0; i < replaceCount; i++) {
+        const targetIndex = i + 1;
+        const original = replaced[targetIndex];
+
+        replaced[targetIndex] = {
+          ...original,
+          text: userWrittenTexts[i],
+          type: "CUSTOM",
+          difficulty: original?.difficulty ?? "EASY",
+          answer_hint: "",
+          related_items: original?.related_items ?? [],
+        };
+      }
+
+      const interviewRes = {
+        ...(typeof interviewResRaw === "object" && !Array.isArray(interviewResRaw) ? interviewResRaw : {}),
+        success: true,
+        data: {
+          ...(interviewResRaw?.data ?? {}),
+          questions: replaced,
+        },
+      };
 
       navigate("/mock-interview/m-environment-test", {
         state: {
@@ -149,6 +286,7 @@ export default function M_MockSettings() {
           jobId: jobIdNum,
           desiredJob,
           jobPostingUrl,
+          interviewStageStatus,
         },
       });
     } catch (e: any) {

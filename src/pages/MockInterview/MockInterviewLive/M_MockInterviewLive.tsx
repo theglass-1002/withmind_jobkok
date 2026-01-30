@@ -28,11 +28,13 @@ type LocationState = {
 };
 
 type LiveQuestion = {
+  stage: string;
   title: string;
   question: string;
   order: number;
   type: string;
   difficulty?: string;
+  answerHint?: string;
 };
 
 type FollowupQuestion = { text: string; reason: string } | null;
@@ -65,32 +67,55 @@ export default function M_MockInterviewLive() {
 
   useEffect(() => {
     console.log("M_MockInterviewLive location.state:", state);
-    console.log("envSpeech:", state.envSpeech);
-    console.log("interviewRes:", state.interviewRes);
-    console.log("jobDetail:", state.jobDetail);
-    console.log("resumeDetail:", state.resumeDetail);
-    console.log("jobId:", state.jobId);
-    console.log("desiredJob:", state.desiredJob);
-    console.log("jobPostingUrl:", state.jobPostingUrl);
   }, [state]);
 
   const baseQuestions: LiveQuestion[] = useMemo(() => {
     const res = state?.interviewRes;
     const apiQuestions = res?.success ? res?.data?.questions : null;
 
+    const typeToStage = (type: string) => {
+      switch (type) {
+        case "EXPERIENCE":
+          return "이력서 기반 ";
+        case "TECHNICAL":
+          return "직무 ";
+        case "BEHAVIORAL":
+          return "역량 ";
+        case "INFORMATION":
+          return "자기소개 및 지원 동기";
+        case "CUSTOM":
+          return "사용자 설정 ";
+        case "FOLLOWUP":
+          return "꼬리 ";
+        case "ETC":
+        default:
+          return "기타 ";
+      }
+    };
+
     if (Array.isArray(apiQuestions) && apiQuestions.length > 0) {
       const sorted = [...apiQuestions].sort((a, b) => (a?.order ?? 0) - (b?.order ?? 0));
-      return sorted.map((q: any, idx: number) => ({
-        title: `질문 ${q?.order ?? idx + 1}`,
-        question: String(q?.text ?? ""),
-        order: Number(q?.order ?? idx + 1),
-        type: String(q?.type ?? "ETC"),
-        difficulty: String(q?.difficulty ?? "EASY"),
-      }));
+
+      return sorted.map((q: any, idx: number) => {
+        const order = Number(q?.order ?? idx + 1);
+        const type = String(q?.type ?? "ETC");
+        const difficulty = String(q?.difficulty ?? "EASY");
+
+        return {
+          stage: typeToStage(type),
+          title: `질문 ${order}`,
+          question: String(q?.text ?? ""),
+          order,
+          type,
+          difficulty,
+          answerHint: q?.answer_hint ? String(q.answer_hint) : undefined,
+        };
+      });
     }
 
     return [
       {
+        stage: "알림",
         title: "질문 1",
         question: "질문 데이터를 불러오지 못했습니다.",
         order: 1,
@@ -116,6 +141,7 @@ export default function M_MockInterviewLive() {
         const nextBase = baseQuestions[i + 1];
         if (nextBase) {
           out.push({
+            stage: "SKIP",
             title: "",
             question: "",
             order: nextBase.order,
@@ -257,8 +283,6 @@ export default function M_MockInterviewLive() {
       let uploadResult: any;
       try {
         uploadResult = await uploadJobInterviewVideo(videoBlob, "interview");
-        console.log("[uploadRecordedFile] uploadResult:", uploadResult);
-        console.log("[uploadRecordedFile] finalUrl:", uploadResult?.finalUrl);
       } catch (err) {
         console.error("[uploadRecordedFile] video upload failed:", err);
         return { uploadResult: null, followupRes: null };
@@ -278,7 +302,6 @@ export default function M_MockInterviewLive() {
       let followupRes: any;
       try {
         followupRes = await fetchInterviewFollowup(payload);
-        console.log("[uploadRecordedFile] followupRes:", followupRes);
       } catch (err) {
         console.error("[uploadRecordedFile] followup API failed:", err);
         return { uploadResult, followupRes: null };
@@ -288,11 +311,13 @@ export default function M_MockInterviewLive() {
       if (!fu) return { uploadResult, followupRes };
 
       const followupLive: LiveQuestion = {
+        stage: "꼬리 질문",
         title: "꼬리 질문",
         question: fu.text,
         order: cur.order + 0.01,
         type: "FOLLOWUP",
         difficulty: cur.difficulty,
+        answerHint: fu.reason,
       };
 
       setFollowUpMap((prev) => ({ ...prev, [cur.order]: followupLive }));
@@ -310,11 +335,7 @@ export default function M_MockInterviewLive() {
       mediaStreamRef.current = stream;
       recordedChunksRef.current = [];
 
-      const mimeCandidates = [
-        "video/webm;codecs=vp9,opus",
-        "video/webm;codecs=vp8,opus",
-        "video/webm",
-      ];
+      const mimeCandidates = ["video/webm;codecs=vp9,opus", "video/webm;codecs=vp8,opus", "video/webm"];
       const mimeType = mimeCandidates.find((m) => MediaRecorder.isTypeSupported(m)) || "";
 
       const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
@@ -417,6 +438,7 @@ export default function M_MockInterviewLive() {
 
       {phase === "thinking" && current.type !== "SKIP" && (
         <LiveThinkingSection
+          stage={current.stage}
           title={current.title}
           question={current.question}
           timeLeft={timeLeft}

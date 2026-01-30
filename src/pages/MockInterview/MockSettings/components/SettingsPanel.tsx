@@ -62,14 +62,12 @@ export default function SettingsPanel({
   const content = getPanelContent();
 
   const resumeTitle =
-    interviewState?.resumeDetail.title ??
-    "선택한 이력서";
+  interviewState?.resumeDetail?.title ?? "선택한 이력서";
 
   const desiredJob = interviewState?.desiredJob ?? "-";
 
   const jobTitle =
-    interviewState?.jobDetail.job.name ??
-    "선택한 채용 공고";
+  interviewState?.jobDetail?.job?.name ?? "선택한 채용 공고 없음";
 
   const renderDesktopInfoSection = () => {
     if (activeStep === 2) {

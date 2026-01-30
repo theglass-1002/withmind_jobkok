@@ -103,7 +103,6 @@ export default function InterviewInfoSection({
   }, []);
 
   const handleResumeSelect = (value: string) => {
-    console.log("자식(InterviewInfoSection)에서 선택한 값:", value);
 
     const selected = resumeOptions.find((opt) => opt.value === value);
 

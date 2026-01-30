@@ -16,6 +16,7 @@ type LocationState = {
   jobId?: number;
   desiredJob?: string;
   jobPostingUrl?: string;
+  interviewStageStatus?: 0 | 1 | 2;
 };
 
 export default function M_EnvironmentTestView() {
@@ -33,6 +34,25 @@ export default function M_EnvironmentTestView() {
     "intro"
   );
   const [showDialog, setShowDialog] = useState(true);
+
+  useEffect(() => {
+    console.log("[M_EnvironmentTestView] location.state:", state);
+    console.log("[M_EnvironmentTestView] interviewStageStatus:", state.interviewStageStatus);
+
+    switch (state.interviewStageStatus) {
+      case 0:
+        console.log("상태 0: 유저 질문 전부 작성 (API 스킵)");
+        break;
+      case 1:
+        console.log("상태 1: 유저 질문 일부 작성 (API + 일부 교체)");
+        break;
+      case 2:
+        console.log("상태 2: 유저 질문 미작성 (API 그대로)");
+        break;
+      default:
+        console.log("상태 없음 또는 알 수 없음");
+    }
+  }, [state]);
 
   useEffect(() => {
     if (!actionType) return;
@@ -63,15 +83,6 @@ export default function M_EnvironmentTestView() {
   };
 
   const handleStartMockInterviewLive = () => {
-    console.log("모의면접 시작하기 클릭 - 전달할 state:", state);
-    console.log("envSpeech:", state.envSpeech);
-    console.log("interviewRes:", state.interviewRes);
-    console.log("jobDetail:", state.jobDetail);
-    console.log("resumeDetail:", state.resumeDetail);
-    console.log("jobId:", state.jobId);
-    console.log("desiredJob:", state.desiredJob);
-    console.log("jobPostingUrl:", state.jobPostingUrl);
-  
     navigate("/mock-interview/m-mock-interview-live", {
       state: {
         ...state,
@@ -82,7 +93,7 @@ export default function M_EnvironmentTestView() {
   return (
     <>
       <div className="mock-settings-page mobile environment">
-        {showSettingsPanel && <SettingsPanel activeStep={activeStep} onExit={handleExitRequest} />}
+        {showSettingsPanel && <SettingsPanel activeStep={activeStep} onExit={handleExitRequest} interviewState={state} />}
 
         <div className="mock-settings__content">
           <div className="mock-settings__content-inner">

@@ -17,6 +17,9 @@
 .page-header.mock{
     background: var(--gray-900, #2A2D2F);
     border-bottom: none;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
 }
 
 .page-header.sticky-active{
@@ -27,6 +30,11 @@
 
 .page-header.mock .header-title{
     color: var(--white-100, #FFF);
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    pointer-events: none;
 }
 .page-header .header-title{
     color: var(--gray-900, #2A2D2F);
@@ -40,6 +48,7 @@
 
 .header-left{
     display: flex;
+    align-items: center;
 }
 
 .action-header{
@@ -66,5 +75,9 @@
 }
 
 .page-header .header-right{
+
+
+    margin-left: auto;
     display: flex;
+    align-items: center;
 }

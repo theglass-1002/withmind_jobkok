@@ -224,7 +224,7 @@
     width: 100%;
     display: flex;
     justify-content: center;
-    height: 940px;
+    height: 100%;
     padding: 28px;
     align-items: flex-start;
     gap: 28px;

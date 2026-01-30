@@ -1,20 +1,21 @@
-// src/pages/MockInterview/MockInterviewLive/components/LiveThinkingSection.tsx
 import React from "react";
 import ic_play_arrow_white_24 from "@/assets/icons/size24/ic_play_arrow_white_24.png";
 import ic_stop_gray700_24 from "@/assets/icons/size24/ic_stop_gray700_24.png";
 
 type Props = {
+  stage?: string;
   title: string;
   question: string;
   timeLeft: number;
-  progress: number;      // 0 ~ 1
+  progress: number;
   running: boolean;
-  onStartAnswer: () => void;   // 답변 시작 전환
+  onStartAnswer: () => void;
   onPauseThinking?: () => void;
   onRestartThinking?: () => void;
 };
 
 export default function LiveThinkingSection({
+  stage,
   title,
   question,
   timeLeft,
@@ -32,7 +33,9 @@ export default function LiveThinkingSection({
       <div className="mock-interview-live__background">
         <div className="mock-interview-live__content">
           <div className="mock-interview-live__question">
-            <span className="mock-interview-live__question-title">{title}</span>
+            <div className="mock-interview-live__question-head">
+            <span className="mock-interview-live__question-title">{stage}ㆍ{title}</span>
+            </div>
             <span className="mock-interview-live__question-text">{question}</span>
           </div>
 
@@ -44,7 +47,10 @@ export default function LiveThinkingSection({
                 cx="120"
                 cy="120"
                 r={R}
-                style={{ strokeDasharray: `${CIRC}px`, strokeDashoffset: `${(1 - progress) * CIRC}px` }}
+                style={{
+                  strokeDasharray: `${CIRC}px`,
+                  strokeDashoffset: `${(1 - progress) * CIRC}px`,
+                }}
               />
             </svg>
 
@@ -61,6 +67,7 @@ export default function LiveThinkingSection({
           <img src={ic_play_arrow_white_24} alt="" />
           답변 시작
         </button>
+
         <button
           className="mock-interview-live__btn mock-interview-live__btn--end"
           onClick={running ? onPauseThinking : onRestartThinking}

@@ -11,13 +11,14 @@ import ic_chevron_right_gray700_24 from "@/assets/icons/size24/ic_chevron_right_
 import Modal from "@/shared/components/modal/Modal";
 
 type LocationState = {
-  envSpeech?:string;
+  envSpeech?: string;
   interviewRes?: any;
   jobDetail?: any;
-  resumeDetail:any;
+  resumeDetail: any;
   jobId?: number;
   desiredJob?: string;
   jobPostingUrl?: string;
+  interviewStageStatus?: 0 | 1 | 2;
 };
 
 export default function EnvironmentTestView() {
@@ -30,7 +31,22 @@ export default function EnvironmentTestView() {
   const [showExitConfirm, setShowExitConfirm] = useState(false);
 
   useEffect(() => {
-    console.log("EnvironmentTestView location.state:", state);
+    console.log("[EnvironmentTestView] location.state:", state);
+    console.log("[EnvironmentTestView] interviewStageStatus:", state.interviewStageStatus);
+
+    switch (state.interviewStageStatus) {
+      case 0:
+        console.log("상태 0: 유저 질문 전부 작성 (API 스킵)");
+        break;
+      case 1:
+        console.log("상태 1: 유저 질문 일부 작성 (API + 일부 교체)");
+        break;
+      case 2:
+        console.log("상태 2: 유저 질문 미작성 (API 그대로)");
+        break;
+      default:
+        console.log("상태 없음 또는 알 수 없음");
+    }
   }, [state]);
 
   const handleExitRequest = () => {
@@ -56,22 +72,12 @@ export default function EnvironmentTestView() {
   };
 
   const handleStartMockInterviewLive = () => {
-    console.log("모의면접 시작하기 클릭 - 전달할 state:", state);
-    console.log("envSpeech:", state.envSpeech);
-    console.log("interviewRes:", state.interviewRes);
-    console.log("jobDetail:", state.jobDetail);
-    console.log("resumeDetail:", state.resumeDetail);
-    console.log("jobId:", state.jobId);
-    console.log("desiredJob:", state.desiredJob);
-    console.log("jobPostingUrl:", state.jobPostingUrl);
-  
     navigate("/mock-interview/mock-interview-live", {
       state: {
-        ...state, // 받은 state 그대로 전달
+        ...state,
       },
     });
   };
-  
 
   return (
     <>
@@ -95,51 +101,8 @@ export default function EnvironmentTestView() {
 
       <div className="mock-settings-page environment">
         <div className="mock-settings-page_container">
-        <SettingsSidebar activeStep={2}
-        onStepChange={() => {}} />
+          <SettingsSidebar activeStep={2} onStepChange={() => {}} />
 
-        <div className="mock-settings__content">
-          <div className="mock-settings__content-inner">
-            {testStep === "intro" && (
-              <div className="mock-settings__submit-btn-container">
-                <button className="default_btn_white radius" onClick={handleBackClick}>
-                  <img src={ic_chevron_left_gray900_24} alt="" />
-                  이전으로
-                </button>
-                <button className="default_btn_gray radius" disabled>
-                  모의면접 시작하기
-                  <img src={ic_chevron_right_gray700_24} alt="" />
-                </button>
-              </div>
-            )}
-
-            {testStep === "camera1" && (
-              <CameraTest
-                speechText={state.envSpeech}
-                testType="camera"
-                onStartInterview={handleStartMockInterviewLive}
-                onFail={() => setTestStep("failed")}
-              />
-            )}
-          </div>
-        </div>
-
-        <SettingsPanel 
-        onExit={handleExitRequest} 
-        activeStep={2}
-        interviewState={state}
-        />
-
-        {showDialog && testStep === "intro" && (
-          <>
-            <div className="env-test-overlay"></div>
-            <div className="env-test-dialog">
-              <TestIntro onStart={handleStartTest} />
-            </div>
-          </>
-        )}
-
-        <div className="mock-settings-page mobile environment">
           <div className="mock-settings__content">
             <div className="mock-settings__content-inner">
               {testStep === "intro" && (
@@ -157,6 +120,7 @@ export default function EnvironmentTestView() {
 
               {testStep === "camera1" && (
                 <CameraTest
+                  speechText={state.envSpeech}
                   testType="camera"
                   onStartInterview={handleStartMockInterviewLive}
                   onFail={() => setTestStep("failed")}
@@ -164,6 +128,8 @@ export default function EnvironmentTestView() {
               )}
             </div>
           </div>
+
+          <SettingsPanel onExit={handleExitRequest} activeStep={2} interviewState={state} />
 
           {showDialog && testStep === "intro" && (
             <>
@@ -173,9 +139,43 @@ export default function EnvironmentTestView() {
               </div>
             </>
           )}
+
+          <div className="mock-settings-page mobile environment">
+            <div className="mock-settings__content">
+              <div className="mock-settings__content-inner">
+                {testStep === "intro" && (
+                  <div className="mock-settings__submit-btn-container">
+                    <button className="default_btn_white radius" onClick={handleBackClick}>
+                      <img src={ic_chevron_left_gray900_24} alt="" />
+                      이전으로
+                    </button>
+                    <button className="default_btn_gray radius" disabled>
+                      모의면접 시작하기
+                      <img src={ic_chevron_right_gray700_24} alt="" />
+                    </button>
+                  </div>
+                )}
+
+                {testStep === "camera1" && (
+                  <CameraTest
+                    testType="camera"
+                    onStartInterview={handleStartMockInterviewLive}
+                    onFail={() => setTestStep("failed")}
+                  />
+                )}
+              </div>
+            </div>
+
+            {showDialog && testStep === "intro" && (
+              <>
+                <div className="env-test-overlay"></div>
+                <div className="env-test-dialog">
+                  <TestIntro onStart={handleStartTest} />
+                </div>
+              </>
+            )}
+          </div>
         </div>
-        </div>
- 
       </div>
     </>
   );

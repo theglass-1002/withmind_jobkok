@@ -13,7 +13,7 @@ import { fetchInterviewFollowup } from "@/api/interview/interview.api";
 
 import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
 
-const THINKING_SECONDS = 15;
+const THINKING_SECONDS = 100335;
 type Phase = "thinking" | "answering";
 
 type LiveQuestion = {
@@ -27,63 +27,82 @@ type LiveQuestion = {
 
 type FollowupQuestion = { text: string; reason: string } | null;
 
+type InterviewStageStatus = 0 | 1 | 2;
+
 export default function MockInterviewLive() {
   const location = useLocation();
+  const state = location.state as any;
 
   const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
-    console.log("[MockInterviewLive] location.state:", location.state);
-  }, [location.state]);
+    console.log("[MockInterviewLive] location.state:", state);
+    console.log("[MockInterviewLive] interviewStageStatus:", state?.interviewStageStatus);
 
-  const interviewRes: InterviewQuestionsResponse | null = useMemo(() => {
-    const state = location.state as any;
-    return state?.interviewRes ?? null;
-  }, [location.state]);
+    switch (state?.interviewStageStatus as InterviewStageStatus | undefined) {
+      case 0:
+        console.log("상태 0: 유저 질문 전부 작성 (API 스킵)");
+        break;
+      case 1:
+        console.log("상태 1: 유저 질문 일부 작성 (API + 일부 교체)");
+        break;
+      case 2:
+        console.log("상태 2: 유저 질문 미작성 (API 그대로)");
+        break;
+      default:
+        console.log("상태 없음 또는 알 수 없음");
+    }
+  }, [state]);
 
   const apiQuestions: InterviewQuestion[] = useMemo(() => {
-    if (!interviewRes?.success || !interviewRes.data) return [];
-    return interviewRes.data.questions ?? [];
-  }, [interviewRes]);
+    const res = state?.interviewRes as InterviewQuestionsResponse | InterviewQuestion[] | null | undefined;
+
+    if (Array.isArray(res)) return res as InterviewQuestion[];
+    if (res?.success && res?.data?.questions && Array.isArray(res.data.questions)) {
+      return res.data.questions as InterviewQuestion[];
+    }
+    return [];
+  }, [state]);
 
   const baseQuestions: LiveQuestion[] = useMemo(() => {
     const typeToStage = (type: string) => {
       switch (type) {
         case "EXPERIENCE":
-          return "경험 질문";
+          return "이력서 기반 ";
         case "TECHNICAL":
-          return "기술 질문";
+          return "직무 ";
         case "BEHAVIORAL":
-          return "인성 질문";
+          return "역량 ";
+        case "INFORMATION":
+          return "자기소개 및 지원 동기";
+        case "CUSTOM":
+          return "사용자 설정 ";
         case "ETC":
         default:
-          return "기타 질문";
+          return "기타 ";
       }
     };
 
-    const mapped =
-      apiQuestions.length > 0
-        ? [...apiQuestions]
-            .sort((a, b) => a.order - b.order)
-            .map((q) => ({
-              stage: `${typeToStage(q.type)} · ${q.difficulty}`,
-              question: q.text,
-              order: q.order,
-              type: q.type,
-              difficulty: q.difficulty,
-              answerHint: q.answer_hint,
-            }))
-        : [
-            {
-              stage: "알림",
-              question: "질문 데이터를 불러오지 못했습니다.",
-              order: 1,
-              type: "ETC",
-              difficulty: "EASY",
-            },
-          ];
-
-    return mapped;
+    return apiQuestions.length > 0
+      ? [...apiQuestions]
+          .sort((a, b) => a.order - b.order)
+          .map((q) => ({
+            stage: `${typeToStage(q.type)}`,
+            question: q.text,
+            order: q.order,
+            type: q.type,
+            difficulty: q.difficulty,
+            answerHint: q.answer_hint,
+          }))
+      : [
+          {
+            stage: "알림",
+            question: "질문 데이터를 불러오지 못했습니다.",
+            order: 1,
+            type: "ETC",
+            difficulty: "EASY",
+          },
+        ];
   }, [apiQuestions]);
 
   const [followUpMap, setFollowUpMap] = useState<Record<number, LiveQuestion>>({});
@@ -141,11 +160,6 @@ export default function MockInterviewLive() {
     });
   }, [effectiveQuestions, qIndex]);
 
-  const isCurrentFollowup = useMemo(() => {
-    const cur = effectiveQuestions[qIndex];
-    return cur?.type === "FOLLOWUP";
-  }, [effectiveQuestions, qIndex]);
-
   const uploadRecordedFile = async (videoBlob: Blob, meta: { qIndex: number }) => {
     const cur = effectiveQuestions[meta.qIndex];
     if (!cur) return { uploadResult: null, followupRes: null };
@@ -160,53 +174,39 @@ export default function MockInterviewLive() {
       let uploadResult: any;
       try {
         uploadResult = await uploadJobInterviewVideo(videoBlob, "interview");
-        console.log("[uploadRecordedFile] uploadResult:", uploadResult);
-        console.log("[uploadRecordedFile] finalUrl:", uploadResult?.finalUrl);
       } catch (err) {
         console.error("[uploadRecordedFile] video upload failed:", err);
         return { uploadResult: null, followupRes: null };
       }
 
-      if (isFollowupNow) {
-        console.log("[uploadRecordedFile] current is followup; skip followup API.");
-        return { uploadResult, followupRes: null };
-      }
+      if (isFollowupNow) return { uploadResult, followupRes: null };
 
       const alreadyHasFollowup = !!followUpMap[cur.order];
-      if (alreadyHasFollowup) {
-        console.log("[uploadRecordedFile] followup already exists for order:", cur.order);
-        return { uploadResult, followupRes: null };
-      }
+      if (alreadyHasFollowup) return { uploadResult, followupRes: null };
 
       const payload = { question: questionText, file_url: uploadResult.finalUrl };
 
       let followupRes: any;
       try {
         followupRes = await fetchInterviewFollowup(payload);
-        console.log("[uploadRecordedFile] followupRes:", followupRes);
       } catch (err) {
         console.error("[uploadRecordedFile] followup API failed, keep original flow:", err);
         return { uploadResult, followupRes: null };
       }
 
       const fu: FollowupQuestion = followupRes?.data?.follow_up_question ?? null;
-      if (!fu) {
-        console.log("[uploadRecordedFile] follow_up_question is null");
-        return { uploadResult, followupRes };
-      }
+      if (!fu) return { uploadResult, followupRes };
 
       const followupLive: LiveQuestion = {
         stage: "꼬리 질문",
         question: fu.text,
-        order: cur.order + 0.01,
+        order: cur.order,
         type: "FOLLOWUP",
         difficulty: cur.difficulty,
         answerHint: fu.reason,
       };
 
       setFollowUpMap((prev) => ({ ...prev, [cur.order]: followupLive }));
-      console.log("[uploadRecordedFile] followup inserted for order:", cur.order, followupLive);
-
       return { uploadResult, followupRes };
     } finally {
       setIsUploading(false);
@@ -221,11 +221,7 @@ export default function MockInterviewLive() {
       mediaStreamRef.current = stream;
       recordedChunksRef.current = [];
 
-      const mimeCandidates = [
-        "video/webm;codecs=vp9,opus",
-        "video/webm;codecs=vp8,opus",
-        "video/webm",
-      ];
+      const mimeCandidates = ["video/webm;codecs=vp9,opus", "video/webm;codecs=vp8,opus", "video/webm"];
       const mimeType = mimeCandidates.find((m) => MediaRecorder.isTypeSupported(m)) || "";
 
       const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
@@ -237,16 +233,10 @@ export default function MockInterviewLive() {
 
       recorder.onstart = () => {
         setIsRecording(true);
-        console.log("[Recorder] start");
-      };
-
-      recorder.onerror = (e) => {
-        console.error("[Recorder] error:", e);
       };
 
       recorder.onstop = () => {
         setIsRecording(false);
-        console.log("[Recorder] stop");
       };
 
       recorder.start();
@@ -257,10 +247,7 @@ export default function MockInterviewLive() {
 
   const stopRecordingAndUpload = async () => {
     const recorder = mediaRecorderRef.current;
-    if (!recorder) {
-      console.warn("[Recorder] stop requested but recorder is null");
-      return;
-    }
+    if (!recorder) return;
 
     const blob = await new Promise<Blob>((resolve, reject) => {
       const onStop = () => {
@@ -290,25 +277,8 @@ export default function MockInterviewLive() {
   };
 
   useEffect(() => {
-    if (qIndex >= effectiveQuestions.length) setQIndex(0);
-  }, [effectiveQuestions.length, qIndex]);
-
-  const current = effectiveQuestions[qIndex] ?? baseQuestions[0];
-
-  const visibleIsLast = (() => {
-    for (let i = qIndex + 1; i < effectiveQuestions.length; i++) {
-      if (effectiveQuestions[i].type !== "SKIP") return false;
-    }
-    return true;
-  })();
-
-  const progress = Math.min(1, Math.max(0, (THINKING_SECONDS - timeLeft) / THINKING_SECONDS));
-
-  // --------- 핵심: 15초 고정 타이머 (timeLeft 의존성 제거) ---------
-  useEffect(() => {
     if (phase !== "thinking" || !running) return;
 
-    // thinking 시작할 때마다 무조건 15초로 고정
     startTsRef.current = performance.now();
     setTimeLeft(THINKING_SECONDS);
 
@@ -336,9 +306,7 @@ export default function MockInterviewLive() {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       rafRef.current = null;
     };
-    // ✅ timeLeft 제거가 핵심
   }, [phase, running]);
-  // ---------------------------------------------------------------
 
   useEffect(() => {
     if (phase !== "answering") return;
@@ -392,50 +360,63 @@ export default function MockInterviewLive() {
     });
   };
 
+  const current = effectiveQuestions[qIndex] ?? baseQuestions[0];
+  const visibleIsLast = (() => {
+    for (let i = qIndex + 1; i < effectiveQuestions.length; i++) {
+      if (effectiveQuestions[i].type !== "SKIP") return false;
+    }
+    return true;
+  })();
+
+  const progress = Math.min(1, Math.max(0, (THINKING_SECONDS - timeLeft) / THINKING_SECONDS));
+
   return (
     <div className="mock-interview-live">
-     <div className="mock-interview-live-page_container">
-      <LoadingOverlay isLoading={isUploading} />
+      <div className="mock-interview-live-page_container">
+        <LoadingOverlay isLoading={isUploading} />
 
-      <SettingsSidebar activeStep={3} onStepChange={() => {}} />
+        <SettingsSidebar activeStep={3} onStepChange={() => {}} />
 
-      {phase === "thinking" && current.type !== "SKIP" && (
-        <LiveThinkingSection
-          title={`질문 ${current.order}`}
-          question={current.question}
-          timeLeft={timeLeft}
-          progress={progress}
-          running={running}
-          onStartAnswer={handleStartAnswer}
-          onPauseThinking={handleThinkingStop}
-          onRestartThinking={handleThinkingRestart}
+        {phase === "thinking" && current.type !== "SKIP" && (
+          <LiveThinkingSection
+            stage={current.stage}
+            title={`질문 ${current.order}`}
+            question={current.question}
+            timeLeft={timeLeft}
+            progress={progress}
+            running={running}
+            onStartAnswer={handleStartAnswer}
+            onPauseThinking={handleThinkingStop}
+            onRestartThinking={handleThinkingRestart}
+          />
+        )}
+
+        {phase === "answering" && current.type !== "SKIP" && (
+          <LiveAnswerSection
+            isLast={visibleIsLast}
+            onEnd={async () => {
+              if (isUploading) return;
+
+              await stopRecordingAndUpload();
+
+              setPhase("thinking");
+
+              if (!visibleIsLast) {
+                advanceToNextVisibleQuestion();
+                handleThinkingRestart();
+              }
+            }}
+          />
+        )}
+
+        <LiveSidePanel
+          currentIndex={qIndex}
+          totalCount={effectiveQuestions.filter((q) => q.type !== "SKIP").length}
+          interviewState={state}
+          interviewStageStatus={state?.interviewStageStatus}
+          currentQuestion={current}
         />
-      )}
-
-      {phase === "answering" && current.type !== "SKIP" && (
-        <LiveAnswerSection
-          isLast={visibleIsLast}
-          onEnd={async () => {
-            if (isUploading) return;
-
-            await stopRecordingAndUpload();
-
-            setPhase("thinking");
-
-            if (!visibleIsLast) {
-              advanceToNextVisibleQuestion();
-              handleThinkingRestart();
-            }
-          }}
-        />
-      )}
-
-      <LiveSidePanel
-        currentIndex={qIndex}
-        totalCount={effectiveQuestions.filter((q) => q.type !== "SKIP").length}
-      />
       </div>
-
     </div>
   );
 }
