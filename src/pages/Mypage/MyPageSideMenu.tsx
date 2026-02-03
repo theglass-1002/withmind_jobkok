@@ -1,11 +1,10 @@
 import { NavLink } from "react-router-dom";
 import "./MyPage.css";
 import { formatPhoneNumber } from "@/shared/utils/util";
+import type { MyInfo } from "@/api/auth/auth.types";
 
 type MyPageSideMenuProps = {
-  userName?: string;
-  userId?: string;
-  phone?: string;
+  myInfo: MyInfo | null;
 };
 
 const GROUPS = [
@@ -29,11 +28,11 @@ const GROUPS = [
   },
 ];
 
-export default function MyPageSideMenu({
-  userName,
-  userId,
-  phone,
-}: MyPageSideMenuProps) {
+export default function MyPageSideMenu({ myInfo }: MyPageSideMenuProps) {
+  const userName = myInfo?.userName;
+  const userId = myInfo?.userId;
+  const phone = myInfo?.phone;
+
   return (
     <aside className="mypage__sidebar" aria-label="마이페이지 메뉴">
       <nav className="sidemenu">
@@ -51,10 +50,14 @@ export default function MyPageSideMenu({
           <p className="usercard__plan">7일 이용권</p>
 
           <span className="user_info_edit">
-            <NavLink to="edit-profile" className="default_btn_black">
-              회원 정보 수정
-            </NavLink>
-          </span>
+              <NavLink
+                to="edit-profile"
+                state={{ myInfo }}
+                className="default_btn_black"
+              >
+                회원 정보 수정
+              </NavLink>
+            </span>
         </div>
 
         {/* 메뉴 */}
@@ -81,10 +84,7 @@ export default function MyPageSideMenu({
         </ul>
 
         <span className="sidemenu__item--logout">
-          <button
-            type="button"
-            className="sidemenu__link sidemenu_logout_btn"
-          >
+          <button type="button" className="sidemenu__link sidemenu_logout_btn">
             로그아웃
           </button>
         </span>

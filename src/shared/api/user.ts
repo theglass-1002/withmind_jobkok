@@ -4,7 +4,7 @@ export type UserProfile = {
     number: string;
     name: string;
     birth: string;           // "YYYY.MM.DD"
-    gender: "m" | "f";
+    gender: "M" | "W";
     certified: boolean;
   };
   

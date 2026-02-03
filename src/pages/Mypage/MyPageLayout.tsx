@@ -7,50 +7,59 @@ import M_MyPageMain from "./mobile/M_MyPageMain";
 
 import { fetchMyInfo, logout } from "@/api/auth/auth.api";
 import { MyInfo } from "@/api/auth/auth.types";
+import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
 
 export default function MyPageLayout() {
   const navigate = useNavigate();
+
   const [myInfo, setMyInfo] = useState<MyInfo | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const loadMyInfo = async () => {
+      setIsLoading(true);
+
       try {
         const res = await fetchMyInfo();
         setMyInfo(res.user);
-      } catch (e) {
+      } catch (e: any) {
         console.error("[MyPageLayout] 내 정보 가져오기 실패", e);
-        if (e.code === 999) {
+
+        if (e?.code === 999) {
           console.log("로그인만료");
           logout();
           navigate("/login");
         }
+      } finally {
+        setIsLoading(false);
       }
     };
 
     loadMyInfo();
-  }, []);
+  }, [navigate]);
 
   return (
-    <main className="mypage">
-      <div className="container mypage__container">
-        <header className="mypage__header">
-          <h1 className="mypage__title">마이페이지</h1>
-        </header>
+    <>
+      {isLoading && <LoadingOverlay />}
 
-        <div className="mypage__body">
-          <MyPageSideMenu
-            userName={myInfo?.userName}
-            userId={myInfo?.userId}
-            phone={myInfo?.phone}
-          />
+      <main className="mypage">
+        <div className="container mypage__container">
+          <header className="mypage__header">
+            <h1 className="mypage__title">마이페이지</h1>
+          </header>
 
-          <section className="mypage__content" aria-labelledby="account-title">
-            <Outlet />
-          </section>
+          <div className="mypage__body">
+
+            <MyPageSideMenu myInfo={myInfo} />
+
+            <section className="mypage__content" aria-labelledby="account-title">
+              <Outlet />
+            </section>
+          </div>
         </div>
-      </div>
 
-      <M_MyPageMain />
-    </main>
+        <M_MyPageMain myInfo={myInfo} />
+      </main>
+    </>
   );
 }

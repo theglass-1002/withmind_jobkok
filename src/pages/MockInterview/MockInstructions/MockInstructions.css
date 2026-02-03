@@ -550,11 +550,11 @@
         }
         .mock-instructions__content{
             gap: 28px;
-            padding-bottom: 150px;
+            padding-bottom: 170px;
         }
 
         .mock-instructions__content.step_two{
-            padding-bottom: 150px;
+            padding-bottom: 170px;
         }
 
         .mock-instructions-page .btn_wrap{

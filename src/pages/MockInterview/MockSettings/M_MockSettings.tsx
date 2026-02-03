@@ -44,6 +44,17 @@ type InterviewStageStatus = 0 | 1 | 2;
 // 1: 유저 질문 일부 작성(1개 이상, API 호출 + 교체)
 // 2: 유저 질문 미작성(0개, API 호출 그대로)
 
+type InterviewState = {
+  envSpeech?: any;
+  interviewRes?: any;
+  jobDetail?: any;
+  resumeDetail?: any;
+  jobId?: number | null;
+  desiredJob?: string;
+  jobPostingUrl?: string;
+  interviewStageStatus?: 0 | 1 | 2;
+};
+
 export default function M_MockSettings() {
   const navigate = useNavigate();
   const { actionType, resetAction } = useLayoutContext();
@@ -60,6 +71,8 @@ export default function M_MockSettings() {
   const [showSubmitErrors, setShowSubmitErrors] = useState(false);
   const [infoErrors, setInfoErrors] = useState<InterviewInfoErrors>({});
   const [isQuestionFailModalOpen, setIsQuestionFailModalOpen] = useState(false);
+
+  const [interviewState, setInterviewState] = useState<InterviewState | null>(null);
 
   const [questions, setQuestions] = useState<LocalQuestion[]>([
     { id: 1, isAiGenerated: true, customText: "" },
@@ -89,6 +102,10 @@ export default function M_MockSettings() {
 
     resetAction?.();
   }, [actionType, resetAction]);
+
+  useEffect(() => {
+    console.log("[M_MockSettings] interviewState:", interviewState);
+  }, [interviewState]);
 
   const handleCloseQuestionFailModal = () => setIsQuestionFailModalOpen(false);
 
@@ -213,17 +230,21 @@ export default function M_MockSettings() {
           },
         };
 
+        const nextInterviewState: InterviewState = {
+          envSpeech,
+          interviewRes,
+          jobDetail,
+          resumeDetail,
+          jobId: jobIdNum,
+          desiredJob,
+          jobPostingUrl,
+          interviewStageStatus,
+        };
+
+        setInterviewState(nextInterviewState);
+
         navigate("/mock-interview/m-environment-test", {
-          state: {
-            envSpeech,
-            interviewRes,
-            jobDetail,
-            resumeDetail,
-            jobId: jobIdNum,
-            desiredJob,
-            jobPostingUrl,
-            interviewStageStatus,
-          },
+          state: nextInterviewState,
         });
 
         return;
@@ -277,17 +298,21 @@ export default function M_MockSettings() {
         },
       };
 
+      const nextInterviewState: InterviewState = {
+        envSpeech,
+        interviewRes,
+        jobDetail,
+        resumeDetail,
+        jobId: jobIdNum,
+        desiredJob,
+        jobPostingUrl,
+        interviewStageStatus,
+      };
+
+      setInterviewState(nextInterviewState);
+
       navigate("/mock-interview/m-environment-test", {
-        state: {
-          envSpeech,
-          interviewRes,
-          jobDetail,
-          resumeDetail,
-          jobId: jobIdNum,
-          desiredJob,
-          jobPostingUrl,
-          interviewStageStatus,
-        },
+        state: nextInterviewState,
       });
     } catch (e: any) {
       if (e?.code === 999) {
@@ -329,7 +354,13 @@ export default function M_MockSettings() {
       <LoadingOverlay isLoading={isSubmitting} />
 
       <div className="mock-settings-page">
-        {showSettingsPanel && <SettingsPanel activeStep={activeStep} onExit={handleExitRequest} />}
+        {showSettingsPanel && (
+          <SettingsPanel
+            activeStep={activeStep}
+            onExit={handleExitRequest}
+            interviewState={interviewState ?? undefined}
+          />
+        )}
 
         <div className={`mock-settings__content mock-settings--step-${activeStep}`}>
           <div className="mock-settings__content-inner">

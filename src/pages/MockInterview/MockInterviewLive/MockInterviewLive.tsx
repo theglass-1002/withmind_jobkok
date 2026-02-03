@@ -13,7 +13,7 @@ import { fetchInterviewFollowup } from "@/api/interview/interview.api";
 
 import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
 
-const THINKING_SECONDS = 100335;
+const THINKING_SECONDS = 15;
 type Phase = "thinking" | "answering";
 
 type LiveQuestion = {

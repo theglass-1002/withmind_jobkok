@@ -112,6 +112,67 @@ export default function PasswordTab({onCancel}:PasswordTabProps) {
               </div>
               </div>
             </div>
+
+            <div className="account-main mobile password-tab">
+             <div className="field">
+             <div className="field-group"> 
+              <span className="field__label">현재 비밀번호 <em>*</em></span>
+                <PasswordInput
+                id="pw-current"
+                value={form.current}
+                onChange={onChange("current")}
+                placeholder="현재 비밀번호를 입력해 주세요."
+                message={errors.current}
+              
+                autoComplete="current-password"
+                required
+                />
+                {errors.current==""?<span className="field__label"><em> {errors.current}??</em></span>:<></>}
+              </div>
+             
+              <div className="field-group"> 
+               <span className="field__label">새 비밀번호 <em>*</em></span>
+                <PasswordInput
+                id="pw-new"
+                value={form.next}                 
+                onChange={onChange("next")}
+                placeholder="새 비밀번호를 입력해 주세요."
+                message={errors.next}
+                autoComplete="new-password"
+                required/>
+                 {errors.next==""?<span className="field__label"><em> {errors.next}??</em></span>:<></>}
+      
+               </div>
+               <div className="field-group"> 
+                <span className="field__label">새 비밀번호 확인 <em>*</em></span>
+                <PasswordInput
+                id="pw-confirm"
+                value={form.confirm}
+                onChange={onChange("confirm")}
+                message={errors.confirm}
+                placeholder="새 비밀번호를 다시 입력해 주세요."
+                autoComplete="new-password"
+                required
+                />
+                 {errors.confirm==""?<span className="field__label"><em> {errors.confirm}??</em></span>:<></>}
+          
+                </div>
+          
+            </div>
+            <div>
+            <div className="field">
+            <div className="field__value_gray hint">
+                  <span>※ 비밀번호는 영문, 숫자, 특수문자를 모두 포함한 8~16자로 입력해 주세요.</span>
+                </div>
+              </div>
+              <div className="field form-action-group">
+              <div className="btn_wrap">
+                  <button className="default_btn_white btn-cancel" onClick={onCancel}>취소</button>
+                  <button className="default_btn_black"  onClick={handleSave}>저장</button>
+                  </div>
+              </div>
+              </div>
+            </div>
             
             </>
     );

@@ -464,6 +464,10 @@ line-height: 20px; /* 125% */
  
 }
 
+.mypage__content-main .account-main.mobile.password-tab{
+    display: none;
+}
+
 
 .mypage__content-main .account-main .field{
     display: flex;
@@ -488,16 +492,7 @@ line-height: 20px; /* 125% */
     background: var(--white-100, #FFF);
 }
 
-.mypage__content-main .account-main .field{
-    display: flex;
-    padding: 28px;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-    align-self: stretch;
-    border-bottom: 1px solid var(---gray-300, #E0E2E4);
-    background: var(--white-100, #FFF);
-}
+
 
 .mypage__content-main .account-main .field:last-child{
     border-radius: 0px 0px 6px 6px;  
@@ -541,6 +536,25 @@ line-height: 18px; /* 128.571% */
     border-radius: 4px;
     border: 1px solid var(---gray-300, #E0E2E4);
     background: var(---gray-50, #F8F8F9);
+}
+
+.mypage__content-main .account-main .field .field__value_gray .value-text.is-verified{
+    width: 100%;
+    position: relative;
+}
+
+.mypage__content-main .account-main .field .field__value_gray .value-text.is-verified::after{
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 0;
+    width: 20px;
+    height: 20px;
+  
+    transform: translateY(-50%);
+    background-image: url("/src/assets/icons/size20/ic_check_circle_green_20.svg"); /* 아이콘 경로 */
+    background-size: contain;
+    background-repeat: no-repeat;
 }
 
 .mypage__content-main .account-main .field .field__value_gray.birth{
@@ -1204,7 +1218,23 @@ line-height: 180%; /* 28.8px */
 
     width: auto;
     flex-wrap: nowrap;
+ }
 
+ .mypage_main .mp-section .empty{
+    width: 100%;
+    display: flex;
+    height: 200px;
+    padding: 20px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+    border-radius: 4px;
+    border: 1px solid var(--gray-300, #E0E2E4);
+    background: var(--gray-50, #F8F8F9);
+    align-self: stretch;
+    color: var(--gray-700, #6F767E);
+    font-size: 16px;
  }
 
  .job_submission_banner{
@@ -1528,6 +1558,15 @@ line-height: 20px; /* 125% */
 
 }
 
+.account-main{
+    display: flex;
+    flex-direction: column;
+}
+
+
+.account-main.mobile{
+    display: none;
+}
 
 /* 모바일: 760px 이하 */
 @media (max-width: 760px) {
@@ -1546,12 +1585,14 @@ line-height: 20px; /* 125% */
             border: none;
         }
         .mypage__body .sidemenu{
-            gap: 20px;
+            gap: 12px;
             background: var(--gray-100, #F2F3F4);
+     
         }
         .mypage__body .sidemenu .user_info{
             padding: 24px 20px;
             background: var(--white-100, #FFF);
+            border-bottom: none;
         }
         .mypage__body .sidemenu .user_info .user_name{
             font-size: 20px;
@@ -1586,6 +1627,7 @@ line-height: 20px; /* 125% */
             align-items: flex-start;
             align-self: stretch;
             background: var(--white-100, #FFF);
+            border-bottom: none;
         }
         .sidemenu__group .sidemenu__sublist a{
             display: flex;
@@ -1608,32 +1650,32 @@ line-height: 20px; /* 125% */
         .sidemenu .sidemenu__item--logout {
             display: flex;
             height: auto;
-            padding: 0px 0px 20px 20px;
+            padding: 20px 20px 32px 20px;
             align-items: start;
-            gap: 12px;
             align-self: stretch;
-        }
-        .sidemenu .sidemenu__link.sidemenu_logout_btn{
             font-size: 14px;
             font-style: normal;
             font-weight: 400;
-            
+            color: var(--gray-700, #6F767E);
             text-decoration-line: underline;
             text-decoration-style: solid;
+            line-height: 18px; /* 128.571% */
         }
-
-        /* .mypage_main */
-
         .mypage_main{
             display: none;
         }
         .mypage_main.mobile{
             display: flex;
             width: 100%;
+            gap: 12px;
         }
 
         .mp-section{
             padding: 24px 20px;
+            border: none;
+        }
+        .mp-section.saved{
+            border: none;
         }
 
         .mp-section .mypage__content-header{
@@ -1661,17 +1703,19 @@ line-height: 20px; /* 125% */
             overflow: auto;
             flex-direction: row;
             justify-content: start;
+            -ms-overflow-style: none;     /* IE, Edge */
+            scrollbar-width: none;        /* Firefox */
         }
 
         .job_submission_banner{
             height: 90px;
         }
         .job_submission_banner__headline{
-            top: 20px;
+            top: 20%;
             font-size: 16px;
         }
         .job_submission_banner__content_wrap{
-            top: 50px;
+            top: 50%;
             font-size: 12px;
         }
 
@@ -1808,21 +1852,123 @@ line-height: 20px; /* 125% */
 
         .my-page-tabs{
             width: 100%;
-            height: 51px;
+            height: 44px;
             gap: 20px;
             padding: 8px 20px 0 20px;
             border-bottom: 1px solid var(--gray-300, #E0E2E4);
             background: var(--white-100, #FFF);
         }
-        .my-page-tabs__item{
-
+        .tabs__item.my-page-tabs__item{
+            font-size: 16px;
+            height: 36px;
+            padding-bottom: 16px;
+        }
+       .tabs__item.my-page-tabs__item.on {
+        font-size: 16px;
         }
         .my-page_faq_wrap{
             padding: 0px;
             gap: 0px;
         }
 
+        .sidemenu__group .sidemenu__sublist{
+            gap: 0px;
+        }
+
+        .job_submission_banner__action{
+            font-size: 12px;
+        }
+
+        .mp-section .empty{
+            display: flex;
+            padding: 36px;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+            align-self: stretch;
+            border-radius: 4px;
+            border: 1px solid var(--gray-300, #E0E2E4);
+            background: var(--gray-100, #F2F3F4);
+            width: 100%;
+            color: var(--gray-700, #6F767E);
+            font-size: 14px;
+        
+        }
  
+        .edit-profile__sticky-tabs{
+            height: 44px;
+            padding: 8px 20px 0 20px;
+        }
+        .my-page_edit-tabs{
+         
+            display: flex;
+            gap: 10px;
+            padding: 0px;
+        }
+
+       
+        .account-main{
+            display: none;
+        }
+        .account-main.mobile{
+            display: flex;
+            gap: 12px;
+            background: var(--gray-100, #F2F3F4);
+        }
+        .account-main.mobile .field.email{
+            gap: 12px;
+            border: none;
+        }
+
+        .account-main.mobile .field{
+            gap: 24px;
+            padding: 24px 20px;
+        }
+
+        .field-group{
+            display: flex;
+            gap: 12px;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .account-main.mobile .account-withdraw-btn{
+            display: flex;
+            padding: 20px;
+            align-items: center;
+            gap: 12px;
+            align-self: stretch;
+            font-size: 14px;
+            color: var(--gray-700, #6F767E);
+            line-height: 18px; /* 128.571% */
+        } 
+        .edit-profile__container.mobile .account-main.mobile .form-action-group{
+            padding: 20px;
+            border-top: 1px solid var(--gray-300, #E0E2E4);
+            background: var(--white-100, #FFF);
+        }
+
+        .mypage__content-main .account-main .field .hint{
+            font-size: 14px;
+        }
+
+
+        .mypage__content-main .account-main.password-tab{
+           display: none;
+         
+        }
+        
+        .mypage__content-main .account-main.mobile.password-tab{
+            display: flex;
+            height: auto;
+        }
+        
+
+        .mypage__content-main .account-main.password-tab .field{
+            padding: 24px 20px;
+            gap: 24px;
+        }
+     
     }
 
 }

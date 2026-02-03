@@ -37,6 +37,7 @@
     pointer-events: none;
 }
 .page-header .header-title{
+    margin-left: auto;
     color: var(--gray-900, #2A2D2F);
     text-align: center;
     font-family: Pretendard;

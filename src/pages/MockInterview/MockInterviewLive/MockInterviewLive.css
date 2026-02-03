@@ -384,6 +384,7 @@
 
     .mock-interview__sidepanel.mobile{
       display: flex;
+      gap: 0px;
     }
 
     .mock-interview__sidepanel{
@@ -401,11 +402,22 @@
     .mock-interview__sidepanel-section.info{
       width: 100%;
       height: auto;
+      padding: 20px 52px 20px 20px;
+      gap: 20px;
     }
+    
+
     .mock-interview__sidepanel-section.stage{
-      height: auto;
       overflow: auto;
+      padding-bottom: 150px;
+      height: 750px;
     }
+
+    .mock-interview-live.mobile .mock-interview__stage-header{
+   
+    }
+
+
     .mock-interview__progress{
       position: fixed;
       bottom: 0px;
@@ -458,5 +470,18 @@
     .mock-interview-live__timer-info{
       width: 160px;
     }
+    .mock-interview__sidepanel-footer{
+      display: none;
+    }
+    .mock-interview-live.mobile .mock-settings__panel-header{
+      padding: 20px 52px 20px 20px;
+    }
+    .mock-interview__stage-items{
+      height: 800px;
+
+      /* padding-bottom: 200px;
+     */
+    }
+
   }
 }

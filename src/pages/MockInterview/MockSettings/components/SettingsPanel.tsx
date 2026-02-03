@@ -2,13 +2,15 @@ import React, { useEffect } from "react";
 import ic_logout_white_24 from "@/assets/icons/size24/ic_logout_white_24.png";
 import ic_close_white_24 from "@/assets/icons/size24/ic_close_white_24.png";
 
-type InterviewState = {
-    interviewRes?: any;
-    jobDetail?: any;
-    resumeDetail:any;
-    jobId?: number;
-    desiredJob?: string;
-    jobPostingUrl?: string;
+export type InterviewState = {
+  envSpeech?: any;
+  interviewRes?: any;
+  jobDetail?: any;
+  resumeDetail?: any;
+  jobId?: number | null;
+  desiredJob?: string;
+  jobPostingUrl?: string;
+  interviewStageStatus?: 0 | 1 | 2;
 };
 
 type SettingsPanelProps = {
@@ -22,16 +24,21 @@ export default function SettingsPanel({
   onExit,
   interviewState,
 }: SettingsPanelProps) {
-
   useEffect(() => {
     if (!interviewState) {
-      console.log("SettingsPanel: interviewState 없음");
+      console.log("[SettingsPanel] interviewState 없음");
       return;
     }
 
-
-    console.log("전체 interviewState:", interviewState);
-
+    console.log("[SettingsPanel] 전체 interviewState:", interviewState);
+    console.log("[SettingsPanel] desiredJob:", interviewState.desiredJob);
+    console.log("[SettingsPanel] jobId:", interviewState.jobId);
+    console.log("[SettingsPanel] interviewStageStatus:", interviewState.interviewStageStatus);
+    console.log("[SettingsPanel] envSpeech:", interviewState.envSpeech);
+    console.log("[SettingsPanel] interviewRes:", interviewState.interviewRes);
+    console.log("[SettingsPanel] jobDetail:", interviewState.jobDetail);
+    console.log("[SettingsPanel] resumeDetail:", interviewState.resumeDetail);
+    console.log("[SettingsPanel] jobPostingUrl:", interviewState.jobPostingUrl);
   }, [interviewState]);
 
   const getPanelContent = () => {
@@ -61,13 +68,9 @@ export default function SettingsPanel({
 
   const content = getPanelContent();
 
-  const resumeTitle =
-  interviewState?.resumeDetail?.title ?? "선택한 이력서";
-
+  const resumeTitle = interviewState?.resumeDetail?.title ?? "선택한 이력서";
   const desiredJob = interviewState?.desiredJob ?? "-";
-
-  const jobTitle =
-  interviewState?.jobDetail?.job?.name ?? "선택한 채용 공고 없음";
+  const jobTitle = interviewState?.jobDetail?.job?.name ?? "선택한 채용 공고 없음";
 
   const renderDesktopInfoSection = () => {
     if (activeStep === 2) {
@@ -95,9 +98,8 @@ export default function SettingsPanel({
     return (
       <div className="mock-settings__panel-section">
         <span className="mock-settings__panel-section-title">면접 정보</span>
-        <div className="mock-settings__panel-section-description">
-          {content.info}
-        </div>
+        <div className="mock-settings__panel-section-description">{content.info}</div>
+
         {interviewState?.desiredJob && (
           <div className="mock-settings__panel-section-description">
             희망 직무: {interviewState.desiredJob}
@@ -110,9 +112,7 @@ export default function SettingsPanel({
   const renderDesktopStageSection = () => (
     <div className="mock-settings__panel-section">
       <span className="mock-settings__panel-section-title">면접 단계</span>
-      <div className="mock-settings__panel-section-description">
-        {content.stage}
-      </div>
+      <div className="mock-settings__panel-section-description">{content.stage}</div>
     </div>
   );
 
@@ -127,9 +127,7 @@ export default function SettingsPanel({
               src={ic_close_white_24}
               alt=""
             />
-            <span className="mock-settings__panel-section-title">
-              면접 진행 현황
-            </span>
+            <span className="mock-settings__panel-section-title">면접 진행 현황</span>
           </div>
 
           <div className="mock-interview__sidepanel-section info">
@@ -162,15 +160,11 @@ export default function SettingsPanel({
             src={ic_close_white_24}
             alt=""
           />
-          <span className="mock-settings__panel-section-title">
-            면접 진행 현황
-          </span>
+          <span className="mock-settings__panel-section-title">면접 진행 현황</span>
         </div>
 
         <span className="mock-settings__panel-section-title">면접 정보</span>
-        <div className="mock-settings__panel-section-description">
-          {content.info}
-        </div>
+        <div className="mock-settings__panel-section-description">{content.info}</div>
 
         {interviewState?.desiredJob && (
           <div className="mock-settings__panel-section-description">
@@ -184,9 +178,7 @@ export default function SettingsPanel({
   const renderMobileStageSection = () => (
     <div className="mock-settings__panel-section">
       <span className="mock-settings__panel-section-title">면접 단계</span>
-      <div className="mock-settings__panel-section-description">
-        {content.stage}
-      </div>
+      <div className="mock-settings__panel-section-description">{content.stage}</div>
     </div>
   );
 
@@ -205,8 +197,41 @@ export default function SettingsPanel({
       </div>
 
       <div className="mock-settings__panel mobile">
-        {renderMobileInfoSection()}
-        {renderMobileStageSection()}
+      <div className="mock-settings__panel-header">
+            <img
+              onClick={onExit}
+              className="mock-settings_header_icon"
+              src={ic_close_white_24}
+              alt=""
+            />
+            <span className="mock-settings__panel-section-title">면접 진행 현황</span>
+          </div>
+          <div className="mock-settings__panel-body">
+          <div className="mock-interview__sidepanel-section info">
+            <span className="mock-interview__sidepanel-title">면접 정보</span>
+            <div className="mock-interview__info-list">
+              <div className="mock-interview__info-item">
+                <span className="mock-interview__info-label">이력서</span>
+                <span className="mock-interview__info-value">{resumeTitle}</span>
+              </div>
+              <div className="mock-interview__info-item">
+                <span className="mock-interview__info-label">희망 직무</span>
+                <span className="mock-interview__info-value">{desiredJob}</span>
+              </div>
+              <div className="mock-interview__info-item">
+                <span className="mock-interview__info-label">채용 공고</span>
+                <span className="mock-interview__info-value">{jobTitle}</span>
+              </div>
+            </div>
+          </div>
+          <div className="mock-settings__panel-section">
+      <span className="mock-settings__panel-section-title">면접 단계</span>
+      <div className="mock-settings__panel-section-description">{content.stage}</div>
+          </div>
+          </div>
+       
+        {/* {renderMobileInfoSection()}
+        {renderMobileStageSection()} */}
       </div>
     </>
   );

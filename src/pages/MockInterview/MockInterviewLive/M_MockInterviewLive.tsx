@@ -16,15 +16,17 @@ import { fetchInterviewFollowup } from "@/api/interview/interview.api";
 const THINKING_SECONDS = 15;
 
 type Phase = "thinking" | "answering";
+type InterviewStageStatus = 0 | 1 | 2;
 
 type LocationState = {
   envSpeech?: string;
   interviewRes?: any;
   jobDetail?: any;
   resumeDetail?: any;
-  jobId?: number;
+  jobId?: number | null;
   desiredJob?: string;
   jobPostingUrl?: string;
+  interviewStageStatus?: InterviewStageStatus;
 };
 
 type LiveQuestion = {
@@ -64,10 +66,6 @@ export default function M_MockInterviewLive() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<BlobPart[]>([]);
   const [isRecording, setIsRecording] = useState(false);
-
-  useEffect(() => {
-    console.log("M_MockInterviewLive location.state:", state);
-  }, [state]);
 
   const baseQuestions: LiveQuestion[] = useMemo(() => {
     const res = state?.interviewRes;
@@ -155,10 +153,6 @@ export default function M_MockInterviewLive() {
 
     return out;
   }, [baseQuestions, followUpMap]);
-
-  useEffect(() => {
-    console.log("mapped questions:", effectiveQuestions);
-  }, [effectiveQuestions]);
 
   useEffect(() => {
     const cur = effectiveQuestions[qIndex];
@@ -288,14 +282,10 @@ export default function M_MockInterviewLive() {
         return { uploadResult: null, followupRes: null };
       }
 
-      if (isFollowupNow) {
-        return { uploadResult, followupRes: null };
-      }
+      if (isFollowupNow) return { uploadResult, followupRes: null };
 
       const alreadyHasFollowup = !!followUpMap[cur.order];
-      if (alreadyHasFollowup) {
-        return { uploadResult, followupRes: null };
-      }
+      if (alreadyHasFollowup) return { uploadResult, followupRes: null };
 
       const payload = { question: questionText, file_url: uploadResult.finalUrl };
 
@@ -345,13 +335,8 @@ export default function M_MockInterviewLive() {
         if (e.data && e.data.size > 0) recordedChunksRef.current.push(e.data);
       };
 
-      recorder.onstart = () => {
-        setIsRecording(true);
-      };
-
-      recorder.onstop = () => {
-        setIsRecording(false);
-      };
+      recorder.onstart = () => setIsRecording(true);
+      recorder.onstop = () => setIsRecording(false);
 
       recorder.start();
     } catch (err) {
@@ -431,8 +416,18 @@ export default function M_MockInterviewLive() {
       {showLivesPanel && (
         <LiveSidePanel
           onExit={() => setShowLivesPanel(false)}
-          currentIndex={currentVisibleIndex}
+          currentIndex={qIndex}
           totalCount={totalVisibleCount}
+          interviewState={state}
+          interviewStageStatus={state?.interviewStageStatus}
+          currentQuestion={{
+            stage: current.stage,
+            question: current.question,
+            order: current.order,
+            type: current.type,
+            difficulty: current.difficulty ?? "EASY",
+            answerHint: current.answerHint,
+          }}
         />
       )}
 

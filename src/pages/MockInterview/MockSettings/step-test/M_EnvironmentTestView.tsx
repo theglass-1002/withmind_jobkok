@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useLayoutContext } from "@/app/LayoutContext";
+
 import SettingsPanel from "@/pages/MockInterview/MockSettings/components/SettingsPanel";
 import TestIntro from "./components/TestIntro";
 import M_CameraTest from "./components/M_CameraTest";
+
 import "./EnvironmentTestView.css";
 import ic_mic_white_24x32 from "@/assets/icons/size24/ic_mic_white_24x32.png";
 import Modal from "@/shared/components/modal/Modal";
@@ -26,7 +28,7 @@ export default function M_EnvironmentTestView() {
 
   const state = (location.state || {}) as LocationState;
 
-  const [activeStep, setActiveStep] = useState(2);
+  const [activeStep] = useState(2);
   const [showSettingsPanel, setShowSettingsPanel] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
@@ -34,25 +36,6 @@ export default function M_EnvironmentTestView() {
     "intro"
   );
   const [showDialog, setShowDialog] = useState(true);
-
-  useEffect(() => {
-    console.log("[M_EnvironmentTestView] location.state:", state);
-    console.log("[M_EnvironmentTestView] interviewStageStatus:", state.interviewStageStatus);
-
-    switch (state.interviewStageStatus) {
-      case 0:
-        console.log("상태 0: 유저 질문 전부 작성 (API 스킵)");
-        break;
-      case 1:
-        console.log("상태 1: 유저 질문 일부 작성 (API + 일부 교체)");
-        break;
-      case 2:
-        console.log("상태 2: 유저 질문 미작성 (API 그대로)");
-        break;
-      default:
-        console.log("상태 없음 또는 알 수 없음");
-    }
-  }, [state]);
 
   useEffect(() => {
     if (!actionType) return;
@@ -83,17 +66,19 @@ export default function M_EnvironmentTestView() {
   };
 
   const handleStartMockInterviewLive = () => {
-    navigate("/mock-interview/m-mock-interview-live", {
-      state: {
-        ...state,
-      },
-    });
+    navigate("/mock-interview/m-mock-interview-live", { state: { ...state } });
   };
 
   return (
     <>
       <div className="mock-settings-page mobile environment">
-        {showSettingsPanel && <SettingsPanel activeStep={activeStep} onExit={handleExitRequest} interviewState={state} />}
+        {showSettingsPanel && (
+          <SettingsPanel
+            activeStep={activeStep}
+            onExit={handleExitRequest}
+            interviewState={state}
+          />
+        )}
 
         <div className="mock-settings__content">
           <div className="mock-settings__content-inner">
@@ -118,7 +103,7 @@ export default function M_EnvironmentTestView() {
 
         {showDialog && testStep === "intro" && (
           <>
-            <div className="env-test-overlay"></div>
+            <div className="env-test-overlay" />
             <div className="env-test-dialog">
               <TestIntro onStart={handleStartTest} />
             </div>

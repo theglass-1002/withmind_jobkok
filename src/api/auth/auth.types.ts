@@ -127,6 +127,8 @@ export interface VerifiedUserInfo {
   phone: string;
   birth: string;
   ci: string;
+  gender:string;
+  
 }
 
 export interface InicisParams {
@@ -210,9 +212,28 @@ export interface MyInfo {
   phone:string;
   userId: string;
   userName: string;
+  ciHash: string;
 }
 
 export interface FetchMyInfoResponse {
   code: number; // 200
   user: MyInfo;
+}
+
+/**
+ * 생년월일 변환1
+ * "YYYYMMDD" → "YYYY.MM.DD"
+ * 예) "19981002" → "1998.10.02"
+ */
+export function formatBirthdate(yyyymmdd?: string): string {
+  if (!yyyymmdd) return "";
+
+  // 숫자 8자리인지 체크
+  if (!/^\d{8}$/.test(yyyymmdd)) return "";
+
+  const year = yyyymmdd.slice(0, 4);
+  const month = yyyymmdd.slice(4, 6);
+  const day = yyyymmdd.slice(6, 8);
+
+  return `${year}.${month}.${day}`;
 }

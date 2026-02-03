@@ -114,7 +114,7 @@ export default function LiveSidePanel({
     interviewState?.jobDetail?.job?.name ??
     interviewState?.jobDetail?.name ??
     interviewState?.jobDetail?.title ??
-    "채용 공고";
+   "선택한 채용 공고 없음";
 
   // 아이콘은 "effectiveType" 기준으로 계산 (FOLLOWUP이 끼어도 기존 타입 아이콘으로 섞임)
   const stageIconSrc = useMemo(() => {
@@ -181,6 +181,7 @@ export default function LiveSidePanel({
   }, [stageItems]);
 
   return (
+    console.log('effectiveType',effectiveType),
     <>
       <Modal
         open={showConfirm}
@@ -246,8 +247,7 @@ export default function LiveSidePanel({
       </div>
 
       <div className="mock-interview__sidepanel mobile">
-        <div className="mock-interview__sidepanel-section info">
-          <div className="mock-settings__panel-header">
+      <div className="mock-settings__panel-header">
             <img
               onClick={handleMobileCloseClick}
               className="mock-settings_header_icon"
@@ -256,55 +256,55 @@ export default function LiveSidePanel({
             />
             <span className="mock-settings__panel-section-title">면접 진행 현황</span>
           </div>
+          <div className="mock-settings__panel-body">
+        <div className="mock-interview__sidepanel-section info">
+        
 
-          <span className="mock-interview__sidepanel-title">면접 정보</span>
-          <div className="mock-interview__info-list">
-            <div className="mock-interview__info-item">
-              <span className="mock-interview__info-label">이력서</span>
-              <span className="mock-interview__info-value">{resumeTitle}</span>
+        <span className="mock-interview__sidepanel-title">면접 정보</span>
+        <div className="mock-interview__info-list">
+          <div className="mock-interview__info-item">
+            <span className="mock-interview__info-label">이력서</span>
+            <span className="mock-interview__info-value">{resumeTitle}</span>
+          </div>
+          <div className="mock-interview__info-item">
+            <span className="mock-interview__info-label">희망 직무</span>
+            <span className="mock-interview__info-value">{desiredJob}</span>
+          </div>
+          <div className="mock-interview__info-item">
+            <span className="mock-interview__info-label">채용 공고</span>
+            <span className="mock-interview__info-value">{jobPostingTitle}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="mock-interview__sidepanel-section stage">
+        <div className="mock-interview__stage-header">
+          <span className="mock-interview__stage-title">면접 단계</span>
+          <div className="mock-interview__stage-list">
+            <div className="mock-interview__stage-icons">
+              <img src={stageIconSrc} alt="" />
             </div>
-            <div className="mock-interview__info-item">
-              <span className="mock-interview__info-label">희망 직무</span>
-              <span className="mock-interview__info-value">{desiredJob}</span>
-            </div>
-            <div className="mock-interview__info-item">
-              <span className="mock-interview__info-label">채용 공고</span>
-              <span className="mock-interview__info-value">{jobPostingTitle}</span>
-            </div>
+            {StageItemsView}
           </div>
         </div>
 
-        <div className="mock-interview__sidepanel-section stage">
-          <div className="mock-interview__stage-header">
-            <span className="mock-interview__stage-title">면접 단계</span>
-            <div className="mock-interview__stage-list">
-              <div className="mock-interview__stage-icons">
-                <img src={stageIconSrc} alt="" />
-              </div>
-              {StageItemsView}
-            </div>
+        <div className="mock-interview__progress">
+          <div className="mock-interview__progress-header">
+            <span className="mock-interview__progress-label">진행 현황</span>
+            <span className="mock-interview__progress-count">
+              질문 {displayCurrent} / {safeTotal}
+            </span>
           </div>
 
-          <div className="mock-interview__progress">
-            <div className="mock-interview__progress-header">
-              <span className="mock-interview__progress-label">진행 현황</span>
-              <span className="mock-interview__progress-count">
-                질문 {displayCurrent} / {safeTotal}
-              </span>
-            </div>
-
-            <div className="mock-interview__progress-bar">
-              <span className="mock-interview__progress-fill" style={{ width: progressWidth }} />
-            </div>
+          <div className="mock-interview__progress-bar">
+            <span className="mock-interview__progress-fill" style={{ width: progressWidth }} />
           </div>
         </div>
+      </div>
 
-        <div className="mock-interview__sidepanel-footer">
-          <button className="mock-interview__exit-btn" onClick={handleExitClick}>
-            <img src={ic_logout_white_24} alt="" />
-            나가기
-          </button>
         </div>
+      
+       
       </div>
     </>
   );

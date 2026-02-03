@@ -797,7 +797,7 @@ mock-settings--step-2 */
 
         .mock-settings__panel.mobile{
             display: flex;
-            gap: 12px;
+            gap: 0px;
         }
         .mock-settings__panel{
             position: fixed; 
@@ -926,6 +926,18 @@ mock-settings--step-2 */
             height: 56px;
             padding: 20px 24px;
             font-size: 16px;
+        }
+        .mock-settings-page .mock-settings__panel.mobile .mock-settings__panel-header{
+            padding: 20px 52px 20px 20px;
+        }
+
+        .mock-settings__panel-body{
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+            flex: 1 0 0;
+            align-self: stretch;
         }
 
        

@@ -6,7 +6,7 @@ import ic_timer_red_18 from "@/assets/icons/size18/ic_timer_red_18.png";
 import ic_stop_white_24 from "@/assets/icons/size24/ic_stop_white_24.png";
 import ic_cheer_white_48 from "@/assets/icons/size48/ic_cheer_white_48.png";
 
-const ANSWER_SECONDS = 90;
+const ANSWER_SECONDS = 91;
 
 type Props = {
   onEnd?: () => void; //  추가: 답변 종료 시 부모에게 알림(다음 질문으로)
