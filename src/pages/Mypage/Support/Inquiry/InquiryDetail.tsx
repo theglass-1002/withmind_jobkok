@@ -115,8 +115,8 @@ return (
         <section className="mypage__content-main inquiry-detail-view__main">
         {/* 문의 카드 */}
         <article className="inquiry-card question" aria-labelledby="inquiry-title">
+        <div className="inquiry-card__header">
             <span className="badge badge--answered">답변완료</span>
-            <div className="inquiry-card__infos">
             <h1 id="inquiry-title" className="inquiry-card__title">
             모의면접을 다시 보거나 완료된 모의면접을 삭제할 수 있나요?
             </h1>
@@ -125,6 +125,7 @@ return (
             <span className="inquiry-card__meta category">오류 신고</span>
             </div>
             </div>
+         
             <div className="inquiry-card__content ">
             모의면접을 다시 보거나 완료된 모의면접을 삭제할 수 있나요? 모의면접을 다시 보거나 완료된 모의면접을 삭제할 수 있나요? 모의면접을 다시 보거나 완료된 모의면접을 삭제할 수 있나요? 모의면접을 다시 보거나 완료된 모의면접을 삭제할 수 있나요? 모의면접을 다시 보거나 완료된 모의면접을 삭제할 수 있나요? 
          

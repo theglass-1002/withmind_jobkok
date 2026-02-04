@@ -52,16 +52,16 @@ export default function SelectDropdown({
           ${errorText||errorIconSrc ? 'error' : ''} 
           ${disabled ? 'disabled' : ''}`}
         onClick={() => !disabled && setIsOpen(!isOpen)}>
-        <span className="select-dropdown__placeholder">
+        <span className={`select-dropdown__placeholder ${selectedOption?.label==undefined?"":"on"}`}>
           {selectedOption?.label || placeholder}
         </span>
 
 
         <span className={`select-dropdown__icon ${isOpen ? 'rotate' : ''}`}>
-          {errorText|| errorIconSrc && (
+          {errorIconSrc && (
             <img className="select-dropdown__error-icon" src={errorIconSrc} alt="error" />
           )}
-          <img src={ic_arrow_drop_down_gray900_24} alt="open" />
+          <img className="drop_down_icon" src={ic_arrow_drop_down_gray900_24} alt="open" />
         </span>
       </div>
 

@@ -6,13 +6,16 @@
     padding: 20px;
     justify-content: space-between;
     align-items: center;
-    gap: 12px;
     align-self: stretch;
     border-bottom: 1px solid var(--gray-300, #E0E2E4);
     background: var(--white-100, #FFF);
     z-index: 10;
     top: 0;
 }
+
+.page-header--no-border {
+    border-bottom: none;
+  }
 
 .page-header.mock{
     background: var(--gray-900, #2A2D2F);
@@ -77,7 +80,7 @@
 
 .page-header .header-right{
 
-
+    width: 20px;
     margin-left: auto;
     display: flex;
     align-items: center;

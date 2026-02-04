@@ -19,16 +19,27 @@ type LocationState = {
 };
 
 function toUserProfileFromMyInfo(myInfo: MyInfo | null): UserProfile {
+  if (!myInfo) {
+    return {
+      email: "",
+      number: "",
+      name: "",
+      birth: "",
+      gender: "M",
+      certified: false,
+    };
+  }
+
   const gender: "M" | "W" =
-    myInfo?.gender === "M" || myInfo?.gender === "W" ? myInfo.gender : "M";
+    myInfo.gender === "M" || myInfo.gender === "W" ? myInfo.gender : "M";
 
   return {
-    email: myInfo?.userId ?? "",
-    number: myInfo?.phone ?? "",
-    name: myInfo?.userName ?? "",
-    birth: myInfo?.birthdate ?? "",
+    email: myInfo.userId ?? "",
+    number: myInfo.phone ?? "",
+    name: myInfo.userName ?? "",
+    birth: myInfo.birthdate ?? "",
     gender,
-    certified: myInfo.ciHash!=""?true:false,
+    certified: Boolean(myInfo.ciHash && myInfo.ciHash.trim() !== ""),
   };
 }
 

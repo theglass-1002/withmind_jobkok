@@ -1862,15 +1862,17 @@ line-height: 20px; /* 125% */
             font-size: 16px;
             height: 36px;
             padding-bottom: 16px;
-        }
-       .tabs__item.my-page-tabs__item.on {
-        font-size: 16px;
-        }
-        .my-page_faq_wrap{
-            padding: 0px;
-            gap: 0px;
+            font-weight: 400;
+     
         }
 
+   
+
+        .tabs__item.my-page-tabs__item.on {
+        font-size: 16px;
+        font-weight: 600;
+        }
+       
         .sidemenu__group .sidemenu__sublist{
             gap: 0px;
         }
@@ -1914,6 +1916,7 @@ line-height: 20px; /* 125% */
             display: flex;
             gap: 12px;
             background: var(--gray-100, #F2F3F4);
+            padding-bottom: 100px;
         }
         .account-main.mobile .field.email{
             gap: 12px;
@@ -1946,6 +1949,9 @@ line-height: 20px; /* 125% */
             padding: 20px;
             border-top: 1px solid var(--gray-300, #E0E2E4);
             background: var(--white-100, #FFF);
+            position: fixed;
+            width: 100%;
+            bottom: 0px;
         }
 
         .mypage__content-main .account-main .field .hint{
@@ -1961,6 +1967,8 @@ line-height: 20px; /* 125% */
         .mypage__content-main .account-main.mobile.password-tab{
             display: flex;
             height: auto;
+            gap: 0px;
+            padding-bottom: 100px;
         }
         
 
@@ -1968,7 +1976,11 @@ line-height: 20px; /* 125% */
             padding: 24px 20px;
             gap: 24px;
         }
-     
+        .mypage__content-main .account-main.mobile.password-tab .form-action-group{
+            position: fixed;
+            bottom: 0px;
+            width: 100%;
+        }
     }
 
 }

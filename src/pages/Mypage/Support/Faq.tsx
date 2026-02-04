@@ -1,62 +1,49 @@
-import { useState, useRef,useMemo, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useMemo, useEffect } from "react";
 import Tabs from "@/shared/components/tabs/Tabs";
-import {useStickyTabs} from '@/shared/utils/util'; 
-import search from '@/assets/icons/search.png';
-import chevronDown from '@/assets/icons/chevron-down.png';
-import chevronUp from '@/assets/icons/chevron-up.png';
-import arrow_left from '@/assets/icons/keyboard_arrow_left.png';
-import arrow_right from '@/assets/icons/keyboard_arrow_right.png';
+import { useStickyTabs } from "@/shared/utils/util";
+import arrow_left from "@/assets/icons/keyboard_arrow_left.png";
+import arrow_right from "@/assets/icons/keyboard_arrow_right.png";
 import Pagination from "@/shared/components/Pagination";
 import * as util from "@/shared/utils/util";
+import faqData from "@/data/faq.json";
 import "./Faq.css";
 
-
 const FAQ_TABS = [
-    { key: "all",     label: "전체" },
-    { key: "howto",   label: "이용 방법" },
-    { key: "account", label: "회원 정보" },
-    { key: "payment", label: "결제" },
-    { key: "etc",     label: "기타" },
-  ];
+  { key: "all", label: "전체" },
+  { key: "howTo", label: "이용방법" },
+  { key: "memberInfo", label: "회원정보" },
+  { key: "resume", label: "이력서" },
+  { key: "jobPosting", label: "채용공고" },
+  { key: "aiMockInterview", label: "AI모의면접" },
+  { key: "other", label: "기타" },
+] as const;
 
-  type FaqTabKey = typeof FAQ_TABS[number]["key"];
-  type Category = Exclude<FaqTabKey, "all">;
-  
+type FaqTabKey = (typeof FAQ_TABS)[number]["key"];
+type Category = Exclude<FaqTabKey, "all">;
 
 type FaqItem = {
-  id: string;          
-  cat: Category;       
-  q: string;
-  a: string;
+  id: string;
+  category: Category;
+  question: string;
+  answer: string;
 };
 
-const ITEMS: FaqItem[] = [
-  { id: "1", cat: "howto",   q: "1모의면접을 다시 보거나 완료된 모의면접을 삭제할 수 있나요?", a: "아니요." },
-  { id: "2", cat: "payment", q: "2결제 영수증은 어디에서 확인하나요?",                      a: "마이페이지 > 이용권 내역에서 확인 가능합니다." },
-  { id: "3", cat: "etc",     q: "3문의는 어디로 하면 되나요?",                              a: "고객지원 1:1 문의를 이용해 주세요." },
-  { id: "4", cat: "account", q: "4이메일을 변경할 수 있나요?",                              a: "보안상 고객센터로 문의해 주세요." },
-  { id: "5", cat: "howto",   q: "5모의면접을 다시 보거나 완료된 모의면접을 삭제할 수 있나요?", a: "아니요." },
-  { id: "6", cat: "payment", q: "6결제 영수증은 어디에서 확인하나요?",                      a: "마이페이지 > 이용권 내역에서 확인 가능합니다." },
-  { id: "7", cat: "etc",     q: "7문의는 어디로 하면 되나요?",                              a: "고객지원 1:1 문의를 이용해 주세요." },
-  { id: "8", cat: "account", q: "8이메일을 변경할 수 있나요?",                              a: "보안상 고객센터로 문의해 주세요." },
-  { id: "9", cat: "howto",   q: "9모의면접을 다시 보거나 완료된 모의면접을 삭제할 수 있나요?", a: "아니요." },
-  { id: "10", cat: "payment", q: "10결제 영수증은 어디에서 확인하나요?",                      a: "마이페이지 > 이용권 내역에서 확인 가능합니다." },
-  { id: "11", cat: "etc",     q: "11문의는 어디로 하면 되나요?",                              a: "고객지원 1:1 문의를 이용해 주세요." },
-  { id: "12", cat: "account", q: "12이메일을 변경할 수 있나요?",                              a: "보안상 고객센터로 문의해 주세요." },
-  { id: "13", cat: "howto",   q: "13모의면접을 다시 보거나 완료된 모의면접을 삭제할 수 있나요?", a: "아니요." },
-  { id: "14", cat: "payment", q: "14결제 영수증은 어디에서 확인하나요?",          a: "마이페이지 > 이용권 내역에서 확인 가능합니다." },
-  { id: "15", cat: "account", q: "15이메일을 변경할 수 있나요?",                              a: "보안상 고객센터로 문의해 주세요." },
-  { id: "16", cat: "howto",   q: "16모의면접을 다시 보거나 완료된 모의면접을 삭제할 수 있나요?", a: "아니요." },
-  { id: "17", cat: "payment", q: "17결제 영수증은 어디에서 확인하나요?",          a: "마이페이지 > 이용권 내역에서 확인 가능합니다." },
-  { id: "18", cat: "howto",   q: "18모의면접을 다시 보거나 완료된 모의면접을 삭제할 수 있나요?", a: "아니요." },
-  { id: "19", cat: "howto", q: "19결제 영수증은 어디에서 확인하나요?",          a: "마이페이지 > 이용권 내역에서 확인 가능합니다." },
-  
-
-];
-
+type RawFaqItem = {
+  id: number | string;
+  category: Category;
+  question: string;
+  answer: string;
+};
 
 const PAGE_SIZE = 10;
+
+// ✅ JSON -> 화면에서 쓸 형태로 변환 (id string 보장)
+const ITEMS: FaqItem[] = (faqData as RawFaqItem[]).map((item) => ({
+  id: String(item.id),
+  category: item.category,
+  question: item.question,
+  answer: item.answer,
+}));
 
 export default function Faq() {
   const [query, setQuery] = useState("");
@@ -68,35 +55,35 @@ export default function Faq() {
   const isTabsSticky = useStickyTabs(
     "sticky-trigger",
     ".default_tabs",
-    ".page-header")
+    ".page-header"
+  );
 
-  const handleTabClick = (key: "all" | "howto" |"account"|"payment"|"etc") => {
+  const handleTabClick = (key: FaqTabKey) => {
     setTab(key);
-  }
-
+  };
 
   useEffect(() => {
     setPage(1);
     setOpenIds(new Set());
   }, [tab, query]);
 
-
   const applySearch = () => {
-    if(util.stripAllWhitespace(searchText.trim()).trim()!=""){
-      console.log('검색');
-      setQuery(util.stripAllWhitespace(searchText.trim()).trim());
-    }
+    const normalized = util.stripAllWhitespace(searchText.trim()).trim();
+    // 기존 코드처럼 "빈 검색어면 적용 안 함" 유지
+    if (normalized !== "") setQuery(normalized);
   };
-  
 
   // 필터링
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return ITEMS.filter((it) => {
-      const byTab = tab === "all" ? true : it.cat === tab;
+
+    return ITEMS.filter((item) => {
+      const byTab = tab === "all" ? true : item.category === tab;
       const byQuery = q
-        ? it.q.toLowerCase().includes(q) || it.a.toLowerCase().includes(q)
+        ? item.question.toLowerCase().includes(q) ||
+          item.answer.toLowerCase().includes(q)
         : true;
+
       return byTab && byQuery;
     });
   }, [tab, query]);
@@ -115,110 +102,122 @@ export default function Faq() {
       return next;
     });
 
-    return (
-         <>
-          <div className="mypage__content-main faq-container">
-          <header className="my-page_faq_header">
-              <h1 className="faq-title">자주 묻는 질문</h1>
-              <Tabs
-                tabs={FAQ_TABS}
-                active={tab}
-                onChange={handleTabClick}
-                className={`my-page_faq-tabs default_tabs ${isTabsSticky?'is-sticky':''}`}
-           
-                itemClassName="my-page-tabs__item"
-                activeClassName="on"
-                />
-            </header> 
-           <div className="my-page_faq_wrap">
-           <div className="search_field"> 
-                <span className="icon-container"><img src={search} alt="" /></span>
-                <input 
-                type="search"
+  return (
+    <>
+      <div className="mypage__content-main faq-container">
+        <header className="my-page_faq_header">
+          <h1 className="faq-title">자주 묻는 질문</h1>
+
+          <Tabs
+            tabs={FAQ_TABS as any}
+            active={tab}
+            onChange={handleTabClick as any}
+            className={`my-page_faq-tabs default_tabs ${
+              isTabsSticky ? "is-sticky" : ""
+            }`}
+            itemClassName="my-page-tabs__item"
+            activeClassName="on"
+          />
+        </header>
+
+        <div className="my-page_faq_wrap">
+          {/* PC 검색 */}
+          <div className="search_field">
+            <span className="icon-container" />
+            <input
+              type="text"
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              placeholder="검색어를 입력해 주세요."
+              onKeyDown={(e) => {
+                const isIme = (e.nativeEvent as any)?.isComposing;
+                if (e.key === "Enter" && !isIme) applySearch();
+              }}
+            />
+          </div>
+
+          {/* 모바일 sticky 검색 */}
+          <div id="sticky-trigger" className="search_container-mobile">
+            <div className="search_field">
+              <span className="icon-container" />
+              <input
+                type="text"
                 value={searchText}
-                onChange={(e)=> setSearchText(e.target.value)}
-                placeholder="(엔터)검색어를 입력해 주세요."
+                onChange={(e) => setSearchText(e.target.value)}
+                placeholder="검색어를 입력해 주세요."
                 onKeyDown={(e) => {
                   const isIme = (e.nativeEvent as any)?.isComposing;
                   if (e.key === "Enter" && !isIme) applySearch();
                 }}
-                /> 
+              />
             </div>
-            <div id="sticky-trigger" className="search_container-mobile">
-            <div className="search_field"> 
-                <span className="icon-container"><img src={search} alt="" /></span>
-                <input 
-                type="search"
-                value={searchText}
-                onChange={(e)=> setSearchText(e.target.value)}
-                placeholder="(엔터)검색어를 입력해 주세요."
-                onKeyDown={(e) => {
-                  const isIme = (e.nativeEvent as any)?.isComposing;
-                  if (e.key === "Enter" && !isIme) applySearch();
-                }}
-                /> 
-            </div>
-            </div>
-      
-            <div className="faq__list-container">
+          </div>
+
+          <div className="faq__list-container">
             {pageItems.length === 0 ? (
               <div className="faq__empty">검색 결과가 없습니다.</div>
             ) : (
               <ul className="faq__list">
-                {pageItems.map((it) => {
-                  const isOpen = openIds.has(it.id);
+                {pageItems.map((item) => {
+                  const isOpen = openIds.has(item.id);
                   return (
-                    <li className="faq__item" key={it.id}>
+                    <li className="faq__item" key={item.id}>
                       <div className="faq__question">
                         <em className="q_mark">Q</em>
-                        <p className="q_text">[{labelOf(it.cat)}] {it.q}</p>
+                        <p className="q_text">
+                          [{getCategoryLabel(item.category)}] {item.question}
+                        </p>
                         <span
                           className={`icon-container ${isOpen ? "on" : ""}`}
                           role="button"
                           aria-expanded={isOpen}
                           tabIndex={0}
-                          onClick={() => toggle(it.id)}
-                        >
-                          <img src={isOpen ? chevronUp : chevronDown} alt="" />
-                        </span>
+                          onClick={() => toggle(item.id)}
+                        />
                       </div>
+
                       <div className={`faq__answer ${isOpen ? "on" : ""}`}>
                         <em className="a_mark">A</em>
-                        <p className="a_text">{it.a}</p>
+                        <p className="a_text">{item.answer}</p>
                       </div>
                     </li>
                   );
                 })}
               </ul>
             )}
-            <Pagination 
-            current={page}
-            total={totalPages}
-            onChange={setPage}
-            pageWindow={5}
-            prevIcon={<img src={arrow_left} alt="" aria-hidden="true" />}
-            nextIcon={<img src={arrow_right} alt="" aria-hidden="true" />}
-            />
-            </div>
-            </div> 
-        
           </div>
-          </>
-    );
-  }
+        
+        </div>
+          <Pagination
+              current={page}
+              total={totalPages}
+              onChange={setPage}
+              pageWindow={5}
+              prevIcon={<img src={arrow_left} alt="" aria-hidden="true" />}
+              nextIcon={<img src={arrow_right} alt="" aria-hidden="true" />}
+            />
+      </div>
 
-
-function labelOf(cat: Category) {
-  switch (cat) {
-    case "howto":
-      return "이용 방법";
-    case "account":
-      return "회원 정보";
-    case "payment":
-      return "결제";
-    case "etc":
-      return "기타";
-  }
+            
+    </>
+  );
 }
 
-    
+function getCategoryLabel(category: Category) {
+  switch (category) {
+    case "howTo":
+      return "이용방법";
+    case "memberInfo":
+      return "회원정보";
+    case "resume":
+      return "이력서";
+    case "jobPosting":
+      return "채용공고";
+    case "aiMockInterview":
+      return "AI 모의면접";
+    case "other":
+      return "기타";
+    default:
+      return "";
+  }
+}

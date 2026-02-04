@@ -37,8 +37,9 @@
 }
 .my-page_faq_wrap{
     display: flex;
+    width: 100%;
     flex-direction: column;
-    padding: 28px;
+    padding: 28px 28px 0px 28px;
     gap: 28px;
 }
 
@@ -117,6 +118,7 @@
   display:flex;
   width: 100%;
   align-items: center;
+  justify-content: space-between;
 }
 
 
@@ -155,7 +157,39 @@
     gap: 10px;
 }
 
-.faq__list .faq__item .faq__question .q_text,
+.faq__list .faq__item .faq__question .q_text {
+    display: block;              /* flex 말고 보통 block이 안정적 */
+    width: 100%;
+    padding: 28px 20px;
+    color: var(--gray-900, #2A2D2F);
+    font-family: Pretendard;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 20px;
+  
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  /* ✅ 답변: 여러 줄 + 내용만큼 높이 늘어나게 */
+  .faq__list .faq__item .faq__answer .a_text {
+    display: block;
+    padding: 28px 20px;
+    color: var(--gray-900, #2A2D2F);
+    font-family: Pretendard;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 20px;
+  
+    white-space: pre-line;       /* JSON의 \n 줄바꿈 반영 */
+    overflow: visible;           /* 잘림 방지 */
+    text-overflow: clip;         /* 말줄임 제거 */
+    word-break: break-word;      /* 긴 텍스트 대응 */
+  }
+  
+
+/* .faq__list .faq__item .faq__question .q_text,
 .faq__list .faq__item .faq__answer .a_text
 {
     display: flex;
@@ -170,23 +204,42 @@
     font-size: 16px;
     font-style: normal;
     font-weight: 400;
-    line-height: 20px; /* 125% */
+    line-height: 20px; 
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 1;
     flex: 1 0 0;
+} */
+
+.my-page_faq_wrap .search_field .icon-container{
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    gap: 10px;
+    background-image: url("/src/assets/icons/size20/ic_search_gray900_20.svg");
+    background-repeat: no-repeat;
+    background-position: top;
+    background-size: contain;  
 }
 
 .faq__item .icon-container{
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    display: inline-block;
+    width: 20px;
+    height: 20px;
     gap: 10px;
+    margin-right: 24px;
     cursor: pointer;
+    background-image: url("/src/assets/icons/size20/ic_arrow_down_gray500_20.svg");
+    background-repeat: no-repeat;
+    background-position: top;
+    background-size: contain;
 }
 
 .faq__item .icon-container.on{
- padding: 28px 24px 28px 0;  
+    transform: rotate(180deg);
+}
+.faq-container .pagination{
+    padding: 28px 28px 28px 28px;
 }
 
 /* 모바일: 760px 이하 */
@@ -199,18 +252,25 @@
             padding:0px;
         }
         .my-page_faq-tabs{
-            height: 51px;
-            
-            padding: 10px 20px 0 20px;
+            height: 44px;
+            padding: 8px 20px 0 20px;
             border-bottom: 1px solid var(--gray-300, #E0E2E4);
             background: var(--white-100, #FFF);
+            white-space: nowrap;
+            overflow-x: auto;  
         }
+
+        .my-page_faq-tabs::-webkit-scrollbar {
+            display: none;              /* Chrome, Safari */
+          }
+
         .faq-container .faq__list-container{
             gap: 0px;
         }
         .mypage__content-main.faq-container{
             padding: 64px 0px 0 0px;
             gap: 0px;
+            background: var(--gray-50, #F8F8F9);
         }
         .faq-container .search_field{
             display: none;
@@ -236,29 +296,61 @@
             width: 100%;
             height: 80px;
             align-items: start;
+            justify-content: space-between;
         }
 
         .faq__list .faq__item .faq__question .q_mark{
             display: flex;
             align-items: start;
             justify-content: start;
-            padding: 20px 12px 20px 20px;
+            padding: 17px 12px 20px 20px;
+            font-size: 14px;
         }
 
         .faq__list .faq__item .faq__question .q_text{
             width: 100%;
-            padding: 20px 12px;
-            overflow: inherit;
+            text-wrap: auto;
         }
-        .faq__list-container .pagination{
+        
+
+
+        /* .faq__list-container .pagination{
             display: flex;
+            width: 100%;
+          
             padding: 20px 20px 36px 20px;
-            /* flex-direction: column; */
+      
             align-items: center;
             gap: 10px;
             align-self: stretch;
             background: var(--gray-50, #F8F8F9);
+        } */
+
+        .faq__list .faq__item .faq__answer .a_mark{
+            padding: 20px 12px 20px 20px;
+            font-size: 14px;
         }
-    
+
+        .faq__list .faq__item .faq__question .q_text,
+        .faq__list .faq__item .faq__answer .a_text{
+            width: 100%;
+            padding-top: 20px;
+            font-size: 14px;
+            padding: 17px 12px;
+
+        }
+        .faq__item .icon-container {
+            margin-top: 17px;
+        }
+
+        .faq-container .my-page_faq_wrap{
+            width: 100%;
+            padding: 0px;
+            gap: 0px;
+        }
+
+        .faq-container .pagination {
+            padding: 20px 20px 36px 20px;
+        }
     }
 }

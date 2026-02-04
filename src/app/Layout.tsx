@@ -188,12 +188,13 @@ export default function Layout({
     if (screen === "EditProfile") {
       return (
         <PageHeader
-          title="회원 정보 수정"
-          leftElement={<img src={ic_arrow_back_ios_gray900_20} alt="닫기" />}
-          onLeftElementClick={() => navigate("/mypage")}
-          rightIcons={<img src={ic_home_gray900_20} alt="홈" />}
-          onRightElementClick={() => navigate("/")}
-        />
+        title="회원 정보 수정"
+        pageHeaderClassName="page-header--no-border"
+        leftElement={<img src={ic_arrow_back_ios_gray900_20} alt="닫기" />}
+        onLeftElementClick={() => navigate("/mypage")}
+        rightIcons={<img src={ic_home_gray900_20} alt="홈" />}
+        onRightElementClick={() => navigate("/")}
+      />
       );
     }
 
@@ -225,6 +226,7 @@ export default function Layout({
       return (
         <PageHeader
           title="자주 묻는 질문"
+          pageHeaderClassName="page-header--no-border"
           leftElement={<img src={ic_arrow_back_ios_gray900_20} alt="닫기" />}
           onLeftElementClick={() => navigate("/mypage")}
           rightIcons={<img src={ic_home_gray900_20} alt="홈" />}
@@ -260,7 +262,7 @@ export default function Layout({
         <PageHeader
           title="1:1 문의하기"
           leftElement={<img src={ic_arrow_back_ios_gray900_20} alt="닫기" />}
-          onLeftElementClick={() => navigate("/mypage/m-support/inquiry")}
+          onLeftElementClick={() =>{handleSendActions("INQUIRY_CREATE_CANCEL")}}
         />
       );
     }

@@ -127,7 +127,10 @@ export default function PasswordTab({onCancel}:PasswordTabProps) {
                 autoComplete="current-password"
                 required
                 />
-                {errors.current==""?<span className="field__label"><em> {errors.current}??</em></span>:<></>}
+                   {errors.current==undefined?<></>:<span className="field__label"><em> {errors.current}</em></span>}
+              
+                {/* {errors.current==""?<span className="field__label"><em> {errors.current}??</em></span>:<></>}
+               */}
               </div>
              
               <div className="field-group"> 
@@ -140,7 +143,8 @@ export default function PasswordTab({onCancel}:PasswordTabProps) {
                 message={errors.next}
                 autoComplete="new-password"
                 required/>
-                 {errors.next==""?<span className="field__label"><em> {errors.next}??</em></span>:<></>}
+                {errors.next==undefined?<></>:<span className="field__label"><em> {errors.next}</em></span>}
+                 {/* {errors.next!=""?<span className="field__label"><em> {errors.next}</em></span>:<></>} */}
       
                </div>
                <div className="field-group"> 
@@ -154,12 +158,11 @@ export default function PasswordTab({onCancel}:PasswordTabProps) {
                 autoComplete="new-password"
                 required
                 />
-                 {errors.confirm==""?<span className="field__label"><em> {errors.confirm}??</em></span>:<></>}
-          
+                 {errors.confirm==undefined?<></>:<span className="field__label"><em> {errors.confirm}</em></span>}
+                 {/* {errors.confirm==""?<span className="field__label"><em> {errors.confirm}??</em></span>:<></>}*/}
                 </div>
           
             </div>
-            <div>
             <div className="field">
             <div className="field__value_gray hint">
                   <span>※ 비밀번호는 영문, 숫자, 특수문자를 모두 포함한 8~16자로 입력해 주세요.</span>
@@ -171,7 +174,8 @@ export default function PasswordTab({onCancel}:PasswordTabProps) {
                   <button className="default_btn_black"  onClick={handleSave}>저장</button>
                   </div>
               </div>
-              </div>
+
+             
             </div>
             
             </>

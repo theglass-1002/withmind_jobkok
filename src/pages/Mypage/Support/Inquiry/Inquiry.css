@@ -282,7 +282,6 @@ align-self: stretch;
 
 .select_box_wrap{
 display: flex;
-height: 86px;
 flex-direction: column;
 align-items: flex-start;
 gap: 16px;
@@ -412,6 +411,7 @@ align-self: stretch;
 
   .content-info .body .body_items .strong{
    font-weight: 600;
+   white-space: nowrap;
   }
 
 .inquiry_title input{
@@ -419,6 +419,19 @@ align-self: stretch;
     border: 1px solid var(--gray-300, #E0E2E4);
     background: var(--white-100, #FFF);
 }
+
+.field .content.error textarea{
+    /* border-radius: 4px;
+    border: 1px solid var(--red-100, #FF524C);
+    background: var(--white-100, #FFF); */
+}
+
+.inquiry .create .content.error .content-info{
+    border-radius: 4px;
+    border: 1px solid var(--red-100, #FF524C);
+    background: var(--white-100, #FFF);
+}
+
 
 /* 모바일: 760px 이하 */
 @media (max-width: 760px) {
@@ -470,6 +483,7 @@ align-self: stretch;
             color: var(--gray-700, #6F767E);
             font-family: Pretendard;
             font-size: 12px;
+            line-height: 14px; /* 116.667% */
         }
 
         .inquiry-history__meta-group span::before{
@@ -477,9 +491,9 @@ align-self: stretch;
             display: flex;
             content: '';
             width: 1px;
-            height: 7px;
+            height: 8px;
             background: #E0E2E4;
-            top: 14px;
+            top: 10px;
             right: 8px;
             margin-left: 0px;
             margin-right: 0px;
@@ -507,21 +521,59 @@ align-self: stretch;
         .inquiry-card__infos{
             width: auto;
         }
+        .inquiry-card__header{
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        .badge.badge--answered{
+            font-size: 14px;
+        }
+        .inquiry-card__title{
+            font-size: 16px;
+            font-weight: 600;
+        }
         .inquiry-card__title{
             line-height: 30px;
         }
         .inquiry-detail-view__main .inquiry-card{
-            gap: 8px;
-            padding: 24px;
+            gap: 16px;
+            padding: 24px 20px 20px 20px;
         }
-        .inquiry-detail-view__main{
-            padding-bottom: 50px;
+        .inquiry.mobile .inquiry-detail-view__main{
+            gap: 0px;
         }
-        .inquiry .create{
-            padding-bottom: 140px;
+
+
+
+        .inquiry.mobile .create{
+            padding: 24px 20px 140px 20px;
             gap: 24px;
         }
 
+        .inquiry.mobile .create .select_box_wrap{
+            height: auto;
+          
+        }
+        
+        .inquiry.mobile .create .select-dropdown__control{
+            padding: 16px 12px 16px 16px;
+            height: 48px;
+        }
+
+        .inquiry .create .select-dropdown{
+            gap: 12px;
+        }
+
+        .inquiry .create .field{
+            gap: 12px;
+            
+        }
+        .inquiry .create .field input{
+            height: 48px;        
+        }
+        
         .inquiry .create .content-info{
             height: auto;
             font-size: 16px;
@@ -538,7 +590,8 @@ align-self: stretch;
             padding: 16px;
         }
         .info_box .info_box_items{
-            font-size: 14px
+            font-size: 14px;
+            line-height: 20px; /* 128.571% */
         }
 
         .inquiry .btn_wrap.create{
@@ -561,5 +614,35 @@ align-self: stretch;
         .announce_field .info_desc .info_content{
             font-size: 14px;
         }
+        .inquiry-history__cell--status.pending{
+            font-weight: 600;
+        }
+
+        .inquiry-history__cell--status.answered{
+            font-weight: 600;
+        }
+
+        .inquiry-card__meta.date,
+        .inquiry-card__meta.category{
+            font-size: 14px;
+        }
+        .inquiry-card__meta{
+            gap: 0px;
+        }
+
+        .inquiry-card__meta span:not(:last-child)::after {
+            content: "";
+            display: inline-block;     
+            width: 1px;
+            height: 10px;
+            margin: 0 8px;
+            background: #E0E2E4;
+            vertical-align: middle;
+          }
+        .inquiry.mobile .create .select-dropdown__menu{
+            top: 88px;
+          }  
+
+        
     }
 }
