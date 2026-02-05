@@ -39,7 +39,7 @@ const solidBarPlugin: Plugin<"bar", SolidBarOpts> = {
     const getCss = (name: string, fallback: string) =>
       getComputedStyle(document.documentElement).getPropertyValue(name) || fallback;
 
-    const trackColor = getCss("--white-20", "rgba(134, 58, 58, 0.2)");
+    const trackColor = getCss("--white-20", "rgba(255, 255, 255, 0.20)");
     const fillColor = `rgba(255,255,255,${opacity})`;
     const lineColor = getCss("--primary-primary", "#816BFE");
 
@@ -126,7 +126,7 @@ export default function ScoreBarChartJS({
   const data = useMemo(
     () => ({
       labels: [""],
-      datasets: [{ data: [score], backgroundColor: "transparent" }],
+      datasets: [{ data: [score], backgroundColor: "rgba(255, 255, 255, 0.2)" }],
     }),
     [score]
   );

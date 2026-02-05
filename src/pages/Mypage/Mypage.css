@@ -1669,10 +1669,14 @@ line-height: 20px; /* 125% */
             width: 100%;
             gap: 12px;
         }
+        .mypage_main.no-bg-flag.mobile{
+            background: var(--gray-100, #F2F3F4);
+        }
 
         .mp-section{
             padding: 24px 20px;
             border: none;
+            gap: 20px;
         }
         .mp-section.saved{
             border: none;
@@ -1692,6 +1696,7 @@ line-height: 20px; /* 125% */
         }
         .mp-section .job-list{
             display: flex;
+            overflow: auto;
           
         }
         .mp-section .job-list .job-card{
@@ -1721,6 +1726,7 @@ line-height: 20px; /* 125% */
 
         .mp-section .data-list__body{
             padding: 0px;
+            gap: 12px;
         }
 
         .mp-section .data-list__body .mock-history__item_num{
@@ -1981,6 +1987,21 @@ line-height: 20px; /* 125% */
             bottom: 0px;
             width: 100%;
         }
+        .resume-card .resume-card__logo{
+            width: 48px;
+            height: 48px;
+        }
+        .resume-card .resume-card__logo img{
+            width: 20px;
+            height: 20px;
+        }
+        .resume-card .resume-card__body .resume-card__headline{
+            font-size: 16px;
+        }
+        .resume-card .resume-card__body .resume-card__meta{
+            font-size: 14px;
+        }
+        
     }
 
 }

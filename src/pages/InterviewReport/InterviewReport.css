@@ -930,6 +930,11 @@ interview_result */
 .mock-history__cell--status.is-done::before    { background: #15D078; }
 .mock-history__cell--status.is-doing::before { background: #C8CCCF; }
 
+.mock-interview-summary__header .sort-control__label{
+  color: var(--gray-900, #2A2D2F);
+  font-size: 16px;
+}
+
 
   /* 모바일: 750px 이하 */
   @media (max-width: 750px) {
@@ -1030,12 +1035,34 @@ interview_result */
       }
       .mock-interview-summary__chart-score{
         font-size: 32px;
+        gap: 16px;
       }
       .mock-interview-summary__chart-badge{
         padding: 6px 8px;
         font-size:14px
       }
       .mock-interview-summary__chart-desc{
+        font-size: 14px;
+      }
+      .mock-interview-summary__chart-tags{
+        gap: 12px;
+      }
+      .mock-interview-summary__chart-tag{
+        font-size: 14px;
+      }
+      .mock-interview-summary__chart-tag-icon{
+        width: 18px;
+        height: 18px;
+      }
+      .mock-interview-summary__chart-right{
+        padding: 24px 20px;
+        gap: 12px;
+      }
+      .mock-interview-summary__chart-metric{
+        font-size: 14px;
+      }
+
+      .mock-interview-summary__chart-axis-range{
         font-size: 14px;
       }
     
@@ -1049,28 +1076,36 @@ interview_result */
       .mock-interview-summary__chart-title--surface{
         padding: 24px 20px 20px 20px;
       }
+      .mock-interview-summary__chart-title-icon{
+        width: 22px;
+        height: 22px;
+      }
 
       .mock-interview-summary__chart-summary-label,
       .mock-interview-summary__chart-summary-value{
         font-size: 16px;
       }
       .mock-interview-summary__trend-graph{
-        padding: 20px;
+        padding: 20px 20px 24px 20px;
       }
       .mock-interview-summary__chart-summary{
         padding: 20px;
       }
       .mock-category-icon,
-      .keywords-keywords-icon,
       .job-match-history-icon
       {
         width: 22px;
         height: 22px;
       }
+      .keywords-keywords-icon{
+        width: 22px;
+        height: 18px;
+      }
       .mock-interview-summary__panel{
-        padding: 20px;
+        padding: 24px 20px;
         gap: 20px;
         background: var(--white-100, #FFF);
+        border-radius: 0px;
       }
       .mock-trend__legend{
         flex-direction: column;
@@ -1078,7 +1113,15 @@ interview_result */
       }
       .mock-trend__legend-item{
         width: 100%;
+        font-size: 14px;
       }
+      .mock-trend__name{
+        font-size: 16px;
+      }
+      .mock-trend__rating{
+        gap: 8px;
+      }
+
       .keywords-panel__content{
         flex-direction: column;
       }
@@ -1094,6 +1137,9 @@ interview_result */
       .mock-interview-summary__panel--jobs .mock-interview__title{
         padding: 0 20px;
         background-color: white;
+      }
+      .mock-interview__title{
+        gap: 8px;
       }
 
       .mock-interview__jobcard-list--grid{
@@ -1220,6 +1266,15 @@ interview_result */
         font-weight: 400;
         line-height: 18px; /* 128.571% */
       }
+    
+      
+      .mock-history__meta > span:not(:last-child)::after {
+        content: "";
+        width: 1px;
+        height: 10px;
+        background: #E0E2E4;
+      }
+
       .mock-history__status{
         display: flex;
         align-items: center;
@@ -1245,6 +1300,8 @@ interview_result */
         align-self: stretch;
         border-radius: 4px;
         background: var(--gray-50, #F8F8F9);
+        font-size: 14px;
+        color: var(--gray-900, #2A2D2F);
       }
 
       .mock-history__btn_wrap{
@@ -1257,6 +1314,33 @@ interview_result */
       }
       .mock-interview-page__section .pagination{
         padding-bottom: 20px;
+      }
+
+      .mock-interview-page__hero-headings{
+        gap: 16px;
+      }
+      .mock-interview-summary__chart-summary-icon-wrap{
+        width: 20px;
+        height: 20px;
+      }
+      .mock-interview-summary__chart-summary-item{
+        gap: 8px;
+      }
+      .mock-interview-summary__chart-summary-label{
+        gap: 8px;
+        color: var(--gray-700, #6F767E);
+        font-weight: 600;
+      }
+      .keywords-panel__rank-item{
+        padding: 16px;
+        font-size: 14px;
+      }
+      .keywords-panel__rank-item-head{
+        gap: 12px;
+        font-size: 16px;
+      }
+      .keywords-panel__rank-badge{
+        font-size: 14px;
       }
 
     }

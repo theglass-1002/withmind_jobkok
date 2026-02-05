@@ -124,7 +124,7 @@ export default function MyReportResult() {
   };
 
 
-  const sortOptions = ["최근 10일", "최근 한달", "최근1년"];
+  const sortOptions = ["최근 10일", "최근 한달", "최근 1년"];
 
 
   const keywords: KeywordPoint[] = [

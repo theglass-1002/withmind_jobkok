@@ -87,6 +87,7 @@ type FormState = {
   isFreshGraduate: boolean;
   education: Education[];
   photoFile?: File | null;
+  profilePhotoFileMeta?: ProfilePhotoFile | null;
   desiredRoles: string[];
   hardSkills: string[];
   softSkills: string[];
@@ -144,6 +145,7 @@ const initial: FormState = {
   isFreshGraduate: false,
   education: [],
   photoFile: null,
+  profilePhotoFileMeta: null,
   desiredRoles: [],
   hardSkills: [],
   softSkills: [],
@@ -171,6 +173,7 @@ const mapCategoryToKind = (category?: string): AwardsCertItem["kind"] => {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 상세 응답 → FormState 매핑
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 const mapDetailToFormState = (data: ResumeDetailResponse): FormState => {
   return {
     title: data.title ?? "",
@@ -183,6 +186,15 @@ const mapDetailToFormState = (data: ResumeDetailResponse): FormState => {
       phone: data.phone ?? "",
       photoUrl: data.profilePhotoFile?.filePath ?? "",
     },
+
+    // 추가: 서버에서 내려준 프로필 사진 메타 저장 (수정 시 기존 사진 유지용)
+    profilePhotoFileMeta: data.profilePhotoFile
+      ? {
+          ...data.profilePhotoFile,
+          filePath: extractS3Path(data.profilePhotoFile.filePath),
+        }
+      : null,
+
     location: {
       nationwide: (data.regionList?.length ?? 0) === 0,
       selectedCodes: data.regionList ?? [],
@@ -230,17 +242,16 @@ const mapDetailToFormState = (data: ResumeDetailResponse): FormState => {
       url: p.url ?? "",
       note: p.description ?? "",
       file: null,
-      filePath: p.filePath ? extractS3Path(p.filePath) : null, // 🔥 CloudFront URL → 순수 경로
+      filePath: p.filePath ? extractS3Path(p.filePath) : null,
       fileIdx: p.fileIdx ?? null,
-      // 🔥 백엔드 재전송을 위해 파일 메타 정보 저장
       sizeBytes: (p as any).sizeBytes ?? 0,
       contentType: (p as any).contentType ?? "",
       storedName: (p as any).storedName ?? "",
     } as any)),
-    selfIntro:
-      (data.selfIntroList && data.selfIntroList[0]?.content) || "",
+    selfIntro: (data.selfIntroList && data.selfIntroList[0]?.content) || "",
   };
 };
+
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 섹션 완료 상태 계산 (Sidebar용)
@@ -480,9 +491,9 @@ export default function ResumeEdit() {
         awards,
       };
 
-      console.log('보내는 페이로드',payload);
+      console.log("보내는 페이로드", payload);
       const titles = await fetchResumeTitleSuggestions(payload);
-      console.log('결과값',titles);
+      console.log("결과값", titles);
       if (!titles || titles.length === 0) {
         toast.info("추천할 제목이 없습니다. 내용을 조금 더 채워보세요.");
         return;
@@ -1036,19 +1047,18 @@ export default function ResumeEdit() {
       awardCerts: [],
       portfolios: [],
     };
-
+  
     if (!form.title.trim()) {
       nextErr.title = "여기 이력서 제목을 입력해 주세요.";
     }
-
+  
     if (!form.location.nationwide && form.location.selectedCodes.length === 0) {
       nextErr.location = "1개 이상 추가해 주세요.";
     }
-
+  
     const basicErr: BasicErrors = {};
     if (!form.basic.name.trim()) basicErr.name = "이름을 입력해 주세요.";
-    if (!form.basic.birth.trim())
-      basicErr.birth = "생년월일을 입력해 주세요.";
+    if (!form.basic.birth.trim()) basicErr.birth = "생년월일을 입력해 주세요.";
     if (!form.basic.gender) basicErr.gender = "성별을 선택해 주세요.";
     if (!form.basic.email.trim()) {
       basicErr.email = "이메일을 입력해 주세요.";
@@ -1056,14 +1066,13 @@ export default function ResumeEdit() {
       basicErr.email = "이메일 형식이 올바르지 않습니다.";
       toast.error("이메일 형식이 올바르지 않습니다.");
     }
-    if (!form.basic.phone.trim())
-      basicErr.phone = "연락처를 입력해 주세요.";
+    if (!form.basic.phone.trim()) basicErr.phone = "연락처를 입력해 주세요.";
     nextErr.basic = basicErr;
-
+  
     if (!form.isFreshGraduate) {
       nextErr.careers = buildCareerErrors(form.careers);
     }
-
+  
     const educationsToValidate =
       form.education.length > 0
         ? form.education
@@ -1078,25 +1087,25 @@ export default function ResumeEdit() {
           ];
     const eduErrs = buildEducationErrors(educationsToValidate);
     nextErr.education = eduErrs;
-
+  
     if (form.desiredRoles.length === 0) {
       nextErr.desiredRoles = "1개 이상 추가해 주세요.";
     }
-
+  
     if (form.activities.length > 0) {
       nextErr.activities = buildActivityErrors(form.activities);
     }
-
+  
     if (form.awardCerts.length > 0) {
       nextErr.awardCerts = buildAwardCertErrors(form.awardCerts);
     }
-
+  
     if (form.portfolios.length > 0) {
       nextErr.portfolios = buildPortfolioErrors(form.portfolios);
     }
-
+  
     setErrors(nextErr);
-
+  
     const hasBasicError = Object.keys(basicErr).length > 0;
     const hasTitleError = !!nextErr.title;
     const hasLocationError = !!nextErr.location;
@@ -1104,8 +1113,7 @@ export default function ResumeEdit() {
       !form.isFreshGraduate &&
       nextErr.careers &&
       nextErr.careers.some((ce) => Object.keys(ce).length > 0);
-    const hasEduError =
-      eduErrs && eduErrs.some((ee) => Object.keys(ee).length > 0);
+    const hasEduError = eduErrs && eduErrs.some((ee) => Object.keys(ee).length > 0);
     const hasDesiredRolesError = !!nextErr.desiredRoles;
     const hasActivityError =
       form.activities.length > 0 &&
@@ -1119,7 +1127,7 @@ export default function ResumeEdit() {
       form.portfolios.length > 0 &&
       nextErr.portfolios &&
       nextErr.portfolios.some((pe) => Object.keys(pe).length > 0);
-
+  
     return (
       !hasTitleError &&
       !hasLocationError &&
@@ -1132,7 +1140,7 @@ export default function ResumeEdit() {
       !hasPortfolioError
     );
   };
-
+  
   const handleSubmit = async () => {
     try {
       const ok = validate();
@@ -1140,19 +1148,23 @@ export default function ResumeEdit() {
         toast.error("필수 항목을 먼저 입력해 주세요.");
         return;
       }
-
+  
       if (isEdit && !resumeId) {
         toast.error("잘못된 접근입니다.");
         return;
       }
-
+  
       setIsLoading(true);
-
-      const profilePhotoFile = await handleFileSubmit();
+  
+      // ✅ 수정: 업로드 없으면 상세조회로 저장해둔 메타 그대로 재전송
+      const uploadedProfilePhotoFile = await handleFileSubmit();
+      const profilePhotoFile =
+        uploadedProfilePhotoFile ?? form.profilePhotoFileMeta ?? null;
+  
       const portfolioFilesResults = await handlePortfolioFilesSubmit();
-
+  
       console.log("🚀 handleSubmit - 전체 portfolios", form.portfolios);
-
+  
       const payload: CreateResumeRequest = {
         userIdx: Storage.getUserIdx(),
         isDefault: isDefaultResume ? 1 : 0,
@@ -1163,11 +1175,11 @@ export default function ResumeEdit() {
         gender: form.basic.gender === "male" ? "M" : "W",
         phone: form.basic.phone,
         birth: form.basic.birth,
-
+  
         ...(profilePhotoFile ? { profilePhotoFile } : {}),
-
+  
         regions: form.location.nationwide ? [] : form.location.selectedCodes,
-
+  
         ...(form.isFreshGraduate
           ? {}
           : {
@@ -1182,7 +1194,7 @@ export default function ResumeEdit() {
                 employedYn: career.isCurrent ? "Y" : "N",
               })),
             }),
-
+  
         educations: form.education.map((edu) => ({
           schoolName: edu.school_name,
           startYm: normalizeYm(edu.startDate)!,
@@ -1190,216 +1202,11 @@ export default function ResumeEdit() {
           majorDegree: edu.major_degree,
           graduatedYn: mapEducationStatusToGraduatedYn(edu.status),
         })),
-
+  
         jobs: form.desiredRoles,
         hardSkills: form.hardSkills,
         softSkills: form.softSkills,
-
-        ...(form.activities.length > 0
-          ? {
-              activities: form.activities.map((act) => ({
-                category: act.activityType ?? "교내활동",
-                activityTitle: act.activityName,
-                startYm: act.startDate ? normalizeYm(act.startDate) : "1999-09-09",
-                endYm: act.endDate ? normalizeYm(act.endDate) : "1999-09-09",
-                description: act.summary,
-                linkUrl: "https://github.com/user",
-              })),
-            }
-          : {}),
-
-        ...(form.awardCerts.length > 0
-          ? {
-              awardCerts: form.awardCerts.map((item) => ({
-                category: mapAwardsKindToCategoryLabel(item.kind),
-                name: item.title,
-                issuer: item.issuer ?? "",
-                acquiredYm: item.dateValue
-                  ? normalizeYm(item.dateValue)!.replace("-", "")
-                  : "",
-                licenseNo: item.score ?? "",
-                note: "",
-              })),
-            }
-          : {}),
-
-        ...(form.portfolios.length > 0
-          ? {
-              portfolios: form.portfolios.map((p, idx) => {
-                if (p.source === "file") {
-                  const uploadedResult = portfolioFilesResults.find(
-                    (r) => r.originalItem.id === p.id
-                  );
-
-                  if (uploadedResult?.uploadedFile) {
-                    const u = uploadedResult.uploadedFile;
-                    return {
-                      itemType: "FILE" as const,
-                      title: u.originalName,
-                      docName: u.originalName,
-                      url: null,
-                      fileRef: u.filePath,
-                      description: p.note ?? "",
-                      sortOrder: idx + 1,
-                      portfolioFile: {
-                        filePath: u.filePath,
-                        originalName: u.originalName,
-                        storedName: u.storedName,
-                        sizeBytes: u.sizeBytes,
-                        contentType: u.contentType,
-                      },
-                    };
-                  }
-
-                  if (p.filePath) {
-                    const cleanPath = extractS3Path(p.filePath); // 🔥 CloudFront URL 제거
-                    const storedName = (p as any).storedName || cleanPath.split('/').pop() || "";
-                    const sizeBytes = (p as any).sizeBytes || 1048576;
-                    const contentType = (p as any).contentType || (() => {
-                      const extension = storedName.split('.').pop()?.toLowerCase() || "";
-                      const contentTypeMap: Record<string, string> = {
-                        'pdf': 'application/pdf',
-                        'doc': 'application/msword',
-                        'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                        'xls': 'application/vnd.ms-excel',
-                        'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                        'ppt': 'application/vnd.ms-powerpoint',
-                        'pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-                        'jpg': 'image/jpeg',
-                        'jpeg': 'image/jpeg',
-                        'png': 'image/png',
-                        'gif': 'image/gif',
-                        'txt': 'text/plain',
-                      };
-                      return contentTypeMap[extension] || 'application/octet-stream';
-                    })();
-                    
-                    return {
-                      itemType: "FILE" as const,
-                      title: p.title || `포트폴리오 문서 ${idx + 1}`,
-                      docName: p.title || "",
-                      url: null,
-                      fileRef: cleanPath, // 🔥 순수 경로 사용
-                      description: p.note ?? "",
-                      sortOrder: idx + 1,
-                      portfolioFile: {
-                        filePath: cleanPath, // 🔥 순수 경로 사용
-                        originalName: p.title || storedName,
-                        storedName: storedName,
-                        sizeBytes: sizeBytes,
-                        contentType: contentType,
-                      },
-                    };
-                  }
-                }
-
-                return {
-                  itemType: "URL" as const,
-                  title: p.title || `포트폴리오 ${idx + 1}`,
-                  docName: p.url || "",
-                  url: p.url,
-                  fileRef: null,
-                  description: p.note ?? "",
-                  sortOrder: idx + 1,
-                  portfolioFile: null,
-                };
-              }),
-            }
-          : {}),
-
-        ...(form.selfIntro.trim().length > 0
-          ? {
-              selfIntros: [
-                {
-                  title: "소개",
-                  content: form.selfIntro,
-                  isAi: false,
-                },
-              ],
-            }
-          : {}),
-      };
-
-      console.log("📨 최종 payload(handleSubmit)", payload);
-
-      const res = await updateResume(Number(resumeId), payload);
-      console.log("이력서 수정", res);
-      if (res.code === 200) {
-        setIsLoading(false);
-        toast.success("이력서가 수정되었습니다!");
-        navigate(`/resumes/${resumeId}`);
-      } else {
-        toast.error(res.msg || "이력서 수정에 실패했습니다.");
-      }
-    } catch (error) {
-      console.error("❌ 이력서 저장 실패:", error);
-      toast.error("이력서 저장 중 오류가 발생했습니다.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleTempSave = async () => {
-    try {
-      setIsLoading(true);
-      const nextErr: typeof errors = {
-        basic: {} as BasicErrors,
-      };
-      if (!form.title.trim()) {
-        nextErr.title = "여기 이력서 제목을 입력해 주세요.";
-        setErrors(nextErr);
-        setIsLoading(false);
-        toast.error("필수 항목을 먼저 입력해 주세요.");
-        return;
-      }
-      const profilePhotoFile = await handleFileSubmit();
-      const portfolioFilesResults = await handlePortfolioFilesSubmit();
-
-      console.log("🚀 handleTempSave - 전체 portfolios", form.portfolios);
-
-      const payload: CreateResumeRequest = {
-        userIdx: Storage.getUserIdx(),
-        isDefault: 0,
-        // isDefault: isDefaultResume ? 1 : 0,
-        temp: "Y",
-        title: form.title,
-        name: form.basic.name,
-        email: form.basic.email,
-        gender: form.basic.gender === "male" ? "M" : "W",
-        phone: form.basic.phone,
-        birth: form.basic.birth,
-
-        ...(profilePhotoFile ? { profilePhotoFile } : {}),
-
-        regions: form.location.nationwide ? [] : form.location.selectedCodes,
-
-        ...(form.isFreshGraduate
-          ? {}
-          : {
-              careers: form.careers.map((career) => ({
-                employmentType: career.employmentType || "정규직",
-                companyName: career.company_name,
-                startYm: normalizeYm(career.startDate)!,
-                endYm: career.isCurrent ? null : normalizeYm(career.endDate),
-                roleName: career.role,
-                positionName: career.position,
-                workAndResult: career.summary,
-                employedYn: career.isCurrent ? "Y" : "N",
-              })),
-            }),
-
-        educations: form.education.map((edu) => ({
-          schoolName: edu.school_name,
-          startYm: normalizeYm(edu.startDate)!,
-          endYm: edu.endDate,
-          majorDegree: edu.major_degree,
-          graduatedYn: mapEducationStatusToGraduatedYn(edu.status),
-        })),
-
-        jobs: form.desiredRoles,
-        hardSkills: form.hardSkills,
-        softSkills: form.softSkills,
-
+  
         ...(form.activities.length > 0
           ? {
               activities: form.activities.map((act) => ({
@@ -1414,7 +1221,7 @@ export default function ResumeEdit() {
               })),
             }
           : {}),
-
+  
         ...(form.awardCerts.length > 0
           ? {
               awardCerts: form.awardCerts.map((item) => ({
@@ -1429,7 +1236,7 @@ export default function ResumeEdit() {
               })),
             }
           : {}),
-
+  
         ...(form.portfolios.length > 0
           ? {
               portfolios: form.portfolios.map((p, idx) => {
@@ -1437,7 +1244,7 @@ export default function ResumeEdit() {
                   const uploadedResult = portfolioFilesResults.find(
                     (r) => r.originalItem.id === p.id
                   );
-
+  
                   if (uploadedResult?.uploadedFile) {
                     const u = uploadedResult.uploadedFile;
                     return {
@@ -1457,40 +1264,47 @@ export default function ResumeEdit() {
                       },
                     };
                   }
-
+  
                   if (p.filePath) {
-                    const cleanPath = extractS3Path(p.filePath); // 🔥 CloudFront URL 제거
-                    const storedName = (p as any).storedName || cleanPath.split('/').pop() || "";
+                    const cleanPath = extractS3Path(p.filePath);
+                    const storedName =
+                      (p as any).storedName || cleanPath.split("/").pop() || "";
                     const sizeBytes = (p as any).sizeBytes || 1048576;
-                    const contentType = (p as any).contentType || (() => {
-                      const extension = storedName.split('.').pop()?.toLowerCase() || "";
-                      const contentTypeMap: Record<string, string> = {
-                        'pdf': 'application/pdf',
-                        'doc': 'application/msword',
-                        'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                        'xls': 'application/vnd.ms-excel',
-                        'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                        'ppt': 'application/vnd.ms-powerpoint',
-                        'pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-                        'jpg': 'image/jpeg',
-                        'jpeg': 'image/jpeg',
-                        'png': 'image/png',
-                        'gif': 'image/gif',
-                        'txt': 'text/plain',
-                      };
-                      return contentTypeMap[extension] || 'application/octet-stream';
-                    })();
-
+                    const contentType =
+                      (p as any).contentType ||
+                      (() => {
+                        const extension =
+                          storedName.split(".").pop()?.toLowerCase() || "";
+                        const contentTypeMap: Record<string, string> = {
+                          pdf: "application/pdf",
+                          doc: "application/msword",
+                          docx:
+                            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                          xls: "application/vnd.ms-excel",
+                          xlsx:
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                          ppt: "application/vnd.ms-powerpoint",
+                          pptx:
+                            "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                          jpg: "image/jpeg",
+                          jpeg: "image/jpeg",
+                          png: "image/png",
+                          gif: "image/gif",
+                          txt: "text/plain",
+                        };
+                        return contentTypeMap[extension] || "application/octet-stream";
+                      })();
+  
                     return {
                       itemType: "FILE" as const,
                       title: p.title || `포트폴리오 문서 ${idx + 1}`,
                       docName: p.title || "",
                       url: null,
-                      fileRef: cleanPath, // 순수 경로 사용
+                      fileRef: cleanPath,
                       description: p.note ?? "",
                       sortOrder: idx + 1,
                       portfolioFile: {
-                        filePath: cleanPath, //  순수 경로 사용
+                        filePath: cleanPath,
                         originalName: p.title || storedName,
                         storedName: storedName,
                         sizeBytes: sizeBytes,
@@ -1499,6 +1313,7 @@ export default function ResumeEdit() {
                     };
                   }
                 }
+  
                 return {
                   itemType: "URL" as const,
                   title: p.title || `포트폴리오 ${idx + 1}`,
@@ -1512,7 +1327,7 @@ export default function ResumeEdit() {
               }),
             }
           : {}),
-
+  
         ...(form.selfIntro.trim().length > 0
           ? {
               selfIntros: [
@@ -1525,20 +1340,244 @@ export default function ResumeEdit() {
             }
           : {}),
       };
-
+  
+      console.log("📨 최종!!!!! payload(handleSubmit)", payload);
+  
+      const res = await updateResume(Number(resumeId), payload);
+      console.log("이력서 수정", res);
+      if (res.code === 200) {
+        setIsLoading(false);
+        toast.success("이력서가 수정되었습니다!");
+        navigate(`/resumes/${resumeId}`);
+      } else {
+        toast.error(res.msg || "이력서 수정에 실패했습니다.");
+      }
+    } catch (error: any) {
+      console.error("❌ 이력서 저장 실패:", error);
+      console.error("❌ status:", error?.response?.status);
+      console.error("❌ data:", error?.response?.data);
+      toast.error(error?.response?.data?.msg || "이력서 저장 중 오류가 발생했습니다.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const handleTempSave = async () => {
+    try {
+      setIsLoading(true);
+      const nextErr: typeof errors = {
+        basic: {} as BasicErrors,
+      };
+  
+      if (!form.title.trim()) {
+        nextErr.title = "여기 이력서 제목을 입력해 주세요.";
+        setErrors(nextErr);
+        setIsLoading(false);
+        toast.error("필수 항목을 먼저 입력해 주세요.");
+        return;
+      }
+  
+      // ✅ 수정: 업로드 없으면 상세조회로 저장해둔 메타 그대로 재전송
+      const uploadedProfilePhotoFile = await handleFileSubmit();
+      const profilePhotoFile =
+        uploadedProfilePhotoFile ?? form.profilePhotoFileMeta ?? null;
+  
+      const portfolioFilesResults = await handlePortfolioFilesSubmit();
+  
+      console.log("🚀 handleTempSave - 전체 portfolios", form.portfolios);
+  
+      const payload: CreateResumeRequest = {
+        userIdx: Storage.getUserIdx(),
+        isDefault: 0,
+        temp: "Y",
+        title: form.title,
+        name: form.basic.name,
+        email: form.basic.email,
+        gender: form.basic.gender === "male" ? "M" : "W",
+        phone: form.basic.phone,
+        birth: form.basic.birth,
+  
+        ...(profilePhotoFile ? { profilePhotoFile } : {}),
+  
+        regions: form.location.nationwide ? [] : form.location.selectedCodes,
+  
+        ...(form.isFreshGraduate
+          ? {}
+          : {
+              careers: form.careers.map((career) => ({
+                employmentType: career.employmentType || "정규직",
+                companyName: career.company_name,
+                startYm: normalizeYm(career.startDate)!,
+                endYm: career.isCurrent ? null : normalizeYm(career.endDate),
+                roleName: career.role,
+                positionName: career.position,
+                workAndResult: career.summary,
+                employedYn: career.isCurrent ? "Y" : "N",
+              })),
+            }),
+  
+        educations: form.education.map((edu) => ({
+          schoolName: edu.school_name,
+          startYm: normalizeYm(edu.startDate)!,
+          endYm: edu.endDate,
+          majorDegree: edu.major_degree,
+          graduatedYn: mapEducationStatusToGraduatedYn(edu.status),
+        })),
+  
+        jobs: form.desiredRoles,
+        hardSkills: form.hardSkills,
+        softSkills: form.softSkills,
+  
+        ...(form.activities.length > 0
+          ? {
+              activities: form.activities.map((act) => ({
+                category: act.activityType ?? "교내활동",
+                activityTitle: act.activityName,
+                startYm: act.startDate
+                  ? normalizeYm(act.startDate)
+                  : "1999-09-09",
+                endYm: act.endDate ? normalizeYm(act.endDate) : "1999-09-09",
+                description: act.summary,
+                linkUrl: "https://github.com/user",
+              })),
+            }
+          : {}),
+  
+        ...(form.awardCerts.length > 0
+          ? {
+              awardCerts: form.awardCerts.map((item) => ({
+                category: mapAwardsKindToCategoryLabel(item.kind),
+                name: item.title,
+                issuer: item.issuer ?? "",
+                acquiredYm: item.dateValue
+                  ? normalizeYm(item.dateValue)!.replace("-", "")
+                  : "",
+                licenseNo: item.score ?? "",
+                note: "",
+              })),
+            }
+          : {}),
+  
+        ...(form.portfolios.length > 0
+          ? {
+              portfolios: form.portfolios.map((p, idx) => {
+                if (p.source === "file") {
+                  const uploadedResult = portfolioFilesResults.find(
+                    (r) => r.originalItem.id === p.id
+                  );
+  
+                  if (uploadedResult?.uploadedFile) {
+                    const u = uploadedResult.uploadedFile;
+                    return {
+                      itemType: "FILE" as const,
+                      title: u.originalName,
+                      docName: u.originalName,
+                      url: null,
+                      fileRef: u.filePath,
+                      description: p.note ?? "",
+                      sortOrder: idx + 1,
+                      portfolioFile: {
+                        filePath: u.filePath,
+                        originalName: u.originalName,
+                        storedName: u.storedName,
+                        sizeBytes: u.sizeBytes,
+                        contentType: u.contentType,
+                      },
+                    };
+                  }
+  
+                  if (p.filePath) {
+                    const cleanPath = extractS3Path(p.filePath);
+                    const storedName =
+                      (p as any).storedName || cleanPath.split("/").pop() || "";
+                    const sizeBytes = (p as any).sizeBytes || 1048576;
+                    const contentType =
+                      (p as any).contentType ||
+                      (() => {
+                        const extension =
+                          storedName.split(".").pop()?.toLowerCase() || "";
+                        const contentTypeMap: Record<string, string> = {
+                          pdf: "application/pdf",
+                          doc: "application/msword",
+                          docx:
+                            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                          xls: "application/vnd.ms-excel",
+                          xlsx:
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                          ppt: "application/vnd.ms-powerpoint",
+                          pptx:
+                            "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                          jpg: "image/jpeg",
+                          jpeg: "image/jpeg",
+                          png: "image/png",
+                          gif: "image/gif",
+                          txt: "text/plain",
+                        };
+                        return contentTypeMap[extension] || "application/octet-stream";
+                      })();
+  
+                    return {
+                      itemType: "FILE" as const,
+                      title: p.title || `포트폴리오 문서 ${idx + 1}`,
+                      docName: p.title || "",
+                      url: null,
+                      fileRef: cleanPath,
+                      description: p.note ?? "",
+                      sortOrder: idx + 1,
+                      portfolioFile: {
+                        filePath: cleanPath,
+                        originalName: p.title || storedName,
+                        storedName: storedName,
+                        sizeBytes: sizeBytes,
+                        contentType: contentType,
+                      },
+                    };
+                  }
+                }
+  
+                return {
+                  itemType: "URL" as const,
+                  title: p.title || `포트폴리오 ${idx + 1}`,
+                  docName: p.url || "",
+                  url: p.url,
+                  fileRef: null,
+                  description: p.note ?? "",
+                  sortOrder: idx + 1,
+                  portfolioFile: null,
+                };
+              }),
+            }
+          : {}),
+  
+        ...(form.selfIntro.trim().length > 0
+          ? {
+              selfIntros: [
+                {
+                  title: "소개",
+                  content: form.selfIntro,
+                  isAi: false,
+                },
+              ],
+            }
+          : {}),
+      };
+  
       console.log("✅ 이력서 임시 저장 payload:", payload);
       const result = await createResume(payload);
       console.log("✅ 이력서 임시저장 성공:", result);
+  
       setIsLoading(false);
       toast.success("임시 저장되었습니다.");
-     // navigate(`/resumes/`);
-    } catch (error) {
+    } catch (error: any) {
       setIsLoading(false);
       console.error("❌ 이력서 임시 저장 실패:", error);
-      toast.error("이력서 등록 중 오류가 발생했습니다.");
+      console.error("❌ status:", error?.response?.status);
+      console.error("❌ data:", error?.response?.data);
+      toast.error(error?.response?.data?.msg || "이력서 등록 중 오류가 발생했습니다.");
       navigate(`/resumes/`);
     }
   };
+  
 
   const isSubmitDisabled = !form.title.trim();
 
@@ -1627,9 +1666,7 @@ export default function ResumeEdit() {
                 }}
               />
               {errors.title && (
-                <span className="resume-create-page__error">
-                  {errors.title}
-                </span>
+                <span className="resume-create-page__error">{errors.title}</span>
               )}
             </div>
             <AISuggestArea
