@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef ,useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import "./ResumeCreate.css";
 import Switch from "react-switch";
 import Tabs from "@/shared/components/tabs/Tabs";
@@ -7,8 +8,6 @@ import {useStickyTabs, tabItems, BasicInfo ,ALL_SECTIONS ,
   LocationValue} from '@/shared/utils/util';
 import { toast } from "react-toastify";
 import Modal from "@/shared/components/modal/Modal";
-
-
 import M_BasicInfoSection from "./ResumeCreate/BasicInfoSection/M_BasicInfoSection";
 import M_LocationSection from "./ResumeCreate/LocationSection/M_LocationSection";
 import M_CareerSection from "./ResumeCreate/CareerSection/M_CareerSection";
@@ -30,9 +29,11 @@ import ResumeSidebar, {
 
 import ic_star_gray700_20 from "@/assets/icons/size20/ic_star_gray700_20.png";
 import "react-toastify/dist/ReactToastify.css";
+import { fetchMyInfo, logout } from "@/api/auth/auth.api";
 
 
 export default function M_ResumeCreate() {
+  const navigate = useNavigate();
   const [form, setForm] = useState<FormState>(initial);
   const [showDefaultModal, setShowDefaultModal] = useState(false); // 기본 이력서 설정 모달
   const [errors, setErrors] = useState<{ 
@@ -51,6 +52,46 @@ export default function M_ResumeCreate() {
     ".default_tabs",
     ".page-header"
   );
+
+  useEffect(() => {
+    const initMyInfo = async () => {
+      try {
+        const res = await fetchMyInfo();
+        console.log("[M_ResumeCreate] fetchMyInfo:", res);
+  
+        const u = res.user;
+  
+        const birth =
+          typeof u.birthdate === "string" && u.birthdate.length === 8
+            ? `${u.birthdate.slice(0, 4)}.${u.birthdate.slice(4, 6)}.${u.birthdate.slice(6, 8)}`
+            : "";
+  
+        const gender =
+          u.gender === "M" ? "male" : u.gender === "W" ? "female" : null;
+  
+        setForm((prev) => ({
+          ...prev,
+          basic: {
+            ...prev.basic,
+            name: u.userName ?? "",
+            email: u.userId ?? "",
+            phone: u.phone ?? "",
+            birth,
+            gender,
+          },
+        }));
+      } catch (e: any) {
+        console.error("[M_ResumeCreate] fetchMyInfo error:", e);
+        if (e?.code === 999) {
+          logout();
+          navigate("/login");
+        }
+      }
+    };
+  
+    initMyInfo();
+  }, [navigate]);
+  
 
   const handleTabClick = (key: string) => {
     setActiveTab(key);
@@ -200,16 +241,6 @@ export default function M_ResumeCreate() {
               </span>
             </span>
           </div>
-            {/* <div className="resume-create-page__assist">
-              <span className="resume-create-page__assist-text">
-                <img className="ai-suggest-icon" src={ic_star_gray700_20} alt="" />
-                더 적합한 문장을 추천을 위해 아래 항목들을 먼저 채워주세요.
-                <span className="ai-suggest-btn career-section__summary-ai-btn">
-                AI 문장 추천
-              </span>
-              </span>
-           
-            </div> */}
           </div>
           <M_BasicInfoSection
             values={form.basic}

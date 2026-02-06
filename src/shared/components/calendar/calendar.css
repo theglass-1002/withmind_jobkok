@@ -425,6 +425,24 @@
     .cal.cal--day{
       width: 100%;
     }
+    .cal--day .daypicker__weekdays{
+      width: 100%;
+      justify-content: space-around;
+    }
+    .cal--day .daypicker__weekday{
+      width: 22px;
+      height: 22px;
+    }
+    .cal--day .daypicker__grid{
+      width: 100%;
+      padding: 0px;
+      justify-items: center;
+    }
+    .cal--day .daypicker__cell,
+    .cal--day .daypicker__cell--empty{
+      width: 22px;
+      height: 22px;
+    }
     
   }
 }

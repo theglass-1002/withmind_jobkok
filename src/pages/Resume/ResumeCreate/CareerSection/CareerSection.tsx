@@ -589,7 +589,7 @@ function CareerItem({
 
             {isCurrent ? (
               <div className="field career-section date career-section__date--end">
-                <label className="label" />
+          
                 <div className="date-section">
                   <div className="section__date-inner disabled">
                     <img src={ic_add_btn_gray700_20} alt="" />
@@ -739,10 +739,10 @@ function CareerItem({
               ) : (
                 <ul className="career-section__summary-tips">
                   <li className="career-section__summary-tip">
-                    세부 내용을 입력해 주세요.
+                  - 프로젝트 경험은 역할ㆍ기여도ㆍ성과 중심으로 정리하면 좋습니다.
                   </li>
                   <li className="career-section__summary-tip">
-                    프로젝트 경험은 역할ㆍ기여도ㆍ성과 중심으로 정리하면 좋습니다.
+                  - 작성 후 [AI 문장 추천]을 눌러 추천 내용을 참고해 보세요.
                   </li>
                 </ul>
               )}
@@ -757,8 +757,7 @@ function CareerItem({
               )} */}
             </div>
           )}
-
-          <AISuggestArea
+        <AISuggestArea
             show={showAISuggest}
             items={aiSuggestions}
             hintText="정확한 문장 추천을 위해 (직무와 담당 업무) 항목을 먼저 입력해주세요."

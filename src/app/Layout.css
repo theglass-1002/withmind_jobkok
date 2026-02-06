@@ -1018,6 +1018,11 @@ body.mock-analysis-print-mode .mock-analysis {
         .default_btn_white{
             height: 48px;
         }
+        .gender-btn_wrap .default_btn_white.on{
+            height: 48px;
+        }
+
+
     }
 
 }

@@ -516,6 +516,10 @@ background: var(--gray-50, #F8F8F9);
     background: var(--white-100, #FFF);
 }
 
+.career-section__date--end .date-section{
+    justify-content: end;
+}
+
 .date-section{
     display: flex;
     width: 100%;
@@ -788,6 +792,25 @@ background: var(--gray-50, #F8F8F9);
   pointer-events: none;
   cursor: default;
 }
+.resume-basic-preview__row.photo{
+    width: 124px;
+    height: 166px;
+    display: flex;
+    position: relative;
+    padding: 5px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    align-self: stretch;
+    border-radius: 4px;
+    border: 1px solid var(--gray-300, #E0E2E4);
+    background: var(--white-100, #FFF);
+
+}
+.resume-basic-preview__photo{
+    width: 100%;
+}
 
 /* 모바일: 760px 이하 */
 @media (max-width: 760px) {
@@ -866,8 +889,35 @@ background: var(--gray-50, #F8F8F9);
             color: var(--gray-500, #9EA4AA);
             font-size: 18px;
         }
+      /* 텍스트 + 버튼을 같은 문장 흐름으로 */
+.resume-create-page__assist {
+    /* 혹시 flex로 되어있다면 끊어버리는 게 핵심 */
+    display: block;          /* 또는 inline-block */
+    padding:16px;
+  }
+  
+  .resume-create-page__assist-text {
+    display: inline;
+    font-size:14px;
+    line-height: 18px;
+}
+  .resume-create-page__assist-text .assist_icon{
 
-        .resume-create-page__assist{
+    width: 14px ;
+    height: 14px;
+    margin-right:4px;
+  }
+  
+  .resume-create-page__assist .ai-suggest-btn {
+    display: inline;         /* inline 이어붙이기 */
+    margin-left: 6px;        /* 문장과 간격 */
+    vertical-align: baseline;
+    white-space: nowrap;     /* 'AI 문장 추천'이 중간에 쪼개지지 않게 */
+    font-size: 14px;
+  }
+  
+          
+        /* .resume-create-page__assist{
             display: flex;
             align-items: flex-start;
             padding: 16px;
@@ -880,19 +930,6 @@ background: var(--gray-50, #F8F8F9);
             line-height: 18px;
             font-size: 14px;
             color: #6F767E;
-            /* color: var(--gray-700, #6F767E);
-            font-family: Pretendard;
-            font-size: 14px;
-            font-style: normal;
-            font-weight: 400;
-            line-height: 18px; 
-
-            white-space: normal;
-            align-items: start;
-            font-size: 14px;
-            flex-shrink: 0;
-            width: 90%;
-            height: 100%; */
             
         }
         .ai-suggest-btn, .career-section__summary-ai-btn{
@@ -911,7 +948,7 @@ background: var(--gray-50, #F8F8F9);
             align-items: end;
             margin-left: 6px;
 
-        }
+        } */
 
         .ai-suggest-icon{
             width: 18px;
@@ -960,6 +997,9 @@ background: var(--gray-50, #F8F8F9);
             width: 100%;
             padding: 0px;
             border: none;
+            flex-wrap: nowrap;
+            white-space: nowrap;
+            overflow: auto;
         }
 
 
@@ -984,5 +1024,19 @@ background: var(--gray-50, #F8F8F9);
         .career-section__toggle--current{
             border: none;
         }
+        .resume-create-page .location-picker__chip{
+            height: 32px;
+            padding: 8px 8px 8px 12px;
+            font-size: 14px;
+            gap: 4px;
+        }
+
+        .section__date-inner{
+            height: 48px;
+            padding:12px;
+        }
+
+      
+        
     }
 }

@@ -56,7 +56,7 @@ export default function DateInline({
       >
         <span className="section__date-input">
           <img src={iconSrc} alt="" />
-          <span className="section__date-value">{value || 'YYYY-MM'}</span>
+          <span className="section__date-value">{value || 'YYYY.MM'}</span>
         </span>
 
         {hasError && rightIconSrc && <img src={rightIconSrc} alt="" />}

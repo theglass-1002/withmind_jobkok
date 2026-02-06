@@ -44,7 +44,7 @@ export default function AISuggestArea({
         }`}
       >
         <span className="resume-create-page__assist-text">
-          {starIconGray && <img src={starIconGray} alt="star gray" />}
+          {starIconGray && <img className="assist_icon" src={starIconGray} alt="star gray" />}
           {hintText}
         </span>
 

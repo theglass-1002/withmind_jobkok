@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { BasicInfo, BasicErrors } from "@/shared/utils/util";
+import React, { useEffect, useState } from "react";
+import { BasicInfo, BasicErrors, formatPhoneNumber } from "@/shared/utils/util";
 import M_BasicInfoForm from "./Form/M_BasicInfoForm";
 
 import ic_mail_gray500_20 from "@/assets/icons/size20/ic_mail_gray500_20.png";
@@ -21,22 +21,26 @@ export default function M_BasicInfoSection({
   sectionRef?: (el: HTMLDivElement | null) => void;
 }) {
   const { name, birth, gender, email, phone } = values;
+
   const [isEditing, setIsEditing] = useState(false);
+  const [draft, setDraft] = useState<BasicInfo>(values);
+
+  useEffect(() => {
+    if (!isEditing) setDraft(values);
+  }, [values, isEditing]);
 
   const handleEdit = () => {
-    console.log("✏️ 수정 버튼 클릭! 편집 모드로 전환");
-    console.log("📋 현재 데이터:", values);
+    setDraft(values);
     setIsEditing(true);
   };
 
   const handleSave = () => {
-    console.log("✅ 저장 완료! 미리보기 모드로 전환");
-    console.log("💾 최종 저장된 데이터:", values);
+    onChange(draft);
     setIsEditing(false);
   };
 
   const handleCancel = () => {
-    console.log("🚫 취소! 미리보기 모드로 복귀");
+    setDraft(values);
     setIsEditing(false);
   };
 
@@ -46,7 +50,10 @@ export default function M_BasicInfoSection({
     const today = new Date();
     let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
       age--;
     }
     return age;
@@ -54,7 +61,8 @@ export default function M_BasicInfoSection({
 
   const birthYear = birth ? birth.split(".")[0] : "";
   const age = calculateAge(birth);
-  const genderText = gender === "male" ? "남성" : gender === "female" ? "여성" : "";
+  const genderText =
+    gender === "male" ? "남성" : gender === "female" ? "여성" : "";
 
   return (
     <div
@@ -70,7 +78,9 @@ export default function M_BasicInfoSection({
 
       <div className="resume-basic-preview">
         <div className="resume-basic-preview__row">
-          <span className="resume-basic-preview__name">{name || "이름 없음"}</span>
+          <span className="resume-basic-preview__name">
+            {name || "이름 없음"}
+          </span>
           <span className="resume-basic-preview__value info">
             {birthYear ? `${birthYear}년생` : ""}
             {age ? `(만 ${age}세)` : ""}
@@ -81,14 +91,32 @@ export default function M_BasicInfoSection({
 
         <div className="resume-basic-preview__row">
           <div className="resume-basic-preview__group">
-            <img className="resume-basic-preview__label_icon" src={ic_mail_gray500_20} alt="" />
-            <span className="resume-basic-preview__value">{email || "이메일 없음"}</span>
+            <img
+              className="resume-basic-preview__label_icon"
+              src={ic_mail_gray500_20}
+              alt=""
+            />
+            <span className="resume-basic-preview__value">
+              {email || "이메일 없음"}
+            </span>
+            
           </div>
+
           <div className="resume-basic-preview__group">
-            <img className="resume-basic-preview__label_icon" src={ic_mobile_gray_20} alt="" />
-            <span className="resume-basic-preview__value">{phone || "연락처 없음"}</span>
+            <img
+              className="resume-basic-preview__label_icon"
+              src={ic_mobile_gray_20}
+              alt=""
+            />
+            <span className="resume-basic-preview__value">
+              {formatPhoneNumber(phone) || "연락처 없음"}
+            </span>
           </div>
-        </div>
+        </div> 
+         {draft.photoUrl?(<div className="resume-basic-preview__row photo">
+        <img className="resume-basic-preview__photo" src={draft.photoUrl} alt="미리보기" />  
+        </div> ):<></>}
+        {/* */}
       </div>
 
       <div className="resume-create-page__section-action">
@@ -101,9 +129,14 @@ export default function M_BasicInfoSection({
         <div className="basic-info-form-overlay">
           <div className="basic-info-form-container">
             <M_BasicInfoForm
-              values={values}
+              values={draft}
               errors={errors}
-              onChange={onChange}
+              onChange={(patch) =>
+                setDraft((prev) => ({
+                  ...prev,
+                  ...patch,
+                }))
+              }
               onFocusAny={onFocusAny}
               onSave={handleSave}
               onCancel={handleCancel}

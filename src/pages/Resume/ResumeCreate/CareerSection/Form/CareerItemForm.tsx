@@ -303,7 +303,7 @@ export default function CareerItemForm({
             {/* 종료일 */}
             {isCurrent ? (
               <div className="field career-section date career-section__date--end">
-                <label className="label">{}</label>
+             
                 <div className="date-section">
                   <div className="section__date-inner disabled">
                     <img src={ic_add_btn_gray700_20} alt="" />
@@ -445,7 +445,7 @@ export default function CareerItemForm({
               value={summary ?? ""}
               onChange={(e) => onChange({ summary: e.target.value.slice(0, 2000) })}
               maxLength={2000}
-              placeholder="세부 내용을 입력해 주세요.&#10;프로젝트 경험은 역할ㆍ기여도ㆍ성과 중심으로 정리하면 좋습니다."
+              placeholder="- 프로젝트 경험은 역할ㆍ기여도ㆍ성과 중심으로 정리하면 좋습니다.&#10;- 작성 후 [AI 문장 추천]을 눌러 추천 내용을 참고해 보세요."
             />
             <span className="career-section__char-count">
               <span>{(summary ?? "").length}</span>
@@ -456,6 +456,7 @@ export default function CareerItemForm({
           <AISuggestArea
             show={showAISuggest}
             items={aiSuggestions}
+            hintText="정확한 문장 추천을 위해 (직무와 담당 업무) 항목을 먼저 입력해주세요."
             onClickSuggest={handleClickAISuggest}
             onClose={handleCloseAISuggest}
             onPick={handlePickSuggestion}

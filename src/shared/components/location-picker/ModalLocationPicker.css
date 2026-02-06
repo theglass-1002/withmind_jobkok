@@ -320,6 +320,10 @@
         }
         .location-picker__body{
             height: 100%;
+            font-size: 14px;
+        }
+        .location-picker__category-count{
+            font-size: 14px;
         }
         .location-picker__column--left,
         .location-picker__column--right{
@@ -336,6 +340,18 @@
         }
         .location-picker__category{
             width: 100%;
+        }
+        .location-picker__chip-chevron{
+            width: 20px;
+            height: 20px;
+            align-items: center;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+        }
+        .location-picker__checkbox{
+            width: 18px;
+            height: 18px;
         }
     }
 }

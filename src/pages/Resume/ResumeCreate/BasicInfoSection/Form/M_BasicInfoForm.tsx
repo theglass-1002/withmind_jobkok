@@ -18,6 +18,7 @@ import ic_close_white_20 from "@/assets/icons/size20/ic_close_white_20.png";
 import ic_replay_gray900_20 from "@/assets/icons/size20/ic_replay_gray900_20.png";
 
 import { BasicInfo, BasicErrors, parseYMD, fmtYMD } from "@/shared/utils/util";
+import { formatPhone } from "@/shared/utils/validators";
 
 interface M_BasicInfoFormProps {
   values: BasicInfo;
@@ -335,7 +336,7 @@ export default function M_BasicInfoForm({
                 id="phone"
                 type="tel"
                 required
-                value={phone}
+                value={formatPhone(phone)}
                 onChange={(v) => {
                   onChange({ phone: v });
                   if (displayErrors.phone) {

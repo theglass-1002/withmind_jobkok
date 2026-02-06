@@ -130,7 +130,7 @@
         }
         .field .career-section__summary-input textarea{
             height: 100%;
-
+            padding:0px;
         }
 
         .career-section__control .resume-create-page__assist-text{
@@ -156,9 +156,16 @@
         }
         .resume-create-page .career-section__fields{
             gap: 24px;
+            padding: 24px 20px;
         }
+        .career-section__fields .field {
+            gap: 12px;
+        }
+
+
         .resume-career-autofill-button{
             display: flex;
+            height: 48px;
             padding: 16px 20px;
             justify-content: center;
             align-items: center;
