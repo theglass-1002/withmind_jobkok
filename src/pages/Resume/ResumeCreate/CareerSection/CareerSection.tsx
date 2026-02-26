@@ -7,21 +7,19 @@ import Switch from "react-switch";
 import Modal from "@/shared/components/modal/Modal";
 import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
 
-import ic_star_gray700_20 from "@/assets/icons/size20/ic_star_gray700_20.png";
-import ic_star_green_20 from "@/assets/icons/size20/ic_star_green_20.png";
+
 import ic_trash_gray500_20 from "@/assets/icons/size20/ic_trash_gray500_20.png";
 import icon_calendar_red_20 from "@/assets/icons/size20/icon_calendar_red_20.png";
 import ic_calendar_gray900_20 from "@/assets/icons/size20/ic_calendar_gray900_20.png";
 import ic_add_btn_gray700_20 from "@/assets/icons/size20/ic_calendar_gray700_20.png";
 import ic_add_btn_gray900_20 from "@/assets/icons/size20/ic_add_btn_gray900_20.png";
 import ic_arrow_drop_down_gray900_24 from "@/assets/icons/size24/ic_arrow_drop_down_gray900_24.png";
-import ic_add_purple_20 from "@/assets/icons/size20/ic_add_purple_20.png";
+
 import ic_key_arrow_down_gray500_20 from "@/assets/icons/size20/ic_key_arrow_down_gray500_20.png";
 import ic_key_arrow_up_gray500_20 from "@/assets/icons/size20/ic_key_arrow_up_gray500_20.png";
 import ic_key_arrow_up_gray900_20 from "@/assets/icons/size20/ic_key_arrow_up_gray900_20.png";
 import ic_key_arrow_down_gray900_20 from "@/assets/icons/size20/ic_key_arrow_down_gray900_20.png";
 import ic_trash_gray900_20 from "@/assets/icons/size20/ic_trash_gray900_20.png";
-import ic_close_gray500_20 from "@/assets/icons/size20/ic_close_gray500_20.png";
 import "./CareerSection.css";
 
 import InlineMonthPicker from "@/shared/components/calendar/InlineMonthPicker";
@@ -100,7 +98,7 @@ export default function CareerSection({
   onChange,
   errors,
   onClearErrors,
-  isEdit = false, // 🔥 기본값: create 모드
+  isEdit = false, // 
 }: CareerSectionProps) {
   const [items, setItems] = useState<CareerInfo[]>(() =>
     normalizeItemsFromValue(value)
@@ -118,7 +116,7 @@ export default function CareerSection({
     const hasRealContent = value.some((v) => !isItemEmpty(v));
     if (!hasRealContent) return;
 
-    console.log("✅ CareerSection(edit): value 동기화", value);
+    console.log("CareerSection(edit): value 동기화", value);
     setItems(normalizeItemsFromValue(value));
     setIsFresh(isFreshGraduate);
     didSyncFromValueRef.current = true;
@@ -127,7 +125,6 @@ export default function CareerSection({
   // items / isFresh 변경 시 부모에 알리기 (공통)
   useEffect(() => {
     onChange(items, isFresh);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items, isFresh]);
 
   // 이하 나머지 로직은 그대로
@@ -141,17 +138,11 @@ export default function CareerSection({
     const checked = e.target.checked;
 
     if (checked) {
-      const hasContent = items.some((item) => !isItemEmpty(item));
-      if (hasContent) {
-        setShowFreshModal(true);
-      } else {
-        setIsFresh(true);
-        setItems([blankItem()]);
-        onClearErrors?.();
-      }
-    } else {
-      setIsFresh(false);
+      setShowFreshModal(true);
+      return;
     }
+
+    setIsFresh(false);
   };
 
   const handleConfirmFresh = () => {
@@ -267,7 +258,7 @@ export default function CareerSection({
             />
             <span className="resume-section-title__control-label">신입</span>
           </label>
-          <span
+          {/* <span
             className="resume-section-title__action--import"
             role="button"
             tabIndex={0}
@@ -275,7 +266,7 @@ export default function CareerSection({
           >
             <img src={ic_add_purple_20} alt="" />
             경력 불러오기
-          </span>
+          </span> */}
         </div>
       </div>
 
@@ -720,11 +711,6 @@ function CareerItem({
                 <span>{(summary ?? "").length}</span>
                 <span className="max"> / 2000</span>
               </span>
-              {/* {aiLoading && (
-                <div className="career-section__ai-loading">
-                  AI가 문장을 생성하고 있습니다...
-                </div>
-              )} */}
             </div>
           ) : (
             <div
@@ -750,11 +736,6 @@ function CareerItem({
                 <span>{(summary ?? "").length}</span>
                 <span className="max"> / 2000</span>
               </span>
-              {/* {aiLoading && (
-                <div className="career-section__ai-loading">
-                  AI가 문장을 생성하고 있습니다...
-                </div>
-              )} */}
             </div>
           )}
         <AISuggestArea

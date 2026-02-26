@@ -267,32 +267,10 @@ export const parseYMD = (s: string) => {
 export const fmtYMD = (d: { year: number; month: number; day: number }) =>
   `${d.year}.${String(d.month + 1).padStart(2, "0")}.${String(d.day).padStart(2, "0")}`;
 
-export type LocationValue = {
-  nationwide: boolean;
-  selectedKeys: string[]; // "RegionName|DistrictName" or "RegionName|ALL"
-};
-
-export type Education = {
-  school_name?: string;
-  major_degree?: string;
-  startDate?: string;
-  endDate?: string;
-};
 
 
-export type FormState = {
-  title: string;
-  basic: BasicInfo;
-  location: LocationValue;
-  education: Education[];
-};
 
-export const initial: FormState = {
-  title: "",
-  basic: { name: "", birth: "", gender: null, email: "", phone: "", photoUrl: "" },
-  location: { nationwide: false, selectedKeys: [] },
-  education:[]
-};
+
 
 export type SectionId =
   | "title"
@@ -534,3 +512,20 @@ export function formatPhoneNumber(phone?: string): string {
   return phone;
 }
 
+
+//---------------------------------------
+// 2025-09=>2025.09 로 날짜 형태 변환
+export const fmtMonthDisplay = (
+  d: { year: number; month: number } | null | undefined
+) => {
+  if (!d) return "";
+  return `${d.year}.${String(d.month + 1).padStart(2, "0")}`;
+};
+
+export const formatMonthStringToDisplay = (s?: string | null) => {
+  const parsed = parseMonth(s);
+  if (!parsed) return "";
+  return fmtMonthDisplay(parsed);
+};
+
+//---------------------------------------

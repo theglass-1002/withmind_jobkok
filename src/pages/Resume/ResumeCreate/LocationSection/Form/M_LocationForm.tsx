@@ -23,7 +23,7 @@ type Region = {
 
 export type LocationValue = {
   nationwide: boolean;
-  selectedKeys: string[];
+  selectedCodes: string[];
 };
 
 interface M_LocationFormProps {
@@ -53,7 +53,7 @@ export default function M_LocationForm({
   const [showCancelModal, setShowCancelModal] = useState(false);
 
   const [globalAllOnly, setGlobalAllOnly] = useState(defaultValue.nationwide);
-  const [selected, setSelected] = useState<Set<string>>(() => new Set(defaultValue.selectedKeys));
+  const [selected, setSelected] = useState<Set<string>>(() => new Set(defaultValue.selectedCodes));
 
   const [activeRegionKey, setActiveRegionKey] = useState<string>(() => {
     const seoul = regions.find(r => r.name === '서울') ?? regions[0];
@@ -229,7 +229,7 @@ export default function M_LocationForm({
 
     onChange({ 
       nationwide: globalAllOnly, 
-      selectedKeys: Array.from(selected) 
+      selectedCodes: Array.from(selected) 
     });
     
     onSave();
@@ -254,7 +254,7 @@ export default function M_LocationForm({
     console.log("🚫 취소 확인 - 모든 선택 초기화하고 닫기");
     setGlobalAllOnly(false);
     setSelected(new Set());
-    onChange({ nationwide: false, selectedKeys: [] }); // ← 부모에도 초기화!
+    onChange({ nationwide: false, selectedCodes: [] }); // ← 부모에도 초기화!
     setShowCancelModal(false);
     onCancel(); // ← 폼 닫기!
   };

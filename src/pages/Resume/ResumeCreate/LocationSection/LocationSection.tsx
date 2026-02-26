@@ -3,11 +3,11 @@ import './LocationSection.css';
 import data from '@/data/locationsV2.json';
 import { toast } from 'react-toastify';
 
-import check_box_purple from '@/assets/icons/size24/ic_check_box_purple24.png';
-import check_box_outline_blank_gray from '@/assets/icons/size24/ic_check_box_blank_gray400_24.png';
+
 import chevron_right_black from '@/assets/icons/chevron_right_black.png';
 import chevron_right_gray_light from '@/assets/icons/chevron_right_gray_light.png';
 import ic_close_gray500_20 from '@/assets/icons/size20/ic_close_gray500_20.png';
+import { Icons } from '@/assets/icons';
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 타입 정의
@@ -338,16 +338,16 @@ export default function LocationSection({
               role="button"
               aria-pressed={globalAllOnly}
             >
-              <span className="location-picker__checkbox">
-                <img
+             
+              <img className="location-picker__checkbox"
                   src={
                     globalAllOnly
-                      ? check_box_purple
-                      : check_box_outline_blank_gray
+                      ? Icons.ic_check_box_purple24
+                      : Icons.ic_check_box_blank_gray400_24
                   }
                   alt=""
                 />
-              </span>
+         
               <span className="location-picker__option-label">
                 {NATIONWIDE_LABEL}
               </span>
@@ -411,16 +411,16 @@ export default function LocationSection({
                     aria-pressed={isRegionAllSelected}
                     aria-disabled={globalAllOnly}
                   >
-                    <span className="location-picker__checkbox">
-                      <img
+              
+                      <img className="location-picker__checkbox"
                         src={
                           isRegionAllSelected
-                            ? check_box_purple
-                            : check_box_outline_blank_gray
+                          ? Icons.ic_check_box_purple24
+                          : Icons.ic_check_box_blank_gray400_24
                         }
                         alt=""
                       />
-                    </span>
+                   
                     <span className="location-picker__option-label">
                       {activeRegion.name}
                     </span>
@@ -440,16 +440,16 @@ export default function LocationSection({
                       aria-pressed={on}
                       aria-disabled={globalAllOnly}
                     >
-                      <span className="location-picker__checkbox">
-                        <img
+                   
+                        <img className="location-picker__checkbox"
                           src={
                             on
-                              ? check_box_purple
-                              : check_box_outline_blank_gray
+                            ? Icons.ic_check_box_purple24
+                            : Icons.ic_check_box_blank_gray400_24
                           }
                           alt=""
                         />
-                      </span>
+                
                       <span className="location-picker__option-label">
                         {d.name}
                       </span>

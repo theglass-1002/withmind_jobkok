@@ -18,7 +18,7 @@ import ic_key_arrow_down_gray900_20 from '@/assets/icons/size20/ic_key_arrow_dow
 import ic_trash_gray900_20 from '@/assets/icons/size20/ic_trash_gray900_20.png';
 
 import InlineMonthPicker from '@/shared/components/calendar/InlineMonthPicker';
-import { parseMonth, fmtMonth } from '@/shared/utils/util';
+import { parseMonth, fmtMonth, formatMonthStringToDisplay } from '@/shared/utils/util';
 
 import '../EducationSection.css';
 import type { Education, EducationErrors } from '../M_EducationSection';
@@ -144,7 +144,7 @@ export default function M_EducationItemForm({
                   iconSrc={
                     errors?.startDate ? icon_calendar_red_20 : ic_calendar_gray900_20
                   }
-                  value={startDate ?? ''}
+                  value={formatMonthStringToDisplay(startDate) ?? ''}
                   onClick={() => setOpenStartCal(true)}
                   invalid={!!errors?.startDate}
                   errorMessage={errors?.startDate}
@@ -190,7 +190,7 @@ export default function M_EducationItemForm({
                   iconSrc={
                     errors?.endDate ? icon_calendar_red_20 : ic_calendar_gray900_20
                   }
-                  value={endDate ?? ''}
+                  value={formatMonthStringToDisplay(endDate) ?? ''}
                   onClick={() => setOpenEndCal(true)}
                   invalid={!!errors?.endDate}
                   errorMessage={errors?.endDate}
@@ -218,7 +218,7 @@ export default function M_EducationItemForm({
             </div>
           </div>
 
-          {/* 🔹 졸업 여부: gradError가 true면 error_box 클래스 추가 */}
+    
           <div
             className={
               'education-section__control education-section__control--employment' +

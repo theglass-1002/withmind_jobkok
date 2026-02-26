@@ -849,6 +849,10 @@ line-height: 18px; /* 128.571% */
 /* 
 드롭다운 박스 */
 
+.error_box .ui-select{
+    border: none;
+}
+
 .ui-select{
     display: flex;
     position: relative;
@@ -1015,7 +1019,8 @@ body.mock-analysis-print-mode .mock-analysis {
             z-index: 5;
         }
 
-        .default_btn_white{
+        .default_btn_white,
+        .default_btn_black{
             height: 48px;
         }
         .gender-btn_wrap .default_btn_white.on{

@@ -600,8 +600,8 @@ export interface CreateExperienceResponse {
 export interface ResumePositionRequest {
   experiences: string;
   educations: string;
-  activities: string;
-  awards: string;
+  activities?: string;
+  awards?: string;
 }
 
 export interface ResumePositionResponse {

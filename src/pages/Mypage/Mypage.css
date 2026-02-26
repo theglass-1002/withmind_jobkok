@@ -2001,7 +2001,9 @@ line-height: 20px; /* 125% */
         .resume-card .resume-card__body .resume-card__meta{
             font-size: 14px;
         }
-        
+        .field{
+            gap: 12px;
+          }
     }
 
 }

@@ -7,6 +7,17 @@ import ic_mobile_gray_20 from "@/assets/icons/size20/ic_mobile_gray_20.png";
 import ic_edit_gray900_20 from "@/assets/icons/size20/ic_edit_gray900_20.png";
 import "./BasicInfoSection.css";
 
+type Gender = "male" | "female" | null;
+
+export type BasicInfo = {
+  name: string;
+  birth: string;
+  gender: Gender;
+  email: string;
+  phone: string;
+  photoUrl?: string;
+};
+
 export default function M_BasicInfoSection({
   values,
   errors,

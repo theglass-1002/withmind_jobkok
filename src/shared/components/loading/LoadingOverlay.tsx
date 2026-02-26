@@ -27,7 +27,7 @@ export default function LoadingOverlay({
   return (
     <div className={`loading-overlay ${overlayClassName}`}>
       <div className={`loading-box ${boxClassName}`}>
-        {isLogo?<img className={`loading-logo`} src={Icons.jobkok_logo_purple} alt="" />:
+        {isLogo?<img className={`loading-logo`} src={Icons.jobkok_logo_gray900} alt="" />:
         <span>{text}</span>}
         {text?? <p className={`loading-text ${textClassName}`}>{text}</p>}
       </div>

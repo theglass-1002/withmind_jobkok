@@ -5,6 +5,7 @@ import ic_edit_gray900_20 from "@/assets/icons/size20/ic_edit_gray900_20.png";
 
 import './EducationSection.css';
 import M_EducationForm from './Form/M_EducationForm';
+import { formatMonthStringToDisplay } from '@/shared/utils/util';
 
 export type Education = {
   school_name?: string;
@@ -29,7 +30,7 @@ interface M_EducationSectionProps {
   values?: Education[];
   onChange?: (list: Education[]) => void;
   onFocusAny?: () => void;
-  errors?: EducationErrors; // 필요시 확장해서 사용
+  errors?: EducationErrors[];
   sectionRef?: (el: HTMLDivElement | null) => void;
 }
 
@@ -37,7 +38,7 @@ export default function M_EducationSection({
   values = [],
   onChange,
   onFocusAny,
-  errors = {},
+  errors = [],
   sectionRef,
 }: M_EducationSectionProps) {
   const [items, setItems] = useState<Education[]>([]);
@@ -94,9 +95,9 @@ export default function M_EducationSection({
         
                 <div className="resume-education__meta">
                   <div className="resume-education__period">
-                    <span className="resume-education__period-start">{edu.startDate}</span>
+                    <span className="resume-education__period-start">{formatMonthStringToDisplay(edu.startDate)}</span>
                     <span className="resume-education__period-sep">~</span>
-                    <span className="resume-education__period-end">{edu.endDate}</span>
+                    <span className="resume-education__period-end">{formatMonthStringToDisplay(edu.endDate)}</span>
                   </div>
         
                   <span className="resume-education__major">{edu.major_degree}</span>
@@ -130,7 +131,7 @@ export default function M_EducationSection({
         {/* 오버레이 폼 */}
         {isEditing && (
           <div className="basic-info-form-overlay">
-            <div className="basic-info-form-container">
+            <div className="basic-info-form-container education">
               <M_EducationForm
                 initialItems={items}
                 initialGradTypes={gradTypeList}

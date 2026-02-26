@@ -399,7 +399,7 @@
   body{
     .resume-career-item{
       display: flex;
-      padding: 16px 20px 20px 20px;
+      padding: 16px 20px 16px 20px;
       gap: 16px;
     }
     .resume-career-item__header{
@@ -407,6 +407,12 @@
     }
     .resume-career-item__bullets{
       font-size: 14px;
+      width: 100%;
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+      height: auto;
+      overflow: visible;
     }
     .resume-career-item__meta{
       display: flex;
@@ -477,7 +483,7 @@
       display: none;
     }
     .resume-basic__img{
-      display: none;
+     
     }
     .resume-career-item__meta .resume-career-item__meta{
       display: flex;
@@ -491,6 +497,22 @@
     }
     .resume-item-chip{
       white-space: nowrap;
+    }
+
+    .resume-career-item__meta,
+    .resume-career-item__tenure,
+    .resume-career-item__employment,
+    .resume-career-item__role,
+    .resume-career-item__level,
+    .resume-career-item__period-start,
+    .resume-career-item__period-sep,
+    .resume-career-item__period-end {
+      font-size: 14px;
+    
+    }
+
+    .resume-education{
+      padding: 16px 20px 20px 20px;
     }
   }
 }
@@ -556,7 +578,18 @@
   .resume-create-page__aside{
     display: none;
   }
-
+/* 16/20 기본 텍스트 타이포 공통화 */
+.resume-career-item__meta,
+.resume-career-item__tenure,
+.resume-career-item__employment,
+.resume-career-item__role,
+.resume-career-item__level,
+.resume-career-item__period-start,
+.resume-career-item__period-sep,
+.resume-career-item__period-end {
+  font-size: 14px;
+ 
+}
 
   /* 필요하면 페이지 나눌 위치에 이런 것도 가능
   .resume-section {

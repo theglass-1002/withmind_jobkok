@@ -63,7 +63,7 @@ export default function AISuggestArea({
         <div className={`${wrapperClassName} resume-ai-suggest`}>
           <div className="resume-ai-suggest__header">
             <div className="resume-ai-suggest__title">
-              {starIconGreen && <img src={starIconGreen} alt="star green" />}
+              {starIconGreen && <img className="star_green" src={starIconGreen} alt="star green" />}
             {suggestResultTitle}
             </div>
 

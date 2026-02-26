@@ -158,10 +158,10 @@
       padding: 24px 20px;
       gap: 20px;
     }
-    .ai-suggest__chip{
-      padding: 12px 16px 12px 14px;
-      font-size: 14px;
+    .resume-create-page__section--desired-role .resume-search{
+      height: 48px;
     }
+
     .resume-create-page__section--desired-role .basic-info-form-overlay .resume-create-page__form-action{
       display: flex;
       flex-direction: column;
@@ -172,5 +172,12 @@
       flex-direction: row;
       gap: 10px;
   }
+    .resume-suggest__role.resume-ai-suggest{
+      padding: 16px;
+      gap: 16px;
+    }
+    .ai-suggest.resume-suggest__role{
+      padding: 0px;
+    }
   }
 }

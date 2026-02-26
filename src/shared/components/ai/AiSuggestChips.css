@@ -58,6 +58,17 @@
     line-height: 20px; /* 125% */
     cursor: pointer;
   }
+
+  .resume-ai-suggest__list .resume-suggest__role .ai-suggest__chip .add_icon{
+    width: 18px;
+    height: 18px;
+  }
+
+  .ai-suggest__chip{
+    padding: 12px 16px 12px 14px;
+    font-size: 14px;
+    gap: 4px;
+  }
   
   .ai-suggest__chip:hover {
     background: var(--gray-100, #F1F2F4);

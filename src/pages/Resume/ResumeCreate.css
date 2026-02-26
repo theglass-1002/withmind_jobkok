@@ -119,6 +119,10 @@ gap: 28px;
     line-height: 24px; /* 120% */
 }
 
+.resume-create-page__label::placeholder {
+    color: var(--gray-500, #9EA4AA);
+  }
+
 
 .resume-create-page__labe ::placeholder{
     color: var(--gray-500, #9EA4AA);
@@ -613,6 +617,15 @@ background: var(--gray-50, #F8F8F9);
     flex: 1 0 0;
 }
 
+.career-section__summary-read{
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    height: auto;
+    overflow: visible;
+
+}
+
 .field .career-section__summary-input,
 .field .activities-section__summary-input,
 .field .personal-section__summary-input
@@ -886,7 +899,7 @@ background: var(--gray-50, #F8F8F9);
             gap: 20px;
         }
         .resume-create-page__label{
-            color: var(--gray-500, #9EA4AA);
+            /* color: var(--gray-500, #9EA4AA); */
             font-size: 18px;
         }
       /* 텍스트 + 버튼을 같은 문장 흐름으로 */
@@ -1035,8 +1048,15 @@ background: var(--gray-50, #F8F8F9);
             height: 48px;
             padding:12px;
         }
+        .resume-create-page__field{
+            gap: 8px;  
+        }
 
-      
-        
+        .resume-create-page__error{
+            font-size: 14px;
+        }
+        .resume-section-title__control--fresh{
+            gap: 8px;
+        }
     }
 }

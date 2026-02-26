@@ -1,12 +1,12 @@
 // 사용법
 // import { Icons } from "@/assets/icons";
-// <img src={Icons.jobkok_logo_purple} alt="" />
+
 // <img src={Icons.jobkok_wordmark_gray900} alt="" />
 
 import jobkok_wordmark_gray400 from "@/assets/icons/logo/ic_jobkok_word_gray400.svg";
 import jobkok_wordmark_gray900 from "@/assets/icons/logo/ic_jobkok_word_gray900.svg";
 
-import jobkok_logo_purple from "./logo/jobkok_logo_purple.png";
+
 import jobkok_logo_gray400 from "@/assets/icons/logo/ic_jobkok_logo_gray400.svg";
 import jobkok_logo_gray900 from "@/assets/icons/logo/ic_jobkok_logo_gray900.svg";
 
@@ -16,8 +16,8 @@ import ic_account_circle_gray900_24 from "@/assets/icons/size24/ic_account_circl
 import ic_weakness_circle_24 from "@/assets/icons/size24/ic_weakness_circle_24.png";
 import ic_strength_circle_24 from "@/assets/icons/size24/ic_strength_circle_24.png";
 import ic_arrow_drop_down_white_24 from "@/assets/icons/size24/ic_arrow_drop_down_white_24.png";
-import ic_check_box_blank_gray400_24 from "./size24/ic_check_box_blank_gray400_24.png";
-import ic_check_box_purple24 from "./size24/ic_check_box_purple24.png";
+import ic_check_box_blank_gray400_24 from "@/assets/icons/size24/ic_check_box_blank_gray400_24.svg";
+import ic_check_box_purple24 from "@/assets/icons/size24/ic_check_box_purple24.svg";
 
 
 import ic_kakao_login_20 from "./login/ic_kakao_login_20.svg";
@@ -94,7 +94,7 @@ export const Icons = {
     ic_interview_step_custom_some_5,
     jobkok_wordmark_gray900,
     jobkok_wordmark_gray400,
-    jobkok_logo_purple,
+
     jobkok_logo_gray400,
     jobkok_logo_gray900,
     ic_search_gray900_24,

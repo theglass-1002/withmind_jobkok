@@ -146,9 +146,14 @@
         }
         .resume-create-form__content{
             display: flex;
+            height: auto;
             flex-direction: column;
             gap: 20px;
             padding: 80px 20px 120px 20px;
+            background: var(--gray-50, #F8F8F9);
+        }
+
+        .basic-info-form-container.education{
             background: var(--gray-50, #F8F8F9);
         }
         .career-add-btn{

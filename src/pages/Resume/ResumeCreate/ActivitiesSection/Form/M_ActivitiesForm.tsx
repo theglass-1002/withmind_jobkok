@@ -211,7 +211,7 @@ export default function M_ActivitiesForm({
           style={{ cursor: "pointer" }}
         />
         <span className="resume-create-form__title">활동ㆍ경험</span>
-        <span></span>
+        <span ></span>
       </header>
 
       <div className="resume-create-form__content activities-section">

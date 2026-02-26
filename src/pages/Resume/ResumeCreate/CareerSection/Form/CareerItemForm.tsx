@@ -3,28 +3,25 @@ import React, { useEffect, useRef, useState } from "react";
 import FormField from "@/shared/components/form/FormField";
 import FormInput from "@/shared/components/form/FormInput";
 import DateInline from "@/shared/components/form/DateInline";
-import Switch from "react-switch";
 import InlineMonthPicker from "@/shared/components/calendar/InlineMonthPicker";
 import AISuggestArea from "@/pages/Resume/ResumeAISuggest";
-
 import ic_error_red100_20 from "@/assets/icons/size20/ic_error_red100_20.png";
-import ic_star_gray700_20 from "@/assets/icons/size20/ic_star_gray700_20.png";
-import ic_star_green_20 from "@/assets/icons/size20/ic_star_green_20.png";
 import icon_calendar_red_20 from "@/assets/icons/size20/icon_calendar_red_20.png";
 import ic_calendar_gray900_20 from "@/assets/icons/size20/ic_calendar_gray900_20.png";
 import ic_add_btn_gray700_20 from "@/assets/icons/size20/ic_calendar_gray700_20.png";
 import ic_arrow_drop_down_gray900_24 from "@/assets/icons/size24/ic_arrow_drop_down_gray900_24.png";
-import ic_close_gray500_20 from "@/assets/icons/size20/ic_close_gray500_20.png";
 import ic_key_arrow_down_gray500_20 from "@/assets/icons/size20/ic_key_arrow_down_gray500_20.png";
 import ic_key_arrow_up_gray500_20 from "@/assets/icons/size20/ic_key_arrow_up_gray500_20.png";
 import ic_key_arrow_up_gray900_20 from "@/assets/icons/size20/ic_key_arrow_up_gray900_20.png";
 import ic_key_arrow_down_gray900_20 from "@/assets/icons/size20/ic_key_arrow_down_gray900_20.png";
 import ic_trash_gray900_20 from "@/assets/icons/size20/ic_trash_gray900_20.png";
 import ic_trash_gray500_20 from "@/assets/icons/size20/ic_trash_gray500_20.png";
-
-import { parseMonth, fmtMonth } from "@/shared/utils/util";
+import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
+import { parseMonth, fmtMonth, formatMonthStringToDisplay } from "@/shared/utils/util";
 import "../CareerSection.css";
 import { Icons } from "@/assets/icons";
+import { createExperience } from "@/api/resume/resume.api";
+
 
 export type CareerInfo = {
   id: string;
@@ -89,6 +86,8 @@ export default function CareerItemForm({
 
   const [showAISuggest, setShowAISuggest] = useState(false);
   const [aiSuggestions, setAISuggestions] = useState<string[]>([]);
+  const [aiLoading, setAiLoading] = useState(false); 
+  const [editing, setEditing] = useState(false);
 
   // 외부 클릭 감지
   useEffect(() => {
@@ -117,15 +116,44 @@ export default function CareerItemForm({
   }, [openStartCal, openEndCal, openEmp]);
 
   // AI 제안
-  const handleClickAISuggest = () => {
-    setAISuggestions([
-      "면접 분석 서비스 API 설계 및 FastAPI 기반 서버 구축",
-      "RabbitMQ, Redis 기반 비동기 영상 처리 파이프라인 설계",
-      "GCP Cloud Run + Cloud Tasks 구조 전환으로 처리 시간 35% 개선",
-      "서비스 응답 속도 1.2s → 0.6s 단축",
-      "GPU 서버 병목 제거로 모델 동시 실행 성능 2배 향상",
-    ]);
-    setShowAISuggest(true);
+  const handleClickAISuggest = async () => {
+    if (!role && !(summary ?? "").trim()) {
+      alert("AI 추천을 받으려면 최소 직무 또는 담당 업무를 입력해 주세요.");
+      return;
+    }
+
+    try {
+      setAiLoading(true);
+      console.log('전송값',summary);
+      const res = await createExperience({
+        role_name:role, 
+        user_input: summary ?? "", 
+      });
+      
+      const { mode, bullets, missing_info } = res.data;
+      
+      if (mode === "NEED_MORE_INPUT") {
+        setAISuggestions(missing_info);
+        setShowAISuggest(true);
+        setEditing(true);
+      }
+
+      if (bullets && bullets.length > 0) {
+        setAISuggestions(bullets);
+         setShowAISuggest(true);
+         setEditing(true);
+      }
+      setAiLoading(false);
+    } catch (error) {
+      console.error(error);
+      alert(
+        error instanceof Error
+          ? error.message
+          : "AI 경력 문장 추천 중 오류가 발생했습니다."
+      );
+    } finally {
+      setAiLoading(false);
+    }
   };
 
   const handleCloseAISuggest = () => setShowAISuggest(false);
@@ -136,6 +164,14 @@ export default function CareerItemForm({
     onChange({ summary: next.slice(0, MAX_SUMMARY) });
   };
 
+  const startEditing = (e?: React.KeyboardEvent | React.MouseEvent) => {
+    if (e && "key" in e) {
+      if ((e as React.KeyboardEvent).nativeEvent?.isComposing) return;
+      if (e.key && e.key !== "Enter" && e.key !== " ") return;
+      e.preventDefault?.();
+    }
+    setEditing(true);
+  };
   // 종료일 비활성화 조건
   const startMV = parseMonth(startDate) ?? null;
   const disableEndMonth = (y: number, m: number) => {
@@ -153,6 +189,10 @@ export default function CareerItemForm({
 
   return (
     <div className="career-section__item">
+      <LoadingOverlay
+        isLoading={aiLoading}
+        isLogo
+      />
       <div className="career-section__fields">
         {/* 회사명 */}
         <FormField label={<>회사명 <em>*</em></>} className="in_icon">
@@ -261,7 +301,7 @@ export default function CareerItemForm({
                 className="career-section date career-section__date--start"
                 id={`career-start_${index}`}
                 iconSrc={displayErrors?.startDate ? icon_calendar_red_20 : ic_calendar_gray900_20}
-                value={startDate}
+                value={formatMonthStringToDisplay(startDate)}
                 onClick={() => setOpenStartCal(true)}
                 invalid={!!displayErrors?.startDate}
                 errorMessage={displayErrors?.startDate}
@@ -317,7 +357,7 @@ export default function CareerItemForm({
                   className="career-section date career-section__date--end"
                   id={`career-end_${index}`}
                   iconSrc={displayErrors?.endDate ? icon_calendar_red_20 : ic_calendar_gray900_20}
-                  value={endDate}
+                  value={formatMonthStringToDisplay(endDate)}
                   onClick={() => setOpenEndCal(true)}
                   invalid={!!displayErrors?.endDate}
                   errorMessage={displayErrors?.endDate}
@@ -439,30 +479,54 @@ export default function CareerItemForm({
         <div className="field career-section__control career-section__control--summary">
           <div className="small_labe_black-14">담당 업무 및 주요 성과</div>
 
-          <div className="career-section__summary-input">
-            <textarea
-              id={`summary_${index}`}
-              value={summary ?? ""}
-              onChange={(e) => onChange({ summary: e.target.value.slice(0, 2000) })}
-              maxLength={2000}
-              placeholder="- 프로젝트 경험은 역할ㆍ기여도ㆍ성과 중심으로 정리하면 좋습니다.&#10;- 작성 후 [AI 문장 추천]을 눌러 추천 내용을 참고해 보세요."
-            />
-            <span className="career-section__char-count">
-              <span>{(summary ?? "").length}</span>
-              <span className="max"> / 2000</span>
-            </span>
-          </div>
-
-          <AISuggestArea
+          {editing ? (
+            <div className="career-section__summary-input">
+              <textarea
+                id={`summary_${index}`}
+                value={summary ?? ""}
+                onChange={(e) =>
+                  onChange({ summary: e.target.value.slice(0, 2000) })
+                }
+                maxLength={2000}
+              />
+              <span className="career-section__char-count">
+                <span>{(summary ?? "").length}</span>
+                <span className="max"> / 2000</span>
+              </span>
+            </div>
+          ) : (
+            <div
+              className="career-section__summary-input"
+              onClick={startEditing}
+              onKeyDown={startEditing}
+              role="button"
+              tabIndex={0}
+            >
+              {(summary ?? "").trim().length > 0 ? (
+                <div className="career-section__summary-read">{summary}</div>
+              ) : (
+                <ul className="career-section__summary-tips">
+                  <li className="career-section__summary-tip">
+                  - 프로젝트 경험은 역할ㆍ기여도ㆍ성과 중심으로 정리하면 좋습니다.
+                  </li>
+                  <li className="career-section__summary-tip">
+                  - 작성 후 [AI 문장 추천]을 눌러 추천 내용을 참고해 보세요.
+                  </li>
+                </ul>
+              )}
+              <span className="career-section__char-count">
+                <span>{(summary ?? "").length}</span>
+                <span className="max"> / 2000</span>
+              </span>
+            </div>
+          )}
+        <AISuggestArea
             show={showAISuggest}
             items={aiSuggestions}
             hintText="정확한 문장 추천을 위해 (직무와 담당 업무) 항목을 먼저 입력해주세요."
             onClickSuggest={handleClickAISuggest}
             onClose={handleCloseAISuggest}
-            onPick={handlePickSuggestion}
-            starIconGray={ic_star_gray700_20}
-            starIconGreen={ic_star_green_20}
-            closeIcon={ic_close_gray500_20}
+            wrapperClassName="resume-suggest__career"
           />
         </div>
 

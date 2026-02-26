@@ -153,18 +153,7 @@ line-height: 20px; /* 125% */
   align-self: stretch;
 }
 
-/* 검색 인풋 래퍼 */
-.resume-create-page__section--desired-role .resume-search{
-  display: flex;
-  height: 52px;
-  padding: 10px 16px;
-  align-items: center;
-  gap: 8px;
-  align-self: stretch;
-  border-radius: 4px;
-  border: 1px solid var(--gray-300, #E0E2E4);
-  background: var(--white-100, #FFF);
-}
+
 
 /* placeholder 색상 */
 .resume-search ::placeholder{
@@ -288,6 +277,10 @@ line-height: 20px; /* 125% */
     }
     .basic-info-form-overlay.hard-skills-section .tooltip--top .tooltip__content::after {
       left: 270px;
+    }
+
+    .tooltip__content{
+      padding: 12px 12px 8px 12px;
     }
   }
 }

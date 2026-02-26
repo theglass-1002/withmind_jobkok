@@ -101,3 +101,40 @@
   }
 
   
+/* 모바일: 760px 이하 */
+@media (max-width: 760px) {
+  body{
+    .resume-ai-suggest{
+      gap: 8px;
+    }
+    .resume-ai-suggest__title{
+      font-size: 14px;
+    }
+    .resume-ai-suggest__title .star_green{
+      width: 18px;
+    }
+
+    .resume-suggest__role .resume-ai-suggest__header .resume-ai-suggest__title{
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    
+      color: var(--gray-700, #6F767E);
+      font-family: Pretendard;
+      font-size: 14px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 18px;
+      background: none !important;
+      -webkit-background-clip: initial !important;
+      background-clip: initial !important;
+      -webkit-text-fill-color: initial !important;
+    }
+    .ai-suggest.resume-suggest__role .ai-suggest__chips{
+      gap: 12px;
+
+    }
+  }
+}

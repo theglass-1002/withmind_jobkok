@@ -11,7 +11,7 @@ import ic_add_btn_gray900_20 from "@/assets/icons/size20/ic_add_btn_gray900_20.p
 
 export type LocationValue = {
   nationwide: boolean;
-  selectedKeys: string[];
+  selectedCodes: string[];
 };
 
 interface M_LocationSectionProps {
@@ -21,7 +21,7 @@ interface M_LocationSectionProps {
 }
 
 export default function M_LocationSection({
-  defaultValue = { nationwide: false, selectedKeys: [] },
+  defaultValue = { nationwide: false, selectedCodes: [] },
   onChange,
   sectionRef,
 }: M_LocationSectionProps) {
@@ -51,8 +51,8 @@ export default function M_LocationSection({
   };
 
   const removeChip = (key: string) => {
-    const newKeys = locationData.selectedKeys.filter(k => k !== key);
-    const newData = { ...locationData, selectedKeys: newKeys };
+    const newKeys = locationData.selectedCodes.filter(k => k !== key);
+    const newData = { ...locationData, selectedCodes: newKeys };
     setLocationData(newData);
     onChange(newData);
   };
@@ -67,7 +67,7 @@ export default function M_LocationSection({
         },
       ];
     }
-    return locationData.selectedKeys.map(key => {
+    return locationData.selectedCodes.map(key => {
       const [regionName, tail] = key.split('|');
       const label = tail === 'ALL' ? `${regionName} 전체` : tail;
       return {
@@ -90,7 +90,7 @@ export default function M_LocationSection({
         </div>
       </div>
 
-      {(locationData.selectedKeys.length > 0 || locationData.nationwide) && (
+      {(locationData.selectedCodes.length > 0 || locationData.nationwide) && (
         <div className="resume-create-page__location">
           <div className="resume-create-page__selected">
             {chips.map(chip => (

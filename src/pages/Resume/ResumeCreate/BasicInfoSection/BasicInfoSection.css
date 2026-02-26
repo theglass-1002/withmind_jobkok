@@ -123,6 +123,11 @@
         align-items: center;
         justify-content: center;
         overflow-y: auto;
+
+        overscroll-behavior: contain;
+
+        /* 오버레이에서만 스크롤 */
+        overflow: auto;
       }
 
       .basic-info-form-container {
@@ -157,6 +162,9 @@
         font-style: normal;
         font-weight: 600;
         line-height: 22px; /* 122.222% */
+      }
+      .resume-create-form__header span:last-child{
+        width: 24px;
       }
 
       .resume-create-page__form-action{

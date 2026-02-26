@@ -45,7 +45,7 @@ export default function AiSuggestChips({
               onClick={() => !disabled && onTagClick?.(t)}
               aria-disabled={disabled || undefined}
             >
-                <img src={ic_add_btn_green_20} alt="" />
+             <img className='add_icon' src={ic_add_btn_green_20} alt="" />
               {t}
             </span>
           );

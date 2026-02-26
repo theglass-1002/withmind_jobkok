@@ -90,14 +90,7 @@ line-height: 20px; /* 125% */
   line-height: 20px; 
 }
 
-.tooltip__desc {
-  color: var(--white-100, #FFF);
-  font-family: Pretendard;
-  font-size: 16px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 180%;
-}
+
 
 
 .resume-create-page__section--soft-skills .search-field{
@@ -146,18 +139,7 @@ line-height: 20px; /* 125% */
   align-self: stretch;
 }
 
-/* 검색 인풋 래퍼 */
-.resume-create-page__section--desired-role .resume-search{
-  display: flex;
-  height: 52px;
-  padding: 10px 16px;
-  align-items: center;
-  gap: 8px;
-  align-self: stretch;
-  border-radius: 4px;
-  border: 1px solid var(--gray-300, #E0E2E4);
-  background: var(--white-100, #FFF);
-}
+
 
 /* placeholder 색상 */
 .resume-search ::placeholder{
