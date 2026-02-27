@@ -320,7 +320,7 @@ export default function M_ResumeCreate() {
   const validate = () => {
     const nextErr: typeof errors = { basic: {} };
     if (!form.title.trim()) nextErr.title = "이력서 제목을 입력해 주세요.";
-    if (!form.location.nationwide && form.location.selectedKeys.length === 0) {
+    if (!form.location.nationwide && form.location.selectedCodes.length === 0) {
       nextErr.location = "희망 근무 지역을 1개 이상 선택해 주세요.";
     }
     setErrors(nextErr);

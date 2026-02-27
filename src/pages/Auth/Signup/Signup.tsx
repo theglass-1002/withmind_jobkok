@@ -114,6 +114,7 @@ export default function Signup() {
             phone: confirmRes.userPhone,
             birth: confirmRes.userBirth,
             ci: confirmRes.ci,
+            gender:confirmRes.userSex
           });
 
           toast.success(`본인인증이 완료되었습니다!`);
@@ -127,16 +128,16 @@ export default function Signup() {
 
       // 2) 혹시 직접 성공/실패를 보내는 형태도 대비(예전 호환)
       if (event.data?.type === "INICIS_AUTH_SUCCESS") {
-        const { name, phone, birth, ci } = event.data.data || {};
+        const { name, phone, birth, ci ,gender} = event.data.data || {};
 
-        if (!name || !phone || !birth || !ci) {
+        if (!name || !phone || !birth || !ci ||!gender) {
           toast.error("본인인증 데이터가 올바르지 않습니다.");
           return;
         }
 
         setIsIdentityVerified(true);
         setIdentityVerifiedError(false);
-        setVerifiedUserInfo({ name, phone, birth, ci });
+        setVerifiedUserInfo({ name, phone, birth, ci ,gender});
 
         toast.success(`${name}님, 본인인증이 완료되었습니다!`);
         return;

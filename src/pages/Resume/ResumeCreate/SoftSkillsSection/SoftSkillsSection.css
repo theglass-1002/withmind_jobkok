@@ -213,6 +213,8 @@ line-height: 20px; /* 125% */
     }
     .resume-create-page__section--soft-skills .tooltip__content{
       width: 300px;
+      padding: 12px 12px 8px 12px;
+      gap: 4px;
     }
 
     .resume-create-form__content.soft-skills-form{

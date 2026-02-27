@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { BasicInfo, BasicErrors, formatPhoneNumber } from "@/shared/utils/util";
+import { BasicErrors, formatPhoneNumber } from "@/shared/utils/util";
 import M_BasicInfoForm from "./Form/M_BasicInfoForm";
 
 import ic_mail_gray500_20 from "@/assets/icons/size20/ic_mail_gray500_20.png";

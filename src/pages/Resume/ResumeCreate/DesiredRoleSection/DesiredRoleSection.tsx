@@ -20,7 +20,6 @@ interface DesiredRoleSectionProps {
   onChange: (roles: string[]) => void;
   error?: string;
   isEdit?: boolean;
-
   aiShow?: boolean;
   aiTags?: string[];
   onClickAISuggest?: () => void;

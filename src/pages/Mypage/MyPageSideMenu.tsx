@@ -2,6 +2,7 @@ import { NavLink } from "react-router-dom";
 import "./MyPage.css";
 import { formatPhoneNumber } from "@/shared/utils/util";
 import type { MyInfo } from "@/api/auth/auth.types";
+import { logout } from "@/api/auth/auth.api";
 
 type MyPageSideMenuProps = {
   myInfo: MyInfo | null;
@@ -84,7 +85,9 @@ export default function MyPageSideMenu({ myInfo }: MyPageSideMenuProps) {
         </ul>
 
         <span className="sidemenu__item--logout">
-          <button type="button" className="sidemenu__link sidemenu_logout_btn">
+          <button type="button" 
+          onClick={logout}
+          className="sidemenu__link sidemenu_logout_btn">
             로그아웃
           </button>
         </span>

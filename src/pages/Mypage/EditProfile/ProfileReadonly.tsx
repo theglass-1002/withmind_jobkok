@@ -51,7 +51,7 @@ export default function ProfileReadonly({ userInfo }: { userInfo: UserProfile })
           <span>
             <button
               type="button"
-              className={`default_btn_white ${userInfo.gender === "m" ? "on" : ""}`}
+              className={`default_btn_white ${userInfo.gender === "M" ? "on" : ""}`}
             >
               남성
             </button>
@@ -59,7 +59,7 @@ export default function ProfileReadonly({ userInfo }: { userInfo: UserProfile })
           <span>
             <button
               type="button"
-              className={`default_btn_white ${userInfo.gender === "f" ? "on" : ""}`}
+              className={`default_btn_white ${userInfo.gender === "W" ? "on" : ""}`}
             >
               여성
             </button>

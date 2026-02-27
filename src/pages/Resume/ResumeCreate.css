@@ -973,6 +973,11 @@ background: var(--gray-50, #F8F8F9);
             font-size: 18px;
         }
 
+        .resume-create-page__section-title__heading .tooltip{
+            margin-left: 0px;
+        }
+      
+
         .resume-create-page__section--basic .resume-create-page__section-body{
             flex-direction: column;
         }

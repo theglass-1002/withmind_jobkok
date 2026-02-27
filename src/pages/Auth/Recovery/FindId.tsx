@@ -56,6 +56,7 @@ export default function FindId() {
             phone: confirmRes.userPhone,
             birth: confirmRes.userBirth,
             ci: confirmRes.ci,
+            gender:confirmRes.userSex
           };
        
           const idRes = await findIdByCi(confirmRes.ci);
@@ -85,9 +86,9 @@ export default function FindId() {
 
       // 2) 구버전 호환: 직접 성공/실패 메시지
       if (event.data?.type === "INICIS_AUTH_SUCCESS") {
-        const { name, phone, birth, ci } = event.data.data || {};
+        const { name, phone, birth, ci ,gender} = event.data.data || {};
 
-        if (!name || !phone || !birth || !ci) {
+        if (!name || !phone || !birth || !ci || !gender) {
           toast.error("본인인증 데이터가 올바르지 않습니다.");
           return;
         }
@@ -106,7 +107,7 @@ export default function FindId() {
             return;
           }
 
-          setVerifiedUserInfo({ name, phone, birth, ci });
+          setVerifiedUserInfo({ name, phone, birth, ci,gender});
           setFoundIds(idRes.userIds);
           setIsVerified(true);
 

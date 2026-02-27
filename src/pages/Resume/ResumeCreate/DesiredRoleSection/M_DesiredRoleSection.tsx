@@ -200,14 +200,17 @@ export default function M_DesiredRoleSection({
   // 저장 버튼 클릭
   const handleSave = () => {
     if (selected.size === 0) {
-      toast.error('1개 이상 추가해 주세요.');
+      toast.error("1개 이상 추가해 주세요.");
       return;
     }
-    // 여기서 selected 상태 자체가 이미 "저장된 값" 역할을 하고 있으므로,
-    // 별도 처리 없이 팝업만 닫으면 됨.
+  
+    const nextRoles = Array.from(selected).map((key) => key.split("|")[1]);
+  
+    onChange(nextRoles); 
+  
     setIsEditing(false);
     setOpen(false);
-    setQ('');
+    setQ("");
   };
 
   return (
@@ -225,10 +228,7 @@ export default function M_DesiredRoleSection({
             {chips.map((chip) => (
               <span className="location-picker__chip" key={chip.key}>
                 <span className="desired-role-chip__label">{chip.role}</span>
-                <img 
-                className="desired-role-chip__remove-btn"
-                onClick={() => removeRole(chip.key)}
-                src={ic_close_gray500_20} alt="삭제" />
+                
               </span>
             ))}
           </div>

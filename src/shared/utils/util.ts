@@ -365,11 +365,6 @@ export function getLocationList(location: { nationwide: boolean; selectedKeys: s
   return expandLocationKeys(location.selectedKeys);
 }
 
-export interface LocationSectionProps {
-  defaultValue?: LocationValue;
-  onChange: (v: LocationValue) => void;
-  sectionRef?: (el: HTMLDivElement | null) => void;
-}
 
 // CareerSection
 export type CareerItem = {
