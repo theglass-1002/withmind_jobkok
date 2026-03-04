@@ -9,7 +9,7 @@ export const GOOGLE_CLIENT_ID = "437460955925-erd8t8c78c8h3hh57gr9552m6pc5gtq7.a
 
 
 
-export const API_BASE_URL = IsDev?"http://34.64.175.29:9090":"https://api.jobkok.kr";
+export const API_BASE_URL = IsDev?"http://34.50.29.227:9090":"https://api.jobkok.kr";
 //export const AI_BASE_URL = IsDev?LOCAL_BASE_URL:"https://ai.api.jobkok.kr";
 
  export const AI_BASE_URL = "https://ai.api.jobkok.kr";

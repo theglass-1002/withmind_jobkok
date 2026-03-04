@@ -3,11 +3,23 @@ import React, { useState, useMemo } from "react";
 import "./LocationSection.css";
 import M_LocationForm from "./Form/M_LocationForm";
 
+import data from "@/data/locationsV2.json";
+
 import chevron_right_black from "@/assets/icons/chevron_right_black.png";
 import ic_close_gray500_20 from "@/assets/icons/size20/ic_close_gray500_20.png";
 import ic_edit_gray900_20 from "@/assets/icons/size20/ic_edit_gray900_20.png";
-
 import ic_add_btn_gray900_20 from "@/assets/icons/size20/ic_add_btn_gray900_20.png";
+
+type District = {
+  code: string;
+  name: string;
+};
+
+type Region = {
+  code: string;
+  name: string;
+  children: District[];
+};
 
 export type LocationValue = {
   nationwide: boolean;
@@ -25,18 +37,17 @@ export default function M_LocationSection({
   onChange,
   sectionRef,
 }: M_LocationSectionProps) {
+  const regions = data as Region[];
+  const NATIONWIDE_LABEL = "지역 전체";
+
   const [isAdding, setIsAdding] = useState(false);
   const [locationData, setLocationData] = useState<LocationValue>(defaultValue);
 
   const handleAdd = () => {
-    console.log("✏️ 추가 버튼 클릭");
-    console.log("📋 현재 데이터:", locationData);
     setIsAdding(true);
   };
 
   const handleSave = () => {
-    console.log("✅ 지역 선택 저장 완료!");
-    console.log("💾 저장된 데이터:", locationData);
     setIsAdding(false);
   };
 
@@ -46,13 +57,21 @@ export default function M_LocationSection({
   };
 
   const handleLocationChange = (v: LocationValue) => {
+    console.log("📌 LocationSection 받은 값(code 유지):", v);
     setLocationData(v);
     onChange(v);
   };
 
-  const removeChip = (key: string) => {
-    const newKeys = locationData.selectedCodes.filter(k => k !== key);
-    const newData = { ...locationData, selectedCodes: newKeys };
+  const removeChip = (code: string) => {
+    if (code === "NATIONWIDE") {
+      const newData = { ...locationData, nationwide: false };
+      setLocationData(newData);
+      onChange(newData);
+      return;
+    }
+
+    const newCodes = locationData.selectedCodes.filter((c) => c !== code);
+    const newData = { ...locationData, selectedCodes: newCodes };
     setLocationData(newData);
     onChange(newData);
   };
@@ -61,22 +80,46 @@ export default function M_LocationSection({
     if (locationData.nationwide) {
       return [
         {
-          key: 'NATIONWIDE',
-          regionName: '전국',
-          label: '지역 전체',
+          key: "NATIONWIDE",
+          regionName: "전국",
+          label: NATIONWIDE_LABEL,
+          rawCode: "NATIONWIDE",
         },
       ];
     }
-    return locationData.selectedCodes.map(key => {
-      const [regionName, tail] = key.split('|');
-      const label = tail === 'ALL' ? `${regionName} 전체` : tail;
-      return {
-        key,
-        regionName,
-        label,
-      };
-    });
-  }, [locationData]);
+
+    return locationData.selectedCodes
+      .map((code) => {
+        const region = regions.find((r) => r.code === code);
+        if (region) {
+          return {
+            key: code,
+            regionName: region.name.replace(" 전체", ""),
+            label: "전체",
+            rawCode: code,
+          };
+        }
+
+        const regionCode = code.split("-")[0];
+        const parentRegion = regions.find((r) => r.code === regionCode);
+        const district = parentRegion?.children.find((d) => d.code === code);
+
+        if (!district || !parentRegion) return null;
+
+        return {
+          key: code,
+          regionName: parentRegion.name.replace(" 전체", ""),
+          label: district.name,
+          rawCode: code,
+        };
+      })
+      .filter(Boolean) as Array<{
+      key: string;
+      regionName: string;
+      label: string;
+      rawCode: string;
+    }>;
+  }, [locationData, regions]);
 
   return (
     <div
@@ -93,10 +136,12 @@ export default function M_LocationSection({
       {(locationData.selectedCodes.length > 0 || locationData.nationwide) && (
         <div className="resume-create-page__location">
           <div className="resume-create-page__selected">
-            {chips.map(chip => (
+            {chips.map((chip) => (
               <div key={chip.key} className="location-picker__chip">
                 <div className="location-picker__chip-body">
-                  <span className="location-picker__chip-group">{chip.regionName}</span>
+                  <span className="location-picker__chip-group">
+                    {chip.regionName}
+                  </span>
                   <span className="location-picker__chip-role">
                     <span className="location-picker__chip-chevron">
                       <img src={chevron_right_black} alt="" />
@@ -106,7 +151,7 @@ export default function M_LocationSection({
                 </div>
                 {/* <span
                   className="location-picker__chip-close"
-                  onClick={() => removeChip(chip.key)}
+                  onClick={() => removeChip(chip.rawCode)}
                   role="button"
                   aria-label="선택 해제"
                 >
@@ -117,13 +162,17 @@ export default function M_LocationSection({
           </div>
         </div>
       )}
+
       <div className="resume-create-page__section-action">
-      {chips.length>0?<button className="btn_w_full default_btn_white" onClick={handleAdd}>
-       <img src={ic_edit_gray900_20} alt="" /> 수정
-     </button>:    <button className="btn_w_full default_btn_white" onClick={handleAdd}>
-       <img src={ic_add_btn_gray900_20} alt="" /> 추가
-     </button>}
-    
+        {chips.length > 0 ? (
+          <button className="btn_w_full default_btn_white" onClick={handleAdd}>
+            <img src={ic_edit_gray900_20} alt="" /> 수정
+          </button>
+        ) : (
+          <button className="btn_w_full default_btn_white" onClick={handleAdd}>
+            <img src={ic_add_btn_gray900_20} alt="" /> 추가
+          </button>
+        )}
       </div>
 
       {isAdding && (

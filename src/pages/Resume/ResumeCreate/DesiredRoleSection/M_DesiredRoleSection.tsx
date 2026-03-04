@@ -352,7 +352,7 @@ export default function M_DesiredRoleSection({
             {/* 하단 버튼 + 팝업 안 선택된 칩 리스트 */}
             <div className="resume-create-page__form-action">
               {chips.length > 0 && (
-                <div className="resume-create-page__selected">
+                <div className="resume-create-page__selected desired">
                   {chips.map((chip) => (
                     <span className="location-picker__chip" key={chip.key}>
                       <span className="desired-role-chip__label">{chip.role}</span>

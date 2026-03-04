@@ -215,9 +215,6 @@ export default function M_BasicInfoForm({
       setLocalErrors(newErrors);
       return;
     }
-
-    console.log("✅ 모든 필수 입력값 확인 완료!");
-    console.log("💾 저장할 데이터:", values);
     setLocalErrors({});
     onSave();
   };

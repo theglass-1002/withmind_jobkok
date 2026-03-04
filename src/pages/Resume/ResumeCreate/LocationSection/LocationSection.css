@@ -105,13 +105,14 @@
  
         .basic-info-form-overlay.location-section .resume-create-page__form-action{
             flex-direction: column;
+            gap: 20px;
             
         }
 
         .basic-info-form-overlay.location-section .resume-create-page__form-action .btn_wrap{
             width: 100%;
             flex-direction: row;
-            gap: 10px;
+            gap: 12px;
         }
     }
 }

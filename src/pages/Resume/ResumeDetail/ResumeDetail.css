@@ -513,6 +513,7 @@
 
     .resume-education{
       padding: 16px 20px 20px 20px;
+      gap: 8px;
     }
   }
 }

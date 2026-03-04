@@ -270,6 +270,7 @@
 .location-picker__chip-body{
     display: flex;
     align-items: center;
+    gap: 4px;
 }
 .location-picker__chip-chevron{
     width: 20px;
@@ -280,6 +281,7 @@
 .location-picker__chip-role{
     display: flex;
     align-items: center;
+    gap: 4px;
 }
 
 .location-picker__chip-close{

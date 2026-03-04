@@ -12,6 +12,7 @@ export type Education = {
   major_degree?: string;
   startDate?: string;
   endDate?: string;
+  status?: string;
 };
 
 export type EducationErrors = Partial<Record<keyof Education, string>>;
@@ -21,6 +22,7 @@ const blankItem = (): Education => ({
   major_degree: '',
   startDate: '',
   endDate: '',
+  status: '',
 });
 
 const initialItems = (values?: Education[]): Education[] =>
@@ -42,19 +44,18 @@ export default function M_EducationSection({
   sectionRef,
 }: M_EducationSectionProps) {
   const [items, setItems] = useState<Education[]>([]);
-  // const [items, setItems] = useState<Education[]>(() => initialItems(values));
   const [gradTypeList, setGradTypeList] = useState<(string | null)[]>(
-    () => (values && values.length > 0 ? values.map(() => null) : [null])
+    () =>
+      values && values.length > 0
+        ? values.map((v) => (v.status ?? null))
+        : [null]
   );
   const [isEditing, setIsEditing] = useState(false);
 
-  // 외부에서 values 바뀌면 동기화 (선택 사항)
   useEffect(() => {
     if (values && values.length > 0) {
       setItems(values);
-      setGradTypeList(prev =>
-        values.length === prev.length ? prev : values.map(() => null)
-      );
+      setGradTypeList(values.map((v) => v.status ?? null));
     }
   }, [values]);
 
@@ -63,10 +64,17 @@ export default function M_EducationSection({
   };
 
   const handleSave = (savedItems: Education[], savedGradTypes: (string | null)[]) => {
-    setItems(savedItems);
+    const merged: Education[] = savedItems.map((edu, idx) => ({
+      ...edu,
+      status: savedGradTypes[idx] ?? '',
+    }));
+
+    setItems(merged);
     setGradTypeList(savedGradTypes);
     setIsEditing(false);
-    onChange?.(savedItems);
+
+    console.log('✅ Education 저장 값:', merged);
+    onChange?.(merged);
   };
 
   const handleCancel = () => {
@@ -86,54 +94,58 @@ export default function M_EducationSection({
           </div>
         </div>
 
-        {/* 학력 카드 미리보기 */}
         {items.length > 0 && (
           <div className="resume-create-page__section-body education-section">
             {items.map((edu, idx) => (
-                <div key={idx} className="resume-field__value resume-education">
+              <div key={idx} className="resume-field__value resume-education">
                 <span className="resume-education__school">{edu.school_name}</span>
-        
+
                 <div className="resume-education__meta">
                   <div className="resume-education__period">
-                    <span className="resume-education__period-start">{formatMonthStringToDisplay(edu.startDate)}</span>
+                    <span className="resume-education__period-start">
+                      {formatMonthStringToDisplay(edu.startDate)}
+                    </span>
                     <span className="resume-education__period-sep">~</span>
-                    <span className="resume-education__period-end">{formatMonthStringToDisplay(edu.endDate)}</span>
+                    <span className="resume-education__period-end">
+                      {formatMonthStringToDisplay(edu.endDate)}
+                    </span>
                   </div>
-        
+
                   <span className="resume-education__major">{edu.major_degree}</span>
-                  <span className="resume-education__status"> {gradTypeList[idx]}</span>
+                  <span className="resume-education__status">
+                    {edu.status ?? gradTypeList[idx] ?? ''}
+                  </span>
                 </div>
               </div>
             ))}
           </div>
         )}
 
-        {/* 추가/수정 버튼 */}
         <div className="resume-create-page__section-action">
           <button
             className="btn_w_full default_btn_white"
             onClick={handleAddOrEdit}
             disabled={isEditing}
           >
-            {items.length>0?
-                <>
+            {items.length > 0 ? (
+              <>
                 <img src={ic_edit_gray900_20} alt="" />
                 수정
-                </>:<>
+              </>
+            ) : (
+              <>
                 <img src={ic_add_btn_gray900_20} alt="" />
                 추가
-                </>}
-            {/* <img src={ic_add_btn_gray900_20} alt="" />
-            {items.length > 0 ? '수정' : '추가'} */}
+              </>
+            )}
           </button>
         </div>
 
-        {/* 오버레이 폼 */}
         {isEditing && (
           <div className="basic-info-form-overlay">
             <div className="basic-info-form-container education">
               <M_EducationForm
-                initialItems={items}
+                initialItems={items.length > 0 ? items : initialItems(values)}
                 initialGradTypes={gradTypeList}
                 onSave={handleSave}
                 onCancel={handleCancel}

@@ -136,6 +136,11 @@
       gap: 0px;
     }
 
+    .resume-create-page .resume-create-page__form-action .resume-create-page__selected.desired .location-picker__chip{
+      border: none;
+
+    }
+
     .desired-role-form-hint{
       width: 100%;
       padding: 16px;
@@ -165,6 +170,7 @@
     .resume-create-page__section--desired-role .basic-info-form-overlay .resume-create-page__form-action{
       display: flex;
       flex-direction: column;
+      gap: 20px;
     }
 
     .basic-info-form-overlay.desired-section .resume-create-page__form-action .btn_wrap{
