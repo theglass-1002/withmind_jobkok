@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import ic_setting_gray700_20 from "@/assets/icons/size20/ic_setting_gray700_20.png";
 import ic_plan_green_20 from "@/assets/icons/size20/ic_plan_green_20.png";
 import ic_arrow_right_gray500_18 from "@/assets/icons/size18/ic_arrow_right_gray500_18.png";
+import { logout } from "@/api/auth/auth.api";
 
 import "@/pages/Mypage/Mypage.css";
 import { formatPhoneNumber } from "@/shared/utils/util";
@@ -33,6 +34,11 @@ export default function M_MyPageSideMenu({ myInfo, planName, planExpireAt }: Pro
 
   const handleNavigation = (to: string) => {
     navigate(to);
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login", { replace: true });
   };
 
   const userName = myInfo?.userName;
@@ -99,7 +105,7 @@ export default function M_MyPageSideMenu({ myInfo, planName, planExpireAt }: Pro
           ))}
         </ul>
 
-        <span className="sidemenu__item--logout">로그아웃</span>
+        <span className="sidemenu__item--logout"   onClick={handleLogout}>로그아웃</span>
       </nav>
     </aside>
   );

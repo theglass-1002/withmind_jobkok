@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import "./MyPage.css";
 import { formatPhoneNumber } from "@/shared/utils/util";
 import type { MyInfo } from "@/api/auth/auth.types";
@@ -30,9 +30,16 @@ const GROUPS = [
 ];
 
 export default function MyPageSideMenu({ myInfo }: MyPageSideMenuProps) {
+  const navigate = useNavigate();
   const userName = myInfo?.userName;
   const userId = myInfo?.userId;
   const phone = myInfo?.phone;
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login", { replace: true });
+  };
+
 
   return (
     <aside className="mypage__sidebar" aria-label="마이페이지 메뉴">
@@ -86,7 +93,7 @@ export default function MyPageSideMenu({ myInfo }: MyPageSideMenuProps) {
 
         <span className="sidemenu__item--logout">
           <button type="button" 
-          onClick={logout}
+          onClick={handleLogout}
           className="sidemenu__link sidemenu_logout_btn">
             로그아웃
           </button>

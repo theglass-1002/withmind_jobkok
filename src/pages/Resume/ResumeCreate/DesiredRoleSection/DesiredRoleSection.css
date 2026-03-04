@@ -21,8 +21,7 @@
   line-height: 20px; /* 125% */
 }
 
-/* 섹션 */
-.resume-create-page__section--desired-role {}
+
 
 /* 섹션 바디 */
 .resume-create-page__section--desired-role .resume-create-page__section-body{
@@ -172,6 +171,9 @@
       flex-direction: column;
       gap: 20px;
     }
+    .resume-create-page .resume-create-page__selected.desired{
+      gap: 12px;
+    }
 
     .basic-info-form-overlay.desired-section .resume-create-page__form-action .btn_wrap{
       width: 100%;
@@ -184,6 +186,12 @@
     }
     .ai-suggest.resume-suggest__role{
       padding: 0px;
+    }
+
+  
+    
+    .resume-field__value.resume-desired-roles{
+      gap: 12px;
     }
   }
 }

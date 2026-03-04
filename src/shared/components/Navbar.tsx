@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo } from "react";
+import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import "./Navbar.css";
 import { Icons } from "@/assets/icons";
@@ -6,7 +6,7 @@ import { Icons } from "@/assets/icons";
 import ic_arrow_back_ios_gray900_20 from "@/assets/icons/size20/ic_arrow_back_ios_gray900_20.png";
 import ic_search_gray900_20 from "@/assets/icons/size20/ic_search_gray900_20.png";
 
-import { isLoggedIn, logout } from "@/api/auth/auth.api";
+import { logout } from "@/api/auth/auth.api";
 import { fetchJobTree } from "@/api/job/job.api";
 import { JobNode } from "@/api/job/job.types";
 
@@ -24,21 +24,23 @@ function highlightSubstring(label: string, query: string): React.ReactNode {
   const parts: React.ReactNode[] = [];
   let lastIndex = 0;
   let m: RegExpExecArray | null;
+
   while ((m = re.exec(label)) !== null) {
     const start = m.index;
     const end = start + m[0].length;
     if (start > lastIndex) {
-      parts.push(<span key={lastIndex + "n"}>{label.slice(lastIndex, start)}</span>);
+      parts.push(<span key={`${lastIndex}-n`}>{label.slice(lastIndex, start)}</span>);
     }
     parts.push(
-      <span key={start + "h"} className="select-highlight">
+      <span key={`${start}-h`} className="select-highlight">
         {label.slice(start, end)}
       </span>
     );
     lastIndex = end;
   }
+
   if (lastIndex < label.length) {
-    parts.push(<span key={lastIndex + "t"}>{label.slice(lastIndex)}</span>);
+    parts.push(<span key={`${lastIndex}-t`}>{label.slice(lastIndex)}</span>);
   }
   return <>{parts}</>;
 }
@@ -48,7 +50,7 @@ interface NavbarProps {
 }
 
 export default function Navbar({ titleText }: NavbarProps) {
-  const [SearchOpen, setSearchOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [mypageMenuOpen, setMypageMenuOpen] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
 
@@ -64,6 +66,10 @@ export default function Navbar({ titleText }: NavbarProps) {
 
   const location = useLocation();
   const navigate = useNavigate();
+
+  const syncAuth = useCallback(() => {
+    setLoggedIn(!!localStorage.getItem("accessToken"));
+  }, []);
 
   const autoItems: AutoItem[] = useMemo(() => {
     const out: AutoItem[] = [];
@@ -118,9 +124,7 @@ export default function Navbar({ titleText }: NavbarProps) {
     const q = (inputValue ?? "").trim().toLowerCase();
     if (!q) return autoItems.slice(0, 10);
 
-    return autoItems
-      .filter((item) => item.label.toLowerCase().includes(q))
-      .slice(0, 10);
+    return autoItems.filter((item) => item.label.toLowerCase().includes(q)).slice(0, 10);
   }, [inputValue, autoItems]);
 
   const toggleSearch = () => {
@@ -168,9 +172,7 @@ export default function Navbar({ titleText }: NavbarProps) {
     setSearchOpen(false);
 
     if (item.kind === "category" && item.categoryId != null) {
-      navigate("/jobs", {
-        state: { activeTab: "all", categoryId: item.categoryId },
-      });
+      navigate("/jobs", { state: { activeTab: "all", categoryId: item.categoryId } });
       return;
     }
 
@@ -189,9 +191,7 @@ export default function Navbar({ titleText }: NavbarProps) {
     setSearchOpen(false);
 
     if (item.kind === "category" && item.categoryId != null) {
-      navigate("/jobs", {
-        state: { activeTab: "all", categoryId: item.categoryId },
-      });
+      navigate("/jobs", { state: { activeTab: "all", categoryId: item.categoryId } });
       return;
     }
 
@@ -207,20 +207,48 @@ export default function Navbar({ titleText }: NavbarProps) {
 
   const handleLogout = () => {
     logout();
-    setLoggedIn(false);
+    syncAuth();
     setMypageMenuOpen(false);
   };
 
+  // 초기 데이터 + 초기 로그인 상태
   useEffect(() => {
-    setLoggedIn(isLoggedIn());
+    syncAuth();
 
     fetchJobTree()
       .then((tree) => setJobTree(tree as JobNode[]))
       .catch((err) => console.error("Failed to fetch job tree:", err));
-  }, []);
+  }, [syncAuth]);
 
+  // 로그인 토큰 변화 감지(같은 탭 로그인 포함)
   useEffect(() => {
-    if (!mypageMenuOpen && !SearchOpen) return;
+    // 라우트 이동 시에도 한번 동기화
+    syncAuth();
+
+    const onStorage = () => syncAuth(); // 다른 탭에서 변경 시
+    const onFocus = () => syncAuth(); // 같은 탭에서 돌아올 때
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") syncAuth();
+    };
+
+    window.addEventListener("storage", onStorage);
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisibility);
+
+    // 같은 탭에서 localStorage만 바뀌고 이벤트가 안 오는 케이스 대비(안전장치)
+    const id = window.setInterval(syncAuth, 500);
+
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.clearInterval(id);
+    };
+  }, [location.pathname, syncAuth]);
+
+  // 바깥 클릭 닫기
+  useEffect(() => {
+    if (!mypageMenuOpen && !searchOpen) return;
 
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
@@ -232,7 +260,7 @@ export default function Navbar({ titleText }: NavbarProps) {
         }
       }
 
-      if (SearchOpen) {
+      if (searchOpen) {
         const inMobile = searchPanelRef.current?.contains(target) ?? false;
         const inDesktop = searchPanelDesktopRef.current?.contains(target) ?? false;
 
@@ -248,10 +276,8 @@ export default function Navbar({ titleText }: NavbarProps) {
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [location.pathname, mypageMenuOpen, SearchOpen]);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [mypageMenuOpen, searchOpen]);
 
   return (
     <>
@@ -300,7 +326,7 @@ export default function Navbar({ titleText }: NavbarProps) {
             <div className="login_on">
               <img
                 className="icon-btn"
-                aria-expanded={SearchOpen}
+                aria-expanded={searchOpen}
                 aria-controls="searchPanel"
                 onClick={toggleSearch}
                 src={Icons.ic_search_gray900_24}
@@ -339,12 +365,7 @@ export default function Navbar({ titleText }: NavbarProps) {
             </div>
           ) : (
             <div className="login_off">
-              <span
-                className="icon-btn"
-                aria-expanded={SearchOpen}
-                aria-controls="searchPanel"
-                onClick={toggleSearch}
-              >
+              <span className="icon-btn" aria-expanded={searchOpen} aria-controls="searchPanel" onClick={toggleSearch}>
                 <img src={Icons.ic_search_gray900_24} alt="" />
               </span>
               <NavLink to="/login">
@@ -357,9 +378,9 @@ export default function Navbar({ titleText }: NavbarProps) {
         </div>
       </header>
 
-      <div className={`backdrop ${SearchOpen ? "is-open" : ""}`} onClick={toggleSearch} />
+      <div className={`backdrop ${searchOpen ? "is-open" : ""}`} onClick={toggleSearch} />
 
-      <div id="searchPanel" className={`search-panel ${SearchOpen ? "is-open" : ""}`}>
+      <div id="searchPanel" className={`search-panel ${searchOpen ? "is-open" : ""}`}>
         <div className="panel-body" ref={searchPanelDesktopRef}>
           <div className="panel-search">
             <img className="jobs-search__icon" src={Icons.ic_search_gray900_20} alt="" />
@@ -394,7 +415,7 @@ export default function Navbar({ titleText }: NavbarProps) {
             )}
           </div>
 
-          {openAutoDesktop && (
+          {openAutoDesktop ? (
             <div className="search-results-dropdown">
               <div className="search-results-dropdown__list">
                 {inputValueDesktop.trim() && filteredAutoDesktop.length === 0 && (
@@ -418,9 +439,7 @@ export default function Navbar({ titleText }: NavbarProps) {
                 ))}
               </div>
             </div>
-          )}
-
-          {!openAutoDesktop && (
+          ) : (
             <>
               <section className="panel-section">
                 <header className="section-head">
@@ -453,7 +472,7 @@ export default function Navbar({ titleText }: NavbarProps) {
         </div>
       </div>
 
-      <div id="searchPanelMobile" className={`search-panel-mobile ${SearchOpen ? "is-open" : ""}`}>
+      <div id="searchPanelMobile" className={`search-panel-mobile ${searchOpen ? "is-open" : ""}`}>
         <div className="panel-body" ref={searchPanelRef}>
           <div className="panel-search-header">
             <img

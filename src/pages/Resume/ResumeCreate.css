@@ -1057,6 +1057,8 @@ background: var(--gray-50, #F8F8F9);
             height: 44px;
             padding: 12px 16px;
             font-size: 14px;
+            white-space: nowrap;
+
         }
         .section__date-inner{
             height: 48px;
