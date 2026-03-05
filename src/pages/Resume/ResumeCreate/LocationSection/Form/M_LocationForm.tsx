@@ -500,7 +500,7 @@ export default function M_LocationForm({
 
       <div className="resume-create-page__form-action">
         {(selectedCodes.size > 0 || globalAllOnly) && (
-          <div className="resume-create-page__selected">
+          <div className="resume-create-page__selected location">
             {chips.map((chip) => (
               <div key={chip.key} className="location-picker__chip">
                 <div className="location-picker__chip-body">

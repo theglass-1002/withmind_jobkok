@@ -157,8 +157,10 @@ export default function M_CareerSection({
                     </div>
                   </div>
                 </div>
-
-                <div className="resume-career-item__bullets">{career.summary}</div>
+                {career.summary&&(
+                    <div className="resume-career-item__bullets">{career.summary}</div>
+                )}
+              
               </div>
             ))}
           </div>

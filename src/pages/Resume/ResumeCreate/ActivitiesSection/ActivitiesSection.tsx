@@ -434,7 +434,7 @@ export default function ActivitiesSection({
                               role="listbox"
                               onClick={(e) => e.stopPropagation()}
                             >
-                              {["교내활동", "인턴", "자원봉사", "동아리"].map(
+                              {["교내활동", "인턴", "자원봉사", "동아리", "사회활동", "수행과제", "해외연수", "교육"].map(
                                 (opt) => (
                                   <div
                                     key={opt}

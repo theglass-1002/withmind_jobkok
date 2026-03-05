@@ -14,6 +14,7 @@ import AISuggestArea from "@/pages/Resume/ResumeAISuggest";
 
 import { fetchHardSkillAutoComplete } from "@/api/resume/resume.api";
 import type { SkillAutoCompleteItem } from "@/api/resume/resume.types";
+import { Icons } from "@/assets/icons";
 
 const MAX_SELECTED = 30;
 const MIN_LENGTH = 1; // "일단"은 1글자부터(원하면 2로 바꾸면 됨)
@@ -245,8 +246,8 @@ export default function HardSkillSection({
               }}
               onSubmit={() => {}}
               onFocus={() => setOpen(true)}
-              leftIconSrc={ic_search_gray900_20}
-              clearIconSrc={ic_clear_btn_gray400_20}
+              leftIconSrc={Icons.ic_search_gray900_20}
+              clearIconSrc={Icons.ic_cancel_gray400_20}
               showSubmitButton={false}
             />
 

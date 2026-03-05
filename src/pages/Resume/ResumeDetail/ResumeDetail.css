@@ -400,7 +400,7 @@
     .resume-career-item{
       display: flex;
       padding: 16px 20px 16px 20px;
-      gap: 16px;
+      gap: 0px;
     }
     .resume-career-item__header{
       font-size: 16px;
@@ -408,6 +408,7 @@
     .resume-career-item__bullets{
       font-size: 14px;
       width: 100%;
+      padding-top: 16px;
       white-space: pre-wrap;
       word-break: break-word;
       overflow-wrap: anywhere;
@@ -443,6 +444,9 @@
     }
     .resume-career-item__company{
       font-size: 16px;
+      white-space: normal;        /*  줄바꿈 허용 */
+      overflow-wrap: anywhere;    /* 긴 단어도 강제로 줄바꿈 */
+      word-break: break-word; 
     }
 
     .resume-page--detail{

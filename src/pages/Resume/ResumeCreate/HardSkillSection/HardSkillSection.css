@@ -239,7 +239,7 @@ line-height: 20px; /* 125% */
       padding: 0px;
     }
     .resume-create-form__content.hard-skills-form{
-      padding: 62px 0px 0px 0px;
+      padding: 62px 0px 150px 0px;
       gap: 0px;
       background: var(--white-100, #FFF);
     }
@@ -267,7 +267,7 @@ line-height: 20px; /* 125% */
     .hard-skills__search-wrapper{
       display: flex;
       flex-direction: column;
-      padding: 24px 20px;
+      padding: 24px 20px 30px 20px;
       gap: 20px;
     }
     .basic-info-form-overlay.hard-skills-section .tooltip--top .tooltip__content{
@@ -281,6 +281,36 @@ line-height: 20px; /* 125% */
       padding: 12px 12px 8px 12px;
       gap: 4px;
     }
+
+    .resume-create-page .resume-create-page__selected.skill{
+      flex-wrap: nowrap;
+    }
+    .hard-skills__menu{
+      width: 100%;
+    }
+
+    .resume-suggest__hardskill.resume-ai-suggest .resume-ai-suggest__title{
+      display: flex;
+      align-items: start;
+      gap: 4px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    
+      color: var(--gray-700, #6F767E);
+      font-family: Pretendard;
+      font-size: 14px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 18px;
+      background: none !important;
+      -webkit-background-clip: initial !important;
+      background-clip: initial !important;
+      -webkit-text-fill-color: initial !important;
+    }
    
+    .ai-suggest.resume-suggest__hardskill{
+       padding: 0px;
+    }
+
   }
 }

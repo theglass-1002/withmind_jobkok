@@ -335,8 +335,8 @@ export default function M_DesiredRoleSection({
                   onChange={setQ}
                   onSubmit={() => {}}
                   onFocus={() => setOpen(true)}
-                  leftIconSrc={ic_search_gray900_20}
-                  clearIconSrc={ic_clear_btn_gray400_20}
+                  leftIconSrc={Icons.ic_search_gray900_20}
+                  clearIconSrc={Icons.ic_cancel_gray400_20}
                   showSubmitButton={false}
                 />
 

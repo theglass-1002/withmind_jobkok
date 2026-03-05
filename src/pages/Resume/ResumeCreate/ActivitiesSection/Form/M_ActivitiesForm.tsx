@@ -145,17 +145,23 @@ export default function M_ActivitiesForm({
   };
 
   const handleReset = () => {
-    if (!hasAnyInput()) return;
+    // if (!hasAnyInput()) return;
     setShowResetModal(true);
   };
 
   const confirmReset = () => {
-    setItems([{ id: makeId(), activityType: null, activityName: "", summary: "" }]);
+    const resetItems: ActivityItem[] = [
+      { id: makeId(), activityType: null, activityName: "", summary: "" },
+    ];
+  
+    // 폼 내부 상태도 초기화
+    setItems(resetItems);
     setItemsErrors([{}]);
     setEditingIndex(null);
     setShowResetModal(false);
+  
+    onSave(resetItems);
   };
-
   const confirmCancel = () => {
     setShowCancelModal(false);
     onCancel();

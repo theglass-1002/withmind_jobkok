@@ -116,7 +116,7 @@
 
     .resume-suggest__role .resume-ai-suggest__header .resume-ai-suggest__title{
       display: flex;
-      align-items: center;
+      align-items: start;
       gap: 4px;
       overflow: hidden;
       text-overflow: ellipsis;

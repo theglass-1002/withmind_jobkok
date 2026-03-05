@@ -10,6 +10,7 @@ import AISuggestArea from "@/pages/Resume/ResumeAISuggest";
 import SearchField from "@/shared/components/search/SearchField";
 import { fetchJobTree } from "@/api/job/job.api";
 import { JobNode } from "@/api/job/job.types";
+import { Icons } from "@/assets/icons";
 
 
 type RoleItem = { group: string; role: string };
@@ -254,8 +255,8 @@ export default function DesiredRoleSection({
           onChange={setQ}
           onSubmit={() => {}}
           onFocus={() => setOpen(true)}
-          leftIconSrc={ic_search_gray900_20}
-          clearIconSrc={ic_clear_btn_gray400_20}
+          leftIconSrc={Icons.ic_search_gray900_20}
+          clearIconSrc={Icons.ic_cancel_gray400_20}
           showSubmitButton={false}
         />
 

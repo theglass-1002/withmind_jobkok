@@ -73,6 +73,9 @@
       font-size: 14px;
       gap: 4px;
     }
+    .ai-suggest__chips{
+      gap: 12px;
+    }
   }
 }
 

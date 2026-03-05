@@ -129,6 +129,7 @@
             height: 100%;
         }
         .resume-create-page__section--education .education-section__fields{
+            padding: 24px 20px;
             gap: 24px;
         }
         .education-section__tilde{

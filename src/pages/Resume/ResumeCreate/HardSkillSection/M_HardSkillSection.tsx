@@ -61,6 +61,9 @@ export default function M_HardSkillSection({
   // ✅ edit / 초기값 동기화 (1회)
   const didSyncFromValueRef = useRef(false);
   useEffect(() => {
+    // edit일 때만 1회 동기화하고 싶으면 아래 두 줄을 살려도 됨
+    // if (!isEdit) return;
+
     if (!value) return;
     if (didSyncFromValueRef.current) return;
 
@@ -71,13 +74,13 @@ export default function M_HardSkillSection({
     }
 
     didSyncFromValueRef.current = true;
-  }, [value]);
+  }, [value, isEdit]);
 
-  // ✅ selected 바뀌면 부모에 반영
-  useEffect(() => {
-    const skills = Array.from(selected).map((key) => key.split("|")[1]);
-    onChange?.(skills);
-  }, [selected, onChange]);
+  // ❌ 여기서 onChange 호출하면 무한 루프 생김 → 제거
+  // useEffect(() => {
+  //   const skills = Array.from(selected).map((key) => key.split("|")[1]);
+  //   onChange?.(skills);
+  // }, [selected, onChange]);
 
   // ✅ 자동완성 호출 (PC와 동일)
   useEffect(() => {
@@ -124,7 +127,10 @@ export default function M_HardSkillSection({
   const highlight = (text: string, keyword: string) => {
     const k = keyword.trim();
     if (!k) return text;
-    const re = new RegExp(`(${k.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\$&")})`, "ig");
+    const re = new RegExp(
+      `(${k.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\$&")})`,
+      "ig"
+    );
     return text.split(re).map((part, i) =>
       part.toLowerCase() === k.toLowerCase() ? (
         <span className="hard-skills__highlight" key={i}>
@@ -179,6 +185,7 @@ export default function M_HardSkillSection({
 
   const handleOpenPopup = () => setIsEditing(true);
 
+  // X 버튼 클릭
   const handleClosePopup = () => {
     if (!hasAnySelected()) {
       setIsEditing(false);
@@ -190,6 +197,7 @@ export default function M_HardSkillSection({
     }
   };
 
+  // 취소 모달에서 "예"
   const confirmCancel = () => {
     setSelected(new Set());
     setQ("");
@@ -199,21 +207,37 @@ export default function M_HardSkillSection({
     setIsEditing(false);
   };
 
+  // 초기화 버튼 클릭
   const handleReset = () => {
     if (!hasAnySelected()) {
       setSelected(new Set());
       setQ("");
       setOpen(false);
+      setItems([]);
       return;
     }
     setShowResetModal(true);
   };
 
+  // 초기화 모달에서 "예"
   const confirmReset = () => {
     setSelected(new Set());
     setQ("");
     setOpen(false);
+    setItems([]);
     setShowResetModal(false);
+  };
+
+
+  const handleSave = () => {
+
+    const skills = Array.from(selected).map((key) => key.split("|")[1]);
+    onChange(skills);
+
+    setIsEditing(false);
+    setOpen(false);
+    setQ("");
+    setItems([]);
   };
 
   return (
@@ -221,34 +245,33 @@ export default function M_HardSkillSection({
       id="resume__create-section--hardSkills"
       className="resume-create-page__section resume-create-page__section--hard-skills"
     >
-      <div className="resume-create-page__section-title resume-create-page__section-title--simple">
-        <div className="resume-create-page__section-title__heading">
-          하드 스킬
-        </div>
-        {error && <span className="resume-create-page__error">{error}</span>}
-      </div>
+    <div className="resume-create-page__section-title resume-create-page__section-title--simple">
+        <div className="section-title__row">
+          <div className="section-title__left">
+            <div className="resume-create-page__section-title__heading">
+              하드 스킬
+              <Tooltip
+                title="하드 스킬이란?"
+                desc="직무 수행에 필요한 전문 기술이나 지식을 의미합니다."
+                position="top"
+              />
 
+            </div>
+          </div>
+        </div>
+      </div>
       {chips.length > 0 && (
-        <div className="resume-create-page__selected">
+        <div className="resume-create-page__selected ">
           {chips.map((chip) => (
             <div key={chip.key} className="location-picker__chip">
               <div className="location-picker__chip-body">{chip.role}</div>
-              <span
-                className="location-picker__chip-close"
-                onClick={() => removeRole(chip.key)}
-              >
-                <img src={ic_close_gray500_24} alt="" />
-              </span>
             </div>
           ))}
         </div>
       )}
 
       <div className="resume-create-page__section-action">
-        <button
-          className="btn_w_full default_btn_white"
-          onClick={handleOpenPopup}
-        >
+        <button className="btn_w_full default_btn_white" onClick={handleOpenPopup}>
           {chips.length > 0 ? (
             <>
               <img src={ic_edit_gray900_20} alt="" />
@@ -275,13 +298,15 @@ export default function M_HardSkillSection({
                 style={{ cursor: "pointer" }}
               />
               <span className="resume-create-form__title">하드 스킬</span>
-              <span />
+              <Tooltip
+                title="하드 스킬이란?"
+                desc="직무 수행에 필요한 전문 기술이나 지식을 의미합니다."
+                position="top"
+              />
             </header>
 
             <div className="resume-create-form__content hard-skills-form">
-              <div className="hard-skills-form-hint">
-                ※ 최대 {MAX_SELECTED}개까지 추가 가능합니다.
-              </div>
+              <div className="hard-skills-form-hint">※ 최대 {MAX_SELECTED}개까지 추가 가능합니다.</div>
 
               <div className="hard-skills__search-wrapper">
                 <SearchField
@@ -294,8 +319,8 @@ export default function M_HardSkillSection({
                   }}
                   onSubmit={() => {}}
                   onFocus={() => setOpen(true)}
-                  leftIconSrc={ic_search_gray900_20}
-                  clearIconSrc={ic_clear_btn_gray400_20}
+                  leftIconSrc={Icons.ic_search_gray900_20}
+                  clearIconSrc={Icons.ic_cancel_gray400_20}
                   showSubmitButton={false}
                 />
 
@@ -304,7 +329,7 @@ export default function M_HardSkillSection({
                     <div className="hard-skills__menu">
                       <ul className="hard-skills__list">
                         {isLoading && (
-                          <li className="hard-skills__option">
+                          <li className="hard-skills__option" aria-disabled="true">
                             불러오는 중...
                           </li>
                         )}
@@ -323,7 +348,7 @@ export default function M_HardSkillSection({
                         {!isLoading &&
                           q.trim().length >= MIN_LENGTH &&
                           items.length === 0 && (
-                            <li className="hard-skills__option">
+                            <li className="hard-skills__option" aria-disabled="true">
                               추천 결과가 없습니다.
                             </li>
                           )}
@@ -331,11 +356,9 @@ export default function M_HardSkillSection({
                     </div>
 
                     {q && (
-                      <div
-                        className="hard-skills__menu-footer"
-                        onClick={() => addRole(q)}
-                      >
-                        “{q}” (으)로 직접 등록하기
+                      <div className="hard-skills__menu-footer" onClick={() => addRole(q)}>
+                        <span className="hard-skills__highlight">“{q}”</span>
+                        <span className="hard-skills__create-suffix">(으)로 직접 등록하기</span>
                       </div>
                     )}
                   </div>
@@ -358,19 +381,27 @@ export default function M_HardSkillSection({
             </div>
 
             <div className="resume-create-page__form-action">
+              {chips.length > 0 && (
+                <div className="resume-create-page__selected skill">
+                  {chips.map((chip) => (
+                    <span className="location-picker__chip" key={chip.key}>
+                      <span className="desired-role-chip__label">{chip.role}</span>
+                      <img
+                        className="desired-role-chip__remove-btn"
+                        onClick={() => removeRole(chip.key)}
+                        src={Icons.ic_close_gray500_20}
+                        alt="삭제"
+                      />
+                    </span>
+                  ))}
+                </div>
+              )}
+
               <div className="btn_wrap">
-                <button
-                  className="btn-reset default_btn_white"
-                  onClick={handleReset}
-                  type="button"
-                >
+                <button className="btn-reset default_btn_white" onClick={handleReset} type="button">
                   <img src={ic_replay_gray900_20} alt="" /> 초기화
                 </button>
-                <button
-                  className="btn_w_full default_btn_black"
-                  onClick={() => setIsEditing(false)}
-                  type="button"
-                >
+                <button className="btn_w_full default_btn_black" onClick={handleSave} type="button">
                   저장
                 </button>
               </div>

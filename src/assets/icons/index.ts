@@ -25,8 +25,8 @@ import ic_naver_login_20 from "./login/ic_naver_login_20.svg";
 import ic_google_login_20 from "./login/ic_google_login_20.svg";
 import ic_search_gray900_20 from "@/assets/icons/size20/ic_search_gray900_20.svg";
 import ic_cancel_gray400_20 from  "@/assets/icons/size20/ic_cancel_gray400_20.svg";
-import ic_close_gray500_20 from "./size20/ic_close_gray500_20.png";
-import ic_error_red100_20 from "@/assets/icons/size20/ic_error_red100_20.png";
+import ic_close_gray500_20 from "@/assets/icons/size20/ic_close_gray500_20.svg";
+import ic_error_red100_20 from "@/assets/icons/size20/ic_error_red100_20.svg";
 import ic_error_gray500_20 from "@/assets/icons/size20/ic_error_gray500_20.svg";
 import ic_edit_gray900_20 from "@/assets/icons/size20/ic_edit_gray900_20.png";
 import ic_edit_cancle_gray900_20 from "@/assets/icons/size20/ic_edit_cancle_gray900_20.png";
@@ -35,6 +35,11 @@ import ic_star_green_20 from "@/assets/icons/size20/ic_star_green_20.png";
 import ic_filter_gray900_20 from "@/assets/icons/size20/ic_filter_gray900_20.svg";
 import ic_refresh_gray900_16 from "@/assets/icons/size20/ic_refresh_gray900_16.svg";
 import code_icon_40px from "@/assets/icons/category_icons/code_icon_40px.svg";
+
+
+import ic_calendar_gray900_20 from "@/assets/icons/size20/ic_calendar_gray900_20.svg";
+import ic_calendar_red_20 from "@/assets/icons/size20/ic_calendar_red_20.svg";
+
 
 import palette_icon_40px from "@/assets/icons/category_icons/palette_icon_40px.svg";
 import megaphone_icon_40px from "@/assets/icons/category_icons/megaphone_icon_40px.svg";
@@ -138,6 +143,8 @@ export const Icons = {
     chef_hat_icon_40px,
     heart_icon_40px,
     headphones_icon_40px,
-    shield_icon_40px
+    shield_icon_40px,
+    ic_calendar_gray900_20,
+    ic_calendar_red_20
 
 };

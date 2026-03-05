@@ -74,7 +74,7 @@ background: white;
     justify-content: space-between;
     align-items: center;
     flex: 1 0 0;
-    color: var(--gray-500, #9EA4AA);
+    
     font-family: Pretendard;
     font-size: 16px;
     font-style: normal;
@@ -149,7 +149,7 @@ flex: 1 0 0;
             flex-direction: row;
         }
         .awards-certifications-section__group .input-group.error{
-           padding: 0px 10px 0px 16px;         
+           padding: 0px 16px 0px 0px         
         }
         .resume-awards-list .resume-award-item{
             padding: 16px 20px 20px 20px;
@@ -164,6 +164,12 @@ flex: 1 0 0;
         }
         .resume-award-item__header--group{
             
+        }
+        .awards-certifications-section__group .input-group{
+            height: 48px;
+        }
+        .awards-certifications_name{
+            padding: 0px 16px 0px 16px;
         }
     }
   }

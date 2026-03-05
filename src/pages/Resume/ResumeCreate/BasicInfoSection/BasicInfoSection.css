@@ -107,6 +107,8 @@
 
     .resume-create-page__section--basic .basic-info-form-container .resume-create-page__section-body{
           padding: 100px 20px 120px 20px;
+          gap: 24px;
+          
       }
 
       .basic-info-form-overlay {
@@ -164,7 +166,7 @@
         line-height: 22px; /* 122.222% */
       }
       .resume-create-form__header span:last-child{
-        width: 24px;
+        width: auto;
       }
 
       .resume-create-page__form-action{
@@ -174,13 +176,15 @@
         display: flex;
         padding: 20px;
         align-items: center;
-        gap: 12px;
+        gap: 20px;
         align-self: stretch;
         border-top: 1px solid var(--gray-300, #E0E2E4);
         background: var(--white-100, #FFF);
+        z-index: 2;
       }
       .resume-create-page__section--basic .resume-create-page__col--left{
         width: 100%;
+        gap: 24px;
       }
 
       .resume-create-page__section--basic .birth,

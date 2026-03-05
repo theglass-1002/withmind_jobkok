@@ -6,10 +6,7 @@ import FormInput from "@/shared/components/form/FormInput";
 import DateInline from "@/shared/components/form/DateInline";
 import InlineMonthPicker from "@/shared/components/calendar/InlineMonthPicker";
 import SelectDropdown from '@/shared/components/select-dropdown/SelectDropdown';
-import ic_error_red100_20 from '@/assets/icons/size20/ic_error_red100_20.png';
-import ic_calendar_gray900_20 from "@/assets/icons/size20/ic_calendar_gray900_20.png";
-import ic_arrow_drop_down_gray900_24 from "@/assets/icons/size24/ic_arrow_drop_down_gray900_24.png";
-import icon_calendar_red_20 from '@/assets/icons/size20/icon_calendar_red_20.png';
+
 import ic_key_arrow_down_gray500_20 from "@/assets/icons/size20/ic_key_arrow_down_gray500_20.png";
 import ic_key_arrow_up_gray500_20 from "@/assets/icons/size20/ic_key_arrow_up_gray500_20.png";
 import ic_trash_gray500_20 from "@/assets/icons/size20/ic_trash_gray500_20.png";
@@ -17,8 +14,9 @@ import ic_key_arrow_up_gray900_20 from "@/assets/icons/size20/ic_key_arrow_up_gr
 import ic_key_arrow_down_gray900_20 from "@/assets/icons/size20/ic_key_arrow_down_gray900_20.png";
 import ic_trash_gray900_20 from "@/assets/icons/size20/ic_trash_gray900_20.png";
 
-import { parseMonth, fmtMonth } from "@/shared/utils/util";
+import { parseMonth, fmtMonth, formatMonthStringToDisplay } from "@/shared/utils/util";
 import type { ActivityItem } from "../M_ActivitiesSection";
+import { Icons } from "@/assets/icons";
 
 type ActivityErrors = Partial<Record<keyof ActivityItem, string>>;
 
@@ -105,7 +103,6 @@ export default function M_ActivitiesItemForm({
   const canRemove = total >= 1; // 1개일 때도 클릭 → 상위에서 모달 처리
 
   return (
-    console.log(errors),
     <div className="activities-section__item">
       <div className="activities-section__fields">
         <div className="activities-section__group">
@@ -120,11 +117,15 @@ export default function M_ActivitiesItemForm({
               { value: "인턴", label: "인턴" },
               { value: "자원봉사", label: "자원봉사" },
               { value: "동아리", label: "동아리" },
+              { value: "사회활동", label: "사회활동" },
+              { value: "수행과제", label: "수행과제" },
+              { value: "해외연수", label: "해외연수" },
+              { value: "교육 이수", label: "교육이수" },
             ]}
             value={activityType ?? ""}
             onChange={(val) => onChange({ activityType: val })}
             className="activities-section__select"
-            errorIconSrc={ic_error_red100_20}
+            errorIconSrc={errors.activityType ? Icons.ic_error_red100_20 : undefined}
           />
           </div>
 
@@ -139,7 +140,7 @@ export default function M_ActivitiesItemForm({
               })
             }
             invalid={!!errors.activityName}
-            rightIconSrc={errors?.activityName ? ic_error_red100_20 : undefined}
+            rightIconSrc={errors?.activityName ? Icons.ic_error_red100_20 : undefined}
           />
         </div>
 
@@ -157,9 +158,9 @@ export default function M_ActivitiesItemForm({
                 id={`activities-start_${index}`}
                 // iconSrc={ic_calendar_gray900_20}
                 iconSrc={
-                  errors?.startDate ? icon_calendar_red_20 : ic_calendar_gray900_20
+                  errors?.startDate ? Icons.ic_calendar_red_20 : Icons.ic_calendar_gray900_20
                 }
-                value={startDate || "YYYY.MM"}
+                value={formatMonthStringToDisplay(startDate) || "YYYY.MM"}
                 onClick={() => setOpenStartCal(true)}
                 invalid={!!errors.startDate}
                 isOpen={openStartCal}
@@ -199,9 +200,9 @@ export default function M_ActivitiesItemForm({
               <DateInline
                 id={`activities-end_${index}`}
                 iconSrc={
-                  errors?.endDate ? icon_calendar_red_20 : ic_calendar_gray900_20
+                  errors?.endDate ? Icons.ic_calendar_red_20 : Icons.ic_calendar_gray900_20
                 }
-                value={endDate || "YYYY.MM"}
+                value={formatMonthStringToDisplay(endDate) || "YYYY.MM"}
                 onClick={() => setOpenEndCal(true)}
                 invalid={!!errors.endDate}
                 isOpen={openEndCal}

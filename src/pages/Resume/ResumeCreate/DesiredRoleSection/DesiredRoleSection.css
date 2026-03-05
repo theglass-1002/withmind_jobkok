@@ -128,9 +128,12 @@
     .resume-create-page__section--desired-role .resume-create-page__section-body{
       padding: 0px;
     }
+    .desired-role__menu{
+      width: 100%;
+    }
     .resume-create-page__section--desired-role .resume-create-form__content{
       padding: 63px 0px 120px 0px;
-      height: 100%;
+      height: auto;
       background: var(--white-100, #FFF);
       gap: 0px;
     }
@@ -159,11 +162,15 @@
     .desired-role__search-wrapper{
       display: flex;
       flex-direction: column;
-      padding: 24px 20px;
+      padding: 16px 20px 34px 20px;
       gap: 20px;
     }
     .resume-create-page__section--desired-role .resume-search{
       height: 48px;
+    }
+
+    .resume-create-page__section--desired-role .resume-search .search-field__icon--left{
+      display: flex;
     }
 
     .resume-create-page__section--desired-role .basic-info-form-overlay .resume-create-page__form-action{
@@ -173,6 +180,7 @@
     }
     .resume-create-page .resume-create-page__selected.desired{
       gap: 12px;
+      flex-wrap: nowrap;
     }
 
     .basic-info-form-overlay.desired-section .resume-create-page__form-action .btn_wrap{
@@ -183,6 +191,7 @@
     .resume-suggest__role.resume-ai-suggest{
       padding: 16px;
       gap: 16px;
+      border: none;
     }
     .ai-suggest.resume-suggest__role{
       padding: 0px;
@@ -192,6 +201,7 @@
     
     .resume-field__value.resume-desired-roles{
       gap: 12px;
+      flex-wrap: wrap;
     }
   }
 }

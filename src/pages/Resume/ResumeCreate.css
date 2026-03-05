@@ -883,7 +883,7 @@ background: var(--gray-50, #F8F8F9);
           border-radius: 0px;
           box-shadow: none;
           border:none;
-          padding: 24px 20px;
+          padding: 20px;
           gap: 20px;
         }
 
@@ -1014,8 +1014,9 @@ background: var(--gray-50, #F8F8F9);
         .resume-create-page .resume-create-page__selected{
             width: 100%;
             padding: 0px;
+            gap: 12px;
             border: none;
-            flex-wrap: nowrap;
+            flex-wrap: wrap;
             white-space: nowrap;
             overflow: auto;
         }
@@ -1023,6 +1024,7 @@ background: var(--gray-50, #F8F8F9);
 
         .resume-create-page__field-row{
             flex-direction: column;
+            gap: 24px;
         }
 
         .resume-page--detail{
@@ -1062,7 +1064,7 @@ background: var(--gray-50, #F8F8F9);
         }
         .section__date-inner{
             height: 48px;
-            padding:12px;
+            
         }
         .resume-create-page__field{
             gap: 8px;  
@@ -1073,6 +1075,16 @@ background: var(--gray-50, #F8F8F9);
         }
         .resume-section-title__control--fresh{
             gap: 8px;
+        }
+        .field .career-section__summary-input,
+        .field .activities-section__summary-input,
+        .field .personal-section__summary-input
+        {
+            height: 320px;
+        }
+
+        .field .activities-section__summary-input textarea{
+            padding: 0px;
         }
     }
 }

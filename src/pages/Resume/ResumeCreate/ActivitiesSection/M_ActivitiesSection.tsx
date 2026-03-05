@@ -4,6 +4,7 @@ import "./ActivitiesSection.css";
 import ic_edit_gray900_20 from "@/assets/icons/size20/ic_edit_gray900_20.png";
 import ic_add_btn_gray900_20 from "@/assets/icons/size20/ic_add_btn_gray900_20.png";
 import M_ActivitiesForm from "./Form/M_ActivitiesForm";
+import { formatMonthStringToDisplay } from "@/shared/utils/util";
 
 export type ActivityItem = {
   id: string;
@@ -49,20 +50,26 @@ export default function M_ActivitiesSection() {
       </div>
 
       {/* 미리보기 카드 */}
-      {items.length > 0 && (
+      {items[0].activityType!=null&& (
+        console.log(items),
+        console.log(items.length),
         <div className="resume-activity-list resume-career-list">
         {items.map((it) => (
             <div className="resume-activity-item resume-career-item" key={it.id}>
             <div className="resume-activity-item__header resume-career-item__header">
-              <span className="resume-activity-item__title resume-career-item__company">
+            <span className="resume-activity-item__title resume-activity-item__type">
+                [{it.activityType}]
+                {" "}
                 {it.activityName}
               </span>
-
-              <div className="resume-activity-item__meta resume-career-item__meta">
+             
+           
+            </div>
+            <div className="resume-activity-item__meta resume-career-item__meta">
                 <span className="resume-activity-item__period resume-career-item__period resume-career-item__period--stack">
                   <div className="resume-activity-item__period-range resume-career-item__period-range">
                     <span className="resume-activity-item__period-start resume-career-item__period-start">
-                      {it.startDate}
+                      {formatMonthStringToDisplay(it.startDate)}
                     </span>
                     {it.endDate && (
                       <>
@@ -71,15 +78,13 @@ export default function M_ActivitiesSection() {
                           ~{" "}
                         </span>
                         <span className="resume-activity-item__period-end resume-career-item__period-end">
-                          {it.endDate}
+                        {formatMonthStringToDisplay(it.endDate)}
                         </span>
                       </>
                     )}
                   </div>
                 </span>
               </div>
-            </div>
-
             {it.summary && it.summary.length > 0 && (
               <ul className="resume-activity-item__bullets resume-career-item__bullets">
                {it.summary}
@@ -88,32 +93,7 @@ export default function M_ActivitiesSection() {
           </div>
         ))}
       </div>
-      // <div className="resume-create-page__section-body activities-preview">
-        //   {items.map((item) => (
-        //     <div className="resume-field__value resume-activities" key={item.id}>
-        //       <div className="resume-activities__header">
-        //         {item.activityType && (
-        //           <span className="resume-activities__type">{item.activityType}</span>
-        //         )}
-        //         <span className="resume-activities__name">
-        //           {item.activityName || "활동ㆍ경험명 미입력"}
-        //         </span>
-        //       </div>
-        //       <div className="resume-activities__meta">
-        //         <span className="resume-activities__period">
-        //           {item.startDate || "YYYY.MM"} ~ {item.endDate || "YYYY.MM"}
-        //         </span>
-        //       </div>
-        //       {item.summary && item.summary.trim().length > 0 && (
-        //         <div className="resume-activities__summary">
-        //           {item.summary.length > 100
-        //             ? `${item.summary.slice(0, 100)}...`
-        //             : item.summary}
-        //         </div>
-        //       )}
-        //     </div>
-        //   ))}
-        // </div>
+
       )}
 
       {/* 추가/수정 버튼 */}

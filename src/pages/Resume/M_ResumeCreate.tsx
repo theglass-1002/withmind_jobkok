@@ -43,7 +43,7 @@ import { fetchMyInfo, logout } from "@/api/auth/auth.api";
 import AISuggestArea from "@/pages/Resume/ResumeAISuggest";
 import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
 import { ResumeHardSkillRequest, ResumePositionRequest } from "@/api/resume/resume.types";
-import { fetchResumeHardSkillSuggestions, fetchResumePositionSuggestions } from "@/api/resume/resume.api";
+import { fetchResumeHardSkillSuggestions, fetchResumePositionSuggestions, fetchResumeSoftSkillSuggestions } from "@/api/resume/resume.api";
 
 type FormState = {
   title: string;
@@ -120,6 +120,7 @@ export default function M_ResumeCreate() {
     education?: EducationErrors[];
     desiredRoles?: string;
     hardSkills?:string;
+    softSkills?:string;
     activities?: ActivityErrors[];
     awardCerts?: AwardsCertErrors[];
     portfolios?: PortfolioErrors[];
@@ -135,9 +136,13 @@ export default function M_ResumeCreate() {
   const [isDefaultResume, setIsDefaultResume] = useState(false);
   const [showRoleSuggest, setShowRoleSuggest] = useState(false);
   const [showHardSkillSuggest, setShowHardSkillSuggest] = useState(false);
+  const [showSoftSkillSuggest, setShowSoftSkillSuggest] = useState(false);
+
+
 
   const [roleSuggestions, setRoleSuggestions] = useState<string[]>([]);
   const [hardSkillSuggestions, setHardSkillSuggestions] = useState<string[]>([]);
+  const [softSkillSuggestions, setSoftSkillSuggestions] = useState<string[]>([]);
 
 
   const [sidebarStatus, setSidebarStatus] = useState<Partial<Record<SectionId, Status>>>({});
@@ -202,11 +207,6 @@ export default function M_ResumeCreate() {
     try {
       if (isRoleLoading) return;
 
-      if (!form.careers || form.careers.length === 0) {
-        toast.info("경력 항목을 1개 이상 입력해 주세요.");
-        return;
-      }
-
       if (!form.education || form.education.length === 0) {
         toast.info("학력 항목을 1개 이상 입력해 주세요.");
         return;
@@ -253,6 +253,83 @@ export default function M_ResumeCreate() {
     }
   };
 
+  const handleClickSoftSkillSuggest = async () => {
+    try {
+      if (isLoading) return;
+
+      if (!form.desiredRoles || form.desiredRoles.length === 0) {
+        toast.info("희망 직무를 1개 이상 입력해 주세요.");
+        return;
+      }
+      // if (!form.careers[0] || form.careers.length === 0) {
+      //   toast.info("경력 항목을 1개 이상 입력해 주세요.");
+      //   return;
+      // }
+      // if (form.careers[0].role === "" || form.careers[0].position === "") {
+      //   toast.info("경력 항목을 1개 이상 입력해 주세요.");
+      //   return;
+      // }
+
+     
+      setIsLoading(true);
+
+      const position = form.desiredRoles.join(","); // or ", "
+      
+      const experiences = form.careers
+        .map((c) => {
+          const base = `${c.company_name} / ${c.role} (${c.position})`;
+          const extra = c.summary ? ` / ${c.summary}` : "";
+          return base + extra;
+        })
+        .join("\n");
+
+      const activities = form.activities
+        .map((a) => {
+          const base = `${a.activityType ?? ""} / ${a.activityName ?? ""}`;
+          const extra = a.summary ? ` / ${a.summary}` : "";
+          return base + extra;
+        })
+        .join("\n");
+
+      const awards = form.awardCerts
+        .map((aw) => `${aw.kind ?? ""} / ${aw.title ?? ""}`)
+        .join("\n");
+
+      const payload: ResumeHardSkillRequest = {
+        position,
+        experiences,
+        activities,
+        awards,
+      };
+
+      console.log("AI 소프트 스킬 추천 payload:", payload);
+
+      const skills = await fetchResumeSoftSkillSuggestions(payload);
+      console.log("AI 소프트 스킬 추천 결과:", skills);
+
+      if (!skills || skills.length === 0) {
+        toast.info(
+          "추천할 소프트 스킬이 없습니다. [경력] 담당 업무 내용을 조금 더 구체적으로 작성해 보세요."
+        );
+        return;
+      }
+
+      setSoftSkillSuggestions(skills);
+      setShowSoftSkillSuggest(true);
+    } catch (error: any) {
+      console.error("AI 소프트 스킬 추천 실패:", error);
+      toast.info(
+        "추천할 소프트 스킬이 없습니다. [경력] 담당 업무 내용을 조금 더 구체적으로 작성해 보세요."
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCloseSoftSkillSuggest = () => setShowSoftSkillSuggest(false);
+
+
+
   const handleClickHardSkillSuggest = async () => {
     try {
       if (isHardSkillLoading) return;
@@ -261,19 +338,21 @@ export default function M_ResumeCreate() {
         toast.info("희망 직무를 1개 이상 입력해 주세요.");
         return;
       }
-      if (!form.careers[0] || form.careers.length === 0) {
-        toast.info("경력 항목을 1개 이상 입력해 주세요.");
-        return;
-      }
-      if (form.careers[0].role === "" || form.careers[0].position === "") {
-        toast.info("경력 항목을 1개 이상 입력해 주세요.");
-        return;
-      }
+      // if (!form.careers[0] || form.careers.length === 0) {
+      //   toast.info("경력 항목을 1개 이상 입력해 주세요.");
+      //   return;
+      // }
+      // if (form.careers[0].role === "" || form.careers[0].position === "") {
+      //   toast.info("경력 항목을 1개 이상 입력해 주세요.");
+      //   return;
+      // }
 
+     
+      console.log('엥');
       setIsHardSkillLoading(true);
 
-      const position = form.desiredRoles[0] ?? "";
-
+      const position = form.desiredRoles.join(","); // or ", "
+      
       const experiences = form.careers
         .map((c) => {
           const base = `${c.company_name} / ${c.role} (${c.position})`;
@@ -326,6 +405,7 @@ export default function M_ResumeCreate() {
   };
 
   const handleCloseHardSkillSuggest = () => setShowHardSkillSuggest(false);
+
 
 
 
@@ -394,12 +474,20 @@ export default function M_ResumeCreate() {
     }
   };
 
-  const updateHardSkills = (roles: string[]) => {
-    setForm((prev) => ({ ...prev, desiredRoles: roles }));
-    if (roles.length > 0) {
-      setErrors((prev) => ({ ...prev, desiredRoles: undefined }));
+  const updateHardSkills = (hardSkills: string[]) => {
+    setForm((prev) => ({ ...prev, hardSkills: hardSkills }));
+    if (hardSkills.length > 0) {
+      setErrors((prev) => ({ ...prev, hardSkills: undefined }));
     }
   };
+
+  const updateSoftSkills = (softSkills: string[]) => {
+    setForm((prev) => ({ ...prev, softSkills: softSkills }));
+    if (softSkills.length > 0) {
+      setErrors((prev) => ({ ...prev, softSkills: undefined }));
+    }
+  };
+
 
 
   const resetBasicErrors = () => setErrors((prev) => ({ ...prev, basic: {} }));
@@ -554,7 +642,16 @@ export default function M_ResumeCreate() {
           onClickAISuggest={handleClickHardSkillSuggest}
           onCloseAISuggest={handleCloseHardSkillSuggest}
         />
-         <M_SoftSkillsSection />
+         <M_SoftSkillsSection 
+            value={form.softSkills}
+            onChange={updateSoftSkills}
+            error={errors.softSkills}
+            aiShow={showSoftSkillSuggest}
+            aiTags={softSkillSuggestions}
+            onClickAISuggest={handleClickSoftSkillSuggest}
+            onCloseAISuggest={handleCloseSoftSkillSuggest}
+         
+         />
          <M_ActivitiesSection />
          <M_AwardsCertificationsSection />
          <M_PortfolioDocumentsSection />

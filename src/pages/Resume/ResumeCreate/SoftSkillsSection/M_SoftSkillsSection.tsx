@@ -1,100 +1,142 @@
 // src/pages/.../SoftSkillSection/M_SoftSkillsSection.tsx
-import React, { useMemo, useState, useRef, useEffect } from 'react';
-import './SoftSkillsSection.css';
-import roles from '@/data/desired_roles.json';
-import { toast } from 'react-toastify';
-import Tooltip from '@/shared/components/tooltip/Tooltip';
-import ic_search_gray900_20 from '@/assets/icons/size20/ic_search_gray900_20.png';
-import ic_clear_btn_gray400_20 from '@/assets/icons/size20/ic_clear_btn_gray400_20.png';
-import ic_error_gray500_20 from '@/assets/icons/size20/ic_error_gray500_20.png';
-import ic_add_purple_20 from '@/assets/icons/size20/ic_add_purple_20.png';
-import ic_close_gray500_24 from '@/assets/icons/size24/ic_close_gray500_24.png';
-import ic_add_btn_gray900_20 from '@/assets/icons/size20/ic_add_btn_gray900_20.png';
-import ic_close_gray900_24 from '@/assets/icons/size24/ic_close_gray900_24.png';
-import ic_replay_gray900_20 from '@/assets/icons/size20/ic_replay_gray900_20.png';
+import React, { useMemo, useState, useRef, useEffect } from "react";
+import "./SoftSkillsSection.css";
+import { toast } from "react-toastify";
+import Tooltip from "@/shared/components/tooltip/Tooltip";
+
+import ic_close_gray500_24 from "@/assets/icons/size24/ic_close_gray500_24.png";
+import ic_add_btn_gray900_20 from "@/assets/icons/size20/ic_add_btn_gray900_20.png";
+import ic_close_gray900_24 from "@/assets/icons/size24/ic_close_gray900_24.png";
+import ic_replay_gray900_20 from "@/assets/icons/size20/ic_replay_gray900_20.png";
 import ic_edit_gray900_20 from "@/assets/icons/size20/ic_edit_gray900_20.png";
 
-import SearchField from '@/shared/components/search/SearchField';
-import AiSuggestChips from '@/shared/components/ai/AiSuggestChips';
-import Modal from '@/shared/components/modal/Modal';
+import SearchField from "@/shared/components/search/SearchField";
+import AISuggestArea from "@/pages/Resume/ResumeAISuggest";
+import Modal from "@/shared/components/modal/Modal";
+import { Icons } from "@/assets/icons";
 
-type RoleItem = { group: string; role: string };
+import { fetchSoftSkillAutoComplete } from "@/api/resume/resume.api";
+import type { SkillAutoCompleteItem } from "@/api/resume/resume.types";
+
 const MAX_SELECTED = 30;
+const MIN_LENGTH = 1;
 
-export default function M_SoftSkillsSection() {
-  const [open, setOpen] = useState(false); // 드롭다운 열림 여부
-  const [q, setQ] = useState(''); // 검색어
+interface SoftSkillsSectionProps {
+  value: string[];
+  onChange: (skills: string[]) => void;
+  error?: string;
+  isEdit?: boolean;
+  aiShow?: boolean;
+  aiTags?: string[];
+  onClickAISuggest?: () => void;
+  onCloseAISuggest?: () => void;
+}
+
+export default function M_SoftSkillsSection({
+  value,
+  onChange,
+  error,
+  isEdit = false,
+  aiShow = false,
+  aiTags = [],
+  onClickAISuggest,
+  onCloseAISuggest,
+}: SoftSkillsSectionProps) {
+  const [open, setOpen] = useState(false);
+  const [q, setQ] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [isEditing, setIsEditing] = useState(false); // 오버레이(팝업) 열림 여부
+  const [isEditing, setIsEditing] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const [showResetModal, setShowResetModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
 
+  const [items, setItems] = useState<SkillAutoCompleteItem[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
   const hasAnySelected = () => selected.size > 0;
 
-  // roles JSON → 평탄화 (임시로 desired_roles 재사용)
-  const flat: RoleItem[] = useMemo(() => {
-    const cats = (roles as any)?.categories as Array<{
-      name: string;
-      all?: string;
-      roles: string[];
-    }>;
-    if (!Array.isArray(cats)) return [];
-    const out: RoleItem[] = [];
-    for (const c of cats) {
-      if (c.all) out.push({ group: c.name, role: c.all });
-      for (const r of c.roles ?? []) out.push({ group: c.name, role: r });
+  // ✅ edit / 초기값 동기화 (1회)
+  const didSyncFromValueRef = useRef(false);
+  useEffect(() => {
+    // if (!isEdit) return; // 필요 시 edit일 때만 동기화
+
+    if (!value) return;
+    if (didSyncFromValueRef.current) return;
+
+    if (value.length > 0) {
+      setSelected(new Set(value.map((v) => `직접 입력|${v}`)));
+    } else {
+      setSelected(new Set());
     }
-    return out;
-  }, []);
 
-  // 필터링
-  const filtered = useMemo(() => {
-    const k = (q ?? '').trim().toLowerCase();
-    if (!k) return flat.slice(0, 20);
-    const toStr = (v: unknown) => (typeof v === 'string' ? v : String(v ?? ''));
-    return flat
-      .filter((i) => {
-        const role = toStr(i.role).toLowerCase();
-        const group = toStr(i.group).toLowerCase();
-        return role.includes(k) || group.includes(k);
-      })
-      .slice(0, 50);
-  }, [q, flat]);
+    didSyncFromValueRef.current = true;
+  }, [value, isEdit]);
 
-  // 외부 클릭 시 드롭다운 닫기
+  // ✅ 자동완성 호출
+  useEffect(() => {
+    const keyword = (q ?? "").trim();
+    if (!open) return;
+
+    if (keyword.length < MIN_LENGTH) {
+      setItems([]);
+      return;
+    }
+
+    let mounted = true;
+
+    (async () => {
+      try {
+        setIsLoading(true);
+        const data = await fetchSoftSkillAutoComplete(keyword);
+        if (!mounted) return;
+        setItems(Array.isArray(data) ? data : []);
+      } catch (e) {
+        console.error("❌ soft auto-complete error:", e);
+        if (mounted) setItems([]);
+      } finally {
+        if (mounted) setIsLoading(false);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, [q, open]);
+
+  // 외부 클릭 닫기
   useEffect(() => {
     if (!open) return;
     const onPointer = (e: PointerEvent) => {
       if (!menuRef.current) return;
       if (!menuRef.current.contains(e.target as Node)) setOpen(false);
     };
-    document.addEventListener('pointerdown', onPointer);
-    return () => document.removeEventListener('pointerdown', onPointer);
+    document.addEventListener("pointerdown", onPointer);
+    return () => document.removeEventListener("pointerdown", onPointer);
   }, [open]);
 
-  // 검색어 하이라이트
   const highlight = (text: string, keyword: string) => {
     const k = keyword.trim();
     if (!k) return text;
-    const re = new RegExp(`(${k.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\$&')})`, 'ig');
+    const re = new RegExp(
+      `(${k.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\$&")})`,
+      "ig"
+    );
     return text.split(re).map((part, i) =>
-      re.test(part)
-        ? (
-          <span className="soft-skills__highlight" key={i}>
-            {part}
-          </span>
-        )
-        : <span key={i}>{part}</span>
+      part.toLowerCase() === k.toLowerCase() ? (
+        <span className="soft-skills__highlight" key={i}>
+          {part}
+        </span>
+      ) : (
+        <span key={i}>{part}</span>
+      )
     );
   };
 
-  // 칩 뷰용
   const chips = useMemo(() => {
     return Array.from(selected).map((key) => {
-      const [group, role] = key.split('|');
-      return { key, group, role };
+      const [, role] = key.split("|");
+      return { key, role };
     });
   }, [selected]);
 
@@ -106,50 +148,52 @@ export default function M_SoftSkillsSection() {
     });
   };
 
-  const addRole = (item: RoleItem | string) => {
-    const roleText = typeof item === 'string' ? item.trim() : item.role;
+  const addRole = (item: SkillAutoCompleteItem | string) => {
+    const roleText = typeof item === "string" ? item.trim() : item.name;
     if (!roleText) return;
-    const group = typeof item === 'string' ? '직접 입력' : item.group;
-    const key = `${group}|${roleText}`;
+
+    const key = `직접 입력|${roleText}`;
 
     setSelected((prev) => {
       if (prev.has(key)) return prev;
+
       if (prev.size >= MAX_SELECTED) {
-        toast.error('최대 30개까지 추가 가능합니다.', { toastId: 'soft-skill-limit' });
+        toast.error("최대 30개까지 추가 가능합니다.", {
+          toastId: "soft-skill-limit",
+        });
         return prev;
       }
+
       const next = new Set(prev);
       next.add(key);
       return next;
     });
 
-    setQ('');
+    setQ("");
     setOpen(false);
+    setItems([]);
   };
 
-  const handleOpenPopup = () => {
-    setIsEditing(true);
-  };
+  const handleOpenPopup = () => setIsEditing(true);
 
   // X 버튼 클릭
   const handleClosePopup = () => {
     if (!hasAnySelected()) {
-      // 선택된 게 없으면 바로 닫기
       setIsEditing(false);
       setOpen(false);
-      setQ('');
+      setQ("");
+      setItems([]);
     } else {
-      // 선택된 게 있으면 취소 확인 모달
       setShowCancelModal(true);
     }
   };
 
-  // 취소 모달에서 "예" 클릭
+  // 취소 모달에서 "예"
   const confirmCancel = () => {
-    // 모두 초기화하고 닫기
     setSelected(new Set());
-    setQ('');
+    setQ("");
     setOpen(false);
+    setItems([]);
     setShowCancelModal(false);
     setIsEditing(false);
   };
@@ -157,39 +201,40 @@ export default function M_SoftSkillsSection() {
   // 초기화 버튼 클릭
   const handleReset = () => {
     if (!hasAnySelected()) {
-      // 선택된 게 없으면 모달 없이 정리만
       setSelected(new Set());
-      setQ('');
+      setQ("");
       setOpen(false);
+      setItems([]);
       return;
     }
     setShowResetModal(true);
   };
 
-  // 초기화 모달에서 "예" 클릭
+  // 초기화 모달에서 "예"
   const confirmReset = () => {
     setSelected(new Set());
-    setQ('');
+    setQ("");
     setOpen(false);
+    setItems([]);
     setShowResetModal(false);
   };
 
-  // 저장 버튼 클릭
   const handleSave = () => {
-    if (selected.size === 0) {
-      toast.error('소프트 스킬을 1개 이상 추가해 주세요.');
-      return;
-    }
-    // selected 가 곧 저장값이므로 팝업만 닫기
+   
+    const skills = Array.from(selected).map((key) => key.split("|")[1]);
+    onChange(skills);
+
     setIsEditing(false);
     setOpen(false);
-    setQ('');
+    setQ("");
+    setItems([]);
   };
 
   return (
-    <div 
-    id='resume__create-section--softSkills'
-    className="resume-create-page__section resume-create-page__section--soft-skills">
+    <div
+      id="resume__create-section--softSkills"
+      className="resume-create-page__section resume-create-page__section--soft-skills"
+    >
       <div className="resume-create-page__section-title resume-create-page__section-title--simple">
         <div className="section-title__row">
           <div className="section-title__left">
@@ -200,7 +245,6 @@ export default function M_SoftSkillsSection() {
                 desc="업무를 효과적으로 수행하고 다른 사람들과 협력하는 데 필요한 개인의 역량, 특성, 태도 등을 의미합니다."
                 position="top"
               />
-
             </div>
           </div>
         </div>
@@ -208,18 +252,16 @@ export default function M_SoftSkillsSection() {
 
       {/* 선택된 소프트 스킬 미리보기 */}
       {chips.length > 0 && (
-        <div className="resume-create-page__selected">
+        <div className="resume-create-page__selected ">
           {chips.map((chip) => (
             <div key={chip.key} className="location-picker__chip">
-              <div className="location-picker__chip-body">
-                {chip.role}
-              </div>
-              <span
+              <div className="location-picker__chip-body">{chip.role}</div>
+              {/* <span
                 className="location-picker__chip-close"
                 onClick={() => removeRole(chip.key)}
               >
                 <img src={ic_close_gray500_24} alt="삭제" />
-              </span>
+              </span> */}
             </div>
           ))}
         </div>
@@ -227,19 +269,18 @@ export default function M_SoftSkillsSection() {
 
       {/* 추가/수정 버튼 */}
       <div className="resume-create-page__section-action">
-        <button
-          className="btn_w_full default_btn_white"
-          onClick={handleOpenPopup}
-        >
-          {chips.length>0?
-          <>
-          <img src={ic_edit_gray900_20} alt="" />
-          수정
-          </>:<>
-          <img src={ic_add_btn_gray900_20} alt="" />
-          추가
-          </>}
-       
+        <button className="btn_w_full default_btn_white" onClick={handleOpenPopup}>
+          {chips.length > 0 ? (
+            <>
+              <img src={ic_edit_gray900_20} alt="" />
+              수정
+            </>
+          ) : (
+            <>
+              <img src={ic_add_btn_gray900_20} alt="" />
+              추가
+            </>
+          )}
         </button>
       </div>
 
@@ -253,7 +294,7 @@ export default function M_SoftSkillsSection() {
                 alt=""
                 className="resume-create-form__close-icon"
                 onClick={handleClosePopup}
-                style={{ cursor: 'pointer' }}
+                style={{ cursor: "pointer" }}
               />
               <span className="resume-create-form__title">소프트 스킬</span>
               <Tooltip
@@ -261,7 +302,6 @@ export default function M_SoftSkillsSection() {
                 desc="업무를 효과적으로 수행하고 다른 사람들과 협력하는 데 필요한 개인의 역량, 특성, 태도 등을 의미합니다."
                 position="top"
               />
-
             </header>
 
             <div className="resume-create-form__content soft-skills-form">
@@ -269,37 +309,51 @@ export default function M_SoftSkillsSection() {
                 ※ 최대 {MAX_SELECTED}개까지 추가 가능합니다.
               </div>
 
-              {/* 검색 + 드롭다운 + AI 추천 */}
               <div className="soft-skills__search-wrapper">
                 <SearchField
                   className="resume-search"
-                  id="soft-skills-search"
-                  placeholder="보유 소프트 스킬을 입력해 주세요. (ex. 팀워크, 리더십)"
+                  id="soft-skill-search"
+                  placeholder="보유 소프트 스킬을 입력해 주세요."
                   value={q}
-                  onChange={setQ}
+                  onChange={(v) => {
+                    setQ(v);
+                    setOpen(true);
+                  }}
                   onSubmit={() => {}}
                   onFocus={() => setOpen(true)}
-                  leftIconSrc={ic_search_gray900_20}
-                  clearIconSrc={ic_clear_btn_gray400_20}
+                  leftIconSrc={Icons.ic_search_gray900_20}
+                  clearIconSrc={Icons.ic_cancel_gray400_20}
                   showSubmitButton={false}
                 />
 
                 {open && (
                   <div className="soft-skills__dropdown" ref={menuRef}>
-                    <div className="soft-skills__menu" role="listbox">
+                    <div className="soft-skills__menu">
                       <ul className="soft-skills__list">
-                        {filtered.map((item, idx) => (
-                          <li
-                            key={`${item.group}-${item.role}-${idx}`}
-                            className="soft-skills__option"
-                            role="option"
-                            onClick={() => addRole(item)}
-                          >
-                            <span className="soft-skills__option-role">
-                              {highlight(item.role, q)}
-                            </span>
+                        {isLoading && (
+                          <li className="soft-skills__option" aria-disabled="true">
+                            불러오는 중...
                           </li>
-                        ))}
+                        )}
+
+                        {!isLoading &&
+                          items.map((item) => (
+                            <li
+                              key={item.id}
+                              className="soft-skills__option"
+                              onClick={() => addRole(item)}
+                            >
+                              {highlight(item.name, q)}
+                            </li>
+                          ))}
+
+                        {!isLoading &&
+                          q.trim().length >= MIN_LENGTH &&
+                          items.length === 0 && (
+                            <li className="soft-skills__option" aria-disabled="true">
+                              추천 결과가 없습니다.
+                            </li>
+                          )}
                       </ul>
                     </div>
 
@@ -307,8 +361,6 @@ export default function M_SoftSkillsSection() {
                       <div
                         className="soft-skills__menu-footer"
                         onClick={() => addRole(q)}
-                        role="button"
-                        tabIndex={0}
                       >
                         <span className="soft-skills__highlight">“{q}”</span>
                         <span className="soft-skills__create-suffix">
@@ -319,25 +371,36 @@ export default function M_SoftSkillsSection() {
                   </div>
                 )}
 
-                <AiSuggestChips
-                  title="경력 및 학력 기반의 AI 추천 소프트 스킬입니다."
-                  tags={['리더십', '적응력']}
-                  onTagClick={(tag) => addRole(tag)}
+                <AISuggestArea
+                  show={aiShow}
+                  items={aiTags}
+                  onClickSuggest={onClickAISuggest}
+                  onClose={onCloseAISuggest}
+                  onPick={(tag) => addRole(tag)}
+                  starIconGreen={Icons.ic_star_gray700_20}
+                  wrapperClassName="resume-suggest__hardskill"
+                  variant="chips"
+                  hintText="더 정확한 AI 추천을 위해 (희망 직무와 경력) 항목을 먼저 입력해 주세요."
+                  triggerLabel="AI 소프트 스킬 추천"
+                  suggestResultTitle="희망 직무와 경력 기반의 AI 추천 소프트 스킬입니다."
                 />
               </div>
+
+              {/* 필요하면 에러 표시 (HardSkillSection과 동일하게 두고 싶으면 유지) */}
+              {error && <div className="resume-create-form__error">{error}</div>}
             </div>
 
             {/* 하단 버튼 + 팝업 내 선택 칩 리스트 */}
             <div className="resume-create-page__form-action">
               {chips.length > 0 && (
-                <div className="resume-create-page__selected">
+                <div className="resume-create-page__selected skill">
                   {chips.map((chip) => (
                     <span className="location-picker__chip" key={chip.key}>
                       <span className="desired-role-chip__label">{chip.role}</span>
                       <img
                         className="desired-role-chip__remove-btn"
                         onClick={() => removeRole(chip.key)}
-                        src={ic_close_gray500_24}
+                        src={Icons.ic_close_gray500_20}
                         alt="삭제"
                       />
                     </span>

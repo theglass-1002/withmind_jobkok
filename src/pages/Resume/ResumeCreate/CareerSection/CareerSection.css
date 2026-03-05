@@ -156,6 +156,10 @@
         .basic-info-form-container.education{
             background: var(--gray-50, #F8F8F9);
         }
+
+        .basic-info-form-container.education .resume-create-form__content{
+            padding-bottom: 300px;
+        }
         .career-add-btn{
             
         }
