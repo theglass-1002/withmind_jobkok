@@ -467,6 +467,11 @@ export default function M_ResumeCreate() {
   const updateEducation = (newList: Education[]) =>
     setForm((prev) => ({ ...prev, education: newList }));
   
+  const updateActivities = (newList: ActivityItem[]) =>
+    setForm((prev) => ({ ...prev, activities: newList }));
+  
+
+
   const updateDesiredRoles = (roles: string[]) => {
     setForm((prev) => ({ ...prev, desiredRoles: roles }));
     if (roles.length > 0) {
@@ -652,8 +657,16 @@ export default function M_ResumeCreate() {
             onCloseAISuggest={handleCloseSoftSkillSuggest}
          
          />
-         <M_ActivitiesSection />
-         <M_AwardsCertificationsSection />
+         <M_ActivitiesSection 
+            value={form.activities}
+            errors={errors.activities ?? []}
+            onChange={updateActivities}
+           
+         />
+         <M_AwardsCertificationsSection 
+          
+         
+         />
          <M_PortfolioDocumentsSection />
          <M_SelfIntroductionSection />
          <M_MockInterviewAnalysisSection /> 

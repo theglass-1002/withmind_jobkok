@@ -1,17 +1,16 @@
 // src/pages/.../AwardsCertificationsSection/M_AwardsCertificationsSection.tsx
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import "./AwardsCertificationsSection.css";
 import ic_edit_gray900_20 from "@/assets/icons/size20/ic_edit_gray900_20.png";
-
 import ic_add_btn_gray900_20 from "@/assets/icons/size20/ic_add_btn_gray900_20.png";
 import M_AwardsCertificationsForm from "./Form/M_AwardsCertificationsForm";
 
 export type AwardsCertItem = {
   id: string;
-  kind: "Award" | "Certification" | "License" | null;
-  end?:string;
+  kind: "Certification" | "LanguageTest" | "Award" | "Etc" | null;
+  end?: string;
   title: string;
-  dateValue?: string; // YYYY.MM
+  dateValue?: string;
   score?: string;
   issuer?: string;
 };
@@ -21,7 +20,7 @@ const makeId = () => Math.random().toString(36).slice(2, 10);
 const blankItem = (): AwardsCertItem => ({
   id: makeId(),
   kind: null,
-  end:"",
+  end: "",
   title: "",
   dateValue: "",
   score: "",
@@ -29,9 +28,10 @@ const blankItem = (): AwardsCertItem => ({
 });
 
 const kindLabelMap: Record<NonNullable<AwardsCertItem["kind"]>, string> = {
-  Award: "[수상]",
   Certification: "[자격증]",
-  License: "[면허]",
+  LanguageTest: "[어학시험]",
+  Award: "[수상]",
+  Etc: "[기타]",
 };
 
 const getKindLabel = (kind: AwardsCertItem["kind"]) =>
@@ -41,6 +41,18 @@ export default function M_AwardsCertificationsSection() {
   const [items, setItems] = useState<AwardsCertItem[]>([]);
   const [isEditing, setIsEditing] = useState(false);
 
+  const previewItems = useMemo(() => {
+    return items.filter(
+      (it) =>
+        !!it.kind ||
+        !!it.title?.trim() ||
+        !!it.dateValue?.trim() ||
+        !!it.end?.trim() ||
+        !!it.score?.trim() ||
+        !!it.issuer?.trim()
+    );
+  }, [items]);
+
   const handleAddOrEdit = () => {
     setIsEditing(true);
     if (items.length === 0) {
@@ -49,7 +61,17 @@ export default function M_AwardsCertificationsSection() {
   };
 
   const handleSave = (nextItems: AwardsCertItem[]) => {
-    setItems(nextItems);
+    const filtered = nextItems.filter(
+      (it) =>
+        !!it.kind ||
+        !!it.title?.trim() ||
+        !!it.dateValue?.trim() ||
+        !!it.end?.trim() ||
+        !!it.score?.trim() ||
+        !!it.issuer?.trim()
+    );
+
+    setItems(filtered);
     setIsEditing(false);
   };
 
@@ -58,9 +80,10 @@ export default function M_AwardsCertificationsSection() {
   };
 
   return (
-    <div 
-        id='resume__create-section--awards'
-    className="resume-create-page__section resume-create-page__section--awards-certifications">
+    <div
+      id="resume__create-section--awards"
+      className="resume-create-page__section resume-create-page__section--awards-certifications"
+    >
       <div className="resume-create-page__section-title resume-create-page__section-title--simple">
         <div className="section-title__row">
           <div className="section-title__left">
@@ -71,77 +94,73 @@ export default function M_AwardsCertificationsSection() {
         </div>
       </div>
 
-
-      {items.length > 0 && (
+      {previewItems.length > 0 && (
         <div className="resume-awards-list resume-career-list">
-          {items.map((it) => (
-            console.log(it),
-               <div className="resume-award-item resume-career-item" key={it.id}>
-               <div className="resume-award-item__header resume-career-item__header">
-                
+          {previewItems.map((it) => (
+            <div className="resume-award-item resume-career-item" key={it.id}>
+              <div className="resume-award-item__header resume-career-item__header">
                 <span className="resume-award-item__title resume-career-item__company">
-                {getKindLabel(it.kind)}   {it.title}
-                 </span>
-               
-            
-            
-   
-                 <div className="resume-award-item__meta resume-career-item__meta">
-                   <span className="resume-award-item__period resume-career-item__period resume-career-item__period--stack">
-                     <div className="resume-award-item__period-range resume-career-item__period-range">
-                       {it.dateValue&&(
-                          <span className="resume-award-item__period-start resume-career-item__period-start">
+                  {getKindLabel(it.kind)} {it.title}
+                </span>
+
+                <div className="resume-award-item__meta resume-career-item__meta">
+                  <span className="resume-award-item__period resume-career-item__period resume-career-item__period--stack">
+                    <div className="resume-award-item__period-range resume-career-item__period-range">
+                      {it.dateValue && (
+                        <span className="resume-award-item__period-start resume-career-item__period-start">
                           {it.dateValue}
                         </span>
-                       )}
-                     
-                       {it.end && (
-                         <>
-                           <span className="resume-award-item__period-sep resume-career-item__period-sep">
-                             {" "}
-                             ~{" "}
-                           </span>
-                           <span className="resume-award-item__period-end resume-career-item__period-end">
-                             {it.end}
-                           </span>
-                         </>
-                       )}
-                     </div>
-                   </span>
-                   {it.score && (
-                     <span className="resume-award-item__score">{it.score}</span>
-                   )}
-                   {it.issuer && (
-                     <span className="resume-award-item__issuer">{it.issuer}</span>
-                   )}
-                 </div>
-               </div>
-             </div>
+                      )}
+
+                      {it.end && (
+                        <>
+                          <span className="resume-award-item__period-sep resume-career-item__period-sep">
+                            {" "}
+                            ~{" "}
+                          </span>
+                          <span className="resume-award-item__period-end resume-career-item__period-end">
+                            {it.end}
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  </span>
+
+                  {it.score && (
+                    <span className="resume-award-item__score">{it.score}</span>
+                  )}
+
+                  {it.issuer && (
+                    <span className="resume-award-item__issuer">{it.issuer}</span>
+                  )}
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       )}
 
-      {/* 추가/수정 버튼 */}
       <div className="resume-create-page__section-action">
         <button
           className="btn_w_full default_btn_white"
           onClick={handleAddOrEdit}
           disabled={isEditing}
+          type="button"
         >
-          {items.length>0?
-          <>
-          <img src={ic_edit_gray900_20} alt="" />
-          수정
-          </>:<>
-          <img src={ic_add_btn_gray900_20} alt="" />
-          추가
-          </>}
-          {/* <img src={ic_add_btn_gray900_20} alt="" />
-          {items.length > 0 ? "수정" : "추가"} */}
+          {previewItems.length > 0 ? (
+            <>
+              <img src={ic_edit_gray900_20} alt="" />
+              수정
+            </>
+          ) : (
+            <>
+              <img src={ic_add_btn_gray900_20} alt="" />
+              추가
+            </>
+          )}
         </button>
       </div>
 
-      {/* 오버레이 폼 */}
       {isEditing && (
         <div className="basic-info-form-overlay">
           <div className="basic-info-form-container">

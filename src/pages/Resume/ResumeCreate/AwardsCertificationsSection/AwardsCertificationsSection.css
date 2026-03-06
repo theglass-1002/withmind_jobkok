@@ -129,6 +129,8 @@ flex: 1 0 0;
         }
         .awards-certifications-section{
             background: var(--gray-50, #F8F8F9);
+            padding: 80px 20px 300px 20px;
+            overflow: auto;
         }
         .awards-certifications-section__item{
             flex-direction: column;

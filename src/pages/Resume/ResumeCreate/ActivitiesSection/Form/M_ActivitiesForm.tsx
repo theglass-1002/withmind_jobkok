@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import "../ActivitiesSection.css";
 
@@ -8,24 +7,26 @@ import ic_add_btn_gray900_20 from "@/assets/icons/size20/ic_add_btn_gray900_20.p
 import { toast } from "react-toastify";
 
 import Modal from "@/shared/components/modal/Modal";
-import type { ActivityItem } from "../M_ActivitiesSection";
+import type { ActivityItem, ActivityErrors } from "../M_ActivitiesSection";
 import M_ActivitiesItemForm from "./M_ActivitiesItemForm";
 
 const makeId = () => Math.random().toString(36).slice(2, 10);
 const MAX_SUMMARY = 2000;
 
-type ActivityErrors = Partial<Record<keyof ActivityItem, string>>;
-
 interface M_ActivitiesFormProps {
   initialItems: ActivityItem[];
   onSave: (items: ActivityItem[]) => void;
   onCancel: () => void;
+  errors?: ActivityErrors[];
+  onFocusAny?: () => void;
 }
 
 export default function M_ActivitiesForm({
   initialItems,
   onSave,
   onCancel,
+  errors = [],
+  onFocusAny,
 }: M_ActivitiesFormProps) {
   const [items, setItems] = useState<ActivityItem[]>(
     initialItems.length > 0
@@ -34,11 +35,13 @@ export default function M_ActivitiesForm({
   );
 
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-
   const [showResetModal, setShowResetModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const [itemsErrors, setItemsErrors] = useState<ActivityErrors[]>(errors);
 
-  const [itemsErrors, setItemsErrors] = useState<ActivityErrors[]>([]);
+  useEffect(() => {
+    setItemsErrors(errors);
+  }, [errors]);
 
   const hasAnyInput = () =>
     items.some(
@@ -50,7 +53,6 @@ export default function M_ActivitiesForm({
         (it.summary ?? "").trim().length > 0
     );
 
-  // 닫기(X) 버튼 클릭
   const handleClose = () => {
     if (hasAnyInput()) {
       setShowCancelModal(true);
@@ -60,6 +62,7 @@ export default function M_ActivitiesForm({
   };
 
   const addItem = () => {
+    onFocusAny?.();
     setItems((prev) => [
       ...prev,
       { id: makeId(), activityType: null, activityName: "", summary: "" },
@@ -67,12 +70,14 @@ export default function M_ActivitiesForm({
     setItemsErrors((prev) => [...prev, {}]);
   };
 
-  // 마지막 1개 삭제 시에는 전체 삭제 확인 모달
   const removeItem = (index: number) => {
     if (items.length === 1) {
       setShowResetModal(true);
       return;
     }
+
+    onFocusAny?.();
+
     setItems((prev) => prev.filter((_, i) => i !== index));
     setItemsErrors((prev) => prev.filter((_, i) => i !== index));
 
@@ -86,43 +91,61 @@ export default function M_ActivitiesForm({
 
   const moveUp = (index: number) => {
     if (index <= 0) return;
+
+    onFocusAny?.();
+
     setItems((prev) => {
       const next = [...prev];
       [next[index - 1], next[index]] = [next[index], next[index - 1]];
       return next;
     });
+
     setItemsErrors((prev) => {
       const next = [...prev];
       [next[index - 1], next[index]] = [next[index], next[index - 1]];
       return next;
     });
-    setEditingIndex((cur) => (cur === index ? index - 1 : cur === index - 1 ? index : cur));
+
+    setEditingIndex((cur) =>
+      cur === index ? index - 1 : cur === index - 1 ? index : cur
+    );
   };
 
   const moveDown = (index: number) => {
     if (index >= items.length - 1) return;
+
+    onFocusAny?.();
+
     setItems((prev) => {
       const next = [...prev];
       [next[index + 1], next[index]] = [next[index], next[index + 1]];
       return next;
     });
+
     setItemsErrors((prev) => {
       const next = [...prev];
       [next[index + 1], next[index]] = [next[index], next[index + 1]];
       return next;
     });
-    setEditingIndex((cur) => (cur === index ? index + 1 : cur === index + 1 ? index : cur));
+
+    setEditingIndex((cur) =>
+      cur === index ? index + 1 : cur === index + 1 ? index : cur
+    );
   };
 
   const updateItem = (index: number, patch: Partial<ActivityItem>) => {
-    setItems((prev) => prev.map((it, i) => (i === index ? { ...it, ...patch } : it)));
+    onFocusAny?.();
 
-    // 수정된 필드는 에러 제거
+    setItems((prev) =>
+      prev.map((it, i) => (i === index ? { ...it, ...patch } : it))
+    );
+
     if (itemsErrors[index]) {
       const updatedErrors = { ...itemsErrors[index] };
       Object.keys(patch).forEach((key) => {
         delete updatedErrors[key as keyof ActivityItem];
       });
+
       setItemsErrors((prev) =>
         prev.map((err, i) => (i === index ? updatedErrors : err))
       );
@@ -130,6 +153,8 @@ export default function M_ActivitiesForm({
   };
 
   const onChangeSummary = (index: number, v: string) => {
+    onFocusAny?.();
+
     const next = v.slice(0, MAX_SUMMARY);
     setItems((prev) =>
       prev.map((it, i) => (i === index ? { ...it, summary: next } : it))
@@ -145,7 +170,6 @@ export default function M_ActivitiesForm({
   };
 
   const handleReset = () => {
-    // if (!hasAnyInput()) return;
     setShowResetModal(true);
   };
 
@@ -153,24 +177,23 @@ export default function M_ActivitiesForm({
     const resetItems: ActivityItem[] = [
       { id: makeId(), activityType: null, activityName: "", summary: "" },
     ];
-  
-    // 폼 내부 상태도 초기화
+
     setItems(resetItems);
     setItemsErrors([{}]);
     setEditingIndex(null);
     setShowResetModal(false);
-  
     onSave(resetItems);
   };
+
   const confirmCancel = () => {
     setShowCancelModal(false);
     onCancel();
   };
 
   const handleSave = () => {
-    // 필수값 검증
     const newErrors: ActivityErrors[] = items.map((it) => {
       const err: ActivityErrors = {};
+
       if (!it.activityType) {
         err.activityType = "구분을 선택해 주세요.";
       }
@@ -183,6 +206,7 @@ export default function M_ActivitiesForm({
       if (!it.endDate?.trim()) {
         err.endDate = "종료일을 선택해 주세요.";
       }
+
       return err;
     });
 
@@ -191,17 +215,18 @@ export default function M_ActivitiesForm({
     if (hasErrors) {
       setItemsErrors(newErrors);
       toast.error("필수 항목을 모두 입력해 주세요.");
-      return; // 저장 안 하고 폼 유지
+      return;
     }
 
     setItemsErrors([]);
     onSave(items);
   };
 
-  // items 길이가 0이 되면 자동으로 1개 추가 (안전장치)
   useEffect(() => {
     if (items.length === 0) {
-      setItems([{ id: makeId(), activityType: null, activityName: "", summary: "" }]);
+      setItems([
+        { id: makeId(), activityType: null, activityName: "", summary: "" },
+      ]);
       setItemsErrors([{}]);
     }
   }, [items.length]);
@@ -217,7 +242,7 @@ export default function M_ActivitiesForm({
           style={{ cursor: "pointer" }}
         />
         <span className="resume-create-form__title">활동ㆍ경험</span>
-        <span ></span>
+        <span></span>
       </header>
 
       <div className="resume-create-form__content activities-section">
@@ -239,13 +264,15 @@ export default function M_ActivitiesForm({
               onMoveUp={() => moveUp(index)}
               onMoveDown={() => moveDown(index)}
               onRemove={() => removeItem(index)}
-              onStartEditSummary={() => setEditingIndex(index)}
+              onStartEditSummary={() => {
+                onFocusAny?.();
+                setEditingIndex(index);
+              }}
               onChangeSummary={(v) => onChangeSummary(index, v)}
             />
           );
         })}
 
-        {/* 추가 버튼 */}
         <button
           className="career-add-btn btn_w_full default_btn_white"
           onClick={addItem}
@@ -255,7 +282,6 @@ export default function M_ActivitiesForm({
         </button>
       </div>
 
-      {/* 하단 버튼 */}
       <div className="resume-create-page__form-action">
         <button
           className="btn-reset default_btn_white"
@@ -273,7 +299,6 @@ export default function M_ActivitiesForm({
         </button>
       </div>
 
-      {/* 전체 삭제(초기화) 확인 모달 */}
       <Modal
         open={showResetModal}
         title="입력된 내용을 전부 삭제하시겠습니까?"
@@ -285,7 +310,6 @@ export default function M_ActivitiesForm({
         onClose={() => setShowResetModal(false)}
       />
 
-      {/* 취소 확인 모달 */}
       <Modal
         open={showCancelModal}
         title="수정사항을 저장하지 않고 취소하시겠습니까?"

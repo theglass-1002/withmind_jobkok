@@ -41,20 +41,11 @@ export default function M_AwardsCertificationsForm({
 
   const [showResetModal, setShowResetModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
-
   const [itemsErrors, setItemsErrors] = useState<AwardsErrors[]>([]);
 
   const hasAnyInput = () =>
-    items.some(
-      (it) =>
-        it.kind ||
-        it.title ||
-        it.dateValue ||
-        it.score ||
-        it.issuer
-    );
+    items.some((it) => it.kind || it.title || it.dateValue || it.score || it.issuer);
 
-  // X 닫기
   const handleClose = () => {
     if (hasAnyInput()) {
       setShowCancelModal(true);
@@ -73,17 +64,20 @@ export default function M_AwardsCertificationsForm({
       setShowResetModal(true);
       return;
     }
+
     setItems((prev) => prev.filter((_, i) => i !== index));
     setItemsErrors((prev) => prev.filter((_, i) => i !== index));
   };
 
   const moveUp = (index: number) => {
     if (index <= 0) return;
+
     setItems((prev) => {
       const next = [...prev];
       [next[index - 1], next[index]] = [next[index], next[index - 1]];
       return next;
     });
+
     setItemsErrors((prev) => {
       const next = [...prev];
       [next[index - 1], next[index]] = [next[index], next[index - 1]];
@@ -93,11 +87,13 @@ export default function M_AwardsCertificationsForm({
 
   const moveDown = (index: number) => {
     if (index >= items.length - 1) return;
+
     setItems((prev) => {
       const next = [...prev];
       [next[index + 1], next[index]] = [next[index], next[index + 1]];
       return next;
     });
+
     setItemsErrors((prev) => {
       const next = [...prev];
       [next[index + 1], next[index]] = [next[index], next[index + 1]];
@@ -108,15 +104,12 @@ export default function M_AwardsCertificationsForm({
   const updateItem = (index: number, patch: Partial<AwardsCertItem>) => {
     setItems((prev) => prev.map((it, i) => (i === index ? { ...it, ...patch } : it)));
 
-    // 수정된 필드 에러 제거
     if (itemsErrors[index]) {
       const updatedErrors = { ...itemsErrors[index] };
       Object.keys(patch).forEach((key) => {
         delete updatedErrors[key as keyof AwardsCertItem];
       });
-      setItemsErrors((prev) =>
-        prev.map((err, i) => (i === index ? updatedErrors : err))
-      );
+      setItemsErrors((prev) => prev.map((err, i) => (i === index ? updatedErrors : err)));
     }
   };
 
@@ -129,6 +122,7 @@ export default function M_AwardsCertificationsForm({
     setItems([blankItem()]);
     setItemsErrors([{}]);
     setShowResetModal(false);
+    onCancel();
   };
 
   const confirmCancel = () => {
@@ -137,8 +131,6 @@ export default function M_AwardsCertificationsForm({
   };
 
   const handleSave = () => {
-    console.log('33')
-    // 필수값 검증: kind + title
     const newErrors: AwardsErrors[] = items.map((it) => {
       const err: AwardsErrors = {};
       if (!it.kind) {
@@ -157,7 +149,7 @@ export default function M_AwardsCertificationsForm({
       toast.error("필수 항목을 모두 입력해 주세요.");
       return;
     }
-    console.log(hasErrors)
+
     setItemsErrors([]);
     onSave(items);
   };
@@ -205,7 +197,6 @@ export default function M_AwardsCertificationsForm({
           );
         })}
 
-        {/* 추가 버튼 */}
         <button
           className="career-add-btn btn_w_full default_btn_white"
           onClick={addItem}
@@ -215,7 +206,6 @@ export default function M_AwardsCertificationsForm({
         </button>
       </div>
 
-      {/* 하단 버튼 */}
       <div className="resume-create-page__form-action">
         <button
           className="btn-reset default_btn_white"
@@ -233,7 +223,6 @@ export default function M_AwardsCertificationsForm({
         </button>
       </div>
 
-      {/* 전체 삭제 확인 모달 */}
       <Modal
         open={showResetModal}
         title="입력된 내용을 전부 삭제하시겠습니까?"
@@ -245,7 +234,6 @@ export default function M_AwardsCertificationsForm({
         onClose={() => setShowResetModal(false)}
       />
 
-      {/* 취소 확인 모달 */}
       <Modal
         open={showCancelModal}
         title="수정사항을 저장하지 않고 취소하시겠습니까?"
