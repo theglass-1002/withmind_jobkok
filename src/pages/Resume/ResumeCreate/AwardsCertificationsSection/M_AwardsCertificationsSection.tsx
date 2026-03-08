@@ -1,5 +1,4 @@
-// src/pages/.../AwardsCertificationsSection/M_AwardsCertificationsSection.tsx
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import "./AwardsCertificationsSection.css";
 import ic_edit_gray900_20 from "@/assets/icons/size20/ic_edit_gray900_20.png";
 import ic_add_btn_gray900_20 from "@/assets/icons/size20/ic_add_btn_gray900_20.png";
@@ -15,6 +14,15 @@ export type AwardsCertItem = {
   issuer?: string;
 };
 
+export type AwardsCertErrors = Partial<Record<keyof AwardsCertItem, string>>;
+
+interface M_AwardsCertificationsSectionProps {
+  value?: AwardsCertItem[];
+  onChange?: (items: AwardsCertItem[]) => void;
+  errors?: AwardsCertErrors[];
+  isEdit?: boolean;
+}
+
 const makeId = () => Math.random().toString(36).slice(2, 10);
 
 const blankItem = (): AwardsCertItem => ({
@@ -27,6 +35,14 @@ const blankItem = (): AwardsCertItem => ({
   issuer: "",
 });
 
+const normalizeItemsFromValue = (value: AwardsCertItem[]): AwardsCertItem[] => {
+  if (!value || value.length === 0) return [];
+  return value.map((it) => ({
+    ...it,
+    id: it.id ?? makeId(),
+  }));
+};
+
 const kindLabelMap: Record<NonNullable<AwardsCertItem["kind"]>, string> = {
   Certification: "[자격증]",
   LanguageTest: "[어학시험]",
@@ -37,9 +53,27 @@ const kindLabelMap: Record<NonNullable<AwardsCertItem["kind"]>, string> = {
 const getKindLabel = (kind: AwardsCertItem["kind"]) =>
   kind ? kindLabelMap[kind] : "";
 
-export default function M_AwardsCertificationsSection() {
-  const [items, setItems] = useState<AwardsCertItem[]>([]);
+export default function M_AwardsCertificationsSection({
+  value = [],
+  onChange,
+  errors = [],
+  isEdit = false,
+}: M_AwardsCertificationsSectionProps) {
+  const [items, setItems] = useState<AwardsCertItem[]>(() =>
+    normalizeItemsFromValue(value)
+  );
   const [isEditing, setIsEditing] = useState(false);
+
+  const didSyncFromValueRef = useRef(false);
+
+  useEffect(() => {
+    if (!isEdit) return;
+    if (!value || value.length === 0) return;
+    if (didSyncFromValueRef.current) return;
+
+    setItems(normalizeItemsFromValue(value));
+    didSyncFromValueRef.current = true;
+  }, [isEdit, value]);
 
   const previewItems = useMemo(() => {
     return items.filter(
@@ -61,17 +95,23 @@ export default function M_AwardsCertificationsSection() {
   };
 
   const handleSave = (nextItems: AwardsCertItem[]) => {
-    const filtered = nextItems.filter(
-      (it) =>
-        !!it.kind ||
-        !!it.title?.trim() ||
-        !!it.dateValue?.trim() ||
-        !!it.end?.trim() ||
-        !!it.score?.trim() ||
-        !!it.issuer?.trim()
-    );
+    const filtered = nextItems
+      .filter(
+        (it) =>
+          !!it.kind ||
+          !!it.title?.trim() ||
+          !!it.dateValue?.trim() ||
+          !!it.end?.trim() ||
+          !!it.score?.trim() ||
+          !!it.issuer?.trim()
+      )
+      .map((it) => ({
+        ...it,
+        id: it.id ?? makeId(),
+      }));
 
     setItems(filtered);
+    onChange?.(filtered);
     setIsEditing(false);
   };
 
@@ -168,6 +208,7 @@ export default function M_AwardsCertificationsSection() {
               initialItems={items}
               onSave={handleSave}
               onCancel={handleCancel}
+              errors={errors}
             />
           </div>
         </div>

@@ -1,5 +1,5 @@
 // src/pages/.../PortfolioDocumentsSection/M_PortfolioDocumentsSection.tsx
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import "./PortfolioDocumentsSection.css";
 
 import ic_edit_gray900_20 from "@/assets/icons/size20/ic_edit_gray900_20.png";
@@ -12,12 +12,21 @@ export type SourceType = "file" | "url";
 
 export type PortfolioDocItem = {
   id: string;
-  source: SourceType;   // 파일 / URL
-  title: string;        // (선택) 문서명
-  file: File | null;    // 파일 모드일 때
-  url: string;          // URL 모드일 때
-  note?: string;        // (선택) 설명
+  source: SourceType;
+  title: string;
+  file: File | null;
+  url: string;
+  note?: string;
 };
+
+export type PortfolioDocErrors = Partial<Record<keyof PortfolioDocItem, string>>;
+
+interface M_PortfolioDocumentsSectionProps {
+  value?: PortfolioDocItem[];
+  onChange?: (items: PortfolioDocItem[]) => void;
+  errors?: PortfolioDocErrors[];
+  isEdit?: boolean;
+}
 
 const makeId = () => Math.random().toString(36).slice(2, 10);
 
@@ -30,9 +39,45 @@ const blankItem = (): PortfolioDocItem => ({
   note: "",
 });
 
-export default function M_PortfolioDocumentsSection() {
-  const [items, setItems] = useState<PortfolioDocItem[]>([]);
+const normalizeItemsFromValue = (value: PortfolioDocItem[]): PortfolioDocItem[] => {
+  if (!value || value.length === 0) return [];
+  return value.map((it) => ({
+    ...it,
+    id: it.id ?? makeId(),
+  }));
+};
+
+export default function M_PortfolioDocumentsSection({
+  value = [],
+  onChange,
+  errors = [],
+  isEdit = false,
+}: M_PortfolioDocumentsSectionProps) {
+  const [items, setItems] = useState<PortfolioDocItem[]>(() =>
+    normalizeItemsFromValue(value)
+  );
   const [isEditing, setIsEditing] = useState(false);
+
+  const didSyncFromValueRef = useRef(false);
+
+  useEffect(() => {
+    if (!isEdit) return;
+    if (!value || value.length === 0) return;
+    if (didSyncFromValueRef.current) return;
+
+    setItems(normalizeItemsFromValue(value));
+    didSyncFromValueRef.current = true;
+  }, [isEdit, value]);
+
+  const previewItems = useMemo(() => {
+    return items.filter(
+      (it) =>
+        !!it.title?.trim() ||
+        !!it.file ||
+        !!it.url?.trim() ||
+        !!it.note?.trim()
+    );
+  }, [items]);
 
   const handleAddOrEdit = () => {
     setIsEditing(true);
@@ -42,7 +87,21 @@ export default function M_PortfolioDocumentsSection() {
   };
 
   const handleSave = (nextItems: PortfolioDocItem[]) => {
-    setItems(nextItems);
+    const filtered = nextItems
+      .filter(
+        (it) =>
+          !!it.title?.trim() ||
+          !!it.file ||
+          !!it.url?.trim() ||
+          !!it.note?.trim()
+      )
+      .map((it) => ({
+        ...it,
+        id: it.id ?? makeId(),
+      }));
+
+    setItems(filtered);
+    onChange?.(filtered);
     setIsEditing(false);
   };
 
@@ -58,9 +117,10 @@ export default function M_PortfolioDocumentsSection() {
   };
 
   return (
-    <div 
-     id='resume__create-section--portfolio'
-    className="resume-create-page__section resume-create-page__section--portfolio-documents">
+    <div
+      id="resume__create-section--portfolio"
+      className="resume-create-page__section resume-create-page__section--portfolio-documents"
+    >
       <div className="resume-create-page__section-title resume-create-page__section-title--simple">
         <div className="section-title__row">
           <div className="section-title__left">
@@ -71,15 +131,19 @@ export default function M_PortfolioDocumentsSection() {
         </div>
       </div>
 
-      {/* 미리보기 (간단하게 파일명/URL 리스트) */}
-      {items.length > 0 && (
+      {previewItems.length > 0 && (
         <div className="resume-portfolio-list">
-          {items.map((it) => (
+          {previewItems.map((it) => (
             <div className="resume-portfolio-item" key={it.id}>
               <div className="resume-portfolio-item__main">
                 <span className="resume-portfolio-item__source">
-                  {it.source === "file" ? <img src={ic_folder_gray900_20} alt="" /> : <img src={ic_link_gray900_20} alt="" />}
+                  {it.source === "file" ? (
+                    <img src={ic_folder_gray900_20} alt="" />
+                  ) : (
+                    <img src={ic_link_gray900_20} alt="" />
+                  )}
                 </span>
+
                 <span className="resume-portfolio-item__label">
                   {it.source === "file"
                     ? it.file?.name || "파일 미선택"
@@ -91,26 +155,27 @@ export default function M_PortfolioDocumentsSection() {
         </div>
       )}
 
-      {/* 추가/수정 버튼 */}
       <div className="resume-create-page__section-action">
         <button
           className="btn_w_full default_btn_white"
           onClick={handleAddOrEdit}
           disabled={isEditing}
+          type="button"
         >
-            {items.length>0?
-          <>
-          <img src={ic_edit_gray900_20} alt="" />
-          수정
-          </>:<>
-          <img src={ic_add_btn_gray900_20} alt="" />
-          추가
-          </>}
-
+          {previewItems.length > 0 ? (
+            <>
+              <img src={ic_edit_gray900_20} alt="" />
+              수정
+            </>
+          ) : (
+            <>
+              <img src={ic_add_btn_gray900_20} alt="" />
+              추가
+            </>
+          )}
         </button>
       </div>
 
-      {/* 오버레이 폼 */}
       {isEditing && (
         <div className="basic-info-form-overlay">
           <div className="basic-info-form-container">
@@ -118,6 +183,7 @@ export default function M_PortfolioDocumentsSection() {
               initialItems={items}
               onSave={handleSave}
               onCancel={handleCancel}
+              errors={errors}
             />
           </div>
         </div>

@@ -361,7 +361,7 @@ export default function M_DesiredRoleSection({
                               <span className="desired-role__option-role">
                                 {highlight(item.role, q)}
                               </span>
-                              <span className="desired-role__option-group">{item.group}</span>
+                              <span className="desired-role__option-group">{}</span>
                             </li>
                           ))}
 

@@ -42,8 +42,10 @@ import "react-toastify/dist/ReactToastify.css";
 import { fetchMyInfo, logout } from "@/api/auth/auth.api";
 import AISuggestArea from "@/pages/Resume/ResumeAISuggest";
 import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
-import { ResumeHardSkillRequest, ResumePositionRequest } from "@/api/resume/resume.types";
-import { fetchResumeHardSkillSuggestions, fetchResumePositionSuggestions, fetchResumeSoftSkillSuggestions } from "@/api/resume/resume.api";
+import { CreateResumeRequest, mapAwardsKindToCategoryLabel, mapEducationStatusToGraduatedYn, normalizeYm, ProfilePhotoFile, ResumeHardSkillRequest, ResumePositionRequest, ResumeSelfIntroRequest, ResumeTitleRequest, SelfIntro } from "@/api/resume/resume.types";
+import { createResume, fetchResumeHardSkillSuggestions, fetchResumePositionSuggestions, fetchResumeSelfIntro, fetchResumeSoftSkillSuggestions, fetchResumeTitleSuggestions } from "@/api/resume/resume.api";
+import { uploadPhotoFile } from "@/api/fileUpload.api";
+import { Storage } from "@/shared/utils/StorageManager";
 
 type FormState = {
   title: string;
@@ -124,6 +126,7 @@ export default function M_ResumeCreate() {
     activities?: ActivityErrors[];
     awardCerts?: AwardsCertErrors[];
     portfolios?: PortfolioErrors[];
+    selfIntro?:string;
   }>({
     basic: {},
     education: [],
@@ -132,18 +135,17 @@ export default function M_ResumeCreate() {
     portfolios: [],
   });
   const [showTitleSuggest, setShowTitleSuggest] = useState(false);
-  
   const [isDefaultResume, setIsDefaultResume] = useState(false);
   const [showRoleSuggest, setShowRoleSuggest] = useState(false);
   const [showHardSkillSuggest, setShowHardSkillSuggest] = useState(false);
   const [showSoftSkillSuggest, setShowSoftSkillSuggest] = useState(false);
+  const [showSelfIntroSuggest, setShowSelfIntroSuggest] = useState(false);
 
-
-
+  const [titleSuggestions, setTitleSuggestions] = useState<string[]>([]);
   const [roleSuggestions, setRoleSuggestions] = useState<string[]>([]);
   const [hardSkillSuggestions, setHardSkillSuggestions] = useState<string[]>([]);
   const [softSkillSuggestions, setSoftSkillSuggestions] = useState<string[]>([]);
-
+  const [selfIntroSuggestions, setSelfIntroSuggestions] = useState<string[]>([]);
 
   const [sidebarStatus, setSidebarStatus] = useState<Partial<Record<SectionId, Status>>>({});
   const [activeTab, setActiveTab] = useState("title");
@@ -194,11 +196,69 @@ export default function M_ResumeCreate() {
   }, [navigate]);
   
 
-  const handleClickTitleSuggest = ()=>{
-    console.log('ai 제목 추천');
-    setShowTitleSuggest(true);
-  }
-
+  const handleClickTitleSuggest = async () => {
+    try {
+      if (isLoading) return;
+  
+      if (!form.desiredRoles || form.desiredRoles.length === 0) {
+        toast.info("희망 직무를 1개 이상 입력해 주세요.");
+        return;
+      }
+  
+      setIsLoading(true);
+  
+      const position = form.desiredRoles.join(",");
+  
+      const experiences = form.careers
+        .map((c) => {
+          const base = `${c.company_name ?? ""} / ${c.role ?? ""} (${c.position ?? ""})`;
+          const extra = c.summary ? ` / ${c.summary}` : "";
+          return base + extra;
+        })
+        .join("\n");
+  
+      const activities = form.activities
+        .map((a) => {
+          const base = `${a.activityType ?? ""} / ${a.activityName ?? ""}`;
+          const extra = a.summary ? ` / ${a.summary}` : "";
+          return base + extra;
+        })
+        .join("\n");
+  
+      const awards = form.awardCerts
+        .map((aw) => `${aw.kind ?? ""} / ${aw.title ?? ""}`)
+        .join("\n");
+  
+      const payload: ResumeTitleRequest = {
+        position,
+        experiences,
+        activities,
+        awards,
+      };
+  
+      console.log("AI 제목 추천 payload:", payload);
+  
+      const titles = await fetchResumeTitleSuggestions(payload);
+      console.log("AI 제목 추천 결과:", titles);
+  
+      if (!titles || titles.length === 0) {
+        toast.info(
+          "추천할 제목이 없습니다. [희망 직무]와 [경력] 내용을 조금 더 구체적으로 작성해 보세요."
+        );
+        return;
+      }
+  
+      setTitleSuggestions(titles);
+      setShowTitleSuggest(true);
+    } catch (error: any) {
+      console.error("AI 제목 추천 실패:", error);
+      toast.info(
+        "추천할 제목이 없습니다. [희망 직무]와 [경력] 내용을 조금 더 구체적으로 작성해 보세요."
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
   const handleCloseAISuggest = () => setShowTitleSuggest(false);
 
   const handleClickRoleSuggest = async () => {
@@ -328,8 +388,6 @@ export default function M_ResumeCreate() {
 
   const handleCloseSoftSkillSuggest = () => setShowSoftSkillSuggest(false);
 
-
-
   const handleClickHardSkillSuggest = async () => {
     try {
       if (isHardSkillLoading) return;
@@ -407,6 +465,74 @@ export default function M_ResumeCreate() {
   const handleCloseHardSkillSuggest = () => setShowHardSkillSuggest(false);
 
 
+  const handleClickSelfIntroSuggest = async () => {
+    try {
+      if (isLoading) return;
+  
+      if (!form.desiredRoles || form.desiredRoles.length === 0) {
+        toast.info("희망 직무를 1개 이상 입력해 주세요.");
+        return;
+      }
+  
+      console.log("엥");
+      setIsLoading(true);
+  
+      const position = form.desiredRoles.join(",");
+  
+      const experiences = form.careers
+        .map((c) => {
+          const base = `${c.company_name ?? ""} / ${c.role ?? ""} (${c.position ?? ""})`;
+          const extra = c.summary ? ` / ${c.summary}` : "";
+          return base + extra;
+        })
+        .join("\n");
+  
+      const activities = form.activities
+        .map((a) => {
+          const base = `${a.activityType ?? ""} / ${a.activityName ?? ""}`;
+          const extra = a.summary ? ` / ${a.summary}` : "";
+          return base + extra;
+        })
+        .join("\n");
+  
+      const awards = form.awardCerts
+        .map((aw) => `${aw.kind ?? ""} / ${aw.title ?? ""}`)
+        .join("\n");
+  
+      const payload: ResumeSelfIntroRequest = {
+        position,
+        experiences,
+        activities,
+        awards,
+      };
+  
+      console.log("AI 자소서 추천 payload:", payload);
+  
+      const selfIntro = await fetchResumeSelfIntro(payload);
+      console.log("AI 자소서 추천 결과:", selfIntro);
+  
+      if (!selfIntro.trim()) {
+        toast.info(
+          "추천할 자기소개 문장이 없습니다. [희망 직무]와 [경력] 내용을 조금 더 구체적으로 작성해 보세요."
+        );
+        return;
+      }
+  
+      setSelfIntroSuggestions([selfIntro]);
+      setShowSelfIntroSuggest(true);
+    } catch (error: any) {
+      console.error("AI 자기소개 추천 실패:", error);
+      toast.info(
+        "추천할 문장이 없습니다. [희망 직무]와 [경력] 내용을 조금 더 구체적으로 작성해 보세요."
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCloseSelfIntroSuggest = () => setShowSelfIntroSuggest(false);
+
+
 
 
   const handleCloseRoleSuggest = () => setShowRoleSuggest(false);
@@ -451,7 +577,9 @@ export default function M_ResumeCreate() {
     setShowDefaultModal(false);
     // 스위치 값은 그대로 false 유지
   };
-
+  
+  const updatePhotoFile = (file: File | null) =>
+    setForm((prev) => ({ ...prev, photoFile: file }));
 
   const updateBasic = (patch: Partial<BasicInfo>) =>
     setForm((prev) => ({ ...prev, basic: { ...prev.basic, ...patch } }));
@@ -470,6 +598,15 @@ export default function M_ResumeCreate() {
   const updateActivities = (newList: ActivityItem[]) =>
     setForm((prev) => ({ ...prev, activities: newList }));
   
+  const updateAwardsCertifications = (newList: AwardsCertItem[]) =>
+    setForm((prev) => ({ ...prev, awardCerts: newList }));
+  
+  const updatePortfolioDocuments = (newList: PortfolioDocItem[]) =>
+    setForm((prev) => ({ ...prev, portfolios: newList }));
+  
+  const updateSelfIntro = (newValue: string) =>
+    setForm((prev) => ({ ...prev, selfIntro: newValue }));
+
 
 
   const updateDesiredRoles = (roles: string[]) => {
@@ -501,28 +638,226 @@ export default function M_ResumeCreate() {
     toast.success("임시 저장되었습니다.");
   };
 
-  const validate = () => {
-    const nextErr: typeof errors = { basic: {} };
-    if (!form.title.trim()) nextErr.title = "이력서 제목을 입력해 주세요.";
-    if (!form.location.nationwide && form.location.selectedCodes.length === 0) {
-      nextErr.location = "희망 근무 지역을 1개 이상 선택해 주세요.";
+  const handleFileSubmit = async (): Promise<ProfilePhotoFile | null> => {
+    try {
+      if (!form.photoFile) return null;
+
+      const { s3_key, finalUrl, uniqueFileName, originalFileName } =
+        await uploadPhotoFile(form.photoFile, "resume/profile");
+
+      const profilePhotoFile: ProfilePhotoFile = {
+        filePath: s3_key,
+        originalName: originalFileName,
+        storedName: uniqueFileName,
+        sizeBytes: form.photoFile.size,
+        contentType: form.photoFile.type,
+      };
+
+      return profilePhotoFile;
+    } catch (error) {
+      console.error("❌ 업로드 실패:", error);
+      throw error;
     }
-    setErrors(nextErr);
-    return !nextErr.title && !nextErr.location;
   };
 
-  const handleSubmit = () => {
-    console.log('작성 완료');
-    console.log(form);
-    // if (!validate()) {
-    //   toast.error("필수 항목을 확인해주세요.");
-    //   return;
-    // }
-    // const next: Partial<Record<SectionId, Status>> = {};
-    // ALL_SECTIONS.forEach((id) => {
-    //   next[id] = "completed";
-    // });
-    // setSidebarStatus(next);
+  const handlePortfolioFilesSubmit = async (): Promise<
+    Array<{
+      originalItem: PortfolioDocItem;
+      uploadedFile?: {
+        filePath: string;
+        originalName: string;
+        storedName: string;
+        sizeBytes: number;
+        contentType: string;
+      };
+    }>
+  > => {
+    try {
+      const fileItems = form.portfolios.filter(
+        (p) => p.source === "file" && p.file
+      );
+      if (fileItems.length === 0) return [];
+
+      const uploadPromises = fileItems.map(async (item) => {
+        if (!item.file) return { originalItem: item };
+
+        const { s3_key, finalUrl, uniqueFileName, originalFileName } =
+          await uploadPhotoFile(item.file, "resume/portfolio");
+
+        return {
+          originalItem: item,
+          uploadedFile: {
+            filePath: s3_key,
+            originalName: originalFileName,
+            storedName: uniqueFileName,
+            sizeBytes: item.file.size,
+            contentType: item.file.type,
+          },
+        };
+      });
+
+      return await Promise.all(uploadPromises);
+    } catch (error) {
+      console.error("❌ 포트폴리오 파일 업로드 실패:", error);
+      toast.error("포트폴리오 파일 업로드 중 오류가 발생했습니다.");
+      throw error;
+    }
+  };
+
+  const handleSubmit = async () => {
+    try {
+      // const ok = validate();
+      // if (!ok) {
+      //   toast.error("필수 항목을 먼저 입력해 주세요.");
+      //   return;
+      // }
+  
+      setIsLoading(true);
+      console.log(form);
+      const profilePhotoFile = await handleFileSubmit();
+      const portfolioFilesResults = await handlePortfolioFilesSubmit();
+  
+      const payload: CreateResumeRequest = {
+        userIdx: Storage.getUserIdx(),
+        isDefault: isDefaultResume ? 1 : 0,
+        temp: "N",
+  
+        title: form.title,
+        name: form.basic.name,
+        email: form.basic.email,
+        gender: form.basic.gender === "male" ? "M" : "W",
+        phone: form.basic.phone,
+        birth: form.basic.birth,
+  
+        ...(profilePhotoFile ? { profilePhotoFile } : {}),
+  
+        regions: form.location.nationwide ? [] : form.location.selectedCodes,
+  
+        ...(form.isFreshGraduate
+          ? {}
+          : {
+              careers: form.careers.map((career) => ({
+                employmentType: career.employmentType || "정규직",
+                companyName: career.company_name,
+                startYm: normalizeYm(career.startDate)!,
+                endYm: career.isCurrent ? null : normalizeYm(career.endDate),
+                roleName: career.role,
+                positionName: career.position,
+                workAndResult: career.summary,
+                employedYn: career.isCurrent ? "Y" : "N",
+              })),
+            }),
+  
+        educations: form.education.map((edu) => ({
+          schoolName: edu.school_name,
+          startYm: normalizeYm(edu.startDate)!,
+          endYm: normalizeYm(edu.endDate),
+          majorDegree: edu.major_degree,
+          graduatedYn: mapEducationStatusToGraduatedYn(edu.status),
+        })),
+  
+        jobs: form.desiredRoles,
+        hardSkills: form.hardSkills,
+        softSkills: form.softSkills,
+  
+        ...(form.activities.length > 0
+          ? {
+              activities: form.activities.map((act) => ({
+                category: act.activityType ?? "교내활동",
+                activityTitle: act.activityName,
+                startYm: act.startDate ? normalizeYm(act.startDate) : "1999-09",
+                endYm: act.endDate ? normalizeYm(act.endDate) : "1999-09",
+                description: act.summary,
+                linkUrl: "https://github.com/user",
+              })),
+            }
+          : {}),
+  
+        ...(form.awardCerts.length > 0
+          ? {
+              awardCerts: form.awardCerts.map((item) => ({
+                category: mapAwardsKindToCategoryLabel(item.kind),
+                name: item.title,
+                issuer: item.issuer ?? "",
+                acquiredYm: item.dateValue
+                  ? normalizeYm(item.dateValue)?.replace("-", "") ?? ""
+                  : "",
+                licenseNo: item.score ?? "",
+                note: "",
+              })),
+            }
+          : {}),
+  
+        ...(form.portfolios.length > 0
+          ? {
+              portfolios: form.portfolios.map((p, idx) => {
+                if (p.source === "file") {
+                  const uploadedResult = portfolioFilesResults.find(
+                    (r) => r.originalItem.id === p.id
+                  );
+  
+                  if (uploadedResult?.uploadedFile) {
+                    const u = uploadedResult.uploadedFile;
+  
+                    return {
+                      itemType: "FILE",
+                      title: p.title || u.originalName || `포트폴리오 문서 ${idx + 1}`,
+                      docName: u.originalName,
+                      url: null,
+                      fileRef: u.filePath,
+                      description: p.note ?? "",
+                      sortOrder: idx + 1,
+                      portfolioFile: {
+                        filePath: u.filePath,
+                        originalName: u.originalName,
+                        storedName: u.storedName,
+                        sizeBytes: u.sizeBytes,
+                        contentType: u.contentType,
+                      },
+                    };
+                  }
+                }
+  
+                return {
+                  itemType: "URL",
+                  title: p.title || `포트폴리오 ${idx + 1}`,
+                  docName: p.url || "",
+                  url: p.url,
+                  fileRef: null,
+                  description: p.note ?? "",
+                  sortOrder: idx + 1,
+                  portfolioFile: null,
+                };
+              }),
+            }
+          : {}),
+  
+        ...(form.selfIntro.trim().length > 0
+          ? {
+              selfIntros: [
+                {
+                  title: "소개",
+                  content: form.selfIntro,
+                  isAi: false,
+                },
+              ],
+            }
+          : {}),
+      };
+      console.log('결과',payload);
+      // const result = await createResume(payload);
+  
+      // console.log("✅ 이력서 등록 성공:", result);
+      // console.log("✅ 이력서 등록 Payload:", payload);
+  
+      // toast.success("이력서가 등록되었습니다!");
+      // navigate(`/resumes/${result}`);
+    } catch (error) {
+      console.error("❌ 이력서 등록 실패:", error);
+      toast.error("이력서 등록 중 오류가 발생했습니다.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const isSubmitDisabled =
@@ -595,7 +930,7 @@ export default function M_ResumeCreate() {
             </div>
             <AISuggestArea
               show={showTitleSuggest}
-              items={["titleSuggestions"]}
+              items={titleSuggestions}
               hintText="더 정확한 문장 추천을 위해 (경력과 활동·경험) 항목을 먼저 입력해주세요."
               onClickSuggest={handleClickTitleSuggest}
               onClose={handleCloseAISuggest}
@@ -603,11 +938,12 @@ export default function M_ResumeCreate() {
             />
           </div>
           <M_BasicInfoSection
-            values={form.basic}
-            errors={errors.basic}
-            onChange={updateBasic}
-            onFocusAny={resetBasicErrors}
-          />
+              values={form.basic}
+              errors={errors.basic}
+              onChange={updateBasic}
+              onFocusAny={resetBasicErrors}
+              onPhotoFileChange={updatePhotoFile}
+            />
           <M_LocationSection
             defaultValue={initial.location}
             onChange={updateLocation}
@@ -664,11 +1000,25 @@ export default function M_ResumeCreate() {
            
          />
          <M_AwardsCertificationsSection 
-          
+            value={form.awardCerts}
+            errors={errors.awardCerts ?? []}
+            onChange={updateAwardsCertifications}
          
          />
-         <M_PortfolioDocumentsSection />
-         <M_SelfIntroductionSection />
+         <M_PortfolioDocumentsSection 
+         value={form.portfolios}
+         errors={errors.portfolios??[]}
+         onChange={updatePortfolioDocuments}
+         />
+          <M_SelfIntroductionSection
+            value={form.selfIntro}
+            onChange={updateSelfIntro}
+            error={!!errors.selfIntro}
+            aiShow={showSelfIntroSuggest}
+            aiSuggestions={selfIntroSuggestions}
+            onClickAISuggest={handleClickSelfIntroSuggest}
+            onCloseAISuggest={handleCloseSelfIntroSuggest}
+          />
          <M_MockInterviewAnalysisSection /> 
         </div>
         </div>

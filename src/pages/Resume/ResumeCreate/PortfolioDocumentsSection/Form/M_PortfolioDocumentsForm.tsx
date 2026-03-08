@@ -8,7 +8,10 @@ import ic_add_btn_gray900_20 from "@/assets/icons/size20/ic_add_btn_gray900_20.p
 import { toast } from "react-toastify";
 
 import Modal from "@/shared/components/modal/Modal";
-import type { PortfolioDocItem } from "../M_PortfolioDocumentsSection";
+import type {
+  PortfolioDocItem,
+  PortfolioDocErrors,
+} from "../M_PortfolioDocumentsSection";
 import M_PortfolioDocumentsItemForm from "./M_PortfolioDocumentsItemForm";
 
 const makeId = () => Math.random().toString(36).slice(2, 10);
@@ -31,12 +34,14 @@ interface M_PortfolioDocumentsFormProps {
   initialItems: PortfolioDocItem[];
   onSave: (items: PortfolioDocItem[]) => void;
   onCancel: () => void;
+  errors?: PortfolioDocErrors[];
 }
 
 export default function M_PortfolioDocumentsForm({
   initialItems,
   onSave,
   onCancel,
+  errors = [],
 }: M_PortfolioDocumentsFormProps) {
   const [items, setItems] = useState<PortfolioDocItem[]>(
     initialItems.length > 0 ? initialItems : [blankItem()]
@@ -55,7 +60,6 @@ export default function M_PortfolioDocumentsForm({
         (it.note && it.note.trim().length > 0)
     );
 
-  // X 클릭
   const handleClose = () => {
     if (hasAnyInput()) {
       setShowCancelModal(true);
@@ -118,7 +122,6 @@ export default function M_PortfolioDocumentsForm({
       prev.map((it, i) => (i === index ? { ...it, ...patch } : it))
     );
 
-    // 수정된 필드 에러 제거
     if (itemErrors[index]) {
       const updated = { ...itemErrors[index] };
       if ("file" in patch) {
@@ -133,21 +136,17 @@ export default function M_PortfolioDocumentsForm({
     }
   };
 
-  // 초기화 버튼 클릭
   const handleReset = () => {
-    if (!hasAnyInput()) return;
+    if (!hasAnyInput() && initialItems.length === 0) return;
     setShowResetModal(true);
   };
 
-  // 초기화 모달에서 "예"
   const confirmReset = () => {
-    setItems([blankItem()]);
-    setItemErrors([{}]);
     setShowResetModal(false);
-    onCancel(); // 초기화 후 닫기
+    setItemErrors([]);
+    onSave([]);
   };
 
-  // 취소 모달에서 "예"
   const confirmCancel = () => {
     setItems([blankItem()]);
     setItemErrors([{}]);
@@ -155,9 +154,7 @@ export default function M_PortfolioDocumentsForm({
     onCancel();
   };
 
-  // 저장 버튼 클릭
   const handleSave = () => {
-    // 파일/URL 검증: 각 아이템당 최소 하나는 있어야 함
     const newErrors: PortfolioErrors[] = items.map((it) => {
       const err: PortfolioErrors = {};
       if (it.source === "file" && !it.file) {
@@ -169,9 +166,7 @@ export default function M_PortfolioDocumentsForm({
       return err;
     });
 
-    const hasErrors = newErrors.some(
-      (e) => e.fileMissing || e.urlMissing
-    );
+    const hasErrors = newErrors.some((e) => e.fileMissing || e.urlMissing);
 
     if (hasErrors) {
       setItemErrors(newErrors);
@@ -189,6 +184,10 @@ export default function M_PortfolioDocumentsForm({
       setItemErrors([{}]);
     }
   }, [items.length]);
+
+  useEffect(() => {
+    void errors;
+  }, [errors]);
 
   return (
     <>
@@ -226,7 +225,6 @@ export default function M_PortfolioDocumentsForm({
           );
         })}
 
-        {/* 추가 버튼 */}
         <button
           className="career-add-btn btn_w_full default_btn_white"
           onClick={addItem}
@@ -236,7 +234,6 @@ export default function M_PortfolioDocumentsForm({
         </button>
       </div>
 
-      {/* 하단 버튼 */}
       <div className="resume-create-page__form-action">
         <button
           className="btn-reset default_btn_white"
@@ -254,7 +251,6 @@ export default function M_PortfolioDocumentsForm({
         </button>
       </div>
 
-      {/* 전체 삭제 확인 모달 */}
       <Modal
         open={showResetModal}
         title="입력된 내용을 전부 삭제하시겠습니까?"
@@ -266,7 +262,6 @@ export default function M_PortfolioDocumentsForm({
         onClose={() => setShowResetModal(false)}
       />
 
-      {/* 취소 확인 모달 */}
       <Modal
         open={showCancelModal}
         title="수정사항을 저장하지 않고 취소하시겠습니까?"

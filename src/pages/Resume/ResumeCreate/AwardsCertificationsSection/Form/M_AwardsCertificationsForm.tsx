@@ -8,7 +8,10 @@ import ic_add_btn_gray900_20 from "@/assets/icons/size20/ic_add_btn_gray900_20.p
 import { toast } from "react-toastify";
 
 import Modal from "@/shared/components/modal/Modal";
-import type { AwardsCertItem } from "../M_AwardsCertificationsSection";
+import type {
+  AwardsCertItem,
+  AwardsCertErrors,
+} from "../M_AwardsCertificationsSection";
 import M_AwardsCertificationsItemForm from "./M_AwardsCertificationsItemForm";
 
 const makeId = () => Math.random().toString(36).slice(2, 10);
@@ -28,12 +31,14 @@ interface M_AwardsCertificationsFormProps {
   initialItems: AwardsCertItem[];
   onSave: (items: AwardsCertItem[]) => void;
   onCancel: () => void;
+  errors?: AwardsCertErrors[];
 }
 
 export default function M_AwardsCertificationsForm({
   initialItems,
   onSave,
   onCancel,
+  errors = [],
 }: M_AwardsCertificationsFormProps) {
   const [items, setItems] = useState<AwardsCertItem[]>(
     initialItems.length > 0 ? initialItems : [blankItem()]
@@ -41,7 +46,7 @@ export default function M_AwardsCertificationsForm({
 
   const [showResetModal, setShowResetModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
-  const [itemsErrors, setItemsErrors] = useState<AwardsErrors[]>([]);
+  const [itemsErrors, setItemsErrors] = useState<AwardsErrors[]>(errors);
 
   const hasAnyInput = () =>
     items.some((it) => it.kind || it.title || it.dateValue || it.score || it.issuer);
@@ -114,15 +119,14 @@ export default function M_AwardsCertificationsForm({
   };
 
   const handleReset = () => {
-    if (!hasAnyInput()) return;
+    if (!hasAnyInput() && initialItems.length === 0) return;
     setShowResetModal(true);
   };
 
   const confirmReset = () => {
-    setItems([blankItem()]);
-    setItemsErrors([{}]);
     setShowResetModal(false);
-    onCancel();
+    setItemsErrors([]);
+    onSave([]);
   };
 
   const confirmCancel = () => {

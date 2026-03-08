@@ -18,19 +18,23 @@ export type BasicInfo = {
   photoUrl?: string;
 };
 
+interface M_BasicInfoSectionProps {
+  values: BasicInfo;
+  errors?: BasicErrors;
+  onChange: (patch: Partial<BasicInfo>) => void;
+  onFocusAny?: () => void;
+  onPhotoFileChange?: (file: File | null) => void;
+  sectionRef?: (el: HTMLDivElement | null) => void;
+}
+
 export default function M_BasicInfoSection({
   values,
   errors,
   onChange,
   onFocusAny,
+  onPhotoFileChange,
   sectionRef,
-}: {
-  values: BasicInfo;
-  errors?: BasicErrors;
-  onChange: (patch: Partial<BasicInfo>) => void;
-  onFocusAny?: () => void;
-  sectionRef?: (el: HTMLDivElement | null) => void;
-}) {
+}: M_BasicInfoSectionProps) {
   const { name, birth, gender, email, phone } = values;
 
   const [isEditing, setIsEditing] = useState(false);
@@ -61,12 +65,14 @@ export default function M_BasicInfoSection({
     const today = new Date();
     let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
+
     if (
       monthDiff < 0 ||
       (monthDiff === 0 && today.getDate() < birthDate.getDate())
     ) {
       age--;
     }
+
     return age;
   };
 
@@ -110,7 +116,6 @@ export default function M_BasicInfoSection({
             <span className="resume-basic-preview__value">
               {email || "이메일 없음"}
             </span>
-            
           </div>
 
           <div className="resume-basic-preview__group">
@@ -123,11 +128,17 @@ export default function M_BasicInfoSection({
               {formatPhoneNumber(phone) || "연락처 없음"}
             </span>
           </div>
-        </div> 
-         {draft.photoUrl?(<div className="resume-basic-preview__row photo">
-        <img className="resume-basic-preview__photo" src={draft.photoUrl} alt="미리보기" />  
-        </div> ):<></>}
-        {/* */}
+        </div>
+
+        {draft.photoUrl ? (
+          <div className="resume-basic-preview__row photo">
+            <img
+              className="resume-basic-preview__photo"
+              src={draft.photoUrl}
+              alt="미리보기"
+            />
+          </div>
+        ) : null}
       </div>
 
       <div className="resume-create-page__section-action">
@@ -148,6 +159,7 @@ export default function M_BasicInfoSection({
                   ...patch,
                 }))
               }
+              onPhotoFileChange={onPhotoFileChange}
               onFocusAny={onFocusAny}
               onSave={handleSave}
               onCancel={handleCancel}

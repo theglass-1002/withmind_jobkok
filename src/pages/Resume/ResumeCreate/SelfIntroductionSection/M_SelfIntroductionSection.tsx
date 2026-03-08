@@ -1,63 +1,77 @@
 // src/pages/.../SelfIntroductionSection/M_SelfIntroductionSection.tsx
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./SelfIntroductionSection.css";
 import { toast } from "react-toastify";
+import { Icons } from "@/assets/icons";
 
 import ic_edit_gray900_20 from "@/assets/icons/size20/ic_edit_gray900_20.png";
 import ic_replay_gray900_20 from "@/assets/icons/size20/ic_replay_gray900_20.png";
 import ic_add_btn_gray900_20 from "@/assets/icons/size20/ic_add_btn_gray900_20.png";
 import ic_close_gray900_24 from "@/assets/icons/size24/ic_close_gray900_24.png";
-import ic_star_gray700_20 from "@/assets/icons/size20/ic_star_gray700_20.png";
-import ic_star_green_20 from "@/assets/icons/size20/ic_star_green_20.png";
-import ic_close_gray500_20 from "@/assets/icons/size20/ic_close_gray500_20.png";
 
 import AISuggestArea from "@/pages/Resume/ResumeAISuggest";
 import Modal from "@/shared/components/modal/Modal";
 
-export default function M_SelfIntroductionSection() {
+interface M_SelfIntroductionSectionProps {
+  value?: string;
+  onChange?: (value: string) => void;
+  error?: boolean;
+
+  aiShow?: boolean;
+  aiSuggestions?: string[];
+  onClickAISuggest?: () => void;
+  onCloseAISuggest?: () => void;
+}
+
+export default function M_SelfIntroductionSection({
+  value = "",
+  onChange,
+  error = false,
+  aiShow = false,
+  aiSuggestions = [],
+  onClickAISuggest,
+  onCloseAISuggest,
+}: M_SelfIntroductionSectionProps) {
+
   const MAX_SUMMARY = 2000;
 
-  const [summary, setSummary] = useState("");
-  const [isEditing, setIsEditing] = useState(false); // 오버레이 열림 여부
-  const [editingField, setEditingField] = useState(false); // textarea 편집 or 읽기
+  const [summary, setSummary] = useState(value);
+  const [isEditing, setIsEditing] = useState(false);
 
-  const [showCancelModal, setShowCancelModal] = useState(false); // X 닫기용 모달
-  const [showResetModal, setShowResetModal] = useState(false); // 초기화 버튼용 모달
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [showResetModal, setShowResetModal] = useState(false);
 
-  const [errorSummary, setErrorSummary] = useState(false); // 내용 에러 여부
+  const [errorSummary, setErrorSummary] = useState(false);
 
-  // AI 추천 상태
-  const [showAISuggest, setShowAISuggest] = useState(false);
-  const [aiSuggestions, setAISuggestions] = useState<string[]>([]);
+  useEffect(() => {
+    setSummary(value);
+  }, [value]);
+
+  useEffect(() => {
+    setErrorSummary(!!error);
+  }, [error]);
 
   const count = summary.length;
   const hasAnyInput = () => summary.trim().length > 0;
 
-  // 섹션에서 "추가/수정" 클릭
   const handleOpen = () => {
     setIsEditing(true);
-    setEditingField(summary.trim().length === 0);
     setErrorSummary(false);
   };
 
-  // 오버레이 닫기 (X 버튼)
   const handleClose = () => {
     if (hasAnyInput()) {
       setShowCancelModal(true);
     } else {
       setIsEditing(false);
       setErrorSummary(false);
-      setShowAISuggest(false);
     }
   };
 
-  // X 모달에서 "예" → 내용 삭제 + 오버레이 닫기
   const confirmCancel = () => {
     setShowCancelModal(false);
-    setSummary("");
-    setEditingField(false);
+    setSummary(value);
     setErrorSummary(false);
-    setShowAISuggest(false);
     setIsEditing(false);
   };
 
@@ -66,66 +80,37 @@ export default function M_SelfIntroductionSection() {
   const onChangeSummary = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const v = e.target.value.slice(0, MAX_SUMMARY);
     setSummary(v);
-    if (errorSummary) setErrorSummary(false);
-  };
 
-  const startEditingField = (e?: React.KeyboardEvent | React.MouseEvent) => {
-    if (e && "key" in e) {
-      // 조합 중 입력(한글 IME 등)일 때는 무시
-      const nativeEvent: any = (e as any).nativeEvent;
-      if (nativeEvent?.isComposing) return;
-
-      const key = e.key;
-      if (key !== "Enter" && key !== " ") return;
-
-      e.preventDefault();
+    if (errorSummary) {
+      setErrorSummary(false);
     }
-    setEditingField(true);
   };
 
-  // 저장 버튼 클릭
   const handleSave = () => {
     if (!summary.trim()) {
       toast.error("필수 항목을 모두 입력해 주세요.");
       setErrorSummary(true);
-      setEditingField(true);
       return;
     }
 
     setErrorSummary(false);
-    setShowAISuggest(false);
     setIsEditing(false);
+    onChange?.(summary);
   };
 
-  // 초기화 버튼 클릭
   const handleReset = () => {
-    if (!hasAnyInput()) return; // 내용 없으면 모달 안 띄움
+    if (!hasAnyInput()) return;
     setShowResetModal(true);
   };
 
-  // 초기화 모달에서 "예" → 내용만 삭제, 오버레이는 유지
   const confirmReset = () => {
     setSummary("");
-    setEditingField(true);
     setErrorSummary(false);
-    setShowAISuggest(false);
     setShowResetModal(false);
+    onChange?.("");
   };
 
   const cancelReset = () => setShowResetModal(false);
-
-  // AI 문장 추천 버튼 클릭
-  const handleClickAISuggest = () => {
-    const dummy =
-      "5년 8개월차 JAVA 개발자 정유리입니다. Spring Boot와 JPA를 활용한 백엔드 개발 및 API 설계 경험이 있으며, 성능 최적화와 데이터베이스 설계에 강점을 가지고 있습니다. 최근에는 MSA 및 CI/CD 구축을 통해 서비스 확장성과 자동화를 경험했습니다. 효율적인 시스템 개발과 문제 해결을 통해 성장하는 개발자가 되고 싶습니다.";
-
-    setAISuggestions([dummy]);
-    setShowAISuggest(true);
-  };
-
-  const handleCloseAISuggest = () => {
-    setShowAISuggest(false);
-  };
 
   const handlePickSuggestion = (text: string) => {
     setSummary((prev) => {
@@ -133,15 +118,15 @@ export default function M_SelfIntroductionSection() {
       const prefix = trimmed.length > 0 ? "\n" : "";
       return `${trimmed}${prefix}${text}`.slice(0, MAX_SUMMARY);
     });
-    setEditingField(true);
-    setShowAISuggest(false);
+
     setErrorSummary(false);
   };
 
   return (
-    <div 
-    id='resume__create-section--selfIntro'
-    className="resume-create-page__section resume-create-page__section--personal-statement">
+    <div
+      id="resume__create-section--selfIntro"
+      className="resume-create-page__section resume-create-page__section--personal-statement"
+    >
       <div className="resume-create-page__section-title resume-create-page__section-title--simple">
         <div className="section-title__row">
           <div className="section-title__left">
@@ -152,7 +137,6 @@ export default function M_SelfIntroductionSection() {
         </div>
       </div>
 
-      {/* 미리보기 영역 */}
       {summary.trim().length > 0 && (
         <div className="resume-create-page__section-body personal-statement-preview">
           <div className="resume-field__value resume-personal-statement">
@@ -161,26 +145,27 @@ export default function M_SelfIntroductionSection() {
         </div>
       )}
 
-      {/* 추가/수정 버튼 */}
       <div className="resume-create-page__section-action">
         <button
           className="btn_w_full default_btn_white"
           onClick={handleOpen}
           disabled={isEditing}
+          type="button"
         >
-             {summary.trim().length > 0 ?
-          <>
-          <img src={ic_edit_gray900_20} alt="" />
-          수정
-          </>:<>
-          <img src={ic_add_btn_gray900_20} alt="" />
-          추가
-          </>}
-
+          {summary.trim().length > 0 ? (
+            <>
+              <img src={ic_edit_gray900_20} alt="" />
+              수정
+            </>
+          ) : (
+            <>
+              <img src={ic_add_btn_gray900_20} alt="" />
+              추가
+            </>
+          )}
         </button>
       </div>
 
-      {/* 오버레이 폼 */}
       {isEditing && (
         <div className="basic-info-form-overlay">
           <div className="basic-info-form-container">
@@ -202,73 +187,46 @@ export default function M_SelfIntroductionSection() {
                   내용 <em className="error_text_red">*</em>
                 </label>
 
-                {editingField ? (
-                  <div
-                    className={
-                      "personal-section__summary-input" +
-                      (errorSummary ? " error_box" : "")
-                    }
-                  >
-                    <textarea
-                      value={summary}
-                      onChange={onChangeSummary}
-                      maxLength={MAX_SUMMARY}
-                    />
-                    <span className="personal-section__char-count">
-                      <span>{count}</span>
-                      <span className="max"> / {MAX_SUMMARY}</span>
-                    </span>
-                  </div>
-                ) : (
-                  <div
-                    className="personal-section__summary-input"
-                    role="button"
-                    tabIndex={0}
-                    onClick={startEditingField}
-                    onKeyDown={startEditingField}
-                  >
-                    {summary.trim().length > 0 ? (
-                      <div className="personal-section__summary-read">
-                        {summary}
-                      </div>
-                    ) : (
-                      <ul className="personal-section__summary-tips">
-                        <li className="personal-section__summary-tip">
-                          내용을 입력해 주세요.
-                        </li>
-                      </ul>
-                    )}
-                    <span className="personal-section__char-count">
-                      <span>{count}</span>
-                      <span className="max"> / {MAX_SUMMARY}</span>
-                    </span>
-                  </div>
-                )}
+                <div
+                  className={
+                    "personal-section__summary-input" +
+                    (errorSummary ? " error_box" : "")
+                  }
+                >
+                  <textarea
+                    value={summary}
+                    onChange={onChangeSummary}
+                    maxLength={MAX_SUMMARY}
+                  />
 
-                {/* AI 문장 추천 영역 */}
+                  <span className="personal-section__char-count">
+                    <span>{count}</span>
+                    <span className="max"> / {MAX_SUMMARY}</span>
+                  </span>
+                </div>
+
                 <AISuggestArea
-                  show={showAISuggest}
-                  items={aiSuggestions}
-                  onClickSuggest={handleClickAISuggest}
-                  onClose={handleCloseAISuggest}
-                  onPick={handlePickSuggestion}
-                  starIconGray={ic_star_gray700_20}
-                  starIconGreen={ic_star_green_20}
-                  closeIcon={ic_close_gray500_20}
-                  hintText="[AI 문장 추천]을 통해 간편하게 작성해 보세요."
-                  triggerLabel="AI 문장 추천"
-                />
+                    show={aiShow}
+                    items={aiSuggestions}
+                    onClickSuggest={onClickAISuggest}
+                    onClose={onCloseAISuggest}
+                    wrapperClassName="resume-suggest__selfintro"
+                    variant="text"
+                    hintText="더 정확한 AI 추천을 위해 (희망 직무와 경력) 항목을 먼저 입력해 주세요."
+                    triggerLabel="AI 자기소개 추천"
+                    suggestResultTitle="AI 추천 결과"
+                  />
               </div>
             </div>
 
-            {/* 하단 버튼 */}
             <div className="resume-create-page__form-action">
               <button
                 className="btn-reset default_btn_white"
                 onClick={handleReset}
                 type="button"
               >
-                <img src={ic_replay_gray900_20} alt="" /> 초기화
+                <img src={ic_replay_gray900_20} alt="" />
+                초기화
               </button>
               <button
                 className="btn_w_full default_btn_black"
@@ -282,7 +240,6 @@ export default function M_SelfIntroductionSection() {
         </div>
       )}
 
-      {/* 초기화 확인 모달 (초기화 버튼 전용) */}
       <Modal
         open={showResetModal}
         title="입력된 내용을 전부 삭제하시겠습니까?"
@@ -294,7 +251,6 @@ export default function M_SelfIntroductionSection() {
         onClose={cancelReset}
       />
 
-      {/* X 닫기용 전체 삭제 확인 모달 */}
       <Modal
         open={showCancelModal}
         title="수정사항을 저장하지 않고 취소하시겠습니까?"

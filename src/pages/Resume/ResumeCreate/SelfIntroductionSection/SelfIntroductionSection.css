@@ -104,5 +104,10 @@ line-height: 20px; /* 125% */
         .resume-create-page__assist.is-hidden{
             display: none;
         }
+
+        .resume-create-page__section--personal-statement .resume-create-page__section-body .resume-field__value{
+            font-size: 14px;
+            line-height: 23px;
+        }
     }
   }

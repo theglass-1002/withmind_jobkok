@@ -24,6 +24,7 @@ interface M_BasicInfoFormProps {
   values: BasicInfo;
   errors?: BasicErrors;
   onChange: (patch: Partial<BasicInfo>) => void;
+  onPhotoFileChange?: (file: File | null) => void;
   onFocusAny?: () => void;
   onSave: () => void;
   onCancel: () => void;
@@ -33,6 +34,7 @@ export default function M_BasicInfoForm({
   values,
   errors,
   onChange,
+  onPhotoFileChange,
   onFocusAny,
   onSave,
   onCancel,
@@ -41,13 +43,12 @@ export default function M_BasicInfoForm({
 
   const [openBirth, setOpenBirth] = useState(false);
   const birthRef = useRef<HTMLDivElement | null>(null);
-  
+
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showResetModal, setShowResetModal] = useState(false);
-  
-  // 로컬 에러 상태 추가
+
   const [localErrors, setLocalErrors] = useState<BasicErrors>({});
-  
+
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | undefined>(photoUrl);
@@ -55,11 +56,17 @@ export default function M_BasicInfoForm({
   const [photoErrState, setPhotoErrState] = useState<PhotoErrorState>("none");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    setPhotoPreview(photoUrl);
+  }, [photoUrl]);
+
   const openPhotoModal = () => {
     setPhotoErrState("none");
     setShowPhotoModal(true);
   };
+
   const closePhotoModal = () => setShowPhotoModal(false);
+
   const onPickFile = () => fileInputRef.current?.click();
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -72,21 +79,27 @@ export default function M_BasicInfoForm({
       setPhotoFilename(undefined);
       setPhotoErrState("invalid");
       if (fileInputRef.current) fileInputRef.current.value = "";
+      onPhotoFileChange?.(null);
       return;
     }
+
     if (f.size > 10 * 1024 * 1024) {
       setPhotoFile(null);
       setPhotoPreview(undefined);
       setPhotoFilename(undefined);
       setPhotoErrState("tooLarge");
       if (fileInputRef.current) fileInputRef.current.value = "";
+      onPhotoFileChange?.(null);
       return;
     }
 
+    const previewUrl = URL.createObjectURL(f);
+
     setPhotoErrState("none");
     setPhotoFile(f);
-    setPhotoPreview(URL.createObjectURL(f));
+    setPhotoPreview(previewUrl);
     setPhotoFilename(f.name);
+    onPhotoFileChange?.(f);
   };
 
   const onApplyPhoto = () => {
@@ -94,6 +107,7 @@ export default function M_BasicInfoForm({
       setPhotoErrState("missing");
       return;
     }
+
     onChange({ photoUrl: photoPreview || "" });
     closePhotoModal();
   };
@@ -101,11 +115,15 @@ export default function M_BasicInfoForm({
   const removePhoto = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
     setPhotoFile(null);
     setPhotoPreview(undefined);
     setPhotoFilename(undefined);
+
     if (fileInputRef.current) fileInputRef.current.value = "";
+
     onChange({ photoUrl: undefined });
+    onPhotoFileChange?.(null);
   };
 
   useEffect(() => {
@@ -116,8 +134,10 @@ export default function M_BasicInfoForm({
         setOpenBirth(false);
       }
     };
+
     document.addEventListener("mousedown", onDocClick, true);
     document.addEventListener("touchstart", onDocClick, true);
+
     return () => {
       document.removeEventListener("mousedown", onDocClick, true);
       document.removeEventListener("touchstart", onDocClick, true);
@@ -126,67 +146,51 @@ export default function M_BasicInfoForm({
 
   const hasPhoto = !!(photoUrl || photoFile);
 
-  // 입력 여부 확인 함수
   const hasAnyInput = () => {
     return !!(name || birth || gender || email || phone || photoUrl);
   };
 
-  // 에러 초기화 함수
-  const clearErrors = () => {
-    setLocalErrors({});
-  };
-
-  // X 버튼 (닫기) 클릭
   const handleClose = () => {
     if (hasAnyInput()) {
-      console.log("✏️ 입력된 내용이 있어 취소 모달 표시");
       setShowCancelModal(true);
     } else {
-      console.log("❌ 입력된 내용 없음 - 바로 닫기");
       onCancel();
     }
   };
 
-  // 초기화 버튼 클릭
   const handleReset = () => {
     if (hasAnyInput()) {
-      console.log("🔄 입력된 내용이 있어 초기화 모달 표시");
       setShowResetModal(true);
-    } else {
-      console.log("🔄 입력된 내용 없음 - 초기화 불필요");
     }
   };
 
-  // 초기화 확인
   const confirmReset = () => {
-    console.log("🗑️ 초기화 확인 - 모든 내용 삭제");
-    onChange({ 
-      name: "", 
-      birth: "", 
-      gender: null, 
-      email: "", 
-      phone: "", 
-      photoUrl: undefined 
+    onChange({
+      name: "",
+      birth: "",
+      gender: null,
+      email: "",
+      phone: "",
+      photoUrl: undefined,
     });
+
     setPhotoFile(null);
     setPhotoPreview(undefined);
     setPhotoFilename(undefined);
+
     if (fileInputRef.current) fileInputRef.current.value = "";
+
+    onPhotoFileChange?.(null);
     setLocalErrors({});
     setShowResetModal(false);
   };
 
-  // 취소 확인
   const confirmCancel = () => {
-    console.log("🚫 취소 확인 - 폼 닫기");
     setShowCancelModal(false);
     onCancel();
   };
 
-  // 저장 버튼 클릭
   const handleSave = () => {
-    console.log("💾 저장 버튼 클릭!");
-    
     const missingFields: string[] = [];
     const newErrors: BasicErrors = {};
 
@@ -208,29 +212,25 @@ export default function M_BasicInfoForm({
     }
 
     if (missingFields.length > 0) {
-      console.log("⚠️ 필수 입력값 누락:");
-      missingFields.forEach((field) => {
-        console.log(`  - ${field}이(가) 입력되지 않았습니다.`);
-      });
       setLocalErrors(newErrors);
       return;
     }
+
     setLocalErrors({});
     onSave();
   };
 
-  // errors prop과 localErrors 병합
   const displayErrors = { ...errors, ...localErrors };
 
   return (
     <>
       <header className="resume-create-form__header">
-        <img 
-          src={ic_close_gray900_24} 
-          alt="" 
+        <img
+          src={ic_close_gray900_24}
+          alt=""
           className="resume-create-form__close-icon"
           onClick={handleClose}
-          style={{ cursor: 'pointer' }}
+          style={{ cursor: "pointer" }}
         />
         <span className="resume-create-form__title">기본 정보</span>
         <span></span>
@@ -247,13 +247,13 @@ export default function M_BasicInfoForm({
               onChange={(v) => {
                 onChange({ name: v });
                 if (displayErrors.name) {
-                  setLocalErrors(prev => ({ ...prev, name: undefined }));
+                  setLocalErrors((prev) => ({ ...prev, name: undefined }));
                 }
               }}
               onFocus={() => {
                 onFocusAny?.();
                 if (displayErrors.name) {
-                  setLocalErrors(prev => ({ ...prev, name: undefined }));
+                  setLocalErrors((prev) => ({ ...prev, name: undefined }));
                 }
               }}
               invalid={!!displayErrors?.name}
@@ -266,18 +266,27 @@ export default function M_BasicInfoForm({
               <FormField label={<>생년월일 <em>*</em></>} className="">
                 <DateInline
                   id="birth"
-                  iconSrc={displayErrors?.birth ? icon_calendar_red_20 : ic_calendar_gray900_20}
+                  iconSrc={
+                    displayErrors?.birth
+                      ? icon_calendar_red_20
+                      : ic_calendar_gray900_20
+                  }
                   value={birth || "YYYY.MM.DD"}
                   onClick={() => setOpenBirth(true)}
                   invalid={!!displayErrors?.birth}
                   errorMessage={displayErrors?.birth}
-                  rightIconSrc={displayErrors?.name ? ic_error_red100_20 : undefined}
+                  rightIconSrc={
+                    displayErrors?.birth ? ic_error_red100_20 : undefined
+                  }
                   isOpen={openBirth}
                 />
               </FormField>
 
               {openBirth && (
-                <div className="calendar-popover" onClick={(e) => e.stopPropagation()}>
+                <div
+                  className="calendar-popover"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <div className="calendar-popover__panel">
                     <InlineDayPicker
                       className="cal--day"
@@ -288,7 +297,10 @@ export default function M_BasicInfoForm({
                         onChange({ birth: fmtYMD(d) });
                         setOpenBirth(false);
                         if (displayErrors.birth) {
-                          setLocalErrors(prev => ({ ...prev, birth: undefined }));
+                          setLocalErrors((prev) => ({
+                            ...prev,
+                            birth: undefined,
+                          }));
                         }
                       }}
                     />
@@ -298,7 +310,12 @@ export default function M_BasicInfoForm({
             </div>
 
             <FormField label={<>성별 <em>*</em></>} className="gender">
-              <GenderChoice value={gender} onChange={(g) => onChange({ gender: g })} />
+              <GenderChoice
+                value={gender}
+                onChange={(g) => {
+                  onChange({ gender: g });
+                }}
+              />
             </FormField>
           </div>
 
@@ -313,13 +330,13 @@ export default function M_BasicInfoForm({
                 onChange={(v) => {
                   onChange({ email: v });
                   if (displayErrors.email) {
-                    setLocalErrors(prev => ({ ...prev, email: undefined }));
+                    setLocalErrors((prev) => ({ ...prev, email: undefined }));
                   }
                 }}
                 onFocus={() => {
                   onFocusAny?.();
                   if (displayErrors.email) {
-                    setLocalErrors(prev => ({ ...prev, email: undefined }));
+                    setLocalErrors((prev) => ({ ...prev, email: undefined }));
                   }
                 }}
                 invalid={!!displayErrors?.email}
@@ -337,17 +354,16 @@ export default function M_BasicInfoForm({
                 onChange={(v) => {
                   onChange({ phone: v });
                   if (displayErrors.phone) {
-                    setLocalErrors(prev => ({ ...prev, phone: undefined }));
+                    setLocalErrors((prev) => ({ ...prev, phone: undefined }));
                   }
                 }}
                 onFocus={() => {
                   onFocusAny?.();
                   if (displayErrors.phone) {
-                    setLocalErrors(prev => ({ ...prev, phone: undefined }));
+                    setLocalErrors((prev) => ({ ...prev, phone: undefined }));
                   }
                 }}
                 invalid={!!displayErrors?.phone}
-            
                 rightIconSrc={displayErrors?.phone ? ic_error_red100_20 : undefined}
               />
             </FormField>
@@ -450,7 +466,6 @@ export default function M_BasicInfoForm({
         </button>
       </div>
 
-      {/* 초기화 확인 모달 */}
       <Modal
         open={showResetModal}
         title="입력된 내용을 전부 삭제하시겠습니까?"
@@ -462,7 +477,6 @@ export default function M_BasicInfoForm({
         onClose={() => setShowResetModal(false)}
       />
 
-      {/* 취소 확인 모달 */}
       <Modal
         open={showCancelModal}
         title="수정사항을 저장하지 않고 취소하시겠습니까?"
