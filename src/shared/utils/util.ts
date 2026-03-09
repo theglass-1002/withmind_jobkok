@@ -506,6 +506,8 @@ export function formatPhoneNumber(phone?: string): string {
   // 그 외는 원본 그대로
   return phone;
 }
+  //1998-10-02-> 1998.10.02 
+  export const convertBirth = (birth: string) => birth.replace(/\./g, "-");
 
 
 //---------------------------------------

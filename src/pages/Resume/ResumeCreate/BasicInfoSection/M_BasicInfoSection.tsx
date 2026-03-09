@@ -91,6 +91,7 @@ export default function M_BasicInfoSection({
         <div className="resume-create-page__section-title__heading">
           기본정보<em className="resume-create-page__required">*</em>
         </div>
+      
       </div>
 
       <div className="resume-basic-preview">

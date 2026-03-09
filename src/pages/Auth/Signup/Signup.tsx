@@ -189,10 +189,12 @@ export default function Signup() {
     return phone.replace(/(\d{3})(\d{4})(\d{4})/, "$1-$2-$3");
   };
 
+  //1998.10.02 → 1998-10-02
   const formatBirth = (birth: string) => {
     if (!birth) return "";
     return birth.replace(/(\d{4})(\d{2})(\d{2})/, "$1.$2.$3");
   };
+
 
   // ====== 핸들러 ======
   const handleDuplicateCheck = async () => {

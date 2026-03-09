@@ -21,6 +21,7 @@ export type CareerInfo = {
   endDate: string;
   tenure: string;
 };
+
 export type CareerErrors = Partial<Record<keyof CareerInfo, string>>;
 
 interface CareerSectionProps {
@@ -29,11 +30,14 @@ interface CareerSectionProps {
   onChange?: (list: CareerInfo[]) => void;
   onFocusAny?: () => void;
   sectionRef?: (el: HTMLDivElement | null) => void;
+  onNewcomerChange?: (checked: boolean) => void;
 }
 
 export default function M_CareerSection({
+  errors,
   sectionRef,
   onChange,
+  onNewcomerChange,
 }: CareerSectionProps) {
   const [careers, setCareers] = useState<CareerInfo[]>([]);
   const [isEditing, setIsEditing] = useState(false);
@@ -50,6 +54,7 @@ export default function M_CareerSection({
 
     if (savedCareers.length > 0) {
       setIsNewcomer(false);
+      onNewcomerChange?.(false);
     }
 
     onChange?.(savedCareers);
@@ -68,13 +73,16 @@ export default function M_CareerSection({
     }
 
     setIsNewcomer(false);
+    onNewcomerChange?.(false);
   };
 
   const handleConfirmReset = () => {
     setCareers([]);
     setIsNewcomer(true);
     setShowResetModal(false);
+
     onChange?.([]);
+    onNewcomerChange?.(true);
   };
 
   const handleCancelReset = () => {
@@ -91,7 +99,9 @@ export default function M_CareerSection({
         <div className="resume-create-page__section-title resume-create-page__section-title--simple">
           <div className="resume-create-page__section-title__heading">
             경력<em className="resume-create-page__required">*</em>
+            
           </div>
+
           <div className="resume-section-title__actions">
             <label className="resume-section-title__control resume-section-title__control--fresh">
               <input
@@ -104,7 +114,8 @@ export default function M_CareerSection({
             </label>
           </div>
         </div>
-
+        {errors !== "" && <div className="resume-create-page__error">희망 근무 지역을 추가해 주세요.</div>}
+     
         {careers.length > 0 && (
           <div className="resume-create-page__section-body career-section">
             {careers.map((career) => (
@@ -157,10 +168,12 @@ export default function M_CareerSection({
                     </div>
                   </div>
                 </div>
-                {career.summary&&(
-                    <div className="resume-career-item__bullets">{career.summary}</div>
+
+                {career.summary && (
+                  <div className="resume-career-item__bullets">
+                    {career.summary}
+                  </div>
                 )}
-              
               </div>
             ))}
           </div>

@@ -4,7 +4,9 @@ import "./ResumeCreate.css";
 import Switch from "react-switch";
 import Tabs from "@/shared/components/tabs/Tabs";
 import {useStickyTabs, tabItems ,ALL_SECTIONS ,
-  BasicErrors,SectionId} from '@/shared/utils/util';
+  BasicErrors,SectionId,
+  formatPhoneNumber,
+  convertBirth} from '@/shared/utils/util';
 import { toast } from "react-toastify";
 import Modal from "@/shared/components/modal/Modal";
 import M_BasicInfoSection,{
@@ -46,6 +48,7 @@ import { CreateResumeRequest, mapAwardsKindToCategoryLabel, mapEducationStatusTo
 import { createResume, fetchResumeHardSkillSuggestions, fetchResumePositionSuggestions, fetchResumeSelfIntro, fetchResumeSoftSkillSuggestions, fetchResumeTitleSuggestions } from "@/api/resume/resume.api";
 import { uploadPhotoFile } from "@/api/fileUpload.api";
 import { Storage } from "@/shared/utils/StorageManager";
+import { formatPhone } from "@/shared/utils/validators";
 
 type FormState = {
   title: string;
@@ -118,8 +121,8 @@ export default function M_ResumeCreate() {
     basic: BasicErrors;
     title?: string;
     location?: string;
-    careers?: CareerErrors[];
-    education?: EducationErrors[];
+    careers?: string;
+    education?:string;
     desiredRoles?: string;
     hardSkills?:string;
     softSkills?:string;
@@ -129,7 +132,6 @@ export default function M_ResumeCreate() {
     selfIntro?:string;
   }>({
     basic: {},
-    education: [],
     activities: [],
     awardCerts: [],
     portfolios: [],
@@ -588,6 +590,8 @@ export default function M_ResumeCreate() {
   const updateCareer = (newList: CareerInfo[]) =>
     setForm((prev) => ({ ...prev, careers: newList }));
 
+  const updateIsFreshGraduate = (checked: boolean) =>
+    setForm((prev) => ({ ...prev, isFreshGraduate: checked }));
 
   const updateLocation = (patch: Partial<LocationValue>) =>
     setForm((prev) => ({ ...prev, location: { ...prev.location, ...patch } }));
@@ -704,16 +708,86 @@ export default function M_ResumeCreate() {
     }
   };
 
+  const validate = () => {
+    let isValid = true;
+    console.log("필수입력체크");
+  
+    const nextErr: typeof errors = {
+      basic: {} as BasicErrors,
+      location:"",
+      careers: "",
+      education: "",
+      desiredRoles:""
+    };
+  
+    const isTitleEmpty = !form.title?.trim();
+  
+    const isLocationEmpty =
+      !form.location?.nationwide &&
+      (!form.location?.selectedCodes || form.location.selectedCodes.length === 0);
+  
+    const isCareersEmpty =
+      !form.isFreshGraduate && (!form.careers || form.careers.length === 0);
+  
+    const isEducationEmpty = !form.education || form.education.length === 0;
+  
+    const isDesiredRolesEmpty =
+      !form.desiredRoles || form.desiredRoles.length === 0;
+  
+    console.log("title 공백 여부:", isTitleEmpty);
+    console.log("location 공백 여부:", isLocationEmpty);
+    console.log("careers 공백 여부:", isCareersEmpty);
+    console.log("education 공백 여부:", isEducationEmpty);
+    console.log("desiredRoles 공백 여부:", isDesiredRolesEmpty);
+  
+    // 제목
+    if (isTitleEmpty) {
+      nextErr.title = "이력서 제목을 입력해 주세요.";
+      isValid = false;
+    }
+  
+    // 근무지역
+    if (isLocationEmpty) {
+      nextErr.location = "희망 근무 지역을 추가해 주세요.";
+      isValid = false;
+    }
+ 
+  
+    // 경력 (신입이 아닐 때만)
+    if (isCareersEmpty) {
+      nextErr.careers = "경력을 추가해 주세요.";
+      isValid = false;
+    }
+    // 학력
+    if (isEducationEmpty) {
+      nextErr.education = "학력을 추가해 주세요.";
+      isValid = false;
+    }
+  
+    // 희망직무
+    if (isDesiredRolesEmpty) {
+      nextErr.desiredRoles = "희망 직무를 추가해 주세요.";
+      isValid = false;
+    }
+    // nextErr.title="";
+    // nextErr.location="";
+    // nextErr.careers ="";
+    setErrors(nextErr);
+  
+    return isValid;
+  };
+
   const handleSubmit = async () => {
     try {
-      // const ok = validate();
-      // if (!ok) {
-      //   toast.error("필수 항목을 먼저 입력해 주세요.");
-      //   return;
-      // }
+      console.log("form",form);
+      const ok = validate();
+      if (!ok) {
+        toast.error("필수 항목을 먼저 입력해 주세요.");
+        return;
+      }
   
       setIsLoading(true);
-      console.log(form);
+
       const profilePhotoFile = await handleFileSubmit();
       const portfolioFilesResults = await handlePortfolioFilesSubmit();
   
@@ -726,8 +800,8 @@ export default function M_ResumeCreate() {
         name: form.basic.name,
         email: form.basic.email,
         gender: form.basic.gender === "male" ? "M" : "W",
-        phone: form.basic.phone,
-        birth: form.basic.birth,
+        phone: formatPhoneNumber(form.basic.phone),
+        birth: convertBirth(form.basic.birth),
   
         ...(profilePhotoFile ? { profilePhotoFile } : {}),
   
@@ -845,13 +919,13 @@ export default function M_ResumeCreate() {
           : {}),
       };
       console.log('결과',payload);
-      // const result = await createResume(payload);
+       const result = await createResume(payload);
   
-      // console.log("✅ 이력서 등록 성공:", result);
-      // console.log("✅ 이력서 등록 Payload:", payload);
+       console.log("✅ 이력서 등록 성공:", result);
+       console.log("✅ 이력서 등록 Payload:", payload);
   
-      // toast.success("이력서가 등록되었습니다!");
-      // navigate(`/resumes/${result}`);
+       toast.success("이력서가 등록되었습니다!");
+       navigate(`/resumes/${result}`);
     } catch (error) {
       console.error("❌ 이력서 등록 실패:", error);
       toast.error("이력서 등록 중 오류가 발생했습니다.");
@@ -946,22 +1020,19 @@ export default function M_ResumeCreate() {
             />
           <M_LocationSection
             defaultValue={initial.location}
+            errors={errors.location}
             onChange={updateLocation}
           />
-          {errors.location && (
-            <div className="resume-create-page__error" style={{ marginTop: 8 }}>
-              {errors.location}
-            </div>
-          )}
-          <M_CareerSection
+         <M_CareerSection
             values={form.careers}
-            errors={errors.careers ?? []}
+            errors={errors.careers}
             onChange={updateCareer}
             onFocusAny={resetBasicErrors}
+            onNewcomerChange={updateIsFreshGraduate}
           />
           <M_EducationSection
             values={form.education}
-            errors={errors.education??[]}
+            errors={errors.education}
             onChange={updateEducation}
             onFocusAny={resetBasicErrors}
           />

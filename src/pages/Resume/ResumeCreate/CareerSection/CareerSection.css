@@ -87,13 +87,31 @@
 /* 모바일: 760px 이하 */
 @media (max-width: 760px) {
     body{
-        .resume-create-page__section--career .resume-create-page__section-title{
-            padding: 0px;
+
+        .resume-create-page__section--career{
+            gap: 0px;
+
         }
+
+        .resume-create-page__section--career .resume-create-page__section-title{
+            padding: 0px 0px 0px 0px;
+        }
+        
+        .resume-create-page__section--career .resume-create-page__error{
+            padding: 8px 0px 0px 0px;
+            
+        }
+
+        .resume-create-page__section--career .resume-create-page__section-action{
+            padding: 20px 0px 0px 0px;
+        }
+
+        
         .resume-create-page__section-body.career-section{
             background: none;
             padding: 0px;
             gap: 16px;
+            padding: 20px 0px 0px 0px;
         }
         .career-section__item{
             display: flex;

@@ -102,6 +102,9 @@
     body{
         .resume-create-page__section--education .resume-create-page__section-title{
             padding: 0px;
+            display: flex;
+            flex-direction: column;
+            align-items: start;
         }
         .education-section__row{
             flex-direction: column;

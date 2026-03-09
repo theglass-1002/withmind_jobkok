@@ -32,7 +32,7 @@ interface M_EducationSectionProps {
   values?: Education[];
   onChange?: (list: Education[]) => void;
   onFocusAny?: () => void;
-  errors?: EducationErrors[];
+  errors?: string;
   sectionRef?: (el: HTMLDivElement | null) => void;
 }
 
@@ -40,7 +40,7 @@ export default function M_EducationSection({
   values = [],
   onChange,
   onFocusAny,
-  errors = [],
+  errors = "",
   sectionRef,
 }: M_EducationSectionProps) {
   const [items, setItems] = useState<Education[]>([]);
@@ -92,6 +92,8 @@ export default function M_EducationSection({
           <div className="resume-create-page__section-title__heading">
             학력 <em className="resume-create-page__required">*</em>
           </div>
+          {errors !== "" && <div className="resume-create-page__error">학력을 추가해 주세요.</div>}
+     
         </div>
 
         {items.length > 0 && (

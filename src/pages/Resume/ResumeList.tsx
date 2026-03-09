@@ -168,6 +168,7 @@ export default function ResumeList() {
   }
 
   return (
+    <>
     <div className="resume-list-page__container">
       <div className="resume-list-page">
         <div className="resume-list-page__banner">
@@ -346,5 +347,7 @@ export default function ResumeList() {
         </div>
       </div>
     </div>
+    
+    </>
   );
 }

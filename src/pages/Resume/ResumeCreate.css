@@ -833,6 +833,9 @@ background: var(--gray-50, #F8F8F9);
             background: var(--gray-100, #F2F3F4);
         
         }
+        .resume-create-page__section-title.resume-create-page__section-title--simple{
+            gap: 8px;
+        }
 
         .resume-sidebar__default{
             border-radius: 4px;
@@ -1084,6 +1087,9 @@ background: var(--gray-50, #F8F8F9);
         }
 
         .field .activities-section__summary-input textarea{
+            padding: 0px;
+        }
+        .field .personal-section__summary-input textarea{
             padding: 0px;
         }
     }

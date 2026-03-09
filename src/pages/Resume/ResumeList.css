@@ -2,6 +2,8 @@
     background: var(--gray-50, #F8F8F9);
 }
 
+
+
 .resume-list-page{
     /* display: flex;
     padding: 108px 0 100px 0;
@@ -293,6 +295,7 @@ box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.08);
     display: flex;
     align-items: center;
     gap: 12px;
+
 }
 
 
@@ -304,6 +307,7 @@ box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.08);
     font-style: normal;
     font-weight: 400;
     line-height: 20px; 
+    
 }
 
 
@@ -449,11 +453,18 @@ box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.08);
             gap: 16px;
             color: var(--gray-700, #6F767E);
             font-family: Pretendard;
-            font-size: 16px;
+            font-size: 14px;
             font-style: normal;
             font-weight: 400;
             line-height: 20px;
         }
+        .resume-list-page__stat em{
+            font-size: 14px;
+        }
+        .resume-list-page__tab.on{
+            font-size: 14px;
+        }
+
         .resume-list-page__tabs{
             flex-direction: column;
             gap: 20px;
@@ -461,7 +472,20 @@ box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.08);
         .resume-list-page__body{
             width: 100%;
             padding: 0 20px;
+            gap: 20px;
             justify-content: center;
+        }
+        .resume-item__meta{
+            gap: 8px;
+        }
+        .resume-item__id{
+            padding: 4px 6px;
+            font-size: 12px;
+        }
+        .resume-item__tag.on,
+        .resume-item__tag.writing{
+            font-size: 12px;
+            padding: 4px 6px;
         }
         .resume-list-page__grid{
             width: 100%;
@@ -470,6 +494,10 @@ box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.08);
         }
         .resume-list-page__item{
             width: 100%;
+            gap: 16px;
+        }
+        .resume-item__title-row{
+            gap: 8px;
         }
 
         .resume-list-page__list{
@@ -484,6 +512,7 @@ box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.08);
         .resume-list-page__tab{
           flex: 1;
           width: 100%;
+          font-size: 14px;
         }
 
         .resume-list-page__empty{
@@ -502,12 +531,45 @@ box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.08);
            
            .create_resumes.mobile{
                display: flex;
+               gap: 8px;
            }
 
           .resume-item__menu{
             right: -20px;
           }   
 
-       
+          .resume-item__attr{
+            gap: 16px;
+            font-size: 14px;
+          }
+          .resume-item__title{
+            width: 100%;
+            font-size: 16px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;  
+          }
+          .resume-item__date{
+            font-size: 14px; 
+          }
+          
+          .resume-item__attr-term{
+            white-space: nowrap;
+            gap: 8px;
+          }
+          .resume-item__attr-term img{
+            width: 18px;
+          }
+          .resume-item__attr-value{
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: 14px;
+          }
+
+          .resume-item__attrs{
+            padding: 16px;
+            gap: 16px;
+          }
     }
 }

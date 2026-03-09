@@ -34,7 +34,7 @@ export function validatePassword(password: string): string | number {
 
 
 
-// 01012345678 → 010-1234-5678 자동 변환
+// 번호 전화번호 01012345678 → 010-1234-5678 자동 변환
 export const formatPhone = (raw: string) => {
   const digits = raw.replace(/\D/g, ""); // 숫자만
   if (digits.length <= 3) return digits;

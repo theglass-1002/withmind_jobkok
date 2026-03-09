@@ -28,12 +28,14 @@ export type LocationValue = {
 
 interface M_LocationSectionProps {
   defaultValue?: LocationValue;
+  errors?: string;
   onChange: (v: LocationValue) => void;
   sectionRef?: (el: HTMLDivElement | null) => void;
 }
 
 export default function M_LocationSection({
   defaultValue = { nationwide: false, selectedCodes: [] },
+  errors,
   onChange,
   sectionRef,
 }: M_LocationSectionProps) {
@@ -131,6 +133,7 @@ export default function M_LocationSection({
         <div className="resume-create-page__section-title__heading">
           희망 근무 지역<em className="resume-create-page__required">*</em>
         </div>
+        {errors !== "" && <div className="resume-create-page__error">희망 근무 지역을 추가해 주세요.</div>}
       </div>
 
       {(locationData.selectedCodes.length > 0 || locationData.nationwide) && (
