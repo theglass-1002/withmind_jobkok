@@ -1,4 +1,5 @@
 import { CareerItem } from "@/api/resume/resume.types";
+import { formatMonthStringToDisplay } from "@/shared/utils/util";
 import React from "react";
 
 
@@ -16,7 +17,7 @@ export default function ResumeCareerSection({
       <div className="resume-field__label">
         경력 <span className="resume-field__label-meta">{totalLabel}</span>
       </div>
-
+        {items.length>0&&(
       <div className="resume-career-list">
         {items.map((it, idx) => (
           <div className="resume-career-item" key={idx}>
@@ -27,7 +28,8 @@ export default function ResumeCareerSection({
                 <span className="resume-career-item__period resume-career-item__period--stack">
                   <div className="resume-career-item__period-range">
                     <span className="resume-career-item__period-start">
-                      {it.start}
+             
+                      {formatMonthStringToDisplay(it.start)}
                     </span>
                     <span className="resume-career-item__period-sep"> ~ </span>
                     <span
@@ -36,7 +38,8 @@ export default function ResumeCareerSection({
                         (it.isCurrent ? " current" : "")
                       }
                     >
-                      {it.end}
+                      {formatMonthStringToDisplay(it.end)}
+               
                     </span>
                   </div>
                   <span className="resume-career-item__tenure">
@@ -44,7 +47,7 @@ export default function ResumeCareerSection({
                   </span>
                 </span>
 
-                <div className="resume-career-item__period--stack"></div>
+        
 
                 <div className="resume-career-item__meta">
                   {it.employment && (
@@ -72,6 +75,7 @@ export default function ResumeCareerSection({
           </div>
         ))}
       </div>
+      )}
     </div>
   );
 }

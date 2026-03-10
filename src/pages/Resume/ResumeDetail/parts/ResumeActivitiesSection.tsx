@@ -22,7 +22,7 @@ export default function ResumeActivitiesSection({
   return (
     <div className={`resume-field resume-field--activities ${className}`.trim()}>
       <div className="resume-field__label">{label}</div>
-
+      {items.length>0&&(
       <div className="resume-activity-list resume-career-list">
         {items.map((it, idx) => (
           <div className="resume-activity-item resume-career-item" key={idx}>
@@ -63,6 +63,7 @@ export default function ResumeActivitiesSection({
           </div>
         ))}
       </div>
+        )}
     </div>
   );
 }

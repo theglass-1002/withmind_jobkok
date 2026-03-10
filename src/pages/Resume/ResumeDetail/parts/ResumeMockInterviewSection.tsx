@@ -31,7 +31,7 @@ export default function ResumeMockInterviewSection({
       ].join(" ").trim()}
     >
       <div className="resume-field__label">{label}</div>
-
+      {items.length>0&&(
       <div className="resume-mock-report-list resume-career-list">
         {items.map((it, idx) => (
           <div
@@ -49,6 +49,7 @@ export default function ResumeMockInterviewSection({
           </div>
         ))}
       </div>
+      )}
     </div>
   );
 }

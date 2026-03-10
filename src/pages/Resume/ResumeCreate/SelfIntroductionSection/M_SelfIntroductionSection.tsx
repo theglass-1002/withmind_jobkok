@@ -140,7 +140,7 @@ export default function M_SelfIntroductionSection({
       {summary.trim().length > 0 && (
         <div className="resume-create-page__section-body personal-statement-preview">
           <div className="resume-field__value resume-personal-statement">
-            {summary.length > 200 ? `${summary.slice(0, 200)}...` : summary}
+            {summary}
           </div>
         </div>
       )}

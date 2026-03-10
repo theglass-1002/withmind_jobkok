@@ -18,6 +18,7 @@ export default function ResumePortfolioSection({
   return (
     <div className={`resume-field resume-field--portfolio ${className}`.trim()}>
       <div className="resume-field__label">{label}</div>
+      {items.length>0&&(
       <div className="resume-portfolio-list resume-career-list">
         {items.map((it, idx) => {
           if (it.kind === "file") {
@@ -50,21 +51,7 @@ export default function ResumePortfolioSection({
                 )}
               </div>
             );
-            // return (
-            //   <div
-            //     key={idx}
-            //     className="resume-portfolio-item resume-portfolio-item--file"
-            //   >
-            //     {iconSrc && (
-            //       <img
-            //         className="resume-portfolio-item__icon"
-            //         src={iconSrc}
-            //         alt=""
-            //       />
-            //     )}
-            //     <span className="resume-portfolio-item__name">{it.name}</span>
-            //   </div>
-            // );
+           
           }
 
           // kind === "link"
@@ -89,6 +76,7 @@ export default function ResumePortfolioSection({
           );
         })}
       </div>
+      )}
     </div>
   );
 }

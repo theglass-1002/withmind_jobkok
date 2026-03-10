@@ -55,6 +55,10 @@
     align-self: stretch;
     background: var(--white-100, #FFF);
   }
+
+  .resume-basic.mobile{
+    display: none;
+  }
   
   .resume-basic__text{
     display: flex;
@@ -157,6 +161,7 @@
     align-items: center;
     gap: 16px;
     align-self: stretch;
+    flex-wrap: wrap;
   }
 
   .resume-item-chip{
@@ -175,6 +180,7 @@
     font-style: normal;
     font-weight: 400;
     line-height: 20px; /* 125% */
+    white-space: nowrap;
   }
 
   .resume-location{
@@ -394,17 +400,26 @@
   align-self: stretch;
 }
 
+.resume-mock-report-item__title{
+  
+}
+.resume-portfolio-item__label,
+.portfolio-documents__file-text{
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+}
+
 /* 모바일: 760px 이하 */
 @media (max-width: 760px) {
-  body{
+  
     .resume-career-item{
       display: flex;
       padding: 16px 20px 16px 20px;
       gap: 0px;
     }
-    .resume-career-item__header{
-      font-size: 16px;
-    }
+  
     .resume-career-item__bullets{
       font-size: 14px;
       width: 100%;
@@ -415,12 +430,7 @@
       height: auto;
       overflow: visible;
     }
-    .resume-career-item__meta{
-      display: flex;
-      flex-direction: column;
-      align-items: start;
-      gap: 8px;
-    }
+   
     .resume-career-item__meta-group{
       flex-direction: row;
       gap: 0px;
@@ -430,6 +440,8 @@
     }
     .resume-career-item__header{
       gap: 8px;
+      font-size: 16px;
+      width: 100%;
     }
     .resume-education__meta,
     .resume-education__period-start,
@@ -444,9 +456,10 @@
     }
     .resume-career-item__company{
       font-size: 16px;
-      white-space: normal;        /*  줄바꿈 허용 */
-      overflow-wrap: anywhere;    /* 긴 단어도 강제로 줄바꿈 */
-      word-break: break-word; 
+      max-width: 100%;   /* 또는 width */
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .resume-page--detail{
@@ -455,7 +468,7 @@
     }
     .resume-page--detail.mobile{
       display: flex;
-      padding: 64px 0 0 0;
+      padding: 64px 0 0px 0;
     }
     .resume-page__container{
       padding: 0px;
@@ -464,22 +477,74 @@
       width: 100%;
       padding: 20px;
     }
-    .resume-detail__content{
+    .resume-page--detail.mobile .resume-page__main{
       padding: 0px;
+      gap: 12px;
+      background: var(--gray-100, #F2F3F4);
+    }
+    
+    .resume-detail__content{
+      padding: 0 0 100px 0;
+      border: none;
+      gap: 12px;
+      background: var(--gray-100, #F2F3F4);
+    }
+    .resume-field{
+      background: var(--white-100, #FFF);
+      padding: 24px 20px;
+      gap: 20px;
       border: none;
     }
     .resume-basic{
-      padding: 0px;
+      display: none;
+      /* display: flex;
+      padding: 24px 20px;
       border: none;
+      flex-direction: column; */
+    }
+    .resume-basic.mobile{
+      display: flex;
+      flex-direction: column;
+      padding: 24px 20px;
+      gap: 20px;
+    }
+
+    .resume-basic.mobile .resume-basic__content{
+      display: flex;
+      padding: 16px 20px 20px 20px;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 20px;
+      align-self: stretch;
+      border-radius: 4px;
+      border: 1px solid var(--gray-300, #E0E2E4);
+      background: var(--white-100, #FFF);
     }
     .resume-detail__title{
+      display: block;  
+      height: 70px;
       font-size: 18px;
+      border: none;
+      padding: 24px 20px;
+      border-radius: 0px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     .resume-basic__name{
       font-size: 16px;
+      line-height: 28px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      width: 100%;
+    }
+    .resume-basic__identity{
+      gap: 8px;
     }
     .resume-basic__contact{
       display: flex;
+      width: 100%;
       flex-direction: column;
       align-items: start;
     }
@@ -487,7 +552,8 @@
       display: none;
     }
     .resume-basic__img{
-     
+      width: 124px;
+      height: 183px;
     }
     .resume-career-item__meta .resume-career-item__meta{
       display: flex;
@@ -496,11 +562,39 @@
     .resume-career-item__meta > span + span::before{
 
     }
+    .resume-basic__meta{
+      font-size: 14px;
+    }
+    .resume-basic__text{
+      width: 100%;
+      gap: 20px;
+    }
+    .resume-page--detail.mobile .resume-field__value{
+     flex-wrap: wrap; 
+    }
     .resume-field__value{
       overflow: auto;
+      gap: 12px;
     }
     .resume-item-chip{
+      height: 44px;
       white-space: nowrap;
+      padding: 12px 16px;
+      gap: 0px;
+      font-size: 14px;
+    }
+
+    .resume-location__city,
+    .resume-location__district{
+      font-size: 14px;
+    }
+
+    .resume-career-item__meta{
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+      align-self: stretch;
     }
 
     .resume-career-item__meta,
@@ -519,86 +613,187 @@
       padding: 16px 20px 20px 20px;
       gap: 8px;
     }
-  }
+
+    .resume-basic__email,
+    .resume-basic__phone{
+      padding: 8px 12px;
+      font-size: 14px;
+      border-radius: 4px;
+      background: var(--gray-50, #F8F8F9);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .resume-basic__email img,
+    .resume-basic__phone img{
+      width: 18px;
+    }
+    .resume-career-list{
+      gap: 12px;
+    }
+    .resume-mock-report-item__title{
+      font-size: 14px;
+    }
+    .resume-self-intro{
+      font-size: 14px;
+      padding: 16px 20px;
+      border-radius: 4px;
+      border: 1px solid var(--gray-300, #E0E2E4);
+      background: var(--white-100, #FFF);
+    }
+    .resume-portfolio-item .resume-portfolio-item__icon{
+      width: 18px;
+    }
+    .resume-portfolio-item__url,
+    .resume-portfolio-item__name{
+      font-size: 14px;
+    }
+    .resume-activity-list .resume-activity-item__header{
+      flex-direction: column;
+    }
+    .resume-activity-item__header .resume-activity-item__meta{
+      padding: 0px;
+    }
+
+    
+  
 }
 
-/* A4 용지 설정 */
 @page {
   size: A4;
-  margin: 0;
+  margin: 12mm;
 }
 
 @media print {
-  /* 기본 여백/배경 초기화 */
   html,
   body {
-    margin: 0;
-    padding: 0;
-    background: #fff;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
-  /* 화면 전체 중 이력서 영역만 보이게 */
-  .resume-page.resume-page--detail {
-    background: #fff;
+  body * {
+    visibility: hidden;
   }
 
-  /* 상단 버튼바, 사이드바, 기타 불필요한 것 숨기기 */
+  .resume-page--detail:not(.mobile),
+  .resume-page--detail:not(.mobile) * {
+    visibility: visible;
+  }
+  
+
+  .resume-page--detail.mobile,
+  .resume-sidebar,
   .resume-controls-wrapper,
-  .resume-sidebar {
+  .resume-create-page__aside,
+  .default_tabs,
+  .resume-sidebar__default,
+  .page-header,
+  .Toastify,
+  .toast-container {
     display: none !important;
   }
 
-  /* 컨테이너는 이력서만 센터에 한 줄로 */
-  .resume-page__container {
-    display: block;
-    margin: 0;
-    padding:0px
+  .resume-page--detail:not(.mobile) {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
   }
 
-  /* ✅ 여기가 실제 A4 본문 레이아웃 */
-  .resume-page__main {
-    width: 210mm;          /* A4 가로 */
-    min-height: 297mm;     /* A4 세로 */
-    margin: 0 auto;
-    padding: 0mm 15mm;    /* 인쇄용 여백 */
-    box-sizing: border-box;
-    background: #ffffff;
-    box-shadow: none;
+  .resume-page__container {
+    display: block !important;
+    margin: 0 !important;
+    padding: 28px 80px;
   }
-  .resume-detail__title{
-    display: none;
-  }
-  .resume-career-item__meta{
-    display: flex;
+
+  .resume-basic__contact{
     flex-direction: row;
   }
-  /* 안쪽 내용 박스 여백/그림자 제거하고 인쇄용으로 깔끔하게 */
-  .resume-detail__content {
-    padding: 0;
-    margin-top: 12mm; /* 제목과 내용 사이 여백 정도만 */
-    box-shadow: none;
-    background: #ffffff;
-    border:none;
+  .resume-basic__email, .resume-basic__phone{
+    background: none;
   }
-  .resume-create-page__aside{
-    display: none;
+  .resume-basic__img{
+    height: 129px;
+    width: 129px;
   }
-/* 16/20 기본 텍스트 타이포 공통화 */
-.resume-career-item__meta,
-.resume-career-item__tenure,
-.resume-career-item__employment,
-.resume-career-item__role,
-.resume-career-item__level,
-.resume-career-item__period-start,
-.resume-career-item__period-sep,
-.resume-career-item__period-end {
-  font-size: 14px;
- 
-}
+  .resume-basic__text{
+    gap: 28px;
+  }
+  .resume-page__main {
+    width: auto !important;
+    min-height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
 
-  /* 필요하면 페이지 나눌 위치에 이런 것도 가능
-  .resume-section {
+  .resume-detail__title {
+    display: none !important;
+  }
+
+  .resume-detail__content {
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    gap: 0 !important;
+  }
+
+  .resume-basic {
+    display: flex !important;
+    background: #fff !important;
+    border-bottom: 1.5px solid #e0e2e4 !important;
+    break-inside: avoid;
     page-break-inside: avoid;
   }
-  */
+
+  .resume-basic.mobile {
+    display: none !important;
+  }
+
+  .resume-field {
+    background: #fff !important;
+    border-bottom: 1px solid #e0e2e4 !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .resume-field.last-item {
+    border-bottom: none !important;
+  }
+
+  .resume-career-item,
+  .resume-education,
+  .resume-portfolio-item,
+  .resume-mock-report-item {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .resume-career-item__meta {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  .resume-career-item__meta,
+  .resume-career-item__tenure,
+  .resume-career-item__employment,
+  .resume-career-item__role,
+  .resume-career-item__level,
+  .resume-career-item__period-start,
+  .resume-career-item__period-sep,
+  .resume-career-item__period-end {
+    font-size: 14px !important;
+  }
 }
+

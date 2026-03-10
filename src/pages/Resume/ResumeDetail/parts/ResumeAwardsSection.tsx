@@ -22,7 +22,7 @@ export default function ResumeAwardsSection({
   return (
     <div className={`resume-field resume-field--awards ${className}`.trim()}>
       <div className="resume-field__label">{label}</div>
-
+      {items.length>0&&(
       <div className="resume-award-list resume-career-list">
         {items.map((it, idx) => (
          
@@ -59,6 +59,7 @@ export default function ResumeAwardsSection({
           </div>
         ))}
       </div>
+        )}
     </div>
   );
 }

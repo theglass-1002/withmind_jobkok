@@ -1604,6 +1604,7 @@ export default function ResumeEdit() {
   }
 
   return (
+    <>
     <div className="resume-create-page edit">
       <LoadingOverlay
         isLoading={
@@ -1799,5 +1800,185 @@ export default function ResumeEdit() {
         onClose={handleCancelEdit}
       />
     </div>
+    <div className="resume-create-page mobile">
+       <LoadingOverlay
+        isLoading={
+          isLoading ||
+          isRoleLoading ||
+          isHardSkillLoading 
+        }
+      />
+      <div className="resume-create-page__container">
+        <div className="resume-create-page__main">
+        <div className="resume-sidebar__default">
+        <span className="resume-sidebar__default-text">기본 이력서로 설정</span>
+        <label className="resume-sidebar__default-label" aria-label="기본 이력서로 설정">
+            <Switch
+              checked={isDefaultResume}
+              onChange={handleToggle}
+              onColor="#000000"
+              offColor="#E5E7EB"
+              onHandleColor="#FFFFFF"
+              offHandleColor="#FFFFFF"
+              handleDiameter={18}
+              height={22}
+              width={42}
+              uncheckedIcon={false}
+              checkedIcon={false}
+              aria-label="기본 이력서로 설정"
+            />
+          </label>
+        </div>
+        <Tabs
+            tabs={tabItems}
+            active={activeTab}
+            onChange={handleTabClick}
+            className={`resume-create-tabs default_tabs ${isTabsSticky?'is-sticky':''}`}
+            itemClassName="resume-create-tabs__item"
+            activeClassName="on"
+            />
+            
+        <div className="resume-create-page__section_container">
+          <div id="resume__create-section--title" 
+           className="resume-create-page__section resume-create-page__section--title">
+            <div className="resume-create-page__field">
+              <input
+                className="resume-create-page__label"
+                type="text"
+                value={form.title}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, title: e.target.value }))
+                }
+                placeholder="이력서 제목을 입력해 주세요. *"
+                onBlur={() => {
+                  if (!form.title.trim()) {
+                    setErrors((prev) => ({ ...prev, title: "이력서 제목을 입력해 주세요." }));
+                  } else {
+                    setErrors((prev) => ({ ...prev, title: undefined }));
+                  }
+                }}
+              />
+              {errors.title && (
+                <span className="resume-create-page__error">{errors.title}</span>
+              )}
+            </div>
+            <AISuggestArea
+              show={showTitleSuggest}
+              items={titleSuggestions}
+              hintText="더 정확한 문장 추천을 위해 (경력과 활동·경험) 항목을 먼저 입력해주세요."
+              onClickSuggest={handleClickTitleSuggest}
+              onClose={handleCloseAISuggest}
+              wrapperClassName="resume-suggest__title"
+            />
+          </div>
+          <M_BasicInfoSection
+              values={form.basic}
+              errors={errors.basic}
+              onChange={updateBasic}
+              onFocusAny={resetBasicErrors}
+              onPhotoFileChange={updatePhotoFile}
+            />
+          <M_LocationSection
+            defaultValue={initial.location}
+            errors={errors.location}
+            onChange={updateLocation}
+          />
+         <M_CareerSection
+            values={form.careers}
+            errors={errors.careers}
+            onChange={updateCareer}
+            onFocusAny={resetBasicErrors}
+            onNewcomerChange={updateIsFreshGraduate}
+          />
+          <M_EducationSection
+            values={form.education}
+            errors={errors.education}
+            onChange={updateEducation}
+            onFocusAny={resetBasicErrors}
+          />
+         <M_DesiredRoleSection 
+              value={form.desiredRoles}
+              onChange={updateDesiredRoles}
+              error={errors.desiredRoles}
+              aiShow={showRoleSuggest}
+              aiTags={roleSuggestions}
+              onClickAISuggest={handleClickRoleSuggest}
+              onCloseAISuggest={handleCloseRoleSuggest}
+         />
+         <M_HardSkillSection
+          value={form.hardSkills}
+          onChange={updateHardSkills}
+          error={errors.hardSkills}
+          aiShow={showHardSkillSuggest}
+          aiTags={hardSkillSuggestions}
+          onClickAISuggest={handleClickHardSkillSuggest}
+          onCloseAISuggest={handleCloseHardSkillSuggest}
+        />
+         <M_SoftSkillsSection 
+            value={form.softSkills}
+            onChange={updateSoftSkills}
+            error={errors.softSkills}
+            aiShow={showSoftSkillSuggest}
+            aiTags={softSkillSuggestions}
+            onClickAISuggest={handleClickSoftSkillSuggest}
+            onCloseAISuggest={handleCloseSoftSkillSuggest}
+         
+         />
+         <M_ActivitiesSection 
+            value={form.activities}
+            errors={errors.activities ?? []}
+            onChange={updateActivities}
+           
+         />
+         <M_AwardsCertificationsSection 
+            value={form.awardCerts}
+            errors={errors.awardCerts ?? []}
+            onChange={updateAwardsCertifications}
+         
+         />
+         <M_PortfolioDocumentsSection 
+         value={form.portfolios}
+         errors={errors.portfolios??[]}
+         onChange={updatePortfolioDocuments}
+         />
+          <M_SelfIntroductionSection
+            value={form.selfIntro}
+            onChange={updateSelfIntro}
+            error={!!errors.selfIntro}
+            aiShow={showSelfIntroSuggest}
+            aiSuggestions={selfIntroSuggestions}
+            onClickAISuggest={handleClickSelfIntroSuggest}
+            onCloseAISuggest={handleCloseSelfIntroSuggest}
+          />
+         <M_MockInterviewAnalysisSection /> 
+        </div>
+        </div>
+      </div>
+      <div className="resume-controls-wrapper">
+      <div className="resume-create-page__status">
+        <span className="default_btn_white btn_w_full" onClick={handleTempSave}>
+          임시저장
+        </span>
+        <span
+          className={`default_btn_black btn_w_full ${isSubmitDisabled ? "disabled" : ""}`}
+          onClick={handleSubmit}
+          aria-disabled={isSubmitDisabled}
+        >
+          작성 완료
+        </span>
+      </div>
+      </div>
+      <Modal
+        open={showDefaultModal}
+        title={`해당 이력서를 기본 이력서로\n변경하시겠습니까?`}
+        confirmText="확인"
+        confirmClassName="btn_w_full default_btn_black"
+        cancelText="취소"
+        cancelClassName="btn_w_full default_btn_white"
+        onConfirm={handleConfirmDefaultResume}
+        onClose={handleCancelDefaultResume}
+      />
+    </div>
+    </>
   );
 }

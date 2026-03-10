@@ -1,4 +1,5 @@
 // src/pages/Resume/parts/ResumeEducationSection.tsx
+import { formatMonthStringToDisplay } from "@/shared/utils/util";
 import React from "react";
 
 type EducationItem = {
@@ -32,11 +33,11 @@ export default function ResumeEducationSection({
           <div className="resume-education__meta">
             <div className="resume-education__period">
               <span className="resume-education__period-start">
-                {edu.start}
+                {formatMonthStringToDisplay(edu.start)}
               </span>
               <span className="resume-education__period-sep">~</span>
               <span className="resume-education__period-end">
-                {edu.end}
+              {formatMonthStringToDisplay(edu.end)}
               </span>
             </div>
 

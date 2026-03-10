@@ -51,7 +51,8 @@ import {
   type ResumeDetailResponse,
 } from "@/api/resume/resume.types";
 import { logout } from "@/api/auth/auth.api";
-
+import { Icons } from "@/assets/icons";
+import { useLayoutContext } from "@/app/LayoutContext";
 const ALL_SECTIONS: SectionId[] = [
   "title",
   "basic",
@@ -113,6 +114,7 @@ function buildStatusMap(
 
 export default function ResumeDetail() {
   const navigate = useNavigate();
+  const { actionType, resetAction } = useLayoutContext();
   const { resumeId } = useParams<{ resumeId: string }>();
   const [isLoading, setIsLoading] = useState(true);
   const [resumeData, setResumeData] = useState<ResumeDetailResponse | null>(
@@ -169,7 +171,7 @@ export default function ResumeDetail() {
       const newValue: 0 | 1 = nextDefaultState ? 1 : 0;
 
       const res = await updateDefaultResume(numericId, newValue);
-      console.log("✅ 기본 이력서 변경 응답:", res);
+      console.log("기본 이력서 변경 응답:", res);
       if (res.code !== 200) {
         throw new Error(res.msg || "기본 이력서 변경 실패");
       }
@@ -201,89 +203,207 @@ export default function ResumeDetail() {
   };
 
   const handleDownloadPdf = async () => {
+    const sourceDetailPage = document.querySelector(
+      "div.resume-page--detail:not(.mobile)"
+    ) as HTMLElement | null;
+  
+    let tempRoot: HTMLDivElement | null = null;
+  
     try {
       toast.info("PDF 생성 중...");
-
-      const desktopWrapper = document.querySelector(
-        ".resume-page--detail:not(.mobile) .resume-page__main"
-      ) as HTMLElement;
-
-      const mobileWrapper = document.querySelector(
-        ".resume-page--detail.mobile .resume-page__main"
-      ) as HTMLElement;
-
-      const wrapper =
-        desktopWrapper && desktopWrapper.offsetHeight > 0
-          ? desktopWrapper
-          : mobileWrapper;
-
-      if (!wrapper) {
+  
+      if (!sourceDetailPage) {
         throw new Error("이력서 영역을 찾을 수 없습니다");
       }
-
-      const shouldAddPdfClass = true;
-      if (shouldAddPdfClass) {
-        wrapper.classList.add("resume-page--pdf");
-        await new Promise((r) => setTimeout(r, 100));
+  
+      const clonedDetailPage = sourceDetailPage.cloneNode(true) as HTMLElement;
+  
+      tempRoot = document.createElement("div");
+      tempRoot.setAttribute("id", "resume-pdf-temp-root");
+      tempRoot.style.position = "absolute";
+      tempRoot.style.left = "-99999px";
+      tempRoot.style.top = "0";
+      tempRoot.style.width = "1200px";
+      tempRoot.style.minWidth = "1200px";
+      tempRoot.style.background = "#ffffff";
+      tempRoot.style.zIndex = "-1";
+      tempRoot.style.pointerEvents = "none";
+      tempRoot.style.visibility = "visible";
+      tempRoot.style.overflow = "visible";
+      tempRoot.style.display = "block";
+  
+      clonedDetailPage.style.display = "block";
+      clonedDetailPage.style.width = "1200px";
+      clonedDetailPage.style.minWidth = "1200px";
+      clonedDetailPage.style.background = "#ffffff";
+      clonedDetailPage.style.overflow = "visible";
+      clonedDetailPage.style.visibility = "visible";
+      clonedDetailPage.style.height = "auto";
+      clonedDetailPage.style.maxHeight = "none";
+  
+      clonedDetailPage
+        .querySelectorAll(
+          ".resume-sidebar, .resume-actions-bar, .resume-create-page__aside, .resume-controls-wrapper, .default_tabs, .is-sticky"
+        )
+        .forEach((el) => el.remove());
+  
+      const clonedContainer = clonedDetailPage.querySelector(
+        ".resume-page__container"
+      ) as HTMLElement | null;
+  
+      if (clonedContainer) {
+        clonedContainer.style.display = "block";
+        clonedContainer.style.width = "100%";
+        clonedContainer.style.margin = "0";
+        clonedContainer.style.padding = "28px 80px";
+        clonedContainer.style.boxSizing = "border-box";
+        clonedContainer.style.overflow = "visible";
+        clonedContainer.style.height = "auto";
+        clonedContainer.style.maxHeight = "none";
       }
-
-      const canvas = await html2canvas(wrapper, {
+  
+      const clonedMain = clonedDetailPage.querySelector(
+        ".resume-page__main"
+      ) as HTMLElement | null;
+  
+      if (clonedMain) {
+        clonedMain.style.width = "100%";
+        clonedMain.style.margin = "0";
+        clonedMain.style.padding = "0";
+        clonedMain.style.background = "#ffffff";
+        clonedMain.style.boxSizing = "border-box";
+        clonedMain.style.overflow = "visible";
+        clonedMain.style.height = "auto";
+        clonedMain.style.maxHeight = "none";
+      }
+  
+      const clonedTitle = clonedDetailPage.querySelector(
+        ".resume-detail__title"
+      ) as HTMLElement | null;
+  
+      if (clonedTitle) {
+        clonedTitle.style.display = "none";
+      }
+  
+      const clonedContent = clonedDetailPage.querySelector(
+        ".resume-detail__content"
+      ) as HTMLElement | null;
+  
+      if (clonedContent) {
+        clonedContent.style.display = "flex";
+        clonedContent.style.flexDirection = "column";
+        clonedContent.style.alignItems = "flex-start";
+        clonedContent.style.width = "100%";
+        clonedContent.style.padding = "0";
+        clonedContent.style.margin = "0";
+        clonedContent.style.border = "none";
+        clonedContent.style.borderRadius = "0";
+        clonedContent.style.background = "#ffffff";
+        clonedContent.style.gap = "0";
+        clonedContent.style.overflow = "visible";
+        clonedContent.style.height = "auto";
+        clonedContent.style.maxHeight = "none";
+      }
+  
+      const clonedBasic = clonedDetailPage.querySelector(
+        ".resume-basic"
+      ) as HTMLElement | null;
+  
+      if (clonedBasic) {
+        clonedBasic.style.display = "flex";
+        clonedBasic.style.flexDirection = "row";
+        clonedBasic.style.alignItems = "flex-start";
+        clonedBasic.style.padding = "40px 0";
+        clonedBasic.style.background = "#ffffff";
+        clonedBasic.style.borderBottom = "1px solid #E0E2E4";
+        clonedBasic.style.overflow = "visible";
+        clonedBasic.style.height = "auto";
+        clonedBasic.style.maxHeight = "none";
+      }
+  
+      tempRoot.appendChild(clonedDetailPage);
+      document.body.appendChild(tempRoot);
+  
+      const images = Array.from(clonedDetailPage.querySelectorAll("img"));
+      await Promise.all(
+        images.map((img) =>
+          img.complete
+            ? Promise.resolve()
+            : new Promise<void>((resolve) => {
+                img.onload = () => resolve();
+                img.onerror = () => resolve();
+              })
+        )
+      );
+  
+      await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
+      await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
+  
+      const target = clonedContainer ?? clonedDetailPage;
+      const width = target.scrollWidth || target.offsetWidth;
+      const height = target.scrollHeight || target.offsetHeight;
+  
+      if (!width || !height) {
+        throw new Error(`캡처 대상 크기가 0입니다: ${width} x ${height}`);
+      }
+  
+      const canvas = await html2canvas(target, {
         scale: 2,
         useCORS: true,
+        allowTaint: true,
         logging: false,
         backgroundColor: "#ffffff",
-        width: wrapper.scrollWidth || wrapper.offsetWidth,
-        height: wrapper.scrollHeight || wrapper.offsetHeight,
+        width,
+        height,
+        windowWidth: width,
+        windowHeight: height,
+        scrollX: 0,
+        scrollY: 0,
       });
-
+  
       if (canvas.width === 0 || canvas.height === 0) {
-        throw new Error(
-          `Canvas 크기가 0입니다: ${canvas.width} x ${canvas.height}`
-        );
+        throw new Error("Canvas 크기가 0입니다");
       }
-
+  
       const imgData = canvas.toDataURL("image/jpeg", 0.98);
       const pdf = new jsPDF("p", "mm", "a4");
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
-
-      const imgWidth = pdfWidth;
       const imgHeight = (canvas.height * pdfWidth) / canvas.width;
-
-      if (!isFinite(imgWidth) || !isFinite(imgHeight) || imgWidth <= 0 || imgHeight <= 0) {
-        throw new Error(`잘못된 이미지 크기: ${imgWidth} x ${imgHeight}`);
-      }
-
+  
       let position = 0;
-      let heightLeft = imgHeight;
-
-      pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
-      heightLeft -= pdfHeight;
-
+      let heightLeft = imgHeight - pdfHeight;
+  
+      pdf.addImage(imgData, "JPEG", 0, position, pdfWidth, imgHeight);
+  
       while (heightLeft > 0) {
         pdf.addPage();
-        position = heightLeft * -1;
-        pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
+        position -= pdfHeight;
+        pdf.addImage(imgData, "JPEG", 0, position, pdfWidth, imgHeight);
         heightLeft -= pdfHeight;
       }
-
-      const fileName = `jobkok-resume-${resumeData?.name || "resume"}.pdf`;
-      pdf.save(fileName);
-
-      toast.success("PDF 다운로드가 완료되었습니다!");
-
-      if (shouldAddPdfClass) {
-        wrapper.classList.remove("resume-page--pdf");
-      }
+  
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, "0");
+      const dd = String(now.getDate()).padStart(2, "0");
+      const hh = String(now.getHours()).padStart(2, "0");
+      const mi = String(now.getMinutes()).padStart(2, "0");
+      const ss = String(now.getSeconds()).padStart(2, "0");
+      const dateTime = `${yyyy}${mm}${dd}_${hh}${mi}${ss}`;
+  
+      pdf.save(`jobkok_resume_${resumeData?.name ?? "resume"}_${dateTime}.pdf`);
+      toast.success("PDF 다운로드 완료!");
     } catch (error) {
       console.error("❌ PDF 생성 실패:", error);
       toast.error("PDF 생성 중 오류가 발생했습니다.");
-      const allWrappers = document.querySelectorAll(".resume-page__main");
-      allWrappers.forEach((w) => w.classList.remove("resume-page--pdf"));
+    } finally {
+      if (tempRoot && tempRoot.parentNode) {
+        tempRoot.parentNode.removeChild(tempRoot);
+      }
     }
   };
 
-  // 상세 조회
   useEffect(() => {
     if (!resumeId) return;
 
@@ -329,6 +449,14 @@ export default function ResumeDetail() {
     }
   }, [resumeData]);
 
+  useEffect(() => {
+    if (actionType === "DOWNLOAD_PDF") {
+      console.log('actionType',actionType);
+      handleDownloadPdf();
+      resetAction();
+    }
+  }, [actionType, resetAction]);
+
   if (!resumeData) {
     return (
       <div className="resume-page resume-page--detail">
@@ -339,6 +467,7 @@ export default function ResumeDetail() {
       </div>
     );
   }
+
 
   const sidebarStatusMap = buildStatusMap(resumeData);
 
@@ -355,13 +484,13 @@ export default function ResumeDetail() {
         : undefined,
     })) ?? [];
 
-  // 🔥 birth, gender nullable 방어
+  // 
   const basicMeta =
     resumeData.birth && resumeData.gender
       ? formatMeta(resumeData.birth, resumeData.gender as "M" | "W")
       : "";
 
-  // 🔥 모달 타이틀 - 토글 방향에 따라 다르게
+  // 
   const defaultModalTitle =
     nextDefaultState === false
       ? "기본이력서를 해지 하시겠습니까?"
@@ -589,7 +718,17 @@ export default function ResumeDetail() {
             />
           </div>
         </div>
-
+        <div className="resume-controls-wrapper">
+      <div className="resume-create-page__status">
+        <span className="default_btn_black btn_w_full"
+             onClick={handleEdit}>
+          <img 
+          src={Icons.ic_edit_white_20} alt="" />
+          수정하기
+        </span>
+ 
+      </div>
+      </div>
         <Modal
           open={showDefaultModal}
           title={defaultModalTitle}

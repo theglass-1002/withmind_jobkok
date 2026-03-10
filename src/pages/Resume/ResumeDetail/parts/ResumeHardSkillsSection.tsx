@@ -15,16 +15,19 @@ export default function ResumeHardSkillsSection({
   return (
     <div className={`resume-field resume-field--hard-skills ${className}`}>
       <span className="resume-field__label">{label}</span>
-      <div className="resume-field__value resume-hard-skill-list">
-        {items.map((text, idx) => (
-          <span
-            key={`${text}-${idx}`}
-            className="resume-hard-skill-item resume-item-chip"
-          >
-            {text}
-          </span>
-        ))}
-      </div>
+      {items.length > 0 && (
+        <div className="resume-field__value resume-hard-skill-list">
+          {items.map((text, idx) => (
+            <span
+              key={`${text}-${idx}`}
+              className="resume-hard-skill-item resume-item-chip"
+            >
+              {text}
+            </span>
+          ))}
+        </div>
+      )}
+  
     </div>
   );
 }
