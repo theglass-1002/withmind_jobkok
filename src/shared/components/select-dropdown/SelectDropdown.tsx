@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import ic_arrow_drop_down_gray900_24 from "@/assets/icons/size24/ic_arrow_drop_down_gray900_24.png";
 import "./SelectDropdown.css";
+import { Icons } from '@/assets/icons';
 
 type SelectDropdownProps = {
   label: string;
@@ -61,7 +62,7 @@ export default function SelectDropdown({
           {errorIconSrc && (
             <img className="select-dropdown__error-icon" src={errorIconSrc} alt="error" />
           )}
-          <img className="drop_down_icon" src={ic_arrow_drop_down_gray900_24} alt="open" />
+          <img className="drop_down_icon" src={Icons.ic_arrow_drop_down_gray900_24} alt="open" />
         </span>
       </div>
 

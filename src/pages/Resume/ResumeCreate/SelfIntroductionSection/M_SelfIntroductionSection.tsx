@@ -16,11 +16,11 @@ interface M_SelfIntroductionSectionProps {
   value?: string;
   onChange?: (value: string) => void;
   error?: boolean;
-
   aiShow?: boolean;
   aiSuggestions?: string[];
   onClickAISuggest?: () => void;
   onCloseAISuggest?: () => void;
+  isEdit?: boolean;
 }
 
 export default function M_SelfIntroductionSection({
@@ -31,6 +31,7 @@ export default function M_SelfIntroductionSection({
   aiSuggestions = [],
   onClickAISuggest,
   onCloseAISuggest,
+  isEdit = false
 }: M_SelfIntroductionSectionProps) {
 
   const MAX_SUMMARY = 2000;

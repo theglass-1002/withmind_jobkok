@@ -221,7 +221,7 @@ export default function M_ResumeCreate() {
   
       const activities = form.activities
         .map((a) => {
-          const base = `${a.activityType ?? ""} / ${a.activityName ?? ""}`;
+          const base = `${a.category ?? ""} / ${a.activityName ?? ""}`;
           const extra = a.summary ? ` / ${a.summary}` : "";
           return base + extra;
         })
@@ -347,7 +347,7 @@ export default function M_ResumeCreate() {
 
       const activities = form.activities
         .map((a) => {
-          const base = `${a.activityType ?? ""} / ${a.activityName ?? ""}`;
+          const base = `${a.category ?? ""} / ${a.activityName ?? ""}`;
           const extra = a.summary ? ` / ${a.summary}` : "";
           return base + extra;
         })
@@ -423,7 +423,7 @@ export default function M_ResumeCreate() {
 
       const activities = form.activities
         .map((a) => {
-          const base = `${a.activityType ?? ""} / ${a.activityName ?? ""}`;
+          const base = `${a.category ?? ""} / ${a.activityName ?? ""}`;
           const extra = a.summary ? ` / ${a.summary}` : "";
           return base + extra;
         })
@@ -491,7 +491,7 @@ export default function M_ResumeCreate() {
   
       const activities = form.activities
         .map((a) => {
-          const base = `${a.activityType ?? ""} / ${a.activityName ?? ""}`;
+          const base = `${a.category ?? ""} / ${a.activityName ?? ""}`;
           const extra = a.summary ? ` / ${a.summary}` : "";
           return base + extra;
         })
@@ -837,7 +837,7 @@ export default function M_ResumeCreate() {
         ...(form.activities.length > 0
           ? {
               activities: form.activities.map((act) => ({
-                category: act.activityType ?? "교내활동",
+                category: act.category ?? "교내활동",
                 activityTitle: act.activityName,
                 startYm: act.startDate ? normalizeYm(act.startDate) : "1999-09",
                 endYm: act.endDate ? normalizeYm(act.endDate) : "1999-09",

@@ -1,10 +1,8 @@
-// src/pages/.../SoftSkillSection/M_SoftSkillsSection.tsx
 import React, { useMemo, useState, useRef, useEffect } from "react";
 import "./SoftSkillsSection.css";
 import { toast } from "react-toastify";
 import Tooltip from "@/shared/components/tooltip/Tooltip";
 
-import ic_close_gray500_24 from "@/assets/icons/size24/ic_close_gray500_24.png";
 import ic_add_btn_gray900_20 from "@/assets/icons/size20/ic_add_btn_gray900_20.png";
 import ic_close_gray900_24 from "@/assets/icons/size24/ic_close_gray900_24.png";
 import ic_replay_gray900_20 from "@/assets/icons/size20/ic_replay_gray900_20.png";
@@ -33,7 +31,7 @@ interface SoftSkillsSectionProps {
 }
 
 export default function M_SoftSkillsSection({
-  value,
+  value = [],
   onChange,
   error,
   isEdit = false,
@@ -46,7 +44,6 @@ export default function M_SoftSkillsSection({
   const [q, setQ] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [isEditing, setIsEditing] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
 
   const [showResetModal, setShowResetModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
@@ -54,28 +51,24 @@ export default function M_SoftSkillsSection({
   const [items, setItems] = useState<SkillAutoCompleteItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  const menuRef = useRef<HTMLDivElement>(null);
+
   const hasAnySelected = () => selected.size > 0;
 
-  // ✅ edit / 초기값 동기화 (1회)
-  const didSyncFromValueRef = useRef(false);
   useEffect(() => {
-    // if (!isEdit) return; // 필요 시 edit일 때만 동기화
+    if (!isEdit) return;
 
-    if (!value) return;
-    if (didSyncFromValueRef.current) return;
-
-    if (value.length > 0) {
-      setSelected(new Set(value.map((v) => `직접 입력|${v}`)));
-    } else {
+    if (!value || value.length === 0) {
       setSelected(new Set());
+      return;
     }
 
-    didSyncFromValueRef.current = true;
-  }, [value, isEdit]);
+    setSelected(new Set(value.map((skill) => `직접 입력|${skill}`)));
+  }, [isEdit, value]);
 
-  // ✅ 자동완성 호출
   useEffect(() => {
-    const keyword = (q ?? "").trim();
+    const keyword = q.trim();
+
     if (!open) return;
 
     if (keyword.length < MIN_LENGTH) {
@@ -89,10 +82,11 @@ export default function M_SoftSkillsSection({
       try {
         setIsLoading(true);
         const data = await fetchSoftSkillAutoComplete(keyword);
+
         if (!mounted) return;
         setItems(Array.isArray(data) ? data : []);
       } catch (e) {
-        console.error("❌ soft auto-complete error:", e);
+        console.error("soft auto-complete error:", e);
         if (mounted) setItems([]);
       } finally {
         if (mounted) setIsLoading(false);
@@ -104,31 +98,34 @@ export default function M_SoftSkillsSection({
     };
   }, [q, open]);
 
-  // 외부 클릭 닫기
   useEffect(() => {
     if (!open) return;
+
     const onPointer = (e: PointerEvent) => {
       if (!menuRef.current) return;
-      if (!menuRef.current.contains(e.target as Node)) setOpen(false);
+      if (!menuRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
     };
+
     document.addEventListener("pointerdown", onPointer);
     return () => document.removeEventListener("pointerdown", onPointer);
   }, [open]);
 
   const highlight = (text: string, keyword: string) => {
-    const k = keyword.trim();
-    if (!k) return text;
-    const re = new RegExp(
-      `(${k.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\$&")})`,
-      "ig"
-    );
-    return text.split(re).map((part, i) =>
-      part.toLowerCase() === k.toLowerCase() ? (
-        <span className="soft-skills__highlight" key={i}>
+    const trimmed = keyword.trim();
+    if (!trimmed) return text;
+
+    const escaped = trimmed.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const regex = new RegExp(`(${escaped})`, "ig");
+
+    return text.split(regex).map((part, index) =>
+      part.toLowerCase() === trimmed.toLowerCase() ? (
+        <span className="soft-skills__highlight" key={index}>
           {part}
         </span>
       ) : (
-        <span key={i}>{part}</span>
+        <span key={index}>{part}</span>
       )
     );
   };
@@ -139,14 +136,6 @@ export default function M_SoftSkillsSection({
       return { key, role };
     });
   }, [selected]);
-
-  const removeRole = (key: string) => {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      next.delete(key);
-      return next;
-    });
-  };
 
   const addRole = (item: SkillAutoCompleteItem | string) => {
     const roleText = typeof item === "string" ? item.trim() : item.name;
@@ -174,23 +163,40 @@ export default function M_SoftSkillsSection({
     setItems([]);
   };
 
-  const handleOpenPopup = () => setIsEditing(true);
+  const removeRole = (key: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      next.delete(key);
+      return next;
+    });
+  };
 
-  // X 버튼 클릭
+  const handleOpenPopup = () => {
+    if (isEdit) {
+      setSelected(new Set(value.map((skill) => `직접 입력|${skill}`)));
+    }
+    setIsEditing(true);
+  };
+
   const handleClosePopup = () => {
     if (!hasAnySelected()) {
       setIsEditing(false);
       setOpen(false);
       setQ("");
       setItems([]);
-    } else {
-      setShowCancelModal(true);
+      return;
     }
+
+    setShowCancelModal(true);
   };
 
-  // 취소 모달에서 "예"
   const confirmCancel = () => {
-    setSelected(new Set());
+    if (isEdit) {
+      setSelected(new Set(value.map((skill) => `직접 입력|${skill}`)));
+    } else {
+      setSelected(new Set());
+    }
+
     setQ("");
     setOpen(false);
     setItems([]);
@@ -198,7 +204,6 @@ export default function M_SoftSkillsSection({
     setIsEditing(false);
   };
 
-  // 초기화 버튼 클릭
   const handleReset = () => {
     if (!hasAnySelected()) {
       setSelected(new Set());
@@ -207,10 +212,10 @@ export default function M_SoftSkillsSection({
       setItems([]);
       return;
     }
+
     setShowResetModal(true);
   };
 
-  // 초기화 모달에서 "예"
   const confirmReset = () => {
     setSelected(new Set());
     setQ("");
@@ -220,7 +225,6 @@ export default function M_SoftSkillsSection({
   };
 
   const handleSave = () => {
-   
     const skills = Array.from(selected).map((key) => key.split("|")[1]);
     onChange(skills);
 
@@ -250,26 +254,22 @@ export default function M_SoftSkillsSection({
         </div>
       </div>
 
-      {/* 선택된 소프트 스킬 미리보기 */}
       {chips.length > 0 && (
-        <div className="resume-create-page__selected ">
+        <div className="resume-create-page__selected">
           {chips.map((chip) => (
             <div key={chip.key} className="location-picker__chip">
               <div className="location-picker__chip-body">{chip.role}</div>
-              {/* <span
-                className="location-picker__chip-close"
-                onClick={() => removeRole(chip.key)}
-              >
-                <img src={ic_close_gray500_24} alt="삭제" />
-              </span> */}
             </div>
           ))}
         </div>
       )}
 
-      {/* 추가/수정 버튼 */}
       <div className="resume-create-page__section-action">
-        <button className="btn_w_full default_btn_white" onClick={handleOpenPopup}>
+        <button
+          type="button"
+          className="btn_w_full default_btn_white"
+          onClick={handleOpenPopup}
+        >
           {chips.length > 0 ? (
             <>
               <img src={ic_edit_gray900_20} alt="" />
@@ -284,7 +284,6 @@ export default function M_SoftSkillsSection({
         </button>
       </div>
 
-      {/* 오버레이 팝업 */}
       {isEditing && (
         <div className="basic-info-form-overlay soft-skills-section">
           <div className="basic-info-form-container">
@@ -361,6 +360,13 @@ export default function M_SoftSkillsSection({
                       <div
                         className="soft-skills__menu-footer"
                         onClick={() => addRole(q)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            addRole(q);
+                          }
+                        }}
                       >
                         <span className="soft-skills__highlight">“{q}”</span>
                         <span className="soft-skills__create-suffix">
@@ -386,11 +392,9 @@ export default function M_SoftSkillsSection({
                 />
               </div>
 
-              {/* 필요하면 에러 표시 (HardSkillSection과 동일하게 두고 싶으면 유지) */}
               {error && <div className="resume-create-form__error">{error}</div>}
             </div>
 
-            {/* 하단 버튼 + 팝업 내 선택 칩 리스트 */}
             <div className="resume-create-page__form-action">
               {chips.length > 0 && (
                 <div className="resume-create-page__selected skill">
@@ -410,16 +414,18 @@ export default function M_SoftSkillsSection({
 
               <div className="btn_wrap">
                 <button
+                  type="button"
                   className="btn-reset default_btn_white"
                   onClick={handleReset}
-                  type="button"
                 >
-                  <img src={ic_replay_gray900_20} alt="" /> 초기화
+                  <img src={ic_replay_gray900_20} alt="" />
+                  초기화
                 </button>
+
                 <button
+                  type="button"
                   className="btn_w_full default_btn_black"
                   onClick={handleSave}
-                  type="button"
                 >
                   저장
                 </button>
@@ -427,7 +433,6 @@ export default function M_SoftSkillsSection({
             </div>
           </div>
 
-          {/* 초기화 확인 모달 */}
           <Modal
             open={showResetModal}
             title="입력된 내용을 전부 삭제하시겠습니까?"
@@ -439,7 +444,6 @@ export default function M_SoftSkillsSection({
             onClose={() => setShowResetModal(false)}
           />
 
-          {/* 취소 확인 모달 */}
           <Modal
             open={showCancelModal}
             title="수정사항을 저장하지 않고 취소하시겠습니까?"

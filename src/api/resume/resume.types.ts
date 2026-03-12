@@ -166,7 +166,7 @@ export interface ResumeListApiResponse {
     }[];
   
     activityList: {
-      category: string;
+      category?: string;
       activityTitle: string;
       startYm: string;
       endYm: string;
@@ -546,6 +546,21 @@ export function mapPortfolioListToPortfolioItems(
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 유틸리티: CloudFront URL에서 순수 S3 경로 추출
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+export const extractS3Path = (url: string): string => {
+  if (!url) return "";
+  // CloudFront URL이면 순수 경로만 추출
+  if (url.includes(".cloudfront.net/")) {
+    return url.split(".cloudfront.net/")[1];
+  }
+  // 이미 순수 경로면 그대로 반환
+  return url;
+
+}
+
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // AI 이력서 제목 추천 API
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -690,4 +705,5 @@ export type SkillAutoCompleteItem = {
   name: string;
   type: "HARD" | "SOFT";
 };
+
 

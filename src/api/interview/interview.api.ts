@@ -9,6 +9,7 @@ import type {
   InterviewQuestionsResponse,
   InterviewFollowupRequest,
   InterviewFollowupResponse,
+  InterviewReportListResponse,
 } from "./interview.types";
 import { AI_BASE_URL } from "@/config/config";
 
@@ -89,6 +90,30 @@ export async function fetchInterviewFollowup(
       requiresAuth: false,
       headers: {
         "Content-Type": "application/json",
+      },
+    }
+  );
+
+  return res.data;
+}
+
+/**
+ * 모의면접 리포트 리스트 조회 API
+ * GET /api/report/list?page=1&size=10
+ */
+export async function fetchInterviewReportList(params?: {
+  page?: number;
+  size?: number;
+}): Promise<InterviewReportListResponse> {
+  const res = await instance.get<InterviewReportListResponse>(
+    "/api/report/list",
+    {
+      params: {
+        page: params?.page ?? 1,
+        size: params?.size ?? 10,
+      },
+      headers: {
+        accept: "application/json",
       },
     }
   );

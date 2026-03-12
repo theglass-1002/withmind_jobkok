@@ -5,11 +5,8 @@ import { toast } from "react-toastify";
 import ic_close_gray900_24 from "@/assets/icons/size24/ic_close_gray900_24.png";
 import ic_replay_gray900_20 from "@/assets/icons/size20/ic_replay_gray900_20.png";
 import ic_close_gray500_20 from "@/assets/icons/size20/ic_close_gray500_20.png";
-import ic_search_gray900_20 from "@/assets/icons/size20/ic_search_gray900_20.png";
-import ic_clear_btn_gray400_20 from "@/assets/icons/size20/ic_clear_btn_gray400_20.png";
 import ic_add_btn_gray900_20 from "@/assets/icons/size20/ic_add_btn_gray900_20.png";
 import ic_edit_gray900_20 from "@/assets/icons/size20/ic_edit_gray900_20.png";
-import ic_arrow_back_ios_gray900_20 from "@/assets/icons/size20/ic_arrow_back_ios_gray900_20.png";
 
 import AISuggestArea from "@/pages/Resume/ResumeAISuggest";
 import SearchField from "@/shared/components/search/SearchField";
@@ -20,6 +17,7 @@ import { fetchJobTree } from "@/api/job/job.api";
 import { JobNode } from "@/api/job/job.types";
 
 type RoleItem = { group: string; role: string };
+
 const MAX_SELECTED = 30;
 
 interface DesiredRoleSectionProps {
@@ -34,7 +32,7 @@ interface DesiredRoleSectionProps {
 }
 
 export default function M_DesiredRoleSection({
-  value,
+  value = [],
   onChange,
   error,
   isEdit = false,
@@ -47,34 +45,17 @@ export default function M_DesiredRoleSection({
   const [q, setQ] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [isEditing, setIsEditing] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
 
   const [showResetModal, setShowResetModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
 
-  // ✅ 서버에서 가져온 직군/직무 트리
   const [jobTree, setJobTree] = useState<JobNode[]>([]);
   const [isTreeLoading, setIsTreeLoading] = useState(false);
 
+  const menuRef = useRef<HTMLDivElement>(null);
+
   const hasAnySelected = () => selected.size > 0;
 
-  // ✅ edit 모드/초기값 value를 selected로 동기화 (1회)
-  const didSyncFromValueRef = useRef(false);
-  useEffect(() => {
-    if (!value) return;
-    if (didSyncFromValueRef.current) return;
-
-    // value가 있으면 초기 칩 세팅
-    if (value.length > 0) {
-      setSelected(new Set(value.map((r) => `직접 입력|${r}`)));
-    } else {
-      setSelected(new Set());
-    }
-
-    didSyncFromValueRef.current = true;
-  }, [value]);
-
-  // ✅ 직무 트리 로드 (최초 1회)
   useEffect(() => {
     let mounted = true;
 
@@ -82,10 +63,11 @@ export default function M_DesiredRoleSection({
       try {
         setIsTreeLoading(true);
         const data = await fetchJobTree();
+
         if (!mounted) return;
         setJobTree(Array.isArray(data) ? (data as JobNode[]) : []);
       } catch (e) {
-        console.error("❌ fetchJobTree error:", e);
+        console.error("fetchJobTree error:", e);
         if (mounted) setJobTree([]);
       } finally {
         if (mounted) setIsTreeLoading(false);
@@ -97,9 +79,6 @@ export default function M_DesiredRoleSection({
     };
   }, []);
 
-  // ✅ jobTree -> flat
-  // - 상위: "개발" -> "개발 전체"
-  // - 하위: children 직무들
   const flat: RoleItem[] = useMemo(() => {
     const out: RoleItem[] = [];
     if (!Array.isArray(jobTree)) return out;
@@ -133,65 +112,81 @@ export default function M_DesiredRoleSection({
     return out;
   }, [jobTree]);
 
-  // ✅ 검색 필터
-  const filtered = useMemo(() => {
-    const k = (q ?? "").trim().toLowerCase();
-    if (!k) return flat.slice(0, 20);
+  const findRoleKey = (roleName: string) => {
+    const matched = flat.find((item) => item.role === roleName);
 
-    const toStr = (v: unknown) =>
-      typeof v === "string" ? v : String(v ?? "");
+    if (matched) {
+      return `${matched.group}|${matched.role}`;
+    }
+
+    return `직접 입력|${roleName}`;
+  };
+
+  useEffect(() => {
+    if (!isEdit) return;
+
+    if (!value || value.length === 0) {
+      setSelected(new Set());
+      return;
+    }
+
+    setSelected(new Set(value.map(findRoleKey)));
+  }, [isEdit, value, flat]);
+
+  const filtered = useMemo(() => {
+    const keyword = q.trim().toLowerCase();
+
+    if (!keyword) {
+      return flat.slice(0, 20);
+    }
 
     return flat
-      .filter((i) => {
-        const role = toStr(i.role).toLowerCase();
-        const group = toStr(i.group).toLowerCase();
-        return role.includes(k) || group.includes(k);
+      .filter((item) => {
+        const role = item.role.toLowerCase();
+        const group = item.group.toLowerCase();
+        return role.includes(keyword) || group.includes(keyword);
       })
       .slice(0, 50);
   }, [q, flat]);
 
-  // ✅ 드롭다운 외부 클릭 닫기
   useEffect(() => {
     if (!open) return;
-    const onPointer = (e: PointerEvent) => {
+
+    const onPointerDown = (e: PointerEvent) => {
       if (!menuRef.current) return;
-      if (!menuRef.current.contains(e.target as Node)) setOpen(false);
+      if (!menuRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
     };
-    document.addEventListener("pointerdown", onPointer);
-    return () => document.removeEventListener("pointerdown", onPointer);
+
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => document.removeEventListener("pointerdown", onPointerDown);
   }, [open]);
 
-  // ✅ 검색 키워드 하이라이트
   const highlight = (text: string, keyword: string) => {
-    const k = keyword.trim();
-    if (!k) return text;
-    const re = new RegExp(`(${k.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\$&")})`, "ig");
-    return text.split(re).map((part, i) =>
-      re.test(part) ? (
-        <span className="desired-role__highlight" key={i}>
+    const trimmed = keyword.trim();
+    if (!trimmed) return text;
+
+    const escaped = trimmed.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const regex = new RegExp(`(${escaped})`, "ig");
+
+    return text.split(regex).map((part, index) =>
+      regex.test(part) ? (
+        <span className="desired-role__highlight" key={index}>
           {part}
         </span>
       ) : (
-        <span key={i}>{part}</span>
+        <span key={index}>{part}</span>
       )
     );
   };
 
-  // ✅ 선택된 직무를 칩 형태로 변환
   const chips = useMemo(() => {
     return Array.from(selected).map((key) => {
       const [group, role] = key.split("|");
       return { key, group, role };
     });
   }, [selected]);
-
-  const removeRole = (key: string) => {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      next.delete(key);
-      return next;
-    });
-  };
 
   const addRole = (item: RoleItem | string) => {
     const roleText = typeof item === "string" ? item.trim() : item.role;
@@ -204,7 +199,9 @@ export default function M_DesiredRoleSection({
       if (prev.has(key)) return prev;
 
       if (prev.size >= MAX_SELECTED) {
-        toast.error("최대 30개까지 추가 가능합니다.", { toastId: "role-limit" });
+        toast.error("최대 30개까지 추가 가능합니다.", {
+          toastId: "role-limit",
+        });
         return prev;
       }
 
@@ -217,20 +214,39 @@ export default function M_DesiredRoleSection({
     setOpen(false);
   };
 
-  const handleOpenPopup = () => setIsEditing(true);
+  const removeRole = (key: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      next.delete(key);
+      return next;
+    });
+  };
+
+  const handleOpenPopup = () => {
+    if (isEdit) {
+      setSelected(new Set(value.map(findRoleKey)));
+    }
+    setIsEditing(true);
+  };
 
   const handleClosePopup = () => {
     if (!hasAnySelected()) {
       setIsEditing(false);
       setOpen(false);
       setQ("");
-    } else {
-      setShowCancelModal(true);
+      return;
     }
+
+    setShowCancelModal(true);
   };
 
   const confirmCancel = () => {
-    setSelected(new Set());
+    if (isEdit) {
+      setSelected(new Set(value.map(findRoleKey)));
+    } else {
+      setSelected(new Set());
+    }
+
     setQ("");
     setOpen(false);
     setShowCancelModal(false);
@@ -244,6 +260,7 @@ export default function M_DesiredRoleSection({
       setOpen(false);
       return;
     }
+
     setShowResetModal(true);
   };
 
@@ -293,7 +310,11 @@ export default function M_DesiredRoleSection({
       )}
 
       <div className="resume-create-page__section-action">
-        <button className="btn_w_full default_btn_white" onClick={handleOpenPopup}>
+        <button
+          type="button"
+          className="btn_w_full default_btn_white"
+          onClick={handleOpenPopup}
+        >
           {chips.length > 0 ? (
             <>
               <img src={ic_edit_gray900_20} alt="" />
@@ -324,7 +345,9 @@ export default function M_DesiredRoleSection({
             </header>
 
             <div className="resume-create-form__content desired-role-form">
-              <div className="desired-role-form-hint">※ 최대 30개까지 추가 가능합니다.</div>
+              <div className="desired-role-form-hint">
+                ※ 최대 30개까지 추가 가능합니다.
+              </div>
 
               <div className="desired-role__search-wrapper">
                 <SearchField
@@ -361,7 +384,9 @@ export default function M_DesiredRoleSection({
                               <span className="desired-role__option-role">
                                 {highlight(item.role, q)}
                               </span>
-                              <span className="desired-role__option-group">{}</span>
+                              <span className="desired-role__option-group">
+                                {item.group}
+                              </span>
                             </li>
                           ))}
 
@@ -379,9 +404,16 @@ export default function M_DesiredRoleSection({
                         onClick={() => addRole(q)}
                         role="button"
                         tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            addRole(q);
+                          }
+                        }}
                       >
                         <span className="desired-role__highlight">“{q}”</span>
-                        <span className="desired-role__create-suffix">(으)로 직접 등록하기</span>
+                        <span className="desired-role__create-suffix">
+                          (으)로 직접 등록하기
+                        </span>
                       </div>
                     )}
                   </div>
@@ -421,10 +453,20 @@ export default function M_DesiredRoleSection({
               )}
 
               <div className="btn_wrap">
-                <button className="btn-reset default_btn_white" onClick={handleReset} type="button">
-                  <img src={ic_replay_gray900_20} alt="" /> 초기화
+                <button
+                  type="button"
+                  className="btn-reset default_btn_white"
+                  onClick={handleReset}
+                >
+                  <img src={ic_replay_gray900_20} alt="" />
+                  초기화
                 </button>
-                <button className="btn_w_full default_btn_black" onClick={handleSave} type="button">
+
+                <button
+                  type="button"
+                  className="btn_w_full default_btn_black"
+                  onClick={handleSave}
+                >
                   저장
                 </button>
               </div>

@@ -1,4 +1,3 @@
-// src/pages/.../PortfolioDocumentsSection/Form/M_PortfolioDocumentsForm.tsx
 import React, { useEffect, useState } from "react";
 import "../PortfolioDocumentsSection.css";
 
@@ -23,6 +22,8 @@ const blankItem = (): PortfolioDocItem => ({
   file: null,
   url: "",
   note: "",
+  filePath: "",
+  fileIdx: undefined,
 });
 
 type PortfolioErrors = {
@@ -48,17 +49,28 @@ export default function M_PortfolioDocumentsForm({
   );
   const [showResetModal, setShowResetModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
-
   const [itemErrors, setItemErrors] = useState<PortfolioErrors[]>([]);
 
-  const hasAnyInput = () =>
-    items.some(
-      (it) =>
-        it.file ||
-        (it.url && it.url.trim().length > 0) ||
-        (it.title && it.title.trim().length > 0) ||
-        (it.note && it.note.trim().length > 0)
+  const hasFileValue = (item: PortfolioDocItem) => {
+    return !!(
+      item.file ||
+      item.title?.trim() ||
+      item.filePath?.trim() ||
+      item.fileIdx
     );
+  };
+
+  const hasUrlValue = (item: PortfolioDocItem) => {
+    return !!item.url?.trim();
+  };
+
+  const hasAnyInput = () =>
+    items.some((it) => {
+      if (it.source === "file") {
+        return hasFileValue(it) || !!it.note?.trim();
+      }
+      return hasUrlValue(it) || !!it.note?.trim();
+    });
 
   const handleClose = () => {
     if (hasAnyInput()) {
@@ -69,10 +81,7 @@ export default function M_PortfolioDocumentsForm({
   };
 
   const addItem = () => {
-    setItems((prev) => [
-      { id: makeId(), source: "file", title: "", file: null, url: "", note: "" },
-      ...prev,
-    ]);
+    setItems((prev) => [blankItem(), ...prev]);
     setItemErrors((prev) => [{}, ...prev]);
   };
 
@@ -81,21 +90,25 @@ export default function M_PortfolioDocumentsForm({
       setShowResetModal(true);
       return;
     }
+
     setItems((prev) => {
       const next = [...prev];
       next.splice(index, 1);
       return next;
     });
+
     setItemErrors((prev) => prev.filter((_, i) => i !== index));
   };
 
   const moveUp = (index: number) => {
     if (index <= 0) return;
+
     setItems((prev) => {
       const next = [...prev];
       [next[index - 1], next[index]] = [next[index], next[index - 1]];
       return next;
     });
+
     setItemErrors((prev) => {
       const next = [...prev];
       [next[index - 1], next[index]] = [next[index], next[index - 1]];
@@ -105,11 +118,13 @@ export default function M_PortfolioDocumentsForm({
 
   const moveDown = (index: number) => {
     if (index >= items.length - 1) return;
+
     setItems((prev) => {
       const next = [...prev];
       [next[index + 1], next[index]] = [next[index], next[index + 1]];
       return next;
     });
+
     setItemErrors((prev) => {
       const next = [...prev];
       [next[index + 1], next[index]] = [next[index], next[index + 1]];
@@ -124,12 +139,20 @@ export default function M_PortfolioDocumentsForm({
 
     if (itemErrors[index]) {
       const updated = { ...itemErrors[index] };
-      if ("file" in patch) {
+
+      if (
+        "file" in patch ||
+        "title" in patch ||
+        "filePath" in patch ||
+        "fileIdx" in patch
+      ) {
         delete updated.fileMissing;
       }
+
       if ("url" in patch) {
         delete updated.urlMissing;
       }
+
       setItemErrors((prev) =>
         prev.map((err, i) => (i === index ? updated : err))
       );
@@ -157,12 +180,15 @@ export default function M_PortfolioDocumentsForm({
   const handleSave = () => {
     const newErrors: PortfolioErrors[] = items.map((it) => {
       const err: PortfolioErrors = {};
-      if (it.source === "file" && !it.file) {
+
+      if (it.source === "file" && !hasFileValue(it)) {
         err.fileMissing = true;
       }
-      if (it.source === "url" && !(it.url && it.url.trim().length > 0)) {
+
+      if (it.source === "url" && !hasUrlValue(it)) {
         err.urlMissing = true;
       }
+
       return err;
     });
 
@@ -177,6 +203,10 @@ export default function M_PortfolioDocumentsForm({
     setItemErrors([]);
     onSave(items);
   };
+
+  useEffect(() => {
+    setItems(initialItems.length > 0 ? initialItems : [blankItem()]);
+  }, [initialItems]);
 
   useEffect(() => {
     if (items.length === 0) {

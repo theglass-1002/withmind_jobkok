@@ -109,6 +109,7 @@ const data1 = {
   softSkills: ["커뮤니케이션", "문제 해결 능력", "데이터 분석"],
   activities: [
     {
+      category:"",
       title: "[교육] UX/UI 디자인 부트캠프",
       start: "2021.09",
       end: "2022.03",
@@ -223,6 +224,7 @@ const data2 = {
   softSkills: ["문제 해결 능력", "팀워크", "코드 리뷰"],
   activities: [
     {
+      category:"",
       title: "[오픈소스] Spring Framework 기여",
       start: "2021.01",
       end: "2023.12",
@@ -329,6 +331,7 @@ const data3 = {
   softSkills: ["UI/UX 감각", "협업 능력", "문제 해결"],
   activities: [
     {
+      category:"",
       title: "[스터디] 프론트엔드 개발자 스터디",
       start: "2020.03",
       end: "2021.11",

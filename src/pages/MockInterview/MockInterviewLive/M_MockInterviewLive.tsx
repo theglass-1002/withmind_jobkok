@@ -272,11 +272,12 @@ export default function M_MockInterviewLive() {
     const isFollowupNow = cur.type === "FOLLOWUP";
 
     setIsUploading(true);
-
+    console.log('영상업로드??');
     try {
       let uploadResult: any;
       try {
-        uploadResult = await uploadJobInterviewVideo(videoBlob, "interview");
+        uploadResult = await uploadJobInterviewVideo(videoBlob);
+        console.log('면접영상 업로드 결과',uploadResult);
       } catch (err) {
         console.error("[uploadRecordedFile] video upload failed:", err);
         return { uploadResult: null, followupRes: null };

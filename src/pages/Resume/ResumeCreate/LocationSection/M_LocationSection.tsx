@@ -1,12 +1,11 @@
 // src/pages/.../LocationSection/M_LocationSection.tsx
-import React, { useState, useMemo } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import "./LocationSection.css";
 import M_LocationForm from "./Form/M_LocationForm";
 
 import data from "@/data/locationsV2.json";
 
 import chevron_right_black from "@/assets/icons/chevron_right_black.png";
-import ic_close_gray500_20 from "@/assets/icons/size20/ic_close_gray500_20.png";
 import ic_edit_gray900_20 from "@/assets/icons/size20/ic_edit_gray900_20.png";
 import ic_add_btn_gray900_20 from "@/assets/icons/size20/ic_add_btn_gray900_20.png";
 
@@ -31,6 +30,7 @@ interface M_LocationSectionProps {
   errors?: string;
   onChange: (v: LocationValue) => void;
   sectionRef?: (el: HTMLDivElement | null) => void;
+  isEdit?: boolean;
 }
 
 export default function M_LocationSection({
@@ -38,12 +38,28 @@ export default function M_LocationSection({
   errors,
   onChange,
   sectionRef,
+  isEdit = false,
 }: M_LocationSectionProps) {
   const regions = data as Region[];
   const NATIONWIDE_LABEL = "지역 전체";
 
   const [isAdding, setIsAdding] = useState(false);
   const [locationData, setLocationData] = useState<LocationValue>(defaultValue);
+  const didSyncRef = useRef(false);
+
+  useEffect(() => {
+    if (!isEdit) return;
+    if (didSyncRef.current) return;
+
+    const hasValue =
+      defaultValue.nationwide ||
+      (defaultValue.selectedCodes?.length ?? 0) > 0;
+
+    if (!hasValue) return;
+
+    setLocationData(defaultValue);
+    didSyncRef.current = true;
+  }, [isEdit, defaultValue.nationwide, defaultValue.selectedCodes]);
 
   const handleAdd = () => {
     setIsAdding(true);
@@ -54,28 +70,12 @@ export default function M_LocationSection({
   };
 
   const handleCancel = () => {
-    console.log("🚫 지역 선택 취소");
     setIsAdding(false);
   };
 
   const handleLocationChange = (v: LocationValue) => {
-    console.log("📌 LocationSection 받은 값(code 유지):", v);
     setLocationData(v);
     onChange(v);
-  };
-
-  const removeChip = (code: string) => {
-    if (code === "NATIONWIDE") {
-      const newData = { ...locationData, nationwide: false };
-      setLocationData(newData);
-      onChange(newData);
-      return;
-    }
-
-    const newCodes = locationData.selectedCodes.filter((c) => c !== code);
-    const newData = { ...locationData, selectedCodes: newCodes };
-    setLocationData(newData);
-    onChange(newData);
   };
 
   const chips = useMemo(() => {
@@ -85,7 +85,6 @@ export default function M_LocationSection({
           key: "NATIONWIDE",
           regionName: "전국",
           label: NATIONWIDE_LABEL,
-          rawCode: "NATIONWIDE",
         },
       ];
     }
@@ -98,7 +97,6 @@ export default function M_LocationSection({
             key: code,
             regionName: region.name.replace(" 전체", ""),
             label: "전체",
-            rawCode: code,
           };
         }
 
@@ -112,14 +110,12 @@ export default function M_LocationSection({
           key: code,
           regionName: parentRegion.name.replace(" 전체", ""),
           label: district.name,
-          rawCode: code,
         };
       })
       .filter(Boolean) as Array<{
       key: string;
       regionName: string;
       label: string;
-      rawCode: string;
     }>;
   }, [locationData, regions]);
 
@@ -133,7 +129,11 @@ export default function M_LocationSection({
         <div className="resume-create-page__section-title__heading">
           희망 근무 지역<em className="resume-create-page__required">*</em>
         </div>
-        {errors !== "" && <div className="resume-create-page__error">희망 근무 지역을 추가해 주세요.</div>}
+        {errors && (
+          <div className="resume-create-page__error">
+            희망 근무 지역을 추가해 주세요.
+          </div>
+        )}
       </div>
 
       {(locationData.selectedCodes.length > 0 || locationData.nationwide) && (
@@ -152,14 +152,6 @@ export default function M_LocationSection({
                     {chip.label}
                   </span>
                 </div>
-                {/* <span
-                  className="location-picker__chip-close"
-                  onClick={() => removeChip(chip.rawCode)}
-                  role="button"
-                  aria-label="선택 해제"
-                >
-                  <img src={ic_close_gray500_20} alt="" />
-                </span> */}
               </div>
             ))}
           </div>
@@ -180,7 +172,7 @@ export default function M_LocationSection({
 
       {isAdding && (
         <div className="basic-info-form-overlay location-section">
-          <div className="basic-info-form-container ">
+          <div className="basic-info-form-container">
             <M_LocationForm
               defaultValue={locationData}
               onChange={handleLocationChange}

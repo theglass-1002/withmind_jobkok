@@ -1,4 +1,3 @@
-// src/pages/.../ActivitiesSection/M_ActivitiesSection.tsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import "./ActivitiesSection.css";
 import ic_edit_gray900_20 from "@/assets/icons/size20/ic_edit_gray900_20.png";
@@ -7,8 +6,8 @@ import M_ActivitiesForm from "./Form/M_ActivitiesForm";
 import { formatMonthStringToDisplay } from "@/shared/utils/util";
 
 export type ActivityItem = {
-  id: string;
-  activityType: string | null;
+  id?: string;
+  category: string | null;
   activityName: string;
   startDate?: string;
   endDate?: string;
@@ -61,7 +60,7 @@ export default function M_ActivitiesSection({
   const previewItems = useMemo(() => {
     return items.filter(
       (it) =>
-        !!it.activityType ||
+        !!it.category ||
         !!it.activityName?.trim() ||
         !!it.startDate?.trim() ||
         !!it.endDate?.trim() ||
@@ -77,7 +76,7 @@ export default function M_ActivitiesSection({
       setItems([
         {
           id: makeId(),
-          activityType: null,
+          category: null,
           activityName: "",
           summary: "",
         },
@@ -89,7 +88,7 @@ export default function M_ActivitiesSection({
     const filtered = nextItems
       .filter(
         (it) =>
-          !!it.activityType ||
+          !!it.category ||
           !!it.activityName?.trim() ||
           !!it.startDate?.trim() ||
           !!it.endDate?.trim() ||
@@ -110,6 +109,7 @@ export default function M_ActivitiesSection({
   };
 
   return (
+   
     <div
       id="resume__create-section--activities"
       className="resume-create-page__section resume-create-page__section--activities"
@@ -130,10 +130,10 @@ export default function M_ActivitiesSection({
             <div className="resume-activity-item resume-career-item" key={it.id}>
               <div className="resume-activity-item__header resume-career-item__header">
                 <span className="resume-activity-item__title resume-career-item__company">
-                  {it.activityType && (
+                  {it.category && (
                     <>
                       <span className="resume-activity-item__type">
-                        [{it.activityType}]
+                        [{it.category}]
                       </span>{" "}
                     </>
                   )}
@@ -164,7 +164,7 @@ export default function M_ActivitiesSection({
 
               {it.summary && it.summary.trim().length > 0 && (
                 <ul className="resume-activity-item__bullets resume-career-item__bullets">
-                  {it.summary}
+                  <li>{it.summary}</li>
                 </ul>
               )}
             </div>

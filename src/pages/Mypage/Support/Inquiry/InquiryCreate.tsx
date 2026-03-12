@@ -1,20 +1,22 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import React, { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import arrow_back_big from "@/assets/icons/arrow_back_big.png";
 import SelectDropdown from "@/shared/components/select-dropdown/SelectDropdown";
-import ic_error_red_20 from "@/assets/icons/size20/ic_error_red100_20.png";
+import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
 import FormField from "@/shared/components/form/FormField";
 import FormInput from "@/shared/components/form/FormInput";
 import Modal from "@/shared/components/modal/Modal";
+import { Storage } from "@/shared/utils/StorageManager";
 import { useLayoutContext } from "@/app/LayoutContext";
+import { Icons } from "@/assets/icons";
+import { insertInquiry } from "@/api/support/support.api";
 
 export default function InquiryCreate() {
-  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const ref = useRef<HTMLTextAreaElement>(null);
-
+  const [isLoading, setIsLoading] = useState(false);
   const { actionType, resetAction } = useLayoutContext();
-
+  const [createdInquiryId, setCreatedInquiryId] = useState<number | null>(null);
   const [editing, setEditing] = useState(false);
 
   const [inquiryType, setInquiryType] = useState<string>("");
@@ -58,7 +60,6 @@ export default function InquiryCreate() {
 
   useEffect(() => {
     if (actionType === "INQUIRY_CREATE_CANCEL") {
-      console.log(actionType);
       setCancelModalOpen(true);
       resetAction();
     }
@@ -76,15 +77,43 @@ export default function InquiryCreate() {
     return isInquiryTypeValid && isTitleValid && isContentValid;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const ok = validate();
     if (!ok) return;
-
-    setOpenModal(true);
+  
+    const payload = {
+      userId: Storage.getUserId(),
+      inquiryType: inquiryType.trim(),
+      title: title.trim(),
+      content: content.trim(),
+      secretYn: "N" as const,
+    };
+  
+    console.log("문의 등록 요청 데이터:", payload);
+  
+    try {
+      setIsLoading(true);
+      const res = await insertInquiry(payload);
+      console.log("문의 등록 응답:", res);
+  
+      if (res.code === 200) {
+        setCreatedInquiryId(res.inquiryId);
+        setOpenModal(true);
+      }
+    } catch (error) {
+      console.error("문의 등록 실패:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
-
   const handleConfirmModal = () => {
     setOpenModal(false);
+  
+    if (createdInquiryId) {
+      navigate(`/mypage/support/inquiry/${createdInquiryId}`);
+    } else {
+      navigate("/mypage/support/inquiry");
+    }
   };
 
   const renderForm = () => (
@@ -98,7 +127,7 @@ export default function InquiryCreate() {
           value={inquiryType}
           onChange={setInquiryType}
           errorText={typeError || undefined}
-          errorIconSrc={typeError ? ic_error_red_20 : undefined}
+          errorIconSrc={typeError ? Icons.ic_error_red100_20 : undefined}
           className="inquiry-form__type-select"
         />
       </div>
@@ -118,7 +147,7 @@ export default function InquiryCreate() {
           onChange={setTitle}
           invalid={Boolean(titleError)}
           errorMessage={titleError || undefined}
-          rightIconSrc={titleError ? ic_error_red_20 : undefined}
+          rightIconSrc={titleError ? Icons.ic_error_red100_20 : undefined}
           rightIconAlt="error"
           placeholder="문의 제목을 입력해 주세요."
         />
@@ -192,10 +221,12 @@ export default function InquiryCreate() {
 
   return (
     <>
+      <LoadingOverlay isLoading={isLoading} />
+
       <div className="inquiry">
         <header className="mypage__content-header detail">
           <h2 className="title">
-            <span className="icon_wrap">
+            <span className="icon_wrap back_btn_icon">
               <img src={arrow_back_big} alt="" />
             </span>
             1:1 문의 하기
@@ -215,7 +246,7 @@ export default function InquiryCreate() {
       <div className="inquiry mobile">
         <header className="mypage__content-header detail">
           <h2 className="title">
-            <span className="icon_wrap">
+            <span className="icon_wrap back_btn_icon">
               <img src={arrow_back_big} alt="" />
             </span>
             1:1 문의 하기
@@ -250,7 +281,6 @@ export default function InquiryCreate() {
         cancelClassName="btn_w_full default_btn_white"
         onConfirm={() => {
           setCancelModalOpen(false);
-        //   navigate("/mypage/m-support/inquiry");
         }}
         onClose={() => setCancelModalOpen(false)}
       />

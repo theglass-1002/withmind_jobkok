@@ -2,6 +2,7 @@
 import React from "react";
 
 type ActivityItem = {
+  category: string | null;
   title: string;       
   start: string;       
   end?: string;         
@@ -28,7 +29,7 @@ export default function ResumeActivitiesSection({
           <div className="resume-activity-item resume-career-item" key={idx}>
             <div className="resume-activity-item__header resume-career-item__header">
               <span className="resume-activity-item__title resume-career-item__company">
-                {it.title}
+              [{it.category}]{" "}{it.title}
               </span>
 
               <div className="resume-activity-item__meta resume-career-item__meta">

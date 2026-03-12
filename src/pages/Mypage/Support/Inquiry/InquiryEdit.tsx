@@ -29,7 +29,7 @@ return (
     <div className="inquiry edit">
         <header className="mypage__content-header detail">
              <h2 className="title">
-                <span className="icon_wrap">
+                <span className="icon_wrap back_btn_icon">
                 <img src={arrow_back_big} alt="" />
                 </span>
                 1:1 문의 수정</h2>

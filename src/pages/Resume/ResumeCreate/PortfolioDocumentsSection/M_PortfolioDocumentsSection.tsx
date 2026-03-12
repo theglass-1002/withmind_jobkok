@@ -1,5 +1,4 @@
-// src/pages/.../PortfolioDocumentsSection/M_PortfolioDocumentsSection.tsx
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import "./PortfolioDocumentsSection.css";
 
 import ic_edit_gray900_20 from "@/assets/icons/size20/ic_edit_gray900_20.png";
@@ -17,12 +16,28 @@ export type PortfolioDocItem = {
   file: File | null;
   url: string;
   note?: string;
+  filePath?: string;
+  fileIdx?: number;
 };
 
 export type PortfolioDocErrors = Partial<Record<keyof PortfolioDocItem, string>>;
 
+type PortfolioValueItem = {
+  id?: string;
+  source?: SourceType;
+  title?: string;
+  file?: File | null;
+  url?: string;
+  note?: string;
+
+  itemType?: "FILE" | "URL";
+  description?: string;
+  filePath?: string;
+  fileIdx?: number;
+};
+
 interface M_PortfolioDocumentsSectionProps {
-  value?: PortfolioDocItem[];
+  value?: PortfolioValueItem[];
   onChange?: (items: PortfolioDocItem[]) => void;
   errors?: PortfolioDocErrors[];
   isEdit?: boolean;
@@ -37,14 +52,30 @@ const blankItem = (): PortfolioDocItem => ({
   file: null,
   url: "",
   note: "",
+  filePath: "",
+  fileIdx: undefined,
 });
 
-const normalizeItemsFromValue = (value: PortfolioDocItem[]): PortfolioDocItem[] => {
+const normalizeItemsFromValue = (
+  value: PortfolioValueItem[] = []
+): PortfolioDocItem[] => {
   if (!value || value.length === 0) return [];
-  return value.map((it) => ({
-    ...it,
-    id: it.id ?? makeId(),
-  }));
+
+  return value.map((item) => {
+    const source: SourceType =
+      item.source ?? (item.itemType === "URL" ? "url" : "file");
+
+    return {
+      id: item.id ?? String(item.fileIdx ?? makeId()),
+      source,
+      title: item.title ?? "",
+      file: item.file ?? null,
+      url: item.url ?? "",
+      note: item.note ?? item.description ?? "",
+      filePath: item.filePath ?? "",
+      fileIdx: item.fileIdx,
+    };
+  });
 };
 
 export default function M_PortfolioDocumentsSection({
@@ -58,29 +89,25 @@ export default function M_PortfolioDocumentsSection({
   );
   const [isEditing, setIsEditing] = useState(false);
 
-  const didSyncFromValueRef = useRef(false);
-
   useEffect(() => {
     if (!isEdit) return;
-    if (!value || value.length === 0) return;
-    if (didSyncFromValueRef.current) return;
-
     setItems(normalizeItemsFromValue(value));
-    didSyncFromValueRef.current = true;
   }, [isEdit, value]);
 
   const previewItems = useMemo(() => {
     return items.filter(
-      (it) =>
-        !!it.title?.trim() ||
-        !!it.file ||
-        !!it.url?.trim() ||
-        !!it.note?.trim()
+      (item) =>
+        !!item.title?.trim() ||
+        !!item.file ||
+        !!item.url?.trim() ||
+        !!item.note?.trim() ||
+        !!item.filePath?.trim()
     );
   }, [items]);
 
   const handleAddOrEdit = () => {
     setIsEditing(true);
+
     if (items.length === 0) {
       setItems([blankItem()]);
     }
@@ -89,15 +116,16 @@ export default function M_PortfolioDocumentsSection({
   const handleSave = (nextItems: PortfolioDocItem[]) => {
     const filtered = nextItems
       .filter(
-        (it) =>
-          !!it.title?.trim() ||
-          !!it.file ||
-          !!it.url?.trim() ||
-          !!it.note?.trim()
+        (item) =>
+          !!item.title?.trim() ||
+          !!item.file ||
+          !!item.url?.trim() ||
+          !!item.note?.trim() ||
+          !!item.filePath?.trim()
       )
-      .map((it) => ({
-        ...it,
-        id: it.id ?? makeId(),
+      .map((item) => ({
+        ...item,
+        id: item.id ?? makeId(),
       }));
 
     setItems(filtered);
@@ -106,14 +134,18 @@ export default function M_PortfolioDocumentsSection({
   };
 
   const handleCancel = () => {
+    if (isEdit) {
+      setItems(normalizeItemsFromValue(value));
+    }
     setIsEditing(false);
   };
 
-  const formatBytes = (bytes: number) => {
-    if (!bytes && bytes !== 0) return "";
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  const getPreviewLabel = (item: PortfolioDocItem) => {
+    if (item.source === "file") {
+      return item.file?.name || item.title || "파일 미선택";
+    }
+
+    return item.url || item.title || "URL 미입력";
   };
 
   return (
@@ -133,11 +165,11 @@ export default function M_PortfolioDocumentsSection({
 
       {previewItems.length > 0 && (
         <div className="resume-portfolio-list">
-          {previewItems.map((it) => (
-            <div className="resume-portfolio-item" key={it.id}>
+          {previewItems.map((item) => (
+            <div className="resume-portfolio-item" key={item.id}>
               <div className="resume-portfolio-item__main">
                 <span className="resume-portfolio-item__source">
-                  {it.source === "file" ? (
+                  {item.source === "file" ? (
                     <img src={ic_folder_gray900_20} alt="" />
                   ) : (
                     <img src={ic_link_gray900_20} alt="" />
@@ -145,9 +177,7 @@ export default function M_PortfolioDocumentsSection({
                 </span>
 
                 <span className="resume-portfolio-item__label">
-                  {it.source === "file"
-                    ? it.file?.name || "파일 미선택"
-                    : it.url || "URL 미입력"}
+                  {getPreviewLabel(item)}
                 </span>
               </div>
             </div>
@@ -157,10 +187,10 @@ export default function M_PortfolioDocumentsSection({
 
       <div className="resume-create-page__section-action">
         <button
+          type="button"
           className="btn_w_full default_btn_white"
           onClick={handleAddOrEdit}
           disabled={isEditing}
-          type="button"
         >
           {previewItems.length > 0 ? (
             <>

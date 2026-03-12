@@ -24,7 +24,7 @@ import { createExperience } from "@/api/resume/resume.api";
 
 
 export type CareerInfo = {
-  id: string;
+  id?: string;
   company_name: string;
   role: string;
   position: string;

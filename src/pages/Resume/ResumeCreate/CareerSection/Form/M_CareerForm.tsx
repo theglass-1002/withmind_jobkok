@@ -12,7 +12,7 @@ import "../CareerSection.css";
 const makeId = () => Math.random().toString(36).slice(2, 10);
 
 export type CareerInfo = {
-  id: string;
+  id?: string;
   company_name: string;
   role: string;
   position: string;
@@ -21,7 +21,7 @@ export type CareerInfo = {
   isCurrent: boolean;
   startDate: string;
   endDate: string;
-  tenure: string;
+  tenure?: string;
 };
 
 type CareerErrors = Partial<Record<keyof CareerInfo, string>>;

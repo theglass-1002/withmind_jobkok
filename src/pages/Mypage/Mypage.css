@@ -310,7 +310,8 @@ line-height: 20px; /* 125% */
 
 .mypage__content .mypage__content-header {
     display: flex;
-    padding: 24px 28px 28px;
+    padding: 28px;
+    /* padding: 24px 28px 28px; */
     flex-direction: column;
     align-items: flex-start;
     gap: 28px;
@@ -1115,6 +1116,7 @@ line-height: 180%; /* 28.8px */
 
 .info_box{
     display: flex;
+    width: 100%;
     padding: 20px;
     align-items: center;
     gap: 10px;

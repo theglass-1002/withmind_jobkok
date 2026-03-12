@@ -1,5 +1,5 @@
 import { logout } from '@/api/auth/auth.api';
-import { createResume, fetchResumeDetail, fetchResumeHardSkillSuggestions, fetchResumePositionSuggestions, fetchResumeSelfIntro, fetchResumeSoftSkillSuggestions, fetchResumeTitleSuggestions } from '@/api/resume/resume.api';
+import { createResume, fetchResumeDetail, fetchResumeHardSkillSuggestions, fetchResumePositionSuggestions, fetchResumeSelfIntro, fetchResumeSoftSkillSuggestions, fetchResumeTitleSuggestions, updateResume } from '@/api/resume/resume.api';
 import LoadingOverlay from '@/shared/components/loading/LoadingOverlay';
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom';
@@ -15,7 +15,7 @@ import M_EducationSection, { Education } from '../ResumeCreate/EducationSection/
 import M_ActivitiesSection, { ActivityErrors, ActivityItem } from '../ResumeCreate/ActivitiesSection/M_ActivitiesSection';
 import M_AwardsCertificationsSection, { AwardsCertItem } from '../ResumeCreate/AwardsCertificationsSection/M_AwardsCertificationsSection';
 import M_PortfolioDocumentsSection, { PortfolioDocItem } from '../ResumeCreate/PortfolioDocumentsSection/M_PortfolioDocumentsSection';
-import { CreateResumeRequest, mapAwardsKindToCategoryLabel, mapEducationStatusToGraduatedYn, normalizeYm, ProfilePhotoFile, ResumeHardSkillRequest, ResumePositionRequest, ResumeSelfIntroRequest, ResumeTitleRequest } from '@/api/resume/resume.types';
+import { CreateResumeRequest, extractS3Path, mapAwardsKindToCategoryLabel, mapEducationStatusToGraduatedYn, mapGraduatedYnToLabel, normalizeYm, ProfilePhotoFile, ResumeDetailResponse, ResumeHardSkillRequest, ResumePositionRequest, ResumeSelfIntroRequest, ResumeTitleRequest } from '@/api/resume/resume.types';
 import M_BasicInfoSection from '../ResumeCreate/BasicInfoSection/M_BasicInfoSection';
 import M_DesiredRoleSection from '../ResumeCreate/DesiredRoleSection/M_DesiredRoleSection';
 import M_HardSkillSection from '../ResumeCreate/HardSkillSection/M_HardSkillSection';
@@ -25,7 +25,7 @@ import M_MockInterviewAnalysisSection from '../ResumeCreate/MockInterviewAnalysi
 import { AwardsCertErrors, PortfolioErrors } from '../M_ResumeCreate';
 import Modal from '@/shared/components/modal/Modal';
 import { uploadPhotoFile } from '@/api/fileUpload.api';
-
+import { useLayoutContext } from "@/app/LayoutContext";
 
 type FormState = {
     title: string;
@@ -35,6 +35,7 @@ type FormState = {
     isFreshGraduate: boolean;
     education: Education[];
     photoFile?: File | null;
+    profilePhotoFileMeta?: ProfilePhotoFile | null;
     desiredRoles: string[];
     hardSkills: string[];
     softSkills: string[];
@@ -72,6 +73,7 @@ const initial: FormState = {
 
 export default function ResumeEditMobile() {
     const [activeTab, setActiveTab] = useState("title");
+    const { actionType, resetAction } = useLayoutContext();
     const navigate = useNavigate();
     const { resumeId } = useParams<{ resumeId: string }>();
     const isEdit = !!resumeId;
@@ -79,6 +81,8 @@ export default function ResumeEditMobile() {
     const [isLoading, setIsLoading] = useState(false);
     const [isDefaultResume, setIsDefaultResume] = useState(false);
     const [showDefaultModal, setShowDefaultModal] = useState(false); // 기본 이력서 설정 모달
+    const [showExitWithoutSavingModal, setShowExitWithoutSavingModal] = useState(false);
+  
     const [form, setForm] = useState<FormState>(initial);
     const [errors, setErrors] = useState<{
         basic: BasicErrors;
@@ -120,6 +124,151 @@ export default function ResumeEditMobile() {
     const [selfIntroSuggestions, setSelfIntroSuggestions] = useState<string[]>([]);
   
 
+   
+    useEffect(() => {
+      if (actionType === "EXIT_WITHOUT_SAVING") {
+        setShowExitWithoutSavingModal(true);
+
+       
+        resetAction();
+      }
+  }, [actionType, resetAction]);
+
+
+  // 상세 조회
+  useEffect(() => {
+      if (!isEdit || !resumeId) {
+        setIsReady(true);
+        return;
+      }
+  
+      const loadDetail = async () => {
+        try {
+          setIsLoading(true);
+          const data = await fetchResumeDetail(Number(resumeId));
+          console.log("📌 resume detail", data);
+          const mapped = mapDetailToFormState(data);
+          console.log("📌 mapped form", mapped);
+          setForm(mapped);
+          setIsDefaultResume(data.isDefault);
+          setIsReady(true);
+        } catch (err: any) {
+          if (err.code === 999) {
+            console.error("❌ 이력서 상세 조회 실패:", err);
+            setIsReady(true);
+            console.log("로그인만료");
+            logout();
+            navigate("/login");
+          } else {
+            console.error("❌ 이력서 상세 조회 실패:", err);
+            toast.error("이력서 정보를 불러오지 못했습니다.");
+            setIsReady(true);
+          }
+        } finally {
+          setIsLoading(false);
+        }
+      };
+  
+      loadDetail();
+    }, [isEdit, resumeId, navigate]);
+  
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 상세 응답 → FormState 매핑
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    const mapCategoryToKind = (category?: string): AwardsCertItem["kind"] => {
+      switch (category) {
+        case "Certification":
+          return "Certification";
+        case "LanguageTest":
+          return "LanguageTest";
+        case "Award":
+          return "Award";
+        case "Etc":
+          return "Etc";
+        default:
+          return "Etc";
+      }
+    };
+
+      const mapDetailToFormState = (data: ResumeDetailResponse): FormState => {
+        return {
+          title: data.title ?? "",
+          basic: {
+            name: data.name ?? "",
+            birth: data.birth ?? "",
+            gender:
+              data.gender === "M" ? "male" : data.gender === "W" ? "female" : null,
+            email: data.email ?? "",
+            phone: data.phone ?? "",
+            photoUrl: data.profilePhotoFile?.filePath ?? "",
+          },
+
+          // 추가: 서버에서 내려준 프로필 사진 메타 저장 (수정 시 기존 사진 유지용)
+          profilePhotoFileMeta: data.profilePhotoFile
+            ? {
+                ...data.profilePhotoFile,
+                filePath: extractS3Path(data.profilePhotoFile.filePath),
+              }
+            : null,
+
+          location: {
+            nationwide: (data.regionList?.length ?? 0) === 0,
+            selectedCodes: data.regionList ?? [],
+          },
+          careers: (data.careerList ?? []).map((c) => ({
+            company_name: c.companyName ?? "",
+            employmentType: c.employmentType ?? "",
+            startDate: c.startYm ?? "",
+            endDate: c.endYm ?? "",
+            isCurrent: c.employedYn === "Y",
+            role: c.roleName ?? "",
+            position: c.positionName ?? "",
+            summary: c.workAndResult ?? "",
+          })),
+          isFreshGraduate: (data.careerList ?? []).length === 0,
+          education: (data.educationList ?? []).map((e) => ({
+            school_name: e.schoolName ?? "",
+            major_degree: e.majorDegree ?? "",
+            startDate: e.startYm ?? "",
+            endDate: e.endYm ?? "",
+            status: mapGraduatedYnToLabel(e.graduatedYn),
+          })),
+          photoFile: null,
+          desiredRoles: data.jobList ?? [],
+          hardSkills: data.hardSkillList ?? [],
+          softSkills: data.softSkillList ?? [],
+          activities: (data.activityList ?? []).map((a) => ({
+            category: a.category ?? "",
+            activityName: a.activityTitle ?? "",
+            startDate: a.startYm ?? "",
+            endDate: a.endYm ?? "",
+            summary: a.description ?? "",
+          })),
+          awardCerts: (data.licenseList ?? []).map((l) => ({
+            kind: mapCategoryToKind(l.category),
+            title: l.name ?? "",
+            issuer: l.issuer ?? "",
+            dateValue: l.acquiredYm ?? "",
+            score: l.score ?? "",
+          })),
+          portfolios: (data.portfolioList ?? []).map((p, idx) => ({
+            id: String(p.order ?? idx),
+            source: p.itemType === "FILE" ? "file" : "url",
+            title: p.title ?? "",
+            url: p.url ?? "",
+            note: p.description ?? "",
+            file: null,
+            filePath: p.filePath ? extractS3Path(p.filePath) : null,
+            fileIdx: p.fileIdx ?? null,
+            sizeBytes: (p as any).sizeBytes ?? 0,
+            contentType: (p as any).contentType ?? "",
+            storedName: (p as any).storedName ?? "",
+          } as any)),
+          selfIntro: (data.selfIntroList && data.selfIntroList[0]?.content) || "",
+        };
+      };
+
     const handleClickTitleSuggest = async () => {
         try {
           if (isLoading) return;
@@ -143,7 +292,7 @@ export default function ResumeEditMobile() {
       
           const activities = form.activities
             .map((a) => {
-              const base = `${a.activityType ?? ""} / ${a.activityName ?? ""}`;
+              const base = `${a.category ?? ""} / ${a.activityName ?? ""}`;
               const extra = a.summary ? ` / ${a.summary}` : "";
               return base + extra;
             })
@@ -161,7 +310,7 @@ export default function ResumeEditMobile() {
           };
       
           console.log("AI 제목 추천 payload:", payload);
-      
+          
           const titles = await fetchResumeTitleSuggestions(payload);
           console.log("AI 제목 추천 결과:", titles);
       
@@ -263,7 +412,7 @@ export default function ResumeEditMobile() {
     
           const activities = form.activities
             .map((a) => {
-              const base = `${a.activityType ?? ""} / ${a.activityName ?? ""}`;
+              const base = `${a.category ?? ""} / ${a.activityName ?? ""}`;
               const extra = a.summary ? ` / ${a.summary}` : "";
               return base + extra;
             })
@@ -328,7 +477,7 @@ export default function ResumeEditMobile() {
     
           const activities = form.activities
             .map((a) => {
-              const base = `${a.activityType ?? ""} / ${a.activityName ?? ""}`;
+              const base = `${a.category ?? ""} / ${a.activityName ?? ""}`;
               const extra = a.summary ? ` / ${a.summary}` : "";
               return base + extra;
             })
@@ -394,7 +543,7 @@ export default function ResumeEditMobile() {
       
           const activities = form.activities
             .map((a) => {
-              const base = `${a.activityType ?? ""} / ${a.activityName ?? ""}`;
+              const base = `${a.category ?? ""} / ${a.activityName ?? ""}`;
               const extra = a.summary ? ` / ${a.summary}` : "";
               return base + extra;
             })
@@ -441,43 +590,7 @@ export default function ResumeEditMobile() {
         toast.success("임시 저장되었습니다.");
       };
     
-    
-    
-
-
-    // 상세 조회
-    useEffect(() => {
-        if (!isEdit || !resumeId) {
-          setIsReady(true);
-          return;
-        }
-    
-        const loadDetail = async () => {
-          try {
-            setIsLoading(true);
-            const data = await fetchResumeDetail(Number(resumeId));
-            console.log("📌 resume detail", data);
-            setIsReady(true);
-          } catch (err: any) {
-            if (err.code === 999) {
-              console.error("❌ 이력서 상세 조회 실패:", err);
-              setIsReady(true);
-              console.log("로그인만료");
-              logout();
-              navigate("/login");
-            } else {
-              console.error("❌ 이력서 상세 조회 실패:", err);
-              toast.error("이력서 정보를 불러오지 못했습니다.");
-              setIsReady(true);
-            }
-          } finally {
-            setIsLoading(false);
-          }
-        };
-    
-        loadDetail();
-      }, [isEdit, resumeId, navigate]);
-    
+ 
       const handleTabClick = (key: string) => {
         setActiveTab(key);
         console.log('선택 된 탭', key);
@@ -506,8 +619,17 @@ export default function ResumeEditMobile() {
         }
       };
 
-    //상태업데이트
 
+    //이동 함수
+    const handleConfirmExitWithoutSaving = () => {
+      navigate(`/resumes/${resumeId}`);
+    };
+    
+    const handleCancelExitWithoutSaving = () => {
+      setShowExitWithoutSavingModal(false);
+    };
+
+    //상태업데이트
     const isSubmitDisabled =
     !form.title.trim() ||
     (!form.location.nationwide && form.location.selectedCodes.length === 0);
@@ -713,9 +835,29 @@ export default function ResumeEditMobile() {
       };
     
 
-    const handleSubmit = async () => {
+      const handleSubmit = async () => {
+        const getPortfolioContentType = (item: any) => {
+          if (item?.contentType) return item.contentType;
+      
+          const name = (item?.title || item?.storedName || "").toLowerCase();
+      
+          if (name.endsWith(".pdf")) return "application/pdf";
+          if (name.endsWith(".pptx")) {
+            return "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+          }
+          if (name.endsWith(".docx")) {
+            return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+          }
+          if (name.endsWith(".xlsx")) {
+            return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+          }
+      
+          return "application/octet-stream";
+        };
+      
         try {
-          console.log("form",form);
+          console.log("form", form);
+      
           const ok = validate();
           if (!ok) {
             toast.error("필수 항목을 먼저 입력해 주세요.");
@@ -723,7 +865,7 @@ export default function ResumeEditMobile() {
           }
       
           setIsLoading(true);
-    
+      
           const profilePhotoFile = await handleFileSubmit();
           const portfolioFilesResults = await handlePortfolioFilesSubmit();
       
@@ -739,7 +881,11 @@ export default function ResumeEditMobile() {
             phone: formatPhoneNumber(form.basic.phone),
             birth: convertBirth(form.basic.birth),
       
-            ...(profilePhotoFile ? { profilePhotoFile } : {}),
+            ...(profilePhotoFile
+              ? { profilePhotoFile }
+              : form.profilePhotoFileMeta
+              ? { profilePhotoFile: form.profilePhotoFileMeta }
+              : {}),
       
             regions: form.location.nationwide ? [] : form.location.selectedCodes,
       
@@ -773,7 +919,7 @@ export default function ResumeEditMobile() {
             ...(form.activities.length > 0
               ? {
                   activities: form.activities.map((act) => ({
-                    category: act.activityType ?? "교내활동",
+                    category: act.category ?? "교내활동",
                     activityTitle: act.activityName,
                     startYm: act.startDate ? normalizeYm(act.startDate) : "1999-09",
                     endYm: act.endDate ? normalizeYm(act.endDate) : "1999-09",
@@ -798,49 +944,96 @@ export default function ResumeEditMobile() {
                 }
               : {}),
       
-            ...(form.portfolios.length > 0
-              ? {
-                  portfolios: form.portfolios.map((p, idx) => {
-                    if (p.source === "file") {
-                      const uploadedResult = portfolioFilesResults.find(
-                        (r) => r.originalItem.id === p.id
-                      );
-      
-                      if (uploadedResult?.uploadedFile) {
-                        const u = uploadedResult.uploadedFile;
-      
-                        return {
-                          itemType: "FILE",
-                          title: p.title || u.originalName || `포트폴리오 문서 ${idx + 1}`,
-                          docName: u.originalName,
-                          url: null,
-                          fileRef: u.filePath,
-                          description: p.note ?? "",
-                          sortOrder: idx + 1,
-                          portfolioFile: {
-                            filePath: u.filePath,
-                            originalName: u.originalName,
-                            storedName: u.storedName,
-                            sizeBytes: u.sizeBytes,
-                            contentType: u.contentType,
-                          },
-                        };
+              ...(form.portfolios.length > 0
+                ? {
+                    portfolios: form.portfolios.map((p, idx) => {
+                      if (p.source === "file") {
+                        const uploadedResult = portfolioFilesResults.find(
+                          (r) => r.originalItem.id === p.id
+                        );
+        
+                        if (uploadedResult?.uploadedFile) {
+                          const u = uploadedResult.uploadedFile;
+                          return {
+                            itemType: "FILE" as const,
+                            title: u.originalName,
+                            docName: u.originalName,
+                            url: null,
+                            fileRef: u.filePath,
+                            description: p.note ?? "",
+                            sortOrder: idx + 1,
+                            portfolioFile: {
+                              filePath: u.filePath,
+                              originalName: u.originalName,
+                              storedName: u.storedName,
+                              sizeBytes: u.sizeBytes,
+                              contentType: u.contentType,
+                            },
+                          };
+                        }
+        
+                        if (p.filePath) {
+                          const cleanPath = extractS3Path(p.filePath);
+                          const storedName =
+                            (p as any).storedName || cleanPath.split("/").pop() || "";
+                          const sizeBytes = (p as any).sizeBytes || 1048576;
+                          const contentType =
+                            (p as any).contentType ||
+                            (() => {
+                              const extension =
+                                storedName.split(".").pop()?.toLowerCase() || "";
+                              const contentTypeMap: Record<string, string> = {
+                                pdf: "application/pdf",
+                                doc: "application/msword",
+                                docx:
+                                  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                                xls: "application/vnd.ms-excel",
+                                xlsx:
+                                  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                ppt: "application/vnd.ms-powerpoint",
+                                pptx:
+                                  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                                jpg: "image/jpeg",
+                                jpeg: "image/jpeg",
+                                png: "image/png",
+                                gif: "image/gif",
+                                txt: "text/plain",
+                              };
+                              return contentTypeMap[extension] || "application/octet-stream";
+                            })();
+        
+                          return {
+                            itemType: "FILE" as const,
+                            title: p.title || `포트폴리오 문서 ${idx + 1}`,
+                            docName: p.title || "",
+                            url: null,
+                            fileRef: cleanPath,
+                            description: p.note ?? "",
+                            sortOrder: idx + 1,
+                            portfolioFile: {
+                              filePath: cleanPath,
+                              originalName: p.title || storedName,
+                              storedName: storedName,
+                              sizeBytes: sizeBytes,
+                              contentType: contentType,
+                            },
+                          };
+                        }
                       }
-                    }
-      
-                    return {
-                      itemType: "URL",
-                      title: p.title || `포트폴리오 ${idx + 1}`,
-                      docName: p.url || "",
-                      url: p.url,
-                      fileRef: null,
-                      description: p.note ?? "",
-                      sortOrder: idx + 1,
-                      portfolioFile: null,
-                    };
-                  }),
-                }
-              : {}),
+        
+                      return {
+                        itemType: "URL" as const,
+                        title: p.title || `포트폴리오 ${idx + 1}`,
+                        docName: p.url || "",
+                        url: p.url,
+                        fileRef: null,
+                        description: p.note ?? "",
+                        sortOrder: idx + 1,
+                        portfolioFile: null,
+                      };
+                    }),
+                  }
+                : {}),
       
             ...(form.selfIntro.trim().length > 0
               ? {
@@ -854,17 +1047,21 @@ export default function ResumeEditMobile() {
                 }
               : {}),
           };
-          console.log('결과',payload);
-           const result = await createResume(payload);
       
-           console.log("✅ 이력서 등록 성공:", result);
-           console.log("✅ 이력서 등록 Payload:", payload);
+          console.log("결과", payload);
       
-           toast.success("이력서가 등록되었습니다!");
-           navigate(`/resumes/${result}`);
+          const res = await updateResume(Number(resumeId), payload);
+      
+          console.log("이력서 수정", res);
+          console.log("✅ 이력서 등록 Payload:", payload);
+      
+          toast.success("이력서가 수정되었습니다!");
+          navigate(`/resumes/${resumeId}`);
         } catch (error) {
-          console.error("❌ 이력서 등록 실패:", error);
-          toast.error("이력서 등록 중 오류가 발생했습니다.");
+          console.error("❌ 이력서 수정 실패:", error);
+          console.error("❌ status:", error?.response?.status);
+          console.error("❌ data:", error?.response?.data);
+          toast.error(error?.response?.data?.msg || "이력서 수정 중 오류가 발생했습니다.");
         } finally {
           setIsLoading(false);
         }
@@ -949,20 +1146,23 @@ export default function ResumeEditMobile() {
                onPhotoFileChange={updatePhotoFile}
              />
            <M_LocationSection
-             defaultValue={initial.location}
+             defaultValue={form.location}
              errors={errors.location}
              onChange={updateLocation}
+             isEdit={isEdit}
            />
           <M_CareerSection
              values={form.careers}
              errors={errors.careers}
              onChange={updateCareer}
              onNewcomerChange={updateIsFreshGraduate}
+             isEdit={isEdit}
            />
            <M_EducationSection
              values={form.education}
              errors={errors.education}
              onChange={updateEducation}
+             
     
            />
           <M_DesiredRoleSection
@@ -973,6 +1173,7 @@ export default function ResumeEditMobile() {
                aiTags={roleSuggestions}
                onClickAISuggest={handleClickRoleSuggest}
                onCloseAISuggest={handleCloseRoleSuggest}
+               isEdit={isEdit}
           />
           <M_HardSkillSection
            value={form.hardSkills}
@@ -982,6 +1183,7 @@ export default function ResumeEditMobile() {
            aiTags={hardSkillSuggestions}
            onClickAISuggest={handleClickHardSkillSuggest}
            onCloseAISuggest={handleCloseHardSkillSuggest}
+           isEdit={isEdit}
          />
           <M_SoftSkillsSection
              value={form.softSkills}
@@ -991,24 +1193,28 @@ export default function ResumeEditMobile() {
              aiTags={softSkillSuggestions}
              onClickAISuggest={handleClickSoftSkillSuggest}
              onCloseAISuggest={handleCloseSoftSkillSuggest}
+             isEdit={isEdit}
           
           />
           <M_ActivitiesSection
              value={form.activities}
              errors={errors.activities ?? []}
              onChange={updateActivities}
+             isEdit={isEdit}
             
           />
           <M_AwardsCertificationsSection
              value={form.awardCerts}
              errors={errors.awardCerts ?? []}
              onChange={updateAwardsCertifications}
+             isEdit={isEdit}
           
           />
           <M_PortfolioDocumentsSection
           value={form.portfolios}
           errors={errors.portfolios??[]}
           onChange={updatePortfolioDocuments}
+          isEdit={isEdit}
           />
            <M_SelfIntroductionSection
              value={form.selfIntro}
@@ -1018,6 +1224,7 @@ export default function ResumeEditMobile() {
              aiSuggestions={selfIntroSuggestions}
              onClickAISuggest={handleClickSelfIntroSuggest}
              onCloseAISuggest={handleCloseSelfIntroSuggest}
+             isEdit={isEdit}
            />
           <M_MockInterviewAnalysisSection /> 
          </div>
@@ -1047,6 +1254,16 @@ export default function ResumeEditMobile() {
          onConfirm={handleConfirmDefaultResume}
          onClose={handleCancelDefaultResume}
        />
+       <Modal
+          open={showExitWithoutSavingModal}
+          title={`수정사항을 저장하지 않고\n나가시겠습니까?`}
+          confirmText="예"
+          confirmClassName="btn_w_full default_btn_black"
+          cancelText="계속 작성"
+          cancelClassName="btn_w_full default_btn_white"
+          onConfirm={handleConfirmExitWithoutSaving}
+          onClose={handleCancelExitWithoutSaving}
+        />
      </div>
   )
 }

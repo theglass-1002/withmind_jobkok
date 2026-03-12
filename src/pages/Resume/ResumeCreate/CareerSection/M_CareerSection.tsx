@@ -1,5 +1,4 @@
-// src/pages/.../CareerSection/M_CareerSection.tsx
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import M_CareerForm from "./Form/M_CareerForm";
 import Modal from "@/shared/components/modal/Modal";
 import ic_add_btn_gray900_20 from "@/assets/icons/size20/ic_add_btn_gray900_20.png";
@@ -10,7 +9,7 @@ import { formatMonthStringToDisplay } from "@/shared/utils/util";
 import { calcTenureLabel } from "@/api/resume/resume.types";
 
 export type CareerInfo = {
-  id: string;
+  id?: string;
   company_name: string;
   role: string;
   position: string;
@@ -19,44 +18,56 @@ export type CareerInfo = {
   isCurrent: boolean;
   startDate: string;
   endDate: string;
-  tenure: string;
+  tenure?: string;
 };
 
 export type CareerErrors = Partial<Record<keyof CareerInfo, string>>;
 
 interface CareerSectionProps {
-  values?: any;
-  errors?: any;
+  values?: CareerInfo[];
+  errors?: string;
   onChange?: (list: CareerInfo[]) => void;
   onFocusAny?: () => void;
   sectionRef?: (el: HTMLDivElement | null) => void;
   onNewcomerChange?: (checked: boolean) => void;
+  isEdit?: boolean;
 }
 
 export default function M_CareerSection({
+  values = [],
   errors,
   sectionRef,
   onChange,
   onNewcomerChange,
+  isEdit = false,
 }: CareerSectionProps) {
-  const [careers, setCareers] = useState<CareerInfo[]>([]);
+  const [careers, setCareers] = useState<CareerInfo[]>(values);
   const [isEditing, setIsEditing] = useState(false);
   const [showResetModal, setShowResetModal] = useState(false);
-  const [isNewcomer, setIsNewcomer] = useState(false);
+  const [isNewcomer, setIsNewcomer] = useState(values.length === 0);
+  useEffect(() => {
+  
+
+    setCareers(values);
+    setIsNewcomer(values.length === 0);
+
+  }, [isEdit, values]);
+
+  const updateNewcomerState = (checked: boolean) => {
+    setIsNewcomer(checked);
+    onNewcomerChange?.(checked);
+  };
 
   const handleAddOrEdit = () => {
     setIsEditing(true);
   };
 
   const handleSave = (savedCareers: CareerInfo[]) => {
+    const hasCareer = savedCareers.length > 0;
+
     setCareers(savedCareers);
     setIsEditing(false);
-
-    if (savedCareers.length > 0) {
-      setIsNewcomer(false);
-      onNewcomerChange?.(false);
-    }
-
+    updateNewcomerState(!hasCareer);
     onChange?.(savedCareers);
   };
 
@@ -72,21 +83,71 @@ export default function M_CareerSection({
       return;
     }
 
-    setIsNewcomer(false);
-    onNewcomerChange?.(false);
+    updateNewcomerState(false);
   };
 
   const handleConfirmReset = () => {
     setCareers([]);
-    setIsNewcomer(true);
     setShowResetModal(false);
-
+    updateNewcomerState(true);
     onChange?.([]);
-    onNewcomerChange?.(true);
   };
 
   const handleCancelReset = () => {
     setShowResetModal(false);
+  };
+
+  
+  
+  const renderPeriod = (career: CareerInfo) => {
+    const start = formatMonthStringToDisplay(career.startDate);
+    const end = career.isCurrent
+      ? "재직 중"
+      : formatMonthStringToDisplay(career.endDate);
+
+    return (
+      <span className="resume-career-item__period resume-career-item__period--stack">
+        <div className="resume-career-item__period-range">
+          <span className="resume-career-item__period-start">{start}</span>
+          <span className="resume-career-item__period-sep"> ~ </span>
+          <span
+            className={
+              "resume-career-item__period-end" +
+              (career.isCurrent ? " current" : "")
+            }
+          >
+            {end}
+          </span>
+        </div>
+
+        <span className="resume-career-item__tenure">
+          {calcTenureLabel(career.startDate, career.endDate)}
+        </span>
+      </span>
+    );
+  };
+
+  const renderMeta = (career: CareerInfo) => {
+    const hasMeta =
+      career.employmentType || career.role || career.position;
+
+    if (!hasMeta) return null;
+
+    return (
+      <div className="resume-career-item__meta-group resume-career-item__meta">
+        {career.employmentType && (
+          <span className="resume-career-item__employment">
+            {career.employmentType}
+          </span>
+        )}
+        {career.role && (
+          <span className="resume-career-item__role">{career.role}</span>
+        )}
+        {career.position && (
+          <span className="resume-career-item__level">{career.position}</span>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -99,7 +160,6 @@ export default function M_CareerSection({
         <div className="resume-create-page__section-title resume-create-page__section-title--simple">
           <div className="resume-create-page__section-title__heading">
             경력<em className="resume-create-page__required">*</em>
-            
           </div>
 
           <div className="resume-section-title__actions">
@@ -114,58 +174,23 @@ export default function M_CareerSection({
             </label>
           </div>
         </div>
-        {errors !== "" && <div className="resume-create-page__error">희망 근무 지역을 추가해 주세요.</div>}
-     
+
+        {errors && (
+          <div className="resume-create-page__error">경력을 추가해 주세요.</div>
+        )}
+
         {careers.length > 0 && (
           <div className="resume-create-page__section-body career-section">
-            {careers.map((career) => (
-              <div className="resume-career-item" key={career.id}>
+            {careers.map((career, idx) => (
+              <div className="resume-career-item" key={career.id ?? idx}>
                 <div className="resume-career-item__header">
                   <span className="resume-career-item__company">
                     {career.company_name}
                   </span>
 
                   <div className="resume-career-item__meta">
-                    <span className="resume-career-item__period resume-career-item__period--stack">
-                      <div className="resume-career-item__period-range">
-                        <span className="resume-career-item__period-start">
-                          {formatMonthStringToDisplay(career.startDate)}
-                        </span>
-                        <span className="resume-career-item__period-sep"> ~ </span>
-                        <span
-                          className={
-                            "resume-career-item__period-end" +
-                            (career.isCurrent ? " current" : "")
-                          }
-                        >
-                          {career.isCurrent
-                            ? "재직 중"
-                            : formatMonthStringToDisplay(career.endDate)}
-                        </span>
-                      </div>
-
-                      <span className="resume-career-item__tenure">
-                        {calcTenureLabel(career.startDate, career.endDate)}
-                      </span>
-                    </span>
-
-                    <div className="resume-career-item__meta-group resume-career-item__meta">
-                      {career.employmentType && (
-                        <span className="resume-career-item__employment">
-                          {career.employmentType}
-                        </span>
-                      )}
-                      {career.role && (
-                        <span className="resume-career-item__role">
-                          {career.role}
-                        </span>
-                      )}
-                      {career.position && (
-                        <span className="resume-career-item__level">
-                          {career.position}
-                        </span>
-                      )}
-                    </div>
+                    {renderPeriod(career)}
+                    {renderMeta(career)}
                   </div>
                 </div>
 
@@ -181,10 +206,10 @@ export default function M_CareerSection({
 
         <div className="resume-create-page__section-action">
           <button
+            type="button"
             className="btn_w_full default_btn_white"
             onClick={handleAddOrEdit}
             disabled={isEditing}
-            type="button"
           >
             {careers.length > 0 ? (
               <>
@@ -215,7 +240,7 @@ export default function M_CareerSection({
 
       <Modal
         open={showResetModal}
-        title="신입으로 변경하시겠습니까??"
+        title="신입으로 변경하시겠습니까?"
         confirmText="예"
         confirmClassName="btn_w_full default_btn_black"
         cancelText="취소"

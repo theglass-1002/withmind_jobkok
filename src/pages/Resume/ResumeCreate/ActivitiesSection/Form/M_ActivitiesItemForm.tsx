@@ -53,7 +53,7 @@ export default function M_ActivitiesItemForm({
   onStartEditSummary,
   onChangeSummary,
 }: M_ActivitiesItemFormProps) {
-  const { activityType, activityName, startDate, endDate, summary } = value;
+  const { category, activityName, startDate, endDate, summary } = value;
 
   const [openType, setOpenType] = useState(false);
   const [openStartCal, setOpenStartCal] = useState(false);
@@ -122,10 +122,10 @@ export default function M_ActivitiesItemForm({
               { value: "해외연수", label: "해외연수" },
               { value: "교육 이수", label: "교육이수" },
             ]}
-            value={activityType ?? ""}
-            onChange={(val) => onChange({ activityType: val })}
+            value={category ?? ""}
+            onChange={(val) => onChange({ category: val })}
             className="activities-section__select"
-            errorIconSrc={errors.activityType ? Icons.ic_error_red100_20 : undefined}
+            errorIconSrc={errors.category ? Icons.ic_error_red100_20 : undefined}
           />
           </div>
 

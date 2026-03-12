@@ -31,7 +31,7 @@ export default function M_ActivitiesForm({
   const [items, setItems] = useState<ActivityItem[]>(
     initialItems.length > 0
       ? initialItems
-      : [{ id: makeId(), activityType: null, activityName: "", summary: "" }]
+      : [{ id: makeId(), category: null, activityName: "", summary: "" }]
   );
 
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -46,10 +46,10 @@ export default function M_ActivitiesForm({
   const hasAnyInput = () =>
     items.some(
       (it) =>
-        it.activityType ||
-        it.activityName ||
-        it.startDate ||
-        it.endDate ||
+        !!it.category ||
+        !!it.activityName?.trim() ||
+        !!it.startDate?.trim() ||
+        !!it.endDate?.trim() ||
         (it.summary ?? "").trim().length > 0
     );
 
@@ -65,7 +65,7 @@ export default function M_ActivitiesForm({
     onFocusAny?.();
     setItems((prev) => [
       ...prev,
-      { id: makeId(), activityType: null, activityName: "", summary: "" },
+      { id: makeId(), category: null, activityName: "", summary: "" },
     ]);
     setItemsErrors((prev) => [...prev, {}]);
   };
@@ -175,7 +175,7 @@ export default function M_ActivitiesForm({
 
   const confirmReset = () => {
     const resetItems: ActivityItem[] = [
-      { id: makeId(), activityType: null, activityName: "", summary: "" },
+      { id: makeId(), category: null, activityName: "", summary: "" },
     ];
 
     setItems(resetItems);
@@ -194,8 +194,8 @@ export default function M_ActivitiesForm({
     const newErrors: ActivityErrors[] = items.map((it) => {
       const err: ActivityErrors = {};
 
-      if (!it.activityType) {
-        err.activityType = "구분을 선택해 주세요.";
+      if (!it.category) {
+        err.category = "구분을 선택해 주세요.";
       }
       if (!it.activityName?.trim()) {
         err.activityName = "활동ㆍ경험명을 입력해 주세요.";
@@ -225,7 +225,7 @@ export default function M_ActivitiesForm({
   useEffect(() => {
     if (items.length === 0) {
       setItems([
-        { id: makeId(), activityType: null, activityName: "", summary: "" },
+        { id: makeId(), category: null, activityName: "", summary: "" },
       ]);
       setItemsErrors([{}]);
     }

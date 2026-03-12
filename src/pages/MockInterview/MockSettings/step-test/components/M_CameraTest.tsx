@@ -208,6 +208,7 @@ export default function M_CameraTest({
       let uploadResult: any;
       try {
         uploadResult = await uploadInterviewTestVideo(blob, "env_test.webm", "interviewTest");
+        console.log('테스트영상 업로드 결과',uploadResult);
       } catch (uploadErr) {
         console.error("영상 업로드 실패:", uploadErr);
         setFailureCode(0);

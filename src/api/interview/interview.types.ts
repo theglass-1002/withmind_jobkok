@@ -106,3 +106,20 @@ export type InterviewFollowupResponse = {
     timestamp: string; // ISO string
   };
 };
+
+export type InterviewReportItem = {
+  interviewAllYn: "Y" | "N";
+  photoUrl: string;
+  regdate: string; // YYYY-MM-DD
+  qzGroup: number;
+  jobGroup: string;
+  job: string;
+  totalScore: number;
+};
+
+export type InterviewReportListResponse = {
+  size: number;
+  page: number;
+  totalCount: number;
+  list: InterviewReportItem[];
+};

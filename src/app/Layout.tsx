@@ -1,6 +1,6 @@
 // Layout.tsx
 import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams, useParams} from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 
 import { LayoutContext } from "./LayoutContext";
@@ -36,9 +36,9 @@ export default function Layout({
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-
   const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 750);
   const [ActionsValue, setActionsValue] = useState("");
+
 
   const sortMockOptions: SortOption[] = [
     { label: "면접 진행 현황", value: "view_status" },
@@ -151,6 +151,17 @@ export default function Layout({
           onLeftElementClick={() => navigate("/resumes")}
         />
       );
+
+    }
+    if (screen === "ResumeEdit") {
+      return (
+        <PageHeader
+          title="이력서 수정"
+          leftElement={<img src={ic_arrow_back_ios_gray900_20} alt="닫기" />}
+          onLeftElementClick={() =>{handleSendActions("EXIT_WITHOUT_SAVING")}}
+        />
+      );
+
     }
 
     if (screen === "ResumeDetail") {

@@ -323,6 +323,7 @@
   font-style: normal;
   font-weight: 700;
   line-height: 24px; /* 133.333% */
+  border: none;
 }
 
 .mock-interview-dialog__btn{
@@ -441,6 +442,7 @@
     .mock-interview-dialog__actions button{
       width: 100%;
       font-size: 16px;
+      height: 56px;
     }
     .mock-interview-dialog__title{
       font-size: 18px;

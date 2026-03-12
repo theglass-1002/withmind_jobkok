@@ -84,11 +84,12 @@ export default function Signup() {
 
     const handleMessage = async (event: MessageEvent) => {
       if (!allowedOrigins.has(event.origin)) return;
-
+  
       // 1) 백엔드가 보내는 SA_RESULT (txId 포함)
       if (event.data?.type === "SA_RESULT") {
+        console.log(event.data);
         const { resultCode, txId } = event.data || {};
-
+        console.log(resultCode);
         if (!txId) {
           toast.error("본인인증 결과(txId)가 없습니다.");
           return;
@@ -306,18 +307,19 @@ export default function Signup() {
 
     try {
       const result = await registerUser(regisData);
-
+      console.log(result);
       if (result.code === 200) {
         logout();
         navigate("/login");
         toast.success("회원가입 완료");
       }
     } catch (error) {
+      console.log(error);
       logout();
       const e = error as ApiErrorResponse;
 
       if (e.code === 400) {
-        toast.error("존재하는 계정입니다.");
+        toast.error("이미 가입된 계정입니다. 아이디/비밀번호 찾기를 이용해주세요.");
       } else {
         toast.error(`관리자에게 문의해주세요 Ecode:${e.code}`);
       }
@@ -383,7 +385,7 @@ export default function Signup() {
       const userName = "홍길동";
       const userPhone = "01012345678";
       const userBirth = "19901101";
-
+      console.log('auth/sa/init호출시',init );
       const params: InicisParams = {
         mid: init.mid,
         reqSvcCd: init.reqSvcCd,
@@ -419,6 +421,8 @@ export default function Signup() {
         form.target = "sa_popup";
         form.setAttribute("method", "post");
         form.setAttribute("action", "https://sa.inicis.com/auth");
+
+        // form.setAttribute("action", "https://sa.inicis.com/auth");
 
         form.submit();
       });

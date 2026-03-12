@@ -473,6 +473,7 @@ export default function ResumeDetail() {
 
   const activityItems =
     (resumeData.activityList ?? []).map((act) => ({
+      category:act.category,
       title: act.activityTitle,
       start: formatYmToDot(act.startYm),
       end: formatYmToDot(act.endYm),
@@ -492,10 +493,16 @@ export default function ResumeDetail() {
 
   // 
   const defaultModalTitle =
-    nextDefaultState === false
-      ? "기본이력서를 해지 하시겠습니까?"
-      : `해당 이력서를 기본 이력서로\n변경하시겠습니까?`;
-
+  nextDefaultState === false ? (
+    <>기본이력서를 해지 하시겠습니까?</>
+  ) : (
+    <>
+      해당 이력서를 기본 이력서로
+      <br />
+      변경하시겠습니까?
+    </>
+  );
+  
   return (
     <>
       <div className="resume-page resume-page--detail">

@@ -86,6 +86,7 @@ export async function fetchResumeDetail(
   const res = await instance.get<ResumeDetailResponse>(
     `/api/resume/detail/${resumeIdx}`
   );
+  console.log(res.data);
   return res.data;
 }
 

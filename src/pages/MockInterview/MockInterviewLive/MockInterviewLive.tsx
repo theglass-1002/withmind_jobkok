@@ -173,7 +173,7 @@ export default function MockInterviewLive() {
     try {
       let uploadResult: any;
       try {
-        uploadResult = await uploadJobInterviewVideo(videoBlob, "interview");
+        uploadResult = await uploadJobInterviewVideo(videoBlob);
       } catch (err) {
         console.error("[uploadRecordedFile] video upload failed:", err);
         return { uploadResult: null, followupRes: null };

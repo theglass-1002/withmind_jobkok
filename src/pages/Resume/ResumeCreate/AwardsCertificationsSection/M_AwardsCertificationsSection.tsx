@@ -5,7 +5,7 @@ import ic_add_btn_gray900_20 from "@/assets/icons/size20/ic_add_btn_gray900_20.p
 import M_AwardsCertificationsForm from "./Form/M_AwardsCertificationsForm";
 
 export type AwardsCertItem = {
-  id: string;
+  id?: string;
   kind: "Certification" | "LanguageTest" | "Award" | "Etc" | null;
   end?: string;
   title: string;

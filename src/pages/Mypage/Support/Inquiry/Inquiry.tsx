@@ -1,152 +1,240 @@
-import { useState, useRef,useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
 import Pagination from "@/shared/components/Pagination";
-import arrow_left from '@/assets/icons/keyboard_arrow_left.png';
-import arrow_right from '@/assets/icons/keyboard_arrow_right.png';
+import arrow_left from "@/assets/icons/keyboard_arrow_left.png";
+import arrow_right from "@/assets/icons/keyboard_arrow_right.png";
 import "./Inquiry.css";
 
+import { toast } from "react-toastify";
+import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
+import { fetchInquiryList } from "@/api/support/support.api";
 
 type InquiryCategory = "howto" | "account" | "payment" | "etc";
 
-
-
 type FaqItem = {
   id: string;
-  cat: InquiryCategory;     // 카테고리 추가
+  cat: InquiryCategory;
   title: string;
-  date: string;             // "2025.00.00"
+  date: string;
   status: "pending" | "answered" | "hold";
 };
 
-const ITEMS: FaqItem[] = [
-  { id: "1", cat: "howto",   title: "1모의면접을 다시 보거나 완료된 모의면접을 삭제할 수 있나요?", date: "2025.00.00",status:"pending" },
-  { id: "2", cat: "payment", title: "2결제 영수증은 어디에서 확인하나요?",                     date: "2025.00.00",status:"pending" },
-  { id: "3", cat: "etc",     title: "3문의는 어디로 하면 되나요?",                           date: "2025.00.00",status:"answered" },
-  { id: "4", cat: "account", title: "4이메일을 변경할 수 있나요?",                             date: "2025.00.00",status:"answered"},
-  { id: "5", cat: "howto",   title: "5모의면접을 다시 보거나 완료된 모의면접을 삭제할 수 있나요?",  date: "2025.00.00",status:"answered" },
-  { id: "6", cat: "payment", title: "6결제 영수증은 어디에서 확인하나요?",                       date: "2025.00.00",status:"answered" },
-  { id: "7", cat: "etc",     title: "7문의는 어디로 하면 되나요?",                              date: "2025.00.00",status:"answered"},
- 
-];
-
-
 const PAGE_SIZE = 10;
-
 
 function labelOfStatus(s: FaqItem["status"]) {
   return s === "pending" ? "문의접수" : s === "answered" ? "답변완료" : "보류";
 }
-function statusClass(s: FaqItem["status"]) {
-  return s === "pending" ? "is-pending" : s === "answered" ? "is-answered" : "is-hold";
-}
 
 function labelOfCat(c: InquiryCategory) {
-  return c === "howto" ? "이용 방법"
-       : c === "account" ? "회원 정보"
-       : c === "payment" ? "결제"
-       : "기타";
-}
-function catClass(c: InquiryCategory) {
-  return `is-${c}`; // 예: is-howto, is-account...
+  return c === "howto"
+    ? "이용방법"
+    : c === "account"
+    ? "회원정보"
+    : c === "payment"
+    ? "결제"
+    : "기타";
 }
 
+function mapInquiryType(type: string): InquiryCategory {
+  if (type === "이용방법") return "howto";
+  if (type === "회원정보") return "account";
+  if (type === "결제") return "payment";
+  return "etc";
+}
 
+function mapReplyStatus(replyYn: string): FaqItem["status"] {
+  return replyYn === "Y" ? "answered" : "pending";
+}
+
+function formatDate(date: string) {
+  return date?.split(" ")[0]?.replaceAll("-", ".") ?? "";
+}
 
 export default function Inquiry() {
   const [page, setPage] = useState(1);
+  const [items, setItems] = useState<FaqItem[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // 페이징 (필터링 없이 전체 ITEMS 기준)
-  const totalPages = Math.max(1, Math.ceil(ITEMS.length / PAGE_SIZE));
-  const start = (page - 1) * PAGE_SIZE;
-  const pageItems = ITEMS.slice(start, start + PAGE_SIZE);;
+  useEffect(() => {
+    const loadInquiry = async () => {
+      try {
+        setIsLoading(true);
 
+        const res = await fetchInquiryList({
+          page,
+          size: PAGE_SIZE,
+        });
 
+        console.log("문의 목록 응답", {
+          page,
+          totalCnt: res.totalCnt,
+          list: res.list,
+        });
 
-    return (
-      <>
-        <div className="inquiry">
+        const mapped: FaqItem[] = (res.list ?? []).map((it) => ({
+          id: String(it.inquiryId),
+          cat: mapInquiryType(it.inquiryType),
+          title: it.title,
+          date: formatDate(it.regDt),
+          status: mapReplyStatus(it.replyYn),
+        }));
+
+        setItems(mapped);
+        setTotalCount(res.totalCnt ?? 0);
+      } catch (error) {
+        console.error("문의 목록 조회 실패:", error);
+        toast.error("문의 목록을 불러오지 못했습니다.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadInquiry();
+  }, [page]);
+
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+  const pageItems = items;
+  //const isEmpty = true;
+   const isEmpty = !isLoading && pageItems.length === 0;
+ 
+  return (
+    <>
+      <LoadingOverlay isLoading={isLoading} />
+
+      <div className="inquiry">
         <header className="mypage__content-header">
-             <h2 className="inquiry-title">1:1 문의</h2>
-           </header> 
-           {/* <section className="mypage__content-main inquiry-container" aria-labelledby="plan-empty-title">
-                <span className="empty"> <p>문의 내역이 없습니다.</p></span>
-           </section> */}
-        <section className="mypage__content-main inquiry-container" >
-           <div className="inquiry-history">
-           <div className="inquiry-history__head">
-            <span className="inquiry-history__cell inquiry-history__cell--title">제목</span>
-            <span className="inquiry-history__cell inquiry-history__cell--date">작성일</span>
-            <span className="inquiry-history__cell inquiry-history__cell--status">답변 상태</span>
-          </div>
-          <div className="inquiry-history__body">
-           <ul className="inquiry-history__body-list">
-            {pageItems.map((r)=>(
-              <NavLink to={`${r.id}`}  key={r.id}>
-              <li className="inquiry-history__item">
-              <span className="inquiry-history__cell inquiry-history__cell--title">
-                  <span>{labelOfCat(r.cat)}</span>
-                  {r.title}
+          <h2 className="inquiry-title">1:1 문의</h2>
+        </header>
+
+        {!isEmpty ? (
+          <>
+            <section className="mypage__content-main inquiry-container">
+              <div className="inquiry-history">
+                <div className="inquiry-history__head">
+                  <span className="inquiry-history__cell inquiry-history__cell--title">
+                    제목
                   </span>
-               <span className="inquiry-history__cell--date">{r.date}</span>
-                <span className={`inquiry-history__cell inquiry-history__cell--status ${r.status}`}>{labelOfStatus(r.status)}</span>
-              </li>
-              </NavLink> 
-            ))}
-      
-           </ul>
-          </div>
-           </div>
-           <Pagination 
-            current={page}
-            total={totalPages}
-            onChange={setPage}
-            pageWindow={5}
-            prevIcon={<img src={arrow_left} alt="" aria-hidden="true" />}
-            nextIcon={<img src={arrow_right} alt="" aria-hidden="true" />}
-            />
-           </section>  
-           <div className="btn_wrap">
-              <NavLink  className="default_btn_black" to={'create'}>
-              1:1 문의하기
-              </NavLink>
-                {/* <button className="default_btn_black"
-                >1:1 문의하기</button> */}
-            </div>
-      
-         </div>
-         <div className="inquiry mobile">
-           {/* <section className="mypage__content-main inquiry-container" aria-labelledby="plan-empty-title">
-                <span className="empty"> <p>문의 내역이 없습니다.</p></span>
-           </section> */}
-        <section className="mypage__content-main inquiry-container" >
-           <div className="inquiry-history">
-          <div className="inquiry-history__body">
-           <ul className="inquiry-history__body-list">
-            {pageItems.map((r)=>(
-              <NavLink className="inquiry-history__item" to={`${r.id}`}  key={r.id}>
-                    <span className={`inquiry-history__cell inquiry-history__cell--status ${r.status}`}>{labelOfStatus(r.status)}</span>
-                     <span className='inquiry-history__cell--title'> {r.title}</span>
-                     <div className="inquiry-history__meta-group">
-                     <span className="inquiry-history__cell">{r.date}</span>
-                     <span className="inquiry-history__cell inquiry-history__cell--category">{labelOfCat(r.cat)}</span>
-                     </div>
-              </NavLink> 
-            ))}
-      
-           </ul>
-          </div>
-           </div>
-           </section>  
-           <div className="btn_wrap">
-              <NavLink  className="default_btn_black" to={'create'}>
-              1:1 문의하기
+                  <span className="inquiry-history__cell inquiry-history__cell--date">
+                    작성일
+                  </span>
+                  <span className="inquiry-history__cell inquiry-history__cell--status">
+                    답변 상태
+                  </span>
+                </div>
+
+                <div className="inquiry-history__body">
+                  <ul className="inquiry-history__body-list">
+                    {pageItems.map((r) => (
+                      <NavLink to={`${r.id}`} key={r.id}>
+                        <li className="inquiry-history__item">
+                          <span className="inquiry-history__cell inquiry-history__cell--title">
+                            <span>[{labelOfCat(r.cat)}]</span>
+                            {r.title}
+                          </span>
+                          <span className="inquiry-history__cell--date">
+                            {r.date}
+                          </span>
+                          <span
+                            className={`inquiry-history__cell inquiry-history__cell--status ${r.status}`}
+                          >
+                            {labelOfStatus(r.status)}
+                          </span>
+                        </li>
+                      </NavLink>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              <Pagination
+                current={page}
+                total={totalPages}
+                onChange={setPage}
+                pageWindow={5}
+                prevIcon={<img src={arrow_left} alt="" aria-hidden="true" />}
+                nextIcon={<img src={arrow_right} alt="" aria-hidden="true" />}
+              />
+            </section>
+
+            <div className="btn_wrap">
+              <NavLink className="default_btn_black" to={"create"}>
+                1:1 문의하기
               </NavLink>
             </div>
-      
-         </div>
-         </>
-    );
-  }
+          </>
+        ) : (
+          <div className="inquiry-empty">
+            <div className="inquiry-history__empty-text">문의 내역이 없습니다.</div>
+            <div className="btn_wrap">
+              <NavLink className="default_btn_black" to={"create"}>
+                1:1 문의하기
+              </NavLink>
+            </div>
+          </div>
+        )}
+      </div>
 
+      <div className="inquiry mobile">
+        {!isEmpty ? (
+          <>
+            <section className="mypage__content-main inquiry-container">
+              <div className="inquiry-history">
+                <div className="inquiry-history__body">
+                  <ul className="inquiry-history__body-list">
+                    {pageItems.map((r) => (
+                      <NavLink
+                        className="inquiry-history__item"
+                        to={`${r.id}`}
+                        key={r.id}
+                      >
+                        <span
+                          className={`inquiry-history__cell inquiry-history__cell--status ${r.status}`}
+                        >
+                          {labelOfStatus(r.status)}
+                        </span>
+                        <span className="inquiry-history__cell--title">
+                          {r.title}
+                        </span>
+                        <div className="inquiry-history__meta-group">
+                          <span className="inquiry-history__cell">{r.date}</span>
+                          <span className="inquiry-history__cell inquiry-history__cell--category">
+                            {labelOfCat(r.cat)}
+                          </span>
+                        </div>
+                      </NavLink>
+                    ))}
+                  </ul>
+                </div>
+              </div>
 
+              <Pagination
+                current={page}
+                total={totalPages}
+                onChange={setPage}
+                pageWindow={5}
+                prevIcon={<img src={arrow_left} alt="" aria-hidden="true" />}
+                nextIcon={<img src={arrow_right} alt="" aria-hidden="true" />}
+              />
+            </section>
+
+            <div className="btn_wrap">
+              <NavLink className="default_btn_black" to={"create"}>
+                1:1 문의하기
+              </NavLink>
+            </div>
+          </>
+        ) : (
+          <div className="inquiry-empty">
+            <div className="inquiry-history__empty-text">문의 내역이 없습니다.</div>
+            <div className="btn_wrap">
+              <NavLink className="default_btn_black" to={"create"}>
+                1:1 문의하기
+              </NavLink>
+            </div>
+          </div>
+        )}
+      </div>
+    </>
+  );
+}

@@ -42,6 +42,8 @@ import ic_calendar_red_20 from "@/assets/icons/size20/ic_calendar_red_20.svg";
 
 import ic_edit_white_20 from "@/assets/icons/size20/ic_edit_white_20.svg";
 
+import ic_arrow_drop_down_gray900_24 from "@/assets/icons/size24/ic_arrow_drop_down_gray900_24.svg";
+
 
 import palette_icon_40px from "@/assets/icons/category_icons/palette_icon_40px.svg";
 import megaphone_icon_40px from "@/assets/icons/category_icons/megaphone_icon_40px.svg";
@@ -148,6 +150,6 @@ export const Icons = {
     shield_icon_40px,
     ic_calendar_gray900_20,
     ic_calendar_red_20,
-    ic_edit_white_20
-
+    ic_edit_white_20,
+    ic_arrow_drop_down_gray900_24
 };

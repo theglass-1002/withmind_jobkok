@@ -1353,10 +1353,10 @@ export default function ResumeEditDesktop() {
         toast.error(res.msg || "이력서 수정에 실패했습니다.");
       }
     } catch (error: any) {
-      console.error("❌ 이력서 저장 실패:", error);
+      console.error("❌ 이력서 수정 실패:", error);
       console.error("❌ status:", error?.response?.status);
       console.error("❌ data:", error?.response?.data);
-      toast.error(error?.response?.data?.msg || "이력서 저장 중 오류가 발생했습니다.");
+      toast.error(error?.response?.data?.msg || "이력서 수정 중 오류가 발생했습니다.");
     } finally {
       setIsLoading(false);
     }

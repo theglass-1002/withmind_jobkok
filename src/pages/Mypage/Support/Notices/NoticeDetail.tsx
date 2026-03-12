@@ -19,7 +19,7 @@ return (
     <div className="inquiry">
         <header className="mypage__content-header detail">
              <h2 className="title">
-                <span className="icon_wrap">
+                <span className="icon_wrap back_btn_icon">
                 <img src={arrow_back_big} alt="" />
                 </span>
                공지사항 상세</h2>
@@ -74,7 +74,7 @@ return (
     <div className="inquiry mobile">
         <header className="mypage__content-header detail">
              <h2 className="title">
-                <span className="icon_wrap">
+                <span className="icon_wrap back_btn_icon">
                 <img src={arrow_back_big} alt="" />
                 </span>
                공지사항 상세</h2>

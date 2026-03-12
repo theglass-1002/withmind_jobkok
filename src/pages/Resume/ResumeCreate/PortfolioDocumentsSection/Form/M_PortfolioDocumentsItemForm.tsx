@@ -1,5 +1,4 @@
-// src/pages/.../PortfolioDocumentsSection/Form/M_PortfolioDocumentsItemForm.tsx
-import React, { useRef } from "react";
+import React, { useMemo, useRef } from "react";
 import "../PortfolioDocumentsSection.css";
 
 import FormInput from "@/shared/components/form/FormInput";
@@ -49,7 +48,7 @@ export default function M_PortfolioDocumentsItemForm({
   onMoveDown,
   onRemove,
 }: Props) {
-  const { source, file, url } = value;
+  const { source, file, url, title, filePath } = value;
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -59,7 +58,13 @@ export default function M_PortfolioDocumentsItemForm({
     onChange(
       src === "file"
         ? { source: "file", url: "" }
-        : { source: "url", file: null }
+        : {
+            source: "url",
+            file: null,
+            filePath: "",
+            fileIdx: undefined,
+            title: "",
+          }
     );
   };
 
@@ -72,24 +77,45 @@ export default function M_PortfolioDocumentsItemForm({
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0] ?? null;
     if (!f) return;
+
     if (f.size > MAX_FILE_BYTES) {
       alert("50MB 이하의 파일만 등록 가능합니다.");
       e.target.value = "";
       return;
     }
-    onChange({ file: f });
+
+    onChange({
+      file: f,
+      title: f.name,
+      filePath: "",
+      fileIdx: undefined,
+      url: "",
+      source: "file",
+    });
   };
 
   const changeUrl = (v: any) => {
-    const value = typeof v === "string" ? v : v?.target?.value ?? "";
-    onChange({ url: value });
+    const nextUrl = typeof v === "string" ? v : v?.target?.value ?? "";
+    onChange({ url: nextUrl });
   };
 
-  const formatBytes = (bytes: number) => {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-  };
+  const displayFileName = useMemo(() => {
+    if (file?.name) return file.name;
+    if (title?.trim()) return title;
+
+    if (filePath?.trim()) {
+      try {
+        const last = filePath.split("/").pop() ?? "";
+        return decodeURIComponent(last);
+      } catch {
+        return filePath.split("/").pop() ?? "";
+      }
+    }
+
+    return "";
+  }, [file, title, filePath]);
+
+  const hasFileValue = source === "file" && !!displayFileName;
 
   return (
     <div className="portfolio-documents-section__item">
@@ -99,7 +125,6 @@ export default function M_PortfolioDocumentsItemForm({
           role="radiogroup"
           aria-label="업로드 방식 선택"
         >
-          {/* 파일 선택 */}
           <div
             className={`portfolio-documents__source-option portfolio-documents__source-option--file ${
               source === "file" ? "is-active" : ""
@@ -127,7 +152,6 @@ export default function M_PortfolioDocumentsItemForm({
             <span className="portfolio-documents__source-label">파일</span>
           </div>
 
-          {/* URL 선택 */}
           <div
             className={`portfolio-documents__source-option portfolio-documents__source-option--url ${
               source === "url" ? "is-active" : ""
@@ -173,26 +197,25 @@ export default function M_PortfolioDocumentsItemForm({
             <div className="portfolio-documents__file">
               <div
                 className={`portfolio-documents__file-name ${
-                  file ? "" : "portfolio-documents__file-name--empty"
+                  hasFileValue ? "" : "portfolio-documents__file-name--empty"
                 } ${errors.fileMissing ? "error_box" : ""}`}
               >
                 <img src={ic_folder_gray900_20} alt="" />
-                {file ? (
-                  <>
-                    <span className="portfolio-documents__file-text">
-                      {file.name}
-                    </span>
-                  
-                  </>
+
+                {hasFileValue ? (
+                  <span className="portfolio-documents__file-text">
+                    {displayFileName}
+                  </span>
                 ) : (
                   <div className="portfolio-documents__file-empty">
-                          선택된 파일이 없습니다
-                          {errors.fileMissing&&(<img src={ic_error_red100_20} alt="" />)}
-                      </div>
-               
+                    선택된 파일이 없습니다
+                    {errors.fileMissing && (
+                      <img src={ic_error_red100_20} alt="" />
+                    )}
+                  </div>
                 )}
               </div>
-              {/* ic_error_red100_20 */}
+
               <span
                 className="default_btn_white btn_w_full"
                 role="button"
@@ -213,9 +236,7 @@ export default function M_PortfolioDocumentsItemForm({
               ※ 50MB 이하의 파일만 등록 가능합니다.
             </span>
 
-            {/* 컨트롤: 위/아래/삭제 */}
             <div className="portfolio-documents__controls">
-              {/* 위로 */}
               <span
                 className={[
                   "portfolio-documents__control-btn",
@@ -239,7 +260,6 @@ export default function M_PortfolioDocumentsItemForm({
                 />
               </span>
 
-              {/* 아래로 */}
               <span
                 className={[
                   "portfolio-documents__control-btn",
@@ -263,7 +283,6 @@ export default function M_PortfolioDocumentsItemForm({
                 />
               </span>
 
-              {/* 삭제 */}
               <span
                 className="portfolio-documents__control-btn portfolio-documents__control--remove"
                 onClick={() => canRemove && onRemove()}
@@ -274,14 +293,13 @@ export default function M_PortfolioDocumentsItemForm({
                 <img src={ic_trash_gray900_20} alt="" />
               </span>
             </div>
-      
           </div>
         ) : (
           <div className="portfolio-documents__uploader">
             <label className="portfolio-documents__label small_labe_black-14">
               URL <em className="error_text_red">*</em>
             </label>
-           
+
             <FormInput
               placeholder="https://"
               leftIconSrc={ic_link_gray900_20}
