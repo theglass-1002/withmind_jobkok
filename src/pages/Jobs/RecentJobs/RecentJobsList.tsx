@@ -65,7 +65,7 @@ export default function RecentJobsList() {
           <div className="saved-jobs__content-area card job-posting__list--grid">
             {jobs.map((job) => (
               <JobPostingItemCardNoAiPick
-                key={job.id}
+                key={job.jobIdx}
                 job={job}
                 showAppliedSection={false}
               />

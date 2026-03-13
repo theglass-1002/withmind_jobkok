@@ -106,7 +106,7 @@ export default function JobDetail() {
       setBookMark(next);
 
       // 현재 bookMark가 true면 "해제" API, false면 "추가" API
-      await toggleJobFavorite(job.id, bookMark);
+      await toggleJobFavorite(job.jobIdx, bookMark);
 
       toast.success(next ? "즐겨찾기에 추가되었습니다." : "즐겨찾기가 해제되었습니다.");
     } catch (e: any) {

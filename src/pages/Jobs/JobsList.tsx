@@ -140,26 +140,26 @@ export default function JobsList() {
           itemClassName="jobs-tab"
           activeClassName="on"
         />
-      {resumeExists === false && (
-            <div className="resume-promo-container">
-            <div className="resume-promo">
-            <span className="resume-promo__text">
-              이력서 작성하고 나에게 맞는 AI 공고 추천을 받아보세요.
-            </span>
-            <a className="resume-promo__action" href="/resumes/m-create">
-              <span className="resume-promo__label">이력서 작성하기</span>
-              <span className="resume-promo__icon">
-              <img  src={keyboard_arrow_right} alt="" />
-              </span>
-          </a>
-          </div>
-        </div>
-        )}
-        {activeTab === "all" ? (
-          <M_AllJobPostingSection />
-        ) : (
-          <M_SavedJobPostingSection />
-        )}
+          {resumeExists === false && (
+                <div className="resume-promo-container">
+                <div className="resume-promo">
+                <span className="resume-promo__text">
+                  이력서 작성하고 나에게 맞는 AI 공고 추천을 받아보세요.
+                </span>
+                <a className="resume-promo__action" href="/resumes/m-create">
+                  <span className="resume-promo__label">이력서 작성하기</span>
+                  <span className="resume-promo__icon">
+                  <img  src={keyboard_arrow_right} alt="" />
+                  </span>
+              </a>
+              </div>
+            </div>
+            )}
+            {activeTab === "all" ? (
+              <M_AllJobPostingSection />
+            ) : (
+              <M_SavedJobPostingSection />
+            )}
       </div>
     </>
   );

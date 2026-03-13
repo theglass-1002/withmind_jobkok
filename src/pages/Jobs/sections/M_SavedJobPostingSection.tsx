@@ -29,7 +29,6 @@ type ViewType = "row" | "card";
 
 const SORT_CODE_MAP: Record<string, string> = {
   오래된순: "oldest",
-  적합도순: "maching",
   최신순: "latest",
   인기순: "popular",
   마감임박순: "closing",
@@ -48,7 +47,7 @@ export default function M_SavedJobPostingSection() {
   const [sortLabel, setSortLabel] = useState("인기순");
   const [sizeLabel, setSizeLabel] = useState("15개씩");
 
-  const sortOptions = ["오래된순", "적합도순", "최신순", "인기순", "마감임박순"];
+  const sortOptions = ["오래된순", "최신순", "인기순", "마감임박순"];
   const sizeOptions = ["15개씩", "30개씩", "45개씩"];
 
   const [page, setPage] = useState(1);

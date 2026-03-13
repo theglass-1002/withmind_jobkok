@@ -66,13 +66,13 @@ export default function M_ModalJobRolePicker({
       .filter((node) => node.depth === 0 && node.isActive)
       .sort((a, b) => a.sortOrder - b.sortOrder)
       .map((cat) => ({
-        key: String(cat.id),
+        key: String(cat.idx),
         title: cat.name,
         roles: (cat.children ?? [])
           .filter((child) => child.isActive)
           .sort((a, b) => a.sortOrder - b.sortOrder)
           .map((child) => ({
-            key: String(child.id),
+            key: String(child.idx),
             label: child.name,
           })),
       }));

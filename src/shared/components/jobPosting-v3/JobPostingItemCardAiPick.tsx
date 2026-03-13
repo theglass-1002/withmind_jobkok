@@ -57,7 +57,7 @@ export default function JobPostingItemCardAiPick({
 
   const handleGoToJobPost = () => {
     if (!job) return;
-    navigate(`/jobs/${job.id}?title=${encodeURIComponent(job.companyName ?? "")}`);
+    navigate(`/jobs/${job.jobIdx}?title=${encodeURIComponent(job.companyName ?? "")}`);
   };
 
   const handleBookmarkToggle = async (e: React.MouseEvent) => {
@@ -73,7 +73,7 @@ export default function JobPostingItemCardAiPick({
       setBookMark(next);
   
       // ✅ 서버 반영: 현재가 favorite면 삭제, 아니면 추가
-      await toggleJobFavorite(job.id, isFavorite);
+      await toggleJobFavorite(job.jobIdx, isFavorite);
   
       toast.success(next === 1 ? "즐겨찾기에 추가되었습니다." : "즐겨찾기가 해제되었습니다.");
     } catch (e: any) {

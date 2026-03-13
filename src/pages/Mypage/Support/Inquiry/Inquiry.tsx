@@ -39,6 +39,7 @@ function mapInquiryType(type: string): InquiryCategory {
   if (type === "이용방법") return "howto";
   if (type === "회원정보") return "account";
   if (type === "결제") return "payment";
+  if (type === "etc") return "etc";
   return "etc";
 }
 
@@ -73,7 +74,7 @@ export default function Inquiry() {
         });
 
         const mapped: FaqItem[] = (res.list ?? []).map((it) => ({
-          id: String(it.inquiryId),
+          id: String(it.inquiryIdx),
           cat: mapInquiryType(it.inquiryType),
           title: it.title,
           date: formatDate(it.regDt),
@@ -95,9 +96,8 @@ export default function Inquiry() {
 
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
   const pageItems = items;
-  //const isEmpty = true;
-   const isEmpty = !isLoading && pageItems.length === 0;
- 
+  const isEmpty = !isLoading && pageItems.length === 0;
+
   return (
     <>
       <LoadingOverlay isLoading={isLoading} />
@@ -132,9 +132,7 @@ export default function Inquiry() {
                             <span>[{labelOfCat(r.cat)}]</span>
                             {r.title}
                           </span>
-                          <span className="inquiry-history__cell--date">
-                            {r.date}
-                          </span>
+                          <span className="inquiry-history__cell--date">{r.date}</span>
                           <span
                             className={`inquiry-history__cell inquiry-history__cell--status ${r.status}`}
                           >
@@ -193,9 +191,7 @@ export default function Inquiry() {
                         >
                           {labelOfStatus(r.status)}
                         </span>
-                        <span className="inquiry-history__cell--title">
-                          {r.title}
-                        </span>
+                        <span className="inquiry-history__cell--title">{r.title}</span>
                         <div className="inquiry-history__meta-group">
                           <span className="inquiry-history__cell">{r.date}</span>
                           <span className="inquiry-history__cell inquiry-history__cell--category">

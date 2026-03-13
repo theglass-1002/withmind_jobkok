@@ -4,7 +4,7 @@ import JobCardV2 from "@/shared/components/job-card-v2/JobCardV2";
 
 // JobCardV2List.tsx
 export type JobCardV2Item = {
-  id: string | number;
+  jobIdx: string | number;
   logoSrc: string;
   company: string;
   sourceLogoSrc: string;
@@ -39,7 +39,7 @@ export default function JobCardV2List({
     <div className="mock-interview__jobcard-list mock-interview__jobcard-list--grid">
       {items.map((job) => (
         <JobCardV2
-          key={job.id}
+          key={job.jobIdx}
           logoSrc={job.logoSrc}
           company={job.company}
           sourceLogoSrc={job.sourceLogoSrc}
@@ -51,7 +51,7 @@ export default function JobCardV2List({
           deadline={job.deadline}
           badges={job.badges}
           isBookmarked={job.isBookmarked ?? false}          // ← 상태 내려줌
-          onClickFavorite={() => onToggleFavorite?.(job.id)} // ← 토글 콜백
+          onClickFavorite={() => onToggleFavorite?.(job.jobIdx)} // ← 토글 콜백
         />
       ))}
 

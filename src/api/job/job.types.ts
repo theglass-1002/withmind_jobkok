@@ -4,9 +4,9 @@ import { Region } from "../resume/resume.types";
 
 // 직군 직무 
 export interface JobNode {
-    id: number;
+  idx: number;
     name: string;
-    parentId: number | null;
+    parentIdx: number | null;
     depth: number;
     sortOrder: number;
     isActive: boolean;
@@ -15,10 +15,10 @@ export interface JobNode {
   
   // 선택 UI 등에 쓰기 좋게 평탄화된 옵션 타입 (선택사항)
   export interface JobOption {
-    id: number;
+    idx: number;
     label: string;
     depth: number;
-    parentId: number | null;
+    parentIdx: number | null;
   }
   
   // 공고 리스트 타입들
@@ -29,7 +29,7 @@ export type EmploymentEtc = "military" | "disabled" | "foreigner" | string;
 
 export interface JobItem {
   /** 공고 id */
-  id: number;
+  jobIdx: number;
 
   /** 직무 카테고리 */
   categoryId: number;
@@ -204,7 +204,7 @@ export const SORT_CODE_MAP: Record<string, string> = {
   "최신순": "latest",
   "마감임박순": "closing",
   "인기순": "popular",
-  "적합도순": "maching", // 준비중이면 우선 보내거나, 아래에서 막기
+ // "적합도순": "maching", // 준비중이면 우선 보내거나, 아래에서 막기
 };
 
 export const SIZE_MAP: Record<string, number> = {

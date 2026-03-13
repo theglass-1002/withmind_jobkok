@@ -6,7 +6,8 @@ import edit from "@/assets/icons/edit.png";
 import deleteIcon from "@/assets/icons/delete.png";
 import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
 import { toast } from "react-toastify";
-import { fetchInquiryDetail } from "@/api/support/support.api";
+import Modal from "@/shared/components/modal/Modal";
+import { deleteInquiry, fetchInquiryDetail } from "@/api/support/support.api";
 import type { InquiryDetailData } from "@/api/support/support.types";
 
 function formatDate(date?: string | null) {
@@ -27,6 +28,8 @@ export default function InquiryDetail() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [detail, setDetail] = useState<InquiryDetailData | null>(null);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [isDeleteCompleteOpen, setIsDeleteCompleteOpen] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -34,9 +37,7 @@ export default function InquiryDetail() {
     const loadDetail = async () => {
       try {
         setIsLoading(true);
-        const res = await fetchInquiryDetail(4);
-        console.log(res);
-        // const res = await fetchInquiryDetail(Number(id));
+        const res = await fetchInquiryDetail(Number(id));
         setDetail(res.data);
       } catch (error) {
         console.error("문의 상세 조회 실패:", error);
@@ -53,10 +54,44 @@ export default function InquiryDetail() {
     navigate("/mypage/support/inquiry");
   };
 
+  const handleEdit = () => {
+    if (!id) return;
+    navigate(`/mypage/support/inquiry/edit/${id}`);
+  };
+
+  const handleDeleteClick = () => {
+    setIsDeleteConfirmOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!id) return;
+
+    try {
+      setIsDeleteConfirmOpen(false);
+      setIsLoading(true);
+
+      const res = await deleteInquiry(Number(id));
+      console.log("문의 삭제 응답:", res);
+
+      if (res.code === 200) {
+        setIsDeleteCompleteOpen(true);
+      }
+    } catch (error) {
+      console.error("문의 삭제 실패:", error);
+      toast.error("문의 삭제에 실패했습니다.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeleteCompleteConfirm = () => {
+    setIsDeleteCompleteOpen(false);
+    navigate("/mypage/support/inquiry");
+  };
+
   function inquiryCardClass(replyYn?: "Y" | "N") {
     return replyYn === "Y" ? "answered" : "pending";
   }
-
 
   if (!detail && !isLoading) {
     return (
@@ -108,9 +143,9 @@ export default function InquiryDetail() {
 
         <section className="mypage__content-main inquiry-detail-view__main">
           <article
-              className={`inquiry-card question ${inquiryCardClass(detail?.replyYn)}`}
-              aria-labelledby="inquiry-title"
-            >
+            className={`inquiry-card question ${inquiryCardClass(detail?.replyYn)}`}
+            aria-labelledby="inquiry-title"
+          >
             <span className={`badge ${badgeClass(detail?.replyYn)}`}>
               {labelOfStatus(detail?.replyYn)}
             </span>
@@ -146,21 +181,18 @@ export default function InquiryDetail() {
         </section>
 
         <div className="inquiry-actions">
-       
-            <button className="default_btn_white" onClick={handleBack}>
-              <img src={chevron_left} alt="" />
-              목록으로
-            </button>
-        
+          <button className="default_btn_white" onClick={handleBack}>
+            <img src={chevron_left} alt="" />
+            목록으로
+          </button>
 
-          {/* 답변 없을 때만 수정/삭제 노출하고 싶으면 이렇게 */}
           {detail?.replyYn !== "Y" && (
             <div className="inquiry-actions__right">
-              <button className="default_btn_white edit">
+              <button className="default_btn_white edit" onClick={handleEdit}>
                 <img src={edit} alt="" />
                 수정
               </button>
-              <button className="default_btn_white delete">
+              <button className="default_btn_white delete" onClick={handleDeleteClick}>
                 <img src={deleteIcon} alt="" />
                 삭제
               </button>
@@ -180,7 +212,7 @@ export default function InquiryDetail() {
         </header>
 
         <section className="mypage__content-main inquiry-detail-view__main">
-            <article
+          <article
             className={`inquiry-card question ${inquiryCardClass(detail?.replyYn)}`}
             aria-labelledby="inquiry-title"
           >
@@ -205,12 +237,16 @@ export default function InquiryDetail() {
 
             <div className="inquiry-card__content">{detail?.content ?? ""}</div>
             {detail?.replyYn !== "Y" && (
-          <div className="inquiry-card__actions">
-             <span className="text-btn edit">수정</span>
-             <span>ㆍ</span>
-             <span className="text-btn delete">삭제</span>
-            </div>
-          )}
+              <div className="inquiry-card__actions">
+                <span className="text-btn edit" onClick={handleEdit}>
+                  수정
+                </span>
+                <span>ㆍ</span>
+                <span className="text-btn delete" onClick={handleDeleteClick}>
+                  삭제
+                </span>
+              </div>
+            )}
           </article>
 
           {detail?.replyYn === "Y" && detail?.replyContent && (
@@ -221,12 +257,31 @@ export default function InquiryDetail() {
                 </span>
               </div>
               <div className="inquiry-card__content">{detail.replyContent}</div>
-            
             </article>
           )}
-   
         </section>
       </div>
+
+      <Modal
+        open={isDeleteConfirmOpen}
+        title="1:1 문의 내역을 삭제하시겠습니까?"
+        confirmText="삭제"
+        cancelText="취소"
+        showCancel
+        confirmClassName="btn_w_full default_btn_red"
+        cancelClassName="btn_w_full default_btn_white"
+        onConfirm={handleDeleteConfirm}
+        onClose={() => setIsDeleteConfirmOpen(false)}
+      />
+
+      <Modal
+        open={isDeleteCompleteOpen}
+        title="1:1 문의가 삭제되었습니다."
+        confirmText="확인"
+        showCancel={false}
+        confirmClassName="btn_w_full default_btn_black"
+        onConfirm={handleDeleteCompleteConfirm}
+      />
     </>
   );
 }

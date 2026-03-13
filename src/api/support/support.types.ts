@@ -2,7 +2,7 @@ export type InquiryReplyYn = "Y" | "N";
 export type InquirySecretYn = "Y" | "N";
 
 export type InquiryListItem = {
-  inquiryId: number;
+  inquiryIdx: number;
   userIdx: number;
   userName: string;
   inquiryType: string;
@@ -65,4 +65,9 @@ export type InsertInquiryResponse = {
   code: number;
   msg: string;
   inquiryId: number;
+};
+
+export type DeleteInquiryResponse = {
+  code: number;
+  msg: string;
 };

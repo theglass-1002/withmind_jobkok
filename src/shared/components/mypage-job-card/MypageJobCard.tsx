@@ -53,7 +53,7 @@ export default function MypageJobCard({
 
   const handleGoToJobPost = () => {
     if (!job) return;
-    navigate(`/jobs/${job.id}?title=${encodeURIComponent(job.companyName ?? "")}`);
+    navigate(`/jobs/${job.jobIdx}?title=${encodeURIComponent(job.companyName ?? "")}`);
   };
 
   const handleBookmarkToggle = async (e: React.MouseEvent) => {
@@ -68,7 +68,7 @@ export default function MypageJobCard({
       // optimistic
       setBookMark(next);
 
-      await toggleJobFavorite(job.id, isFavorite);
+      await toggleJobFavorite(job.jobIdx, isFavorite);
 
       toast.success(next === 1 ? "즐겨찾기에 추가되었습니다." : "즐겨찾기가 해제되었습니다.");
     } catch (err: any) {
@@ -104,10 +104,10 @@ export default function MypageJobCard({
 
     try {
       if (next === 1) {
-        await markJobApplied(job.id);
+        await markJobApplied(job.jobIdx);
         toast.success(appliedSuccessMessage);
       } else {
-        await unmarkJobApplied(job.id);
+        await unmarkJobApplied(job.jobIdx);
         toast.info(unappliedInfoMessage);
       }
     } catch (err: any) {

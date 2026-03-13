@@ -69,7 +69,7 @@ export default function JobPostingItemRowNoAiPick({
 
   const handleGoToJobPost = () => {
     if (!job) return;
-    navigate(`/jobs/${job.id}?title=${encodeURIComponent(job.companyName ?? "")}`);
+    navigate(`/jobs/${job.jobIdx}?title=${encodeURIComponent(job.companyName ?? "")}`);
   };
 
   const handleBookmark = async (e: React.MouseEvent) => {
@@ -82,15 +82,15 @@ export default function JobPostingItemRowNoAiPick({
 
     try {
       setBookMark(next);
-      await toggleJobFavorite(job.id, isFavorite);
+      await toggleJobFavorite(job.jobIdx, isFavorite);
       toast.success(
         next === 1 ? "즐겨찾기에 추가되었습니다." : "즐겨찾기가 해제되었습니다."
       );
 
-      onFavoriteChanged(job.id, next);
+      onFavoriteChanged(job.jobIdx, next);
 
       if (next === 0) {
-        onUnfavorite(job.id);
+        onUnfavorite(job.jobIdx);
       }
     } catch (err: any) {
       console.error(err);
@@ -117,14 +117,14 @@ export default function JobPostingItemRowNoAiPick({
 
     try {
       if (next === 1) {
-        await markJobApplied(job.id);
+        await markJobApplied(job.jobIdx);
         toast.success(appliedSuccessMessage);
-        onAppliedChanged(job.id, 1);
+        onAppliedChanged(job.jobIdx, 1);
       } else {
-        await unmarkJobApplied(job.id);
+        await unmarkJobApplied(job.jobIdx);
         toast.info(unappliedInfoMessage);
-        onAppliedChanged(job.id, 0);
-        onUnapplied(job.id);
+        onAppliedChanged(job.jobIdx, 0);
+        onUnapplied(job.jobIdx);
       }
     } catch (err: any) {
       console.error(err);

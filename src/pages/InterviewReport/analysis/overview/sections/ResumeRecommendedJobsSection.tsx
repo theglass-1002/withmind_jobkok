@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import JobCardV2, { type JobCardV2Props } from "@/shared/components/job-card-v2/JobCardV2";
 import PaginationRound from "@/shared/components/pagination/PaginationRound";
 
-export type JobCardV2Item = JobCardV2Props & { id: number };
+export type JobCardV2Item = JobCardV2Props & { jobIdx: number };
 
 type Props = {
   /** 섹션 제목 */
@@ -48,12 +48,12 @@ export default function ResumeRecommendedJobsSection({
       <div className="analysis-section__body">
         <div className="analysis-resume-recommended-jobs">
           {pageJobs.map((job) => (
-            <div key={job.id} className="analysis-resume-recommended-jobs__item">
+            <div key={job.jobIdx} className="analysis-resume-recommended-jobs__item">
               <JobCardV2
                 {...job}
                 onClickFavorite={
                   onToggleFavorite
-                    ? () => onToggleFavorite(job.id, !job.isBookmarked)
+                    ? () => onToggleFavorite(job.jobIdx, !job.isBookmarked)
                     : job.onClickFavorite
                 }
               />

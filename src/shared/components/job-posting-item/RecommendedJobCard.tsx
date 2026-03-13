@@ -6,22 +6,22 @@ import mp_test_logo from '@/assets/icons/mp_test_logo.png';
 import "./RecommendedJobCard.css";
 
 type Job = {
-  id: number;
+  jobIdx: number;
   isBookmarked: boolean;
 };
 
 export default function RecommendedJobCard() {
   // 각 카드마다 개별 북마크 상태 관리
   const [jobs, setJobs] = useState<Job[]>([
-    { id: 1, isBookmarked: false },
-    { id: 2, isBookmarked: false },
-    { id: 3, isBookmarked: false },
-    { id: 4, isBookmarked: false },
-    { id: 5, isBookmarked: false },
-    { id: 6, isBookmarked: false },
-    { id: 7, isBookmarked: false },
-    { id: 8, isBookmarked: false },
-    { id: 9, isBookmarked: false },
+    { jobIdx: 1, isBookmarked: false },
+    { jobIdx: 2, isBookmarked: false },
+    { jobIdx: 3, isBookmarked: false },
+    { jobIdx: 4, isBookmarked: false },
+    { jobIdx: 5, isBookmarked: false },
+    { jobIdx: 6, isBookmarked: false },
+    { jobIdx: 7, isBookmarked: false },
+    { jobIdx: 8, isBookmarked: false },
+    { jobIdx: 9, isBookmarked: false },
     // { id: 4, isBookmarked: false },
     // { id: 5, isBookmarked: false },
     // { id: 6, isBookmarked: false },
@@ -34,7 +34,7 @@ export default function RecommendedJobCard() {
     e.stopPropagation();
     setJobs(prevJobs => 
       prevJobs.map(job => 
-        job.id === jobId ? { ...job, isBookmarked: !job.isBookmarked } : job
+        job.jobIdx === jobId ? { ...job, isBookmarked: !job.isBookmarked } : job
       )
     );
   };
@@ -43,12 +43,12 @@ export default function RecommendedJobCard() {
     <>
       <ul className="job-list recommend">
         {jobs.map((job) => (
-          <li key={job.id} className="job-card">
+          <li key={job.jobIdx} className="job-card">
             <div className="job-head">
               <span className="job-logo"><img src={mp_test_logo} alt="" /></span>
               <span 
                 className="job-bookmark" 
-                onClick={(e) => handleBookmark(e, job.id)}
+                onClick={(e) => handleBookmark(e, job.jobIdx)}
                 style={{cursor: 'pointer'}}
               >
                 <img 

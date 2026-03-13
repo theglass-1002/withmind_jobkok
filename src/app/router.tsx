@@ -163,7 +163,7 @@ export const router = createBrowserRouter([
         {path:"support/inquiry",element:<Inquiry/>},
         {path:"support/inquiry/:id",element:<InquiryDetail/>},
         {path:"support/inquiry/create",element:<InquiryCreate/>},
-        {path:"support/inquiry/edit",element:<InquiryEdit/>},
+        { path: "support/inquiry/edit/:id", element: <InquiryEdit/> },
         {path:"support/notices", element: <NoticeList/>},
         {path:"support/notices/:id", element: <NoticeDetail/>},
         {path:"support/report-job", element: <ReportJob/>},

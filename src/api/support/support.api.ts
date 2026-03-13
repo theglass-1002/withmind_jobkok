@@ -1,5 +1,6 @@
 import instance from "@/api/axios.instance";
 import type {
+  DeleteInquiryResponse,
   FetchInquiryListParams,
   InquiryDetailResponse,
   InquiryListResponse,
@@ -71,6 +72,23 @@ export async function insertInquiry(
       },
     }
   );
+
+  return res.data;
+}
+
+
+/**
+ * 문의 삭제
+ * DELETE /api/inquiry/{inquiryId}
+ */
+export async function deleteInquiry(
+  inquiryId: number
+): Promise<DeleteInquiryResponse> {
+  const res = await instance.delete<DeleteInquiryResponse>(`/api/inquiry/${inquiryId}`, {
+    headers: {
+      accept: "application/json",
+    },
+  });
 
   return res.data;
 }

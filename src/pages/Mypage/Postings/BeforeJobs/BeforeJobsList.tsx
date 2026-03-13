@@ -63,7 +63,7 @@ export default function BeforeJobsList({
         <div className={`saved-jobs__content-area ${viewType} job-posting__list--grid`}>
           {jobs.map((job) => (
             <JobPostingItemCardNoAiPick
-              key={job.id}
+              key={job.jobIdx}
               job={job}
               appliedSuccessMessage="지원 정보가 반영되었습니다."
               onAppliedChanged={onAppliedChanged}
@@ -77,7 +77,7 @@ export default function BeforeJobsList({
         <div className={`saved-jobs__content-area ${viewType} job-posting__item job-posting__item--row`}>
           {jobs.map((job) => (
             <JobPostingItemRowNoAiPick
-              key={job.id}
+              key={job.jobIdx}
               job={job}
               appliedSuccessMessage="지원 정보가 반영되었습니다."
               onAppliedChanged={onAppliedChanged}

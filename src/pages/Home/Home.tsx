@@ -3,8 +3,6 @@ import { useNavigate } from "react-router-dom";
 
 import ic_search_white_24 from "@/assets/icons/size24/ic_search_white_24.png";
 
-
-
 import { fetchJobTree, fetchJobList } from "@/api/job/job.api";
 import { JobNode } from "@/api/job/job.types";
 import { logout } from "@/api/auth/auth.api";
@@ -14,14 +12,15 @@ import "./Home.css";
 import { Icons } from "@/assets/icons";
 
 type AutoItem = {
-  label: string; // 화면 표시 텍스트
-  kind: "category" | "job"; // 구분 (원하면 스타일링/이동 분기 가능)
-  categoryId?: number | string; // 필요시
-  jobId?: number | string; // 필요시
+  label: string;
+  kind: "category" | "job";
+  categoryId?: number | string;
+  jobId?: number | string;
 };
 
 function highlightSubstring(label: string, query: string) {
   if (!query) return label;
+
   const q = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const re = new RegExp(q, "ig");
   const parts: React.ReactNode[] = [];
@@ -34,12 +33,14 @@ function highlightSubstring(label: string, query: string) {
 
     if (start > lastIndex) {
       parts.push(
-        <span key={lastIndex + "n"}>{label.slice(lastIndex, start)}</span>
+        <span key={`text-${lastIndex}-${start}`}>
+          {label.slice(lastIndex, start)}
+        </span>
       );
     }
 
     parts.push(
-      <span key={start + "h"} className="select-highlight">
+      <span key={`highlight-${start}-${end}`} className="select-highlight">
         {label.slice(start, end)}
       </span>
     );
@@ -48,13 +49,16 @@ function highlightSubstring(label: string, query: string) {
   }
 
   if (lastIndex < label.length) {
-    parts.push(<span key={lastIndex + "t"}>{label.slice(lastIndex)}</span>);
+    parts.push(
+      <span key={`tail-${lastIndex}-${label.length}`}>
+        {label.slice(lastIndex)}
+      </span>
+    );
   }
 
   return <>{parts}</>;
 }
 
-// name 매칭을 위한 정규화(· / ㆍ, 공백, 하이픈 등 차이 흡수)
 function normalizeCategoryName(name: string) {
   return name
     .trim()
@@ -68,34 +72,30 @@ function normalizeCategoryName(name: string) {
 export default function Home() {
   const navigate = useNavigate();
 
-  // 검색
   const [inputValue, setInputValue] = useState("");
   const [openAuto, setOpenAuto] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
 
-  // 데이터
   const [jobTree, setJobTree] = useState<JobNode[]>([]);
   const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [, setErrorMsg] = useState<string | null>(null);
 
   const handleMovePage = (type: string) => {
     if (type === "resume") navigate("/resumes/create");
     if (type === "interview") navigate("/mock-interview-report");
   };
 
-  // ✅ 아이콘 매핑 테이블
   const CATEGORIES = [
     { key: "dev", name: "개발", icon: Icons.code_icon_40px },
     { key: "design", name: "디자인", icon: Icons.palette_icon_40px },
     { key: "marketing-ads", name: "마케팅ㆍ광고", icon: Icons.megaphone_icon_40px },
     { key: "sales", name: "영업", icon: Icons.briefcase_icon_40px },
-    { key: "management-business", name: "경영ㆍ비즈니스", icon:Icons.handshake_icon_40px },
+    { key: "management-business", name: "경영ㆍ비즈니스", icon: Icons.handshake_icon_40px },
     { key: "engineering-design", name: "엔지니어링ㆍ설계", icon: Icons.wrench_icon_40px },
     { key: "hr", name: "HR", icon: Icons.users_icon_40px },
     { key: "manufacturing", name: "제조ㆍ생산", icon: Icons.factory_icon_40px },
     { key: "construction-facility", name: "건설ㆍ시설", icon: Icons.hard_hat_icon_40px },
     { key: "healthcare-bio", name: "의료ㆍ제약ㆍ바이오", icon: Icons.health_icon_40px },
-
     { key: "media", name: "미디어", icon: Icons.video_icon_40px },
     { key: "game-dev", name: "게임 제작", icon: Icons.gamepad_icon_40px },
     { key: "finance", name: "금융", icon: Icons.dollar_sign_icon_40px },
@@ -105,15 +105,13 @@ export default function Home() {
     { key: "food-beverage", name: "식ㆍ음료", icon: Icons.chef_hat_icon_40px },
     { key: "public-welfare", name: "공공ㆍ복지", icon: Icons.heart_icon_40px },
     { key: "customer-service-retail", name: "고객서비스ㆍ리테일", icon: Icons.headphones_icon_40px },
-    { key: "information-security", name: "정보 보호", icon: Icons.shield_icon_40px},
+    { key: "information-security", name: "정보 보호", icon: Icons.shield_icon_40px },
   ];
 
-  // ✅ name -> icon 매핑
   const iconMap = useMemo(() => {
     const m = new Map<string, string>();
     CATEGORIES.forEach((c) => m.set(normalizeCategoryName(c.name), c.icon));
     return m;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getCategoryIcon = (name: string) => {
@@ -121,14 +119,12 @@ export default function Home() {
     return iconMap.get(normalized) ?? Icons.code_icon_40px;
   };
 
-  // ✅ depth=0 카테고리만
   const topCategories = useMemo(() => {
     return jobTree
       .filter((n) => n.depth === 0 && n.isActive !== false)
       .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
   }, [jobTree]);
 
-  // ✅ 자동완성용 flat 리스트 만들기 (카테고리 + 직무)
   const autoItems: AutoItem[] = useMemo(() => {
     const out: AutoItem[] = [];
     if (!Array.isArray(jobTree)) return out;
@@ -141,11 +137,10 @@ export default function Home() {
       if (parent?.isActive === false) continue;
       if (!parent?.name) continue;
 
-      // 카테고리도 검색 대상에 포함
       out.push({
         label: parent.name,
         kind: "category",
-        categoryId: parent.id,
+        categoryId: parent.idx,
       });
 
       const childrenSorted = Array.isArray(parent.children)
@@ -161,8 +156,8 @@ export default function Home() {
         out.push({
           label: child.name,
           kind: "job",
-          categoryId: parent.id,
-          jobId: child.id,
+          categoryId: parent.idx,
+          jobId: child.idx,
         });
       }
     }
@@ -170,7 +165,6 @@ export default function Home() {
     return out;
   }, [jobTree]);
 
-  // ✅ 입력값 기반 필터
   const filteredAuto = useMemo(() => {
     const q = (inputValue ?? "").trim().toLowerCase();
     if (!q) return autoItems.slice(0, 10);
@@ -180,7 +174,6 @@ export default function Home() {
       .slice(0, 10);
   }, [inputValue, autoItems]);
 
-  // 검색 실행(아이콘 클릭/Enter)
   const handleSearch = () => {
     const keyword = inputValue.trim();
     if (!keyword) {
@@ -189,29 +182,13 @@ export default function Home() {
     }
 
     setOpenAuto(false);
-
-    // ✅ 원하는 방식으로 전달
-    // 1) state로 전달
     navigate("/jobs", { state: { activeTab: "all", keyword } });
-
-    // 2) querystring이 필요하면 이렇게:
-    // navigate(`/jobs?keyword=${encodeURIComponent(keyword)}`);
   };
 
-  // 자동완성 선택
   const handlePickAuto = (item: AutoItem) => {
     setInputValue(item.label);
     setOpenAuto(false);
-    console.log("[Home] 자동완성 선택:", {
-      kind: item.kind,
-      label: item.label,
-      categoryId: item.categoryId,
-      jobId: item.jobId,
-    });
-  
-    // ✅ 클릭 시 바로 이동시키고 싶으면:
-    // - 직무(job)면 jobId로 필터
-    // - 카테고리(category)면 categoryId로 필터
+
     if (item.kind === "category" && item.categoryId != null) {
       navigate("/jobs", {
         state: { activeTab: "all", categoryId: item.categoryId },
@@ -219,15 +196,17 @@ export default function Home() {
       return;
     }
 
-    // job
     if (item.jobId != null) {
       navigate("/jobs", {
-        state: { activeTab: "all", jobId: item.jobId, categoryId: item.categoryId },
+        state: {
+          activeTab: "all",
+          jobId: item.jobId,
+          categoryId: item.categoryId,
+        },
       });
       return;
     }
 
-    // fallback: 키워드 검색
     navigate("/jobs", { state: { activeTab: "all", keyword: item.label } });
   };
 
@@ -235,14 +214,13 @@ export default function Home() {
     navigate("/jobs", {
       state: {
         activeTab: "all",
-        categoryId: cat.id,
+        categoryId: cat.idx,
         childrenCount: cat.children?.length ?? 0,
         children: cat.children,
       },
     });
   };
 
-  // ✅ Home 진입 시 API 실행 (둘 다 끝날 때까지 로딩)
   useEffect(() => {
     let alive = true;
 
@@ -251,13 +229,10 @@ export default function Home() {
         setLoading(true);
         setErrorMsg(null);
 
-        const [tree] = await Promise.all([
-          fetchJobTree(),
-          fetchJobList(1, 10),
-        ]);
+        const [tree] = await Promise.all([fetchJobTree(), fetchJobList(1, 10)]);
 
         if (!alive) return;
-        setJobTree(tree as any);
+        setJobTree(tree as JobNode[]);
       } catch (e: any) {
         if (!alive) return;
         setErrorMsg(e?.message ?? "홈 데이터 로딩 실패");
@@ -274,7 +249,6 @@ export default function Home() {
     };
   }, [navigate]);
 
-  // ✅ 스크롤 + 외부 클릭 감지 + 자동완성 닫기
   useEffect(() => {
     const masthead = document.querySelector(".masthead");
     if (!masthead) return;
@@ -311,14 +285,8 @@ export default function Home() {
           <div className="text">
             <span className="subtitle">모든 채용 공고를 한 자리에</span>
             <span className="titles">이제, 잡콕에서 검색만 하세요!</span>
-            {/* <p className="subtitle">모든 채용 공고를 한 자리에</p>
-            <span className="titles">
-              <h1>이제, 잡콕에서 검색만 하세요!</h1>
-            </span> */}
-
           </div>
 
-          {/* 자동완성 검색 */}
           <div className="search" ref={searchRef}>
             <input
               type="text"
@@ -353,17 +321,15 @@ export default function Home() {
             {openAuto && (
               <div className="search-results-dropdown">
                 <div className="search-results-dropdown__list">
-                  {/* 결과 없음 */}
                   {inputValue.trim() && filteredAuto.length === 0 && (
                     <span className="search-results-dropdown__item search-results-dropdown__item--disabled">
                       추천 결과가 없습니다.
                     </span>
                   )}
 
-                  {/* 결과 */}
-                  {filteredAuto.map((item) => (
+                  {filteredAuto.map((item, index) => (
                     <span
-                      key={`${item.kind}-${item.categoryId ?? "x"}-${item.jobId ?? "x"}-${item.label}`}
+                      key={`auto-${item.kind}-${item.categoryId ?? "x"}-${item.jobId ?? "x"}-${item.label}-${index}`}
                       className="search-results-dropdown__item"
                       role="button"
                       tabIndex={0}
@@ -381,12 +347,11 @@ export default function Home() {
           </div>
         </header>
 
-        {/*  카테고리 */}
         <div className="categories">
-          {topCategories.map((cat) => (
+          {topCategories.map((cat, index) => (
             <div
               className="category"
-              key={cat.id}
+              key={`cat-${cat.idx ?? cat.name ?? index}-${index}`}
               onClick={() => handleClickCategory(cat)}
               role="button"
               tabIndex={0}
@@ -403,7 +368,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 배너 */}
       <div className="banner-slider-container">
         <div className="banner-slider-track">
           <div className="home-cta-banner resume">

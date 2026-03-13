@@ -33,7 +33,7 @@ export default function SavedPostings() {
   const [currentView, setCurrentView] = useState<ViewType>("card");
 
   const [sortLabel, setSortLabel] = useState("인기순");
-  const sortOptions =["오래된순", "적합도순", "최신순", "인기순", "마감임박순"];
+  const sortOptions =["오래된순", "최신순", "인기순", "마감임박순"];
 
   const [sizeLabel, setSizeLabel] = useState("15개씩");
   const sizeOptions = ["15개씩", "30개씩", "45개씩"];

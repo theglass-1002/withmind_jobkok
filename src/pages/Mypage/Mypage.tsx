@@ -134,7 +134,7 @@ export default function MyPage() {
             {!isLoading &&
               visibleSavedJobs.map((job) => (
                 <MypageJobCard
-                  key={job.id}
+                  key={job.jobIdx}
                   job={job}
                   appliedSuccessMessage="지원 정보가 반영되었습니다."
                   showAppliedSection={false}
@@ -177,7 +177,7 @@ export default function MyPage() {
             {!isLoading &&
               visibleRecentJobs.map((job) => (
                 <MypageJobCard
-                  key={job.id}
+                  key={job.jobIdx}
                   job={job}
                   appliedSuccessMessage="지원 정보가 반영되었습니다."
                   showAppliedSection={false}

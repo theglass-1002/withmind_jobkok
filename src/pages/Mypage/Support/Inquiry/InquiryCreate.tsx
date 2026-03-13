@@ -37,6 +37,10 @@ export default function InquiryCreate() {
     { value: "etc", label: "기타" },
   ];
 
+  const getInquiryTypeLabel = (value: string) => {
+    return inquiryOptions.find((option) => option.value === value)?.label ?? "";
+  };
+
   const startEditing = (e?: React.KeyboardEvent | React.MouseEvent) => {
     if (e && "key" in e) {
       if (e.nativeEvent?.isComposing) return;
@@ -44,6 +48,10 @@ export default function InquiryCreate() {
       e.preventDefault();
     }
     setEditing(true);
+  };
+
+  const handleCancelClick = () => {
+    setCancelModalOpen(true);
   };
 
   useEffect(() => {
@@ -80,22 +88,22 @@ export default function InquiryCreate() {
   const handleSubmit = async () => {
     const ok = validate();
     if (!ok) return;
-  
+
     const payload = {
       userId: Storage.getUserId(),
-      inquiryType: inquiryType.trim(),
+      inquiryType: getInquiryTypeLabel(inquiryType.trim()),
       title: title.trim(),
       content: content.trim(),
       secretYn: "N" as const,
     };
-  
+
     console.log("문의 등록 요청 데이터:", payload);
-  
+
     try {
       setIsLoading(true);
       const res = await insertInquiry(payload);
       console.log("문의 등록 응답:", res);
-  
+
       if (res.code === 200) {
         setCreatedInquiryId(res.inquiryId);
         setOpenModal(true);
@@ -106,14 +114,20 @@ export default function InquiryCreate() {
       setIsLoading(false);
     }
   };
+
   const handleConfirmModal = () => {
     setOpenModal(false);
-  
+
     if (createdInquiryId) {
       navigate(`/mypage/support/inquiry/${createdInquiryId}`);
     } else {
       navigate("/mypage/support/inquiry");
     }
+  };
+
+  const handleCancelConfirm = () => {
+    setCancelModalOpen(false);
+    navigate("/mypage/support/inquiry");
   };
 
   const renderForm = () => (
@@ -179,18 +193,15 @@ export default function InquiryCreate() {
                   <li className="strong">※ 1:1 문의 작성 전 확인해 주세요!</li>
                   <li>
                     <p className="strong">이용 방법:</p>
-                    [자주 묻는 질문]을 통해 도움을 받아보세요. 자세한 답변을 보다 빠르게 답변을
-                    확인하실 수 있어요.
+                    [자주 묻는 질문]을 통해 도움을 받아보세요. 자세한 답변을 보다 빠르게 답변을 확인하실 수 있어요.
                   </li>
                   <li>
                     <p className="strong">회원 정보:</p>
-                    아이디/비밀번호의 경우 개인정보로 도움 안내에 제한이 있을 수 있어요. 사이트
-                    내 아이디/비밀번호 찾기를 먼저 시도해 주세요.
+                    아이디/비밀번호의 경우 개인정보로 도움 안내에 제한이 있을 수 있어요. 사이트 내 아이디/비밀번호 찾기를 먼저 시도해 주세요.
                   </li>
                   <li>
                     <p className="strong">결제:</p>
-                    결제 이용권 문의의 경우 결제 이용권의 이용권명, 결제일시, 결제자명 등의 결제
-                    정보를 함께 작성해 주세요.
+                    결제 이용권 문의의 경우 결제 이용권의 이용권명, 결제일시, 결제자명 등의 결제 정보를 함께 작성해 주세요.
                   </li>
                   <li>
                     <p className="strong">기타:</p>
@@ -208,10 +219,7 @@ export default function InquiryCreate() {
       <div className="info_box">
         <ul className="info_box_items">
           <li>※ 1:1 문의를 통해 고객님의 문의사항을 답변해 드립니다.</li>
-          <li>
-            ※ 고객 지원의 [자주 묻는 질문]을 이용하시면 자세한 답변을 보다 빠르게 확인하실 수
-            있습니다.
-          </li>
+          <li>※ 고객 지원의 [자주 묻는 질문]을 이용하시면 자세한 답변을 보다 빠르게 확인하실 수 있습니다.</li>
           <li>※ 문의하신 내용은 운영 시간을 기준으로 확인 후 답변해 드립니다.</li>
           <li>※ 주말과 공휴일 접수 건은 답변이 다소 늦어질 수 있는 점 양해 부탁드립니다.</li>
         </ul>
@@ -226,7 +234,7 @@ export default function InquiryCreate() {
       <div className="inquiry">
         <header className="mypage__content-header detail">
           <h2 className="title">
-            <span className="icon_wrap back_btn_icon">
+            <span className="icon_wrap back_btn_icon" onClick={handleCancelClick}>
               <img src={arrow_back_big} alt="" />
             </span>
             1:1 문의 하기
@@ -236,7 +244,9 @@ export default function InquiryCreate() {
         {renderForm()}
 
         <div className="btn_wrap create">
-          <button className="btn_w_full default_btn_white">취소</button>
+          <button className="btn_w_full default_btn_white" onClick={handleCancelClick}>
+            취소
+          </button>
           <button className="btn_w_full default_btn_black" onClick={handleSubmit}>
             등록
           </button>
@@ -246,7 +256,7 @@ export default function InquiryCreate() {
       <div className="inquiry mobile">
         <header className="mypage__content-header detail">
           <h2 className="title">
-            <span className="icon_wrap back_btn_icon">
+            <span className="icon_wrap back_btn_icon" onClick={handleCancelClick}>
               <img src={arrow_back_big} alt="" />
             </span>
             1:1 문의 하기
@@ -256,6 +266,9 @@ export default function InquiryCreate() {
         {renderForm()}
 
         <div className="btn_wrap create">
+          <button className="btn_w_full default_btn_white" onClick={handleCancelClick}>
+            취소
+          </button>
           <button className="btn_w_full default_btn_black" onClick={handleSubmit}>
             등록
           </button>
@@ -279,9 +292,7 @@ export default function InquiryCreate() {
         showCancel
         confirmClassName="btn_w_full default_btn_black"
         cancelClassName="btn_w_full default_btn_white"
-        onConfirm={() => {
-          setCancelModalOpen(false);
-        }}
+        onConfirm={handleCancelConfirm}
         onClose={() => setCancelModalOpen(false)}
       />
     </>
