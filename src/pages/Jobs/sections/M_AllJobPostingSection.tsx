@@ -157,7 +157,7 @@ export default function M_AllJobPostingSection() {
     const params: any = { sort: sortCode };
 
     if (hasFilters) {
-      params.categoryId = roleIds.length ? roleIds : undefined;
+      params.categoryIdx = roleIds.length ? roleIds : undefined;
       params.career = career;
       params.educationCode = educationCode;
       params.locationCode = locationCode;

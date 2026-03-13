@@ -36,7 +36,7 @@ type Props = {
 
 const baseJobs = [
   {
-    id: 101,
+    jobIdx: 101,
     logoSrc: test_company_logo,
     company: "위드마인드",
     sourceLogoSrc: ic_saramin_18,
@@ -52,7 +52,7 @@ const baseJobs = [
     ],
   },
   {
-    id: 102,
+    jobIdx: 102,
     logoSrc: test_company_logo,
     company: "에이프로소프트",
     sourceLogoSrc: ic_saramin_18,
@@ -68,7 +68,7 @@ const baseJobs = [
     ],
   },
   {
-    id: 103,
+    jobIdx: 103,
     logoSrc: test_company_logo,
     company: "넥스트랩",
     sourceLogoSrc: ic_saramin_18,
@@ -81,7 +81,7 @@ const baseJobs = [
     badges: [{ text: "리액트ㆍ타입스크립트", iconSrc: ic_seed_16 }],
   },
   {
-    id: 104,
+    jobIdx: 104,
     logoSrc: test_company_logo,
     company: "브라이트테크",
     sourceLogoSrc: ic_saramin_18,
@@ -94,7 +94,7 @@ const baseJobs = [
     badges: [{ text: "디자인 협업 우대", iconSrc: ic_seed_16 }],
   },
   {
-    id: 105,
+    jobIdx: 105,
     logoSrc: test_company_logo,
     company: "에버소스",
     sourceLogoSrc: ic_saramin_18,
@@ -499,7 +499,7 @@ export default function AIAnalysisSection({ id = 1 }: Props) {
   const handleToggleFavorite = (id: number | string, nextValue?: boolean) => {
     setJobs((prev) =>
       prev.map((j) =>
-        j.id === id ? { ...j, isBookmarked: nextValue ?? !j.isBookmarked } : j
+        j.jobIdx === id ? { ...j, isBookmarked: nextValue ?? !j.isBookmarked } : j
       )
     );
   };

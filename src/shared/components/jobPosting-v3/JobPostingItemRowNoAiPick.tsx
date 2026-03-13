@@ -61,11 +61,11 @@ export default function JobPostingItemRowNoAiPick({
 
   useEffect(() => {
     setBookMark(((job?.favorite as 0 | 1) ?? 0));
-  }, [job?.favorite, job?.id]);
+  }, [job?.favorite, job?.jobIdx]);
 
   useEffect(() => {
     setRecordAsApplied(((job?.applied as 0 | 1) ?? 0));
-  }, [job?.applied, job?.id]);
+  }, [job?.applied, job?.jobIdx]);
 
   const handleGoToJobPost = () => {
     if (!job) return;

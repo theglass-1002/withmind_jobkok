@@ -64,7 +64,7 @@ type Chip = {
 type FilterKey = "role" | "career" | "education" | "location" | "employment";
 
 type RoleSelectedItem = {
-  categoryId: number;
+  categoryIdx: number;
   categoryName: string;
   roleId: number;
   roleName: string;
@@ -164,7 +164,7 @@ export default function AllJobPostingSection() {
         const size = SIZE_MAP[sizeSort] ?? 15;
         const sortCode = SORT_CODE_MAP[sort] ?? "latest";
 
-        const roleIds = roleSelected.map((r) => (r.roleId === 0 ? r.categoryId : r.roleId));
+        const roleIds = roleSelected.map((r) => (r.roleId === 0 ? r.categoryIdx : r.roleId));
         const career = toCareerParam(careerRange);
         const educationCode = toEducationCodeParam(educationSelected);
         const locationCode = toLocationCodeParam(locationSelected);
@@ -182,7 +182,7 @@ export default function AllJobPostingSection() {
         };
 
         if (hasFilters) {
-          params.categoryId = roleIds.length ? roleIds : undefined;
+          params.categoryIdx = roleIds.length ? roleIds : undefined;
           params.career = career;
           params.educationCode = educationCode;
           params.locationCode = locationCode;
@@ -250,7 +250,7 @@ export default function AllJobPostingSection() {
       case "role":
         setRoleSelected((prev) =>
           prev.filter(
-            (r) => `role-${r.roleId}` !== chip.id && `role-all-${r.categoryId}` !== chip.id
+            (r) => `role-${r.roleId}` !== chip.id && `role-all-${r.categoryIdx}` !== chip.id
           )
         );
         break;
@@ -405,7 +405,7 @@ export default function AllJobPostingSection() {
 
       if (isAll) {
         return {
-          id: `role-all-${s.categoryId}`,
+          id: `role-all-${s.categoryIdx}`,
           role: `${s.categoryName} 전체`,
           kind: "role",
         };

@@ -56,24 +56,24 @@ export default function SavedPostings() {
   };
 
   const handleUnfavorite = (jobId: number) => {
-    setJobs((prev) => prev.filter((j) => j.id !== jobId));
+    setJobs((prev) => prev.filter((j) => j.jobIdx !== jobId));
     setTotalCount((prev) => Math.max(0, prev - 1));
   };
 
   const handleUnapplied = (jobId: number) => {
-    setJobs((prev) => prev.filter((j) => j.id !== jobId));
+    setJobs((prev) => prev.filter((j) => j.jobIdx !== jobId));
     setTotalCount((prev) => Math.max(0, prev - 1));
   };
 
   const handleAppliedChanged = (jobId: number, nextApplied: 0 | 1) => {
     setJobs((prev) =>
-      prev.map((j) => (j.id === jobId ? ({ ...j, applied: nextApplied } as JobItem) : j))
+      prev.map((j) => (j.jobIdx === jobId ? ({ ...j, applied: nextApplied } as JobItem) : j))
     );
   };
 
   const handleFavoriteChanged = (jobId: number, nextFavorite: 0 | 1) => {
     setJobs((prev) =>
-      prev.map((j) => (j.id === jobId ? ({ ...j, favorite: nextFavorite } as JobItem) : j))
+      prev.map((j) => (j.jobIdx === jobId ? ({ ...j, favorite: nextFavorite } as JobItem) : j))
     );
   };
 
@@ -227,7 +227,7 @@ export default function SavedPostings() {
             onAppliedChanged={(jobId, nextApplied) => {
               handleAppliedChanged(jobId, nextApplied);
               if (nextApplied === 1) {
-                setJobs((prev) => prev.filter((j) => j.id !== jobId));
+                setJobs((prev) => prev.filter((j) => j.jobIdx !== jobId));
                 setTotalCount((prev) => Math.max(0, prev - 1));
               }
             }}

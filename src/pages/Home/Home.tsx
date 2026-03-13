@@ -14,8 +14,8 @@ import { Icons } from "@/assets/icons";
 type AutoItem = {
   label: string;
   kind: "category" | "job";
-  categoryId?: number | string;
-  jobId?: number | string;
+  categoryIdx?: number | string;
+  jobIdx?: number | string;
 };
 
 function highlightSubstring(label: string, query: string) {
@@ -140,7 +140,7 @@ export default function Home() {
       out.push({
         label: parent.name,
         kind: "category",
-        categoryId: parent.idx,
+        categoryIdx: parent.idx,
       });
 
       const childrenSorted = Array.isArray(parent.children)
@@ -156,8 +156,8 @@ export default function Home() {
         out.push({
           label: child.name,
           kind: "job",
-          categoryId: parent.idx,
-          jobId: child.idx,
+          categoryIdx: parent.idx,
+          jobIdx: child.idx,
         });
       }
     }
@@ -189,19 +189,19 @@ export default function Home() {
     setInputValue(item.label);
     setOpenAuto(false);
 
-    if (item.kind === "category" && item.categoryId != null) {
+    if (item.kind === "category" && item.categoryIdx != null) {
       navigate("/jobs", {
-        state: { activeTab: "all", categoryId: item.categoryId },
+        state: { activeTab: "all", categoryIdx: item.categoryIdx },
       });
       return;
     }
 
-    if (item.jobId != null) {
+    if (item.jobIdx != null) {
       navigate("/jobs", {
         state: {
           activeTab: "all",
-          jobId: item.jobId,
-          categoryId: item.categoryId,
+          jobId: item.jobIdx,
+          categoryIdx: item.categoryIdx,
         },
       });
       return;
@@ -214,7 +214,7 @@ export default function Home() {
     navigate("/jobs", {
       state: {
         activeTab: "all",
-        categoryId: cat.idx,
+        categoryIdx: cat.idx,
         childrenCount: cat.children?.length ?? 0,
         children: cat.children,
       },
@@ -329,7 +329,7 @@ export default function Home() {
 
                   {filteredAuto.map((item, index) => (
                     <span
-                      key={`auto-${item.kind}-${item.categoryId ?? "x"}-${item.jobId ?? "x"}-${item.label}-${index}`}
+                      key={`auto-${item.kind}-${item.categoryIdx ?? "x"}-${item.jobIdx ?? "x"}-${item.label}-${index}`}
                       className="search-results-dropdown__item"
                       role="button"
                       tabIndex={0}

@@ -13,7 +13,7 @@ import { JobNode } from "@/api/job/job.types";
 type AutoItem = {
   label: string;
   kind: "category" | "job";
-  categoryId?: number | string;
+  categoryIdx?: number | string;
   jobId?: number | string;
 };
 
@@ -86,7 +86,7 @@ export default function Navbar({ titleText }: NavbarProps) {
       out.push({
         label: parent.name,
         kind: "category",
-        categoryId: parent.id,
+        categoryIdx: parent.idx,
       });
 
       const childrenSorted = Array.isArray(parent.children)
@@ -102,8 +102,8 @@ export default function Navbar({ titleText }: NavbarProps) {
         out.push({
           label: child.name,
           kind: "job",
-          categoryId: parent.id,
-          jobId: child.id,
+          categoryIdx: parent.idx,
+          jobId: child.idx,
         });
       }
     }
@@ -171,14 +171,14 @@ export default function Navbar({ titleText }: NavbarProps) {
     setOpenAutoDesktop(false);
     setSearchOpen(false);
 
-    if (item.kind === "category" && item.categoryId != null) {
-      navigate("/jobs", { state: { activeTab: "all", categoryId: item.categoryId } });
+    if (item.kind === "category" && item.categoryIdx != null) {
+      navigate("/jobs", { state: { activeTab: "all", categoryIdx: item.categoryIdx } });
       return;
     }
 
     if (item.jobId != null) {
       navigate("/jobs", {
-        state: { activeTab: "all", jobId: item.jobId, categoryId: item.categoryId },
+        state: { activeTab: "all", jobId: item.jobId, categoryIdx: item.categoryIdx },
       });
       return;
     }
@@ -190,14 +190,14 @@ export default function Navbar({ titleText }: NavbarProps) {
     setInputValue(item.label);
     setSearchOpen(false);
 
-    if (item.kind === "category" && item.categoryId != null) {
-      navigate("/jobs", { state: { activeTab: "all", categoryId: item.categoryId } });
+    if (item.kind === "category" && item.categoryIdx != null) {
+      navigate("/jobs", { state: { activeTab: "all", categoryIdx: item.categoryIdx } });
       return;
     }
 
     if (item.jobId != null) {
       navigate("/jobs", {
-        state: { activeTab: "all", jobId: item.jobId, categoryId: item.categoryId },
+        state: { activeTab: "all", jobId: item.jobId, categoryIdx: item.categoryIdx },
       });
       return;
     }
@@ -425,7 +425,7 @@ export default function Navbar({ titleText }: NavbarProps) {
                 )}
                 {filteredAutoDesktop.map((item) => (
                   <span
-                    key={`${item.kind}-${item.categoryId ?? "x"}-${item.jobId ?? "x"}-${item.label}`}
+                    key={`${item.kind}-${item.categoryIdx ?? "x"}-${item.jobId ?? "x"}-${item.label}`}
                     className="search-results-dropdown__item"
                     role="button"
                     tabIndex={0}
@@ -517,7 +517,7 @@ export default function Navbar({ titleText }: NavbarProps) {
                 )}
                 {filteredAutoMobile.map((item) => (
                   <span
-                    key={`${item.kind}-${item.categoryId ?? "x"}-${item.jobId ?? "x"}-${item.label}`}
+                    key={`${item.kind}-${item.categoryIdx ?? "x"}-${item.jobId ?? "x"}-${item.label}`}
                     className="search-results-dropdown__item"
                     role="button"
                     tabIndex={0}

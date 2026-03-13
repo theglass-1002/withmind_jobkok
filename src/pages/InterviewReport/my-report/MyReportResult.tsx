@@ -27,7 +27,7 @@ import SortDropdown from "@/shared/components/sort-dropdown/SortDropdown";
 
 const mockJobs: JobCardV2Item[] = [
   {
-    id: 101,
+    jobIdx: 101,
     logoSrc: test_company_logo,
     company: "위드마인드",
     sourceLogoSrc: ic_saramin_18,
@@ -44,7 +44,7 @@ const mockJobs: JobCardV2Item[] = [
     ],
   },
   {
-    id: 102,
+    jobIdx: 102,
     logoSrc: test_company_logo,
     company: "에이프로소프트",
     sourceLogoSrc: ic_saramin_18,
@@ -61,7 +61,7 @@ const mockJobs: JobCardV2Item[] = [
     ],
   },
   {
-    id: 103,
+    jobIdx: 103,
     logoSrc: test_company_logo,
     company: "넥스트웨이브",
     sourceLogoSrc: ic_saramin_18,
@@ -78,7 +78,7 @@ const mockJobs: JobCardV2Item[] = [
     ],
   },
   {
-    id: 104,
+    jobIdx: 104,
     logoSrc: test_company_logo,
     company: "스프린트랩",
     sourceLogoSrc: ic_saramin_18,
@@ -95,7 +95,7 @@ const mockJobs: JobCardV2Item[] = [
     ],
   },
   {
-    id: 105,
+    jobIdx: 105,
     logoSrc: test_company_logo,
     company: "코어브릿지",
     sourceLogoSrc: ic_saramin_18,
@@ -119,7 +119,7 @@ export default function MyReportResult() {
 
   const handleToggleFavorite = (id: string | number) => {
     setJobs((prev) =>
-      prev.map((j) => (j.id === id ? { ...j, isBookmarked: !j.isBookmarked } : j))
+      prev.map((j) => (j.jobIdx === id ? { ...j, isBookmarked: !j.isBookmarked } : j))
     );
   };
 

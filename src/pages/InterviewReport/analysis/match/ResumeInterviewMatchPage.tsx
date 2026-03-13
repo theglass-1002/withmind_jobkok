@@ -13,7 +13,7 @@ type Props = {
 
 
   jobs: JobCardV2Item[];
-  onToggleFavorite: (id: number | string, nextValue?: boolean) => void;
+  onToggleFavorite: (jobIdx: number | string, nextValue?: boolean) => void;
 
  
 };

@@ -25,7 +25,7 @@ type Category = {
 };
 
 type SelectedItem = {
-  categoryId: number;
+  categoryIdx: number;
   categoryName: string;
   roleId: number; // ✅ 전체 = -1
   roleName: string; // ✅ 전체 = "전체"
@@ -46,7 +46,7 @@ type ChipView =
       kind: "all";
       key: string;
       categoryKey: string;
-      categoryId: number;
+      categoryIdx: number;
       categoryTitle: string;
       roleLabel: string; // "개발 전체"
     }
@@ -54,7 +54,7 @@ type ChipView =
       kind: "role";
       key: string;
       roleKey: string; // roleId string
-      categoryId: number;
+      categoryIdx: number;
       categoryTitle: string;
       roleId: number;
       roleLabel: string;
@@ -113,13 +113,13 @@ export default function ModalJobRolePicker({
 
     const allPick = initialSelected.find((s) => s.roleId === -1);
     if (allPick) {
-      const catKey = String(allPick.categoryId);
+      const catKey = String(allPick.categoryIdx);
       nextAll.add(catKey);
       nextActive = catKey;
     } else {
       for (const s of initialSelected) {
         if (s.roleId > 0) nextRoles.add(String(s.roleId));
-        if (!nextActive) nextActive = String(s.categoryId);
+        if (!nextActive) nextActive = String(s.categoryIdx);
       }
     }
 
@@ -219,7 +219,7 @@ export default function ModalJobRolePicker({
           kind: "all",
           key: `all-${category.key}`,
           categoryKey: category.key,
-          categoryId: Number(category.key),
+          categoryIdx: Number(category.key),
           categoryTitle: category.title,
           roleLabel: `${category.title} 전체`,
         },
@@ -232,7 +232,7 @@ export default function ModalJobRolePicker({
         kind: "role",
         key: `role-${r.key}`,
         roleKey: r.key,
-        categoryId: Number(category.key),
+        categoryIdx: Number(category.key),
         categoryTitle: category.title,
         roleId: Number(r.key),
         roleLabel: r.label,
@@ -245,14 +245,14 @@ export default function ModalJobRolePicker({
     const payload: SelectedItem[] = selectedChips.map((chip) => {
       if (chip.kind === "all") {
         return {
-          categoryId: chip.categoryId,
+          categoryIdx: chip.categoryIdx,
           categoryName: chip.categoryTitle,
           roleId: 0,
           roleName: "전체",
         };
       }
       return {
-        categoryId: chip.categoryId,
+        categoryIdx: chip.categoryIdx,
         categoryName: chip.categoryTitle,
         
         roleId: chip.roleId,

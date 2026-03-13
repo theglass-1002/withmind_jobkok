@@ -7,7 +7,7 @@ import check_box_outline_blank_gray from "@/assets/icons/check_box_outline_blank
 import refresh_black from "@/assets/icons/refresh_black.png";
 import ic_close_gray500_20 from "@/assets/icons/size20/ic_close_gray500_20.png";
 
-import "./ModalEducationPicker.css";
+import "@/shared/components/education-picker/ModalEducationPicker.css";
 
 interface ModalEducationPickerProps {
   onApply?: (selected: string[]) => void;

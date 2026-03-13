@@ -43,6 +43,8 @@ export default function JobDetail() {
   const navigate = useNavigate();
   const { jobId } = useParams(); // /jobs/:jobId
 
+
+    console.log("jobId:", jobId);
   const [bookMark, setBookMark] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
