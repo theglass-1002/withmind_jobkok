@@ -28,7 +28,7 @@ export type FetchInquiryListParams = {
 };
 
 export type InquiryDetailData = {
-  inquiryId: number;
+  inquiryIdx: number;
   userIdx: number;
   userName: string;
   inquiryType: string;
@@ -64,7 +64,21 @@ export type InsertInquiryRequest = {
 export type InsertInquiryResponse = {
   code: number;
   msg: string;
-  inquiryId: number;
+  inquiryIdx: number;
+};
+
+export type UpdateInquiryRequest = {
+  userId: string;
+  inquiryIdx: number;
+  inquiryType: string;
+  title: string;
+  content: string;
+  secretYn: InquirySecretYn;
+};
+
+export type UpdateInquiryResponse = {
+  code: number;
+  msg: string;
 };
 
 export type DeleteInquiryResponse = {

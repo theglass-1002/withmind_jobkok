@@ -291,9 +291,19 @@ gap: 16px;
     justify-content: space-between;
     align-items: center;
     align-self: stretch;
-  
 
 }
+.inquiry.edit{
+ display: flex;   
+}
+.inquiry.edit.mobile{
+    display: none;
+}
+
+.inquiry.edit .create{
+    border-bottom: 1px solid var(--gray-300, #E0E2E4);
+}
+
 
 .inquiry-actions .inquiry-actions__left{
     display: flex;
@@ -616,7 +626,9 @@ align-self: stretch;
             border: none;
         }
 
-
+        .inquiry.edit.mobile .create{
+            padding-bottom: 50px;
+        }
 
         .inquiry.mobile .create{
             padding: 24px 20px 140px 20px;
@@ -625,6 +637,7 @@ align-self: stretch;
 
         .inquiry.mobile .create .select_box_wrap{
             height: auto;
+            gap: 12px;
           
         }
         
@@ -718,6 +731,7 @@ align-self: stretch;
         }
         .inquiry-card__content{
             font-size: 14px;
+            height: 170px;
         }
         .inquiry-detail-view__main .inquiry-card__actions{
             display: flex;
@@ -732,7 +746,27 @@ align-self: stretch;
         }
         
        
+        .inquiry.edit{
+            display: none;
+        }
+        .inquiry.edit.mobile{
+            display: flex;
+        }
 
+        .inquiry-actions{
+            padding: 20px;
+        }
+        .inquiry.edit .inquiry-actions{
+            gap: 12px;
+        }
+
+        .inquiry.edit.mobile .inquiry-actions .delete{
+            padding: 8px 20px 8px 16px;
+            flex: 1;
+        }
+        .inquiry.edit.mobile .inquiry-actions .save{
+          flex: 2;
+        }
         
     }
 }

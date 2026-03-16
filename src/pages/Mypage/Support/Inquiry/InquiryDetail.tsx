@@ -2,13 +2,15 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import arrow_back_big from "@/assets/icons/arrow_back_big.png";
 import chevron_left from "@/assets/icons/chevron_left.png";
-import edit from "@/assets/icons/edit.png";
-import deleteIcon from "@/assets/icons/delete.png";
+
 import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
 import { toast } from "react-toastify";
 import Modal from "@/shared/components/modal/Modal";
 import { deleteInquiry, fetchInquiryDetail } from "@/api/support/support.api";
 import type { InquiryDetailData } from "@/api/support/support.types";
+import { Icons } from "@/assets/icons";
+
+const MOBILE_BREAKPOINT = 760;
 
 function formatDate(date?: string | null) {
   return date?.split(" ")[0]?.replaceAll("-", ".") ?? "";
@@ -22,6 +24,10 @@ function badgeClass(replyYn?: "Y" | "N") {
   return replyYn === "Y" ? "badge--answered" : "badge--pending";
 }
 
+function inquiryCardClass(replyYn?: "Y" | "N") {
+  return replyYn === "Y" ? "answered" : "pending";
+}
+
 export default function InquiryDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -31,6 +37,17 @@ export default function InquiryDetail() {
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [isDeleteCompleteOpen, setIsDeleteCompleteOpen] = useState(false);
 
+  const isMobile = window.innerWidth <= MOBILE_BREAKPOINT;
+
+  const inquiryListPath = isMobile
+    ? "/mypage/m-support/inquiry"
+    : "/mypage/support/inquiry";
+
+  const getInquiryEditPath = (inquiryId: number | string) =>
+    isMobile
+      ? `/mypage/m-support/inquiry/edit/${inquiryId}`
+      : `/mypage/support/inquiry/edit/${inquiryId}`;
+
   useEffect(() => {
     if (!id) return;
 
@@ -38,6 +55,7 @@ export default function InquiryDetail() {
       try {
         setIsLoading(true);
         const res = await fetchInquiryDetail(Number(id));
+        console.log(res);
         setDetail(res.data);
       } catch (error) {
         console.error("문의 상세 조회 실패:", error);
@@ -51,12 +69,12 @@ export default function InquiryDetail() {
   }, [id]);
 
   const handleBack = () => {
-    navigate("/mypage/support/inquiry");
+    navigate(inquiryListPath);
   };
 
   const handleEdit = () => {
     if (!id) return;
-    navigate(`/mypage/support/inquiry/edit/${id}`);
+    navigate(getInquiryEditPath(id));
   };
 
   const handleDeleteClick = () => {
@@ -86,12 +104,8 @@ export default function InquiryDetail() {
 
   const handleDeleteCompleteConfirm = () => {
     setIsDeleteCompleteOpen(false);
-    navigate("/mypage/support/inquiry");
+    navigate(inquiryListPath);
   };
-
-  function inquiryCardClass(replyYn?: "Y" | "N") {
-    return replyYn === "Y" ? "answered" : "pending";
-  }
 
   if (!detail && !isLoading) {
     return (
@@ -189,11 +203,11 @@ export default function InquiryDetail() {
           {detail?.replyYn !== "Y" && (
             <div className="inquiry-actions__right">
               <button className="default_btn_white edit" onClick={handleEdit}>
-                <img src={edit} alt="" />
+                <img src={Icons.ic_edit_gray900_20} alt="" />
                 수정
               </button>
               <button className="default_btn_white delete" onClick={handleDeleteClick}>
-                <img src={deleteIcon} alt="" />
+                <img src={Icons.ic_delete_gray900_20} alt="" />
                 삭제
               </button>
             </div>
@@ -236,6 +250,7 @@ export default function InquiryDetail() {
             </div>
 
             <div className="inquiry-card__content">{detail?.content ?? ""}</div>
+
             {detail?.replyYn !== "Y" && (
               <div className="inquiry-card__actions">
                 <span className="text-btn edit" onClick={handleEdit}>

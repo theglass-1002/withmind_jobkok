@@ -278,6 +278,16 @@ export default function Layout({
       );
     }
 
+    if (screen === "InquiryEdit") {
+      return (
+        <PageHeader
+          title="1:1 문의 수정"
+          leftElement={<img src={ic_arrow_back_ios_gray900_20} alt="닫기" />}
+          onLeftElementClick={() =>{handleSendActions("INQUIRY_CREATE_CANCEL")}}
+        />
+      );
+    }
+
     if (screen === "NoticeList") {
       return (
         <PageHeader

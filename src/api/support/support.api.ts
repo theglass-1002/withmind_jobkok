@@ -6,6 +6,8 @@ import type {
   InquiryListResponse,
   InsertInquiryRequest,
   InsertInquiryResponse,
+  UpdateInquiryRequest,
+  UpdateInquiryResponse,
 } from "@/api/support/support.types";
 
 /**
@@ -23,8 +25,6 @@ export async function fetchInquiryList(
       ...(params?.replyYn ? { replyYn: params.replyYn } : {}),
       pageNo: page,
       pageSize: size,
-
-      // 백엔드가 page/size 쓰는 경우도 대비
       page,
       size,
     },
@@ -41,21 +41,21 @@ export async function fetchInquiryList(
  * GET /api/inquiry/detail/{inquiryId}
  */
 export async function fetchInquiryDetail(
-    inquiryId: number
-  ): Promise<InquiryDetailResponse> {
-    const res = await instance.get<InquiryDetailResponse>(
-      `/api/inquiry/${inquiryId}`,
-      {
-        headers: {
-          accept: "application/json",
-        },
-      }
-    );
-  
-    return res.data;
-  }
+  inquiryIdx: number
+): Promise<InquiryDetailResponse> {
+  const res = await instance.get<InquiryDetailResponse>(
+    `/api/inquiry/${inquiryIdx}`,
+    {
+      headers: {
+        accept: "application/json",
+      },
+    }
+  );
 
-  /**
+  return res.data;
+}
+
+/**
  * 문의 등록
  * POST /api/inquiry/insert
  */
@@ -76,19 +76,42 @@ export async function insertInquiry(
   return res.data;
 }
 
+/**
+ * 문의 수정
+ * POST /api/inquiry/update
+ */
+export async function updateInquiry(
+  data: UpdateInquiryRequest
+): Promise<UpdateInquiryResponse> {
+  const res = await instance.put<UpdateInquiryResponse>(
+    "/api/inquiry/update",
+    data,
+    {
+      headers: {
+        "Content-Type": "application/json",
+        accept: "application/json",
+      },
+    }
+  );
+
+  return res.data;
+}
 
 /**
  * 문의 삭제
- * DELETE /api/inquiry/{inquiryId}
+ * DELETE /api/inquiry/{inquiryIdx}
  */
 export async function deleteInquiry(
-  inquiryId: number
+  inquiryIdx: number
 ): Promise<DeleteInquiryResponse> {
-  const res = await instance.delete<DeleteInquiryResponse>(`/api/inquiry/${inquiryId}`, {
-    headers: {
-      accept: "application/json",
-    },
-  });
+  const res = await instance.delete<DeleteInquiryResponse>(
+    `/api/inquiry/${inquiryIdx}`,
+    {
+      headers: {
+        accept: "application/json",
+      },
+    }
+  );
 
   return res.data;
 }

@@ -35,7 +35,7 @@ import ic_star_green_20 from "@/assets/icons/size20/ic_star_green_20.png";
 import ic_filter_gray900_20 from "@/assets/icons/size20/ic_filter_gray900_20.svg";
 import ic_refresh_gray900_16 from "@/assets/icons/size20/ic_refresh_gray900_16.svg";
 import code_icon_40px from "@/assets/icons/category_icons/code_icon_40px.svg";
-
+import ic_delete_gray900_20 from "@/assets/icons/size20/ic_delete_gray900_20.svg";
 
 import ic_calendar_gray900_20 from "@/assets/icons/size20/ic_calendar_gray900_20.svg";
 import ic_calendar_red_20 from "@/assets/icons/size20/ic_calendar_red_20.svg";
@@ -151,5 +151,6 @@ export const Icons = {
     ic_calendar_gray900_20,
     ic_calendar_red_20,
     ic_edit_white_20,
-    ic_arrow_drop_down_gray900_24
+    ic_arrow_drop_down_gray900_24,
+    ic_delete_gray900_20
 };

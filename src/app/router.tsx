@@ -94,6 +94,8 @@ export const router = createBrowserRouter([
   {path: "/mypage/m-support/inquiry", element:<Layout screen="Inquiry" showFooter="desktop-only" showBottomNav={false}> <Inquiry/></Layout> },
   {path: "/mypage/m-support/inquiry/:id",element:<Layout screen="InquiryDetail" showFooter="desktop-only" showBottomNav={false}> <InquiryDetail/></Layout> },
   {path: "/mypage/m-support/inquiry/create", element:<Layout screen="InquiryCreate" showFooter="desktop-only" showBottomNav={false}> <InquiryCreate/></Layout> },
+  {path: "/mypage/m-support/inquiry/edit/:id", element:<Layout screen="InquiryEdit" showFooter="desktop-only" showBottomNav={false}> <InquiryEdit/></Layout> },
+  
   {path: "/mypage/m-support/notices", element:<Layout screen="NoticeList" showFooter="desktop-only" showBottomNav={false}> <NoticeList/></Layout> },
   {path: "/mypage/m-support/notices/:id", element:<Layout screen="NoticeList" showFooter="desktop-only" showBottomNav={false}> <NoticeDetail/></Layout> },
   {path: "/mypage/m-support/report-job", element:<Layout screen="ReportJob" showFooter="desktop-only" showBottomNav={false}> <ReportJob/></Layout> },
@@ -163,7 +165,7 @@ export const router = createBrowserRouter([
         {path:"support/inquiry",element:<Inquiry/>},
         {path:"support/inquiry/:id",element:<InquiryDetail/>},
         {path:"support/inquiry/create",element:<InquiryCreate/>},
-        { path: "support/inquiry/edit/:id", element: <InquiryEdit/> },
+        {path:"support/inquiry/edit/:id", element: <InquiryEdit/> },
         {path:"support/notices", element: <NoticeList/>},
         {path:"support/notices/:id", element: <NoticeDetail/>},
         {path:"support/report-job", element: <ReportJob/>},

@@ -11,12 +11,14 @@ import { useLayoutContext } from "@/app/LayoutContext";
 import { Icons } from "@/assets/icons";
 import { insertInquiry } from "@/api/support/support.api";
 
+const MOBILE_BREAKPOINT = 760;
+
 export default function InquiryCreate() {
   const navigate = useNavigate();
   const ref = useRef<HTMLTextAreaElement>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { actionType, resetAction } = useLayoutContext();
-  const [createdInquiryId, setCreatedInquiryId] = useState<number | null>(null);
+  const [createdInquiryIdx, setCreatedInquiryIdx] = useState<number | null>(null);
   const [editing, setEditing] = useState(false);
 
   const [inquiryType, setInquiryType] = useState<string>("");
@@ -29,6 +31,17 @@ export default function InquiryCreate() {
 
   const [openModal, setOpenModal] = useState(false);
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
+
+  const isMobile = window.innerWidth <= MOBILE_BREAKPOINT;
+
+  const inquiryListPath = isMobile
+    ? "/mypage/m-support/inquiry"
+    : "/mypage/support/inquiry";
+
+  const getInquiryDetailPath = (inquiryIdx: number) =>
+    isMobile
+      ? `/mypage/m-support/inquiry/${inquiryIdx}`
+      : `/mypage/support/inquiry/${inquiryIdx}`;
 
   const inquiryOptions = [
     { value: "usage", label: "이용방법" },
@@ -105,7 +118,7 @@ export default function InquiryCreate() {
       console.log("문의 등록 응답:", res);
 
       if (res.code === 200) {
-        setCreatedInquiryId(res.inquiryId);
+        setCreatedInquiryIdx(res.inquiryIdx);
         setOpenModal(true);
       }
     } catch (error) {
@@ -118,16 +131,17 @@ export default function InquiryCreate() {
   const handleConfirmModal = () => {
     setOpenModal(false);
 
-    if (createdInquiryId) {
-      navigate(`/mypage/support/inquiry/${createdInquiryId}`);
-    } else {
-      navigate("/mypage/support/inquiry");
+    if (createdInquiryIdx) {
+      navigate(getInquiryDetailPath(createdInquiryIdx));
+      return;
     }
+
+    navigate(inquiryListPath);
   };
 
   const handleCancelConfirm = () => {
     setCancelModalOpen(false);
-    navigate("/mypage/support/inquiry");
+    navigate(inquiryListPath);
   };
 
   const renderForm = () => (
@@ -193,15 +207,18 @@ export default function InquiryCreate() {
                   <li className="strong">※ 1:1 문의 작성 전 확인해 주세요!</li>
                   <li>
                     <p className="strong">이용 방법:</p>
-                    [자주 묻는 질문]을 통해 도움을 받아보세요. 자세한 답변을 보다 빠르게 답변을 확인하실 수 있어요.
+                    [자주 묻는 질문]을 통해 도움을 받아보세요. 자세한 답변을 보다 빠르게 답변을
+                    확인하실 수 있어요.
                   </li>
                   <li>
                     <p className="strong">회원 정보:</p>
-                    아이디/비밀번호의 경우 개인정보로 도움 안내에 제한이 있을 수 있어요. 사이트 내 아이디/비밀번호 찾기를 먼저 시도해 주세요.
+                    아이디/비밀번호의 경우 개인정보로 도움 안내에 제한이 있을 수 있어요. 사이트
+                    내 아이디/비밀번호 찾기를 먼저 시도해 주세요.
                   </li>
                   <li>
                     <p className="strong">결제:</p>
-                    결제 이용권 문의의 경우 결제 이용권의 이용권명, 결제일시, 결제자명 등의 결제 정보를 함께 작성해 주세요.
+                    결제 이용권 문의의 경우 결제 이용권의 이용권명, 결제일시, 결제자명 등의 결제
+                    정보를 함께 작성해 주세요.
                   </li>
                   <li>
                     <p className="strong">기타:</p>
@@ -219,7 +236,10 @@ export default function InquiryCreate() {
       <div className="info_box">
         <ul className="info_box_items">
           <li>※ 1:1 문의를 통해 고객님의 문의사항을 답변해 드립니다.</li>
-          <li>※ 고객 지원의 [자주 묻는 질문]을 이용하시면 자세한 답변을 보다 빠르게 확인하실 수 있습니다.</li>
+          <li>
+            ※ 고객 지원의 [자주 묻는 질문]을 이용하시면 자세한 답변을 보다 빠르게 확인하실 수
+            있습니다.
+          </li>
           <li>※ 문의하신 내용은 운영 시간을 기준으로 확인 후 답변해 드립니다.</li>
           <li>※ 주말과 공휴일 접수 건은 답변이 다소 늦어질 수 있는 점 양해 부탁드립니다.</li>
         </ul>
@@ -266,9 +286,9 @@ export default function InquiryCreate() {
         {renderForm()}
 
         <div className="btn_wrap create">
-          <button className="btn_w_full default_btn_white" onClick={handleCancelClick}>
+          {/* <button className="btn_w_full default_btn_white" onClick={handleCancelClick}>
             취소
-          </button>
+          </button> */}
           <button className="btn_w_full default_btn_black" onClick={handleSubmit}>
             등록
           </button>
