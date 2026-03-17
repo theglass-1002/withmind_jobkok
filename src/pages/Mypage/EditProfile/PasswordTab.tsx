@@ -1,183 +1,315 @@
 import { useState } from "react";
+import { toast } from "react-toastify";
 import PasswordInput from "./PasswordInput";
 import * as util from "@/shared/utils/util";
-import { data } from "react-router-dom";
+import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
+import { updateUser } from "@/api/auth/auth.api";
 
+type Form = {
+  current: string;
+  next: string;
+  confirm: string;
+};
 
-
-
-type Form = { current: string; next: string; confirm: string };
 type Errors = Partial<Record<keyof Form, string>>;
 
 type PasswordTabProps = {
   onCancel: () => void;
- };
+};
 
-
-export default function PasswordTab({onCancel}:PasswordTabProps) {
-  const [form, setForm] = useState<Form>({ current: "", next: "", confirm: "" });
+export default function PasswordTab({ onCancel }: PasswordTabProps) {
+  const [form, setForm] = useState<Form>({
+    current: "",
+    next: "",
+    confirm: "",
+  });
   const [errors, setErrors] = useState<Errors>({});
-  const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
+  const onChange =
+    (key: keyof Form) => (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value.replace(/\s/g, "");
+      setForm((prev) => ({ ...prev, [key]: value }));
 
-  const onChange = (key: keyof Form) =>
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const v = e.target.value.replace(/\s/g, "");
-      setForm((f) => ({ ...f, [key]: v }));
-    };
-    
-    const validate = (f: Form) => {
-      const current = util.stripAllWhitespace(f.current.trim());
-      const next    = util.stripAllWhitespace(f.next.trim());
-      const confirm = util.stripAllWhitespace(f.confirm.trim());
-      const errs: Errors = {};
-      if (!current) errs.current = "비밀번호를 입력해 주세요.";
-      if (!next)    errs.next    = "비밀번호를 입력해 주세요.";
-      if (!confirm) errs.confirm = "비밀번호를 입력해 주세요.";
-    
-      if (!errs.next && !util.isValidPassword(next)) {
-        errs.next = "입력한 비밀번호를 확인해 주세요.";
-      }  if (!errs.confirm && !util.isValidPassword(confirm)) {
-        errs.confirm = "입력한 비밀번호를 확인해 주세요.";
+      if (errors[key]) {
+        setErrors((prev) => ({ ...prev, [key]: "" }));
       }
-      
-      if (!errs.confirm && next !== confirm) {
-        errs.next = "비밀번호가 일치하지 않습니다.";
-        errs.confirm = "비밀번호가 일치하지 않습니다.";
+
+      if (notice) {
+        setNotice(null);
       }
-     
-      return { data: { current, next, confirm }, errs };
     };
 
-    const handleSave = async () => {
-       console.log('비밀번호 변경 api 통신');
-      setSubmitted(true);
-      setNotice(null);
-      const { data, errs } = validate(form);
-      setErrors(errs);
-      
+  const validate = (f: Form) => {
+    const current = util.stripAllWhitespace(f.current.trim());
+    const next = util.stripAllWhitespace(f.next.trim());
+    const confirm = util.stripAllWhitespace(f.confirm.trim());
+    const errs: Errors = {};
+
+    if (!current) errs.current = "비밀번호를 입력해 주세요.";
+    if (!next) errs.next = "비밀번호를 입력해 주세요.";
+    if (!confirm) errs.confirm = "비밀번호를 입력해 주세요.";
+
+    if (!errs.next && !util.isValidPassword(next)) {
+      errs.next = "입력한 비밀번호를 확인해 주세요.";
+    }
+
+    if (!errs.confirm && !util.isValidPassword(confirm)) {
+      errs.confirm = "입력한 비밀번호를 확인해 주세요.";
+    }
+
+    if (!errs.next && !errs.confirm && next !== confirm) {
+      errs.next = "비밀번호가 일치하지 않습니다.";
+      errs.confirm = "비밀번호가 일치하지 않습니다.";
+    }
+
+    if (!errs.current && current === next) {
+      errs.next = "현재 비밀번호와 다른 비밀번호를 입력해 주세요.";
+    }
+
+    return {
+      data: { current, next, confirm },
+      errs,
     };
+  };
 
-    return (
-           <>
-             <div className="account-main password-tab">
-             <div className="field">
-                <span className="field__label">현재 비밀번호 <em>*</em></span>
-                <PasswordInput
-                id="pw-current"
-                value={form.current}
-                onChange={onChange("current")}
-                placeholder="현재 비밀번호를 입력해 주세요."
-                message={errors.current}
-              
-                autoComplete="current-password"
-                required
-                />
-               <span className="field__label"><em> {errors.current}</em></span>
-                <span className="field__label">새 비밀번호 <em>*</em></span>
-                <PasswordInput
-                id="pw-new"
-                value={form.next}                 
-                onChange={onChange("next")}
-                placeholder="새 비밀번호를 입력해 주세요."
-                message={errors.next}
-                autoComplete="new-password"
-                required/>
-                 <span className="field__label"><em> {errors.next}</em></span>
-                <span className="field__label">새 비밀번호 확인 <em>*</em></span>
-                <PasswordInput
-                id="pw-confirm"
-                value={form.confirm}
-                onChange={onChange("confirm")}
-                message={errors.confirm}
-                placeholder="새 비밀번호를 다시 입력해 주세요."
-                autoComplete="new-password"
-                required
-                />
-              <span className="field__label"><em> {errors.confirm}</em></span>
-            </div>
-            <div>
-            <div className="field">
+  const handleSave = async () => {
+    setNotice(null);
+
+    const { data, errs } = validate(form);
+    setErrors(errs);
+
+    if (Object.keys(errs).length > 0) {
+      return;
+    }
+
+    const userIdx = localStorage.getItem("userIdx");
+    const userId = localStorage.getItem("userId");
+    const userName = localStorage.getItem("userName");
+
+    if (!userIdx || !userId) {
+      toast.error("사용자 정보를 확인할 수 없습니다.");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+
+      const res = await updateUser({
+        userIdx,
+        userName: userName ?? "",
+        email: userId,
+        password: data.next,
+        modifier: userId,
+      });
+      console.log(res)
+      if (res.code === 200) {
+        toast.success("비밀번호가 변경되었습니다.");
+        setNotice("비밀번호가 변경되었습니다.");
+        setForm({
+          current: "",
+          next: "",
+          confirm: "",
+        });
+        setErrors({});
+        return;
+      }
+
+      toast.error(res.msg || "비밀번호 변경에 실패했습니다.");
+    } catch (error) {
+      console.error("비밀번호 변경 실패:", error);
+      toast.error("비밀번호 변경에 실패했습니다.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <>
+      <LoadingOverlay isLoading={isSubmitting}/>
+
+      <div className="account-main password-tab">
+        <div className="field">
+          <span className="field__label">
+            현재 비밀번호 <em>*</em>
+          </span>
+          <PasswordInput
+            id="pw-current"
+            value={form.current}
+            onChange={onChange("current")}
+            placeholder="현재 비밀번호를 입력해 주세요."
+            message={errors.current}
+            autoComplete="current-password"
+            required
+          />
+          {errors.current ? (
+            <span className="field__label">
+              <em>{errors.current}</em>
+            </span>
+          ) : null}
+
+          <span className="field__label">
+            새 비밀번호 <em>*</em>
+          </span>
+          <PasswordInput
+            id="pw-new"
+            value={form.next}
+            onChange={onChange("next")}
+            placeholder="새 비밀번호를 입력해 주세요."
+            message={errors.next}
+            autoComplete="new-password"
+            required
+          />
+          {errors.next ? (
+            <span className="field__label">
+              <em>{errors.next}</em>
+            </span>
+          ) : null}
+
+          <span className="field__label">
+            새 비밀번호 확인 <em>*</em>
+          </span>
+          <PasswordInput
+            id="pw-confirm"
+            value={form.confirm}
+            onChange={onChange("confirm")}
+            message={errors.confirm}
+            placeholder="새 비밀번호를 다시 입력해 주세요."
+            autoComplete="new-password"
+            required
+          />
+          {errors.confirm ? (
+            <span className="field__label">
+              <em>{errors.confirm}</em>
+            </span>
+          ) : null}
+        </div>
+
+        <div>
+          <div className="field">
             <div className="field__value_gray hint">
-                  <span>※ 비밀번호는 영문, 숫자, 특수문자를 모두 포함한 8~16자로 입력해 주세요.</span>
-                </div>
-              </div>
-              <div className="field form-action-group">
-              <div className="btn_wrap">
-                  <button className="default_btn_white btn-cancel" onClick={onCancel}>취소</button>
-                  <button className="default_btn_black"  onClick={handleSave}>저장</button>
-                  </div>
-              </div>
-              </div>
+              <span>※ 비밀번호는 영문, 숫자, 특수문자를 모두 포함한 8~16자로 입력해 주세요.</span>
             </div>
+          </div>
 
-            <div className="account-main mobile password-tab">
-             <div className="field">
-             <div className="field-group"> 
-              <span className="field__label">현재 비밀번호 <em>*</em></span>
-                <PasswordInput
-                id="pw-current"
-                value={form.current}
-                onChange={onChange("current")}
-                placeholder="현재 비밀번호를 입력해 주세요."
-                message={errors.current}
-              
-                autoComplete="current-password"
-                required
-                />
-                   {errors.current==undefined?<></>:<span className="field__label"><em> {errors.current}</em></span>}
-              
-                {/* {errors.current==""?<span className="field__label"><em> {errors.current}??</em></span>:<></>}
-               */}
-              </div>
-             
-              <div className="field-group"> 
-               <span className="field__label">새 비밀번호 <em>*</em></span>
-                <PasswordInput
-                id="pw-new"
-                value={form.next}                 
-                onChange={onChange("next")}
-                placeholder="새 비밀번호를 입력해 주세요."
-                message={errors.next}
-                autoComplete="new-password"
-                required/>
-                {errors.next==undefined?<></>:<span className="field__label"><em> {errors.next}</em></span>}
-                 {/* {errors.next!=""?<span className="field__label"><em> {errors.next}</em></span>:<></>} */}
-      
-               </div>
-               <div className="field-group"> 
-                <span className="field__label">새 비밀번호 확인 <em>*</em></span>
-                <PasswordInput
-                id="pw-confirm"
-                value={form.confirm}
-                onChange={onChange("confirm")}
-                message={errors.confirm}
-                placeholder="새 비밀번호를 다시 입력해 주세요."
-                autoComplete="new-password"
-                required
-                />
-                 {errors.confirm==undefined?<></>:<span className="field__label"><em> {errors.confirm}</em></span>}
-                 {/* {errors.confirm==""?<span className="field__label"><em> {errors.confirm}??</em></span>:<></>}*/}
-                </div>
-          
-            </div>
-            <div className="field">
-            <div className="field__value_gray hint">
-                  <span>※ 비밀번호는 영문, 숫자, 특수문자를 모두 포함한 8~16자로 입력해 주세요.</span>
-                </div>
-              </div>
-              <div className="field form-action-group">
-              <div className="btn_wrap">
-                  <button className="default_btn_white btn-cancel" onClick={onCancel}>취소</button>
-                  <button className="default_btn_black"  onClick={handleSave}>저장</button>
-                  </div>
-              </div>
+       
 
-             
+          <div className="field form-action-group">
+            <div className="btn_wrap">
+              <button
+                type="button"
+                className="default_btn_white btn-cancel"
+                onClick={onCancel}
+                disabled={isSubmitting}
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                className="default_btn_black"
+                onClick={handleSave}
+                disabled={isSubmitting}
+              >
+                저장
+              </button>
             </div>
-            
-            </>
-    );
-  }
+          </div>
+        </div>
+      </div>
+
+      <div className="account-main mobile password-tab">
+        <div className="field">
+          <div className="field-group">
+            <span className="field__label">
+              현재 비밀번호 <em>*</em>
+            </span>
+            <PasswordInput
+              id="pw-current-mobile"
+              value={form.current}
+              onChange={onChange("current")}
+              placeholder="현재 비밀번호를 입력해 주세요."
+              message={errors.current}
+              autoComplete="current-password"
+              required
+            />
+            {errors.current ? (
+              <span className="field__label">
+                <em>{errors.current}</em>
+              </span>
+            ) : null}
+          </div>
+
+          <div className="field-group">
+            <span className="field__label">
+              새 비밀번호 <em>*</em>
+            </span>
+            <PasswordInput
+              id="pw-new-mobile"
+              value={form.next}
+              onChange={onChange("next")}
+              placeholder="새 비밀번호를 입력해 주세요."
+              message={errors.next}
+              autoComplete="new-password"
+              required
+            />
+            {errors.next ? (
+              <span className="field__label">
+                <em>{errors.next}</em>
+              </span>
+            ) : null}
+          </div>
+
+          <div className="field-group">
+            <span className="field__label">
+              새 비밀번호 확인 <em>*</em>
+            </span>
+            <PasswordInput
+              id="pw-confirm-mobile"
+              value={form.confirm}
+              onChange={onChange("confirm")}
+              message={errors.confirm}
+              placeholder="새 비밀번호를 다시 입력해 주세요."
+              autoComplete="new-password"
+              required
+            />
+            {errors.confirm ? (
+              <span className="field__label">
+                <em>{errors.confirm}</em>
+              </span>
+            ) : null}
+          </div>
+        </div>
+
+        <div className="field">
+          <div className="field__value_gray hint">
+            <span>※ 비밀번호는 영문, 숫자, 특수문자를 모두 포함한 8~16자로 입력해 주세요.</span>
+          </div>
+        </div>
+
+       
+
+        <div className="field form-action-group">
+          <div className="btn_wrap">
+            <button
+              type="button"
+              className="default_btn_white btn-cancel"
+              onClick={onCancel}
+              disabled={isSubmitting}
+            >
+              취소
+            </button>
+            <button
+              type="button"
+              className="default_btn_black"
+              onClick={handleSave}
+              disabled={isSubmitting}
+            >
+              저장
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}

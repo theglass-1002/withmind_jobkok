@@ -53,7 +53,7 @@ export default function MyPageLayout() {
             <MyPageSideMenu myInfo={myInfo} />
 
             <section className="mypage__content" aria-labelledby="account-title">
-              <Outlet />
+            <Outlet context={{ myInfo, setMyInfo }} />
             </section>
           </div>
         </div>

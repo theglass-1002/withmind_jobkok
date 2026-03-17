@@ -41,9 +41,9 @@ export default function MyPage() {
 
       try {
         try {
-          const favoritesRes = await fetchJobList(1, 3, { tabs: "favorites" });
+          const favoritesRes = await fetchJobList(1, 20, { tabs: "favorites" });
           if (!isMounted) return;
-          setSavedJobs((favoritesRes.jobs ?? []).slice(0, 3));
+          setSavedJobs(favoritesRes.jobs ?? []);
           successCount += 1;
         } catch (e: any) {
           if (e?.code === 999) {
@@ -57,9 +57,9 @@ export default function MyPage() {
         }
 
         try {
-          const recentRes = await fetchJobList(1, 3, { tabs: "recent" });
+          const recentRes = await fetchJobList(1, 20, { tabs: "recent" });
           if (!isMounted) return;
-          setRecentJobs((recentRes.jobs ?? []).slice(0, 3));
+          setRecentJobs(recentRes.jobs ?? []);
           successCount += 1;
         } catch (e: any) {
           if (e?.code === 999) {
@@ -102,6 +102,10 @@ export default function MyPage() {
     };
   }, [navigate]);
 
+  const handleRemoveSavedJob = (jobIdx: number) => {
+    setSavedJobs((prev) => prev.filter((job) => job.jobIdx !== jobIdx));
+  };
+
   const visibleSavedJobs = useMemo(() => savedJobs.slice(0, 3), [savedJobs]);
   const visibleRecentJobs = useMemo(() => recentJobs.slice(0, 3), [recentJobs]);
 
@@ -138,6 +142,7 @@ export default function MyPage() {
                   job={job}
                   appliedSuccessMessage="지원 정보가 반영되었습니다."
                   showAppliedSection={false}
+                  onUnfavorite={handleRemoveSavedJob}
                 />
               ))}
           </ul>
@@ -207,7 +212,7 @@ export default function MyPage() {
               </span>
               <div className="resume-card__meta">
                 <span className="resume-card__date">
-                {formatDate(defaultResume?.createdAt)}
+                  {formatDate(defaultResume?.createdAt)}
                 </span>
                 <span className="resume-card__role">
                   {defaultResume?.hopeJobs ?? ""}

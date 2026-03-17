@@ -26,6 +26,8 @@ import {
   IssueTempPasswordResponse,
   IssueTempPasswordRequest,
   FetchMyInfoResponse,
+  UpdateUserResponse,
+  UpdateUserRequest,
 } from "./auth.types";
 
 import {
@@ -309,3 +311,24 @@ export async function fetchMyInfo(): Promise<FetchMyInfoResponse> {
 
 //   return res.data;
 // }
+
+/**
+ * 유저 정보 수정
+ * POST /api/user/update
+ */
+export async function updateUser(
+  payload: UpdateUserRequest
+): Promise<UpdateUserResponse> {
+  const res = await instance.put<UpdateUserResponse>(
+    "/api/user/update",
+    payload,
+    {
+      headers: {
+        "Content-Type": "application/json",
+        accept: "application/json",
+      },
+    }
+  );
+
+  return res.data;
+}

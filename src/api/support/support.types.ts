@@ -85,3 +85,16 @@ export type DeleteInquiryResponse = {
   code: number;
   msg: string;
 };
+
+export type InsertJobReportRequest = {
+  userIdx: string | number;
+  jobUrl: string;
+  memo: string;
+  email: string;
+};
+
+export type InsertJobReportResponse = {
+  code: number;
+  msg: string;
+  data?: number | string | null;
+};

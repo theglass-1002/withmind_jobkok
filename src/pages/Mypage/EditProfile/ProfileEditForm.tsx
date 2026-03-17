@@ -16,6 +16,7 @@ interface ProfileEditFormProps {
   onRequestDelete: () => void;
 }
 
+type GenderType = "M" | "W";
 
 export default function ProfileEditForm({
   userInfo,
@@ -29,21 +30,28 @@ export default function ProfileEditForm({
   const [isVerified, setIsVerified] = useState<boolean>(false);
   const [verifiedUserInfo, setVerifiedUserInfo] = useState<VerifiedUserInfo | null>(null);
   const [verifiedCertified, setVerifiedCertified] = useState<boolean>(false);
+  const [selectedGender, setSelectedGender] = useState<GenderType>("M");
 
   const handledRef = useRef(false);
 
+  useEffect(() => {
+    const initialGender = (verifiedUserInfo?.gender ||
+      userInfo?.gender ||
+      "M") as GenderType;
+
+    setSelectedGender(initialGender);
+  }, [userInfo?.gender, verifiedUserInfo?.gender]);
+
   const viewModel = useMemo(() => {
-
-
     return {
       email: userInfo?.email ?? "",
       certified: verifiedCertified || (userInfo?.certified ?? false),
       name: verifiedUserInfo?.name ?? userInfo?.name ?? "",
       number: verifiedUserInfo?.phone ?? userInfo?.number ?? "",
       birth: verifiedUserInfo?.birth ?? userInfo?.birth ?? "",
-      gender: userInfo.gender??"M",
+      gender: selectedGender,
     };
-  }, [userInfo, verifiedUserInfo, verifiedCertified]);
+  }, [userInfo, verifiedUserInfo, verifiedCertified, selectedGender]);
 
   useEffect(() => {
     const allowedOrigins = new Set([window.location.origin, "https://api.jobkok.kr"]);
@@ -75,16 +83,17 @@ export default function ProfileEditForm({
             toast.error("본인인증 검증에 실패했습니다.");
             return;
           }
-          //여기서 변경 반영
+
           const info: VerifiedUserInfo = {
             name: confirmRes.userName,
             phone: confirmRes.userPhone,
             birth: confirmRes.userBirth,
-            gender: confirmRes.userSex??"M",
+            gender: (confirmRes.userSex ?? "M") as GenderType,
             ci: confirmRes.ci,
           };
 
           setVerifiedUserInfo(info);
+          setSelectedGender((confirmRes.userSex ?? "M") as GenderType);
           setVerifiedCertified(true);
           setIsVerified(true);
 
@@ -112,11 +121,12 @@ export default function ProfileEditForm({
           name,
           phone,
           birth,
-          gender,
+          gender: (gender ?? "M") as GenderType,
           ci,
         };
 
         setVerifiedUserInfo(info);
+        setSelectedGender((gender ?? "M") as GenderType);
         setVerifiedCertified(true);
         setIsVerified(true);
 
@@ -187,221 +197,231 @@ export default function ProfileEditForm({
     }
   };
 
+  const handleGenderChange = (gender: GenderType) => {
+    setSelectedGender(gender);
+  };
+
   if (!userInfo) return <LoadingOverlay />;
 
   return (
     <>
-    <div className="account-main">
-      <div className="field">
-        <span className="field__label">아이디(이메일)</span>
-        <span className="field__value_gray">{viewModel.email || "-"}</span>
-      </div>
+      <div className="account-main">
+        <div className="field">
+          <span className="field__label">아이디(이메일)</span>
+          <span className="field__value_gray">{viewModel.email || "-"}</span>
+        </div>
 
-      <div className="field">
-        <span className="field__label">
-          휴대폰 번호 <em>*</em>
-        </span>
+        <div className="field">
+          <span className="field__label">
+            휴대폰 번호 <em>*</em>
+          </span>
 
-        <div className="number_field_value">
-          <div className="field__value_gray">
-            <span className={`value-text ${viewModel.certified ? "is-verified" : ""}`}>
-              {formatPhoneNumber(viewModel.number) || "-"}
-            </span>
+          <div className="number_field_value">
+            <div className="field__value_gray">
+              <span className={`value-text ${viewModel.certified ? "is-verified" : ""}`}>
+                {formatPhoneNumber(viewModel.number) || "-"}
+              </span>
+            </div>
+
+            <button
+              type="button"
+              className="default_btn_white"
+              onClick={handleVerify}
+              disabled={isVerified}
+            >
+              {isVerified ? "인증 완료" : "본인 인증"}
+            </button>
           </div>
 
-          <button
-            type="button"
-            className="default_btn_white"
-            onClick={handleVerify}
-            disabled={isVerified}
-          >
-            {isVerified ? "인증 완료" : "본인 인증"}
-          </button>
-        </div>
-
-        <span className="field__label">
-          이름 <em>*</em>
-        </span>
-        <div className="field__value_gray">
-          <span>{viewModel.name || "-"}</span>
-        </div>
-
-        <span className="field__label">
-          생년월일 <em>*</em>
-        </span>
-        <div className="field__value_gray birth">
-          <span>
-            <img src={calendar_today} alt="달력 아이콘" />
+          <span className="field__label">
+            이름 <em>*</em>
           </span>
-          <span className="date">{formatBirthdate(viewModel.birth) || "-"}</span>
-        </div>
-
-        <span className="field__label">
-          성별 <em>*</em>
-        </span>
-        <div className="btn_wrap">
-          <button
-            type="button"
-            className={`default_btn_white ${viewModel.gender === "M" ? "on" : ""}`}
-          >
-            남성
-          </button>
-
-          <button
-            type="button"
-            className={`default_btn_white ${viewModel.gender === "W" ? "on" : ""}`}
-          >
-            여성
-          </button>
-        </div>
-
-        <div className="field__value_gray hint">
-          <span>※ 휴대폰 번호, 이름, 생년월일은 본인 인증 완료 시 자동 반영됩니다.</span>
-        </div>
-      </div>
-
-      <div className="field">
-        <button type="button" className="default_a_btn_line" onClick={onRequestDelete}>
-          회원 탈퇴
-        </button>
-      </div>
-
-      <div className="field form-action-group">
-        <div className="btn_wrap">
-          <button type="button" className="default_btn_white btn-cancel" onClick={onCancel}>
-            취소
-          </button>
-          <button type="button" className="default_btn_black btn_w_full" onClick={onSubmit}>
-            저장
-          </button>
-        </div>
-      </div>
-
-      <form ref={saFormRef} name="saForm" style={{ display: "none" }}>
-        <input type="hidden" name="mid" value={inicisParams?.mid || ""} />
-        <input type="hidden" name="reqSvcCd" value={inicisParams?.reqSvcCd || ""} />
-        <input type="hidden" name="identifier" value="테스트서명입니다." />
-        <input type="hidden" name="mTxId" value={inicisParams?.mTxId || ""} />
-        <input type="hidden" name="authHash" value={inicisParams?.authHash || ""} />
-        <input type="hidden" name="flgFixedUser" value={inicisParams?.flgFixedUser || ""} />
-        <input type="hidden" name="userName" value={inicisParams?.userName || ""} />
-        <input type="hidden" name="userPhone" value={inicisParams?.userPhone || ""} />
-        <input type="hidden" name="userBirth" value={inicisParams?.userBirth || ""} />
-        <input type="hidden" name="userHash" value={inicisParams?.userHash || ""} />
-        <input type="hidden" name="reservedMsg" value={inicisParams?.reservedMsg || ""} />
-        <input type="hidden" name="directAgency" value={inicisParams?.directAgency || ""} />
-        <input type="hidden" name="successUrl" value={inicisParams?.successUrl || ""} />
-        <input type="hidden" name="failUrl" value={inicisParams?.failUrl || ""} />
-      </form>
-    </div>
-    <div className="account-main mobile">
-      <div className="field email">
-        <span className="field__label">아이디(이메일)</span>
-        <span className="field__value_gray">{viewModel.email || "-"}</span>
-      </div>
-      
-      <div className="field">
-        <div className="field-group"> 
-        <span className="field__label">
-          휴대폰 번호 <em>*</em>
-        </span>
-        <div className="number_field_value">
           <div className="field__value_gray">
-            <span className={`value-text ${viewModel.certified ? "is-verified" : ""}`}>
-              {formatPhoneNumber(viewModel.number) || "-"}
-            </span>
+            <span>{viewModel.name || "-"}</span>
           </div>
 
-          <button
-            type="button"
-            className="default_btn_white"
-            onClick={handleVerify}
-            disabled={isVerified}
-          >
-            {isVerified ? "인증 완료" : "본인 인증"}
-          </button>
-        </div>
-
-        </div>
-        <div className="field-group"> 
-        <span className="field__label">
-          이름 <em>*</em>
-        </span>
-        <div className="field__value_gray">
-          <span>{viewModel.name || "-"}</span>
-        </div>
-        </div>
-  
-        <div className="field-group"> 
-        <span className="field__label">
-          생년월일 <em>*</em>
-        </span>
-        <div className="field__value_gray birth">
-          <span>
-            <img src={calendar_today} alt="달력 아이콘" />
+          <span className="field__label">
+            생년월일 <em>*</em>
           </span>
-          <span className="date">{formatBirthdate(viewModel.birth) || "-"}</span>
-        </div>
+          <div className="field__value_gray birth">
+            <span>
+              <img src={calendar_today} alt="달력 아이콘" />
+            </span>
+            <span className="date">{formatBirthdate(viewModel.birth) || "-"}</span>
+          </div>
+
+          <span className="field__label">
+            성별 <em>*</em>
+          </span>
+          <div className="btn_wrap">
+            <button
+              type="button"
+              className={`default_btn_white ${viewModel.gender === "M" ? "on" : ""}`}
+              onClick={() => handleGenderChange("M")}
+            >
+              남성
+            </button>
+
+            <button
+              type="button"
+              className={`default_btn_white ${viewModel.gender === "W" ? "on" : ""}`}
+              onClick={() => handleGenderChange("W")}
+            >
+              여성
+            </button>
+          </div>
+
+          <div className="field__value_gray hint">
+            <span>※ 휴대폰 번호, 이름, 생년월일은 본인 인증 완료 시 자동 반영됩니다.</span>
+          </div>
         </div>
 
-        <div className="field-group"> 
-        <span className="field__label">
-          성별 <em>*</em>
-        </span>
-        <div className="btn_wrap">
-          <button
-            type="button"
-            className={`default_btn_white ${viewModel.gender === "M" ? "on" : ""}`}
-          >
-            남성
+        <div className="field">
+          <button type="button" className="default_a_btn_line" onClick={onRequestDelete}>
+            회원 탈퇴
           </button>
+        </div>
 
-          <button
-            type="button"
-            className={`default_btn_white ${viewModel.gender === "W" ? "on" : ""}`}
-          >
-            여성
-          </button>
+        <div className="field form-action-group">
+          <div className="btn_wrap">
+            <button type="button" className="default_btn_white btn-cancel" onClick={onCancel}>
+              취소
+            </button>
+            <button type="button" className="default_btn_black btn_w_full" onClick={onSubmit}>
+              저장
+            </button>
+          </div>
         </div>
-        </div>
-     
 
-        <div className="field__value_gray hint">
-          <span>※ 휴대폰 번호, 이름, 생년월일은 본인 인증 완료 시 자동 반영됩니다.</span>
-        </div>
+        <form ref={saFormRef} name="saForm" style={{ display: "none" }}>
+          <input type="hidden" name="mid" value={inicisParams?.mid || ""} />
+          <input type="hidden" name="reqSvcCd" value={inicisParams?.reqSvcCd || ""} />
+          <input type="hidden" name="identifier" value="테스트서명입니다." />
+          <input type="hidden" name="mTxId" value={inicisParams?.mTxId || ""} />
+          <input type="hidden" name="authHash" value={inicisParams?.authHash || ""} />
+          <input type="hidden" name="flgFixedUser" value={inicisParams?.flgFixedUser || ""} />
+          <input type="hidden" name="userName" value={inicisParams?.userName || ""} />
+          <input type="hidden" name="userPhone" value={inicisParams?.userPhone || ""} />
+          <input type="hidden" name="userBirth" value={inicisParams?.userBirth || ""} />
+          <input type="hidden" name="userHash" value={inicisParams?.userHash || ""} />
+          <input type="hidden" name="reservedMsg" value={inicisParams?.reservedMsg || ""} />
+          <input type="hidden" name="directAgency" value={inicisParams?.directAgency || ""} />
+          <input type="hidden" name="successUrl" value={inicisParams?.successUrl || ""} />
+          <input type="hidden" name="failUrl" value={inicisParams?.failUrl || ""} />
+        </form>
       </div>
 
-      <button type="button" className="default_a_btn_line account-withdraw-btn" onClick={onRequestDelete}>
+      <div className="account-main mobile">
+        <div className="field email">
+          <span className="field__label">아이디(이메일)</span>
+          <span className="field__value_gray">{viewModel.email || "-"}</span>
+        </div>
+
+        <div className="field">
+          <div className="field-group">
+            <span className="field__label">
+              휴대폰 번호 <em>*</em>
+            </span>
+            <div className="number_field_value">
+              <div className="field__value_gray">
+                <span className={`value-text ${viewModel.certified ? "is-verified" : ""}`}>
+                  {formatPhoneNumber(viewModel.number) || "-"}
+                </span>
+              </div>
+
+              <button
+                type="button"
+                className="default_btn_white"
+                onClick={handleVerify}
+                disabled={isVerified}
+              >
+                {isVerified ? "인증 완료" : "본인 인증"}
+              </button>
+            </div>
+          </div>
+
+          <div className="field-group">
+            <span className="field__label">
+              이름 <em>*</em>
+            </span>
+            <div className="field__value_gray">
+              <span>{viewModel.name || "-"}</span>
+            </div>
+          </div>
+
+          <div className="field-group">
+            <span className="field__label">
+              생년월일 <em>*</em>
+            </span>
+            <div className="field__value_gray birth">
+              <span>
+                <img src={calendar_today} alt="달력 아이콘" />
+              </span>
+              <span className="date">{formatBirthdate(viewModel.birth) || "-"}</span>
+            </div>
+          </div>
+
+          <div className="field-group">
+            <span className="field__label">
+              성별 <em>*</em>
+            </span>
+            <div className="btn_wrap">
+              <button
+                type="button"
+                className={`default_btn_white ${viewModel.gender === "M" ? "on" : ""}`}
+                onClick={() => handleGenderChange("M")}
+              >
+                남성
+              </button>
+
+              <button
+                type="button"
+                className={`default_btn_white ${viewModel.gender === "W" ? "on" : ""}`}
+                onClick={() => handleGenderChange("W")}
+              >
+                여성
+              </button>
+            </div>
+          </div>
+
+          <div className="field__value_gray hint">
+            <span>※ 휴대폰 번호, 이름, 생년월일은 본인 인증 완료 시 자동 반영됩니다.</span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          className="default_a_btn_line account-withdraw-btn"
+          onClick={onRequestDelete}
+        >
           회원 탈퇴
         </button>
-      <div className="field form-action-group">
-        <div className="btn_wrap">
-       
-          <button type="button" className="default_btn_black btn_w_full" onClick={onSubmit}>
-            저장
-          </button>
-        </div>
-      </div>
 
-      <form ref={saFormRef} name="saForm" style={{ display: "none" }}>
-        <input type="hidden" name="mid" value={inicisParams?.mid || ""} />
-        <input type="hidden" name="reqSvcCd" value={inicisParams?.reqSvcCd || ""} />
-        <input type="hidden" name="identifier" value="테스트서명입니다." />
-        <input type="hidden" name="mTxId" value={inicisParams?.mTxId || ""} />
-        <input type="hidden" name="authHash" value={inicisParams?.authHash || ""} />
-        <input type="hidden" name="flgFixedUser" value={inicisParams?.flgFixedUser || ""} />
-        <input type="hidden" name="userName" value={inicisParams?.userName || ""} />
-        <input type="hidden" name="userPhone" value={inicisParams?.userPhone || ""} />
-        <input type="hidden" name="userBirth" value={inicisParams?.userBirth || ""} />
-        <input type="hidden" name="userHash" value={inicisParams?.userHash || ""} />
-        <input type="hidden" name="reservedMsg" value={inicisParams?.reservedMsg || ""} />
-        <input type="hidden" name="directAgency" value={inicisParams?.directAgency || ""} />
-        <input type="hidden" name="successUrl" value={inicisParams?.successUrl || ""} />
-        <input type="hidden" name="failUrl" value={inicisParams?.failUrl || ""} />
-      </form>
-   
-    
-    </div>
+        <div className="field form-action-group">
+          <div className="btn_wrap">
+            <button type="button" className="default_btn_black btn_w_full" onClick={onSubmit}>
+              저장
+            </button>
+          </div>
+        </div>
+
+        <form name="saForm" style={{ display: "none" }}>
+          <input type="hidden" name="mid" value={inicisParams?.mid || ""} />
+          <input type="hidden" name="reqSvcCd" value={inicisParams?.reqSvcCd || ""} />
+          <input type="hidden" name="identifier" value="테스트서명입니다." />
+          <input type="hidden" name="mTxId" value={inicisParams?.mTxId || ""} />
+          <input type="hidden" name="authHash" value={inicisParams?.authHash || ""} />
+          <input type="hidden" name="flgFixedUser" value={inicisParams?.flgFixedUser || ""} />
+          <input type="hidden" name="userName" value={inicisParams?.userName || ""} />
+          <input type="hidden" name="userPhone" value={inicisParams?.userPhone || ""} />
+          <input type="hidden" name="userBirth" value={inicisParams?.userBirth || ""} />
+          <input type="hidden" name="userHash" value={inicisParams?.userHash || ""} />
+          <input type="hidden" name="reservedMsg" value={inicisParams?.reservedMsg || ""} />
+          <input type="hidden" name="directAgency" value={inicisParams?.directAgency || ""} />
+          <input type="hidden" name="successUrl" value={inicisParams?.successUrl || ""} />
+          <input type="hidden" name="failUrl" value={inicisParams?.failUrl || ""} />
+        </form>
+      </div>
     </>
   );
 }

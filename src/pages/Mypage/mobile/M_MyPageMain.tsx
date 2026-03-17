@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import M_MyPageSideMenu from "@/pages/Mypage/mobile/M_MyPageSideMenu";
 import M_Mypage from "@/pages/Mypage/mobile/M_Mypage";
 import { useStickyTabs } from "@/shared/utils/util";
@@ -18,12 +18,19 @@ export default function M_MyPageMain({ myInfo }: Props) {
     ".page-header"
   );
 
+
+
+  useEffect(() => {
+   
+  }, [myInfo]);
+
   const tabItems = [
     { key: "profile", label: "프로필" },
     { key: "activity", label: "내 활동" },
   ];
 
   const handleTabClick = (key: "profile" | "activity") => {
+    console.log("[M_MyPageMain] tab clicked:", key);
     setActiveTab(key);
   };
 
@@ -40,7 +47,9 @@ export default function M_MyPageMain({ myInfo }: Props) {
 
       <div id="sticky-trigger" className="mypage__body">
         {activeTab === "profile" ? (
-          <M_MyPageSideMenu myInfo={myInfo} />
+          <>
+            <M_MyPageSideMenu myInfo={myInfo} />
+          </>
         ) : (
           <M_Mypage />
         )}

@@ -18,6 +18,9 @@ import ic_strength_circle_24 from "@/assets/icons/size24/ic_strength_circle_24.p
 import ic_arrow_drop_down_white_24 from "@/assets/icons/size24/ic_arrow_drop_down_white_24.png";
 import ic_check_box_blank_gray400_24 from "@/assets/icons/size24/ic_check_box_blank_gray400_24.svg";
 import ic_check_box_purple24 from "@/assets/icons/size24/ic_check_box_purple24.svg";
+import ic_bookmark_active_purple24 from "@/assets/icons/size24/ic_bookmark_active_purple24.svg";
+import ic_bookmark_gray400_24 from "@/assets/icons/size24/ic_bookmark_gray400_24.svg";
+
 
 
 import ic_kakao_login_20 from "./login/ic_kakao_login_20.svg";
@@ -39,6 +42,8 @@ import ic_delete_gray900_20 from "@/assets/icons/size20/ic_delete_gray900_20.svg
 
 import ic_calendar_gray900_20 from "@/assets/icons/size20/ic_calendar_gray900_20.svg";
 import ic_calendar_red_20 from "@/assets/icons/size20/ic_calendar_red_20.svg";
+import ic_visibility700_20 from "@/assets/icons/size20/ic_visibility700_20.svg";
+import ic_visibility_off700_20 from "@/assets/icons/size20/ic_visibility_off700_20.svg";
 
 import ic_edit_white_20 from "@/assets/icons/size20/ic_edit_white_20.svg";
 
@@ -69,8 +74,6 @@ import heart_icon_40px from "@/assets/icons/category_icons/heart_icon_40px.svg";
 
 import headphones_icon_40px from "@/assets/icons/category_icons/headphones_icon_40px.svg";
 import shield_icon_40px from "@/assets/icons/category_icons/shield_icon_40px.svg";
-
-
 
 
 import interview_step_custom_all_1 from "@/assets/progress/interview_step_custom_all_1.svg";
@@ -152,5 +155,9 @@ export const Icons = {
     ic_calendar_red_20,
     ic_edit_white_20,
     ic_arrow_drop_down_gray900_24,
-    ic_delete_gray900_20
+    ic_delete_gray900_20,
+    ic_visibility700_20,
+    ic_visibility_off700_20,
+    ic_bookmark_active_purple24,
+    ic_bookmark_gray400_24
 };

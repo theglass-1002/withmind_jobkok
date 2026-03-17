@@ -50,33 +50,59 @@ export default function EditProfile() {
   const myInfoFromState =
     (location.state as LocationState | null)?.myInfo ?? null;
 
-  const [userData, setUserData] = useState<UserProfile>(() =>
-    toUserProfileFromMyInfo(myInfoFromState)
-  );
-
-  useEffect(() => {
-    setUserData(toUserProfileFromMyInfo(myInfoFromState));
-  }, [myInfoFromState]);
-
   const [dialog, setDialog] = useState<DialogKind>(null);
-
   const [activeTab, setActiveTab] = useState<"edit" | "password">("edit");
+  const [userData, setUserData] = useState<UserProfile>({
+    email: "",
+    number: "",
+    name: "",
+    birth: "",
+    gender: "M",
+    certified: false,
+  });
+
   const tabItems = [
     { key: "edit", label: "기본 정보" },
     { key: "password", label: "비밀번호" },
   ];
 
-  const handleTabClick = (key: "password" | "edit") => setActiveTab(key);
+  useEffect(() => {
 
-  const closeDialog = () => setDialog(null);
-  const openDeleteAccountModal = () => setDialog("deleteAccount");
+
+    if (!myInfoFromState) return;
+
+    const mapped = toUserProfileFromMyInfo(myInfoFromState);
+
+
+    setUserData(mapped);
+  }, [myInfoFromState]);
+
+  useEffect(() => {
+  }, [userData]);
+
+  const handleTabClick = (key: "password" | "edit") => {
+    setActiveTab(key);
+  };
+
+  const closeDialog = () => {
+    setDialog(null);
+  };
+
+  const openDeleteAccountModal = () => {
+    setDialog("deleteAccount");
+  };
 
   const handleConfirmDeleteAccount = async () => {
     setDialog("deleteAccountSuccess");
   };
 
   const handleConfirmEditAccount = async () => {
-    setDialog("editAccountSuccess");
+    try {
+      setDialog("editAccountSuccess");
+    } catch (error) {
+      console.error("회원 정보 수정 실패:", error);
+      setDialog("error");
+    }
   };
 
   const renderContent = () => {
@@ -176,7 +202,7 @@ export default function EditProfile() {
         confirmText="확인"
         showCancel={false}
         confirmClassName="btn btn--primary"
-        onConfirm={() => navigate("/", { replace: true })}
+        onConfirm={closeDialog}
         onClose={closeDialog}
       />
     </>

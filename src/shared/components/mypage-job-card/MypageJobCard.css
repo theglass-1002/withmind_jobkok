@@ -47,6 +47,11 @@
  font-size: 14px;
 }
 
+
+.mp-section .saved .job-posting__card .job-card__body .job-card__title-group .job-posting__company{
+    font-weight: 600;
+}
+
 .mp-section .saved .job-posting__card .job-card__body .job-card__info-group,
 .mp-section .recent .job-posting__card .job-card__body .job-card__info-group
 {

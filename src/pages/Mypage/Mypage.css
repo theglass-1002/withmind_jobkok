@@ -655,6 +655,9 @@ line-height: 18px; /* 128.571% */
     height: 20px;
   }
   
+  .mypage__content-main .account-main .field .field__value .icon_wrap{
+    cursor: pointer;
+  }
 
  
 .mypage__content-main .account-main .field .field__value input{
@@ -1699,6 +1702,7 @@ line-height: 20px; /* 125% */
         .mp-section .job-list{
             display: flex;
             overflow: auto;
+            gap: 12px;
           
         }
         .mp-section .job-list .job-card{
@@ -1910,9 +1914,8 @@ line-height: 20px; /* 125% */
             padding: 8px 20px 0 20px;
         }
         .my-page_edit-tabs{
-         
             display: flex;
-            gap: 10px;
+            gap: 20px;
             padding: 0px;
         }
 
@@ -1976,7 +1979,7 @@ line-height: 20px; /* 125% */
             display: flex;
             height: auto;
             gap: 0px;
-            padding-bottom: 100px;
+            padding: 0px;
         }
         
 
@@ -2005,6 +2008,11 @@ line-height: 20px; /* 125% */
         }
         .field{
             gap: 12px;
+          }
+
+          .mypage_main .mp-section .empty{
+            font-size: 14px;
+            height: 90px;
           }
     }
 

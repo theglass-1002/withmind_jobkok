@@ -38,7 +38,6 @@ export default function M_Mypage() {
       let successCount = 0;
 
       try {
-        // 1) 저장한 공고
         try {
           const favoritesRes = await fetchJobList(1, 3, { tabs: "favorites" });
           console.log("[M_Mypage] favoritesRes:", favoritesRes);
@@ -57,7 +56,6 @@ export default function M_Mypage() {
           console.error("[M_Mypage] 저장한 공고 조회 실패", e);
         }
 
-        // 2) 최근 본 공고
         try {
           const recentRes = await fetchJobList(1, 3, { tabs: "recent" });
           console.log("[M_Mypage] recentRes:", recentRes);
@@ -76,7 +74,6 @@ export default function M_Mypage() {
           console.error("[M_Mypage] 최근 본 공고 조회 실패", e);
         }
 
-        // 3) 기본 이력서 (첫 번째)
         try {
           const resumeRes = await fetchResumeList(1, 1);
           console.log("[M_Mypage] resumeRes:", resumeRes);
@@ -107,6 +104,31 @@ export default function M_Mypage() {
       isMounted = false;
     };
   }, [navigate]);
+
+  const handleUnfavorite = (jobIdx: number) => {
+    setSavedJobs((prev) => prev.filter((job) => job.jobIdx !== jobIdx));
+
+    setRecentJobs((prev) =>
+      prev.map((job) =>
+        job.jobIdx === jobIdx ? { ...job, favorite: 0 as 0 | 1 } : job
+      )
+    );
+  };
+
+  const handleFavorite = (job: JobItem) => {
+    setSavedJobs((prev) => {
+      const exists = prev.some((item) => item.jobIdx === job.jobIdx);
+      if (exists) return prev;
+
+      return [{ ...job, favorite: 1 as 0 | 1 }, ...prev].slice(0, 3);
+    });
+
+    setRecentJobs((prev) =>
+      prev.map((item) =>
+        item.jobIdx === job.jobIdx ? { ...item, favorite: 1 as 0 | 1 } : item
+      )
+    );
+  };
 
   const visibleSavedJobs = useMemo(() => savedJobs.slice(0, 3), [savedJobs]);
   const visibleRecentJobs = useMemo(() => recentJobs.slice(0, 3), [recentJobs]);
@@ -176,12 +198,13 @@ export default function M_Mypage() {
                   job={job}
                   appliedSuccessMessage="지원 정보가 반영되었습니다."
                   showAppliedSection={false}
+                  onUnfavorite={handleUnfavorite}
+                  onFavorite={handleFavorite}
                 />
               ))}
           </ul>
         </section>
 
-        {/* 공고 제보 배너 */}
         <div className="job_submission_banner">
           <img className="job_submission_banner__image" src={mp_banner} alt="" />
           <span className="job_submission_banner__headline">
@@ -221,6 +244,8 @@ export default function M_Mypage() {
                   job={job}
                   appliedSuccessMessage="지원 정보가 반영되었습니다."
                   showAppliedSection={false}
+                  onFavorite={handleFavorite}
+                  onUnfavorite={handleUnfavorite}
                 />
               ))}
           </ul>

@@ -1,16 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
-import bookmark_active_purple from "@/assets/icons/bookmark_active_purple.png";
-import bookmark_inactive from "@/assets/icons/bookmark_inactive.png";
 import mp_test_logo from "@/assets/icons/mp_test_logo.png";
-import jobkorea from "@/assets/icons/company_logos/jobkorea.png";
-import fire from "@/assets/icons/fire.png";
-import seed from "@/assets/icons/seed.png";
 import check_circle_purple from "@/assets/icons/check_circle_purple.png";
 import "./MypageJobCard.css";
-
 
 import {
   getCareerLabel,
@@ -27,6 +21,7 @@ import {
 } from "@/api/job/job.api";
 
 import { logout } from "@/api/auth/auth.api";
+import { Icons } from "@/assets/icons";
 
 const DEFAULT_SUCCESS_MESSAGE = "지원 정보가 반영되었습니다.";
 const DEFAULT_INFO_MESSAGE = "기록을 해제했어요.";
@@ -35,9 +30,9 @@ interface MypageJobCardProps {
   appliedSuccessMessage?: string;
   unappliedInfoMessage?: string;
   showAppliedSection?: boolean;
-
-  /** 실제 공고 데이터 */
   job?: JobItem;
+  onUnfavorite?: (jobIdx: number) => void;
+  onFavorite?: (job: JobItem) => void;
 }
 
 export default function MypageJobCard({
@@ -45,11 +40,22 @@ export default function MypageJobCard({
   unappliedInfoMessage = DEFAULT_INFO_MESSAGE,
   showAppliedSection = true,
   job,
+  onUnfavorite,
+  onFavorite,
 }: MypageJobCardProps) {
   const navigate = useNavigate();
 
-  const [bookMark, setBookMark] = useState<0 | 1>(((job?.favorite as 0 | 1) ?? 0));
-  const [recordAsApplied, setRecordAsApplied] = useState<0 | 1>(((job?.applied as 0 | 1) ?? 0));
+  const [bookMark, setBookMark] = useState<0 | 1>((job?.favorite as 0 | 1) ?? 0);
+  const [recordAsApplied, setRecordAsApplied] = useState<0 | 1>((job?.applied as 0 | 1) ?? 0);
+  const [isBookmarkLoading, setIsBookmarkLoading] = useState(false);
+
+  useEffect(() => {
+    setBookMark((job?.favorite as 0 | 1) ?? 0);
+  }, [job?.favorite]);
+
+  useEffect(() => {
+    setRecordAsApplied((job?.applied as 0 | 1) ?? 0);
+  }, [job?.applied]);
 
   const handleGoToJobPost = () => {
     if (!job) return;
@@ -58,23 +64,27 @@ export default function MypageJobCard({
 
   const handleBookmarkToggle = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!job) return;
+    if (!job || isBookmarkLoading) return;
 
     const prev = bookMark;
     const isFavorite = prev === 1;
     const next: 0 | 1 = isFavorite ? 0 : 1;
 
     try {
-      // optimistic
+      setIsBookmarkLoading(true);
       setBookMark(next);
 
       await toggleJobFavorite(job.jobIdx, isFavorite);
 
-      toast.success(next === 1 ? "즐겨찾기에 추가되었습니다." : "즐겨찾기가 해제되었습니다.");
+      if (next === 1) {
+        toast.success("즐겨찾기에 추가되었습니다.");
+        onFavorite?.({ ...job, favorite: 1 as 0 | 1 });
+      } else {
+        toast.success("즐겨찾기가 해제되었습니다.");
+        onUnfavorite?.(job.jobIdx);
+      }
     } catch (err: any) {
       console.error(err);
-
-      // rollback
       setBookMark(prev);
 
       if (err?.code === 999) {
@@ -84,14 +94,11 @@ export default function MypageJobCard({
       }
 
       toast.error("즐겨찾기 처리 중 오류가 발생했습니다.");
+    } finally {
+      setIsBookmarkLoading(false);
     }
   };
 
-  /**
-   * ✅ 지원 기록 토글
-   * next === 1 → 기록하기(POST)
-   * next === 0 → 기록해제(DELETE)
-   */
   const handleRecordAsApplied = async (e: React.MouseEvent, next: 0 | 1) => {
     e.stopPropagation();
     if (!job) return;
@@ -99,7 +106,6 @@ export default function MypageJobCard({
     const prev = recordAsApplied;
     if (prev === next) return;
 
-    // optimistic
     setRecordAsApplied(next);
 
     try {
@@ -112,8 +118,6 @@ export default function MypageJobCard({
       }
     } catch (err: any) {
       console.error(err);
-
-      // rollback
       setRecordAsApplied(prev);
 
       if (err?.code === 999) {
@@ -126,7 +130,6 @@ export default function MypageJobCard({
     }
   };
 
-  // job 없으면 최소 렌더(에러 방지)
   if (!job) {
     return (
       <div className="job-posting__card">
@@ -136,7 +139,6 @@ export default function MypageJobCard({
             <div className="job-card__identity">
               <div className="job-card__byline">
                 <span className="job-posting__company">-</span>
-  
               </div>
               <span className="job-posting__role">-</span>
             </div>
@@ -154,27 +156,33 @@ export default function MypageJobCard({
   return (
     <div className="job-posting__card" onClick={handleGoToJobPost}>
       <div className="job-card__header">
-      <img
-            className="job-posting__logo"
-            src={job.companyLogoUrl || mp_test_logo}
-            alt={job.companyName ?? ""}
-          />
-            <span className="job-card__favorite">
-          <img
-            src={bookMark === 0 ? bookmark_inactive : bookmark_active_purple}
-            onClick={handleBookmarkToggle}
-            alt=""
-          />
-        </span>
+        <img
+          className="job-posting__logo"
+          src={job.companyLogoUrl || mp_test_logo}
+          alt={job.companyName ?? ""}
+        />
+
+        <img
+          className="job-card__favorite"
+          src={
+            bookMark === 0
+              ? Icons.ic_bookmark_gray400_24
+              : Icons.ic_bookmark_active_purple24
+          }
+          onClick={handleBookmarkToggle}
+          alt="즐겨찾기"
+        />
       </div>
+
       <div className="job-card__body">
         <div className="job-card__content">
-        <div className="job-card__title-group">
-         <span className="job-posting__company">{job.companyName}</span>
-         <span className="job-posting__role">{job.name}</span>
-         </div>
-         <div className="job-card__info-group">
-         <div className="job-posting__meta-items">
+          <div className="job-card__title-group">
+            <span className="job-posting__company">{job.companyName}</span>
+            <span className="job-posting__role">{job.name}</span>
+          </div>
+
+          <div className="job-card__info-group">
+            <div className="job-posting__meta-items">
               <span className="job-posting__meta-item">
                 {loc}ㆍ{career}ㆍ{job.educationText ?? edu}
               </span>
@@ -182,12 +190,8 @@ export default function MypageJobCard({
             <span className="job-card__deadline">
               {employmentType} ㆍ {job.dueTime ?? "상시채용"}
             </span>
-         </div>
-
-        
+          </div>
         </div>
-
-        
 
         {showAppliedSection &&
           (recordAsApplied === 0 ? (

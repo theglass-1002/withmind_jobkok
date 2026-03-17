@@ -237,3 +237,17 @@ export function formatBirthdate(yyyymmdd?: string): string {
 
   return `${year}.${month}.${day}`;
 }
+
+export interface UpdateUserRequest {
+  userIdx: string | number;
+  userName: string;
+  email: string;
+  password: string;
+  modifier: string;
+}
+
+export interface UpdateUserResponse {
+  code: number;
+  msg: string;
+  userIdx?: number | string;
+}
