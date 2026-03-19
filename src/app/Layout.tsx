@@ -293,7 +293,7 @@ export default function Layout({
         <PageHeader
           title="공지사항"
           leftElement={<img src={ic_arrow_back_ios_gray900_20} alt="닫기" />}
-          onLeftElementClick={() => navigate("/mypage")}
+          onLeftElementClick={()  =>{handleSendActions("NOTICE_BACK")}}
           rightIcons={<img src={ic_home_gray900_20} alt="홈" />}
           onRightElementClick={() => navigate("/")}
         />

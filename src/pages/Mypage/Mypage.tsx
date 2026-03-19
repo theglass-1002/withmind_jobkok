@@ -77,7 +77,7 @@ export default function MyPage() {
           if (!isMounted) return;
           setDefaultResume((resumeRes.list ?? [])[0] ?? null);
           successCount += 1;
-          console.log(resumeRes);
+         
         } catch (e: any) {
           if (e?.code === 999) {
             logout();

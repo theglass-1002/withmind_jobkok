@@ -239,11 +239,16 @@ export function formatBirthdate(yyyymmdd?: string): string {
 }
 
 export interface UpdateUserRequest {
-  userIdx: string | number;
-  userName: string;
-  email: string;
-  password: string;
-  modifier: string;
+  userIdx: number;
+  phone?: string;
+  userName?: string;
+  birthdate?: string;
+  gender?: "M" | "W";
+  certified?: boolean;
+
+  // 선택으로 변경
+  email?: string;
+  password?: string;
 }
 
 export interface UpdateUserResponse {

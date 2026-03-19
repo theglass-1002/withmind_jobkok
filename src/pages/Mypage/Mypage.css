@@ -1042,6 +1042,7 @@ line-height: 18px; /* 128.571% */
   }
 
 
+
   .field .label{
     color: var(--gray-900, #2A2D2F);
     font-family: Pretendard;
@@ -1827,6 +1828,14 @@ line-height: 20px; /* 125% */
             border-radius: 0px;
             background: var(--gray-50, #F8F8F9);
         }
+        .notice-container .body{
+            width: 100%;
+        }
+        .notice-container .body .body-list{
+            width: 100%;
+           
+        }
+
         .notice-container .body .body-list .cell__item{
             display: flex;
             padding: 20px;
@@ -1834,6 +1843,8 @@ line-height: 20px; /* 125% */
             align-items: flex-start;
             gap: 8px;
             align-self: stretch;
+            border-bottom: 1px solid var(--gray-300, #E0E2E4);
+            background: var(--white-100, #FFF);
         }
         .notice-container .cell--title{
            padding: 0px;

@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useOutletContext } from "react-router-dom";
 import PasswordTab from "./PasswordTab";
-import ProfileEditForm from "./ProfileEditForm";
+import ProfileEditForm, { ProfileEditSubmitPayload } from "./ProfileEditForm";
 import Modal from "@/shared/components/modal/Modal";
+import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
 import { UserProfile } from "@/shared/api/user";
 import Tabs from "@/shared/components/tabs/Tabs";
-import type { MyInfo } from "@/api/auth/auth.types";
+import type { MyInfo, UpdateUserRequest } from "@/api/auth/auth.types";
+import { updateUser } from "@/api/auth/auth.api";
 
 type DialogKind =
   | "deleteAccount"
@@ -13,6 +15,11 @@ type DialogKind =
   | "deleteAccountSuccess"
   | "error"
   | null;
+
+type OutletContextType = {
+  myInfo: MyInfo | null;
+  setMyInfo: React.Dispatch<React.SetStateAction<MyInfo | null>>;
+};
 
 type LocationState = {
   myInfo?: MyInfo | null;
@@ -47,11 +54,15 @@ export default function EditProfile() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const myInfoFromState =
+  const outletContext = useOutletContext<OutletContextType | null>();
+  const myInfoFromLocation =
     (location.state as LocationState | null)?.myInfo ?? null;
+
+  const myInfo = outletContext?.myInfo ?? myInfoFromLocation ?? null;
 
   const [dialog, setDialog] = useState<DialogKind>(null);
   const [activeTab, setActiveTab] = useState<"edit" | "password">("edit");
+  const [isSaving, setIsSaving] = useState(false);
   const [userData, setUserData] = useState<UserProfile>({
     email: "",
     number: "",
@@ -67,17 +78,14 @@ export default function EditProfile() {
   ];
 
   useEffect(() => {
+    if (!myInfo) return;
 
-
-    if (!myInfoFromState) return;
-
-    const mapped = toUserProfileFromMyInfo(myInfoFromState);
-
-
+    const mapped = toUserProfileFromMyInfo(myInfo);
     setUserData(mapped);
-  }, [myInfoFromState]);
+  }, [outletContext, myInfoFromLocation, myInfo]);
 
   useEffect(() => {
+    
   }, [userData]);
 
   const handleTabClick = (key: "password" | "edit") => {
@@ -96,12 +104,79 @@ export default function EditProfile() {
     setDialog("deleteAccountSuccess");
   };
 
-  const handleConfirmEditAccount = async () => {
+  const handleConfirmEditAccount = async (
+    payload: ProfileEditSubmitPayload
+  ) => {
     try {
+      setIsSaving(true);
+
+      console.log("수정");
+      console.log("전달받은 전체 payload:", payload);
+      console.log("휴대폰 번호:", payload.phone);
+      console.log("이름:", payload.name);
+      console.log("생년월일:", payload.birth);
+      console.log("성별:", payload.gender);
+      console.log("인증 여부:", payload.certified);
+
+      const requestPayload: UpdateUserRequest = {
+        userIdx: myInfo?.userIdx ?? 0,
+        email: myInfo?.userId ?? userData.email ?? "",
+        password: "",
+        phone: payload.phone,
+        userName: payload.name,
+        birthdate: payload.birth,
+        gender: payload.gender,
+        certified: payload.certified,
+      };
+
+   
+
+      const res = await updateUser(requestPayload);
+
+
+
+      setUserData((prev) => ({
+        ...prev,
+        number: payload.phone,
+        name: payload.name,
+        birth: payload.birth,
+        gender: payload.gender,
+        certified: payload.certified,
+      }));
+
+      if (outletContext?.setMyInfo) {
+        outletContext.setMyInfo((prev) => {
+          if (!prev) return prev;
+
+          return {
+            ...prev,
+            phone: payload.phone,
+            userName: payload.name,
+            birthdate: payload.birth,
+            gender: payload.gender,
+          };
+        });
+      }
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+      document.documentElement.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+      document.body.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+
       setDialog("editAccountSuccess");
     } catch (error) {
       console.error("회원 정보 수정 실패:", error);
       setDialog("error");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -124,6 +199,12 @@ export default function EditProfile() {
 
   return (
     <>
+      <LoadingOverlay
+        isLoading={isSaving}
+        isLogo={false}
+        text="회원 정보를 저장하고 있습니다."
+      />
+
       <div className="edit-profile__container">
         <header className="mypage__content-header tabs">
           <h2 className="title">회원 정보 수정</h2>

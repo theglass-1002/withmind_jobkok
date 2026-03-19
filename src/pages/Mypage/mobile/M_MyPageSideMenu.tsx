@@ -104,9 +104,7 @@ export default function M_MyPageSideMenu({ myInfo, planName, planExpireAt }: Pro
                     className={({ isActive }) =>
                       `sidemenu__link ${isActive ? "is-active" : ""}`
                     }
-                    onClick={() =>
-                      console.log("[M_MyPageSideMenu] menu click:", it.to, "myInfo:", myInfo)
-                    }
+                 
                   >
                     {it.label}
                     <img src={ic_arrow_right_gray500_18} alt="" />

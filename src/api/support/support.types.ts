@@ -98,3 +98,55 @@ export type InsertJobReportResponse = {
   msg: string;
   data?: number | string | null;
 };
+
+export type NoticeImportantYn = "Y" | "N";
+export type NoticePopupYn = "Y" | "N";
+export type NoticeUseYn = "Y" | "N";
+
+export type NoticeListItem = {
+  noticeIdx: number;
+  userIdx: number;
+  userName: string;
+  category: string;
+  title: string;
+  importantYn: NoticeImportantYn;
+  popupYn: NoticePopupYn;
+  viewCnt: number;
+  useYn: NoticeUseYn;
+  regDt: string;
+};
+
+export type NoticeListResponse = {
+  code: number;
+  totalCnt: number;
+  list: NoticeListItem[];
+};
+
+export type FetchNoticeListParams = {
+  page?: number;
+  size?: number;
+  category?: string;
+  importantYn?: NoticeImportantYn;
+  popupYn?: NoticePopupYn;
+  useYn?: NoticeUseYn;
+};
+
+export type NoticeDetailData = {
+  noticeIdx: number;
+  userIdx: number;
+  userName: string;
+  category: string;
+  title: string;
+  content: string;
+  importantYn: NoticeImportantYn;
+  popupYn: NoticePopupYn;
+  viewCnt: number;
+  useYn: NoticeUseYn;
+  regDt: string;
+  modDt?: string | null;
+};
+
+export type NoticeDetailResponse = {
+  code: number;
+  data: NoticeDetailData;
+};

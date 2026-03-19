@@ -9,14 +9,22 @@ import { toast } from "react-toastify";
 import { saConfirm, saInit } from "@/api/auth/auth.api";
 import { InicisParams, VerifiedUserInfo } from "@/api/auth/auth.types";
 
+type GenderType = "M" | "W";
+
+export interface ProfileEditSubmitPayload {
+  phone: string;
+  name: string;
+  birth: string;
+  gender: GenderType;
+  certified: boolean;
+}
+
 interface ProfileEditFormProps {
   userInfo: UserProfile;
   onCancel: () => void;
-  onSubmit: () => Promise<void>;
+  onSubmit: (payload: ProfileEditSubmitPayload) => Promise<void>;
   onRequestDelete: () => void;
 }
-
-type GenderType = "M" | "W";
 
 export default function ProfileEditForm({
   userInfo,
@@ -35,10 +43,7 @@ export default function ProfileEditForm({
   const handledRef = useRef(false);
 
   useEffect(() => {
-    const initialGender = (verifiedUserInfo?.gender ||
-      userInfo?.gender ||
-      "M") as GenderType;
-
+    const initialGender = (verifiedUserInfo?.gender || userInfo?.gender || "M") as GenderType;
     setSelectedGender(initialGender);
   }, [userInfo?.gender, verifiedUserInfo?.gender]);
 
@@ -77,6 +82,7 @@ export default function ProfileEditForm({
 
         try {
           const confirmRes = await saConfirm(txId);
+          console.log("본인인증3", confirmRes);
 
           if (!confirmRes?.verified) {
             handledRef.current = false;
@@ -96,8 +102,6 @@ export default function ProfileEditForm({
           setSelectedGender((confirmRes.userSex ?? "M") as GenderType);
           setVerifiedCertified(true);
           setIsVerified(true);
-
-          toast.success("본인인증이 완료되었습니다.");
         } catch (e) {
           handledRef.current = false;
           toast.error("본인인증 처리 중 오류가 발생했습니다.");
@@ -151,6 +155,7 @@ export default function ProfileEditForm({
       setVerifiedUserInfo(null);
 
       const init = await saInit();
+      console.log("인증값", init);
 
       const userName = `${viewModel.name}본인인증한것12`;
       const userPhone = viewModel.number || "";
@@ -199,6 +204,26 @@ export default function ProfileEditForm({
 
   const handleGenderChange = (gender: GenderType) => {
     setSelectedGender(gender);
+  };
+
+  const handleSubmitClick = async () => {
+    const payload: ProfileEditSubmitPayload = {
+      phone: viewModel.number ?? "",
+      name: viewModel.name ?? "",
+      birth: viewModel.birth ?? "",
+      gender: viewModel.gender,
+      certified: viewModel.certified,
+    };
+
+    console.log("저장 버튼 클릭");
+    console.log("폼에서 부모로 보내는 값:", payload);
+    console.log("휴대폰 번호:", payload.phone);
+    console.log("이름:", payload.name);
+    console.log("생년월일:", payload.birth);
+    console.log("성별:", payload.gender);
+    console.log("인증 여부:", payload.certified);
+
+    await onSubmit(payload);
   };
 
   if (!userInfo) return <LoadingOverlay />;
@@ -287,7 +312,11 @@ export default function ProfileEditForm({
             <button type="button" className="default_btn_white btn-cancel" onClick={onCancel}>
               취소
             </button>
-            <button type="button" className="default_btn_black btn_w_full" onClick={onSubmit}>
+            <button
+              type="button"
+              className="default_btn_black btn_w_full"
+              onClick={handleSubmitClick}
+            >
               저장
             </button>
           </div>
@@ -399,7 +428,11 @@ export default function ProfileEditForm({
 
         <div className="field form-action-group">
           <div className="btn_wrap">
-            <button type="button" className="default_btn_black btn_w_full" onClick={onSubmit}>
+            <button
+              type="button"
+              className="default_btn_black btn_w_full"
+              onClick={handleSubmitClick}
+            >
               저장
             </button>
           </div>

@@ -2,10 +2,15 @@ import instance from "@/api/axios.instance";
 import type {
   DeleteInquiryResponse,
   FetchInquiryListParams,
+  FetchNoticeListParams,
   InquiryDetailResponse,
   InquiryListResponse,
   InsertInquiryRequest,
   InsertInquiryResponse,
+  InsertJobReportRequest,
+  InsertJobReportResponse,
+  NoticeDetailResponse,
+  NoticeListResponse,
   UpdateInquiryRequest,
   UpdateInquiryResponse,
 } from "@/api/support/support.types";
@@ -108,6 +113,75 @@ export async function deleteInquiry(
     `/api/inquiry/${inquiryIdx}`,
     {
       headers: {
+        accept: "application/json",
+      },
+    }
+  );
+
+  return res.data;
+}
+
+/**
+ * 공지사항 목록 조회
+ * GET /auth/notice/list
+ */
+export async function fetchNoticeList(
+  params?: FetchNoticeListParams
+): Promise<NoticeListResponse> {
+  const page = params?.page ?? 1;
+  const size = params?.size ?? 10;
+
+  const res = await instance.get<NoticeListResponse>("/auth/notice/list", {
+    params: {
+      ...(params?.category ? { category: params.category } : {}),
+      ...(params?.importantYn ? { importantYn: params.importantYn } : {}),
+      ...(params?.popupYn ? { popupYn: params.popupYn } : {}),
+      ...(params?.useYn ? { useYn: params.useYn } : {}),
+      pageNo: page,
+      pageSize: size,
+      page,
+      size,
+    },
+    headers: {
+      accept: "application/json",
+    },
+  });
+
+  return res.data;
+}
+
+/**
+ * 공지사항 상세 조회
+ * GET /auth/notice/{noticeIdx}
+ */
+export async function fetchNoticeDetail(
+  noticeIdx: number
+): Promise<NoticeDetailResponse> {
+  const res = await instance.get<NoticeDetailResponse>(
+    `/auth/notice/${noticeIdx}`,
+    {
+      headers: {
+        accept: "application/json",
+      },
+    }
+  );
+
+  return res.data;
+}
+
+/**
+ * 공고 제보하기
+ * POST /api/jobs/insert
+ */
+export async function insertJobReport(
+  data: InsertJobReportRequest
+): Promise<InsertJobReportResponse> {
+  const res = await instance.post<InsertJobReportResponse>(
+    "/api/jobs/insert",
+    data,
+    {
+      headers: {
+        "Content-Type": "application/json",
         accept: "application/json",
       },
     }

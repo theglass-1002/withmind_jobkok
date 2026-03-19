@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import ic_search_white_24 from "@/assets/icons/size24/ic_search_white_24.png";
 
-import { fetchJobTree, fetchJobList } from "@/api/job/job.api";
+import { fetchJobTree } from "@/api/job/job.api";
 import { JobNode } from "@/api/job/job.types";
 import { logout } from "@/api/auth/auth.api";
 
@@ -16,6 +16,11 @@ type AutoItem = {
   kind: "category" | "job";
   categoryIdx?: number | string;
   jobIdx?: number | string;
+};
+
+type FlatJobNode = JobNode & {
+  parentidx?: number | string;
+  children?: JobNode[];
 };
 
 function highlightSubstring(label: string, query: string) {
@@ -69,6 +74,44 @@ function normalizeCategoryName(name: string) {
     .replace(/[&]/g, "and");
 }
 
+function buildTreeFromFlatList(list: FlatJobNode[]): JobNode[] {
+  if (!Array.isArray(list)) return [];
+
+  const parents = list
+    .filter((item) => item.depth === 0)
+    .map((item) => ({
+      ...item,
+      children: [] as JobNode[],
+    }));
+
+  const parentMap = new Map<number | string, (JobNode & { parentidx?: number | string })>();
+
+  parents.forEach((parent) => {
+    parentMap.set(parent.idx, parent);
+  });
+
+  list
+    .filter((item) => item.depth === 1)
+    .forEach((child) => {
+      const parent = parentMap.get(child.parentidx as number | string);
+      if (!parent) return;
+
+      parent.children.push({
+        ...child,
+        children: Array.isArray(child.children) ? child.children : [],
+      });
+    });
+
+  return parents
+    .map((parent) => ({
+      ...parent,
+      children: (parent.children ?? []).sort(
+        (a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)
+      ),
+    }))
+    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+}
+
 export default function Home() {
   const navigate = useNavigate();
 
@@ -120,6 +163,8 @@ export default function Home() {
   };
 
   const topCategories = useMemo(() => {
+    if (!Array.isArray(jobTree)) return [];
+
     return jobTree
       .filter((n) => n.depth === 0 && n.isActive !== false)
       .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
@@ -229,10 +274,15 @@ export default function Home() {
         setLoading(true);
         setErrorMsg(null);
 
-        const [tree] = await Promise.all([fetchJobTree(), fetchJobList(1, 10)]);
+        const response = await fetchJobTree();
+        console.log("fetchJobTree:", response);
 
         if (!alive) return;
-        setJobTree(tree as JobNode[]);
+
+        const flatList = Array.isArray(response?.list) ? response.list : [];
+
+        const tree = buildTreeFromFlatList(flatList as FlatJobNode[]);
+        setJobTree(tree);
       } catch (e: any) {
         if (!alive) return;
         setErrorMsg(e?.message ?? "홈 데이터 로딩 실패");

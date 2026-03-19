@@ -74,7 +74,8 @@ export default function MockInterviewAnalysisSection() {
         page: 1,
         size: 10,
       });
-
+      console.log("📦 API 원본 응답:", res);
+      console.log("📦 list:", res.list);
       const mappedItems: Item[] = (res.list ?? []).map((it, idx) => ({
         id: String(it.qzGroup ?? idx + 1),
         score: `${it.totalScore ?? 0}점`,

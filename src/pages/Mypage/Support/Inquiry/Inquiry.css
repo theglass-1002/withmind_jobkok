@@ -499,10 +499,16 @@ align-self: stretch;
     background: var(--white-100, #FFF);
 }
 
-.field .content.error textarea{
-    /* border-radius: 4px;
+
+
+.inquiry.report.mobile .field .content .error{
+    border-radius: 4px;
     border: 1px solid var(--red-100, #FF524C);
-    background: var(--white-100, #FFF); */
+    background: var(--white-100, #FFF);
+}
+
+.mypage__content .field .content .memo.error{
+
 }
 
 .inquiry .create .content.error .content-info{

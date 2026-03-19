@@ -147,6 +147,7 @@ box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.08);
 .resume-list-page__item{
     display: flex;
     width: 588px;
+    height: 310px;
     padding: 20px;
     flex-direction: column;
     align-items: flex-start;
@@ -293,13 +294,17 @@ box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.08);
 
 .resume-item__attr-term{
     display: flex;
+    flex: 1;
     align-items: center;
     gap: 12px;
+    white-space: nowrap;
+
 
 }
 
 
 .resume-item__attr-value{
+    flex: 1;
     color: var(--gray-900, #2A2D2F);
     text-align: right;
     font-family: Pretendard;
@@ -307,7 +312,10 @@ box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.08);
     font-style: normal;
     font-weight: 400;
     line-height: 20px; 
-    
+    white-space: nowrap;      /* 줄바꿈 금지 */
+    overflow: hidden;         /* 넘치는 부분 숨김 */
+    text-overflow: ellipsis;  /* ... 표시 */
+  
 }
 
 

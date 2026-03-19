@@ -86,7 +86,7 @@ export default function LiveAnswerSection({ onEnd, isLast = false }: Props) {
         setRunning(false);
         stopCamera();
 
-        // ✅ 마지막 질문이면 완료 다이얼로그, 아니면 다음 질문
+        //  마지막 질문이면 완료 다이얼로그, 아니면 다음 질문
         if (isLast) {
           setShowCompleteDialog(true);
         } else {
