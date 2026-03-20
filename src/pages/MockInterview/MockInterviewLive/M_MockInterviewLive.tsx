@@ -66,6 +66,7 @@ export default function M_MockInterviewLive() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<BlobPart[]>([]);
   const [isRecording, setIsRecording] = useState(false);
+  const [liveStream, setLiveStream] = useState<MediaStream | null>(null);
 
   const baseQuestions: LiveQuestion[] = useMemo(() => {
     const res = state?.interviewRes;
@@ -154,9 +155,8 @@ export default function M_MockInterviewLive() {
     return out;
   }, [baseQuestions, followUpMap]);
 
-
   useEffect(() => {
-    console.log("모바일 [MockInterviewLive] 면접보는화면",state);
+    console.log("모바일 [MockInterviewLive] 면접보는화면", state);
   }, [state]);
 
   useEffect(() => {
@@ -277,32 +277,30 @@ export default function M_MockInterviewLive() {
     const isFollowupNow = cur.type === "FOLLOWUP";
 
     setIsUploading(true);
-  
+
     console.log("[uploadRecordedFile] 현재 qIndex:", meta.qIndex);
     console.log("[uploadRecordedFile] 현재 질문 번호:", cur?.order);
     console.log("[uploadRecordedFile] 현재 질문 내용:", cur?.question);
-  
+
     try {
       let uploadResult: any;
       try {
         uploadResult = await uploadJobInterviewVideo(videoBlob);
         console.log("M_영상업로드 후 면접영상 저장 api 날리기");
-        const res =  await saveInterviewAnalysis({
+        const res = await saveInterviewAnalysis({
           qzGroup: state?.interviewGroupId,
-          num:cur.order,
-          qzTts:questionText,
-          fileUrl:uploadResult.finalUrl,
-          thumUrl:uploadResult.thumbUrl,
-          category:"interview",
-          originalName:uploadResult.uniqueFileName,
-          storedName:uploadResult.uniqueFileName,
-          sizeBytes:uploadResult.fileSize,
-          contentType:"video/webm"
-
+          num: cur.order,
+          qzTts: questionText,
+          fileUrl: uploadResult.finalUrl,
+          thumUrl: uploadResult.thumbUrl,
+          category: "interview",
+          originalName: uploadResult.uniqueFileName,
+          storedName: uploadResult.uniqueFileName,
+          sizeBytes: uploadResult.fileSize,
+          contentType: "video/webm",
         });
-        
 
-        console.log('면접 영상 저장 API',res);
+        console.log("면접 영상 저장 API", res);
       } catch (err) {
         console.error("[uploadRecordedFile] video upload failed:", err);
         return { uploadResult: null, followupRes: null };
@@ -349,9 +347,14 @@ export default function M_MockInterviewLive() {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
       mediaStreamRef.current = stream;
+      setLiveStream(stream);
       recordedChunksRef.current = [];
 
-      const mimeCandidates = ["video/webm;codecs=vp9,opus", "video/webm;codecs=vp8,opus", "video/webm"];
+      const mimeCandidates = [
+        "video/webm;codecs=vp9,opus",
+        "video/webm;codecs=vp8,opus",
+        "video/webm",
+      ];
       const mimeType = mimeCandidates.find((m) => MediaRecorder.isTypeSupported(m)) || "";
 
       const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
@@ -396,6 +399,7 @@ export default function M_MockInterviewLive() {
 
     mediaStreamRef.current?.getTracks().forEach((t) => t.stop());
     mediaStreamRef.current = null;
+    setLiveStream(null);
     mediaRecorderRef.current = null;
 
     await uploadRecordedFile(blob, { qIndex });
@@ -422,6 +426,7 @@ export default function M_MockInterviewLive() {
 
       mediaStreamRef.current?.getTracks().forEach((t) => t.stop());
       mediaStreamRef.current = null;
+      setLiveStream(null);
       mediaRecorderRef.current = null;
       recordedChunksRef.current = [];
       setIsRecording(false);
@@ -442,7 +447,7 @@ export default function M_MockInterviewLive() {
       {showLivesPanel && (
         <LiveSidePanel
           onExit={() => setShowLivesPanel(false)}
-          currentIndex={qIndex}
+          currentIndex={currentVisibleIndex}
           totalCount={totalVisibleCount}
           interviewState={state}
           interviewStageStatus={state?.interviewStageStatus}
@@ -473,6 +478,7 @@ export default function M_MockInterviewLive() {
 
       {phase === "answering" && current.type !== "SKIP" && (
         <LiveAnswerSection
+          stream={liveStream}
           isLast={visibleIsLast}
           onEnd={async () => {
             if (isUploading) return;

@@ -35,12 +35,11 @@ export default function LiveAnswerSection({
   };
 
   useEffect(() => {
+
     const video = videoRef.current;
     if (!video || !stream) return;
 
-    if (video.srcObject !== stream) {
-      video.srcObject = stream;
-    }
+    video.srcObject = stream;
 
     const playVideo = async () => {
       try {
@@ -55,10 +54,8 @@ export default function LiveAnswerSection({
     playVideo();
 
     return () => {
-      if (video) {
-        video.pause();
-        video.srcObject = null;
-      }
+      video.pause();
+      video.srcObject = null;
     };
   }, [stream]);
 

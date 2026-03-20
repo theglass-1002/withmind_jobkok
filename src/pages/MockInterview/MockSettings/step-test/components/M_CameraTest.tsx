@@ -90,20 +90,33 @@ export default function M_CameraTest({
   }, []);
 
   useEffect(() => {
-    const startCamera = async () => {
-      if (!videoRef.current) return;
+    let isMounted = true;
 
+    const startCamera = async () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: true,
           audio: true,
         });
 
-        streamRef.current = stream;
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
+        if (!isMounted) {
+          stream.getTracks().forEach((t) => t.stop());
+          return;
+        }
 
-        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const videoEl = videoRef.current;
+        if (!videoEl) {
+          stream.getTracks().forEach((t) => t.stop());
+          return;
+        }
+
+        streamRef.current = stream;
+        videoEl.srcObject = stream;
+        await videoEl.play();
+
+        const AudioContextClass =
+          window.AudioContext || (window as any).webkitAudioContext;
+        const audioContext = new AudioContextClass();
         const analyser = audioContext.createAnalyser();
         const microphone = audioContext.createMediaStreamSource(stream);
         microphone.connect(analyser);
@@ -118,6 +131,7 @@ export default function M_CameraTest({
     startCamera();
 
     return () => {
+      isMounted = false;
       clearTimers();
       try {
         recorderRef.current?.stop();
@@ -208,7 +222,7 @@ export default function M_CameraTest({
       let uploadResult: any;
       try {
         uploadResult = await uploadInterviewTestVideo(blob, "env_test.webm", "interviewTest");
-        console.log('테스트영상 업로드 결과',uploadResult);
+        console.log("테스트영상 업로드 결과", uploadResult);
       } catch (uploadErr) {
         console.error("영상 업로드 실패:", uploadErr);
         setFailureCode(0);
