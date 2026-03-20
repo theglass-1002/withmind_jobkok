@@ -97,13 +97,12 @@ export default function PasswordTab({ onCancel }: PasswordTabProps) {
       setSubmitting(true);
 
       const res = await updateUser({
-        userIdx,
+        userIdx: Number(userIdx),
         userName: userName ?? "",
         email: userId,
         password: data.next,
-        modifier: userId,
       });
-      console.log(res)
+ 
       if (res.code === 200) {
         toast.success("비밀번호가 변경되었습니다.");
         setNotice("비밀번호가 변경되었습니다.");

@@ -35,6 +35,7 @@ function generateUniqueFileName(originalFileName: string): string {
   return `${nameWithoutExt}_${userIdx}_${timestamp}${extension}`;
 }
 
+//aws 경로 만들어주는 api 
 export async function getPreSignedUrl(
   fileName: string,
   folderPath?: string,
@@ -53,6 +54,7 @@ export async function getPreSignedUrl(
   }
 }
 
+//aws 파일 업로드 경로 받기 위함 검증과정
 export async function getAwsPresignedUrl(
   presignedUrlApi: string
 ): Promise<{ presigned_url: string; s3_key: string }> {
@@ -62,16 +64,20 @@ export async function getAwsPresignedUrl(
     );
     return response.data;
   } catch (error) {
-    console.error("❌ AWS presigned_url 요청 실패:", error);
+    console.error(" AWS presigned_url 요청 실패:", error);
     throw error;
   }
 }
 
+  //uploadFileToS3 는 파일 업로드 api 
 export async function uploadFileToS3(presignedUrl: string, file: File): Promise<void> {
   try {
+ 
+
     const response = await axios.put(presignedUrl, file, {
       headers: { "Content-Type": file.type },
     });
+
     console.log(" S3 파일 업로드 성공:", response.status);
   } catch (error) {
     console.error(" S3 파일 업로드 실패:", error);
@@ -176,22 +182,31 @@ export async function uploadJobInterviewVideo(
   originalFileName: string = "env_test.webm",
   folderPath: string = "interview"
 ): Promise<{
+  file:File;
   s3_key: string;
   finalUrl: string;
   uniqueFileName: string;
   originalFileName: string;
 }> {
+
   try {
     const uniqueFileName = generateUniqueFileName(originalFileName);
+    
     const file = blobToFile(videoBlob, uniqueFileName);
-    const preSignedData = await getPreSignedUrl(uniqueFileName,folderPath ,"video");
-    const awsData = await getAwsPresignedUrl(preSignedData.presignedUrlApi);
-    await uploadFileToS3(awsData.presigned_url, file);
 
+    //getPreSignedUrl 는 aws 경로 만들어주는 api 
+    const preSignedData = await getPreSignedUrl(uniqueFileName,folderPath ,"video");
+   
+    //getAwsPresignedUrl 는 aws 파일 업로드 경로 받기 위함 검증과정
+    const awsData = await getAwsPresignedUrl(preSignedData.presignedUrlApi);
+    
+    //uploadFileToS3 는 파일 업로드 api 
+    await uploadFileToS3(awsData.presigned_url, file);
+  
     const finalUrl = preSignedData.awsFrontUrlStr || "";
     const filePath = resolveFilePath(finalUrl, awsData.s3_key);
-
     return {
+      file:file,
       s3_key: filePath,
       finalUrl,
       uniqueFileName,

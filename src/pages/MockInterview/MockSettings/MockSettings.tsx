@@ -17,7 +17,7 @@ import { fetchJobDetail } from "@/api/job/job.api";
 
 import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
 import type { InterviewQuestionsRequest } from "@/api/interview/interview.types";
-import { fetchEnvTestSpeech, fetchInterviewQuestions } from "@/api/interview/interview.api";
+import { createQzGroup, fetchEnvTestSpeech, fetchInterviewQuestions } from "@/api/interview/interview.api";
 import { logout } from "@/api/auth/auth.api";
 
 type InterviewInfoErrors = {
@@ -150,6 +150,12 @@ export default function MockSettings() {
 
       const resumeDetail = await fetchResumeDetail(resumeIdxNum);
       const jobDetail = jobIdNum !== null ? await fetchJobDetail(jobIdNum) : null;
+      const res = await createQzGroup({
+        resumeIdx: resumeDetail.resumeIdx, // 상태값 사용
+        job: desiredJob.trim(),
+      });
+      const interviewGroupId = res.qzGroup;
+      console.log("interviewGroupId",interviewGroupId);
       const envSpeech = await fetchEnvTestSpeech();
 
       const introQuestion: InterviewQuestionLike = {
@@ -208,6 +214,7 @@ export default function MockSettings() {
             desiredJob,
             jobPostingUrl,
             interviewStageStatus,
+            interviewGroupId,
           },
         });
 
@@ -270,6 +277,7 @@ export default function MockSettings() {
           desiredJob,
           jobPostingUrl,
           interviewStageStatus,
+          interviewGroupId,
         },
       });
     } catch (e: any) {

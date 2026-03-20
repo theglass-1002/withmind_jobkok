@@ -10,6 +10,10 @@ import type {
   InterviewFollowupRequest,
   InterviewFollowupResponse,
   InterviewReportListResponse,
+  CreateQzGroupResponse,
+  CreateQzGroupRequest,
+  SaveInterviewAnalysisResponse,
+  SaveInterviewAnalysisRequest,
 } from "./interview.types";
 import { AI_BASE_URL } from "@/config/config";
 
@@ -114,6 +118,49 @@ export async function fetchInterviewReportList(params?: {
       },
       headers: {
         accept: "application/json",
+      },
+    }
+  );
+
+  return res.data;
+}
+
+
+/**
+ * qzGroup 생성 API
+ * POST /api/interview/callQzGroup
+ */
+export async function createQzGroup(
+  payload: CreateQzGroupRequest
+): Promise<CreateQzGroupResponse> {
+  const res = await instance.post<CreateQzGroupResponse>(
+    "/api/interview/callQzGroup",
+    payload,
+    {
+      headers: {
+        accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  return res.data;
+}
+
+/**
+ * 면접 영상 저장 API
+ * POST /api/interview/analysis
+ */
+export async function saveInterviewAnalysis(
+  payload: SaveInterviewAnalysisRequest
+): Promise<SaveInterviewAnalysisResponse> {
+  const res = await instance.post<SaveInterviewAnalysisResponse>(
+    "/api/interview/analysis",
+    payload,
+    {
+      headers: {
+        accept: "application/json",
+        "Content-Type": "application/json",
       },
     }
   );

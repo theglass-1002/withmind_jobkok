@@ -210,7 +210,7 @@ export interface MyInfo {
   gender:string;
   idx: string;
   phone:string;
-  userId: string;
+  userIdx: string;
   userName: string;
   ciHash: string;
 }

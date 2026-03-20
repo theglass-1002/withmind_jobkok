@@ -32,7 +32,7 @@ const GROUPS = [
 export default function MyPageSideMenu({ myInfo }: MyPageSideMenuProps) {
   const navigate = useNavigate();
   const userName = myInfo?.userName;
-  const userId = myInfo?.userId;
+  const userId = myInfo?.userIdx;
   const phone = myInfo?.phone;
 
   const handleLogout = () => {

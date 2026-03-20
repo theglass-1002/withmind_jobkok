@@ -7,7 +7,10 @@ import LiveSidePanel from "@/pages/MockInterview/MockInterviewLive/components/Li
 import LiveThinkingSection from "@/pages/MockInterview/MockInterviewLive/components/LiveThinkingSection";
 import LiveAnswerSection from "@/pages/MockInterview/MockInterviewLive/components/LiveAnswerSection";
 
-import { InterviewQuestion, InterviewQuestionsResponse } from "@/api/interview/interview.types";
+import {
+  InterviewQuestion,
+  InterviewQuestionsResponse,
+} from "@/api/interview/interview.types";
 import { uploadJobInterviewVideo } from "@/api/fileUpload.api";
 import { fetchInterviewFollowup } from "@/api/interview/interview.api";
 
@@ -36,10 +39,15 @@ export default function MockInterviewLive() {
   const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
-    console.log("[MockInterviewLive] location.state:", state);
-    console.log("[MockInterviewLive] interviewStageStatus:", state?.interviewStageStatus);
+    console.log("[MockInterviewLive] 면접보는화면", state);
+    console.log(
+      "[MockInterviewLive] interviewStageStatus:",
+      state?.interviewStageStatus
+    );
 
-    switch (state?.interviewStageStatus as InterviewStageStatus | undefined) {
+    switch (state?.interviewStageStatus as
+      | InterviewStageStatus
+      | undefined) {
       case 0:
         console.log("상태 0: 유저 질문 전부 작성 (API 스킵)");
         break;
@@ -55,7 +63,11 @@ export default function MockInterviewLive() {
   }, [state]);
 
   const apiQuestions: InterviewQuestion[] = useMemo(() => {
-    const res = state?.interviewRes as InterviewQuestionsResponse | InterviewQuestion[] | null | undefined;
+    const res = state?.interviewRes as
+      | InterviewQuestionsResponse
+      | InterviewQuestion[]
+      | null
+      | undefined;
 
     if (Array.isArray(res)) return res as InterviewQuestion[];
     if (res?.success && res?.data?.questions && Array.isArray(res.data.questions)) {
@@ -105,7 +117,9 @@ export default function MockInterviewLive() {
         ];
   }, [apiQuestions]);
 
-  const [followUpMap, setFollowUpMap] = useState<Record<number, LiveQuestion>>({});
+  const [followUpMap, setFollowUpMap] = useState<Record<number, LiveQuestion>>(
+    {}
+  );
 
   const effectiveQuestions: LiveQuestion[] = useMemo(() => {
     const out: LiveQuestion[] = [];
@@ -148,6 +162,7 @@ export default function MockInterviewLive() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<BlobPart[]>([]);
   const [isRecording, setIsRecording] = useState(false);
+  const [previewStream, setPreviewStream] = useState<MediaStream | null>(null);
 
   useEffect(() => {
     const cur = effectiveQuestions[qIndex];
@@ -160,8 +175,18 @@ export default function MockInterviewLive() {
     });
   }, [effectiveQuestions, qIndex]);
 
-  const uploadRecordedFile = async (videoBlob: Blob, meta: { qIndex: number }) => {
+  const uploadRecordedFile = async (
+    videoBlob: Blob,
+    meta: { qIndex: number }
+  ) => {
     const cur = effectiveQuestions[meta.qIndex];
+
+    console.log("[uploadRecordedFile] 현재 qIndex:", meta.qIndex);
+    console.log("[uploadRecordedFile] 현재 질문 객체:", cur);
+    console.log("[uploadRecordedFile] 현재 질문 번호:", cur?.order);
+    console.log("[uploadRecordedFile] 현재 질문 타입:", cur?.type);
+    console.log("[uploadRecordedFile] 현재 질문 내용:", cur?.question);
+
     if (!cur) return { uploadResult: null, followupRes: null };
     if (cur.type === "SKIP") return { uploadResult: null, followupRes: null };
 
@@ -172,30 +197,63 @@ export default function MockInterviewLive() {
 
     try {
       let uploadResult: any;
+
       try {
         uploadResult = await uploadJobInterviewVideo(videoBlob);
-        console.log('면접',uploadResult);
+
+        console.log("[uploadRecordedFile] 아이디:", state?.interviewGroupId);
+        console.log(
+          "[uploadRecordedFile] uploadJobInterviewVideo 응답값:",
+          uploadResult
+        );
+        console.log("[uploadRecordedFile] 업로드한 질문 내용:", questionText);
+        console.log("[uploadRecordedFile] 업로드한 질문 번호:", cur.order);
       } catch (err) {
         console.error("[uploadRecordedFile] video upload failed:", err);
         return { uploadResult: null, followupRes: null };
       }
 
-      if (isFollowupNow) return { uploadResult, followupRes: null };
+      if (isFollowupNow) {
+        console.log(
+          "[uploadRecordedFile] 현재 질문은 FOLLOWUP 이라 추가 꼬리질문 생성 없이 종료"
+        );
+        return { uploadResult, followupRes: null };
+      }
 
       const alreadyHasFollowup = !!followUpMap[cur.order];
-      if (alreadyHasFollowup) return { uploadResult, followupRes: null };
+      console.log(
+        "[uploadRecordedFile] 이미 꼬리질문 있는지:",
+        alreadyHasFollowup
+      );
 
-      const payload = { question: questionText, file_url: uploadResult.finalUrl };
+      if (alreadyHasFollowup) {
+        return { uploadResult, followupRes: null };
+      }
+
+      const payload = {
+        question: questionText,
+        file_url: uploadResult.finalUrl,
+      };
+
+      console.log("[uploadRecordedFile] followup 요청 payload:", payload);
 
       let followupRes: any;
       try {
         followupRes = await fetchInterviewFollowup(payload);
+        console.log("[uploadRecordedFile] followup 응답:", followupRes);
       } catch (err) {
-        console.error("[uploadRecordedFile] followup API failed, keep original flow:", err);
+        console.error(
+          "[uploadRecordedFile] followup API failed, keep original flow:",
+          err
+        );
         return { uploadResult, followupRes: null };
       }
 
-      const fu: FollowupQuestion = followupRes?.data?.follow_up_question ?? null;
+      const fu: FollowupQuestion =
+        followupRes?.data?.follow_up_question ?? null;
+
+      console.log("[uploadRecordedFile] follow_up_question:", fu);
+
       if (!fu) return { uploadResult, followupRes };
 
       const followupLive: LiveQuestion = {
@@ -207,7 +265,10 @@ export default function MockInterviewLive() {
         answerHint: fu.reason,
       };
 
+      console.log("[uploadRecordedFile] 생성된 followupLive:", followupLive);
+
       setFollowUpMap((prev) => ({ ...prev, [cur.order]: followupLive }));
+
       return { uploadResult, followupRes };
     } finally {
       setIsUploading(false);
@@ -215,21 +276,38 @@ export default function MockInterviewLive() {
   };
 
   const startRecording = async () => {
-    if (isRecording) return;
+    if (isRecording || mediaRecorderRef.current || mediaStreamRef.current) {
+      return;
+    }
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true,
+      });
+
       mediaStreamRef.current = stream;
+      setPreviewStream(stream);
       recordedChunksRef.current = [];
 
-      const mimeCandidates = ["video/webm;codecs=vp9,opus", "video/webm;codecs=vp8,opus", "video/webm"];
-      const mimeType = mimeCandidates.find((m) => MediaRecorder.isTypeSupported(m)) || "";
+      const mimeCandidates = [
+        "video/webm;codecs=vp9,opus",
+        "video/webm;codecs=vp8,opus",
+        "video/webm",
+      ];
+      const mimeType =
+        mimeCandidates.find((m) => MediaRecorder.isTypeSupported(m)) || "";
 
-      const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+      const recorder = new MediaRecorder(
+        stream,
+        mimeType ? { mimeType } : undefined
+      );
       mediaRecorderRef.current = recorder;
 
       recorder.ondataavailable = (e) => {
-        if (e.data && e.data.size > 0) recordedChunksRef.current.push(e.data);
+        if (e.data && e.data.size > 0) {
+          recordedChunksRef.current.push(e.data);
+        }
       };
 
       recorder.onstart = () => {
@@ -273,6 +351,7 @@ export default function MockInterviewLive() {
     mediaStreamRef.current?.getTracks().forEach((t) => t.stop());
     mediaStreamRef.current = null;
     mediaRecorderRef.current = null;
+    setPreviewStream(null);
 
     await uploadRecordedFile(blob, { qIndex });
   };
@@ -322,16 +401,25 @@ export default function MockInterviewLive() {
     startRecording();
 
     return () => {
+      console.log("[answering cleanup] cleanup 실행");
+
       try {
-        if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+        if (
+          mediaRecorderRef.current &&
+          mediaRecorderRef.current.state !== "inactive"
+        ) {
+          console.log("[answering cleanup] recorder stop");
           mediaRecorderRef.current.stop();
         }
-      } catch {}
+      } catch (e) {
+        console.error("[answering cleanup] recorder stop error:", e);
+      }
 
       mediaStreamRef.current?.getTracks().forEach((t) => t.stop());
       mediaStreamRef.current = null;
       mediaRecorderRef.current = null;
       recordedChunksRef.current = [];
+      setPreviewStream(null);
       setIsRecording(false);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -354,7 +442,10 @@ export default function MockInterviewLive() {
   const advanceToNextVisibleQuestion = () => {
     setQIndex((prev) => {
       let next = prev + 1;
-      while (next < effectiveQuestions.length && effectiveQuestions[next].type === "SKIP") {
+      while (
+        next < effectiveQuestions.length &&
+        effectiveQuestions[next].type === "SKIP"
+      ) {
         next += 1;
       }
       return next >= effectiveQuestions.length ? prev : next;
@@ -362,6 +453,7 @@ export default function MockInterviewLive() {
   };
 
   const current = effectiveQuestions[qIndex] ?? baseQuestions[0];
+
   const visibleIsLast = (() => {
     for (let i = qIndex + 1; i < effectiveQuestions.length; i++) {
       if (effectiveQuestions[i].type !== "SKIP") return false;
@@ -369,7 +461,10 @@ export default function MockInterviewLive() {
     return true;
   })();
 
-  const progress = Math.min(1, Math.max(0, (THINKING_SECONDS - timeLeft) / THINKING_SECONDS));
+  const progress = Math.min(
+    1,
+    Math.max(0, (THINKING_SECONDS - timeLeft) / THINKING_SECONDS)
+  );
 
   return (
     <div className="mock-interview-live">
@@ -394,9 +489,17 @@ export default function MockInterviewLive() {
 
         {phase === "answering" && current.type !== "SKIP" && (
           <LiveAnswerSection
+            stream={previewStream}
             isLast={visibleIsLast}
             onEnd={async () => {
               if (isUploading) return;
+
+              console.log("[onEnd] 현재 qIndex:", qIndex);
+              console.log("[onEnd] 현재 질문 객체:", effectiveQuestions[qIndex]);
+              console.log(
+                "[onEnd] 현재 질문 내용:",
+                effectiveQuestions[qIndex]?.question
+              );
 
               await stopRecordingAndUpload();
 

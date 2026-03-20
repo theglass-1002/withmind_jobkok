@@ -23,6 +23,29 @@ type FlatJobNode = JobNode & {
   children?: JobNode[];
 };
 
+const CATEGORIES = [
+  { key: "dev", name: "개발", icon: Icons.code_icon_40px },
+  { key: "design", name: "디자인", icon: Icons.palette_icon_40px },
+  { key: "marketing-ads", name: "마케팅ㆍ광고", icon: Icons.megaphone_icon_40px },
+  { key: "sales", name: "영업", icon: Icons.briefcase_icon_40px },
+  { key: "management-business", name: "경영ㆍ비즈니스", icon: Icons.handshake_icon_40px },
+  { key: "engineering-design", name: "엔지니어링ㆍ설계", icon: Icons.wrench_icon_40px },
+  { key: "hr", name: "HR", icon: Icons.users_icon_40px },
+  { key: "manufacturing", name: "제조ㆍ생산", icon: Icons.factory_icon_40px },
+  { key: "construction-facility", name: "건설ㆍ시설", icon: Icons.hard_hat_icon_40px },
+  { key: "healthcare-bio", name: "의료ㆍ제약ㆍ바이오", icon: Icons.health_icon_40px },
+  { key: "media", name: "미디어", icon: Icons.video_icon_40px },
+  { key: "game-dev", name: "게임 제작", icon: Icons.gamepad_icon_40px },
+  { key: "finance", name: "금융", icon: Icons.dollar_sign_icon_40px },
+  { key: "logistics-trade", name: "물류ㆍ무역", icon: Icons.globe_icon_40px },
+  { key: "legal-law-enforcement", name: "법률ㆍ법집행기관", icon: Icons.scale_icon_40px },
+  { key: "education", name: "교육", icon: Icons.graduation_cap_icon_40px },
+  { key: "food-beverage", name: "식ㆍ음료", icon: Icons.chef_hat_icon_40px },
+  { key: "public-welfare", name: "공공ㆍ복지", icon: Icons.heart_icon_40px },
+  { key: "customer-service-retail", name: "고객서비스ㆍ리테일", icon: Icons.headphones_icon_40px },
+  { key: "information-security", name: "정보 보호", icon: Icons.shield_icon_40px },
+];
+
 function highlightSubstring(label: string, query: string) {
   if (!query) return label;
 
@@ -84,7 +107,10 @@ function buildTreeFromFlatList(list: FlatJobNode[]): JobNode[] {
       children: [] as JobNode[],
     }));
 
-  const parentMap = new Map<number | string, (JobNode & { parentidx?: number | string })>();
+  const parentMap = new Map<
+    number | string,
+    JobNode & { parentidx?: number | string }
+  >();
 
   parents.forEach((parent) => {
     parentMap.set(parent.idx, parent);
@@ -128,32 +154,11 @@ export default function Home() {
     if (type === "interview") navigate("/mock-interview-report");
   };
 
-  const CATEGORIES = [
-    { key: "dev", name: "개발", icon: Icons.code_icon_40px },
-    { key: "design", name: "디자인", icon: Icons.palette_icon_40px },
-    { key: "marketing-ads", name: "마케팅ㆍ광고", icon: Icons.megaphone_icon_40px },
-    { key: "sales", name: "영업", icon: Icons.briefcase_icon_40px },
-    { key: "management-business", name: "경영ㆍ비즈니스", icon: Icons.handshake_icon_40px },
-    { key: "engineering-design", name: "엔지니어링ㆍ설계", icon: Icons.wrench_icon_40px },
-    { key: "hr", name: "HR", icon: Icons.users_icon_40px },
-    { key: "manufacturing", name: "제조ㆍ생산", icon: Icons.factory_icon_40px },
-    { key: "construction-facility", name: "건설ㆍ시설", icon: Icons.hard_hat_icon_40px },
-    { key: "healthcare-bio", name: "의료ㆍ제약ㆍ바이오", icon: Icons.health_icon_40px },
-    { key: "media", name: "미디어", icon: Icons.video_icon_40px },
-    { key: "game-dev", name: "게임 제작", icon: Icons.gamepad_icon_40px },
-    { key: "finance", name: "금융", icon: Icons.dollar_sign_icon_40px },
-    { key: "logistics-trade", name: "물류ㆍ무역", icon: Icons.globe_icon_40px },
-    { key: "legal-law-enforcement", name: "법률ㆍ법집행기관", icon: Icons.scale_icon_40px },
-    { key: "education", name: "교육", icon: Icons.graduation_cap_icon_40px },
-    { key: "food-beverage", name: "식ㆍ음료", icon: Icons.chef_hat_icon_40px },
-    { key: "public-welfare", name: "공공ㆍ복지", icon: Icons.heart_icon_40px },
-    { key: "customer-service-retail", name: "고객서비스ㆍ리테일", icon: Icons.headphones_icon_40px },
-    { key: "information-security", name: "정보 보호", icon: Icons.shield_icon_40px },
-  ];
-
   const iconMap = useMemo(() => {
     const m = new Map<string, string>();
-    CATEGORIES.forEach((c) => m.set(normalizeCategoryName(c.name), c.icon));
+    CATEGORIES.forEach((c) => {
+      m.set(normalizeCategoryName(c.name), c.icon);
+    });
     return m;
   }, []);
 
@@ -274,14 +279,22 @@ export default function Home() {
         setLoading(true);
         setErrorMsg(null);
 
-        const response = await fetchJobTree();
+        const response: any = await fetchJobTree();
         console.log("fetchJobTree:", response);
 
         if (!alive) return;
 
-        const flatList = Array.isArray(response?.list) ? response.list : [];
+        const flatList = Array.isArray(response?.list)
+          ? response.list
+          : Array.isArray(response)
+          ? response
+          : [];
+
+        console.log("flatList:", flatList);
 
         const tree = buildTreeFromFlatList(flatList as FlatJobNode[]);
+        console.log("tree:", tree);
+
         setJobTree(tree);
       } catch (e: any) {
         if (!alive) return;
@@ -298,6 +311,11 @@ export default function Home() {
       alive = false;
     };
   }, [navigate]);
+
+  useEffect(() => {
+    console.log("jobTree:", jobTree);
+    console.log("topCategories:", topCategories);
+  }, [jobTree, topCategories]);
 
   useEffect(() => {
     const masthead = document.querySelector(".masthead");

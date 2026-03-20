@@ -9,15 +9,19 @@ import ic_cheer_white_48 from "@/assets/icons/size48/ic_cheer_white_48.png";
 const ANSWER_SECONDS = 91;
 
 type Props = {
-  onEnd?: () => void; //  추가: 답변 종료 시 부모에게 알림(다음 질문으로)
-  isLast?: boolean;   //  선택: 마지막 질문이면 종료 다이얼로그
+  stream: MediaStream | null;
+  onEnd?: () => void;
+  isLast?: boolean;
 };
 
-export default function LiveAnswerSection({ onEnd, isLast = false }: Props) {
+export default function LiveAnswerSection({
+  stream,
+  onEnd,
+  isLast = false,
+}: Props) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [timeLeft, setTimeLeft] = useState(ANSWER_SECONDS);
   const [running, setRunning] = useState(true);
-
   const [showCompleteDialog, setShowCompleteDialog] = useState(false);
 
   const rafRef = useRef<number | null>(null);
@@ -30,36 +34,33 @@ export default function LiveAnswerSection({ onEnd, isLast = false }: Props) {
     navigate("/");
   };
 
-  const stopCamera = () => {
-    if (videoRef.current && videoRef.current.srcObject) {
-      const stream = videoRef.current.srcObject as MediaStream;
-      stream.getTracks().forEach((track) => track.stop());
-      videoRef.current.srcObject = null;
-    }
-  };
-
   useEffect(() => {
-    const startCamera = async () => {
+    const video = videoRef.current;
+    if (!video || !stream) return;
+
+    if (video.srcObject !== stream) {
+      video.srcObject = stream;
+    }
+
+    const playVideo = async () => {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: true,
-          audio: false,
-        });
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          await videoRef.current.play();
+        await video.play();
+      } catch (err: any) {
+        if (err?.name !== "AbortError") {
+          console.error("카메라 접근 오류:", err);
         }
-      } catch (err) {
-        console.error("카메라 접근 오류:", err);
       }
     };
 
-    startCamera();
+    playVideo();
 
     return () => {
-      stopCamera();
+      if (video) {
+        video.pause();
+        video.srcObject = null;
+      }
     };
-  }, []);
+  }, [stream]);
 
   useEffect(() => {
     if (!running) {
@@ -84,9 +85,7 @@ export default function LiveAnswerSection({ onEnd, isLast = false }: Props) {
       } else {
         rafRef.current = null;
         setRunning(false);
-        stopCamera();
 
-        //  마지막 질문이면 완료 다이얼로그, 아니면 다음 질문
         if (isLast) {
           setShowCompleteDialog(true);
         } else {
@@ -102,6 +101,7 @@ export default function LiveAnswerSection({ onEnd, isLast = false }: Props) {
 
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
     };
   }, [running, isLast, onEnd]);
 
@@ -117,9 +117,7 @@ export default function LiveAnswerSection({ onEnd, isLast = false }: Props) {
 
   const stopTimer = () => {
     setRunning(false);
-    stopCamera();
 
-    //  마지막 질문이면 완료 다이얼로그, 아니면 다음 질문
     if (isLast) {
       setShowCompleteDialog(true);
     } else {
@@ -158,7 +156,10 @@ export default function LiveAnswerSection({ onEnd, isLast = false }: Props) {
                 timeLeft <= 5 ? "mock-interview-live__answer-timer--warning" : ""
               }`}
             >
-              <img src={timeLeft <= 5 ? ic_timer_red_18 : ic_timer_white_20} alt="타이머 아이콘" />
+              <img
+                src={timeLeft <= 5 ? ic_timer_red_18 : ic_timer_white_20}
+                alt="타이머 아이콘"
+              />
               <span
                 className={`mock-interview-live__answer-time ${
                   timeLeft <= 5 ? "mock-interview-live__answer-timer--warning" : ""
@@ -186,7 +187,8 @@ export default function LiveAnswerSection({ onEnd, isLast = false }: Props) {
             onClick={startTimer}
             disabled={running}
           >
-            <img src={ic_play_arrow_gray700_24} alt="답변 시작 아이콘" /> 답변 시작
+            <img src={ic_play_arrow_gray700_24} alt="답변 시작 아이콘" />
+            답변 시작
           </button>
 
           <button
@@ -194,12 +196,12 @@ export default function LiveAnswerSection({ onEnd, isLast = false }: Props) {
             onClick={stopTimer}
             disabled={!running}
           >
-            <img src={ic_stop_white_24} alt="답변 종료 아이콘" /> 답변 종료
+            <img src={ic_stop_white_24} alt="답변 종료 아이콘" />
+            답변 종료
           </button>
         </div>
       </div>
 
-      {/*  마지막 질문일 때만 완료 다이얼로그 */}
       {showCompleteDialog && (
         <div className="mock-interview-dialog">
           <div className="mock-interview-dialog__header">
@@ -208,7 +210,9 @@ export default function LiveAnswerSection({ onEnd, isLast = false }: Props) {
             </span>
 
             <div className="mock-interview-dialog__text-group">
-              <span className="mock-interview-dialog__title">정유리님, 수고하셨습니다!</span>
+              <span className="mock-interview-dialog__title">
+                정유리님, 수고하셨습니다!
+              </span>
               <span className="mock-interview-dialog__description">
                 모의면접이 종료되었습니다. 분석 결과를 확인해 보세요.
               </span>
@@ -216,10 +220,16 @@ export default function LiveAnswerSection({ onEnd, isLast = false }: Props) {
           </div>
 
           <div className="mock-interview-dialog__actions">
-            <button className="mock-interview-dialog__btn default_btn_white radius" onClick={handleMain}>
+            <button
+              className="mock-interview-dialog__btn default_btn_white radius"
+              onClick={handleMain}
+            >
               메인 페이지로
             </button>
-            <button className="mock-interview-dialog__btn--primary" onClick={() => navigate("/mock-interview-report")}>
+            <button
+              className="mock-interview-dialog__btn--primary"
+              onClick={() => navigate("/mock-interview-report")}
+            >
               분석 결과 보기
             </button>
           </div>

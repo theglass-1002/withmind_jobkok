@@ -123,3 +123,32 @@ export type InterviewReportListResponse = {
   totalCount: number;
   list: InterviewReportItem[];
 };
+
+export type CreateQzGroupRequest = {
+  resumeIdx: number;
+  job: string;
+};
+
+export type CreateQzGroupResponse = {
+  qzGroup: number;
+  status: number;
+};
+
+export type SaveInterviewAnalysisRequest = {
+  qzGroup: number;
+  num: number;
+  qzTts: string;
+  fileUrl: string;
+  thumUrl: string;
+  category: string;
+  originalName: string;
+  storedName: string;
+  sizeBytes: number;
+  contentType: string;
+};
+
+export type SaveInterviewAnalysisResponse = {
+  status: number;
+  message?: string;
+  data?: any;
+};

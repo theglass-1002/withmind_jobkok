@@ -41,7 +41,7 @@ function toUserProfileFromMyInfo(myInfo: MyInfo | null): UserProfile {
     myInfo.gender === "M" || myInfo.gender === "W" ? myInfo.gender : "M";
 
   return {
-    email: myInfo.userId ?? "",
+    email: myInfo.userIdx ?? "",
     number: myInfo.phone ?? "",
     name: myInfo.userName ?? "",
     birth: myInfo.birthdate ?? "",
@@ -119,8 +119,8 @@ export default function EditProfile() {
       console.log("인증 여부:", payload.certified);
 
       const requestPayload: UpdateUserRequest = {
-        userIdx: myInfo?.userIdx ?? 0,
-        email: myInfo?.userId ?? userData.email ?? "",
+        userIdx: Number(myInfo?.userIdx ?? 0),
+        email: myInfo?.userIdx ?? userData.email ?? "",
         password: "",
         phone: payload.phone,
         userName: payload.name,

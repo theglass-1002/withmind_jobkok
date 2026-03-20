@@ -49,7 +49,7 @@ export default function M_MyPageSideMenu({ myInfo, planName, planExpireAt }: Pro
   };
 
   const userName = myInfo?.userName;
-  const email = myInfo?.userId;
+  const email = myInfo?.userIdx;
   const phone = myInfo?.phone;
 
 
