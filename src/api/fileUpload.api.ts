@@ -182,9 +182,11 @@ export async function uploadJobInterviewVideo(
   originalFileName: string = "env_test.webm",
   folderPath: string = "interview"
 ): Promise<{
-  file:File;
+  fileName:string;
+  fileSize:number;
   s3_key: string;
   finalUrl: string;
+  thumbUrl: string;
   uniqueFileName: string;
   originalFileName: string;
 }> {
@@ -202,13 +204,17 @@ export async function uploadJobInterviewVideo(
     
     //uploadFileToS3 는 파일 업로드 api 
     await uploadFileToS3(awsData.presigned_url, file);
-  
     const finalUrl = preSignedData.awsFrontUrlStr || "";
     const filePath = resolveFilePath(finalUrl, awsData.s3_key);
+
+    const thumbUrl = finalUrl.replace(/\.[^/.]+$/, ".jpg");
+
     return {
-      file:file,
+      fileName:file.name,
+      fileSize:file.size,
       s3_key: filePath,
       finalUrl,
+      thumbUrl,
       uniqueFileName,
       originalFileName,
     };

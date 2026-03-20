@@ -280,7 +280,7 @@ export default function Home() {
         setErrorMsg(null);
 
         const response: any = await fetchJobTree();
-        console.log("fetchJobTree:", response);
+       
 
         if (!alive) return;
 
@@ -290,10 +290,10 @@ export default function Home() {
           ? response
           : [];
 
-        console.log("flatList:", flatList);
+     
 
         const tree = buildTreeFromFlatList(flatList as FlatJobNode[]);
-        console.log("tree:", tree);
+      
 
         setJobTree(tree);
       } catch (e: any) {
@@ -313,8 +313,7 @@ export default function Home() {
   }, [navigate]);
 
   useEffect(() => {
-    console.log("jobTree:", jobTree);
-    console.log("topCategories:", topCategories);
+    
   }, [jobTree, topCategories]);
 
   useEffect(() => {

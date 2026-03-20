@@ -11,7 +11,7 @@ import Modal from "@/shared/components/modal/Modal";
 import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
 
 import { uploadJobInterviewVideo } from "@/api/fileUpload.api";
-import { fetchInterviewFollowup } from "@/api/interview/interview.api";
+import { fetchInterviewFollowup, saveInterviewAnalysis } from "@/api/interview/interview.api";
 
 const THINKING_SECONDS = 15;
 
@@ -46,7 +46,7 @@ export default function M_MockInterviewLive() {
   const location = useLocation();
   const { actionType, resetAction } = useLayoutContext();
 
-  const state = (location.state || {}) as LocationState;
+  const state = location.state as any;
 
   const [isUploading, setIsUploading] = useState(false);
 
@@ -153,6 +153,11 @@ export default function M_MockInterviewLive() {
 
     return out;
   }, [baseQuestions, followUpMap]);
+
+
+  useEffect(() => {
+    console.log("모바일 [MockInterviewLive] 면접보는화면",state);
+  }, [state]);
 
   useEffect(() => {
     const cur = effectiveQuestions[qIndex];
@@ -272,12 +277,32 @@ export default function M_MockInterviewLive() {
     const isFollowupNow = cur.type === "FOLLOWUP";
 
     setIsUploading(true);
-    console.log('영상업로드??');
+  
+    console.log("[uploadRecordedFile] 현재 qIndex:", meta.qIndex);
+    console.log("[uploadRecordedFile] 현재 질문 번호:", cur?.order);
+    console.log("[uploadRecordedFile] 현재 질문 내용:", cur?.question);
+  
     try {
       let uploadResult: any;
       try {
         uploadResult = await uploadJobInterviewVideo(videoBlob);
-        console.log('면접영상 업로드 결과',uploadResult);
+        console.log("M_영상업로드 후 면접영상 저장 api 날리기");
+        const res =  await saveInterviewAnalysis({
+          qzGroup: state?.interviewGroupId,
+          num:cur.order,
+          qzTts:questionText,
+          fileUrl:uploadResult.finalUrl,
+          thumUrl:uploadResult.thumbUrl,
+          category:"interview",
+          originalName:uploadResult.uniqueFileName,
+          storedName:uploadResult.uniqueFileName,
+          sizeBytes:uploadResult.fileSize,
+          contentType:"video/webm"
+
+        });
+        
+
+        console.log('면접 영상 저장 API',res);
       } catch (err) {
         console.error("[uploadRecordedFile] video upload failed:", err);
         return { uploadResult: null, followupRes: null };

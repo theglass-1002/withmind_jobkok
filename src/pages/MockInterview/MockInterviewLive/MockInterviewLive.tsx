@@ -12,7 +12,7 @@ import {
   InterviewQuestionsResponse,
 } from "@/api/interview/interview.types";
 import { uploadJobInterviewVideo } from "@/api/fileUpload.api";
-import { fetchInterviewFollowup } from "@/api/interview/interview.api";
+import { fetchInterviewFollowup, saveInterviewAnalysis } from "@/api/interview/interview.api";
 
 import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
 
@@ -182,9 +182,7 @@ export default function MockInterviewLive() {
     const cur = effectiveQuestions[meta.qIndex];
 
     console.log("[uploadRecordedFile] 현재 qIndex:", meta.qIndex);
-    console.log("[uploadRecordedFile] 현재 질문 객체:", cur);
     console.log("[uploadRecordedFile] 현재 질문 번호:", cur?.order);
-    console.log("[uploadRecordedFile] 현재 질문 타입:", cur?.type);
     console.log("[uploadRecordedFile] 현재 질문 내용:", cur?.question);
 
     if (!cur) return { uploadResult: null, followupRes: null };
@@ -200,14 +198,24 @@ export default function MockInterviewLive() {
 
       try {
         uploadResult = await uploadJobInterviewVideo(videoBlob);
+      console.log("영상업로드 후 면접영상 저장 api 날리기");
+      const res =  await saveInterviewAnalysis({
+          qzGroup: state?.interviewGroupId,
+          num:cur.order,
+          qzTts:questionText,
+          fileUrl:uploadResult.finalUrl,
+          thumUrl:uploadResult.thumbUrl,
+          category:"interview",
+          originalName:uploadResult.uniqueFileName,
+          storedName:uploadResult.uniqueFileName,
+          sizeBytes:uploadResult.fileSize,
+          contentType:"video/webm"
 
-        console.log("[uploadRecordedFile] 아이디:", state?.interviewGroupId);
-        console.log(
-          "[uploadRecordedFile] uploadJobInterviewVideo 응답값:",
-          uploadResult
-        );
-        console.log("[uploadRecordedFile] 업로드한 질문 내용:", questionText);
-        console.log("[uploadRecordedFile] 업로드한 질문 번호:", cur.order);
+        });
+        
+
+        console.log('면접 영상 저장 API',res);
+
       } catch (err) {
         console.error("[uploadRecordedFile] video upload failed:", err);
         return { uploadResult: null, followupRes: null };
@@ -235,8 +243,7 @@ export default function MockInterviewLive() {
         file_url: uploadResult.finalUrl,
       };
 
-      console.log("[uploadRecordedFile] followup 요청 payload:", payload);
-
+   
       let followupRes: any;
       try {
         followupRes = await fetchInterviewFollowup(payload);
@@ -401,8 +408,6 @@ export default function MockInterviewLive() {
     startRecording();
 
     return () => {
-      console.log("[answering cleanup] cleanup 실행");
-
       try {
         if (
           mediaRecorderRef.current &&
@@ -494,13 +499,7 @@ export default function MockInterviewLive() {
             onEnd={async () => {
               if (isUploading) return;
 
-              console.log("[onEnd] 현재 qIndex:", qIndex);
-              console.log("[onEnd] 현재 질문 객체:", effectiveQuestions[qIndex]);
-              console.log(
-                "[onEnd] 현재 질문 내용:",
-                effectiveQuestions[qIndex]?.question
-              );
-
+            
               await stopRecordingAndUpload();
 
               setPhase("thinking");

@@ -14,7 +14,7 @@ import { extractJobId } from "@/shared/utils/util";
 
 import { fetchResumeDetail } from "@/api/resume/resume.api";
 import { fetchJobDetail } from "@/api/job/job.api";
-import { fetchEnvTestSpeech, fetchInterviewQuestions } from "@/api/interview/interview.api";
+import { createQzGroup, fetchEnvTestSpeech, fetchInterviewQuestions } from "@/api/interview/interview.api";
 import { logout } from "@/api/auth/auth.api";
 import { InterviewQuestionsRequest } from "@/api/interview/interview.types";
 
@@ -53,6 +53,7 @@ type InterviewState = {
   desiredJob?: string;
   jobPostingUrl?: string;
   interviewStageStatus?: 0 | 1 | 2;
+  interviewGroupId:number;
 };
 
 export default function M_MockSettings() {
@@ -182,6 +183,12 @@ export default function M_MockSettings() {
 
       const resumeDetail = await fetchResumeDetail(resumeIdxNum);
       const jobDetail = jobIdNum !== null ? await fetchJobDetail(jobIdNum) : null;
+      
+      const res = await createQzGroup({
+        resumeIdx: resumeDetail.resumeIdx, // 상태값 사용
+        job: desiredJob.trim(),
+      });
+      const interviewGroupId = res.qzGroup;
       const envSpeech = await fetchEnvTestSpeech();
 
       const introQuestion: InterviewQuestionLike = {
@@ -239,6 +246,7 @@ export default function M_MockSettings() {
           desiredJob,
           jobPostingUrl,
           interviewStageStatus,
+          interviewGroupId
         };
 
         setInterviewState(nextInterviewState);
@@ -307,6 +315,7 @@ export default function M_MockSettings() {
         desiredJob,
         jobPostingUrl,
         interviewStageStatus,
+        interviewGroupId
       };
 
       setInterviewState(nextInterviewState);
