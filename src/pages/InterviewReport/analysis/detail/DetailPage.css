@@ -48,12 +48,14 @@
   line-height: 54px;
 }
 .detail-analysis__level-desc{
+  height: 90px;
   color: var(--white-100, #FFF);
   font-family: Pretendard;
   font-size: 16px;
   font-style: normal;
   font-weight: 400;
   line-height: 180%;
+  overflow: auto;
 }
 
 .detail-analysis__level-chart{
@@ -142,7 +144,7 @@
     justify-content: space-between;
     align-items: center;
     top: 20px;
-    padding: 0px 5px 0px 5px;
+    padding: 0px 20px 0px 20px;
 }
 
 .detail-analysis__video-notice{
@@ -210,7 +212,16 @@
   font-weight: 600;
   line-height: 20px;
 }
+.detail-analysis__question-label{
+  white-space: nowrap;
+
+}
+
 .detail-analysis__question-title{
+  display: -webkit-box;
+  -webkit-line-clamp: 1;   /* 👈 핵심 */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
   color: var(--white-100, #FFF);
 }
 
@@ -339,12 +350,14 @@
 
 /* 답변 분석 본문 */
 .detail-analysis__answer-analysis-text{
+  height: 60px;
   color: var(--gray-900, #2A2D2F);
   font-family: Pretendard;
   font-size: 16px;
   font-style: normal;
   font-weight: 400;
   line-height: 180%;
+  overflow: auto;
 }
 
 /* 구분선 */
@@ -369,6 +382,7 @@
 }
 .detail-analysis__word-list{
   display: flex;
+ 
   color: var(--primary-primary, #816BFE);
   font-family: Pretendard;
   font-size: 16px;
@@ -376,6 +390,10 @@
   font-weight: 600;
   line-height: 180%;
 }
+.detail-analysis__word-item{
+  
+}
+
 .detail-analysis__word-item:not(:first-child)::before {
   content: ", ";
   display: inline-block;
@@ -715,6 +733,13 @@ background: var(--white-100, #FFF);
   background: var(--gray-300, #E0E2E4);
 }
 
+.detail-analysis__metric-table.attitude{
+
+  /* border: 1px solid var(--gray-300, #E0E2E4); */
+
+  border-bottom: 1px solid var(--gray-300, #E0E2E4);
+  border-left: 1px solid var(--gray-300, #E0E2E4);
+}
 
 .detail-analysis__metric-table-header,
 .detail-analysis__metric-table-row{
@@ -754,6 +779,7 @@ background: var(--white-100, #FFF);
 
 .detail-analysis__metric-table-cell:first-child{
   flex: 1;
+  border-right: 1px solid var(--gray-300, #E0E2E4);
 }
 
 

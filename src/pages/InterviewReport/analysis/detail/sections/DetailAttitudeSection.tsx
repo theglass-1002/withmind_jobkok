@@ -1,4 +1,3 @@
-// src/pages/InterviewReport/analysis/detail/sections/DetailAttitudeSection.tsx
 import React, { useState } from "react";
 import LevelGraph from "@/pages/InterviewReport/analysis/chart/LevelGraph";
 
@@ -7,7 +6,11 @@ import GazeTabContent from "@/pages/InterviewReport/analysis/detail/sections/par
 import GestureTabContent from "@/pages/InterviewReport/analysis/detail/sections/part/GestureTabContent";
 import ExpressionTabContent from "@/pages/InterviewReport/analysis/detail/sections/part/ExpressionTabContent";
 
-import UiFilter, { type UiFilterOption } from "@/shared/components/ui-filter/UiFilter";
+import UiFilter, {
+  type UiFilterOption,
+} from "@/shared/components/ui-filter/UiFilter";
+
+import { InterviewReportDetailResponse } from "@/api/report/report.types";
 
 type Props = {
   score: number;
@@ -16,6 +19,7 @@ type Props = {
   description?: string;
   faceAngle?: number;
   bodyAngle?: number;
+  reportDetail?: InterviewReportDetailResponse | null;
 };
 
 export default function DetailAttitudeSection({
@@ -25,6 +29,7 @@ export default function DetailAttitudeSection({
   description,
   faceAngle,
   bodyAngle,
+  reportDetail,
 }: Props) {
   const DEFAULT_FILTERS: UiFilterOption[] = [
     { label: "자세", value: "attitude" },
@@ -33,7 +38,13 @@ export default function DetailAttitudeSection({
     { label: "표정", value: "expression" },
   ];
 
-  const [selectedQuestion, setSelectedQuestion] = useState<string>(DEFAULT_FILTERS[0].value);
+  const [selectedQuestion, setSelectedQuestion] = useState<string>(
+    DEFAULT_FILTERS[0].value
+  );
+
+  // 필요하면 reportDetail에서 값 꺼내서 사용 가능
+  // 예시:
+  // const attitudeData = reportDetail?.attitudeAnalysis;
 
   const attitudeHeaders = ["", "머리 각도", "어깨 각도", "좌우 움직임"];
   const attitudeRows = [
@@ -48,9 +59,7 @@ export default function DetailAttitudeSection({
   ];
 
   const expressionHeaders = ["", "긍정", "부정", "무표정"];
-  const expressionRows = [
-    { label: "정유리 님", values: ["24%", "8%", "68%"] },
-  ];
+  const expressionRows = [{ label: "정유리 님", values: ["24%", "8%", "68%"] }];
 
   return (
     <div className="analysis-section detail-analysis__attitude ">
@@ -59,7 +68,12 @@ export default function DetailAttitudeSection({
       </span>
 
       <div className="analysis-section__body">
-        <LevelGraph score={score} description={description} />
+        <LevelGraph 
+        score={reportDetail.detailAttitude.attitudeTotalScore}
+        description={description} 
+        reportDetail={reportDetail}
+        type="attitude"
+        />
 
         <div className="detail-analysis__attitude">
           <UiFilter
@@ -79,6 +93,7 @@ export default function DetailAttitudeSection({
               highlight="머리 ‘-1.234도’, 어깨 ‘-1.234도’, 좌우 움직임 ‘13회"
               headers={attitudeHeaders}
               rows={attitudeRows}
+              reportDetail={reportDetail}
             />
           ) : selectedQuestion === "gaze" ? (
             <GazeTabContent
@@ -101,15 +116,15 @@ export default function DetailAttitudeSection({
             />
           ) : selectedQuestion === "expression" ? (
             <ExpressionTabContent
-            faceAngle={10}
-            bodyAngle={10}
-            analysisTitle="표정 분석"
-            selectedGrade="보통"
-            analysisText="전체 평균과 비교했을 때, 정유리님의 자세는 양호합니다"
-            highlight="머리 ‘-1.234도’, 어깨 ‘-1.234도’, 좌우 움직임 ‘13회"
-            headers={expressionHeaders}
-            rows={expressionRows}
-          />
+              faceAngle={10}
+              bodyAngle={10}
+              analysisTitle="표정 분석"
+              selectedGrade="보통"
+              analysisText="전체 평균과 비교했을 때, 정유리님의 자세는 양호합니다"
+              highlight="머리 ‘-1.234도’, 어깨 ‘-1.234도’, 좌우 움직임 ‘13회"
+              headers={expressionHeaders}
+              rows={expressionRows}
+            />
           ) : (
             <AttitudeTabContent
               faceAngle={faceAngle}

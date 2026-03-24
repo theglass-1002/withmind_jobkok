@@ -23,6 +23,41 @@ type Props = {
   reportDetail?: InterviewReportDetailResponse | null;
 };
 
+type QuestionGrade = "상" | "중" | "하";
+
+type QuestionItem = {
+  title: string;
+  grade: QuestionGrade;
+  keywords: string[];
+  analysis: string;
+  category: string;
+  fileUrl?: string;
+};
+
+type WordItem = {
+  common: string[];
+  habit: string[];
+};
+
+function mapGrade(grade?: number): QuestionGrade {
+  switch (grade) {
+    case 3:
+      return "상";
+    case 2:
+      return "중";
+    case 1:
+    default:
+      return "하";
+  }
+}
+
+function normalizeKeyword(value?: string) {
+  if (!value) return "";
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+  return trimmed;
+}
+
 export default function DetailCompetenceSection({
   score,
   title,
@@ -33,14 +68,6 @@ export default function DetailCompetenceSection({
 }: Props) {
   const location = useLocation();
   const isPrintMode = new URLSearchParams(location.search).has("printViewr");
-
-  const currentVideoSrc = videoSrc || interview_video_02;
-
-  useEffect(() => {
-    console.log("DetailCompetenceSection - 프린트 모드:", isPrintMode);
-    console.log("DetailCompetenceSection - 비디오 소스:", currentVideoSrc);
-    console.log("DetailCompetenceSection - reportDetail:", reportDetail);
-  }, [isPrintMode, currentVideoSrc, reportDetail]);
 
   const DEFAULT_FILTERS: UiFilterOption[] = [
     { label: "질문 1", value: "q1" },
@@ -56,16 +83,7 @@ export default function DetailCompetenceSection({
     { label: "질문 11", value: "q11" },
   ];
 
-  const QUESTIONS: Record<
-    string,
-    {
-      title: string;
-      grade: "상" | "중" | "하";
-      keywords: string[];
-      analysis: string;
-      category: string;
-    }
-  > = {
+  const QUESTIONS: Record<string, QuestionItem> = {
     q1: {
       title: "1분동안 자신을 소개해주세요",
       grade: "상",
@@ -138,24 +156,86 @@ export default function DetailCompetenceSection({
     },
   };
 
-  const WORDS: Record<string, { common: string[]; habit: string[] }> = {
+  const WORDS: Record<string, WordItem> = {
     q1: { common: ["디자인", "MVP", "협업", "지표"], habit: ["그러니까"] },
     q2: { common: ["리팩토링", "최적화", "번들", "성능", "도입"], habit: ["뭐랄까", "약간"] },
     q3: { common: ["문제정의", "원인분석", "가설", "실험", "회고"], habit: [] },
     default: { common: ["키워드", "사례", "성과"], habit: ["아니"] },
   };
 
-  const [selectedQuestion, setSelectedQuestion] = useState<string>(DEFAULT_FILTERS[0].value);
+  const hasInterviewVideo =
+    Array.isArray(reportDetail?.interviewVideo) &&
+    reportDetail!.interviewVideo.length > 0;
 
-  const current = QUESTIONS[selectedQuestion] ?? {
+  const resolvedFilters = useMemo<UiFilterOption[]>(() => {
+    if (!hasInterviewVideo) return DEFAULT_FILTERS;
+
+    return [...reportDetail!.interviewVideo]
+      .sort((a, b) => (a.qzNum ?? 0) - (b.qzNum ?? 0))
+      .map((item) => ({
+        label: `질문 ${item.qzNum}`,
+        value: `q${item.qzNum}`,
+      }));
+  }, [hasInterviewVideo, reportDetail]);
+
+  const resolvedQuestions = useMemo<Record<string, QuestionItem>>(() => {
+    if (!hasInterviewVideo) return QUESTIONS;
+
+    return reportDetail!.interviewVideo
+      .slice()
+      .sort((a, b) => (a.qzNum ?? 0) - (b.qzNum ?? 0))
+      .reduce<Record<string, QuestionItem>>((acc, item) => {
+        const key = `q${item.qzNum}`;
+
+        const keywords = [
+          normalizeKeyword(item.keyAnswerEval1),
+          normalizeKeyword(item.keyAnswerEval2),
+          normalizeKeyword(item.keyAnswerEval3),
+        ].filter(Boolean);
+
+        acc[key] = {
+          title: item.qzTxt || `질문 ${item.qzNum}`,
+          grade: mapGrade(item.grade),
+          category: `질문 ${item.qzNum}`,
+          keywords,
+          analysis: item.evaluation || "분석 없음",
+          fileUrl: item.fileUrl,
+        };
+
+        return acc;
+      }, {});
+  }, [hasInterviewVideo, reportDetail]);
+
+  const resolvedWords = useMemo<Record<string, WordItem>>(() => {
+    return WORDS;
+  }, []);
+
+  const [selectedQuestion, setSelectedQuestion] = useState<string>(
+    resolvedFilters[0]?.value ?? "q1"
+  );
+
+  useEffect(() => {
+    setSelectedQuestion(resolvedFilters[0]?.value ?? "q1");
+  }, [resolvedFilters]);
+
+  const current = resolvedQuestions[selectedQuestion] ?? {
     title: "질문을 선택해주세요",
     grade: "중" as const,
     category: "질문",
     keywords: [],
     analysis: "",
+    fileUrl: undefined,
   };
 
-  const words = WORDS[selectedQuestion] ?? WORDS.default;
+  const words = resolvedWords[selectedQuestion] ?? resolvedWords.default;
+
+  const currentVideoSrc = current.fileUrl || videoSrc || interview_video_02;
+
+  useEffect(() => {
+    console.log("DetailCompetenceSection - 프린트 모드:", isPrintMode);
+    console.log("DetailCompetenceSection - 비디오 소스:", currentVideoSrc);
+    console.log("DetailCompetenceSection - reportDetail:", reportDetail);
+  }, [isPrintMode, currentVideoSrc, reportDetail]);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [isBlurred, setIsBlurred] = useState(true);
@@ -185,7 +265,7 @@ export default function DetailCompetenceSection({
     }
   }, [selectedQuestion]);
 
-  const printItems = useMemo(() => Object.entries(QUESTIONS), []);
+  const printItems = useMemo(() => Object.entries(resolvedQuestions), [resolvedQuestions]);
 
   return (
     <div className="analysis-section detail-analysis__competence">
@@ -278,7 +358,7 @@ export default function DetailCompetenceSection({
           <div className="detail-analysis__content">
             <div className="detail-analysis__qa-section">
               <UiFilter
-                options={DEFAULT_FILTERS}
+                options={resolvedFilters}
                 value={selectedQuestion}
                 onChange={(v) => setSelectedQuestion(v)}
                 className="detail-analysis__question__filters"

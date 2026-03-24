@@ -24,7 +24,7 @@ export default function DetailMetricTable({
   className,
 }: Props) {
   const rootClass = `detail-analysis__metric-table ${
-    className ?? ""
+    type ?? ""
   }`;
 
   return (

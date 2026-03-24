@@ -71,7 +71,7 @@ function getGradeTextFromReport(
   type?: "voice" | "attitude" | "competence" | "tension"
 ): string | undefined {
   if (!reportDetail || !type) return undefined;
-
+  console.log(type);
   switch (type) {
     case "competence":
       return (

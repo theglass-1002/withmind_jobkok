@@ -36,14 +36,14 @@ export default function DetailPage({
         competence_score:
           reportDetail.itemTotalScores.abilityTotalScore ?? competence_score,
         attitude_score:
-          reportDetail.itemTotalScores.attitudeTotalScore ?? attitude_score,
+          reportDetail.detailAttitude.attitudeTotalScore ?? attitude_score,
         voice_score:
           reportDetail.itemTotalScores.voiceTotalScore ?? voice_score,
         tension_score:
           reportDetail.itemTotalScores.tensionTotalScore ?? tension_score,
 
         competence_desc: reportDetail.feedback?.competency ?? "-",
-        attitude_desc: reportDetail.feedback?.attitude ?? "-",
+        attitude_desc: reportDetail.detailAttitude.attitudeFeedBack ?? "-",
         voice_desc: reportDetail.feedback?.voice ?? "-",
         tension_desc: reportDetail.feedback?.tension ?? "-",
       };
@@ -89,6 +89,7 @@ export default function DetailPage({
         titleIconSrc={ic_technologist_24}
         score={resolvedData.attitude_score}
         description={resolvedData.attitude_desc}
+        reportDetail={reportDetail}
       />
 
       <span className="print-page-break"></span>

@@ -1,4 +1,5 @@
 // src/shared/components/detail-analysis/DetailMetric.tsx
+import { InterviewReportDetailResponse } from "@/api/report/report.types";
 import React from "react";
 
 type Grade = string;
@@ -15,6 +16,7 @@ type Props = {
   analysisText?: React.ReactNode;
   highlight?: React.ReactNode;
   className?: string;
+  reportDetail?: InterviewReportDetailResponse | null;
 };
 
 export default function DetailMetric({
