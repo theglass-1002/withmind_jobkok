@@ -100,6 +100,7 @@ export default function DetailPage({
         titleIconSrc={ic_speaker_24}
         score={resolvedData.voice_score}
         description={resolvedData.voice_desc}
+        reportDetail={reportDetail}
       />
 
       <span className="print-page-break"></span>

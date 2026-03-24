@@ -4,6 +4,7 @@ import LevelGraph from "@/pages/InterviewReport/analysis/chart/LevelGraph";
 import VoiceTabContent from "@/pages/InterviewReport/analysis/detail/sections/part/VoiceTabContent";
 import SpeechSpeedTabContent from "@/pages/InterviewReport/analysis/detail/sections/part/SpeechSpeedTabContent";
 import UiFilter, { type UiFilterOption } from "@/shared/components/ui-filter/UiFilter";
+import { InterviewReportDetailResponse } from "@/api/report/report.types";
 
 type Props = {
   score: number;
@@ -11,6 +12,8 @@ type Props = {
   className?: string;
   titleIconSrc?: string;
   description?: string;
+  reportDetail?: InterviewReportDetailResponse| null;
+
 };
 
 const DEFAULT_FILTERS: UiFilterOption[] = [
@@ -31,7 +34,7 @@ const VOICE_TONE_ROWS = [
   },
 ];
 
-const SPEECH_SPEED_HEADERS = ["느림", "다소 느림", "보통", "빠름", "다소 빠름"];
+const SPEECH_SPEED_HEADERS = ["느림", "다소 느림", "보통", "다소 빠름", "빠름"];
 const SPEECH_SPEED_ROWS = [
   { 
     label: "3.5 SPS 이하",
@@ -45,6 +48,7 @@ export default function DetailVoiceSection({
   className,
   titleIconSrc,
   description,
+  reportDetail
 }: Props) {
   const [selectedQuestion, setSelectedQuestion] = useState<string>(DEFAULT_FILTERS[0].value);
 
@@ -54,7 +58,13 @@ export default function DetailVoiceSection({
         {titleIconSrc && <img src={titleIconSrc} alt="" />} {title}
       </span>
       <div className="analysis-section__body">
-        <LevelGraph score={score} description={description} />
+        <LevelGraph 
+        reportDetail={reportDetail}
+        score={score} 
+        description={description} 
+        type="voice"
+        />
+        
         <div className="detail-analysis__attitude">
           <UiFilter
             options={DEFAULT_FILTERS}
@@ -72,6 +82,7 @@ export default function DetailVoiceSection({
               highlight="평균 톤 '205 Hz', 변동폭 '중간', 안정성 '우수'"
               headers={VOICE_TONE_HEADERS}
               rows={VOICE_TONE_ROWS}
+              reportDetail={reportDetail}
             />
           ) : selectedQuestion === "speechSpeed" ? (
             <SpeechSpeedTabContent
@@ -81,6 +92,7 @@ export default function DetailVoiceSection({
               selectedGrade="미흡"
               headers={SPEECH_SPEED_HEADERS}
               rows={SPEECH_SPEED_ROWS}
+              reportDetail={reportDetail}
             />
           ) : null}
         </div>

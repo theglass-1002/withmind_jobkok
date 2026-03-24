@@ -31,6 +31,7 @@ export default function DetailMetric({
   analysisText,
   highlight,
   className,
+  reportDetail,
 }: Props) {
   /** 한글 → 영어 modifier 매핑 */
   const gradeClassMap: Record<string, string> = {
@@ -39,12 +40,28 @@ export default function DetailMetric({
     미흡: "poor",
   };
 
+  const resolvedSelectedGrade = (() => {
+    if (!reportDetail) return selectedGrade;
+
+    switch (type) {
+      case "voice":
+        return reportDetail?.voiceAnalysis?.tone?.scoreText ?? selectedGrade;
+      case "speed":
+          return reportDetail?.voiceAnalysis?.speed?.scoreText ?? selectedGrade;
+  
+
+      default:
+        return selectedGrade;
+    }
+  })();
+
   return (
     <>
       {/* 등급 영역 */}
       <div className={`detail-analysis__metric-grade ${className ?? ""}`}>
         <span className="detail-analysis__metric-grade-label">
-          {gradeIconSrc && <img src={gradeIconSrc} alt="" aria-hidden="true" />} {gradeLabel}
+          {gradeIconSrc && <img src={gradeIconSrc} alt="" aria-hidden="true" />}{" "}
+          {gradeLabel}
         </span>
 
         <div
@@ -53,7 +70,7 @@ export default function DetailMetric({
           aria-label={`${gradeLabel} 선택`}
         >
           {gradeOptions.map((g) => {
-            const isOn = selectedGrade === g;
+            const isOn = resolvedSelectedGrade === g;
             const modifier = gradeClassMap[g] || "unknown";
             const itemCls = `detail-analysis__metric-grade-option ${modifier} ${
               isOn ? "on" : ""
@@ -70,7 +87,11 @@ export default function DetailMetric({
                 {g}
               </button>
             ) : (
-              <span key={g} className={itemCls} aria-current={isOn || undefined}>
+              <span
+                key={g}
+                className={itemCls}
+                aria-current={isOn || undefined}
+              >
                 {g}
               </span>
             );
@@ -81,13 +102,20 @@ export default function DetailMetric({
       {/* 분석 영역 */}
       <div className={`detail-analysis__metric-analysis ${className ?? ""}`}>
         <span className="detail-analysis__metric-analysis-title">
-          {analysisIconSrc && <img src={analysisIconSrc} alt="" aria-hidden="true" />} {analysisTitle}
+          {analysisIconSrc && (
+            <img src={analysisIconSrc} alt="" aria-hidden="true" />
+          )}{" "}
+          {analysisTitle}
         </span>
 
         {analysisText && (
           <span className="detail-analysis__metric-analysis-text">
             {analysisText}{" "}
-            {highlight && <span className="detail-analysis__metric-highlight">{highlight}</span>}
+            {highlight && (
+              <span className="detail-analysis__metric-highlight">
+                {highlight}
+              </span>
+            )}
           </span>
         )}
       </div>

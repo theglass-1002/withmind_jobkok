@@ -148,7 +148,7 @@ export default function SpeakingSpeedChart({
         tooltip: {
           enabled: true,
           callbacks: {
-            label: (ctx: any) => ` ${ctx.parsed.y.toFixed(0)} Hz`,
+            label: (ctx: any) => ` ${ctx.parsed.y.toFixed(0)} SPS`,
           },
         },
       },
@@ -157,8 +157,8 @@ export default function SpeakingSpeedChart({
           min,
           max,
           ticks: {
-            stepSize: 50,
-            callback: (v: any) => `${v} Hz`,
+            stepSize: 2,
+            callback: (v: any) => `${v} SPS`,
             font: { size: 14, family: "Pretendard" },
             color: "#848B93",
           },

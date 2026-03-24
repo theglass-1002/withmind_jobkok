@@ -78,7 +78,7 @@ export default function VoicePitchChart({
   const minWidth = useMemo(() => {
     const pointCount = values.length;
     const minGap = 60; // 포인트 간 최소 간격
-    const yAxisSpace = 80; // Y축 레이블 공간
+    const yAxisSpace = 110; // Y축 레이블 공간
     return pointCount * minGap + yAxisSpace;
   }, [values.length]);
 
@@ -153,7 +153,8 @@ export default function VoicePitchChart({
   const options = useMemo(() => {
     return {
       animation: false as const,
-      responsive: false, // responsive를 false로 변경
+      responsive : true,
+      // responsive: false, // responsive를 false로 변경
       maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
@@ -255,12 +256,16 @@ export default function VoicePitchChart({
         overflowY: "hidden",
       }}
     >
-      <div style={{ minWidth, height: "100%" }}>
+      <div style={{ 
+        //minWidth,
+        minWidth: values.length * 60, // 핵심
+        height: "100%" }}>
         <Line 
           data={data} 
           options={options} 
           plugins={[averageLinePlugin]} 
-          width={minWidth}
+          width={values.length * 60} //  반드시 필요
+          //width={minWidth}
           height={height}
         />
       </div>

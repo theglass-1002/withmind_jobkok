@@ -449,7 +449,7 @@ background: var(--white-100, #FFF);
 
 .detail-analysis__attitude-left{
   display: flex;
-  flex: 1;
+  width: 60%;
   height: 100%;
   border-radius: 4px;
   border: 1px solid var(--gray-300, #E0E2E4);
@@ -459,7 +459,7 @@ background: var(--white-100, #FFF);
 
 .detail-analysis__attitude-right{
   display: flex;
-  flex: 1;
+  width: 40%;
   height: 100%;
   flex-direction: column;
   align-items: flex-start;
@@ -734,11 +734,22 @@ background: var(--white-100, #FFF);
 }
 
 .detail-analysis__metric-table.attitude{
+   /* border: 1px solid var(--gray-300, #E0E2E4); */
 
-  /* border: 1px solid var(--gray-300, #E0E2E4); */
-
-  border-bottom: 1px solid var(--gray-300, #E0E2E4);
+  /* border-bottom: 1px solid var(--gray-300, #E0E2E4);
   border-left: 1px solid var(--gray-300, #E0E2E4);
+
+  border-left: 1px solid var(--gray-300, #E0E2E4); */
+
+}
+
+
+.detail-analysis__metric-table.voice_tone{
+  /* border:1px solid var(--gray-300, #E0E2E4); */
+  
+  /* border-bottom: 1px solid var(--gray-300, #E0E2E4);
+  border-left: 1px solid var(--gray-300, #E0E2E4);
+  border-right: 1px solid var(--gray-300, #E0E2E4); */
 }
 
 .detail-analysis__metric-table-header,
@@ -752,8 +763,15 @@ background: var(--white-100, #FFF);
   color: var(--gray-900, #2A2D2F);
 }
 
+.detail-analysis__metric-table.attitude .detail-analysis__metric-table-header{
+
+  /* border-bottom: 1px solid var(--gray-300, #E0E2E4); */
+
+}
+
 .detail-analysis__metric-table-header{
   background: var(--gray-300, #E0E2E4);
+  
 }
 
 .detail-analysis__metric-table .detail-analysis__metric-table-cell{
@@ -779,7 +797,7 @@ background: var(--white-100, #FFF);
 
 .detail-analysis__metric-table-cell:first-child{
   flex: 1;
-  border-right: 1px solid var(--gray-300, #E0E2E4);
+  /* border-right: 1px solid var(--gray-300, #E0E2E4); */
 }
 
 
@@ -921,6 +939,7 @@ VoiceTabContent */
   white-space: pre-line; /* 줄바꿈 문자(\n)를 실제 줄바꿈으로 표시 */
   text-align: center;
   line-height: 1.4; /* 줄 간격 조정 */
+
 }
 
 /* 
