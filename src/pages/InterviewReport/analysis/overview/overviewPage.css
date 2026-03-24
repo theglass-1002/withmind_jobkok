@@ -9,7 +9,7 @@
 .mock-analysis-overview__kpi-title{
     display: flex;
     flex: 2;
-    height: 100%;
+    height: 503px;
     padding: 28px;
     flex-direction: column;
     align-items: flex-start;
@@ -169,6 +169,13 @@
     line-height: 180%; /* 28.8px */
   }
 
+  .mock-analysis-overview__kpi-desc-body{
+    width: 100%;
+    height: 100px;
+    overflow: auto;
+    padding-right: 5px;
+  }
+
   .mock-analysis-overview__kpi-chart{
     display: flex;
     padding: 24px;
@@ -177,7 +184,7 @@
     gap: 16px;
     align-self: stretch;
     border-radius: 4px;
-background: var(--white-12, rgba(255, 255, 255, 0.12));
+    background: var(--white-12, rgba(255, 255, 255, 0.12));
   }
 
   .kpi-chart__score{
@@ -315,12 +322,14 @@ background: var(--white-12, rgba(255, 255, 255, 0.12));
   }
 
   .kpi-fit__desc{
+    height: 140px;
     color: var(--gray-900, #2A2D2F);
     font-family: Pretendard;
     font-size: 16px;
     font-style: normal;
     font-weight: 400;
     line-height: 180%; /* 28.8px */
+    overflow: auto;
   }
 
   .kpi-fit__bar {
@@ -543,12 +552,15 @@ background: var(--primary-12, rgba(129, 107, 254, 0.12));
  }
 
  .analysis-eval-item__description{
+  width: 100%;
+  height: 80px;
   color: var(--gray-700, #6F767E);
   font-family: Pretendard;
   font-size: 16px;
   font-style: normal;
   font-weight: 400;
   line-height: 170%; /* 28.8px */
+  overflow: auto;
  }
  
  .analysis-score-title{
@@ -653,6 +665,7 @@ background: var(--primary-12, rgba(129, 107, 254, 0.12));
   font-style: normal;
   font-weight: 400;
   line-height: 180%; /* 28.8px */
+  overflow: auto;
   
 }
 

@@ -20,35 +20,35 @@ const TAB_LABELS: Record<TabKey, string> = {
   match: "이력서−면접 일치도 분석",
 };
 
-export default function MockAnalysisHeader({ 
-  title, 
-  date, 
-  status, 
+export default function MockAnalysisHeader({
+  title,
+  date,
+  status,
   metaRows,
-  activeTab = "overview"
+  activeTab = "overview",
 }: MockAnalysisHeaderProps) {
   const location = useLocation();
-  
-  // URL에 printViewr가 있는지 확인
-  const isPrintMode = new URLSearchParams(location.search).has('printViewr');
-  
-  // printViewr가 있으면 activeTab 라벨만, 없으면 title 표시
+
+  const isPrintMode = new URLSearchParams(location.search).has("printViewr");
   const displayTitle = isPrintMode ? TAB_LABELS[activeTab] : title;
 
   return (
     <>
-   
-     <div className="mock-analysis__meta">
-           {metaRows.map((row, rowIndex)=>(
-            <>
-          {row.map((item, itemIndex) =>(
-        <div  className="mock-analysis__meta-item">
-                   <span className="mock-analysis__meta-key">{item.key}</span>
-                   <span className="mock-analysis__meta-value">{item.value}</span>
-                   </div>
-          ))}
-           </>))}
-         </div>
+      <div className="mock-analysis__meta">
+        {metaRows.map((row, rowIndex) => (
+          <React.Fragment key={`row-${rowIndex}`}>
+            {row.map((item, itemIndex) => (
+              <div
+                key={`item-${rowIndex}-${itemIndex}`}
+                className="mock-analysis__meta-item"
+              >
+                <span className="mock-analysis__meta-key">{item.key}</span>
+                <span className="mock-analysis__meta-value">{item.value}</span>
+              </div>
+            ))}
+          </React.Fragment>
+        ))}
+      </div>
     </>
   );
 }

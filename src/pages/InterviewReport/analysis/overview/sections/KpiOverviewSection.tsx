@@ -4,31 +4,37 @@ import ic_error_gray500_20 from "@/assets/icons/size20/ic_error_gray500_20.png";
 import KpiOverview from "./part/KpiOverview";
 import MockAnalysisKpiFit from "./part/MockAnalysisKpiFit";
 
+import { InterviewReportDetailResponse } from "@/api/report/report.types";
+
 type Props = {
-  score: number;
-  totalCandidates: number;
-  percentile: number;
-  fit: number;
+  reportDetail: InterviewReportDetailResponse | null;
 };
 
-export default function KpiOverviewSection({
-  score,
-  totalCandidates,
-  percentile,
-  fit,
-}: Props) {
+export default function KpiOverviewSection({ reportDetail }: Props) {
+  const score = reportDetail?.overallScore?.myScore ?? 0;
+  const totalCandidates = reportDetail?.overallScore?.totalCount ?? 0;
+  const percentile = reportDetail?.overallScore?.topPercent ?? 0;
+  const fit = reportDetail?.jobFitInfo?.jobFitScore ?? 0;
+  const fitText =
+  reportDetail?.jobFitInfo?.jobFitText ?? "직군";
+  const fitDescription =
+    reportDetail?.jobFitInfo?.jobFitFeedback ?? "직무 적합도 분석 결과가 없습니다.";
+
+
   return (
-    <div className="mock-analysis-overview__kpi ">
+    <div className="mock-analysis-overview__kpi">
       <KpiOverview
-        score={score}
-        totalCandidates={totalCandidates}
-        percentile={percentile}
+          score={score}
+          totalCandidates={totalCandidates}
+          percentile={percentile}
+          reportDetail={reportDetail}
       />
       <MockAnalysisKpiFit
         value={fit}
+        roleLabel={fitText}
         headIconSrc={ic_magnifier_24}
         noteIconSrc={ic_error_gray500_20}
-        description="응답은 직무 핵심 키워드와 역할을 잘 반영해 이력서와 높은 일치도를 보였습니다. 이력서에서 강조한 프로젝트 경험과 협업 역량도 답변에 드러났으나, 정량적 성과와 최신 기술 활용 사례는 충분히 연결되지 않아 구체성과 최신성이 다소 부족했습니다."
+        description={fitDescription}
       />
     </div>
   );

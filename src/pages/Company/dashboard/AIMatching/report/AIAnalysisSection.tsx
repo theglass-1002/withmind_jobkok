@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import test_company_logo from "@/assets/testImg/company_logo/test_company_logo.png";
 import ic_saramin_18 from "@/assets/icons/size18/ic_saramin_18.png";
@@ -13,16 +13,19 @@ import ic_weakness_circle_24 from "@/assets/icons/size24/ic_weakness_circle_24.p
 import ic_strength_circle_24 from "@/assets/icons/size24/ic_strength_circle_24.png";
 
 // ✅ 비디오 파일 import
-import interview_video_01 from "@/assets/testImg/interview_video_01.webm"; // 정유리
-import interview_video_02 from "@/assets/testImg/interview_video_02.webm"; // 이택진
-import interview_video_03 from "@/assets/testImg/interview_video_03.webm"; // 임서하
+import interview_video_01 from "@/assets/testImg/interview_video_01.webm";
+import interview_video_02 from "@/assets/testImg/interview_video_02.webm";
+import interview_video_03 from "@/assets/testImg/interview_video_03.webm";
 
 import MockAnalysisHeader from "@/pages/InterviewReport/analysis/MockAnalysisHeader";
 import OverviewPage from "@/pages/InterviewReport/analysis/overview/OverviewPage";
 import DetailPage from "@/pages/InterviewReport/analysis/detail/DetailPage";
 import ResumeInterviewMatchPage from "@/pages/InterviewReport/analysis/match/ResumeInterviewMatchPage";
-
 import KpiRadarChart from "@/pages/InterviewReport/analysis/chart/KpiRadarChart";
+
+import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
+import { fetchInterviewReportDetail } from "@/api/report/report.api";
+import { InterviewReportDetailResponse } from "@/api/report/report.types";
 
 type TabKey = "overview" | "detail" | "match";
 
@@ -109,10 +112,9 @@ const baseJobs = [
 ];
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 🔥 ID별 분석 데이터
+// 🔥 fallback mock data
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-// ✅ 1. 정유리 (기획자, 적합률 92%, 높은 점수)
 const analysisData1 = {
   name: "정유리",
   userId: "jeongyuri",
@@ -124,7 +126,7 @@ const analysisData1 = {
   totalCandidates: 171,
   percentile: 5,
   fit: 92,
-  videoSrc: interview_video_02, // ✅ 비디오 추가
+  videoSrc: interview_video_02,
   jobMatches: baseJobs.map((job, idx) => ({
     ...job,
     matchPercent: [92, 88, 85, 82, 78][idx] || 70,
@@ -226,8 +228,8 @@ const analysisData1 = {
   },
 };
 
-// ✅ 2. 이택진 (백엔드, 적합률 60%, 중간 점수)
 const analysisData2 = {
+  ...analysisData1,
   name: "이택진",
   userId: "leetaekjin",
   desiredRole: "백엔드 개발자",
@@ -238,7 +240,7 @@ const analysisData2 = {
   totalCandidates: 243,
   percentile: 40,
   fit: 60,
-  videoSrc: interview_video_03, // ✅ 비디오 추가
+  videoSrc: interview_video_03,
   jobMatches: baseJobs.map((job, idx) => ({
     ...job,
     matchPercent: [60, 65, 58, 62, 55][idx] || 50,
@@ -255,93 +257,10 @@ const analysisData2 = {
     voice: 68,
     tension: 75,
   },
-  scoreSection: {
-    labels: [
-      ["0", "~9"],
-      ["10", "~19"],
-      ["20", "~35"],
-      ["36", "~45"],
-      ["46", "~59"],
-      ["60", "~75"],
-      ["76", "~85"],
-      ["86", "~93"],
-      ["94", "~100"],
-    ],
-    max: 100,
-    left: {
-      role: "개발직군",
-      rankText: "응시자 2,851명 중 97위",
-      badgeText: "상위 40%",
-      values: [30, 40, 50, 60, 70, 65, 55, 45, 35],
-      highlightScore: 60,
-    },
-    right: {
-      role: "백엔드 직무",
-      rankText: "응시자 423명 중 97위",
-      badgeText: "상위 40%",
-      values: [35, 45, 55, 62, 68, 62, 58, 48, 38],
-      highlightScore: 60,
-    },
-  },
-  categorySummary: {
-    left: {
-      scoreTitle: "이택진님의 점수",
-      scores: { attitude: 55, voice: 68, tension: 75, competence: 58 },
-      RadarChartComponent: KpiRadarChart,
-    },
-    right: {
-      items: [
-        {
-          label: "역량",
-          gradeText: "보통",
-          gradeTone: "fair" as const,
-          description:
-            "기술적 지식은 충분하나, 질문에 대한 구조화된 답변과 문제 해결 접근 방식에서 개선이 필요합니다. 실무 경험을 바탕으로 한 구체적인 사례 제시가 부족했습니다.",
-        },
-        {
-          label: "태도",
-          gradeText: "보통",
-          gradeTone: "fair" as const,
-          description:
-            "성실한 태도로 면접에 임했으나, 적극성과 자신감이 다소 부족해 보였습니다. 질문에 대한 답변이 다소 소극적이었습니다.",
-        },
-        {
-          label: "목소리",
-          gradeText: "보통",
-          gradeTone: "fair" as const,
-          description:
-            "답변은 명확했으나, 목소리 톤이 단조롭고 에너지가 부족했습니다. 좀 더 자신감 있는 목소리가 필요합니다.",
-        },
-        {
-          label: "긴장도",
-          gradeText: "개선 필요",
-          gradeTone: "improvement" as const,
-          description:
-            "면접 전반에 걸쳐 긴장감이 높았으며, 이로 인해 답변이 다소 경직되어 보였습니다. 긴장 완화가 필요합니다.",
-        },
-      ],
-    },
-  },
-  aiSummary: {
-    strength: {
-      iconSrc: ic_strength_circle_24,
-      label: "강점",
-      tags: ["기술적 지식", "성실한 태도"],
-      description:
-        "이택진님은 충분한 기술적 지식을 보유하고 있으며, 성실한 태도로 면접에 임했습니다.",
-    },
-    weakness: {
-      iconSrc: ic_weakness_circle_24,
-      label: "약점",
-      tags: ["긴장 관리", "답변 구조화", "자신감"],
-      description:
-        "높은 긴장도로 인해 본인의 역량을 충분히 표현하지 못했으며, 답변의 구조화와 자신감 있는 태도가 필요합니다.",
-    },
-  },
 };
 
-// ✅ 3. 임서하 (프론트엔드, 적합률 80%, 중상 점수)
 const analysisData3 = {
+  ...analysisData1,
   name: "임서하",
   userId: "imseoha",
   desiredRole: "프론트엔드 개발자",
@@ -352,7 +271,7 @@ const analysisData3 = {
   totalCandidates: 198,
   percentile: 15,
   fit: 80,
-  videoSrc: interview_video_01, // ✅ 비디오 추가
+  videoSrc: interview_video_01,
   jobMatches: baseJobs.map((job, idx) => ({
     ...job,
     matchPercent: [80, 84, 82, 78, 75][idx] || 70,
@@ -369,121 +288,61 @@ const analysisData3 = {
     voice: 78,
     tension: 35,
   },
-  scoreSection: {
-    labels: [
-      ["0", "~9"],
-      ["10", "~19"],
-      ["20", "~35"],
-      ["36", "~45"],
-      ["46", "~59"],
-      ["60", "~75"],
-      ["76", "~85"],
-      ["86", "~93"],
-      ["94", "~100"],
-    ],
-    max: 100,
-    left: {
-      role: "개발직군",
-      rankText: "응시자 2,851명 중 30위",
-      badgeText: "상위 15%",
-      values: [25, 35, 45, 60, 70, 80, 85, 82, 75],
-      highlightScore: 80,
-    },
-    right: {
-      role: "프론트엔드 직무",
-      rankText: "응시자 356명 중 29위",
-      badgeText: "상위 15%",
-      values: [28, 38, 48, 62, 72, 82, 85, 84, 78],
-      highlightScore: 80,
-    },
-  },
-  categorySummary: {
-    left: {
-      scoreTitle: "임서하님의 점수",
-      scores: { attitude: 82, voice: 78, tension: 35, competence: 85 },
-      RadarChartComponent: KpiRadarChart,
-    },
-    right: {
-      items: [
-        {
-          label: "역량",
-          gradeText: "우수",
-          gradeTone: "good" as const,
-          description:
-            "React와 TypeScript에 대한 깊이 있는 이해를 보였으며, 실무 경험을 바탕으로 한 구체적인 답변이 인상적이었습니다. 성능 최적화에 대한 전문성이 돋보입니다.",
-        },
-        {
-          label: "태도",
-          gradeText: "우수",
-          gradeTone: "good" as const,
-          description:
-            "적극적이고 열정적인 태도로 면접에 임했습니다. 질문에 대한 이해도가 높고, 추가 설명도 적절히 제공했습니다.",
-        },
-        {
-          label: "목소리",
-          gradeText: "우수",
-          gradeTone: "good" as const,
-          description:
-            "명확하고 자신감 있는 목소리로 답변했습니다. 적절한 속도와 톤으로 전문성을 잘 표현했습니다.",
-        },
-        {
-          label: "긴장도",
-          gradeText: "보통",
-          gradeTone: "fair" as const,
-          description:
-            "약간의 긴장감이 있었으나, 전반적으로 안정적인 모습을 보였습니다. 경험이 쌓이면 더 자연스러워질 것으로 예상됩니다.",
-        },
-      ],
-    },
-  },
-  aiSummary: {
-    strength: {
-      iconSrc: ic_strength_circle_24,
-      label: "강점",
-      tags: ["기술적 전문성", "실무 경험 활용", "적극적 태도"],
-      description:
-        "임서하님은 프론트엔드 기술에 대한 깊이 있는 이해와 실무 경험을 바탕으로 한 구체적인 답변이 강점입니다. 적극적인 태도도 인상적이었습니다.",
-    },
-    weakness: {
-      iconSrc: ic_weakness_circle_24,
-      label: "약점",
-      tags: ["긴장 완화", "백엔드 이해도"],
-      description:
-        "약간의 긴장감이 있었으며, 백엔드 관련 질문에 대한 이해도를 높이면 더 좋을 것 같습니다.",
-    },
-  },
 };
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 🔥 메인 컴포넌트
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function getFallbackData(id: number) {
+  if (id === 2) return analysisData2;
+  if (id === 3) return analysisData3;
+  return analysisData1;
+}
+
+function getFallbackVideo(id: number) {
+  if (id === 2) return interview_video_03;
+  if (id === 3) return interview_video_01;
+  return interview_video_02;
+}
 
 export default function AIAnalysisSection({ id = 1 }: Props) {
   const [activeTab, setActiveTab] = useState<TabKey>("overview");
+  const [reportDetail, setReportDetail] =
+    useState<InterviewReportDetailResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  console.log("AIAnalysisSection id:", id);
+  const fallbackData = useMemo(() => getFallbackData(id), [id]);
 
-  // ✅ id에 따라 데이터 선택
-  const data =
-    id === 1
-      ? analysisData1
-      : id === 2
-      ? analysisData2
-      : id === 3
-      ? analysisData3
-      : analysisData1;
+  const [jobs, setJobs] = useState(fallbackData.jobMatches);
 
-  const [jobs, setJobs] = useState(data.jobMatches);
+  useEffect(() => {
+    setJobs(fallbackData.jobMatches);
+  }, [fallbackData]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const res = await fetchInterviewReportDetail(id);
+  
+        console.log("=== fetchInterviewReportDetail response ===");
+        console.log("id:", id);
+        console.log(res);
+  
+        setReportDetail(res);
+      } catch (error) {
+        console.error("분석결과 상세 조회 실패:", error);
+        setReportDetail(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+  
+    fetchData();
+  }, [id]);
 
   const handleTabClick = (key: TabKey) => setActiveTab(key);
 
   const handleOpenPrintPage = () => {
-    console.log("현재 URL을 새 창에 띄우고 인쇄 플래그를 추가합니다.");
-    console.log("현재 탭:", activeTab);
-
     const currentUrl = window.location.href;
     const separator = currentUrl.includes("?") ? "&" : "?";
-
     const printUrl = `${currentUrl}${separator}printViewr&tab=${activeTab}`;
 
     const A4_WIDTH = 794;
@@ -499,33 +358,76 @@ export default function AIAnalysisSection({ id = 1 }: Props) {
   const handleToggleFavorite = (id: number | string, nextValue?: boolean) => {
     setJobs((prev) =>
       prev.map((j) =>
-        j.jobIdx === id ? { ...j, isBookmarked: nextValue ?? !j.isBookmarked } : j
+        j.jobIdx === id
+          ? { ...j, isBookmarked: nextValue ?? !j.isBookmarked }
+          : j
       )
     );
   };
 
+  const headerMetaRows = reportDetail
+    ? [
+        [
+          { key: "이름", value: reportDetail.userInfo.name },
+          { key: "아이디", value: reportDetail.userInfo.email },
+        ],
+        [
+          { key: "희망직무", value: reportDetail.userInfo.desiredJob },
+          { key: "선택 이력서", value: fallbackData.resumeTitle },
+        ],
+        [
+          { key: "신뢰도", value: reportDetail.userInfo.aiTrustLevel },
+          { key: "면접시간", value: reportDetail.userInfo.interviewTime },
+        ],
+      ]
+    : [
+        [
+          { key: "이름", value: fallbackData.name },
+          { key: "아이디", value: fallbackData.userId },
+        ],
+        [
+          { key: "희망직무", value: fallbackData.desiredRole },
+          { key: "선택 이력서", value: fallbackData.resumeTitle },
+        ],
+        [
+          { key: "신뢰도", value: fallbackData.reliability },
+          { key: "면접시간", value: fallbackData.interviewTime },
+        ],
+      ];
+
+  const overviewScore = reportDetail?.overallScore.myScore ?? fallbackData.score;
+  const overviewTotalCandidates =
+    reportDetail?.overallScore.totalCount ?? fallbackData.totalCandidates;
+  const overviewPercentile =
+    reportDetail?.overallScore.topPercent ?? fallbackData.percentile;
+  const overviewFit = reportDetail?.jobFitInfo.jobFitScore ?? fallbackData.fit;
+
+  const detailCompetenceScore =
+    reportDetail?.detailAbility.abilityTotalScore ??
+    fallbackData.detailScores.competence;
+  const detailAttitudeScore =
+    reportDetail?.detailAttitude.attitudeTotalScore ??
+    fallbackData.detailScores.attitude;
+  const detailVoiceScore =
+    reportDetail?.voiceAnalysis.voiceTotalScore ??
+    fallbackData.detailScores.voice;
+  const detailTensionScore =
+    reportDetail?.itemTotalScores.tensionTotalScore ??
+    fallbackData.detailScores.tension;
+
+  const detailVideoSrc = getFallbackVideo(id);
+
   return (
-    <div className="mock-analysis">
+    <div className="mock-analysis" style={{ position: "relative" }}>
+      <LoadingOverlay isLoading={isLoading} isLogo text="분석 결과 불러오는 중..." />
+
       <div className="mock-analysis__inner page-summary">
         <MockAnalysisHeader
           title="분석결과"
-          date="2025.12.10 00:00"
-          status="진행 완료"
+          date={reportDetail?.userInfo.interviewDate ?? "2025.12.10 00:00"}
+          status={reportDetail?.userInfo.interviewStatus ?? "진행 완료"}
           activeTab={activeTab}
-          metaRows={[
-            [
-              { key: "이름", value: data.name },
-              { key: "아이디", value: data.userId },
-            ],
-            [
-              { key: "희망직무", value: data.desiredRole },
-              { key: "선택 이력서", value: data.resumeTitle },
-            ],
-            [
-              { key: "신뢰도", value: data.reliability },
-              { key: "면접시간", value: data.interviewTime },
-            ],
-          ]}
+          metaRows={headerMetaRows}
         />
 
         <div className="mock-analysis-tabs default_tabs ">
@@ -580,25 +482,25 @@ export default function AIAnalysisSection({ id = 1 }: Props) {
 
             {activeTab === "overview" && (
               <OverviewPage
-                score={data.score}
-                totalCandidates={data.totalCandidates}
-                percentile={data.percentile}
-                fit={data.fit}
+                score={overviewScore}
+                totalCandidates={overviewTotalCandidates}
+                percentile={overviewPercentile}
+                fit={overviewFit}
                 jobs={jobs}
                 onToggleFavorite={handleToggleFavorite}
-                scoreSection={data.scoreSection}
-                categorySummary={data.categorySummary}
-                aiSummary={data.aiSummary}
+                scoreSection={fallbackData.scoreSection}
+                categorySummary={fallbackData.categorySummary}
+                aiSummary={fallbackData.aiSummary}
               />
             )}
 
             {activeTab === "detail" && (
               <DetailPage
-                competence_score={data.detailScores.competence}
-                attitude_score={data.detailScores.attitude}
-                voice_score={data.detailScores.voice}
-                tension_score={data.detailScores.tension}
-                videoSrc={data.videoSrc} // ✅ 비디오 전달!
+                competence_score={detailCompetenceScore}
+                attitude_score={detailAttitudeScore}
+                voice_score={detailVoiceScore}
+                tension_score={detailTensionScore}
+                videoSrc={detailVideoSrc}
               />
             )}
 

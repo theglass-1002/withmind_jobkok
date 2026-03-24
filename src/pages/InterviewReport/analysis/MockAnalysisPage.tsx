@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 
 import test_company_logo from "@/assets/testImg/company_logo/test_company_logo.png";
@@ -13,8 +13,9 @@ import ic_star_white_20 from "@/assets/icons/size20/ic_star_white_20.png";
 import ic_weakness_circle_24 from "@/assets/icons/size24/ic_weakness_circle_24.png";
 import ic_strength_circle_24 from "@/assets/icons/size24/ic_strength_circle_24.png";
 
-
 import Tabs from "@/shared/components/tabs/Tabs";
+import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
+
 import M_MockAnalysisPage from "./M_MockAnalysisPage";
 import MockAnalysisHeader from "./MockAnalysisHeader";
 import OverviewPage from "./overview/OverviewPage";
@@ -22,6 +23,9 @@ import DetailPage from "./detail/DetailPage";
 import ResumeInterviewMatchPage from "./match/ResumeInterviewMatchPage";
 
 import KpiRadarChart from "@/pages/InterviewReport/analysis/chart/KpiRadarChart";
+
+import { fetchInterviewReportDetail } from "@/api/report/report.api";
+import { InterviewReportDetailResponse } from "@/api/report/report.types";
 
 import "./mock-analysis.css";
 
@@ -106,228 +110,323 @@ const mockJobs = [
 
 type TabKey = "overview" | "detail" | "match";
 
+const fallbackOverviewData = {
+  score: 92,
+  totalCandidates: 171,
+  percentile: 10,
+  fit: 80,
+  scoreSection: {
+    labels: [
+      ["0", "~9"],
+      ["10", "~19"],
+      ["20", "~35"],
+      ["36", "~45"],
+      ["46", "~59"],
+      ["60", "~75"],
+      ["76", "~85"],
+      ["86", "~93"],
+      ["94", "~100"],
+    ],
+    max: 100,
+    left: {
+      role: "기획직군",
+      rankText: "응시자 2,851명 중 7위",
+      badgeText: "상위 10%",
+      values: [50, 30, 20, 60, 92, 80, 70, 100, 50],
+      highlightScore: 38,
+    },
+    right: {
+      role: "기획직무",
+      rankText: "응시자 267명 중 17위",
+      badgeText: "상위 10%",
+      values: [50, 30, 20, 60, 92, 80, 70, 100, 50],
+      highlightScore: 48,
+    },
+  },
+  categorySummary: {
+    left: {
+      scoreTitle: "정유리님의 점수",
+      scores: { attitude: 92, voice: 80, tension: 10, competence: 30 },
+      RadarChartComponent: KpiRadarChart,
+    },
+    right: {
+      items: [
+        {
+          label: "역량",
+          gradeText: "최우수",
+          gradeTone: "excellent" as const,
+          description:
+            "문제 해결 능력과 직무 관련 역량이 비교적 우수하게 나타났습니다.",
+        },
+        {
+          label: "태도",
+          gradeText: "우수",
+          gradeTone: "good" as const,
+          description:
+            "면접 과정에서 보인 의사소통능력과 문제해결능력은 매우 우수한 것으로 평가됩니다. 잘 이해하고 뛰어난 의사소통 기술을 보였으며, 문제의 핵심을 파악하고 해결책을 제시하는 등 전화 기획자로써 역량이 뛰어나다고 판단됩니다.",
+        },
+        {
+          label: "목소리",
+          gradeText: "보통",
+          gradeTone: "fair" as const,
+          description:
+            "초반에 약간의 긴장감이 있었지만 점차 안정적으로 변했습니다. 소리 톤은 전반적으로 안정적이었으나 말 속도가 조금 빠른 편입니다.",
+        },
+        {
+          label: "긴장도",
+          gradeText: "보통",
+          gradeTone: "improvement" as const,
+          description:
+            "전체적으로 안정적인 모의면접 수행 능력을 보여주었으며 답변의 구조가 명확합니다.",
+        },
+      ],
+    },
+  },
+  aiSummary: {
+    strength: {
+      iconSrc: ic_strength_circle_24,
+      label: "강점",
+      tags: ["효과적 의견 교환", "타인에 대한 신뢰"],
+      description:
+        "정유리님의 강점으로 두드러지는 점은 효과적인 의견 교환과 타인에 대한 신뢰입니다.",
+    },
+    weakness: {
+      iconSrc: ic_weakness_circle_24,
+      label: "약점",
+      tags: ["의사소통 기술 활용", "타인 이해"],
+      description:
+        "정유리님은 효과적 의견교환 및 타인에 대한 신뢰가 다소 부족합니다.",
+    },
+  },
+};
+
+function buildHeaderMetaRows(reportDetail: InterviewReportDetailResponse | null) {
+  if (!reportDetail) {
+    return [
+      [
+        { key: "이름", value: "정유리" },
+        { key: "아이디", value: "withmind01" },
+      ],
+      [
+        { key: "희망직무", value: "서비스 기획" },
+        { key: "선택 이력서", value: "성장하는 서비스 기획자" },
+      ],
+      [
+        { key: "신뢰도", value: "중" },
+        { key: "면접시간", value: "12분" },
+      ],
+    ];
+  }
+
+  return [
+    [
+      { key: "이름", value: reportDetail.userInfo.name },
+      { key: "아이디", value: reportDetail.userInfo.email || "-" },
+    ],
+    [
+      { key: "희망직무", value: reportDetail.userInfo.desiredJob },
+      { key: "선택 이력서", value: "성장하는 서비스 기획자" },
+    ],
+    [
+      { key: "신뢰도", value: reportDetail.userInfo.aiTrustLevel },
+      { key: "면접시간", value: reportDetail.userInfo.interviewTime },
+    ],
+  ];
+}
+
 export default function MockAnalysisPage() {
   const [activeTab, setActiveTab] = useState<TabKey>("overview");
   const [jobs, setJobs] = useState(mockJobs);
+  const [reportDetail, setReportDetail] =
+    useState<InterviewReportDetailResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
   const location = useLocation();
-  const score = 92;
+
   const tabItems: { key: TabKey; label: React.ReactNode }[] = [
     { key: "overview", label: "종합 분석" },
     { key: "detail", label: "상세 분석" },
     { key: "match", label: "이력서−면접 일치도 분석" },
   ];
 
-  const handleTabClick = (key: TabKey) => setActiveTab(key);
-
-
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const tabParam = params.get('tab') as TabKey;
-    
-    if (tabParam && ['overview', 'detail', 'match'].includes(tabParam)) {
+    const tabParam = params.get("tab") as TabKey | null;
+
+    if (tabParam && ["overview", "detail", "match"].includes(tabParam)) {
       setActiveTab(tabParam);
     }
   }, [location.search]);
- 
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const idParam = params.get("id");
+    const qzGroup = Number(idParam ?? 1);
+
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+
+        const res = await fetchInterviewReportDetail(qzGroup);
+
+        // console.log("=== 분석결과 상세 API 응답 시작 ===");
+        // console.log("qzGroup:", qzGroup);
+        // console.log("전체 응답:", res);
+        // console.log("userInfo:", res.userInfo);
+        // console.log("overallScore:", res.overallScore);
+        // console.log("voiceAnalysis:", res.voiceAnalysis);
+        // console.log("detailAbility:", res.detailAbility);
+        // console.log("detailAttitude:", res.detailAttitude);
+        // console.log("resumeAnalysis:", res.resumeAnalysis);
+        // console.log("=== 분석결과 상세 API 응답 끝 ===");
+
+        setReportDetail(res);
+      } catch (error) {
+        console.error("분석결과 상세 조회 실패:", error);
+        setReportDetail(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [location.search]);
+
+  useEffect(() => {
+  }, [reportDetail]);
+
+  const handleTabClick = (key: TabKey) => setActiveTab(key);
+
   const handleOpenPrintPage = () => {
-    console.log('현재 URL을 새 창에 띄우고 인쇄 플래그를 추가합니다.');
-    console.log('현재 탭:', activeTab);
-    
-    const currentUrl = window.location.href; 
-    const separator = currentUrl.includes('?') ? '&' : '?';
-    
+    console.log("현재 URL을 새 창에 띄우고 인쇄 플래그를 추가합니다.");
+    console.log("현재 탭:", activeTab);
+
+    const currentUrl = window.location.href;
+    const separator = currentUrl.includes("?") ? "&" : "?";
     const printUrl = `${currentUrl}${separator}printViewr&tab=${activeTab}`;
-    
-    const A4_WIDTH = 794; 
+
+    const A4_WIDTH = 794;
     const A4_HEIGHT = 1123;
-    
+
     window.open(
-      printUrl, 
-      '_blank', 
-      `width=${A4_WIDTH},height=${A4_HEIGHT},scrollbars=yes,resizable=yes` 
+      printUrl,
+      "_blank",
+      `width=${A4_WIDTH},height=${A4_HEIGHT},scrollbars=yes,resizable=yes`
     );
   };
 
-
   const handleToggleFavorite = (id: number | string, nextValue?: boolean) => {
-    setJobs(prev =>
-      prev.map(j =>
+    setJobs((prev) =>
+      prev.map((j) =>
         j.jobIdx === id ? { ...j, isBookmarked: nextValue ?? !j.isBookmarked } : j
       )
     );
   };
 
+  const metaRows = useMemo(
+    () => buildHeaderMetaRows(reportDetail),
+    [reportDetail]
+  );
+
+  const score = reportDetail?.overallScore.myScore ?? fallbackOverviewData.score;
+  const totalCandidates =
+    reportDetail?.overallScore.totalCount ?? fallbackOverviewData.totalCandidates;
+  const percentile =
+    reportDetail?.overallScore.topPercent ?? fallbackOverviewData.percentile;
+  const fit = reportDetail?.jobFitInfo.jobFitScore ?? fallbackOverviewData.fit;
+
+  const detailCompetenceScore =
+    reportDetail?.detailAbility.abilityTotalScore ?? 80;
+  const detailAttitudeScore =
+    reportDetail?.detailAttitude.attitudeTotalScore ?? 10;
+  const detailVoiceScore = reportDetail?.voiceAnalysis.voiceTotalScore ?? 45;
+  const detailTensionScore =
+    reportDetail?.itemTotalScores.tensionTotalScore ?? 20;
+
   return (
     <>
-    <div className="mock-analysis">
-      <div className="mock-analysis__inner page-summary">
-        <div className="mock-analysis__header_container">
-        <MockAnalysisHeader
-          title="분석결과"
-          date="2025.12.10 00:00"
-          status="진행 완료"
-          activeTab={activeTab} 
-          metaRows={[
-            [
-              { key: "이름", value: "정유리" },
-              { key: "아이디", value: "withmind01" },
-            ],
-            [
-              { key: "희망직무", value: "서비스 기획" },
-              { key: "선택 이력서", value: "성장하는 서비스 기획자" },
-            ],
-            [
-              { key: "신뢰도", value: "중" },
-              { key: "면접시간", value: "12분" },
-            ],
-          ]}
-        />
-      </div>
-      <Tabs
+      <div className="mock-analysis">
+        <div className="mock-analysis__inner page-summary">
+          <div className="mock-analysis__header_container">
+            <MockAnalysisHeader
+              title="분석결과"
+              date={reportDetail?.userInfo.interviewDate ?? "2025.12.10 00:00"}
+              status={reportDetail?.userInfo.interviewStatus ?? "진행 완료"}
+              activeTab={activeTab}
+              metaRows={metaRows}
+            />
+          </div>
+
+          <Tabs
             tabs={tabItems}
             active={activeTab}
             onChange={(key) => handleTabClick(key as TabKey)}
-            className={`mock-analysis-tabs default_tabs`}
-            itemClassName="mock-analysis-tabs__item "
+            className="mock-analysis-tabs default_tabs"
+            itemClassName="mock-analysis-tabs__item"
             activeClassName="on"
           />
-      </div>
+        </div>
 
-      <div className="mock-analysis-panel mock-analysis-report">
-        <div className="mock-analysis-report__container">
-          <div className="mock-analysis-report__inner">
-            <span className="mock-analysis-report__icon-btn" 
-            onClick={handleOpenPrintPage}
-            role="button" aria-label="리포트 인쇄">
-              <img className="mock-analysis-report__icon" src={ic_print_gray900_24} alt="" />
-            </span>
+        <div className="mock-analysis-panel mock-analysis-report">
+          <div className="mock-analysis-report__container">
+            <div className="mock-analysis-report__inner">
+              <span
+                className="mock-analysis-report__icon-btn"
+                onClick={handleOpenPrintPage}
+                role="button"
+                aria-label="리포트 인쇄"
+              >
+                <img
+                  className="mock-analysis-report__icon"
+                  src={ic_print_gray900_24}
+                  alt=""
+                />
+              </span>
 
-            {activeTab === "overview" && (
-              <OverviewPage
-                score={score}
-                totalCandidates={171}
-                percentile={10}
-                fit={80}
-                jobs={jobs}
+              {activeTab === "overview" && (
+                <OverviewPage
+                reportDetail={reportDetail}
                 onToggleFavorite={handleToggleFavorite}
-                scoreSection={{
-                  labels: [
-                    ["0", "~9"],
-                    ["10", "~19"],
-                    ["20", "~35"],
-                    ["36", "~45"],
-                    ["46", "~59"],
-                    ["60", "~75"],
-                    ["76", "~85"],
-                    ["86", "~93"],
-                    ["94", "~100"],
-                  ],
-                  max: 100,
-                  left: {
-                    role: "기획직군",
-                    rankText: "응시자 2,851명 중 7위",
-                    badgeText: "상위 10%",
-                    values: [50, 30, 20, 60, 92, 80, 70, 100, 50],
-                    highlightScore: 38,
-                  },
-                  right: {
-                    role: "기획직무",
-                    rankText: "응시자 267명 중 17위",
-                    badgeText: "상위 10%",
-                    values: [50, 30, 20, 60, 92, 80, 70, 100, 50],
-                    highlightScore: 48,
-                  },
-                }}
-                categorySummary={{
-                  left: {
-                    scoreTitle: "정유리님의 점수",
-                    scores: { attitude: 92, voice: 80, tension: 10, competence: 30 },
-                    RadarChartComponent: KpiRadarChart,
-                  },
-                  right: {
-                    items: [
-                      {
-                        label: "역량",
-                        gradeText: "최우수",
-                        gradeTone: "excellent",
-                        description:
-                          "문제 해결 능력과 직무 관련 역량이 비교적 우수하게 나타났습니다.",
-                      },
-                      {
-                        label: "태도",
-                        gradeText: "우수",
-                        gradeTone: "good",
-                        description:
-                          "면접 과정에서 보인 의사소통능력과 문제해결능력은 매우 우수한 것으로 평가됩니다. 잘 이해하고 뛰어난 의사소통 기술을 보였으며, 문제의 핵심을 파악하고 해결책을 제시하는 등 전화 기획자로써 역량이 뛰어나다고 판단됩니다.",
-                      },
-                      {
-                        label: "목소리",
-                        gradeText: "보통",
-                        gradeTone: "fair",
-                        description:
-                          "초반에 약간의 긴장감이 있었지만 점차 안정적으로 변했습니다. 소리 톤은 전반적으로 안정적이었으나 말 속도가 조금 빠른 편입니다.",
-                      },
-                      {
-                        label: "긴장도",
-                        gradeText: "보통",
-                        gradeTone: "improvement",
-                        description:
-                          "전체적으로 안정적인 모의면접 수행 능력을 보여주었으며 답변의 구조가 명확합니다.",
-                      },
-                    ],
-                  },
-                }}
-                aiSummary={{
-                  strength: {
-                    iconSrc: ic_strength_circle_24,
-                    label: "강점",
-                    tags: ["효과적 의견 교환", "타인에 대한 신뢰"],
-                    description:
-                      "정유리님의 강점으로 두드러지는 점은 효과적인 의견 교환과 타인에 대한 신뢰입니다.",
-                  },
-                  weakness: {
-                    iconSrc: ic_weakness_circle_24,
-                    label: "약점",
-                    tags: ["의사소통 기술 활용", "타인 이해"],
-                    description:
-                      "정유리님은 효과적 의견교환 및 타인에 대한 신뢰가 다소 부족합니다.",
-                  },
-                }}
               />
-            )}
+              )}
 
-            {activeTab === "detail" && (
-              <DetailPage
-              competence_score={80}
-              attitude_score={10}
-              voice_score={45}
-              tension_score={20}
-              />
-            )}
+              {activeTab === "detail" && (
+                <DetailPage
+                reportDetail={reportDetail}
+                />
+              )}
 
-            {activeTab === "match" && (
-              <ResumeInterviewMatchPage
-              onToggleFavorite={handleToggleFavorite}
-              jobs={jobs}
-              />
-            )}
+              {activeTab === "match" && (
+                <ResumeInterviewMatchPage
+                  onToggleFavorite={handleToggleFavorite}
+                  jobs={jobs}
+                />
+              )}
 
-            <div className="btn_wrap mock-analysis-report__actions">
-              <span className="default_btn_white">
-                <img className="mock-analysis-report__btn-icon" src={ic_arrow_left_gray900_20} alt="" />
-                목록으로
-              </span>
-              <span className="default_btn_black">
-                <img className="mock-analysis-report__btn-icon" src={ic_star_white_20} alt="" />
-                모의면접 다시 보기
-              </span>
+              <div className="btn_wrap mock-analysis-report__actions">
+                <span className="default_btn_white">
+                  <img
+                    className="mock-analysis-report__btn-icon"
+                    src={ic_arrow_left_gray900_20}
+                    alt=""
+                  />
+                  목록으로
+                </span>
+                <span className="default_btn_black">
+                  <img
+                    className="mock-analysis-report__btn-icon"
+                    src={ic_star_white_20}
+                    alt=""
+                  />
+                  모의면접 다시 보기
+                </span>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <M_MockAnalysisPage/>
+      {/* <M_MockAnalysisPage /> */}
     </>
   );
 }

@@ -37,7 +37,7 @@ export default function AiSummarySection({
   weakness,
   report
 }: Props) {
-  console.log(report);
+  
   const powerKeywords = report?.powerKeywords;
 
   return (

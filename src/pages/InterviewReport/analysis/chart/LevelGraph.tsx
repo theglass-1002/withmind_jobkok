@@ -6,11 +6,17 @@ import {
   segmentsFromScore,
   bucketOf,
   modifierByBucket,
-} from "@/shared/utils/util"; 
+} from "@/shared/utils/util";
+import { InterviewReportDetailResponse } from "@/api/report/report.types";
+
+type LevelModifier = "poor" | "improvement" | "fair" | "good" | "excellent";
 
 type LevelGraphProps = {
   score: number;
   description?: string;
+
+  reportDetail?: InterviewReportDetailResponse | null;
+  type?: "voice" | "attitude" | "competence" | "tension";
 
   labels?: readonly string[];
   breaks?: readonly number[];
@@ -32,7 +38,6 @@ type LevelGraphProps = {
   className?: string;
 };
 
-// 컴포넌트 밖으로 이동 (재생성 방지)
 const DEFAULT_VALUE_COLOR_MAP: Record<string, string> = {
   "매우 미흡": "#FF524C",
   "미흡": "#FF972F",
@@ -41,12 +46,64 @@ const DEFAULT_VALUE_COLOR_MAP: Record<string, string> = {
   "최우수": "#816BFE",
 };
 
-// 필요 시 점수 클램프(선택)
-const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n));
+const clamp = (n: number, min: number, max: number) =>
+  Math.max(min, Math.min(max, n));
+
+function getModifierFromGradeText(gradeText?: string): LevelModifier {
+  switch (gradeText) {
+    case "최우수":
+      return "excellent";
+    case "우수":
+      return "good";
+    case "보통":
+      return "fair";
+    case "미흡":
+      return "improvement";
+    case "매우 미흡":
+      return "poor";
+    default:
+      return "fair";
+  }
+}
+
+function getGradeTextFromReport(
+  reportDetail?: InterviewReportDetailResponse | null,
+  type?: "voice" | "attitude" | "competence" | "tension"
+): string | undefined {
+  if (!reportDetail || !type) return undefined;
+
+  switch (type) {
+    case "competence":
+      return (
+        reportDetail.detailAbility?.abilityTotalScoreText ??
+        reportDetail.itemTotalScores?.abilityTotalScoreText
+      );
+
+    case "attitude":
+      return (
+        reportDetail.detailAttitude?.attitudeTotalScoreText ??
+        reportDetail.itemTotalScores?.attitudeTotalScoreText
+      );
+
+    case "voice":
+      return (
+        reportDetail.voiceAnalysis?.voiceTotalScoreText ??
+        reportDetail.itemTotalScores?.voiceTotalScoreText
+      );
+
+    case "tension":
+      return reportDetail.itemTotalScores?.tensionTotalScoreText;
+
+    default:
+      return undefined;
+  }
+}
 
 export default function LevelGraph({
   score,
   description,
+  reportDetail,
+  type,
   labels = DEFAULT_LABELS,
   breaks = DEFAULT_BREAKS,
   baseColor = "rgba(255, 255, 255, 0.40)",
@@ -63,9 +120,78 @@ export default function LevelGraph({
   kpiTitleModifierClass,
   className,
 }: LevelGraphProps) {
-  // (선택) 점수 가드
+  const resolvedScore = useMemo(() => {
+    if (!reportDetail || !type) return score;
+
+    switch (type) {
+      case "voice":
+        return (
+          reportDetail.voiceAnalysis?.voiceTotalScore ??
+          reportDetail.itemTotalScores?.voiceTotalScore ??
+          score
+        );
+
+      case "attitude":
+        return (
+          reportDetail.detailAttitude?.attitudeTotalScore ??
+          reportDetail.itemTotalScores?.attitudeTotalScore ??
+          score
+        );
+
+      case "competence":
+        return (
+          reportDetail.detailAbility?.abilityTotalScore ??
+          reportDetail.itemTotalScores?.abilityTotalScore ??
+          score
+        );
+
+      case "tension":
+        return reportDetail.itemTotalScores?.tensionTotalScore ?? score;
+
+      default:
+        return score;
+    }
+  }, [reportDetail, type, score]);
+
+  const resolvedDescription = useMemo(() => {
+    if (!reportDetail || !type) return description;
+
+    switch (type) {
+      case "voice":
+        return (
+          reportDetail.voiceAnalysis?.voiceFeedBack ??
+          reportDetail.feedback?.voice ??
+          description
+        );
+
+      case "attitude":
+        return (
+          reportDetail.detailAttitude?.attitudeFeedBack ??
+          reportDetail.feedback?.attitude ??
+          description
+        );
+
+      case "competence":
+        return (
+          reportDetail.detailAbility?.abilityFeedBack ??
+          reportDetail.feedback?.competency ??
+          description
+        );
+
+      case "tension":
+        return reportDetail.feedback?.tension ?? description;
+
+      default:
+        return description;
+    }
+  }, [reportDetail, type, description]);
+
+  const resolvedGradeText = useMemo(() => {
+    return getGradeTextFromReport(reportDetail, type);
+  }, [reportDetail, type]);
+
   const maxBreak = breaks[breaks.length - 1] ?? 100;
-  const safeScore = clamp(score, 0, maxBreak);
+  const safeScore = clamp(resolvedScore, 0, maxBreak);
 
   const segments = useMemo(
     () => segmentsFromScore(safeScore, breaks),
@@ -77,54 +203,58 @@ export default function LevelGraph({
     [safeScore, breaks, labels]
   );
 
-  const modifier = kpiTitleModifierClass ?? modifierByBucket(bucketIndex);
+  const modifier = useMemo(() => {
+    if (kpiTitleModifierClass) {
+      return kpiTitleModifierClass;
+    }
+
+    if (resolvedGradeText) {
+      return getModifierFromGradeText(resolvedGradeText);
+    }
+
+    return modifierByBucket(bucketIndex);
+  }, [kpiTitleModifierClass, resolvedGradeText, bucketIndex]);
 
   return (
     <div className={`detail-analysis__level-graph ${modifier} ${className ?? ""}`}>
       <div className="detail-analysis__level-info">
-        <span className="detail-analysis__level-label">{bucketLabel}</span>
-        {description && <span className="detail-analysis__level-desc">{description}</span>}
+        <span className="detail-analysis__level-label">
+          {resolvedGradeText ?? bucketLabel}
+        </span>
+        {resolvedDescription && (
+          <span className="detail-analysis__level-desc">{resolvedDescription}</span>
+        )}
       </div>
 
       <div className="detail-analysis__level-chart">
         <div className="detail-analysis__chart-gauge">
-        <KpiGaugeChart
-            // 필수 데이터/레이아웃 props
+          <KpiGaugeChart
             segments={segments}
             labels={Array.from(labels)}
-            valueLabel={`${score}점`}
+            activeLabel={resolvedGradeText ?? bucketLabel}
+            valueLabel={valueLabel ?? `${resolvedScore}점`}
             height={chartHeight}
-
-            // Theme props (색상/텍스트 관련)
             theme={{
-                base: baseColor,       // baseColor 대신 theme.base
-                fill: fillColor,       // fillColor 대신 theme.fill
-                valueBg: "var(--white-100, #FFF)",
-                valueColorMap: {
-                    "매우 미흡": "#FF524C",
-                    "미흡": "#FF972F",
-                    "보통": "#15D078",
-                    "우수": "#26A4FF",
-                    "최우수": "#816BFE",
-                },
-                valueColorFallback: "#26A4FF",
+              base: baseColor,
+              fill: fillColor,
+              valueBg: "var(--white-100, #FFF)",
+              valueColorMap,
+              valueColorFallback,
             }}
-
-            // Layout props (간격/크기 관련)
             layout={{
-                gap: gap,
-                barHeight: barHeight,
-                labelFontSize: labelFontSize,
-                valueFontSize: 16,
-                valueFontWeight: 600,
-                valuePaddingX: 8,
-                valuePaddingY: 4,
-                valueOffsetY: 16,
-                valueRadius: 100,
-                valueTail: true,
-                valueTailSize: 6,
+              gap,
+              barHeight,
+              labelFontSize,
+              valueFontSize: 16,
+              valueFontWeight: 600,
+              valuePaddingX: 8,
+              valuePaddingY: 4,
+              valueOffsetY: 16,
+              valueRadius: 100,
+              valueTail,
+              valueTailSize,
             }}
-        />
+          />
         </div>
       </div>
     </div>

@@ -1,4 +1,3 @@
-// src/pages/InterviewReport/my-report/detail/sections/DetailCompetenceSection.tsx
 import React, { useMemo, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import UiFilter, { type UiFilterOption } from "@/shared/components/ui-filter/UiFilter";
@@ -12,15 +11,16 @@ import ic_play_arrow_white_48 from "@/assets/icons/size48/ic_play_arrow_white_48
 import ic_info_white_20 from "@/assets/icons/size20/ic_info_white_20.png";
 import ic_download_white_20 from "@/assets/icons/size20/ic_download_white_20.png";
 
-// ✅ 기본 비디오 (fallback)
 import interview_video_02 from "@/assets/testImg/interview_video_02.webm";
+import { InterviewReportDetailResponse } from "@/api/report/report.types";
 
 type Props = {
   score: number;
   title?: string;
   titleIconSrc?: string;
   description?: string;
-  videoSrc?: string; // ✅ 비디오 URL prop
+  videoSrc?: string;
+  reportDetail?: InterviewReportDetailResponse | null;
 };
 
 export default function DetailCompetenceSection({
@@ -28,18 +28,19 @@ export default function DetailCompetenceSection({
   title,
   titleIconSrc,
   description = "면접 과정에서 보인 의사소통 능력과 문제해결 능력은 우수하다고 평가됩니다.",
-  videoSrc, // ✅ 비디오 받기
+  videoSrc,
+  reportDetail,
 }: Props) {
   const location = useLocation();
   const isPrintMode = new URLSearchParams(location.search).has("printViewr");
 
-  // ✅ videoSrc가 없으면 기본 비디오 사용
   const currentVideoSrc = videoSrc || interview_video_02;
 
   useEffect(() => {
     console.log("DetailCompetenceSection - 프린트 모드:", isPrintMode);
     console.log("DetailCompetenceSection - 비디오 소스:", currentVideoSrc);
-  }, [isPrintMode, currentVideoSrc]);
+    console.log("DetailCompetenceSection - reportDetail:", reportDetail);
+  }, [isPrintMode, currentVideoSrc, reportDetail]);
 
   const DEFAULT_FILTERS: UiFilterOption[] = [
     { label: "질문 1", value: "q1" },
@@ -57,7 +58,13 @@ export default function DetailCompetenceSection({
 
   const QUESTIONS: Record<
     string,
-    { title: string; grade: "상" | "중" | "하"; keywords: string[]; analysis: string; category: string }
+    {
+      title: string;
+      grade: "상" | "중" | "하";
+      keywords: string[];
+      analysis: string;
+      category: string;
+    }
   > = {
     q1: {
       title: "1분동안 자신을 소개해주세요",
@@ -147,9 +154,9 @@ export default function DetailCompetenceSection({
     keywords: [],
     analysis: "",
   };
+
   const words = WORDS[selectedQuestion] ?? WORDS.default;
 
-  // ✅ 비디오 블러/재생 제어
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [isBlurred, setIsBlurred] = useState(true);
 
@@ -166,16 +173,10 @@ export default function DetailCompetenceSection({
     }
   };
 
-  const handleVideoPause = () => {
-    // pause 시 블러 유지 안 함
-  };
-
   const handleVideoEnded = () => {
-    // 끝나면 다시 블러로 돌리고 싶으면 아래 주석 해제
     // setIsBlurred(true);
   };
 
-  // 질문 바꾸면 다시 블러 상태로 초기화(선택)
   useEffect(() => {
     setIsBlurred(true);
     if (videoRef.current) {
@@ -184,8 +185,7 @@ export default function DetailCompetenceSection({
     }
   }, [selectedQuestion]);
 
-  // print 모드 리스트 렌더링
-  const printItems = useMemo(() => Object.entries(QUESTIONS), [QUESTIONS]);
+  const printItems = useMemo(() => Object.entries(QUESTIONS), []);
 
   return (
     <div className="analysis-section detail-analysis__competence">
@@ -194,7 +194,12 @@ export default function DetailCompetenceSection({
       </span>
 
       <div className="analysis-section__body">
-        <LevelGraph score={score} description={description} />
+        <LevelGraph
+          score={score}
+          description={description}
+          reportDetail={reportDetail}
+          type="competence"
+        />
 
         {isPrintMode ? (
           <div className="detail-analysis__content">
@@ -211,7 +216,11 @@ export default function DetailCompetenceSection({
                       <div className="detail-analysis__question-info">
                         <div className="detail-analysis__answer-grade">
                           <div className="detail-analysis__answer-grade-label">
-                            <img className="detail-analysis__answer-grade_icon" src={ic_stars_gray600_20} alt="" />
+                            <img
+                              className="detail-analysis__answer-grade_icon"
+                              src={ic_stars_gray600_20}
+                              alt=""
+                            />
                             답변 등급
                           </div>
                           <div className="detail-analysis__answer-grade-options">
@@ -223,7 +232,11 @@ export default function DetailCompetenceSection({
 
                         <div className="detail-analysis__answer-keywords">
                           <span className="detail-analysis__answer-keywords-label">
-                            <img className="detail-analysis__answer-keywords_icon" src={ic_emergency_gray600_20} alt="" />
+                            <img
+                              className="detail-analysis__answer-keywords_icon"
+                              src={ic_emergency_gray600_20}
+                              alt=""
+                            />
                             답변 핵심 표현
                           </span>
                           <div className="detail-analysis__answer-keyword-list">
@@ -243,10 +256,16 @@ export default function DetailCompetenceSection({
                       <div className="detail-analysis__question-info">
                         <div className="detail-analysis__answer-analysis">
                           <div className="detail-analysis__answer-analysis-title">
-                            <img className="detail-analysis__answer-analysis_icon" src={ic_forum_gray600_20} alt="" />
+                            <img
+                              className="detail-analysis__answer-analysis_icon"
+                              src={ic_forum_gray600_20}
+                              alt=""
+                            />
                             답변 분석
                           </div>
-                          <span className="detail-analysis__answer-analysis-text">{q.analysis || "분석 없음"}</span>
+                          <span className="detail-analysis__answer-analysis-text">
+                            {q.analysis || "분석 없음"}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -271,10 +290,11 @@ export default function DetailCompetenceSection({
                     <video
                       ref={videoRef}
                       className="detail-analysis__video-thumbnail"
-                      src={currentVideoSrc} // ✅ 동적 비디오 소스 사용!
+                      src={currentVideoSrc}
                       muted
                       playsInline
                       preload="metadata"
+                      onEnded={handleVideoEnded}
                       onClick={() => {
                         const v = videoRef.current;
                         if (!v) return;
@@ -286,14 +306,13 @@ export default function DetailCompetenceSection({
                         }
                       }}
                       style={{
-                        filter: "blur(8px) brightness(0.7)",
-                        transform: "scale(1.03)",
+                        filter: isBlurred ? "blur(8px) brightness(0.7)" : "none",
+                        transform: isBlurred ? "scale(1.03)" : "none",
                         width: "100%",
                         cursor: "pointer",
                       }}
                     />
 
-                    {/* ✅ 블러 상태에서만 재생 버튼 오버레이 */}
                     {isBlurred && (
                       <button
                         type="button"
@@ -328,7 +347,11 @@ export default function DetailCompetenceSection({
                       </span>
                       <span className="detail-analysis__video-download">
                         영상 다운로드{" "}
-                        <img className="detail-analysis__video-download_icon" src={ic_download_white_20} alt="" />
+                        <img
+                          className="detail-analysis__video-download_icon"
+                          src={ic_download_white_20}
+                          alt=""
+                        />
                       </span>
                     </div>
                   </div>
@@ -341,7 +364,11 @@ export default function DetailCompetenceSection({
 
                     <div className="detail-analysis__answer-grade">
                       <div className="detail-analysis__answer-grade-label">
-                        <img className="detail-analysis__answer-grade_icon" src={ic_stars_gray600_20} alt="" />
+                        <img
+                          className="detail-analysis__answer-grade_icon"
+                          src={ic_stars_gray600_20}
+                          alt=""
+                        />
                         답변 등급
                       </div>
                       <div className="detail-analysis__answer-grade-options">
@@ -353,7 +380,11 @@ export default function DetailCompetenceSection({
 
                     <div className="detail-analysis__answer-keywords">
                       <span className="detail-analysis__answer-keywords-label">
-                        <img className="detail-analysis__answer-keywords_icon" src={ic_emergency_gray600_20} alt="" />
+                        <img
+                          className="detail-analysis__answer-keywords_icon"
+                          src={ic_emergency_gray600_20}
+                          alt=""
+                        />
                         답변 핵심 표현
                       </span>
                       <div className="detail-analysis__answer-keyword-list">
@@ -373,10 +404,16 @@ export default function DetailCompetenceSection({
 
                 <div className="detail-analysis__answer-analysis">
                   <div className="detail-analysis__answer-analysis-title">
-                    <img className="detail-analysis__answer-analysis_icon" src={ic_forum_gray600_20} alt="" />
+                    <img
+                      className="detail-analysis__answer-analysis_icon"
+                      src={ic_forum_gray600_20}
+                      alt=""
+                    />
                     답변 분석
                   </div>
-                  <span className="detail-analysis__answer-analysis-text">{current.analysis || "분석 없음"}</span>
+                  <span className="detail-analysis__answer-analysis-text">
+                    {current.analysis || "분석 없음"}
+                  </span>
                 </div>
               </div>
             </div>
@@ -386,7 +423,11 @@ export default function DetailCompetenceSection({
             <div className="detail-analysis__word-section">
               <div className="detail-analysis__word-common">
                 <span className="detail-analysis__word-title">
-                  <img className="detail-analysis__word-common_icon" src={ic_inventory_gray600_20} alt="" />
+                  <img
+                    className="detail-analysis__word-common_icon"
+                    src={ic_inventory_gray600_20}
+                    alt=""
+                  />
                   자주 사용하는 단어
                 </span>
                 <div className="detail-analysis__word-list">
@@ -404,7 +445,11 @@ export default function DetailCompetenceSection({
 
               <div className="detail-analysis__word-habit">
                 <span className="detail-analysis__word-title">
-                  <img className="detail-analysis__word-habit_icon" src={ic_inventory_gray600_20} alt="" />
+                  <img
+                    className="detail-analysis__word-habit_icon"
+                    src={ic_inventory_gray600_20}
+                    alt=""
+                  />
                   자주 사용하는 습관어
                 </span>
                 <div className="detail-analysis__word-list">
