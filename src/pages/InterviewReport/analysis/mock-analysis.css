@@ -68,6 +68,10 @@
     width: 100%;
 }
 
+.mock-analysis__header.mobile{
+    display: none;
+}
+
 .mock-analysis-tabs{
     /* display: flex;
     height: 98px;
@@ -303,6 +307,22 @@
         .mock-analysis-report__content{
             gap: 12px;
         }
+
+        .mock-analysis__header{
+            display: none;
+        }
+
+        .mock-analysis__header.mobile{
+            display: flex;
+            padding: 0px;
+        }
+
+        .mock-analysis__meta-row{
+            width: 100%;
+            padding: 0px;
+            border: none;
+        }
+        
     }
 
 }

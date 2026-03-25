@@ -11,13 +11,16 @@ import ic_gaze_scatter from "@/assets/illustrations/ic_gaze_scatter.png";
 import ic_stars_gray600_20 from "@/assets/icons/size20/ic_stars_gray600_20.png";
 import ic_conditions_gray600_20 from "@/assets/icons/size20/ic_conditions_gray600_20.png";
 
+type GradeText = "최우수" | "우수" | "보통" | "미흡" | "매우 미흡";
+
+
 type Props = {
   gazeAngle: number;
   gazeX?: number;
   gazeY?: number;
   gradeLabel?: string;
   analysisTitle?: string;
-  selectedGrade?: "우수" | "보통" | "미흡";
+  selectedGrade?: GradeText
   analysisText?: React.ReactNode;
   highlight?: React.ReactNode;
 };

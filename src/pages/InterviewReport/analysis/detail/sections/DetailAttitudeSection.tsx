@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import LevelGraph from "@/pages/InterviewReport/analysis/chart/LevelGraph";
 
 import AttitudeTabContent from "@/pages/InterviewReport/analysis/detail/sections/part/AttitudeTabContent";
@@ -13,7 +13,7 @@ import UiFilter, {
 import { InterviewReportDetailResponse } from "@/api/report/report.types";
 
 type Props = {
-  score: number;
+  score?: number;
   title?: string;
   titleIconSrc?: string;
   description?: string;
@@ -22,9 +22,22 @@ type Props = {
   reportDetail?: InterviewReportDetailResponse | null;
 };
 
+type GradeText = "우수" | "보통" | "미흡";
+
+function normalizeGrade(value?: string): GradeText {
+  switch (value) {
+    case "우수":
+    case "보통":
+    case "미흡":
+      return value;
+    default:
+      return "보통";
+  }
+}
+
 export default function DetailAttitudeSection({
   score,
-  title,
+  title = "태도 분석",
   titleIconSrc,
   description,
   faceAngle,
@@ -42,24 +55,102 @@ export default function DetailAttitudeSection({
     DEFAULT_FILTERS[0].value
   );
 
-  // 필요하면 reportDetail에서 값 꺼내서 사용 가능
-  // 예시:
-  // const attitudeData = reportDetail?.attitudeAnalysis;
+  const detailAttitude = reportDetail?.tab2?.detailAttitude;
+  const posture = detailAttitude?.posture;
+  const gaze = detailAttitude?.gaze;
+  const gesture = detailAttitude?.gesture;
+  const emotion = detailAttitude?.emotion;
+
+  const resolvedScore = score ?? detailAttitude?.attitudeTotalScore ?? 0;
+
+  const resolvedDescription =
+    description ??
+    detailAttitude?.attitudeFeedBack ??
+    "눈 맞춤과 고른 발성으로 자신감과 안정감을 전달하였습니다.";
+
+  const postureAngleData =
+    posture?.postureShoulderAngleData?.postureAngle?.dataList ?? [];
+  const shoulderMovementData =
+    posture?.postureShoulderAngleData?.shoulderMovement?.dataList ?? [];
+
+  const resolvedFaceAngle = faceAngle ?? postureAngleData[0]?.faceAngle ?? 0;
+  const resolvedBodyAngle =
+    bodyAngle ?? postureAngleData[0]?.shoulderAngle ?? 0;
+
+  const totalMovementCount = shoulderMovementData.reduce((sum, item) => {
+    return (
+      sum +
+      (item.centerMoveCount ?? 0) +
+      (item.leftMoveCount ?? 0) +
+      (item.rightMoveCount ?? 0)
+    );
+  }, 0);
+
+  const avgFaceAngle =
+    postureAngleData.length > 0
+      ? postureAngleData.reduce((sum, item) => sum + (item.faceAngle ?? 0), 0) /
+        postureAngleData.length
+      : 0;
+
+  const avgShoulderAngle =
+    postureAngleData.length > 0
+      ? postureAngleData.reduce(
+          (sum, item) => sum + (item.shoulderAngle ?? 0),
+          0
+        ) / postureAngleData.length
+      : 0;
 
   const attitudeHeaders = ["", "머리 각도", "어깨 각도", "좌우 움직임"];
   const attitudeRows = [
-    { label: "전체 평균", values: ["1.23도", "1.23도", "4회"] },
-    { label: "직군 평균", values: ["1.23도", "1.23도", "4회"] },
+    {
+      label: "전체 평균",
+      values: [
+        `${avgFaceAngle.toFixed(2)}도`,
+        `${avgShoulderAngle.toFixed(2)}도`,
+        `${totalMovementCount}회`,
+      ],
+    },
   ];
 
   const gestureHeaders = ["", "평균 횟수", "평균 시간"];
   const gestureRows = [
-    { label: "전체 횟수", values: ["12회", "3.3초"] },
-    { label: "직군 평균", values: ["8회", "4초"] },
+    {
+      label: "전체 횟수",
+      values: [
+        `${gesture?.gestureData?.gesture?.dataList?.[0]?.handMoveCount ?? 0}회`,
+        `${gesture?.gestureData?.gesture?.dataList?.[0]?.handTime ?? 0}초`,
+      ],
+    },
   ];
 
   const expressionHeaders = ["", "긍정", "부정", "무표정"];
-  const expressionRows = [{ label: "정유리 님", values: ["24%", "8%", "68%"] }];
+  const expressionRows = [
+    {
+      label: reportDetail?.userInfo?.name
+        ? `${reportDetail.userInfo.name} 님`
+        : "사용자",
+      values: [
+        `${emotion?.emotionData?.positive ?? 0}%`,
+        `${emotion?.emotionData?.negative ?? 0}%`,
+        `${emotion?.emotionData?.neutral ?? 0}%`,
+      ],
+    },
+  ];
+
+  const selectedGradeText = useMemo<GradeText>(() => {
+    switch (selectedQuestion) {
+      case "attitude":
+        return normalizeGrade(posture?.postureGrade);
+      case "gaze":
+        return normalizeGrade(gaze?.gazeGrade);
+      case "gesture":
+        return normalizeGrade(gesture?.gestureGrade);
+      case "expression":
+        return normalizeGrade(emotion?.emotionGrade);
+      default:
+        return "보통";
+    }
+  }, [selectedQuestion, posture, gaze, gesture, emotion]);
 
   return (
     <div className="analysis-section detail-analysis__attitude ">
@@ -68,11 +159,11 @@ export default function DetailAttitudeSection({
       </span>
 
       <div className="analysis-section__body">
-        <LevelGraph 
-        score={reportDetail.detailAttitude.attitudeTotalScore}
-        description={description} 
-        reportDetail={reportDetail}
-        type="attitude"
+        <LevelGraph
+          score={resolvedScore}
+          description={resolvedDescription}
+          reportDetail={reportDetail}
+          type="attitude"
         />
 
         <div className="detail-analysis__attitude">
@@ -85,54 +176,76 @@ export default function DetailAttitudeSection({
 
           {selectedQuestion === "attitude" ? (
             <AttitudeTabContent
-              faceAngle={0}
-              bodyAngle={0}
+              faceAngle={resolvedFaceAngle}
+              bodyAngle={resolvedBodyAngle}
               analysisTitle="자세 분석"
-              selectedGrade="보통"
-              analysisText="전체 평균과 비교했을 때, 정유리님의 자세는 양호합니다"
-              highlight="머리 ‘-1.234도’, 어깨 ‘-1.234도’, 좌우 움직임 ‘13회"
+              selectedGrade={selectedGradeText}
+              analysisText={
+                posture?.analysisText ??
+                "전체 평균과 비교했을 때, 자세는 양호합니다."
+              }
+              highlight={
+                posture?.detailText ??
+                `머리 ‘${avgFaceAngle.toFixed(2)}도’, 어깨 ‘${avgShoulderAngle.toFixed(
+                  2
+                )}도’, 좌우 움직임 ‘${totalMovementCount}회’`
+              }
               headers={attitudeHeaders}
               rows={attitudeRows}
               reportDetail={reportDetail}
             />
           ) : selectedQuestion === "gaze" ? (
             <GazeTabContent
-              gazeAngle={25}
-              gazeX={40}
-              gazeY={-10}
+              gazeAngle={gaze?.gazeData?.geze?.pointValue ?? 0}
+              gazeX={gaze?.gazeData?.geze?.pointList?.[0]?.x ?? 0}
+              gazeY={gaze?.gazeData?.geze?.pointList?.[0]?.y ?? 0}
               analysisTitle="시선 분석"
-              selectedGrade="미흡"
-              analysisText="대학 평균과 비교했을 때, 정유리님의 시선 분포 정도는 우수합니다.정유리님은 답변하는 동안 카메라를 바라보고 있었던"
-              highlight="시선의 위치 변화가 적습니다(안정적)."
+              selectedGrade={selectedGradeText}
+              analysisText={
+                gaze?.analysisText ??
+                "시선 분포와 카메라 응시 안정성이 전반적으로 양호합니다."
+              }
+              highlight={gaze?.detailText ?? "시선의 위치 변화가 적습니다."}
             />
           ) : selectedQuestion === "gesture" ? (
             <GestureTabContent
               gradeLabel="제스처 등급"
               analysisTitle="제스처 분석"
-              selectedGrade="우수"
-              analysisText="전체 평균과 비교했을 때, 정유리님의 제스처는 우수합니다. 정유리님의 얼굴 주변 제스처를 취한 평균 횟수는 ‘5회’이며, 제스처를 유지한 평균 시간은 ‘64.3초’입니다."
+              selectedGrade={selectedGradeText}
+              analysisText={
+                gesture?.analysisText ??
+                "제스처 사용이 전반적으로 안정적입니다."
+              }
               headers={gestureHeaders}
               rows={gestureRows}
             />
           ) : selectedQuestion === "expression" ? (
             <ExpressionTabContent
-              faceAngle={10}
-              bodyAngle={10}
+              faceAngle={emotion?.emotionData?.positive ?? 0}
+              bodyAngle={emotion?.emotionData?.negative ?? 0}
               analysisTitle="표정 분석"
-              selectedGrade="보통"
-              analysisText="전체 평균과 비교했을 때, 정유리님의 자세는 양호합니다"
-              highlight="머리 ‘-1.234도’, 어깨 ‘-1.234도’, 좌우 움직임 ‘13회"
+              selectedGrade={selectedGradeText}
+              analysisText={
+                emotion?.analysisText ?? "표정 변화는 전반적으로 안정적입니다."
+              }
+              highlight={
+                emotion?.detailText ??
+                `긍정 ‘${emotion?.emotionData?.positive ?? 0}%’, 부정 ‘${
+                  emotion?.emotionData?.negative ?? 0
+                }%’, 무표정 ‘${emotion?.emotionData?.neutral ?? 0}%’`
+              }
               headers={expressionHeaders}
               rows={expressionRows}
             />
           ) : (
             <AttitudeTabContent
-              faceAngle={faceAngle}
-              bodyAngle={bodyAngle}
+              faceAngle={resolvedFaceAngle}
+              bodyAngle={resolvedBodyAngle}
               analysisTitle="자세 분석"
-              selectedGrade="보통"
+              selectedGrade={selectedGradeText}
               headers={attitudeHeaders}
               rows={attitudeRows}
+              reportDetail={reportDetail}
             />
           )}
         </div>

@@ -15,7 +15,7 @@ import interview_video_02 from "@/assets/testImg/interview_video_02.webm";
 import { InterviewReportDetailResponse } from "@/api/report/report.types";
 
 type Props = {
-  score: number;
+  score?: number;
   title?: string;
   titleIconSrc?: string;
   description?: string;
@@ -60,14 +60,26 @@ function normalizeKeyword(value?: string) {
 
 export default function DetailCompetenceSection({
   score,
-  title,
+  title = "역량 분석",
   titleIconSrc,
-  description = "면접 과정에서 보인 의사소통 능력과 문제해결 능력은 우수하다고 평가됩니다.",
+  description,
   videoSrc,
   reportDetail,
 }: Props) {
   const location = useLocation();
   const isPrintMode = new URLSearchParams(location.search).has("printViewr");
+
+  const abilityAnalysis = reportDetail?.tab2?.abilityAnalysis;
+  const itemTotalScores = reportDetail?.tab1?.itemTotalScores;
+  const feedback = reportDetail?.tab1?.feedback;
+
+  const resolvedScore =
+    score ?? itemTotalScores?.abilityTotalScore ?? 0;
+
+  const resolvedDescription =
+    description ??
+    feedback?.competency ??
+    "면접 과정에서 보인 의사소통 능력과 문제해결 능력은 우수하다고 평가됩니다.";
 
   const DEFAULT_FILTERS: UiFilterOption[] = [
     { label: "질문 1", value: "q1" },
@@ -163,25 +175,27 @@ export default function DetailCompetenceSection({
     default: { common: ["키워드", "사례", "성과"], habit: ["아니"] },
   };
 
-  const hasInterviewVideo =
-    Array.isArray(reportDetail?.interviewVideo) &&
-    reportDetail!.interviewVideo.length > 0;
+  const interviewVideo = abilityAnalysis?.interviewVideo ?? [];
+  const frequentWords = abilityAnalysis?.frequentlyUsedWords ?? [];
+  const habitWords = abilityAnalysis?.frequentlyUsedHabitWords ?? [];
+
+  const hasInterviewVideo = interviewVideo.length > 0;
 
   const resolvedFilters = useMemo<UiFilterOption[]>(() => {
     if (!hasInterviewVideo) return DEFAULT_FILTERS;
 
-    return [...reportDetail!.interviewVideo]
+    return [...interviewVideo]
       .sort((a, b) => (a.qzNum ?? 0) - (b.qzNum ?? 0))
       .map((item) => ({
         label: `질문 ${item.qzNum}`,
         value: `q${item.qzNum}`,
       }));
-  }, [hasInterviewVideo, reportDetail]);
+  }, [hasInterviewVideo, interviewVideo]);
 
   const resolvedQuestions = useMemo<Record<string, QuestionItem>>(() => {
     if (!hasInterviewVideo) return QUESTIONS;
 
-    return reportDetail!.interviewVideo
+    return interviewVideo
       .slice()
       .sort((a, b) => (a.qzNum ?? 0) - (b.qzNum ?? 0))
       .reduce<Record<string, QuestionItem>>((acc, item) => {
@@ -204,11 +218,20 @@ export default function DetailCompetenceSection({
 
         return acc;
       }, {});
-  }, [hasInterviewVideo, reportDetail]);
+  }, [hasInterviewVideo, interviewVideo]);
 
   const resolvedWords = useMemo<Record<string, WordItem>>(() => {
+    if (frequentWords.length > 0 || habitWords.length > 0) {
+      return {
+        default: {
+          common: frequentWords,
+          habit: habitWords,
+        },
+      };
+    }
+
     return WORDS;
-  }, []);
+  }, [frequentWords, habitWords]);
 
   const [selectedQuestion, setSelectedQuestion] = useState<string>(
     resolvedFilters[0]?.value ?? "q1"
@@ -227,15 +250,14 @@ export default function DetailCompetenceSection({
     fileUrl: undefined,
   };
 
-  const words = resolvedWords[selectedQuestion] ?? resolvedWords.default;
+  const words =
+    resolvedWords[selectedQuestion] ??
+    resolvedWords.default ?? {
+      common: [],
+      habit: [],
+    };
 
   const currentVideoSrc = current.fileUrl || videoSrc || interview_video_02;
-
-  useEffect(() => {
-    console.log("DetailCompetenceSection - 프린트 모드:", isPrintMode);
-    console.log("DetailCompetenceSection - 비디오 소스:", currentVideoSrc);
-    console.log("DetailCompetenceSection - reportDetail:", reportDetail);
-  }, [isPrintMode, currentVideoSrc, reportDetail]);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [isBlurred, setIsBlurred] = useState(true);
@@ -253,9 +275,7 @@ export default function DetailCompetenceSection({
     }
   };
 
-  const handleVideoEnded = () => {
-    // setIsBlurred(true);
-  };
+  const handleVideoEnded = () => {};
 
   useEffect(() => {
     setIsBlurred(true);
@@ -265,7 +285,10 @@ export default function DetailCompetenceSection({
     }
   }, [selectedQuestion]);
 
-  const printItems = useMemo(() => Object.entries(resolvedQuestions), [resolvedQuestions]);
+  const printItems = useMemo(
+    () => Object.entries(resolvedQuestions),
+    [resolvedQuestions]
+  );
 
   return (
     <div className="analysis-section detail-analysis__competence">
@@ -275,8 +298,8 @@ export default function DetailCompetenceSection({
 
       <div className="analysis-section__body">
         <LevelGraph
-          score={score}
-          description={description}
+          score={resolvedScore}
+          description={resolvedDescription}
           reportDetail={reportDetail}
           type="competence"
         />

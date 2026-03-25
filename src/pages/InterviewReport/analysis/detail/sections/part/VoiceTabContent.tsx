@@ -46,7 +46,7 @@ export default function VoiceTabContent({
   className,
   reportDetail,
 }: Props) {
-  const averageLine = Number(reportDetail?.voiceAnalysis?.avgHz ?? 200);
+  const averageLine = Number(reportDetail?.voiceAnalysis?.tone ?? 200);
 
   const rawChartData = reportDetail?.voiceAnalysis?.tone?.chartData;
 

@@ -12,10 +12,12 @@ import ic_conditions_gray600_20 from "@/assets/icons/size20/ic_conditions_gray60
 
 type TableRow = { label: string; values: (string | number)[] };
 
+type GradeText = "최우수" | "우수" | "보통" | "미흡" | "매우 미흡";
+
 type Props = {
   gradeLabel?: string;
   analysisTitle?: string;
-  selectedGrade?: "우수" | "보통" | "미흡";
+  selectedGrade?: GradeText;
   analysisText?: React.ReactNode;
   highlight?: React.ReactNode;
   headers?: string[];
@@ -39,7 +41,11 @@ export default function GestureTabContent({
       <div className="detail-analysis__attitude-content">
         <div className="detail-analysis__attitude-left">
           <div className="attitude-control">
-            <img className="attitude-control__image" src={ic_posture_body} alt="제스처 이미지" />
+            <img
+              className="attitude-control__image"
+              src={ic_posture_body}
+              alt="제스처 이미지"
+            />
 
             <div className="attitude-control__overlay_gesture left">
               <span>5회</span>
@@ -53,8 +59,16 @@ export default function GestureTabContent({
               <span className="attitude-control__label">R</span>
             </div>
 
-            <img className="attitude-control__arrows-horizontal" src={ic_arrow_horizontal} alt="" />
-            <img className="attitude-control__arrows-vertical" src={ic_arrow_vertical} alt="" />
+            <img
+              className="attitude-control__arrows-horizontal"
+              src={ic_arrow_horizontal}
+              alt=""
+            />
+            <img
+              className="attitude-control__arrows-vertical"
+              src={ic_arrow_vertical}
+              alt=""
+            />
           </div>
         </div>
 
@@ -63,7 +77,7 @@ export default function GestureTabContent({
             type="gesture"
             gradeLabel={gradeLabel}
             gradeIconSrc={ic_stars_gray600_20}
-            gradeOptions={["우수", "보통", "미흡"]}
+            gradeOptions={["최우수", "우수", "보통", "미흡", "매우 미흡"]}
             selectedGrade={selectedGrade}
             className="gesture"
             analysisTitle={analysisTitle}

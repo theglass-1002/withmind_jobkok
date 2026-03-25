@@ -3,11 +3,8 @@ import { useLocation } from "react-router-dom";
 
 import ic_bar_chart_24 from "@/assets/icons/size24/ic_bar_chart_24.png";
 import ic_laptop_24 from "@/assets/icons/size24/ic_laptop_24.png";
-import ic_rocket_24 from "@/assets/icons/size24/ic_rocket_24.png";
 import ic_clipboard_24 from "@/assets/icons/size24/ic_clipboard_24.png";
 import ic_flag_green_24 from "@/assets/icons/size24/ic_flag_green_24.png";
-import ic_keyboard_arrow_left_gray900_24 from "@/assets/icons/size24/ic_keyboard_arrow_left_gray900_24.png";
-import ic_keyboard_arrow_right_gray900_24 from "@/assets/icons/size24/ic_keyboard_arrow_right_gray900_24.png";
 import ic_strength_circle_24 from "@/assets/icons/size24/ic_strength_circle_24.png";
 import ic_weakness_circle_24 from "@/assets/icons/size24/ic_weakness_circle_24.png";
 
@@ -17,9 +14,6 @@ import ScoreDistributionSection from "./sections/ScoreDistributionSection";
 import CategorySummarySection, {
   type EvalItem,
 } from "./sections/CategorySummarySection";
-import ResumeRecommendedJobsSection, {
-  type JobCardV2Item,
-} from "./sections/ResumeRecommendedJobsSection";
 
 import KpiRadarChart from "@/pages/InterviewReport/analysis/chart/KpiRadarChart";
 import { InterviewReportDetailResponse } from "@/api/report/report.types";
@@ -74,13 +68,7 @@ type AiSummary = {
 };
 
 type Props = {
-  score?: number;
-  totalCandidates?: number;
-  percentile?: number;
-  fit?: number;
   reportDetail?: InterviewReportDetailResponse | null;
-  jobs?: JobCardV2Item[];
-  onToggleFavorite: (id: number | string, nextValue?: boolean) => void;
   scoreSection?: ScoreSection;
   categorySummary?: CategorySummary;
   aiSummary?: AiSummary;
@@ -174,7 +162,8 @@ const FALLBACK_AI_SUMMARY: AiSummary = {
 function buildScoreSectionFromReport(
   reportDetail: InterviewReportDetailResponse
 ): ScoreSection {
-  const { groupRankInfo, jobRankInfo } = reportDetail;
+  const groupRankInfo = reportDetail.tab1?.groupRankInfo;
+  const jobRankInfo = reportDetail.tab1?.jobRankInfo;
 
   return {
     labels: SCORE_LABELS,
@@ -222,7 +211,9 @@ function getGradeTone(
 function buildCategorySummaryFromReport(
   reportDetail: InterviewReportDetailResponse
 ): CategorySummary {
-  const { itemTotalScores, feedback, userInfo } = reportDetail;
+  const itemTotalScores = reportDetail.tab1?.itemTotalScores;
+  const feedback = reportDetail.tab1?.feedback;
+  const userInfo = reportDetail.userInfo;
 
   return {
     left: {
@@ -269,7 +260,7 @@ function buildCategorySummaryFromReport(
 function buildAiSummaryFromReport(
   reportDetail: InterviewReportDetailResponse
 ): AiSummary {
-  const powerKeywords = reportDetail?.powerKeywords;
+  const powerKeywords = reportDetail.tab1?.powerKeywords;
 
   return {
     strength: {
@@ -292,36 +283,30 @@ function buildAiSummaryFromReport(
 }
 
 export default function OverviewPage({
-  score,
-  totalCandidates,
-  percentile,
-  fit,
   reportDetail,
   scoreSection,
   categorySummary,
   aiSummary,
-  jobs,
-  onToggleFavorite,
 }: Props) {
   const contentRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
 
   const resolvedScoreSection = useMemo(() => {
-    if (reportDetail?.groupRankInfo && reportDetail?.jobRankInfo) {
+    if (reportDetail?.tab1?.groupRankInfo && reportDetail?.tab1?.jobRankInfo) {
       return buildScoreSectionFromReport(reportDetail);
     }
     return scoreSection ?? FALLBACK_SCORE_SECTION;
   }, [reportDetail, scoreSection]);
 
   const resolvedCategorySummary = useMemo(() => {
-    if (reportDetail?.itemTotalScores && reportDetail?.feedback) {
+    if (reportDetail?.tab1?.itemTotalScores && reportDetail?.tab1?.feedback) {
       return buildCategorySummaryFromReport(reportDetail);
     }
     return categorySummary ?? FALLBACK_CATEGORY_SUMMARY;
   }, [reportDetail, categorySummary]);
 
   const resolvedAiSummary = useMemo(() => {
-    if (reportDetail?.powerKeywords) {
+    if (reportDetail?.tab1?.powerKeywords) {
       return buildAiSummaryFromReport(reportDetail);
     }
     return aiSummary ?? FALLBACK_AI_SUMMARY;
@@ -368,20 +353,7 @@ export default function OverviewPage({
         titleIconSrc={ic_laptop_24}
         strength={resolvedAiSummary.strength}
         weakness={resolvedAiSummary.weakness}
-        report={reportDetail}
       />
-
-      {/* {jobs && jobs.length > 0 && (
-        <ResumeRecommendedJobsSection
-          title="이 이력서와 가장 잘 맞는 공고"
-          titleIconSrc={ic_rocket_24}
-          jobs={jobs}
-          pageSize={3}
-          prevIconSrc={ic_keyboard_arrow_left_gray900_24}
-          nextIconSrc={ic_keyboard_arrow_right_gray900_24}
-          onToggleFavorite={onToggleFavorite}
-        />
-      )} */}
     </div>
   );
 }

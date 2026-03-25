@@ -71,28 +71,28 @@ function getGradeTextFromReport(
   type?: "voice" | "attitude" | "competence" | "tension"
 ): string | undefined {
   if (!reportDetail || !type) return undefined;
-  console.log(type);
+
   switch (type) {
     case "competence":
       return (
-        reportDetail.detailAbility?.abilityTotalScoreText ??
-        reportDetail.itemTotalScores?.abilityTotalScoreText
+        reportDetail.tab2?.abilityAnalysis?.detailAbility?.abilityTotalScoreText ??
+        reportDetail.tab1?.itemTotalScores?.abilityTotalScoreText
       );
 
     case "attitude":
       return (
-        reportDetail.detailAttitude?.attitudeTotalScoreText ??
-        reportDetail.itemTotalScores?.attitudeTotalScoreText
+        reportDetail.tab2?.detailAttitude?.attitudeTotalScoreText ??
+        reportDetail.tab1?.itemTotalScores?.attitudeTotalScoreText
       );
 
     case "voice":
       return (
-        reportDetail.voiceAnalysis?.voiceTotalScoreText ??
-        reportDetail.itemTotalScores?.voiceTotalScoreText
+        reportDetail.tab2?.voiceAnalysis?.voiceTotalScoreText ??
+        reportDetail.tab1?.itemTotalScores?.voiceTotalScoreText
       );
 
     case "tension":
-      return reportDetail.itemTotalScores?.tensionTotalScoreText;
+      return reportDetail.tab1?.itemTotalScores?.tensionTotalScoreText;
 
     default:
       return undefined;
@@ -126,27 +126,27 @@ export default function LevelGraph({
     switch (type) {
       case "voice":
         return (
-          reportDetail.voiceAnalysis?.voiceTotalScore ??
-          reportDetail.itemTotalScores?.voiceTotalScore ??
+          reportDetail.tab2?.voiceAnalysis?.voiceTotalScore ??
+          reportDetail.tab1?.itemTotalScores?.voiceTotalScore ??
           score
         );
 
       case "attitude":
         return (
-          reportDetail.detailAttitude?.attitudeTotalScore ??
-          reportDetail.itemTotalScores?.attitudeTotalScore ??
+          reportDetail.tab2?.detailAttitude?.attitudeTotalScore ??
+          reportDetail.tab1?.itemTotalScores?.attitudeTotalScore ??
           score
         );
 
       case "competence":
         return (
-          reportDetail.detailAbility?.abilityTotalScore ??
-          reportDetail.itemTotalScores?.abilityTotalScore ??
+          reportDetail.tab2?.abilityAnalysis?.detailAbility?.abilityTotalScore ??
+          reportDetail.tab1?.itemTotalScores?.abilityTotalScore ??
           score
         );
 
       case "tension":
-        return reportDetail.itemTotalScores?.tensionTotalScore ?? score;
+        return reportDetail.tab1?.itemTotalScores?.tensionTotalScore ?? score;
 
       default:
         return score;
@@ -159,27 +159,27 @@ export default function LevelGraph({
     switch (type) {
       case "voice":
         return (
-          reportDetail.voiceAnalysis?.voiceFeedBack ??
-          reportDetail.feedback?.voice ??
+          reportDetail.tab2?.voiceAnalysis?.voiceFeedBack ??
+          reportDetail.tab1?.feedback?.voice ??
           description
         );
 
       case "attitude":
         return (
-          reportDetail.detailAttitude?.attitudeFeedBack ??
-          reportDetail.feedback?.attitude ??
+          reportDetail.tab2?.detailAttitude?.attitudeFeedBack ??
+          reportDetail.tab1?.feedback?.attitude ??
           description
         );
 
       case "competence":
         return (
-          reportDetail.detailAbility?.abilityFeedBack ??
-          reportDetail.feedback?.competency ??
+          reportDetail.tab2?.abilityAnalysis?.detailAbility?.abilityFeedBack ??
+          reportDetail.tab1?.feedback?.competency ??
           description
         );
 
       case "tension":
-        return reportDetail.feedback?.tension ?? description;
+        return reportDetail.tab1?.feedback?.tension ?? description;
 
       default:
         return description;

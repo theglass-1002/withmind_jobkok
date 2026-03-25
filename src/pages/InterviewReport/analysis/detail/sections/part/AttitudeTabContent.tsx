@@ -1,4 +1,3 @@
-// src/pages/InterviewReport/analysis/detail/sections/part/AttitudeTabContent.tsx
 import React from "react";
 import DetailMetric from "@/pages/InterviewReport/analysis/detail/sections/part/DetailMetric";
 import DetailMetricTable from "@/pages/InterviewReport/analysis/detail/sections/part/DetailMetricTable";
@@ -18,12 +17,14 @@ type TableRow = {
   values: (string | number)[];
 };
 
+type GradeText = "우수" | "보통" | "미흡";
+
 type Props = {
   faceAngle: number;
   bodyAngle: number;
   gradeLabel?: string;
   analysisTitle?: string;
-  selectedGrade?: "우수" | "보통" | "미흡";
+  selectedGrade?: GradeText;
   analysisText?: React.ReactNode;
   highlight?: React.ReactNode;
   headers?: string[];
@@ -49,12 +50,12 @@ export default function AttitudeTabContent({
   reportDetail,
 }: Props) {
   const reportFaceAngle =
-    reportDetail?.detailAttitude?.postureShoulderAngleData?.postureAngle
-      ?.dataList?.[0]?.faceAngle ?? faceAngle;
+    reportDetail?.tab2?.detailAttitude?.posture?.postureShoulderAngleData
+      ?.postureAngle?.dataList?.[0]?.faceAngle ?? faceAngle;
 
   const reportBodyAngle =
-    reportDetail?.detailAttitude?.postureShoulderAngleData?.postureAngle
-      ?.dataList?.[0]?.shoulderAngle ?? bodyAngle;
+    reportDetail?.tab2?.detailAttitude?.posture?.postureShoulderAngleData
+      ?.postureAngle?.dataList?.[0]?.shoulderAngle ?? bodyAngle;
 
   return (
     <>
@@ -137,7 +138,7 @@ export default function AttitudeTabContent({
             analysisIconSrc={ic_conditions_gray600_20}
             analysisText={analysisText}
             highlight={highlight}
-            reportDetail={reportDetail}  
+            reportDetail={reportDetail}
           />
         </div>
       </div>

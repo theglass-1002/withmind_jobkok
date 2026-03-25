@@ -21,6 +21,8 @@ import ic_check_box_purple24 from "@/assets/icons/size24/ic_check_box_purple24.s
 import ic_bookmark_active_purple24 from "@/assets/icons/size24/ic_bookmark_active_purple24.svg";
 import ic_bookmark_gray400_24 from "@/assets/icons/size24/ic_bookmark_gray400_24.svg";
 
+import ic_magnifier_24 from "@/assets/icons/size24/ic_magnifier_24.png";
+import ic_page_facing_up_24 from "@/assets/icons/size24/ic_page-facing-up_24.png";
 
 
 import ic_kakao_login_20 from "./login/ic_kakao_login_20.svg";
@@ -159,5 +161,7 @@ export const Icons = {
     ic_visibility700_20,
     ic_visibility_off700_20,
     ic_bookmark_active_purple24,
-    ic_bookmark_gray400_24
+    ic_bookmark_gray400_24,
+    ic_magnifier_24,
+    ic_page_facing_up_24
 };

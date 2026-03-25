@@ -14,47 +14,42 @@ import ic_heart_24 from "@/assets/icons/size24/ic_heart_24.png";
 import { InterviewReportDetailResponse } from "@/api/report/report.types";
 
 type Props = {
-  competence_score?: number;
-  attitude_score?: number;
-  voice_score?: number;
-  tension_score?: number;
   videoSrc?: string;
   reportDetail?: InterviewReportDetailResponse | null;
 };
 
 export default function DetailPage({
-  competence_score = 80,
-  attitude_score = 10,
-  voice_score = 45,
-  tension_score = 45,
   videoSrc,
   reportDetail,
 }: Props) {
   const resolvedData = useMemo(() => {
-    if (reportDetail?.itemTotalScores && reportDetail?.feedback) {
+    if (reportDetail?.tab1 && reportDetail?.tab2) {
+      const tab1 = reportDetail.tab1;
+      const tab2 = reportDetail.tab2;
+
       return {
         competence_score:
-          reportDetail.itemTotalScores.abilityTotalScore ?? competence_score,
+          tab1.itemTotalScores?.abilityTotalScore ?? 0,
         attitude_score:
-          reportDetail.detailAttitude.attitudeTotalScore ?? attitude_score,
+          tab2.detailAttitude?.attitudeTotalScore ?? 0,
         voice_score:
-          reportDetail.itemTotalScores.voiceTotalScore ?? voice_score,
+          tab1.itemTotalScores?.voiceTotalScore ?? 0,
         tension_score:
-          reportDetail.itemTotalScores.tensionTotalScore ?? tension_score,
+          tab1.itemTotalScores?.tensionTotalScore ?? 0,
 
-        competence_desc: reportDetail.feedback?.competency ?? "-",
-        attitude_desc: reportDetail.detailAttitude.attitudeFeedBack ?? "-",
-        voice_desc: reportDetail.feedback?.voice ?? "-",
-        tension_desc: reportDetail.feedback?.tension ?? "-",
+        competence_desc: tab1.feedback?.competency ?? "-",
+        attitude_desc:
+          tab2.detailAttitude?.attitudeFeedBack ?? "-",
+        voice_desc: tab1.feedback?.voice ?? "-",
+        tension_desc: tab1.feedback?.tension ?? "-",
       };
     }
 
-    // fallback (기존 하드코딩 유지)
     return {
-      competence_score,
-      attitude_score,
-      voice_score,
-      tension_score,
+      competence_score: 0,
+      attitude_score: 0,
+      voice_score: 0,
+      tension_score: 0,
 
       competence_desc:
         "면접 과정에서 보인 의사소통 능력과 문제해결 능력은 매우 우수한 것으로 평가됩니다.",
@@ -65,30 +60,20 @@ export default function DetailPage({
       tension_desc:
         "전반적으로 안정적인 모습을 보이며 긴장도가 낮은 편으로 평가됩니다.",
     };
-  }, [
-    reportDetail,
-    competence_score,
-    attitude_score,
-    voice_score,
-    tension_score,
-  ]);
+  }, [reportDetail]);
 
   return (
     <div className="mock-analysis-report__content mock-analysis--detail">
       <DetailCompetenceSection
         title="역량 분석"
         titleIconSrc={ic_hammer_24}
-        score={resolvedData.competence_score}
         videoSrc={videoSrc}
-        description={resolvedData.competence_desc}
         reportDetail={reportDetail}
       />
 
       <DetailAttitudeSection
         title="태도 분석"
         titleIconSrc={ic_technologist_24}
-        score={resolvedData.attitude_score}
-        description={resolvedData.attitude_desc}
         reportDetail={reportDetail}
       />
 
@@ -111,6 +96,7 @@ export default function DetailPage({
         titleIconSrc={ic_heart_24}
         score={resolvedData.tension_score}
         description={resolvedData.tension_desc}
+        reportDetail={reportDetail}
       />
     </div>
   );

@@ -1,4 +1,4 @@
-import { InterviewReportResponse } from "@/api/report/report.types";
+import { InterviewReportDetailResponse, InterviewReportResponse } from "@/api/report/report.types";
 import { Icons } from "@/assets/icons";
 import React from "react";
 
@@ -27,7 +27,7 @@ type Props = {
   strength?: StrengthProps;
   /** 우측 약점 정보 */
   weakness?: WeaknessProps;
-  report: InterviewReportResponse | null;
+
 };
 
 export default function AiSummarySection({
@@ -35,10 +35,9 @@ export default function AiSummarySection({
   titleIconSrc,
   strength,
   weakness,
-  report
+
 }: Props) {
   
-  const powerKeywords = report?.powerKeywords;
 
   return (
     <div className="analysis-section mock-analysis-overview__ai-summary">

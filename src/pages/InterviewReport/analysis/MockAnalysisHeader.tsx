@@ -36,6 +36,7 @@ export default function MockAnalysisHeader({
   const displayTitle = isPrintMode ? TAB_LABELS[activeTab] : title;
 
   return (
+    <>
     <div className="mock-analysis__header">
       <div className="mock-analysis__title">
         {isPrintMode?TAB_LABELS[activeTab]:displayTitle}
@@ -61,5 +62,27 @@ export default function MockAnalysisHeader({
         ))}
       </div>
     </div>
+
+    <div className="mock-analysis__header mobile">
+      <div className="mock-analysis__meta">
+        <div className="mock-analysis__meta-row">
+          <div className="mock-analysis__meta-item">
+          <span className="mock-analysis__meta-key">{status}</span>
+          <span className="mock-analysis__meta-value">{date}</span>
+          </div>
+        </div>
+        {metaRows.map((row, rowIndex) => (
+          <div key={rowIndex} className="mock-analysis__meta-row">
+            {row.map((item, itemIndex) => (
+              <div key={itemIndex} className="mock-analysis__meta-item">
+                <span className="mock-analysis__meta-key">{item.key}</span>
+                <span className="mock-analysis__meta-value">{item.value}</span>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+    </>
   );
 }

@@ -21,7 +21,7 @@ export default function MyPageLayout() {
 
       try {
         const res = await fetchMyInfo();
-      
+        console.log(res);
         setMyInfo(res.user);
       } catch (e: any) {
         console.error("[MyPageLayout] 내 정보 가져오기 실패", e);

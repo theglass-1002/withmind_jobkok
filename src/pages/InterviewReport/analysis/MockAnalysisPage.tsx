@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useLocation } from "react-router-dom";
-
+import { useLocation, useNavigate } from "react-router-dom";
+import {useStickyTabs} from '@/shared/utils/util'; 
 import test_company_logo from "@/assets/testImg/company_logo/test_company_logo.png";
 import ic_saramin_18 from "@/assets/icons/size18/ic_saramin_18.png";
 import ic_star_green_18 from "@/assets/icons/size18/ic_star_green_18.png";
@@ -28,6 +28,7 @@ import { fetchInterviewReportDetail } from "@/api/report/report.api";
 import { InterviewReportDetailResponse } from "@/api/report/report.types";
 
 import "./mock-analysis.css";
+import { logout } from "@/api/auth/auth.api";
 
 const mockJobs = [
   {
@@ -235,6 +236,7 @@ function buildHeaderMetaRows(reportDetail: InterviewReportDetailResponse | null)
 }
 
 export default function MockAnalysisPage() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabKey>("overview");
   const [jobs, setJobs] = useState(mockJobs);
   const [reportDetail, setReportDetail] =
@@ -248,6 +250,11 @@ export default function MockAnalysisPage() {
     { key: "detail", label: "상세 분석" },
     { key: "match", label: "이력서−면접 일치도 분석" },
   ];
+
+  const isTabsSticky = useStickyTabs(
+    "sticky-trigger",
+    ".default_tabs",
+    ".page-header")
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -281,8 +288,12 @@ export default function MockAnalysisPage() {
         // console.log("=== 분석결과 상세 API 응답 끝 ===");
 
         setReportDetail(res);
-      } catch (error) {
-        console.error("분석결과 상세 조회 실패:", error);
+      } catch (e) {
+        if (e?.code === 999) {
+          logout();
+          navigate("/login");
+          return;
+        }
         setReportDetail(null);
       } finally {
         setIsLoading(false);
@@ -328,20 +339,6 @@ export default function MockAnalysisPage() {
     [reportDetail]
   );
 
-  const score = reportDetail?.overallScore.myScore ?? fallbackOverviewData.score;
-  const totalCandidates =
-    reportDetail?.overallScore.totalCount ?? fallbackOverviewData.totalCandidates;
-  const percentile =
-    reportDetail?.overallScore.topPercent ?? fallbackOverviewData.percentile;
-  const fit = reportDetail?.jobFitInfo.jobFitScore ?? fallbackOverviewData.fit;
-
-  const detailCompetenceScore =
-    reportDetail?.detailAbility.abilityTotalScore ?? 80;
-  const detailAttitudeScore =
-    reportDetail?.detailAttitude.attitudeTotalScore ?? 10;
-  const detailVoiceScore = reportDetail?.voiceAnalysis.voiceTotalScore ?? 45;
-  const detailTensionScore =
-    reportDetail?.itemTotalScores.tensionTotalScore ?? 20;
 
   return (
     <>
@@ -386,7 +383,6 @@ export default function MockAnalysisPage() {
               {activeTab === "overview" && (
                 <OverviewPage
                 reportDetail={reportDetail}
-                onToggleFavorite={handleToggleFavorite}
               />
               )}
 
@@ -425,7 +421,68 @@ export default function MockAnalysisPage() {
           </div>
         </div>
       </div>
+      <div className="mock-analysis mobile"> 
+      <div className="mock-analysis__inner page-summary">
+          <div className="mock-analysis__header_container">
+            <MockAnalysisHeader
+              title="분석결과"
+              date={reportDetail?.userInfo.interviewDate ?? "2025.12.10 00:00"}
+              status={reportDetail?.userInfo.interviewStatus ?? "진행 완료"}
+              activeTab={activeTab}
+              metaRows={metaRows}
+            />
+          </div>
 
+          <Tabs
+            tabs={tabItems}
+            active={activeTab}
+            onChange={(key) => handleTabClick(key as TabKey)}
+            className={`mock-analysis-tabs default_tabs ${isTabsSticky?'is-sticky':''}`}
+            itemClassName="mock-analysis-tabs__item "
+            activeClassName="on"
+          />
+        </div>
+        <div id="sticky-trigger" className="mock-analysis-panel mock-analysis-report">
+        <div className="mock-analysis-report__container">
+          <div className="mock-analysis-report__inner">
+            <span className="mock-analysis-report__icon-btn" 
+            onClick={handleOpenPrintPage}
+            role="button" aria-label="리포트 인쇄">
+              <img className="mock-analysis-report__icon" src={ic_print_gray900_24} alt="" />
+            </span>
+
+            {activeTab === "overview" && (
+               <OverviewPage
+               reportDetail={reportDetail}
+             />
+            )}
+
+            {activeTab === "detail" && (
+              <DetailPage
+              reportDetail={reportDetail}
+              />
+            )}
+
+            {activeTab === "match" && (
+              <ResumeInterviewMatchPage
+              onToggleFavorite={handleToggleFavorite}
+              jobs={jobs}
+              />
+            )}
+
+            <div className="btn_wrap mock-analysis-report__actions">
+              <span className="default_btn_white">
+                <img className="mock-analysis-report__btn-icon" src={ic_print_gray900_24} alt="" />
+              </span>
+              <span className="btn_w_full default_btn_black">
+                <img className="mock-analysis-report__btn-icon" src={ic_star_white_20} alt="" />
+                모의면접 다시 보기
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>        
       {/* <M_MockAnalysisPage /> */}
     </>
   );

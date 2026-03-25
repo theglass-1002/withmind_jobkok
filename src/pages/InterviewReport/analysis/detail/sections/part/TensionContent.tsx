@@ -10,6 +10,7 @@ import ic_favorite_green_20 from "@/assets/icons/size20/ic_favorite_green_20.png
 import ic_favorite_blue_20 from "@/assets/icons/size20/ic_favorite_blue_20.png";
 import ic_favorite_red_20 from "@/assets/icons/size20/ic_favorite_red_20.png";
 
+import { Storage } from "@/shared/utils/StorageManager";
 
 
 type TableRow = { label: string; values: (string | number)[] };
@@ -38,6 +39,8 @@ export default function TensionContent({
   ],
   className
 }: Props) {
+  const userName = Storage.getUserName() || "사용자";
+
   return (
     <>
   
@@ -48,7 +51,7 @@ export default function TensionContent({
          <div className="detail-analysis__tension-header">
          <span className="detail-analysis__metric-grade-label">
             <img src={ic_timeline_gray600_20} alt="" />
-              정유리님의 응답 긴장도
+            {userName}님의 응답 긴장도
             </span>
             <span className="detail-analysis__tension-summary">
             질문 5에서 가장 긴장하였고, 질문 2에서 가장 긴장도가 낮았던 것으로 확인됩니다.</span>

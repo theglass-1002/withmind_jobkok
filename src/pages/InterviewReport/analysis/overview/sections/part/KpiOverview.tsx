@@ -1,16 +1,18 @@
 import React, { useMemo } from "react";
 import KpiGaugeChart from "@/pages/InterviewReport/analysis/chart/KpiGaugeChart";
 
-import ic_page_facing_up_24 from "@/assets/icons/size24/ic_page-facing-up_24.png";
 import ic_info_white80_20 from "@/assets/icons/size20/ic_info_white80_20.png";
 import ic_yellow_flag20 from "@/assets/icons/size20/ic_yellow_flag20.png";
 import Tooltip from "@/shared/components/tooltip/Tooltip";
 import { InterviewReportDetailResponse } from "@/api/report/report.types";
 
+import { Storage } from "@/shared/utils/StorageManager";
+import { Icons } from "@/assets/icons";
+
 type Props = {
-  score: number;
-  totalCandidates: number;
-  percentile: number;
+  score?: number;
+  totalCandidates?: number;
+  percentile?: number;
 
   labels?: string[];
   breaks?: number[];
@@ -25,7 +27,7 @@ type Props = {
   kpiTitleModifierClass?: string;
   tooltipTitle?: string;
   tooltipDesc?: string;
-  reportDetail: InterviewReportDetailResponse | null;
+  reportDetail?: InterviewReportDetailResponse | null;
 };
 
 const DEFAULT_BREAKS = [20, 40, 60, 80, 100] as const;
@@ -92,21 +94,30 @@ export default function KpiOverview({
   tooltipTitle = "모의면접 평균 점수",
   tooltipDesc = "모의면접 평균 점수는 여러분이 면접에 얼마나 잘 대비하고 있는지를 평가하는 지표입니다. 이 지표는 3단계(미흡, 보통, 우수)로 나뉘며, 모의면접 종합 코멘트가 함께 제공됩니다.",
 }: Props) {
+  const userName = Storage.getUserName() || "사용자";
+
+  const resolvedScore = score ?? reportDetail?.tab1?.overallScore?.myScore ?? 0;
+  const resolvedTotalCandidates =
+    totalCandidates ?? reportDetail?.tab1?.overallScore?.totalCount ?? 0;
+  const resolvedPercentile =
+    percentile ?? reportDetail?.tab1?.overallScore?.topPercent ?? 0;
+
   const segments = useMemo(
-    () => segmentsFromScore(score, breaks),
-    [score, breaks]
+    () => segmentsFromScore(resolvedScore, breaks),
+    [resolvedScore, breaks]
   );
 
   const myScoreText =
-    reportDetail?.overallScore?.myScoreText ?? DEFAULT_LABELS[getBucketIndexFromScore(score, breaks)];
+    reportDetail?.tab1?.overallScore?.myScoreText ??
+    DEFAULT_LABELS[getBucketIndexFromScore(resolvedScore, breaks)];
 
-  const overallFeedback = reportDetail?.feedback?.overall ?? "";
+  const overallFeedback = reportDetail?.tab1?.feedback?.overall ?? "";
 
   const modifierIndex = useMemo(() => {
     const serverIndex = getIndexFromLabel(myScoreText, labels);
     if (serverIndex >= 0) return serverIndex;
-    return getBucketIndexFromScore(score, breaks);
-  }, [myScoreText, labels, score, breaks]);
+    return getBucketIndexFromScore(resolvedScore, breaks);
+  }, [myScoreText, labels, resolvedScore, breaks]);
 
   const modifier = kpiTitleModifierClass ?? modifierByBucket(modifierIndex);
 
@@ -116,7 +127,7 @@ export default function KpiOverview({
         <div className="mock-analysis-overview__kpi-headline">
           <img
             className="mock-analysis-overview__kpi-icon"
-            src={ic_page_facing_up_24}
+            src={Icons.ic_page_facing_up_24}
             alt=""
           />
           모의면접 종합 평가
@@ -136,14 +147,15 @@ export default function KpiOverview({
 
         <div className="mock-analysis-overview__kpi-desc-text">
           <div className="mock-analysis-overview__kpi-desc-lead">
-            정유리님의 종합 평가 점수는 {score}점이며, 응시자 {totalCandidates}명 중
+            {userName}님의 종합 평가 점수는 {resolvedScore}점이며, 응시자{" "}
+            {resolvedTotalCandidates}명 중
             <span className="mock-analysis-overview__percent">
               <img
                 className="mock-analysis-overview__percent-icon"
                 src={ic_yellow_flag20}
                 alt=""
               />
-              상위 {percentile}% 에 해당합니다.
+              상위 {resolvedPercentile}% 에 해당합니다.
             </span>
           </div>
 
@@ -158,7 +170,7 @@ export default function KpiOverview({
           <KpiGaugeChart
             segments={segments}
             labels={labels}
-            valueLabel={`${score}점`}
+            valueLabel={`${resolvedScore}점`}
             height={chartHeight}
             theme={{
               base: baseColor,

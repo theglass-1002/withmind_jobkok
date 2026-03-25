@@ -41,7 +41,7 @@ export default function ProfileEditForm({
   const [selectedGender, setSelectedGender] = useState<GenderType>("M");
 
   const handledRef = useRef(false);
-
+  
   useEffect(() => {
     const initialGender = (verifiedUserInfo?.gender || userInfo?.gender || "M") as GenderType;
     setSelectedGender(initialGender);

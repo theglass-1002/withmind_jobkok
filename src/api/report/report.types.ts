@@ -28,8 +28,8 @@ export interface Feedback {
 }
 
 export interface RankInfo {
-  jobGroup: string | null;
-  job: string | null;
+  jobGroup?: string | null;
+  job?: string | null;
   myScore: number;
   myRank: number;
   totalCount: number;
@@ -46,6 +46,9 @@ export interface PowerKeywords {
   weakness: string;
 }
 
+/**
+ * tab1 기준 요약 응답
+ */
 export interface InterviewReportResponse {
   qzGroup: number;
   overallScore: OverallScore;
@@ -54,9 +57,12 @@ export interface InterviewReportResponse {
   groupRankInfo: RankInfo;
   jobRankInfo: RankInfo;
   powerKeywords: PowerKeywords;
+  jobFitInfo: JobFitInfo;
 }
 
-// 분석결과
+// =========================
+// 공통
+// =========================
 
 export interface ChartData10 {
   x1: number;
@@ -78,14 +84,20 @@ export interface UserInfo {
   name: string;
   desiredJob: string;
   interviewDate: string;
+  userName: string;
   email: string;
 }
+
+// =========================
+// 음성 분석
+// =========================
 
 export interface VoiceTone {
   chartData: ChartData10;
   levelText: string;
   avgHz: number;
   scoreText: string;
+  toneAnalysisText: string;
 }
 
 export interface VoiceSpeed {
@@ -97,12 +109,18 @@ export interface VoiceSpeed {
 
 export interface VoiceAnalysis {
   voiceTotalScoreText: string;
+  voiceGrade: string;
   tone: VoiceTone;
-  levelText?: string;
   voiceFeedBack: string;
+  voiceAnalysisDetailText: string;
+  voiceAnalysisText: string;
   voiceTotalScore: number;
   speed: VoiceSpeed;
 }
+
+// =========================
+// 적합도 / 역량
+// =========================
 
 export interface JobFitInfo {
   jobFitScore: number;
@@ -115,6 +133,31 @@ export interface DetailAbility {
   abilityTotalScore: number;
   abilityFeedBack: string;
 }
+
+export interface InterviewVideoItem {
+  evaluation: string;
+  score: number;
+  stt: string;
+  qzTxt: string;
+  grade: number;
+  regdate: string;
+  fileUrl: string;
+  qzNum: number;
+  keyAnswerEval1: string;
+  keyAnswerEval2: string;
+  keyAnswerEval3: string;
+}
+
+export interface AbilityAnalysis {
+  detailAbility: DetailAbility;
+  interviewVideo: InterviewVideoItem[];
+  frequentlyUsedWords: string[];
+  frequentlyUsedHabitWords: string[];
+}
+
+// =========================
+// 자세 분석
+// =========================
 
 export interface GroupTypeMovementData {
   groupType: string;
@@ -134,6 +177,8 @@ export interface ShoulderMovement {
 }
 
 export interface PostureAngle {
+  postureScore: number;
+  postureGrade: string;
   dataList: GroupTypeAngleData[];
 }
 
@@ -142,25 +187,17 @@ export interface PostureShoulderAngleData {
   postureAngle: PostureAngle;
 }
 
-export interface GestureSection {
-  pointCount: number;
-  pointValue: string;
+export interface Posture {
+  postureScore: number;
+  postureGrade: string;
+  analysisText: string;
+  detailText: string;
+  postureShoulderAngleData: PostureShoulderAngleData;
 }
 
-export interface GestureGroupData {
-  groupType: string;
-  handTime: number;
-  handMoveCount: number;
-}
-
-export interface GestureInfo {
-  gestureSectionList: GestureSection[];
-  dataList: GestureGroupData[];
-}
-
-export interface GestureData {
-  gesture: GestureInfo;
-}
+// =========================
+// 시선 분석
+// =========================
 
 export interface Point2D {
   x: number;
@@ -182,15 +219,87 @@ export interface GazeSectionData {
 }
 
 export interface GazeInfo {
+  gazeScore: number;
   pointList: Point2D[];
   pointValue: number;
   pointName: string;
+  gazeGrade: string;
   section: GazeSectionData[];
 }
 
 export interface GazeData {
   geze: GazeInfo;
 }
+
+export interface Gaze {
+  gazeScore: number;
+  gazeGrade: string;
+  analysisText: string;
+  detailText: string;
+  gazeData: GazeData;
+}
+
+// =========================
+// 제스처 분석
+// =========================
+
+export interface GestureSection {
+  pointCount: number;
+  pointValue: string;
+}
+
+export interface GestureGroupData {
+  groupType: string;
+  handTime: number;
+  handMoveCount: number;
+}
+
+export interface GestureInfo {
+  gestureSectionList: GestureSection[];
+  gestureScore: number;
+  gestureGrade: string;
+  dataList: GestureGroupData[];
+}
+
+export interface GestureData {
+  gesture: GestureInfo;
+}
+
+export interface Gesture {
+  gestureScore: number;
+  gestureGrade: string;
+  analysisText: string;
+  detailText: string;
+  gestureData: GestureData;
+}
+
+// =========================
+// 표정 분석
+// =========================
+
+export interface EmotionData {
+  topEmotionName: string;
+  topEmotionPercent: number;
+  negative: number;
+  neutral: number;
+  positive: number;
+  dominantEmotion: string;
+  feedBack: string;
+  emotionScore: number;
+  emotionGrade: string;
+}
+
+export interface Emotion {
+  emotionScore: number;
+  emotionGrade: string;
+  analysisText: string;
+  detailText: string;
+  emotionData: EmotionData;
+}
+
+// =========================
+// 긴장도 분석
+// =========================
 
 export interface TensionInfo {
   score: number;
@@ -219,49 +328,42 @@ export interface HeartRateSummary {
 export interface TensionHeartRate {
   heartRateCount: number;
   tensionInfo: TensionInfo;
+  tensionGrade: string;
   lowTension: TensionRangeData;
   highTension: TensionRangeData;
   heartRate: HeartRateSummary;
   heartRateCharts: ChartData10[];
+  tensionAnalysisText: string;
+  tensionAnalysisDetailText: string;
   tensionScore: number;
 }
 
 export interface TensionData {
+  tensionScore: number;
+  tensionGrade: string;
+  tensionAnalysisText: string;
+  tensionAnalysisDetailText: string;
   tebHeartRate: TensionHeartRate;
 }
 
-export interface EmotionData {
-  negative: number;
-  neutral: number;
-  positive: number;
-  dominantEmotion: string;
-  feedBack: string;
-}
+// =========================
+// 태도 분석
+// =========================
 
 export interface DetailAttitude {
-  postureShoulderAngleData: PostureShoulderAngleData;
   attitudeTotalScore: number;
-  gestureData: GestureData;
-  attitudeFeedBack: string;
-  gazeData: GazeData;
-  tensionData: TensionData;
   attitudeTotalScoreText: string;
-  emotionData: EmotionData;
+  attitudeFeedBack: string;
+  posture: Posture;
+  gaze: Gaze;
+  gesture: Gesture;
+  emotion: Emotion;
+  tensionData: TensionData;
 }
 
-export interface InterviewVideoItem {
-  evaluation: string;
-  score: number;
-  stt: string;
-  qzTxt: string;
-  grade: number;
-  regdate: string;
-  fileUrl: string;
-  qzNum: number;
-  keyAnswerEval1: string;
-  keyAnswerEval2: string;
-  keyAnswerEval3: string;
-}
+// =========================
+// 이력서 분석
+// =========================
 
 export interface ExpectedQuestion {
   mainCategory: string;
@@ -291,21 +393,60 @@ export interface ResumeAnalysis {
   overallDescription: string;
 }
 
-export interface InterviewReportDetailResponse {
-  userInfo: UserInfo;
-  jobRankInfo: RankInfo;
-  voiceAnalysis: VoiceAnalysis;
-  itemTotalScores: ItemTotalScores;
+// =========================
+// 실제 API 응답 구조
+// =========================
+
+export interface InterviewReportTab1 {
   overallScore: OverallScore;
-  frequentlyUsedHabitWords: string[];
-  powerKeywords: PowerKeywords;
   jobFitInfo: JobFitInfo;
-  detailAbility: DetailAbility;
-  frequentlyUsedWords: string[];
   groupRankInfo: RankInfo;
+  jobRankInfo: RankInfo;
+  itemTotalScores: ItemTotalScores;
   feedback: Feedback;
+  powerKeywords: PowerKeywords;
+}
+
+export interface InterviewReportTab2 {
+  abilityAnalysis: AbilityAnalysis;
   detailAttitude: DetailAttitude;
-  interviewVideo: InterviewVideoItem[];
-  qzGroup: number;
+  voiceAnalysis: VoiceAnalysis;
+}
+
+export interface InterviewReportTab3 {
   resumeAnalysis: ResumeAnalysis;
 }
+
+export interface InterviewReportDetailResponse {
+  qzGroup: number;
+  userInfo: UserInfo;
+  tab1: InterviewReportTab1;
+  tab2: InterviewReportTab2;
+  tab3: InterviewReportTab3;
+}
+
+// =========================
+// 프론트에서 평탄화해서 쓰는 응답 구조
+// =========================
+
+// export interface InterviewReportDetailResponse {
+//   qzGroup: number;
+//   userInfo: UserInfo;
+
+//   overallScore: OverallScore;
+//   itemTotalScores: ItemTotalScores;
+//   feedback: Feedback;
+//   groupRankInfo: RankInfo;
+//   jobRankInfo: RankInfo;
+//   powerKeywords: PowerKeywords;
+//   jobFitInfo: JobFitInfo;
+
+//   detailAbility: DetailAbility;
+//   interviewVideo: InterviewVideoItem[];
+//   frequentlyUsedWords: string[];
+//   frequentlyUsedHabitWords: string[];
+
+//   detailAttitude: DetailAttitude;
+//   voiceAnalysis: VoiceAnalysis;
+//   resumeAnalysis: ResumeAnalysis;
+// }
