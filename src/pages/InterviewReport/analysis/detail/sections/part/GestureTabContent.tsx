@@ -9,33 +9,52 @@ import ic_arrow_vertical from "@/assets/illustrations/ic_arrow_vertical.png";
 
 import ic_stars_gray600_20 from "@/assets/icons/size20/ic_stars_gray600_20.png";
 import ic_conditions_gray600_20 from "@/assets/icons/size20/ic_conditions_gray600_20.png";
+import { InterviewReportDetailResponse } from "@/api/report/report.types";
 
-type TableRow = { label: string; values: (string | number)[] };
-
-type GradeText = "최우수" | "우수" | "보통" | "미흡" | "매우 미흡";
-
-type Props = {
-  gradeLabel?: string;
-  analysisTitle?: string;
-  selectedGrade?: GradeText;
-  analysisText?: React.ReactNode;
-  highlight?: React.ReactNode;
-  headers?: string[];
-  rows?: TableRow[];
+type TableRow = {
+  label: string;
+  values: (string | number)[];
 };
 
-export default function GestureTabContent({
-  gradeLabel = "제스처 등급",
-  analysisTitle = "제스처 분석",
-  selectedGrade = "보통",
-  analysisText = <>전체 평균과 비교했을 때, 정유리님의 제스처 사용은 적절합니다.</>,
-  highlight = <>손 제스처 빈도 ‘5회’, 다양도 ‘중간’, 동기화 ‘보통’</>,
-  headers = ["", "손 제스처 빈도", "제스처 다양도", "동기화"],
-  rows = [
-    { label: "전체 평균", values: ["10회", "중간", "보통"] },
-    { label: "직군 평균", values: ["9회", "낮음", "낮음"] },
-  ],
-}: Props) {
+type Props = {
+  reportDetail?: InterviewReportDetailResponse | null;
+};
+
+function formatCount(value?: number | null) {
+  return `${value ?? 0}회`;
+}
+
+function formatSeconds(value?: number | null) {
+  return `${value ?? 0}초`;
+}
+
+export default function GestureTabContent({ reportDetail }: Props) {
+  const gesture = reportDetail?.tab2?.detailAttitude?.gesture;
+  const gestureDataList = gesture?.gestureData?.gesture?.dataList ?? [];
+
+  const meData = gestureDataList[0];
+  const totalAverageData = gestureDataList[1];
+  const jobAverageData = gestureDataList[2];
+
+  const headers = ["", "평균 횟수", "평균 시간"];
+
+  const rows: TableRow[] = [
+    {
+      label: "전체 평균",
+      values: [
+        formatCount(totalAverageData?.handMoveCount),
+        formatSeconds(totalAverageData?.handTime),
+      ],
+    },
+    {
+      label: "직군 평균",
+      values: [
+        formatCount(jobAverageData?.handMoveCount),
+        formatSeconds(jobAverageData?.handTime),
+      ],
+    },
+  ];
+
   return (
     <>
       <div className="detail-analysis__attitude-content">
@@ -47,11 +66,13 @@ export default function GestureTabContent({
               alt="제스처 이미지"
             />
 
+            {/* 좌 / 우 동일하게 handMoveCount 사용 */}
             <div className="attitude-control__overlay_gesture left">
-              <span>5회</span>
+              <span>{formatCount(meData?.handMoveCount)}</span>
             </div>
+
             <div className="attitude-control__overlay_gesture right">
-              <span>2회</span>
+              <span>{formatCount(meData?.handMoveCount)}</span>
             </div>
 
             <div className="attitude-control__label-horizontal">
@@ -75,15 +96,13 @@ export default function GestureTabContent({
         <div className="detail-analysis__attitude-right">
           <DetailMetric
             type="gesture"
-            gradeLabel={gradeLabel}
+            gradeLabel="제스처 등급"
             gradeIconSrc={ic_stars_gray600_20}
-            gradeOptions={["최우수", "우수", "보통", "미흡", "매우 미흡"]}
-            selectedGrade={selectedGrade}
+            gradeOptions={["우수", "보통", "미흡"]}
             className="gesture"
-            analysisTitle={analysisTitle}
+            analysisTitle="제스처 분석"
             analysisIconSrc={ic_conditions_gray600_20}
-            analysisText={analysisText}
-            highlight={highlight}
+            reportDetail={reportDetail}
           />
         </div>
       </div>

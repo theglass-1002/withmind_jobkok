@@ -402,7 +402,7 @@ export default function TensionAnalysisChart({
       className={className || "detail-analysis__tension-chart-wrapper"}
       style={{
         width: "100%",
-        height,
+        height:"100%",
         overflowX: "auto",
         overflowY: "hidden",
       }}

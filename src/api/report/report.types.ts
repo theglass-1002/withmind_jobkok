@@ -228,7 +228,7 @@ export interface GazeInfo {
 }
 
 export interface GazeData {
-  geze: GazeInfo;
+  geze: GazeInfo; // ⚠️ API 그대로 유지 (오타 아님)
 }
 
 export interface Gaze {
@@ -333,6 +333,8 @@ export interface TensionHeartRate {
   highTension: TensionRangeData;
   heartRate: HeartRateSummary;
   heartRateCharts: ChartData10[];
+
+  tensionSummaryText: string; // ⭐ 추가
   tensionAnalysisText: string;
   tensionAnalysisDetailText: string;
   tensionScore: number;
@@ -343,6 +345,9 @@ export interface TensionData {
   tensionGrade: string;
   tensionAnalysisText: string;
   tensionAnalysisDetailText: string;
+
+  tensionSummaryText: string; // ⭐ 추가
+
   tebHeartRate: TensionHeartRate;
 }
 
@@ -424,29 +429,3 @@ export interface InterviewReportDetailResponse {
   tab2: InterviewReportTab2;
   tab3: InterviewReportTab3;
 }
-
-// =========================
-// 프론트에서 평탄화해서 쓰는 응답 구조
-// =========================
-
-// export interface InterviewReportDetailResponse {
-//   qzGroup: number;
-//   userInfo: UserInfo;
-
-//   overallScore: OverallScore;
-//   itemTotalScores: ItemTotalScores;
-//   feedback: Feedback;
-//   groupRankInfo: RankInfo;
-//   jobRankInfo: RankInfo;
-//   powerKeywords: PowerKeywords;
-//   jobFitInfo: JobFitInfo;
-
-//   detailAbility: DetailAbility;
-//   interviewVideo: InterviewVideoItem[];
-//   frequentlyUsedWords: string[];
-//   frequentlyUsedHabitWords: string[];
-
-//   detailAttitude: DetailAttitude;
-//   voiceAnalysis: VoiceAnalysis;
-//   resumeAnalysis: ResumeAnalysis;
-// }

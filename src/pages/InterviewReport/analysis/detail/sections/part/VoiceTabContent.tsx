@@ -46,15 +46,29 @@ export default function VoiceTabContent({
   className,
   reportDetail,
 }: Props) {
-  const averageLine = Number(reportDetail?.voiceAnalysis?.tone ?? 200);
+  const averageLine = Number(
+    reportDetail?.tab2?.voiceAnalysis?.tone?.avgHz ?? 200
+  );
 
-  const rawChartData = reportDetail?.voiceAnalysis?.tone?.chartData;
+  const rawChartData = reportDetail?.tab2?.voiceAnalysis?.tone?.chartData;
 
-  const chartValues = Array.isArray(rawChartData)
-    ? rawChartData.map((value) => Number(value))
+  const chartValues = rawChartData
+    ? [
+        Number(rawChartData.x1 ?? 0),
+        Number(rawChartData.x2 ?? 0),
+        Number(rawChartData.x3 ?? 0),
+        Number(rawChartData.x4 ?? 0),
+        Number(rawChartData.x5 ?? 0),
+        Number(rawChartData.x6 ?? 0),
+        Number(rawChartData.x7 ?? 0),
+        Number(rawChartData.x8 ?? 0),
+        Number(rawChartData.x9 ?? 0),
+        Number(rawChartData.x10 ?? 0),
+      ]
     : [220, 195, 210, 180, 195, 170, 180, 170, 195, 145, 180];
 
   const userName = Storage.getUserName() || "사용자";
+
 
   return (
     <>
@@ -76,18 +90,15 @@ export default function VoiceTabContent({
 
         <div className="detail-analysis__attitude-right">
           <DetailMetric
-            type={'voice'}
+            type="voice_tone"
             gradeLabel={gradeLabel}
             gradeIconSrc={ic_stars_gray600_20}
-            gradeOptions={["우수", "보통", "미흡"]}
-            selectedGrade={selectedGrade}
             className={className}
             analysisTitle={analysisTitle}
             analysisIconSrc={ic_conditions_gray600_20}
             analysisText={analysisText}
             highlight={highlight}
             reportDetail={reportDetail}
-            
           />
         </div>
       </div>

@@ -83,8 +83,6 @@ export default function DetailPage({
         title="목소리 분석"
         className="voice"
         titleIconSrc={ic_speaker_24}
-        score={resolvedData.voice_score}
-        description={resolvedData.voice_desc}
         reportDetail={reportDetail}
       />
 
@@ -94,8 +92,6 @@ export default function DetailPage({
         title="긴장도 분석"
         className="tension"
         titleIconSrc={ic_heart_24}
-        score={resolvedData.tension_score}
-        description={resolvedData.tension_desc}
         reportDetail={reportDetail}
       />
     </div>

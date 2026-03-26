@@ -74,15 +74,13 @@ export default function VoicePitchChart({
   );
   const animationRef = useRef<number | undefined>(undefined);
 
-  // 최소 너비 계산: 데이터 포인트 수 * 포인트당 최소 간격
   const minWidth = useMemo(() => {
     const pointCount = values.length;
-    const minGap = 60; // 포인트 간 최소 간격
-    const yAxisSpace = 110; // Y축 레이블 공간
+    const minGap = 60;
+    const yAxisSpace = 110;
     return pointCount * minGap + yAxisSpace;
   }, [values.length]);
 
-  // 애니메이션 효과
   useEffect(() => {
     const startTime = Date.now();
     const duration = 1200;
@@ -92,11 +90,10 @@ export default function VoicePitchChart({
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / duration, 1);
 
-      // easeOutCubic
       const easeProgress = 1 - Math.pow(1 - progress, 3);
 
       const currentValues = values.map((target, i) => {
-        const start = startValues[i] || min;
+        const start = startValues[i] ?? min;
         return start + (target - start) * easeProgress;
       });
 
@@ -127,6 +124,7 @@ export default function VoicePitchChart({
           backgroundColor: (context: any) => {
             const { ctx, chartArea } = context.chart;
             if (!chartArea) return areaColorStart;
+
             const gradient = ctx.createLinearGradient(
               0,
               chartArea.top,
@@ -153,8 +151,7 @@ export default function VoicePitchChart({
   const options = useMemo(() => {
     return {
       animation: false as const,
-      responsive : true,
-      // responsive: false, // responsive를 false로 변경
+      responsive: true,
       maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
@@ -174,7 +171,7 @@ export default function VoicePitchChart({
             callback: (v: any) => `${v} Hz`,
             font: { size: 14, family: "Pretendard" },
             color: "#848B93",
-            autoSkip: false, // 자동 생략 방지
+            autoSkip: false,
           },
           grid: {
             color: "#E0E2E4",
@@ -186,7 +183,7 @@ export default function VoicePitchChart({
           ticks: {
             font: { size: 14, family: "Pretendard" },
             color: "#848B93",
-            autoSkip: false, // 자동 생략 방지
+            autoSkip: false,
             maxRotation: 0,
             minRotation: 0,
           },
@@ -197,10 +194,9 @@ export default function VoicePitchChart({
     };
   }, [min, max]);
 
-  // 평균선 플러그인
   const averageLinePlugin: Plugin<"line"> = useMemo(
     () => ({
-      id: "averageLine",
+      id: `averageLine-${averageLine}-${averageLabel}`,
       afterDatasetsDraw(chart) {
         const { ctx, chartArea, scales } = chart;
         if (!chartArea || !scales.y) return;
@@ -209,7 +205,6 @@ export default function VoicePitchChart({
 
         ctx.save();
 
-        // 점선 그리기
         ctx.setLineDash([8, 4]);
         ctx.strokeStyle = averageLineColor;
         ctx.lineWidth = 2;
@@ -218,7 +213,6 @@ export default function VoicePitchChart({
         ctx.lineTo(chartArea.right, y);
         ctx.stroke();
 
-        // 라벨 배지
         ctx.setLineDash([]);
         const text = averageLabel;
         ctx.font = "600 14px Pretendard";
@@ -228,13 +222,11 @@ export default function VoicePitchChart({
         const badgeX = chartArea.right - badgeW;
         const badgeY = y - badgeH / 2;
 
-        // 배지 배경
         ctx.fillStyle = averageLineColor;
         ctx.beginPath();
         ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 4);
         ctx.fill();
 
-        // 배지 텍스트
         ctx.fillStyle = "#fff";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
@@ -256,16 +248,18 @@ export default function VoicePitchChart({
         overflowY: "hidden",
       }}
     >
-      <div style={{ 
-        //minWidth,
-        minWidth: values.length * 60, // 핵심
-        height: "100%" }}>
-        <Line 
-          data={data} 
-          options={options} 
-          plugins={[averageLinePlugin]} 
-          width={values.length * 60} //  반드시 필요
-          //width={minWidth}
+      <div
+        style={{
+          minWidth,
+          height: "100%",
+        }}
+      >
+        <Line
+          key={`voice-pitch-${averageLine}-${averageLabel}-${values.join(",")}`}
+          data={data}
+          options={options}
+          plugins={[averageLinePlugin]}
+          width={values.length * 60}
           height={height}
         />
       </div>

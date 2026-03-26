@@ -5,45 +5,45 @@ import ExpressionDonutChart from "@/pages/InterviewReport/analysis/chart/Express
 
 import ic_stars_gray600_20 from "@/assets/icons/size20/ic_stars_gray600_20.png";
 import ic_conditions_gray600_20 from "@/assets/icons/size20/ic_conditions_gray600_20.png";
+import { InterviewReportDetailResponse } from "@/api/report/report.types";
 
-type TableRow = { label: string; values: (string | number)[] };
-
-type GradeText = "최우수" | "우수" | "보통" | "미흡" | "매우 미흡";
-
-
-type Props = {
-  faceAngle: number;
-  bodyAngle: number;
-  gradeLabel?: string;
-  analysisTitle?: string;
-  selectedGrade?: GradeText;
-  analysisText?: React.ReactNode;
-  highlight?: React.ReactNode;
-  headers?: string[];
-  rows?: TableRow[];
+type TableRow = {
+  label: string;
+  values: (string | number)[];
 };
 
-export default function ExpressionTabContent({
-  faceAngle,
-  bodyAngle,
-  gradeLabel = "자세 등급",
-  analysisTitle = "자세 분석",
-  selectedGrade = "미흡",
-  analysisText = <>전체 평균과 비교했을 때, 정유리님의 자세는 양호합니다.</>,
-  highlight = <>머리 '-1.234도', 어깨 '-1.234도', 좌우 움직임 '13회'</>,
-  headers = ["", "머리 각도", "어깨 각도", "좌우 움직임"],
-  rows = [
-    { label: "전체 평균", values: ["1.23도", "1.23도", "4회"] },
-    { label: "직군 평균", values: ["1.23도", "1.23도", "4회"] },
-  ],
-}: Props) {
+type Props = {
+  reportDetail?: InterviewReportDetailResponse | null;
+};
+
+export default function ExpressionTabContent({ reportDetail }: Props) {
+  const emotion = reportDetail?.tab2?.detailAttitude?.emotion;
+
+  const emotionScore = emotion?.emotionScore ?? 0;
+  const emotionGrade = emotion?.emotionGrade ?? "무표정";
+
+  const positive = emotion?.emotionData?.positive ?? 0;
+  const negative = emotion?.emotionData?.negative ?? 0;
+  const neutral = emotion?.emotionData?.neutral ?? 0;
+
+  const expressionHeaders = ["", "긍정", "부정", "무표정"];
+
+  const expressionRows: TableRow[] = [
+    {
+      label: reportDetail?.userInfo?.name
+        ? `${reportDetail.userInfo.name} 님`
+        : "사용자",
+      values: [`${positive}%`, `${negative}%`, `${neutral}%`],
+    },
+  ];
+
   return (
     <>
       <div className="detail-analysis__attitude-content">
         <div className="detail-analysis__attitude-left expression">
           <ExpressionDonutChart
-            value={70}
-            label="무표정"
+            value={emotionScore}
+            label={emotionGrade}
             size={300}
             stroke={20}
           />
@@ -51,21 +51,30 @@ export default function ExpressionTabContent({
 
         <div className="detail-analysis__attitude-right">
           <DetailMetric
-            type="expression"
-            gradeLabel={gradeLabel}
+            type="emotion"
+            gradeLabel="표정 등급"
             gradeIconSrc={ic_stars_gray600_20}
             gradeOptions={["우수", "보통", "미흡"]}
-            selectedGrade={selectedGrade}
             className="expression"
-            analysisTitle={analysisTitle}
+            analysisTitle="표정 분석"
             analysisIconSrc={ic_conditions_gray600_20}
-            analysisText={analysisText}
-            highlight={highlight}
+            analysisText={
+              emotion?.analysisText ?? "표정 변화는 전반적으로 안정적입니다."
+            }
+            highlight={
+              emotion?.detailText ??
+              `긍정 ‘${positive}%’, 부정 ‘${negative}%’, 무표정 ‘${neutral}%’`
+            }
+            reportDetail={reportDetail}
           />
         </div>
       </div>
 
-      <DetailMetricTable headers={headers} rows={rows} type="expression" />
+      <DetailMetricTable
+        headers={expressionHeaders}
+        rows={expressionRows}
+        type="expression"
+      />
     </>
   );
 }

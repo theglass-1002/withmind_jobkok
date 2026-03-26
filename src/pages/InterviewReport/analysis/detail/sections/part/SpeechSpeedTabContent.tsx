@@ -44,21 +44,27 @@ export default function SpeechSpeedTabContent({
 }: Props) {
   const userName = Storage.getUserName() || "사용자";
 
-  const averageLine = Number(reportDetail?.voiceAnalysis?.speed?.avgSps ?? 5);
+  const averageLine = Number(
+    reportDetail?.tab2?.voiceAnalysis?.speed?.avgSps ?? 200
+  );
 
-  const rawChartData = reportDetail?.voiceAnalysis?.speed?.chartData;
+  const rawChartData = reportDetail?.tab2?.voiceAnalysis?.speed?.chartData;
 
   const chartValues = rawChartData
-    ? Array.isArray(rawChartData)
-      ? rawChartData.map((value) => Number(value))
-      : Object.keys(rawChartData)
-          .sort((a, b) => {
-            const aNum = Number(a.replace(/\D/g, ""));
-            const bNum = Number(b.replace(/\D/g, ""));
-            return aNum - bNum;
-          })
-          .map((key) => Number(rawChartData[key as keyof typeof rawChartData]))
-    : [2, 3, 6, 1, 4, 4, 6, 7, 1, 2, 3];
+    ? [
+        Number(rawChartData.x1 ?? 0),
+        Number(rawChartData.x2 ?? 0),
+        Number(rawChartData.x3 ?? 0),
+        Number(rawChartData.x4 ?? 0),
+        Number(rawChartData.x5 ?? 0),
+        Number(rawChartData.x6 ?? 0),
+        Number(rawChartData.x7 ?? 0),
+        Number(rawChartData.x8 ?? 0),
+        Number(rawChartData.x9 ?? 0),
+        Number(rawChartData.x10 ?? 0),
+      ]
+    : [1, 2, 5, 7, 7, 7, 1, 4, 9, 5, 1];
+
 
   return (
     <>
@@ -80,10 +86,9 @@ export default function SpeechSpeedTabContent({
 
         <div className="detail-analysis__attitude-right">
           <DetailMetric
-            type="speed"
+            type="voice_speed"
             gradeLabel={gradeLabel}
             gradeIconSrc={ic_stars_gray600_20}
-            gradeOptions={["우수", "보통", "미흡"]}
             selectedGrade={selectedGrade}
             className={className}
             analysisTitle={analysisTitle}

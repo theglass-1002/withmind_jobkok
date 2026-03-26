@@ -12,7 +12,7 @@ import { InterviewReportDetailResponse } from "@/api/report/report.types";
 type LevelModifier = "poor" | "improvement" | "fair" | "good" | "excellent";
 
 type LevelGraphProps = {
-  score: number;
+  score?: number;
   description?: string;
 
   reportDetail?: InterviewReportDetailResponse | null;

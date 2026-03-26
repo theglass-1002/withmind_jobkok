@@ -60,12 +60,18 @@ export default function DetailMetric({
     switch (type) {
       case "voice":
         return (
-          toThreeGrade(reportDetail?.tab2?.voiceAnalysis?.tone?.scoreText) ??
+          toThreeGrade(reportDetail?.tab2?.voiceAnalysis.tone.scoreText) ??
           toThreeGrade(reportDetail?.tab2?.voiceAnalysis?.voiceTotalScoreText) ??
           selectedGrade
         );
 
-      case "speed":
+    case "voice_tone":
+        return (
+          toThreeGrade(reportDetail?.tab2?.voiceAnalysis.tone.scoreText) ??
+          toThreeGrade(reportDetail?.tab2?.voiceAnalysis?.voiceTotalScoreText) ??
+          selectedGrade
+        );
+      case "voice_speed":
         return (
           toThreeGrade(reportDetail?.tab2?.voiceAnalysis?.speed?.scoreText) ??
           toThreeGrade(reportDetail?.tab2?.voiceAnalysis?.voiceTotalScoreText) ??
@@ -74,17 +80,24 @@ export default function DetailMetric({
 
       case "attitude":
         return (
-          toThreeGrade(reportDetail?.tab2?.detailAttitude?.attitudeTotalScoreText) ??
-          toThreeGrade(reportDetail?.tab1?.itemTotalScores?.attitudeTotalScoreText) ??
+          toThreeGrade(
+            reportDetail?.tab2?.detailAttitude?.attitudeTotalScoreText
+          ) ??
+          toThreeGrade(
+            reportDetail?.tab1?.itemTotalScores?.attitudeTotalScoreText
+          ) ??
           selectedGrade
         );
 
       case "competence":
         return (
           toThreeGrade(
-            reportDetail?.tab2?.abilityAnalysis?.detailAbility?.abilityTotalScoreText
+            reportDetail?.tab2?.abilityAnalysis?.detailAbility
+              ?.abilityTotalScoreText
           ) ??
-          toThreeGrade(reportDetail?.tab1?.itemTotalScores?.abilityTotalScoreText) ??
+          toThreeGrade(
+            reportDetail?.tab1?.itemTotalScores?.abilityTotalScoreText
+          ) ??
           selectedGrade
         );
 
@@ -93,14 +106,17 @@ export default function DetailMetric({
           toThreeGrade(
             reportDetail?.tab2?.detailAttitude?.tensionData?.tensionGrade
           ) ??
-          toThreeGrade(reportDetail?.tab1?.itemTotalScores?.tensionTotalScoreText) ??
+          toThreeGrade(
+            reportDetail?.tab1?.itemTotalScores?.tensionTotalScoreText
+          ) ??
           selectedGrade
         );
 
       case "gesture":
         return (
-          toThreeGrade(reportDetail?.tab2?.detailAttitude?.gesture?.gestureGrade) ??
-          selectedGrade
+          toThreeGrade(
+            reportDetail?.tab2?.detailAttitude?.gesture?.gestureGrade
+          ) ?? selectedGrade
         );
 
       case "gaze":
@@ -109,14 +125,90 @@ export default function DetailMetric({
           selectedGrade
         );
 
+      case "emotion":
       case "expression":
         return (
-          toThreeGrade(reportDetail?.tab2?.detailAttitude?.emotion?.emotionGrade) ??
-          selectedGrade
+          toThreeGrade(
+            reportDetail?.tab2?.detailAttitude?.emotion?.emotionGrade
+          ) ?? selectedGrade
         );
 
       default:
         return selectedGrade;
+    }
+  })();
+
+  const resolvedAnalysisText: React.ReactNode = (() => {
+    if (!reportDetail) return analysisText;
+    switch (type) {
+      case "posture":
+        return (
+          reportDetail?.tab2?.detailAttitude?.posture?.analysisText ??
+          analysisText
+        );
+
+      case "gaze":
+        return (
+          reportDetail?.tab2?.detailAttitude?.gaze?.analysisText ?? analysisText
+        );
+
+      case "gesture":
+        return (
+          reportDetail?.tab2?.detailAttitude?.gesture?.analysisText ??
+          analysisText
+        );
+
+      case "emotion":
+        return (
+          reportDetail?.tab2?.detailAttitude?.emotion?.analysisText ??
+          analysisText
+        );
+      case "expression":
+        return (
+          reportDetail?.tab2?.detailAttitude?.emotion?.analysisText ??
+          analysisText
+        );
+
+      case "voice_tone":
+      case "voice_speed":
+          return (
+            reportDetail?.tab2?.voiceAnalysis?.voiceAnalysisText ??
+            analysisText
+          );
+
+
+      default:
+        return analysisText;
+    }
+  })();
+
+  const resolvedHighlight: React.ReactNode = (() => {
+    if (!reportDetail) return highlight;
+
+    switch (type) {
+      case "posture":
+        return reportDetail?.tab2?.detailAttitude?.posture?.detailText ?? highlight;
+
+      case "gaze":
+        return reportDetail?.tab2?.detailAttitude?.gaze?.detailText ?? highlight;
+
+      case "gesture":
+        return reportDetail?.tab2?.detailAttitude?.gesture?.detailText ?? highlight;
+
+      case "emotion":
+        return reportDetail?.tab2?.detailAttitude?.emotion?.detailText ?? highlight;
+
+      case "expression":
+        return reportDetail?.tab2?.detailAttitude?.emotion?.detailText ?? highlight;
+
+      case "voice_tone":
+      case "voice_speed":
+          return (
+            reportDetail?.tab2?.voiceAnalysis?.voiceAnalysisDetailText ??
+            analysisText
+          );
+      default:
+        return highlight;
     }
   })();
 
@@ -171,12 +263,12 @@ export default function DetailMetric({
           {analysisTitle}
         </span>
 
-        {analysisText && (
+        {resolvedAnalysisText && (
           <span className="detail-analysis__metric-analysis-text">
-            {analysisText}{" "}
-            {highlight && (
+            {resolvedAnalysisText}{" "}
+            {resolvedHighlight && (
               <span className="detail-analysis__metric-highlight">
-                {highlight}
+                {resolvedHighlight}
               </span>
             )}
           </span>

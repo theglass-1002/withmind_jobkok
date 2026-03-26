@@ -23,8 +23,8 @@ export default function DetailMetricTable({
   type = "attitude",
   className,
 }: Props) {
-  const rootClass = `detail-analysis__metric-table ${
-    type ?? ""
+  const rootClass = `detail-analysis__metric-table ${type ?? ""} ${
+    className ?? ""
   }`;
 
   return (
@@ -44,6 +44,7 @@ export default function DetailMetricTable({
           <span className="detail-analysis__metric-table-cell detail-analysis__metric-table-cell--label">
             {row.label}
           </span>
+
           {row.values.map((v, j) => (
             <span key={j} className="detail-analysis__metric-table-cell">
               {v}

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import LevelGraph from "@/pages/InterviewReport/analysis/chart/LevelGraph";
 
 import AttitudeTabContent from "@/pages/InterviewReport/analysis/detail/sections/part/AttitudeTabContent";
@@ -44,7 +44,7 @@ export default function DetailAttitudeSection({
   bodyAngle,
   reportDetail,
 }: Props) {
-  const DEFAULT_FILTERS: UiFilterOption[] = [
+  const FILTERS: UiFilterOption[] = [
     { label: "자세", value: "attitude" },
     { label: "시선", value: "gaze" },
     { label: "제스처", value: "gesture" },
@@ -52,14 +52,11 @@ export default function DetailAttitudeSection({
   ];
 
   const [selectedQuestion, setSelectedQuestion] = useState<string>(
-    DEFAULT_FILTERS[0].value
+    FILTERS[0].value
   );
 
   const detailAttitude = reportDetail?.tab2?.detailAttitude;
   const posture = detailAttitude?.posture;
-  const gaze = detailAttitude?.gaze;
-  const gesture = detailAttitude?.gesture;
-  const emotion = detailAttitude?.emotion;
 
   const resolvedScore = score ?? detailAttitude?.attitudeTotalScore ?? 0;
 
@@ -112,48 +109,10 @@ export default function DetailAttitudeSection({
     },
   ];
 
-  const gestureHeaders = ["", "평균 횟수", "평균 시간"];
-  const gestureRows = [
-    {
-      label: "전체 횟수",
-      values: [
-        `${gesture?.gestureData?.gesture?.dataList?.[0]?.handMoveCount ?? 0}회`,
-        `${gesture?.gestureData?.gesture?.dataList?.[0]?.handTime ?? 0}초`,
-      ],
-    },
-  ];
-
-  const expressionHeaders = ["", "긍정", "부정", "무표정"];
-  const expressionRows = [
-    {
-      label: reportDetail?.userInfo?.name
-        ? `${reportDetail.userInfo.name} 님`
-        : "사용자",
-      values: [
-        `${emotion?.emotionData?.positive ?? 0}%`,
-        `${emotion?.emotionData?.negative ?? 0}%`,
-        `${emotion?.emotionData?.neutral ?? 0}%`,
-      ],
-    },
-  ];
-
-  const selectedGradeText = useMemo<GradeText>(() => {
-    switch (selectedQuestion) {
-      case "attitude":
-        return normalizeGrade(posture?.postureGrade);
-      case "gaze":
-        return normalizeGrade(gaze?.gazeGrade);
-      case "gesture":
-        return normalizeGrade(gesture?.gestureGrade);
-      case "expression":
-        return normalizeGrade(emotion?.emotionGrade);
-      default:
-        return "보통";
-    }
-  }, [selectedQuestion, posture, gaze, gesture, emotion]);
+  const attitudeSelectedGrade = normalizeGrade(posture?.postureGrade);
 
   return (
-    <div className="analysis-section detail-analysis__attitude ">
+    <div className="analysis-section detail-analysis__attitude">
       <span className="analysis-section__title">
         {titleIconSrc && <img src={titleIconSrc} alt="" />} {title}
       </span>
@@ -168,83 +127,23 @@ export default function DetailAttitudeSection({
 
         <div className="detail-analysis__attitude">
           <UiFilter
-            options={DEFAULT_FILTERS}
+            options={FILTERS}
             value={selectedQuestion}
             onChange={(v) => setSelectedQuestion(v)}
             className="detail-analysis__attitude-filters"
           />
 
           {selectedQuestion === "attitude" ? (
-            <AttitudeTabContent
-              faceAngle={resolvedFaceAngle}
-              bodyAngle={resolvedBodyAngle}
-              analysisTitle="자세 분석"
-              selectedGrade={selectedGradeText}
-              analysisText={
-                posture?.analysisText ??
-                "전체 평균과 비교했을 때, 자세는 양호합니다."
-              }
-              highlight={
-                posture?.detailText ??
-                `머리 ‘${avgFaceAngle.toFixed(2)}도’, 어깨 ‘${avgShoulderAngle.toFixed(
-                  2
-                )}도’, 좌우 움직임 ‘${totalMovementCount}회’`
-              }
-              headers={attitudeHeaders}
-              rows={attitudeRows}
-              reportDetail={reportDetail}
-            />
+          <AttitudeTabContent reportDetail={reportDetail} />
           ) : selectedQuestion === "gaze" ? (
-            <GazeTabContent
-              gazeAngle={gaze?.gazeData?.geze?.pointValue ?? 0}
-              gazeX={gaze?.gazeData?.geze?.pointList?.[0]?.x ?? 0}
-              gazeY={gaze?.gazeData?.geze?.pointList?.[0]?.y ?? 0}
-              analysisTitle="시선 분석"
-              selectedGrade={selectedGradeText}
-              analysisText={
-                gaze?.analysisText ??
-                "시선 분포와 카메라 응시 안정성이 전반적으로 양호합니다."
-              }
-              highlight={gaze?.detailText ?? "시선의 위치 변화가 적습니다."}
-            />
+            <GazeTabContent reportDetail={reportDetail} />
           ) : selectedQuestion === "gesture" ? (
-            <GestureTabContent
-              gradeLabel="제스처 등급"
-              analysisTitle="제스처 분석"
-              selectedGrade={selectedGradeText}
-              analysisText={
-                gesture?.analysisText ??
-                "제스처 사용이 전반적으로 안정적입니다."
-              }
-              headers={gestureHeaders}
-              rows={gestureRows}
-            />
+            <GestureTabContent reportDetail={reportDetail} />
           ) : selectedQuestion === "expression" ? (
-            <ExpressionTabContent
-              faceAngle={emotion?.emotionData?.positive ?? 0}
-              bodyAngle={emotion?.emotionData?.negative ?? 0}
-              analysisTitle="표정 분석"
-              selectedGrade={selectedGradeText}
-              analysisText={
-                emotion?.analysisText ?? "표정 변화는 전반적으로 안정적입니다."
-              }
-              highlight={
-                emotion?.detailText ??
-                `긍정 ‘${emotion?.emotionData?.positive ?? 0}%’, 부정 ‘${
-                  emotion?.emotionData?.negative ?? 0
-                }%’, 무표정 ‘${emotion?.emotionData?.neutral ?? 0}%’`
-              }
-              headers={expressionHeaders}
-              rows={expressionRows}
-            />
+            <ExpressionTabContent reportDetail={reportDetail} />
           ) : (
             <AttitudeTabContent
-              faceAngle={resolvedFaceAngle}
-              bodyAngle={resolvedBodyAngle}
-              analysisTitle="자세 분석"
-              selectedGrade={selectedGradeText}
-              headers={attitudeHeaders}
-              rows={attitudeRows}
+            
               reportDetail={reportDetail}
             />
           )}

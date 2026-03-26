@@ -17,45 +17,118 @@ type TableRow = {
   values: (string | number)[];
 };
 
-type GradeText = "우수" | "보통" | "미흡";
-
 type Props = {
-  faceAngle: number;
-  bodyAngle: number;
-  gradeLabel?: string;
-  analysisTitle?: string;
-  selectedGrade?: GradeText;
-  analysisText?: React.ReactNode;
-  highlight?: React.ReactNode;
-  headers?: string[];
-  rows?: TableRow[];
   reportDetail?: InterviewReportDetailResponse | null;
 };
 
-export default function AttitudeTabContent({
-  faceAngle,
-  bodyAngle,
-  gradeLabel = "자세 등급",
-  analysisTitle = "자세 분석",
-  selectedGrade = "미흡",
-  analysisText = (
-    <>전체 평균과 비교했을 때, 정유리님의 자세는 양호합니다.</>
-  ),
-  highlight = <>머리 ‘-1.234도’, 어깨 ‘-1.234도’, 좌우 움직임 ‘13회’</>,
-  headers = ["", "머리 각도", "어깨 각도", "좌우 움직임"],
-  rows = [
-    { label: "전체 평균", values: ["1.23도", "1.23도", "4회"] },
-    { label: "직군 평균", values: ["1.23도", "1.23도", "4회"] },
-  ],
-  reportDetail,
-}: Props) {
-  const reportFaceAngle =
-    reportDetail?.tab2?.detailAttitude?.posture?.postureShoulderAngleData
-      ?.postureAngle?.dataList?.[0]?.faceAngle ?? faceAngle;
+function formatAngle(value?: number | null) {
+  if (value === null || value === undefined || Number.isNaN(value)) {
+    return "-";
+  }
+  return `${value.toFixed(2)}도`;
+}
 
-  const reportBodyAngle =
-    reportDetail?.tab2?.detailAttitude?.posture?.postureShoulderAngleData
-      ?.postureAngle?.dataList?.[0]?.shoulderAngle ?? bodyAngle;
+function formatMoveCount(
+  rightMoveCount?: number | null,
+  leftMoveCount?: number | null,
+  centerMoveCount?: number | null
+) {
+  const right = rightMoveCount ?? 0;
+  const left = leftMoveCount ?? 0;
+  const center = centerMoveCount ?? 0;
+  return `${right + left + center}회`;
+}
+
+function normalizeGrade(value?: string): "우수" | "보통" | "미흡" {
+  switch (value) {
+    case "우수":
+    case "보통":
+    case "미흡":
+      return value;
+    default:
+      return "보통";
+  }
+}
+
+export default function AttitudeTabContent({ reportDetail }: Props) {
+  const posture = reportDetail?.tab2?.detailAttitude?.posture;
+  const postureShoulderAngleData = posture?.postureShoulderAngleData;
+
+  const postureAngleList = postureShoulderAngleData?.postureAngle?.dataList ?? [];
+  const shoulderMovementList =
+    postureShoulderAngleData?.shoulderMovement?.dataList ?? [];
+
+  const mePostureAngle = postureAngleList[0];
+  const totalAveragePostureAngle = postureAngleList[1];
+  const jobAveragePostureAngle = postureAngleList[2];
+
+  const totalAverageShoulderMovement = shoulderMovementList[1];
+  const jobAverageShoulderMovement = shoulderMovementList[2];
+
+  const faceAngle = mePostureAngle?.faceAngle ?? 0;
+  const bodyAngle = mePostureAngle?.shoulderAngle ?? 0;
+
+  const totalMovementCount = shoulderMovementList.reduce((sum, item) => {
+    return (
+      sum +
+      (item.centerMoveCount ?? 0) +
+      (item.leftMoveCount ?? 0) +
+      (item.rightMoveCount ?? 0)
+    );
+  }, 0);
+
+  const avgFaceAngle =
+    postureAngleList.length > 0
+      ? postureAngleList.reduce((sum, item) => sum + (item.faceAngle ?? 0), 0) /
+        postureAngleList.length
+      : 0;
+
+  const avgShoulderAngle =
+    postureAngleList.length > 0
+      ? postureAngleList.reduce((sum, item) => sum + (item.shoulderAngle ?? 0), 0) /
+        postureAngleList.length
+      : 0;
+
+  const headers = ["", "머리 각도", "어깨 각도", "좌우 움직임"];
+
+  const rows: TableRow[] =
+    postureAngleList.length && shoulderMovementList.length
+      ? [
+          {
+            label: "전체 평균",
+            values: [
+              formatAngle(totalAveragePostureAngle?.faceAngle),
+              formatAngle(totalAveragePostureAngle?.shoulderAngle),
+              formatMoveCount(
+                totalAverageShoulderMovement?.rightMoveCount,
+                totalAverageShoulderMovement?.leftMoveCount,
+                totalAverageShoulderMovement?.centerMoveCount
+              ),
+            ],
+          },
+          {
+            label: "직군 평균",
+            values: [
+              formatAngle(jobAveragePostureAngle?.faceAngle),
+              formatAngle(jobAveragePostureAngle?.shoulderAngle),
+              formatMoveCount(
+                jobAverageShoulderMovement?.rightMoveCount,
+                jobAverageShoulderMovement?.leftMoveCount,
+                jobAverageShoulderMovement?.centerMoveCount
+              ),
+            ],
+          },
+        ]
+      : [
+          {
+            label: "전체 평균",
+            values: [
+              `${avgFaceAngle.toFixed(2)}도`,
+              `${avgShoulderAngle.toFixed(2)}도`,
+              `${totalMovementCount}회`,
+            ],
+          },
+        ];
 
   return (
     <>
@@ -81,7 +154,7 @@ export default function AttitudeTabContent({
               className="attitude-control__overlay-face"
               style={
                 {
-                  "--face-angle": `${reportFaceAngle}deg`,
+                  "--face-angle": `${faceAngle}deg`,
                 } as React.CSSProperties
               }
               src={face_outline_dotted}
@@ -92,7 +165,7 @@ export default function AttitudeTabContent({
               className="attitude-control__overlay-body"
               style={
                 {
-                  "--body-angle": `${reportBodyAngle}deg`,
+                  "--body-angle": `${bodyAngle}deg`,
                 } as React.CSSProperties
               }
               src={body_outline_dotted}
@@ -128,22 +201,29 @@ export default function AttitudeTabContent({
 
         <div className="detail-analysis__attitude-right">
           <DetailMetric
-            type="attitude"
-            gradeLabel={gradeLabel}
+            type="posture"
+            gradeLabel="자세 등급"
             gradeIconSrc={ic_stars_gray600_20}
-            gradeOptions={["우수", "보통", "미흡"]}
-            selectedGrade={selectedGrade}
             className="attitude"
-            analysisTitle={analysisTitle}
+            analysisTitle="자세 분석"
             analysisIconSrc={ic_conditions_gray600_20}
-            analysisText={analysisText}
-            highlight={highlight}
+            analysisText={
+              posture?.analysisText ??
+              "전체 평균과 비교했을 때, 자세는 양호합니다."
+            }
+            highlight={
+              posture?.detailText ??
+              `머리 ‘${avgFaceAngle.toFixed(2)}도’, 어깨 ‘${avgShoulderAngle.toFixed(
+                2
+              )}도’, 좌우 움직임 ‘${totalMovementCount}회’`
+            }
+            selectedGrade={normalizeGrade(posture?.postureGrade)}
             reportDetail={reportDetail}
           />
         </div>
       </div>
 
-      <DetailMetricTable headers={headers} rows={rows} type="attitude" />
+      <DetailMetricTable headers={headers} rows={rows} type="posture" />
     </>
   );
 }

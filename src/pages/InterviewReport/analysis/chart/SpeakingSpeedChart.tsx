@@ -53,6 +53,7 @@ export default function SpeakingSpeedChart({
   labels,
   averageLine = 200,
   averageLabel = "평균",
+  height = 300,
   lineColor = "#26A4FF",
   areaColorStart = "rgba(38, 164, 255, 0.3)",
   areaColorEnd = "rgba(38, 164, 255, 0.05)",
@@ -70,7 +71,7 @@ export default function SpeakingSpeedChart({
     values.map(() => min)
   );
   const animationRef = useRef<number | undefined>(undefined);
-  // 애니메이션 효과
+
   useEffect(() => {
     const startTime = Date.now();
     const duration = 1200;
@@ -80,11 +81,10 @@ export default function SpeakingSpeedChart({
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / duration, 1);
 
-      // easeOutCubic
       const easeProgress = 1 - Math.pow(1 - progress, 3);
 
       const currentValues = values.map((target, i) => {
-        const start = startValues[i] || min;
+        const start = startValues[i] ?? min;
         return start + (target - start) * easeProgress;
       });
 
@@ -109,12 +109,13 @@ export default function SpeakingSpeedChart({
       labels: chartLabels,
       datasets: [
         {
-          label: "목소리 톤",
+          label: "말하는 속도",
           data: animatedValues,
           borderColor: lineColor,
           backgroundColor: (context: any) => {
             const { ctx, chartArea } = context.chart;
             if (!chartArea) return areaColorStart;
+
             const gradient = ctx.createLinearGradient(
               0,
               chartArea.top,
@@ -180,10 +181,9 @@ export default function SpeakingSpeedChart({
     };
   }, [min, max]);
 
-  // 평균선 플러그인
   const averageLinePlugin: Plugin<"line"> = useMemo(
     () => ({
-      id: "averageLine",
+      id: `averageLine-${averageLine}-${averageLabel}`,
       afterDatasetsDraw(chart) {
         const { ctx, chartArea, scales } = chart;
         if (!chartArea || !scales.y) return;
@@ -192,7 +192,6 @@ export default function SpeakingSpeedChart({
 
         ctx.save();
 
-        // 점선 그리기
         ctx.setLineDash([8, 4]);
         ctx.strokeStyle = averageLineColor;
         ctx.lineWidth = 2;
@@ -201,23 +200,20 @@ export default function SpeakingSpeedChart({
         ctx.lineTo(chartArea.right, y);
         ctx.stroke();
 
-        // 라벨 배지
         ctx.setLineDash([]);
         const text = averageLabel;
         ctx.font = "600 14px Pretendard";
         const textWidth = ctx.measureText(text).width;
         const badgeW = textWidth + 16;
         const badgeH = 24;
-        const badgeX = chartArea.right - badgeW ;
+        const badgeX = chartArea.right - badgeW;
         const badgeY = y - badgeH / 2;
 
-        // 배지 배경
         ctx.fillStyle = averageLineColor;
         ctx.beginPath();
         ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 4);
         ctx.fill();
 
-        // 배지 텍스트
         ctx.fillStyle = "#fff";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
@@ -230,8 +226,13 @@ export default function SpeakingSpeedChart({
   );
 
   return (
-    <div style={{ width: "100%", height:"100%", padding:"0px" }}>
-      <Line data={data} options={options} plugins={[averageLinePlugin]} />
+    <div style={{ width: "100%", height: height, padding: "0px" }}>
+      <Line
+        key={`speaking-speed-${averageLine}-${averageLabel}-${values.join(",")}`}
+        data={data}
+        options={options}
+        plugins={[averageLinePlugin]}
+      />
     </div>
   );
 }
