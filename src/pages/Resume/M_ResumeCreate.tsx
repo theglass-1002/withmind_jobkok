@@ -179,7 +179,7 @@ export default function M_ResumeCreate() {
           basic: {
             ...prev.basic,
             name: u.userName ?? "",
-            email: u.userIdx ?? "",
+            email: u.userId ?? "",
             phone: u.phone ?? "",
             birth,
             gender,

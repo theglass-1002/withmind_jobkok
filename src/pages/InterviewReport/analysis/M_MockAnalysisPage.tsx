@@ -205,8 +205,9 @@ export default function M_MockAnalysisPage() {
               <img className="mock-analysis-report__icon" src={ic_print_gray900_24} alt="" />
             </span>
 
-            {activeTab === "overview" && (
+            {/* {activeTab === "overview" && (
               <OverviewPage
+              
                 score={score}
                 totalCandidates={171}
                 percentile={10}
@@ -313,7 +314,7 @@ export default function M_MockAnalysisPage() {
               onToggleFavorite={handleToggleFavorite}
               jobs={jobs}
               />
-            )}
+            )} */}
 
             <div className="btn_wrap mock-analysis-report__actions">
               <span className="default_btn_white">

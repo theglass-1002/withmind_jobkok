@@ -396,6 +396,7 @@ export default function MockAnalysisPage() {
                 <ResumeInterviewMatchPage
                   onToggleFavorite={handleToggleFavorite}
                   jobs={jobs}
+                  reportDetail={reportDetail}
                 />
               )}
 
@@ -467,6 +468,7 @@ export default function MockAnalysisPage() {
               <ResumeInterviewMatchPage
               onToggleFavorite={handleToggleFavorite}
               jobs={jobs}
+              reportDetail={reportDetail}
               />
             )}
 

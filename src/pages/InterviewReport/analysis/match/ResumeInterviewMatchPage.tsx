@@ -8,25 +8,25 @@ import ic_rocket_24 from "@/assets/icons/size24/ic_rocket_24.png";
 import ResumeRecommendedJobsSection, { type JobCardV2Item } from "@/pages/InterviewReport/analysis/overview/sections/ResumeRecommendedJobsSection";
 import ic_keyboard_arrow_left_gray900_24 from "@/assets/icons/size24/ic_keyboard_arrow_left_gray900_24.png";
 import ic_keyboard_arrow_right_gray900_24 from "@/assets/icons/size24/ic_keyboard_arrow_right_gray900_24.png";
+import { InterviewReportDetailResponse } from "@/api/report/report.types";
 
 type Props = {
 
 
   jobs: JobCardV2Item[];
   onToggleFavorite: (jobIdx: number | string, nextValue?: boolean) => void;
-
- 
+  reportDetail?: InterviewReportDetailResponse | null;
 };
 
 export default function ResumeInterviewMatchPage({
   jobs,
-  onToggleFavorite
+  onToggleFavorite,
+  reportDetail
 }:Props) {
 
-  
     return (
       <div className="mock-analysis-report__content">
-       <ResumeSummarySection />
+      <ResumeSummarySection reportDetail={reportDetail} />
        <MatchAnalysisSection />
        <span className="print-page-break"></span>
        <SuggestionSection />

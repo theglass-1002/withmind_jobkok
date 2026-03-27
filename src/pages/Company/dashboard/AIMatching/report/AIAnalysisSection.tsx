@@ -395,24 +395,24 @@ export default function AIAnalysisSection({ id = 1 }: Props) {
         ],
       ];
 
-  const overviewScore = reportDetail?.overallScore.myScore ?? fallbackData.score;
+  const overviewScore = reportDetail?.tab1.overallScore.myScore ?? fallbackData.score;
   const overviewTotalCandidates =
-    reportDetail?.overallScore.totalCount ?? fallbackData.totalCandidates;
+    reportDetail?.tab1.overallScore.totalCount ?? fallbackData.totalCandidates;
   const overviewPercentile =
-    reportDetail?.overallScore.topPercent ?? fallbackData.percentile;
-  const overviewFit = reportDetail?.jobFitInfo.jobFitScore ?? fallbackData.fit;
+    reportDetail?.tab1.overallScore.topPercent ?? fallbackData.percentile;
+  const overviewFit = reportDetail?.tab1.jobFitInfo.jobFitScore ?? fallbackData.fit;
 
   const detailCompetenceScore =
-    reportDetail?.detailAbility.abilityTotalScore ??
+    reportDetail?.tab2.abilityAnalysis.detailAbility.abilityTotalScore ??
     fallbackData.detailScores.competence;
   const detailAttitudeScore =
-    reportDetail?.detailAttitude.attitudeTotalScore ??
+    reportDetail?.tab2.detailAttitude.attitudeTotalScore ??
     fallbackData.detailScores.attitude;
   const detailVoiceScore =
-    reportDetail?.voiceAnalysis.voiceTotalScore ??
+    reportDetail?.tab2.voiceAnalysis.voiceTotalScore ??
     fallbackData.detailScores.voice;
   const detailTensionScore =
-    reportDetail?.itemTotalScores.tensionTotalScore ??
+    reportDetail?.tab1.itemTotalScores.tensionTotalScore ??
     fallbackData.detailScores.tension;
 
   const detailVideoSrc = getFallbackVideo(id);
@@ -482,25 +482,27 @@ export default function AIAnalysisSection({ id = 1 }: Props) {
 
             {activeTab === "overview" && (
               <OverviewPage
-                score={overviewScore}
-                totalCandidates={overviewTotalCandidates}
-                percentile={overviewPercentile}
-                fit={overviewFit}
-                jobs={jobs}
-                onToggleFavorite={handleToggleFavorite}
-                scoreSection={fallbackData.scoreSection}
-                categorySummary={fallbackData.categorySummary}
-                aiSummary={fallbackData.aiSummary}
+              reportDetail={reportDetail}
+              // score={overviewScore}
+                // totalCandidates={overviewTotalCandidates}
+                // percentile={overviewPercentile}
+                // fit={overviewFit}
+                // jobs={jobs}
+                // onToggleFavorite={handleToggleFavorite}
+                // scoreSection={fallbackData.scoreSection}
+                // categorySummary={fallbackData.categorySummary}
+                // aiSummary={fallbackData.aiSummary}
               />
             )}
 
             {activeTab === "detail" && (
               <DetailPage
-                competence_score={detailCompetenceScore}
-                attitude_score={detailAttitudeScore}
-                voice_score={detailVoiceScore}
-                tension_score={detailTensionScore}
-                videoSrc={detailVideoSrc}
+                reportDetail={reportDetail} 
+              // competence_score={detailCompetenceScore}
+                // attitude_score={detailAttitudeScore}
+                // voice_score={detailVoiceScore}
+                // tension_score={detailTensionScore}
+                // videoSrc={detailVideoSrc}
               />
             )}
 

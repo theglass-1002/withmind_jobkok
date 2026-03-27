@@ -285,7 +285,7 @@ export default function ResumeCreate() {
             basic: {
               ...prev.basic,
               name: u.userName ?? "",
-              email: u.userIdx ?? "",
+              email: u.userId ?? "",
               phone:phone,
               birth,
               gender,

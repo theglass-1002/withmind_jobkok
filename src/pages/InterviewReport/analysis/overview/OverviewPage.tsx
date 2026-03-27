@@ -68,6 +68,7 @@ type AiSummary = {
 };
 
 type Props = {
+  score?:number
   reportDetail?: InterviewReportDetailResponse | null;
   scoreSection?: ScoreSection;
   categorySummary?: CategorySummary;
