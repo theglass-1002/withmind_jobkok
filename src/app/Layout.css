@@ -38,6 +38,11 @@ textarea:focus {
     align-self: stretch;
 }
 
+.btn_wrap .center{
+    display: flex;
+    justify-content: center;
+}
+
 .btn-reset{
     width: 60%;
 }

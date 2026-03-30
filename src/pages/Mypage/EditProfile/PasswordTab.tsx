@@ -95,12 +95,12 @@ export default function PasswordTab({ onCancel }: PasswordTabProps) {
 
     try {
       setSubmitting(true);
-
       const res = await updateUser({
         userIdx: Number(userIdx),
         userName: userName ?? "",
         email: userId,
-        password: data.next,
+        oldPassword: data.current,
+        newPassword: data.next,
       });
  
       if (res.code === 200) {

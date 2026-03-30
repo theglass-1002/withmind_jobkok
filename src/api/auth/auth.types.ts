@@ -248,7 +248,8 @@ export interface UpdateUserRequest {
 
   // 선택으로 변경
   email?: string;
-  password?: string;
+  newPassword?: string;
+  oldPassword?: string;
 }
 
 export interface UpdateUserResponse {

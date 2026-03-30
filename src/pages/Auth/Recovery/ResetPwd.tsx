@@ -59,7 +59,7 @@ export default function ResetPwd() {
 
           console.log("[ResetPwd] issueTempPassword:", pwdRes);
 
-          if (pwdRes.code !== 200 || !pwdRes.tempPassword) {
+          if (pwdRes.code !== 200) {
             toast.error("임시 비밀번호 발급에 실패했습니다.");
             return;
           }

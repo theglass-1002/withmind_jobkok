@@ -388,6 +388,7 @@ export interface SupplementSuggestion {
   missingSkill: string;
   suggestion: string;
   expectedEffect: string;
+  ex: string; 
 }
 
 export interface ResumeAnalysis {

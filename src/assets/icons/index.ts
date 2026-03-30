@@ -46,6 +46,7 @@ import ic_calendar_gray900_20 from "@/assets/icons/size20/ic_calendar_gray900_20
 import ic_calendar_red_20 from "@/assets/icons/size20/ic_calendar_red_20.svg";
 import ic_visibility700_20 from "@/assets/icons/size20/ic_visibility700_20.svg";
 import ic_visibility_off700_20 from "@/assets/icons/size20/ic_visibility_off700_20.svg";
+import ic_arrow_up_right_gray900_20 from "@/assets/icons/size20/ic_arrow_up_right_gray900_20.svg";
 
 import ic_edit_white_20 from "@/assets/icons/size20/ic_edit_white_20.svg";
 
@@ -163,5 +164,6 @@ export const Icons = {
     ic_bookmark_active_purple24,
     ic_bookmark_gray400_24,
     ic_magnifier_24,
-    ic_page_facing_up_24
+    ic_page_facing_up_24,
+    ic_arrow_up_right_gray900_20
 };

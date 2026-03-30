@@ -218,6 +218,7 @@ background: var(--report-green-12, rgba(21, 208, 120, 0.12));
 /* Cell - Detail (세부 분석) */
 .analysis-table__cell--detail {
     flex: 1 0 0;
+    justify-content: start;
     align-items: flex-start;
     text-align: left;
     font-size: 16px;
@@ -269,24 +270,42 @@ line-height: 20px; /* 125% */
     text-align: center;
 }
 
-.suggest-analysis__container .analysis-table__cell:nth-child(2){
+.suggest-analysis__container .analysis-table__cell:nth-child(2) {
     display: flex;
     padding: 20px;
     flex-direction: column;
-    justify-content: start;
-    align-items: start;
+    justify-content: flex-start;
+    align-items: flex-start;
     flex: 1 0 0;
-    text-align: start;
-}
-
-.suggest-analysis__container .analysis-table__cell:last-child{
+    text-align: left;
+  }
+  .suggest-analysis__container .analysis-table__cell:last-child {
+    display: flex;
+    align-items: center;      /* 세로 가운데 */
+    justify-content: flex-start;
+    padding: 20px;
+  }
+  
+  .analysis-table__cell--effect .effect-text {
+    display: block;
+    width: 100%;
+    text-align: left;
     color: var(--gray-900, #2A2D2F);
     font-family: Pretendard;
     font-size: 16px;
     font-style: normal;
     font-weight: 400;
-    line-height: 180%; /* 28.8px */
-}
+    line-height: 180%;
+    word-break: keep-all;
+    white-space: normal;
+  }
+  
+  
+  .percent-highlight {
+    color: #7b61ff;
+    font-weight: 600;
+    white-space: nowrap;
+  }
 
 .guide__description{
     color: var(--gray-900, #2A2D2F);
@@ -323,7 +342,7 @@ QuestionSection */
 }
 
 .question-analysis__container .analysis-table__row{
-    border-bottom: 1px solid var(--gray-400, #C8CCCF);
+    /* border-bottom: 1px solid var(--gray-400, #C8CCCF); */
 }
 
 .question-analysis__container .analysis-table__col-title{
