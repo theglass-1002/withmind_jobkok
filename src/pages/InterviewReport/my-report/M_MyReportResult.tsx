@@ -176,7 +176,7 @@ export default function M_MyReportResult() {
             score={82}
             average={72}
             max={100}
-            userName="정유리님"
+         
             markLabel="면접우수 마크"
             topBadgeText="상위10%"
             secondaryBadges={["기본기 충실", "준비도 높음"]}

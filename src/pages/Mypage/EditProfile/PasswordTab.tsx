@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 import PasswordInput from "./PasswordInput";
 import * as util from "@/shared/utils/util";
 import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
-import { updateUser } from "@/api/auth/auth.api";
+import { changePassword, updateUser } from "@/api/auth/auth.api";
 
 type Form = {
   current: string;
@@ -76,49 +76,61 @@ export default function PasswordTab({ onCancel }: PasswordTabProps) {
 
   const handleSave = async () => {
     setNotice(null);
-
+  
     const { data, errs } = validate(form);
     setErrors(errs);
-
+  
     if (Object.keys(errs).length > 0) {
       return;
     }
-
-    const userIdx = localStorage.getItem("userIdx");
-    const userId = localStorage.getItem("userId");
-    const userName = localStorage.getItem("userName");
-
-    if (!userIdx || !userId) {
-      toast.error("사용자 정보를 확인할 수 없습니다.");
-      return;
-    }
-
+  
     try {
       setSubmitting(true);
-      const res = await updateUser({
-        userIdx: Number(userIdx),
-        userName: userName ?? "",
-        email: userId,
+  
+      const res = await changePassword({
         oldPassword: data.current,
         newPassword: data.next,
       });
- 
+  
+      console.log(res);
+  
+      //  성공
       if (res.code === 200) {
         toast.success("비밀번호가 변경되었습니다.");
         setNotice("비밀번호가 변경되었습니다.");
+  
         setForm({
           current: "",
           next: "",
           confirm: "",
         });
+  
         setErrors({});
         return;
       }
-
+  
+      //  현재 비밀번호 불일치
+      if (res.reasonCode === "OLD_PASSWORD_MISMATCH") {
+        toast.error("현재 비밀번호가 일치하지 않습니다.");
+  
+        setErrors((prev) => ({
+          ...prev,
+          current: "현재 비밀번호가 일치하지 않습니다.",
+        }));
+  
+        return;
+      }
+  
+      //  기타 서버 에러
       toast.error(res.msg || "비밀번호 변경에 실패했습니다.");
-    } catch (error) {
+    } catch (error: any) {
       console.error("비밀번호 변경 실패:", error);
-      toast.error("비밀번호 변경에 실패했습니다.");
+  
+      // axios 에러 대응
+      const msg =
+        error?.response?.data?.msg || "비밀번호 변경에 실패했습니다.";
+  
+      toast.error(msg);
     } finally {
       setSubmitting(false);
     }

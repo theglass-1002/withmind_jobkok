@@ -257,3 +257,15 @@ export interface UpdateUserResponse {
   msg: string;
   userIdx?: number | string;
 }
+
+export interface ChangePasswordRequest {
+  oldPassword: string;
+  newPassword: string;
+}
+
+export interface ChangePasswordResponse {
+  result?: "SUCCESS";
+  code?: number;
+  msg?: string;
+  reasonCode?: string;
+}

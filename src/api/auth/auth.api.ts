@@ -28,6 +28,8 @@ import {
   FetchMyInfoResponse,
   UpdateUserResponse,
   UpdateUserRequest,
+  ChangePasswordResponse,
+  ChangePasswordRequest,
 } from "./auth.types";
 
 import {
@@ -321,6 +323,23 @@ export async function updateUser(
 ): Promise<UpdateUserResponse> {
   const res = await instance.put<UpdateUserResponse>(
     "/api/user/update",
+    payload,
+    {
+      headers: {
+        "Content-Type": "application/json",
+        accept: "application/json",
+      },
+    }
+  );
+
+  return res.data;
+}
+
+export async function changePassword(
+  payload: ChangePasswordRequest
+): Promise<ChangePasswordResponse> {
+  const res = await instance.put<ChangePasswordResponse>(
+    "/api/user/update-password",
     payload,
     {
       headers: {

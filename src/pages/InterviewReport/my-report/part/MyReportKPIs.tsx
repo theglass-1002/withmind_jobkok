@@ -1,4 +1,6 @@
+// src/pages/InterviewReport/my-report/part/MyReportKPIs.tsx
 import React, { ReactNode } from "react";
+import type { MyReportResponse } from "@/api/report/report.types";
 
 type KPICardProps = {
   label: string;
@@ -36,11 +38,32 @@ function KPIPairCard({ label, date, score }: KPIPairCardProps) {
 
 export type MyReportKPIsProps = {
   recentInterviewDate: string; // 예: "2025.12.10"
-  totalCount: number;          // 예: 81
-  averageDuration: string;     // 예: "8분 24초"
-  bestDate: string;            // 예: "2025.12.10"
-  bestScore: string;           // 예: "100점"
+  totalCount: number; // 예: 81
+  averageDuration: string; // 예: "8분 24초"
+  bestDate: string; // 예: "2025.12.10"
+  bestScore: string; // 예: "100점"
+  data?: MyReportResponse | null;
 };
+
+function formatDate(value?: string) {
+  if (!value) return "-";
+  return value.replace(/-/g, ".");
+}
+
+function formatDuration(seconds?: number) {
+  if (typeof seconds !== "number" || seconds <= 0) return "-";
+
+  const minutes = Math.floor(seconds / 60);
+  const remainSeconds = seconds % 60;
+
+  if (minutes === 0) return `${remainSeconds}초`;
+  return `${minutes}분 ${remainSeconds}초`;
+}
+
+function formatScore(score?: number) {
+  if (typeof score !== "number") return "-";
+  return `${score}점`;
+}
 
 export default function MyReportKPIs({
   recentInterviewDate,
@@ -48,20 +71,52 @@ export default function MyReportKPIs({
   averageDuration,
   bestDate,
   bestScore,
+  data,
 }: MyReportKPIsProps) {
+  const summaryCards = data?.summaryCards;
+
+  const displayRecentInterviewDate =
+    summaryCards?.lastInterviewDate != null
+      ? formatDate(summaryCards.lastInterviewDate)
+      : recentInterviewDate;
+
+  const displayTotalCount =
+    typeof summaryCards?.totalCount === "number"
+      ? summaryCards.totalCount
+      : totalCount;
+
+  const displayAverageDuration =
+    summaryCards?.avgDuration != null
+      ? formatDuration(summaryCards.avgDuration)
+      : averageDuration;
+
+  const displayBestDate =
+    summaryCards?.bestScoreDate != null
+      ? formatDate(summaryCards.bestScoreDate)
+      : bestDate;
+
+  const displayBestScore =
+    summaryCards?.bestScore != null
+      ? formatScore(summaryCards.bestScore)
+      : bestScore;
+
   return (
     <div className="mock-interview-summary__kpis">
-      <KPICard label="최근 면접 일자">{recentInterviewDate}</KPICard>
+      <KPICard label="최근 면접 일자">{displayRecentInterviewDate}</KPICard>
 
       <KPICard label="총 면접 횟수">
         <>
-          {totalCount} <span className="mock-interview-summary__kpi-unit">회</span>
+          {displayTotalCount} <span className="mock-interview-summary__kpi-unit">회</span>
         </>
       </KPICard>
 
-      <KPICard label="평균 면접 시간">{averageDuration}</KPICard>
+      <KPICard label="평균 면접 시간">{displayAverageDuration}</KPICard>
 
-      <KPIPairCard label="가장 높은 점수의 면접" date={bestDate} score={bestScore} />
+      <KPIPairCard
+        label="가장 높은 점수의 면접"
+        date={displayBestDate}
+        score={displayBestScore}
+      />
     </div>
   );
 }

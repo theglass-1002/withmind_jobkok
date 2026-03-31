@@ -1,8 +1,7 @@
 // src/pages/InterviewReport/my-report/MyReportResult.tsx
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import ic_event_available_gray700_20 from "@/assets/icons/size20/ic_event_available_gray700_20.png";
-import ic_arrow_drop_down_gray500_24 from "@/assets/icons/size24/ic_arrow_drop_down_gray500_24.png";
 import ic_open_book_24 from "@/assets/icons/size24/ic_open_book_24.png";
 import ic_rocket_24 from "@/assets/icons/size24/ic_rocket_24.png";
 import test_company_logo from "@/assets/testImg/company_logo/test_company_logo.png";
@@ -11,6 +10,9 @@ import ic_star_green_18 from "@/assets/icons/size18/ic_star_green_18.png";
 import ic_fire_16 from "@/assets/icons/size16/ic_fire_16.png";
 import ic_seed_16 from "@/assets/icons/size16/ic_seed_16.png";
 import ic_arrow_up_right_gray900_20 from "@/assets/icons/size20/ic_arrow_up_right_gray900_20.png";
+
+import { fetchMyReport } from "@/api/report/report.api";
+import type { MyReportResponse } from "@/api/report/report.types";
 
 import MyReportKPIs from "@/pages/InterviewReport/my-report/part/MyReportKPIs";
 import AverageScoreCard from "@/pages/InterviewReport/my-report/part/AverageScoreCard";
@@ -22,8 +24,8 @@ import MockInterviewKeywordsPanel from "@/pages/InterviewReport/my-report/part/M
 import JobMatchHistoryPanel from "@/pages/InterviewReport/my-report/part/JobMatchHistoryPanel";
 import type { JobCardV2Item } from "@/pages/InterviewReport/my-report/part/JobCardV2List";
 import SortDropdown from "@/shared/components/sort-dropdown/SortDropdown";
-
-
+import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
+// 실제 경로가 다르면 여기만 네 프로젝트 경로에 맞게 수정
 
 const mockJobs: JobCardV2Item[] = [
   {
@@ -113,35 +115,116 @@ const mockJobs: JobCardV2Item[] = [
   },
 ];
 
+const sortOptions = ["최근 10일", "최근 30일", "최근 1년"] as const;
+
+const SORT_PERIOD_MAP: Record<(typeof sortOptions)[number], number> = {
+  "최근 10일": 10,
+  "최근 30일": 30,
+  "최근 1년": 365,
+};
+
+function formatDateToDot(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}.${month}.${day}`;
+}
+
+function getDateRangeText(period: number) {
+  const endDate = new Date();
+  const startDate = new Date();
+
+  startDate.setDate(endDate.getDate() - period);
+
+  return `${formatDateToDot(startDate)}~${formatDateToDot(endDate)}`;
+}
+
+function formatDuration(minutes?: number) {
+  if (!minutes || minutes <= 0) return "-";
+
+  const hour = Math.floor(minutes / 60);
+  const minute = minutes % 60;
+
+  if (hour > 0) {
+    return `${hour}시간 ${minute}분`;
+  }
+
+  return `${minute}분`;
+}
+
 export default function MyReportResult() {
   const [jobs, setJobs] = useState<JobCardV2Item[]>(mockJobs);
-  const [sort, setSort] = useState("최근 10일");
+  const [sort, setSort] = useState<(typeof sortOptions)[number]>("최근 10일");
+  const [myReport, setMyReport] = useState<MyReportResponse | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const handleToggleFavorite = (id: string | number) => {
     setJobs((prev) =>
-      prev.map((j) => (j.jobIdx === id ? { ...j, isBookmarked: !j.isBookmarked } : j))
+      prev.map((j) =>
+        j.jobIdx === id ? { ...j, isBookmarked: !j.isBookmarked } : j
+      )
     );
   };
 
+  const period = useMemo(() => SORT_PERIOD_MAP[sort], [sort]);
+  const dateRangeText = useMemo(() => getDateRangeText(period), [period]);
 
-  const sortOptions = ["최근 10일", "최근 한달", "최근 1년"];
+  useEffect(() => {
+    const loadMyReport = async () => {
+      try {
+        setLoading(true);
+        const data = await fetchMyReport(period);
+        console.log("[MyReport API response]", data);
+        setMyReport(data);
+      } catch (err) {
+        console.error("[MyReport API error]", err);
+        setMyReport(null);
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    loadMyReport();
+  }, [period]);
 
-  const keywords: KeywordPoint[] = [
-    { label: "기회", x: 30, y: 50, r: 90, group: "green" },
-    { label: "앱", x: 45, y: 35, r: 72, group: "teal" },
-    { label: "이용자", x: 15, y: 60, r: 64, group: "teal" },
-    { label: "단어", x: 20, y: 35, r: 52, group: "gray" },
-    { label: "인공지능", x: 80, y: 30, r: 48, group: "gray" },
-  ];
+  const keywords: KeywordPoint[] =
+    myReport?.frequentWords?.slice(0, 5).map((item, index) => {
+      const preset = [
+        { x: 30, y: 50, r: 90, group: "green" as const },
+        { x: 45, y: 35, r: 72, group: "teal" as const },
+        { x: 15, y: 60, r: 64, group: "teal" as const },
+        { x: 20, y: 35, r: 52, group: "gray" as const },
+        { x: 80, y: 30, r: 48, group: "gray" as const },
+      ][index];
 
-  const rankItems = [
-    { rank: 1, label: "기회", count: 55 },
-    { rank: 2, label: "앱", count: 45 },
-    { rank: 3, label: "이용자", count: 35 },
-    { rank: 4, label: "단어", count: 25 },
-    { rank: 5, label: "인공지능", count: 15 },
-  ];
+      return {
+        label: item.word,
+        x: preset?.x ?? 50,
+        y: preset?.y ?? 50,
+        r: preset?.r ?? 50,
+        group: preset?.group ?? "gray",
+      };
+    }) ?? [];
+
+  const rankItems =
+    myReport?.frequentWords?.slice(0, 5).map((item) => ({
+      rank: item.rank,
+      label: item.word,
+      count: item.count,
+    })) ?? [];
+
+  if (loading) {
+    return <LoadingOverlay />;
+  }
+
+  if (!myReport) {
+    return (
+      <div className="mock-interview-summary__empty">
+       
+      </div>
+    );
+  }
 
   return (
     <>
@@ -153,48 +236,52 @@ export default function MyReportResult() {
             alt=""
             aria-hidden="true"
           />
-          <span className="mock-interview-summary__daterange">2025.12.10~2025.01.10</span>
+          <span className="mock-interview-summary__daterange">
+            {dateRangeText}
+          </span>
         </div>
+
         <SortDropdown
-                      value={sort}
-                      options={sortOptions}
-                      onChange={setSort}
-                      className="job-posting__sort"
-                    />
+          value={sort}
+          options={[...sortOptions]}
+          onChange={(value) => setSort(value as (typeof sortOptions)[number])}
+          className="job-posting__sort"
+        />
       </div>
 
       <div className="mock-interview-summary__content">
         <MyReportKPIs
-          recentInterviewDate="2025.12.10"
-          totalCount={81}
-          averageDuration="8분 24초"
-          bestDate="2025.12.10"
-          bestScore="100점"
+          recentInterviewDate={myReport.summaryCards.lastInterviewDate ?? "-"}
+          totalCount={myReport.summaryCards.totalCount}
+          averageDuration={formatDuration(myReport.summaryCards.avgDuration)}
+          bestDate={myReport.summaryCards.bestScoreDate ?? "-"}
+          bestScore={
+            myReport.summaryCards.bestScore != null
+              ? `${myReport.summaryCards.bestScore}점`
+              : "-"
+          }
+          data={myReport}
         />
 
         <div className="mock-interview-summary__charts">
           <AverageScoreCard
-            score={82}
-            average={72}
+            score={myReport.myAvgScore.avgScore}
+            average={myReport.myAvgScore.globalAvg}
             max={100}
-            userName="정유리님"
-            markLabel="면접우수 마크"
-            topBadgeText="상위10%"
-            secondaryBadges={["기본기 충실", "준비도 높음"]}
+            markLabel={myReport.myAvgScore.gradeText}
+            desc={myReport.myAvgFeedback.overallFeedback}
+            topBadgeText={`상위 ${myReport.myAvgScore.topPercent}%`}
+            secondaryBadges={[
+              myReport.myAvgScore.basicLevel,
+              myReport.myAvgScore.readiness,
+            ]}
+            data={myReport}
           />
-          <ScoreTrendCard bestScore="92점">
+
+          <ScoreTrendCard bestScore={`${myReport.bestScore}점`}>
             <ScoreTrendBarChart
-              dates={[
-                "2025-01-01",
-                "2025-01-03",
-                "2025-01-08",
-                "2025-01-10",
-                "2025-01-12",
-                "2025-01-15",
-                "2025-01-18",
-                "2025-01-20",
-              ]}
-              values={[50, 30, 20, 60, 92, 80, 70, 80]}
+              dates={myReport.scoreTrend.map((item) => item.date)}
+              values={myReport.scoreTrend.map((item) => item.score)}
               max={100}
             />
           </ScoreTrendCard>
@@ -202,54 +289,43 @@ export default function MyReportResult() {
 
         <div className="mock-interview-summary__panel mock-interview-category-trend">
           <CategoryTrendPanel
-            labels={[
-              "2025.01.02",
-              "2025.01.04",
-              "2025.01.06",
-              "2025.01.08",
-              "2025.01.10",
-              "2025.01.12",
-              "2025.01.14",
-              "2025.01.16",
-              "2025.01.18",
-              "2025.01.20",
-            ]}
+            labels={myReport.categoryTrend.map((item) => item.date)}
             series={{
-              stress: [88, 62, 63, 58, 56, 54, 50, 48, 46, 44],
-              competency: [50, 70, 57, 60, 75, 67, 69, 72, 74, 78],
-              attitude: [28, 60, 63, 62, 35, 66, 68, 70, 71, 73],
-              voice: [48, 50, 54, 56, 59, 61, 64, 66, 69, 71],
+              stress: myReport.categoryTrend.map((item) => item.tensionScore),
+              competency: myReport.categoryTrend.map(
+                (item) => item.abilityScore
+              ),
+              attitude: myReport.categoryTrend.map(
+                (item) => item.attitudeScore
+              ),
+              voice: myReport.categoryTrend.map((item) => item.voiceScore),
             }}
             tension={0}
             height={260}
             legendItems={[
               {
                 variant: "competency",
-                description:
-                  "지원한 직무와 연관된 지식, 혹은 경험 및 역량의 내용 전달이 다소 부족했습니다. 지원한 직무와 연관된 지식, 혹은 경험 및 역량의 내용 전달이 다소 부족했습니다.",
+                description: myReport.myAvgFeedback.abilityFeedback,
                 rating: 2,
-                ratingText: "중",
+                ratingText: myReport.categorySummary.abilityGrade,
               },
               {
                 variant: "attitude",
-                description:
-                  "지원한 직무와 연관된 지식, 혹은 경험 및 역량의 내용 전달이 다소 부족했습니다. 지원한 직무와 연관된 지식, 혹은 경험 및 역량의 내용 전달이 다소 부족했습니다.",
+                description: myReport.myAvgFeedback.attitudeFeedback,
                 rating: 2,
-                ratingText: "중",
+                ratingText: myReport.categorySummary.attitudeGrade,
               },
               {
                 variant: "voice",
-                description:
-                  "지원한 직무와 연관된 지식, 혹은 경험 및 역량의 내용 전달이 다소 부족했습니다. 지원한 직무와 연관된 지식, 혹은 경험 및 역량의 내용 전달이 다소 부족했습니다.",
+                description: myReport.myAvgFeedback.voiceFeedback,
                 rating: 2,
-                ratingText: "중",
+                ratingText: myReport.categorySummary.voiceGrade,
               },
               {
                 variant: "stress",
-                description:
-                  "지원한 직무와 연관된 지식, 혹은 경험 및 역량의 내용 전달이 다소 부족했습니다. 지원한 직무와 연관된 지식, 혹은 경험 및 역량의 내용 전달이 다소 부족했습니다.",
+                description: myReport.myAvgFeedback.tensionFeedback,
                 rating: 2,
-                ratingText: "중",
+                ratingText: myReport.categorySummary.tensionGrade,
               },
             ]}
           />

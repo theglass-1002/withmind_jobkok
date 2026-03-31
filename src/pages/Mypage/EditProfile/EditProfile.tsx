@@ -121,7 +121,7 @@ export default function EditProfile() {
       const requestPayload: UpdateUserRequest = {
         userIdx: Number(myInfo?.idx ?? 0),
         email: myInfo?.userId ?? userData.email ?? "",
-        password: "",
+   
         phone: payload.phone,
         userName: payload.name,
         birthdate: payload.birth,

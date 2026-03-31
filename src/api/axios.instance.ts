@@ -120,7 +120,7 @@ instance.interceptors.response.use(
     ) {
       originalRequest._retry = true;
       const refreshToken = getRefreshToken();
-     
+      console.log('리프래시',refreshToken);
 
       if (!refreshToken) {
         console.log('여기로들어옴',refreshToken);
@@ -132,7 +132,7 @@ instance.interceptors.response.use(
         return Promise.reject(apiError);
       }
     
-
+      console.log('api전송 ');
       try {
         const refreshResponse = await axios.post(
           `${API_BASE_URL}/auth/refresh`,
@@ -154,13 +154,22 @@ instance.interceptors.response.use(
         }
         (originalRequest.headers as AxiosRequestHeaders).Authorization =
           `Bearer ${newAccessToken}`;
-
+          console.log('api전송 ',refreshResponse);
         return instance(originalRequest);
+   
       } catch (refreshError) {
+        console.log("api전송", refreshError);
+
+        const refreshErrorMessage =
+          refreshError?.response?.data?.message ??
+          refreshError?.response?.data?.msg ??
+          refreshError?.message ??
+          "TOKEN_REFRESH_FAILED";
+          
         const apiError: ApiErrorResponse = {
-          code: 999,                         // 로그인 만료로 사용할 custom code
-          msg: "TOKEN_REFRESH_FAILED",       // 원하는 메시지
-          raw: refreshError,                 // 원본 AxiosError도 담아두면 디버깅 가능
+          code: 999,
+          msg: refreshErrorMessage,
+          raw: refreshError,
         };
         return Promise.reject(apiError);
       }

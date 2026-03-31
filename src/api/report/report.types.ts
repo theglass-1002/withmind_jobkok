@@ -228,7 +228,7 @@ export interface GazeInfo {
 }
 
 export interface GazeData {
-  geze: GazeInfo; // ⚠️ API 그대로 유지 (오타 아님)
+  geze: GazeInfo; // API 응답 그대로 유지
 }
 
 export interface Gaze {
@@ -333,8 +333,7 @@ export interface TensionHeartRate {
   highTension: TensionRangeData;
   heartRate: HeartRateSummary;
   heartRateCharts: ChartData10[];
-
-  tensionSummaryText: string; // ⭐ 추가
+  tensionSummaryText: string;
   tensionAnalysisText: string;
   tensionAnalysisDetailText: string;
   tensionScore: number;
@@ -345,9 +344,7 @@ export interface TensionData {
   tensionGrade: string;
   tensionAnalysisText: string;
   tensionAnalysisDetailText: string;
-
-  tensionSummaryText: string; // ⭐ 추가
-
+  tensionSummaryText: string;
   tebHeartRate: TensionHeartRate;
 }
 
@@ -388,7 +385,7 @@ export interface SupplementSuggestion {
   missingSkill: string;
   suggestion: string;
   expectedEffect: string;
-  ex: string; 
+  ex: string;
 }
 
 export interface ResumeAnalysis {
@@ -429,4 +426,82 @@ export interface InterviewReportDetailResponse {
   tab1: InterviewReportTab1;
   tab2: InterviewReportTab2;
   tab3: InterviewReportTab3;
+}
+
+// =========================
+// 마이 리포트
+// =========================
+
+export interface MyReportResponse {
+  isSample: boolean;
+  summaryCards: SummaryCards;
+  myAvgScore: MyAvgScore;
+  bestScore: number;
+  bestScoreIndex: number;
+  scoreTrend: ScoreTrendItem[];
+  categoryTrend: CategoryTrendItem[];
+  categorySummary: CategorySummary;
+  myAvgFeedback: MyAvgFeedback;
+  frequentWords: FrequentWord[];
+  resumeAnalysis: ResumeAnalysis;
+}
+
+export interface SummaryCards {
+  lastInterviewDate?: string;
+  totalCount: number;
+  avgDuration?: number;
+  bestScore?: number;
+  bestScoreDate?: string;
+}
+
+export interface MyAvgScore {
+  avgScore: number;
+  gradeText: string;
+  topPercent: number;
+  groupAvg: number;
+  globalAvg: number;
+  basicLevel: string;
+  readiness: string;
+}
+
+export interface ScoreTrendItem {
+  date: string;
+  score: number;
+}
+
+export interface CategoryTrendItem {
+  date: string;
+  abilityScore: number;
+  attitudeScore: number;
+  voiceScore: number;
+  tensionScore: number;
+}
+
+export interface CategorySummary {
+  abilityAvg: number;
+  attitudeAvg: number;
+  voiceAvg: number;
+  tensionAvg: number;
+  globalAbilityAvg: number;
+  globalAttitudeAvg: number;
+  globalVoiceAvg: number;
+  globalTensionAvg: number;
+  abilityGrade: string;
+  attitudeGrade: string;
+  voiceGrade: string;
+  tensionGrade: string;
+}
+
+export interface MyAvgFeedback {
+  overallFeedback: string;
+  abilityFeedback: string;
+  attitudeFeedback: string;
+  voiceFeedback: string;
+  tensionFeedback: string;
+}
+
+export interface FrequentWord {
+  rank: number;
+  word: string;
+  count: number;
 }

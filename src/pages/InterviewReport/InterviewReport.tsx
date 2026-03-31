@@ -116,7 +116,7 @@ export default function InterviewReport() {
         onClose={handleCloseConfirm}
       />
     </div>
-    <M_InterviewReport/>
+    {/* <M_InterviewReport/> */}
     </>
   );
 }
