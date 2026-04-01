@@ -7,30 +7,36 @@ import type { CategoryTrendLineChartProps } from "./CategoryTrendLineChart";
 
 import TrendLegendItem from "./TrendLegendItem";
 import type { TrendLegendItemProps } from "./TrendLegendItem";
+import type { MyReportResponse } from "@/api/report/report.types";
+
 export interface CategoryTrendPanelProps {
   /** 패널 타이틀 */
   title?: string;
-  /** 차트 라벨 (하단 날짜 10개) */
-  labels: CategoryTrendLineChartProps["labels"];
-  /** 차트 시리즈 */
-  series: {
-    stress: number[];     // 긴장도
-    competency: number[]; // 역량
-    attitude: number[];   // 태도
-    voice: number[];      // 목소리
+
+  /** data 없을 때 사용할 fallback */
+  labels?: CategoryTrendLineChartProps["labels"];
+  series?: {
+    stress: number[];
+    competency: number[];
+    attitude: number[];
+    voice: number[];
   };
+
   /** 선 곡률(0=직선) */
   tension?: number;
   /** 차트 높이(px) */
   height?: number;
-  multiLineLabels?: boolean; // true면 "YYYY\nMM.DD" 형식으로 2줄 표시
-  /** 우측 레전드 아이템들 */
-  legendItems: Array<
+  multiLineLabels?: boolean;
+
+  /** data 없을 때 사용할 fallback */
+  legendItems?: Array<
     Omit<TrendLegendItemProps, "variant" | "name"> & {
       variant: TrendLegendItemProps["variant"];
-      name?: string; // 비우면 variant로 기본 이름 매핑
+      name?: string;
     }
   >;
+
+  data?: MyReportResponse | null;
 }
 
 const DEFAULT_NAME: Record<TrendLegendItemProps["variant"], string> = {
@@ -40,19 +46,90 @@ const DEFAULT_NAME: Record<TrendLegendItemProps["variant"], string> = {
   stress: "긴장도 분석",
 };
 
+function convertGradeToRating(grade?: string): number {
+  switch (grade) {
+    case "상":
+      return 3;
+    case "중":
+      return 2;
+    case "하":
+      return 1;
+    default:
+      return 0;
+  }
+}
+
 export default function CategoryTrendPanel({
   title = "항목별 종합 분석 추이",
-  labels,
-  series,
+  labels = [],
+  series = {
+    stress: [],
+    competency: [],
+    attitude: [],
+    voice: [],
+  },
   tension = 0,
   height = 260,
-  legendItems,
+  legendItems = [],
   multiLineLabels = false,
+  data,
 }: CategoryTrendPanelProps) {
+  const trendData = data?.categoryTrend ?? [];
+  const myAvgFeedback = data?.myAvgFeedback ?? {};
+  const categorySummary = data?.categorySummary ?? {};
+
+  const resolvedLabels =
+    trendData.length > 0 ? trendData.map((item) => item.date) : labels;
+
+  const resolvedSeries =
+    trendData.length > 0
+      ? {
+          stress: trendData.map((item) => item.tensionScore),
+          competency: trendData.map((item) => item.abilityScore),
+          attitude: trendData.map((item) => item.attitudeScore),
+          voice: trendData.map((item) => item.voiceScore),
+        }
+      : series;
+
+      const resolvedLegendItems =
+      data != null
+        ? [
+            {
+              variant: "competency" as const,
+              description: data?.myAvgFeedback?.abilityFeedback ?? "-",
+              rating: convertGradeToRating(data?.categorySummary?.abilityGrade),
+              ratingText: data?.categorySummary?.abilityGrade ?? "-",
+            },
+            {
+              variant: "attitude" as const,
+              description: data?.myAvgFeedback?.attitudeFeedback ?? "-",
+              rating: convertGradeToRating(data?.categorySummary?.attitudeGrade),
+              ratingText: data?.categorySummary?.attitudeGrade ?? "-",
+            },
+            {
+              variant: "voice" as const,
+              description: data?.myAvgFeedback?.voiceFeedback ?? "-",
+              rating: convertGradeToRating(data?.categorySummary?.voiceGrade),
+              ratingText: data?.categorySummary?.voiceGrade ?? "-",
+            },
+            {
+              variant: "stress" as const,
+              description: data?.myAvgFeedback?.tensionFeedback ?? "-",
+              rating: convertGradeToRating(data?.categorySummary?.tensionGrade),
+              ratingText: data?.categorySummary?.tensionGrade ?? "-",
+            },
+          ]
+        : legendItems;
+
   return (
     <>
-       <span className="mock-interview__title mock-interview-category-trend__title">
-        <img className="mock-category-icon" src={ic_card_index_dividers_24} alt="" aria-hidden="true" />
+      <span className="mock-interview__title mock-interview-category-trend__title">
+        <img
+          className="mock-category-icon"
+          src={ic_card_index_dividers_24}
+          alt=""
+          aria-hidden="true"
+        />
         {title}
       </span>
 
@@ -60,18 +137,18 @@ export default function CategoryTrendPanel({
         <div className="mock-interview-category-trend__chart">
           <CategoryTrendLineChart
             multiLineLabels={multiLineLabels}
-            labels={labels}
+            labels={resolvedLabels}
             tension={tension}
-            dataStress={series.stress}
-            dataCompetency={series.competency}
-            dataAttitude={series.attitude}
-            dataVoice={series.voice}
+            dataStress={resolvedSeries.stress}
+            dataCompetency={resolvedSeries.competency}
+            dataAttitude={resolvedSeries.attitude}
+            dataVoice={resolvedSeries.voice}
             height={height}
           />
         </div>
 
         <div className="mock-trend__legend">
-          {legendItems.map((item, idx) => (
+          {resolvedLegendItems.map((item, idx) => (
             <TrendLegendItem
               key={`${item.variant}-${idx}`}
               variant={item.variant}
@@ -86,6 +163,6 @@ export default function CategoryTrendPanel({
           ))}
         </div>
       </div>
-      </>
+    </>
   );
 }

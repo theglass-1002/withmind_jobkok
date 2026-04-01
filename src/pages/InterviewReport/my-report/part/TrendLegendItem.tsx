@@ -43,7 +43,9 @@ export default function TrendLegendItem({
   return (
     <div className={`mock-trend__legend-item mock-trend__legend-item--${variant}`}>
       <span className={`mock-trend__name ${variant}`}>{name}</span>
+      <span className="mock-trend__legend-description">
       {description}
+      </span>
       <div className="mock-trend__rating">
         <div className="mock-trend__rating-icon">
           {Array.from({ length: maxStars }).map((_, i) => (

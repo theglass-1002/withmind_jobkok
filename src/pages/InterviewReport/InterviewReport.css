@@ -390,6 +390,9 @@ interview_result */
     font-family:Pretendard;font-size:18px;font-weight:600;line-height:22px;
   }
   .mock-interview-summary__chart-desc{
+    width: 100%;
+    height: 90px;
+    overflow: auto;
     color:#FFF;font-family:Pretendard;font-size:16px;font-weight:400;line-height:180%;
   }
   
@@ -400,7 +403,10 @@ interview_result */
     color:#FFF;text-overflow:ellipsis;
     font-family:Pretendard;font-size:16px;font-weight:600;line-height:20px;
   }
-  .mock-interview-summary__chart-tags--secondary{display:flex;flex-direction:row;align-items:center;gap:20px;}
+  .mock-interview-summary__chart-tags--secondary{
+    display:flex;flex-direction:row;
+    width:100%;
+align-items:center;gap:20px;}
   .mock-interview-summary__chart-tag--accent{color:#F9FF41;}
   
   /* Right side (average bar) */
@@ -507,6 +513,7 @@ interview_result */
 .mock-trend__legend-item{
   display: flex;
   width: 271px;
+  max-height: 260px;
   padding: 20px;
   flex-direction: column;
   align-items: flex-start;
@@ -520,6 +527,7 @@ interview_result */
   font-style: normal;
   font-weight: 400;
   line-height: 180%; /* 28.8px */
+  align-self: stretch;
 
 }  
 
@@ -533,6 +541,12 @@ interview_result */
   display: inline-flex;
   align-items: center;
   gap: 8px; /* dot-텍스트 간격 */
+}
+
+.mock-trend__legend-description{
+  max-height: 145px;
+  height: auto;
+  overflow: auto;
 }
 
 /* 공통 dot */
@@ -935,6 +949,10 @@ interview_result */
   font-size: 16px;
 }
 
+.mock-interview-summary__kpis.mobile{
+  display: none;
+}
+
 
   /* 모바일: 750px 이하 */
   @media (max-width: 750px) {
@@ -983,9 +1001,13 @@ interview_result */
         font-weight: 400;
         line-height: 18px; /* 128.571% */
       }
-
       .mock-interview-summary__kpis{
+        display: none;
+      }
+      .mock-interview-summary__kpis.mobile{
         display: flex;
+      }
+      .mock-interview-summary__kpis{
         flex-direction: column;
         gap: 20px;
         padding: 20px;
@@ -1340,6 +1362,17 @@ interview_result */
         font-size: 16px;
       }
       .keywords-panel__rank-badge{
+        font-size: 14px;
+      }
+
+      .mock-interview-summary__kpi{
+        display: flex;
+        justify-content: space-between;
+        flex-direction: row;
+        padding: 0px; 
+        border: none; 
+      }
+      .mock-interview-summary__header .sort-control__label{
         font-size: 14px;
       }
 

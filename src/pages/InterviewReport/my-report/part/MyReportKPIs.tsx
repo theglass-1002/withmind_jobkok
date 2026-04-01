@@ -19,7 +19,7 @@ function KPICard({ label, children }: KPICardProps) {
 type KPIPairCardProps = {
   label: string;
   date: string;
-  score: string; // "100점" 처럼 단위 포함 문자열
+  score: string;
 };
 
 function KPIPairCard({ label, date, score }: KPIPairCardProps) {
@@ -37,11 +37,6 @@ function KPIPairCard({ label, date, score }: KPIPairCardProps) {
 }
 
 export type MyReportKPIsProps = {
-  recentInterviewDate: string; // 예: "2025.12.10"
-  totalCount: number; // 예: 81
-  averageDuration: string; // 예: "8분 24초"
-  bestDate: string; // 예: "2025.12.10"
-  bestScore: string; // 예: "100점"
   data?: MyReportResponse | null;
 };
 
@@ -65,48 +60,33 @@ function formatScore(score?: number) {
   return `${score}점`;
 }
 
-export default function MyReportKPIs({
-  recentInterviewDate,
-  totalCount,
-  averageDuration,
-  bestDate,
-  bestScore,
-  data,
-}: MyReportKPIsProps) {
-  const summaryCards = data?.summaryCards;
-
-  const displayRecentInterviewDate =
-    summaryCards?.lastInterviewDate != null
-      ? formatDate(summaryCards.lastInterviewDate)
-      : recentInterviewDate;
+export default function MyReportKPIs({ data }: MyReportKPIsProps) {
+  const displayRecentInterviewDate = formatDate(
+    data?.summaryCards?.lastInterviewDate
+  );
 
   const displayTotalCount =
-    typeof summaryCards?.totalCount === "number"
-      ? summaryCards.totalCount
-      : totalCount;
+    typeof data?.summaryCards?.totalCount === "number"
+      ? data.summaryCards.totalCount
+      : 0;
 
-  const displayAverageDuration =
-    summaryCards?.avgDuration != null
-      ? formatDuration(summaryCards.avgDuration)
-      : averageDuration;
+  const displayAverageDuration = formatDuration(
+    data?.summaryCards?.avgDuration
+  );
 
-  const displayBestDate =
-    summaryCards?.bestScoreDate != null
-      ? formatDate(summaryCards.bestScoreDate)
-      : bestDate;
+  const displayBestDate = formatDate(data?.summaryCards?.bestScoreDate);
 
-  const displayBestScore =
-    summaryCards?.bestScore != null
-      ? formatScore(summaryCards.bestScore)
-      : bestScore;
+  const displayBestScore = formatScore(data?.summaryCards?.bestScore);
 
   return (
+    <>
     <div className="mock-interview-summary__kpis">
       <KPICard label="최근 면접 일자">{displayRecentInterviewDate}</KPICard>
 
       <KPICard label="총 면접 횟수">
         <>
-          {displayTotalCount} <span className="mock-interview-summary__kpi-unit">회</span>
+          {displayTotalCount}{" "}
+          <span className="mock-interview-summary__kpi-unit">회</span>
         </>
       </KPICard>
 
@@ -118,5 +98,24 @@ export default function MyReportKPIs({
         score={displayBestScore}
       />
     </div>
+    <div className="mock-interview-summary__kpis mobile">
+      <KPICard label="최근 면접 일자">{displayRecentInterviewDate}</KPICard>
+
+      <KPICard label="총 면접 횟수">
+        <>
+          {displayTotalCount}{" "}
+          <span className="mock-interview-summary__kpi-unit">회</span>
+        </>
+      </KPICard>
+
+      <KPICard label="평균 면접 시간">{displayAverageDuration}</KPICard>
+
+      <KPIPairCard
+        label="가장 높은 점수의 면접"
+        date={displayBestDate}
+        score={displayBestScore}
+      />
+    </div>
+    </>
   );
 }

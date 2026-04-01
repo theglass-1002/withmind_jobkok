@@ -9,47 +9,32 @@ import ScoreBarChartJS from "@/pages/InterviewReport/my-report/part/ScoreBarChar
 import Tooltip from "@/shared/components/tooltip/Tooltip";
 import type { MyReportResponse } from "@/api/report/report.types";
 import { Storage } from "@/shared/utils/StorageManager";
-// 실제 경로가 다르면 이 import 경로만 네 프로젝트에 맞게 수정
 
 type AverageScoreCardProps = {
-  score: number;
-  average: number;
-  max: number;
-  markLabel?: string;
-  desc?: string;
-  topBadgeText?: string;
-  secondaryBadges?: string[];
   data?: MyReportResponse | null;
 };
 
 export default function AverageScoreCard({
-  score,
-  average,
-  max,
-  markLabel = "면접우수 마크",
-  desc = "꾸준한 연습과 경험이 안정적으로 반영된 결과입니다. 면접 대응의 기본 역량과 직무 관련 이해도가 충분히 확보되어 있으며, 추가 보완을 통해 더 높은 성과로 이어질 수 있습니다.",
-  topBadgeText = "상위10%",
-  secondaryBadges = ["기본기 충실", "준비도 높음"],
   data,
 }: AverageScoreCardProps) {
-  console.log("[AverageScoreCard data]", data);
+  
 
   if (!data) {
     return null;
   }
 
-  const myAvgScore = data.myAvgScore;
-  const myAvgFeedback = data.myAvgFeedback;
-  const userName = Storage.getUserName();
+  const userName = Storage.getUserName() ?? "사용자";
 
-  const displayScore = myAvgScore.avgScore ?? score;
-  const displayAverage = myAvgScore.globalAvg ?? average;
-  const displayMarkLabel = myAvgScore.gradeText ?? markLabel;
-  const displayDesc = myAvgFeedback.overallFeedback ?? desc;
-  const displayTopBadgeText = `상위 ${myAvgScore.topPercent}%`;
+  const displayScore = data.myAvgScore?.avgScore ?? 0;
+  const displayAverage =
+    data.myAvgScore?.globalAvg ?? data.myAvgScore?.groupAvg ?? 0;
+  const displayMarkLabel = data.myAvgScore?.gradeText ?? "-";
+  const displayDesc = data.myAvgFeedback?.overallFeedback ?? "-";
+  const displayTopBadgeText = `상위 ${data.myAvgScore?.topPercent ?? 0}%`;
+
   const displaySecondaryBadges = [
-    myAvgScore.basicLevel,
-    myAvgScore.readiness,
+    data.myAvgScore?.basicLevel,
+    data.myAvgScore?.readiness,
   ].filter(Boolean);
 
   return (
@@ -70,7 +55,7 @@ export default function AverageScoreCard({
             iconElement={<img src={ic_info_white80_20} alt="" />}
             title="모의면접 평균 점수"
             desc={`모의면접 평균 점수는 여러분이 면접에 얼마나 잘 대비하고 있는지를 평가하는 지표입니다.
-이 지표는 3단계(미흡, 보통, 우수)로 나뉘며, 모의면접 종합 코멘트가 함께 제공됩니다.`}
+            이 지표는 3단계(미흡, 보통, 우수)로 나뉘며, 모의면접 종합 코멘트가 함께 제공됩니다.`}
             position="top"
             className="mock-interview__chart-info"
           />
@@ -96,13 +81,13 @@ export default function AverageScoreCard({
               alt=""
               aria-hidden="true"
             />
-            {displayTopBadgeText || topBadgeText}
+            {displayTopBadgeText}
           </span>
 
           <div className="mock-interview-summary__chart-tags mock-interview-summary__chart-tags--secondary">
             {(displaySecondaryBadges.length > 0
               ? displaySecondaryBadges
-              : secondaryBadges
+              : ["-"]
             ).map((label, i) => (
               <span className="mock-interview-summary__chart-tag" key={i}>
                 <img
@@ -124,7 +109,7 @@ export default function AverageScoreCard({
             {userName}
           </span>
           <span className="mock-interview-summary__chart-metric-score">
-            {displayScore}/{max}점
+            {displayScore}/100점
           </span>
         </div>
 
@@ -136,7 +121,7 @@ export default function AverageScoreCard({
           <ScoreBarChartJS
             score={displayScore}
             average={displayAverage}
-            max={max}
+            max={100}
           />
         </div>
 
@@ -144,12 +129,12 @@ export default function AverageScoreCard({
           <div className="mock-interview-summary__chart-axis-range">
             <span className="mock-interview-summary__chart-axis-min">0점</span>
             <span className="mock-interview-summary__chart-axis-max">
-              {max}점
+              100점
             </span>
             <span
               className="mock-interview-summary__chart-axis-avg"
               style={{
-                left: `${(displayAverage / max) * 100}%`,
+                left: `${(displayAverage / 100) * 100}%`,
                 transform: "translateX(-50%)",
               }}
             >

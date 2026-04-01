@@ -6,7 +6,7 @@
 
 .sort-control__menu{
     position: absolute;
-    width: 100px;
+    width: auto;
     top: 30px;
     right: 5px;
     display: flex;
@@ -69,6 +69,7 @@
     font-weight: 400;
     line-height: 20px; /* 125% */
     cursor: pointer;    
+    white-space: nowrap;
 }
 
 .sort-control__option:hover{

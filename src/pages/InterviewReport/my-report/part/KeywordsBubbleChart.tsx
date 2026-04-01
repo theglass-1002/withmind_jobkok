@@ -28,7 +28,7 @@ export interface KeywordsBubbleChartProps {
   showLabels?: boolean;
   className?: string;
   style?: React.CSSProperties;
-  scale?: number; // 버블 크기 스케일 (기본값: 1)
+  scale?: number;
 }
 
 function makeGradient(chart: Chart, group: ColorGroup) {
@@ -36,13 +36,16 @@ function makeGradient(chart: Chart, group: ColorGroup) {
     ctx: CanvasRenderingContext2D;
     chartArea: ChartArea | undefined;
   };
+
   if (!chartArea) return "#ccc";
+
   const g = ctx.createLinearGradient(
     chartArea.left,
     chartArea.top,
     chartArea.right,
     chartArea.bottom
   );
+
   if (group === "green") {
     g.addColorStop(0, "rgba(21, 208, 120, 0.12)");
     g.addColorStop(0.8, "#15D078");
@@ -53,12 +56,15 @@ function makeGradient(chart: Chart, group: ColorGroup) {
     g.addColorStop(0, "rgba(158, 164, 170, 0.12)");
     g.addColorStop(0.8, "#9EA4AA");
   }
+
   return g;
 }
 
 const cssVar = (name: string, fallback: string) => {
   if (typeof window === "undefined") return fallback;
-  const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const v = getComputedStyle(document.documentElement)
+    .getPropertyValue(name)
+    .trim();
   return v || fallback;
 };
 
@@ -67,12 +73,12 @@ const createBubbleLabelPlugin = (scale: number): Plugin<"bubble"> => ({
   afterDatasetsDraw(chart) {
     const meta = chart.getDatasetMeta(0);
     const ds: any = chart.data.datasets[0];
-    if (!meta?.data?.length) return;
+
+    if (!meta?.data?.length || !ds) return;
 
     const ctx = chart.ctx;
     ctx.save();
-    
-    // scale에 따라 폰트 크기 조정
+
     const baseFontSize = 25;
     const fontSize = Math.round(baseFontSize * scale);
     ctx.font = `600 ${fontSize}px Pretendard, system-ui, -apple-system`;
@@ -82,11 +88,12 @@ const createBubbleLabelPlugin = (scale: number): Plugin<"bubble"> => ({
     const white = cssVar("--white-100", "#FFF");
     ctx.fillStyle = white;
     ctx.shadowColor = "rgba(42, 45, 47, 0.08)";
-    ctx.shadowBlur = 12 * scale; // shadow도 스케일에 맞춤
+    ctx.shadowBlur = 12 * scale;
 
     meta.data.forEach((el: any, i: number) => {
-      const p = (ds._points as KeywordPoint[])[i];
+      const p = (ds._points as KeywordPoint[] | undefined)?.[i];
       if (!p) return;
+
       const { x, y } = el;
       ctx.fillText(p.label, x, y);
     });
@@ -100,14 +107,14 @@ export default function KeywordsBubbleChart({
   showLabels = true,
   className,
   style,
-  scale = 1, // 기본값 1 (원본 크기)
+  scale = 1,
 }: KeywordsBubbleChartProps) {
-  // scale 적용된 데이터
   const scaledData = useMemo(
-    () => data.map(point => ({
-      ...point,
-      r: point.r * scale,
-    })),
+    () =>
+      data.map((point) => ({
+        ...point,
+        r: point.r * scale,
+      })),
     [data, scale]
   );
 
@@ -120,14 +127,14 @@ export default function KeywordsBubbleChart({
           data: scaledData.map(({ x, y, r }) => ({ x, y, r })),
           borderWidth: 0,
           backgroundColor: (ctx: any) => {
-            const idx = ctx.dataIndex ?? 0;
-            const p: KeywordPoint = (ctx.dataset as any)._points[idx];
-            return makeGradient(ctx.chart, p.group);
+            const idx = ctx?.dataIndex ?? 0;
+            const p: KeywordPoint | undefined = (ctx?.dataset as any)?._points?.[idx];
+            return makeGradient(ctx.chart, p?.group ?? "gray");
           },
           hoverBackgroundColor: (ctx: any) => {
-            const idx = ctx.dataIndex ?? 0;
-            const p: KeywordPoint = (ctx.dataset as any)._points[idx];
-            return makeGradient(ctx.chart, p.group);
+            const idx = ctx?.dataIndex ?? 0;
+            const p: KeywordPoint | undefined = (ctx?.dataset as any)?._points?.[idx];
+            return makeGradient(ctx.chart, p?.group ?? "gray");
           },
           _points: scaledData,
         } as any,
@@ -136,9 +143,9 @@ export default function KeywordsBubbleChart({
     [scaledData]
   );
 
-  const options = useMemo<ChartOptions<'bubble'>>( 
+  const options = useMemo<ChartOptions<"bubble">>(
     () => ({
-      animation: false, 
+      animation: false,
       responsive: true,
       maintainAspectRatio: false,
       elements: {
@@ -179,8 +186,8 @@ export default function KeywordsBubbleChart({
         tooltip: {
           callbacks: {
             label: (ctx: any) => {
-              const p: KeywordPoint = (ctx.dataset as any)._points[ctx.dataIndex];
-              return ` ${p.label}`;
+              const p: KeywordPoint | undefined = (ctx?.dataset as any)?._points?.[ctx.dataIndex];
+              return ` ${p?.label ?? ""}`;
             },
           },
         },

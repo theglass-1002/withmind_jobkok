@@ -13,9 +13,9 @@ import ic_selected_file_purple_20 from "@/assets/icons/size20/ic_selected_file_p
 import ic_keyboard_arrow_left_gray700_20 from "@/assets/icons/size20/ic_keyboard_arrow_left_gray700_20.png";
 import ic_keyboard_arrow_right_gray700_20 from "@/assets/icons/size20/ic_keyboard_arrow_right_gray700_20.png";
 
-// ✅ webm import (경로 맞게)
 import interview_video_02 from "@/assets/testImg/interview_video_02.webm";
 import { createVideoThumbnail } from "@/shared/utils/util";
+import { fetchInterviewReportList } from "@/api/interview/interview.api";
 
 const DEFAULT_FILTERS: UiFilterOption[] = [
   { label: "전체", value: "all" },
@@ -33,7 +33,6 @@ interface InterviewReportHistoryProps {
   emptyIconSrc: string;
 }
 
-
 export default function InterviewReportHistory({
   totalCount,
   doneCount,
@@ -47,10 +46,27 @@ export default function InterviewReportHistory({
   const isEmpty = totalCount === 0;
   const [page, setPage] = useState(1);
 
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetchInterviewReportList({
+          page,
+          size: 10,
+        });
+
+        console.log("📦 interview report list:", res);
+      } catch (error) {
+        console.error("❌ interview report list fetch error:", error);
+      }
+    };
+
+    fetchData();
+  }, [page]); // page 바뀌면 재호출
+
   // ✅ 썸네일 상태 (dataURL)
   const [videoThumb, setVideoThumb] = useState<string | null>(null);
 
-  // ✅ 컴포넌트 마운트 시 썸네일 생성
   useEffect(() => {
     let mounted = true;
 
@@ -75,7 +91,6 @@ export default function InterviewReportHistory({
         id: 1,
         title: "",
         no: 1,
-        // ✅ video 썸네일 있으면 그걸, 없으면 기존 이미지
         avatarSrc: videoThumb ?? interview_video_02,
         scoreText: "82점",
         roleText: "서비스 기획",
