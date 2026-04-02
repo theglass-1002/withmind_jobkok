@@ -22,8 +22,9 @@ export default function Footer() {
         <div className="site-footer__inner">
           <div>
             <Link className="masthead__brand" to="/" aria-label="jobkok 홈">
-              <img src={Icons.jobkok_logo_gray400} alt="jobkok" />
-              <img src={Icons.jobkok_wordmark_gray400} alt="jobkok" />
+         
+              {/* <img src={Icons.jobkok_logo_gray400} alt="jobkok" />
+              <img src={Icons.jobkok_wordmark_gray400} alt="jobkok" /> */}
             </Link>
           </div>
 

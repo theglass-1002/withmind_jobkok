@@ -753,6 +753,7 @@ export default function ResumeCreate() {
     setForm((prev) => ({ ...prev, photoFile: file }));
 
   const updateDesiredRoles = (roles: string[]) => {
+    console.log(roles);
     setForm((prev) => ({ ...prev, desiredRoles: roles }));
     if (roles.length > 0) {
       setErrors((prev) => ({ ...prev, desiredRoles: undefined }));

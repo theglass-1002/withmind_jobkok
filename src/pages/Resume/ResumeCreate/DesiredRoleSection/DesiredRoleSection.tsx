@@ -3,15 +3,11 @@ import "./DesiredRoleSection.css";
 import { toast } from "react-toastify";
 
 import ic_close_gray500_20 from "@/assets/icons/size20/ic_close_gray500_20.png";
-import ic_search_gray900_20 from "@/assets/icons/size20/ic_search_gray900_20.png";
-import ic_clear_btn_gray400_20 from "@/assets/icons/size20/ic_clear_btn_gray400_20.png";
-
 import AISuggestArea from "@/pages/Resume/ResumeAISuggest";
 import SearchField from "@/shared/components/search/SearchField";
 import { fetchJobTree } from "@/api/job/job.api";
 import { JobNode } from "@/api/job/job.types";
 import { Icons } from "@/assets/icons";
-
 
 type RoleItem = { group: string; role: string };
 const MAX_SELECTED = 30;
@@ -27,6 +23,8 @@ interface DesiredRoleSectionProps {
   onCloseAISuggest?: () => void;
 }
 
+type JobTreeLikeResponse = JobNode[] | { code?: number; list?: JobNode[] };
+
 export default function DesiredRoleSection({
   value,
   onChange,
@@ -40,11 +38,9 @@ export default function DesiredRoleSection({
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
 
-  // ✅ 서버에서 가져온 직군/직무 트리
   const [jobTree, setJobTree] = useState<JobNode[]>([]);
   const [isTreeLoading, setIsTreeLoading] = useState(false);
 
-  // 내부 선택 상태: "그룹|직무명"
   const [selected, setSelected] = useState<Set<string>>(
     () => new Set((value ?? []).map((r) => `직접 입력|${r}`))
   );
@@ -52,37 +48,42 @@ export default function DesiredRoleSection({
   const menuRef = useRef<HTMLDivElement>(null);
   const didSyncFromValueRef = useRef(false);
 
-  // ✅ edit 모드에서 value 한번만 동기화
   useEffect(() => {
     if (!isEdit) return;
     if (!value || value.length === 0) return;
     if (didSyncFromValueRef.current) return;
 
-    console.log("✅ DesiredRoleSection(edit): value 동기화", value);
     setSelected(new Set(value.map((r) => `직접 입력|${r}`)));
     didSyncFromValueRef.current = true;
   }, [isEdit, value]);
 
-  // ✅ selected 바뀌면 부모로 반영
   useEffect(() => {
     const rolesArr = Array.from(selected).map((key) => key.split("|")[1]);
     onChange(rolesArr);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected]);
 
-  // ✅ 직무 트리 로드 (최초 1회)
   useEffect(() => {
     let mounted = true;
+
+    const normalizeJobTree = (raw: JobTreeLikeResponse): JobNode[] => {
+      if (Array.isArray(raw)) return raw;
+      if (raw && Array.isArray(raw.list)) return raw.list;
+      return [];
+    };
 
     (async () => {
       try {
         setIsTreeLoading(true);
-        const data = await fetchJobTree();
+
+        const raw = (await fetchJobTree()) as unknown as JobTreeLikeResponse;
+        const normalized = normalizeJobTree(raw);
+
         if (!mounted) return;
-        setJobTree(Array.isArray(data) ? data : []);
+        setJobTree(normalized);
       } catch (e) {
-        console.error("❌ fetchJobTree error:", e);
-        setJobTree([]);
+        console.error("fetchJobTree error:", e);
+        if (mounted) setJobTree([]);
       } finally {
         if (mounted) setIsTreeLoading(false);
       }
@@ -93,14 +94,13 @@ export default function DesiredRoleSection({
     };
   }, []);
 
-  // ✅ 트리를 roles.json flat 구조로 변환
-  // - depth 0: "개발" -> "개발 전체"를 all처럼 생성
-  // - depth 1 children: "소프트웨어 엔지니어" 등 roles로 생성
   const flat: RoleItem[] = useMemo(() => {
     const out: RoleItem[] = [];
     if (!Array.isArray(jobTree)) return out;
 
-    const topSorted = [...jobTree].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+    const topSorted = [...jobTree].sort(
+      (a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)
+    );
 
     for (const parent of topSorted) {
       if (!parent?.isActive) continue;
@@ -108,11 +108,12 @@ export default function DesiredRoleSection({
       const parentName = parent.name ?? "";
       if (!parentName) continue;
 
-      // ✅ "개발 전체" / "마케팅·광고 전체"
       out.push({ group: parentName, role: `${parentName} 전체` });
 
       const childrenSorted = Array.isArray(parent.children)
-        ? [...parent.children].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+        ? [...parent.children].sort(
+            (a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)
+          )
         : [];
 
       for (const child of childrenSorted) {
@@ -126,42 +127,40 @@ export default function DesiredRoleSection({
     return out;
   }, [jobTree]);
 
-  // ✅ 검색 필터
+  // role 기준으로만 검색
   const filtered = useMemo(() => {
-    const k = (q ?? "").trim().toLowerCase();
-    if (!k) return flat.slice(0, 20);
+    const keyword = (q ?? "").trim().toLowerCase();
 
-    const toStr = (v: unknown) =>
-      typeof v === "string" ? v : String(v ?? "");
+    if (!keyword) {
+      return flat.slice(0, 20);
+    }
 
     return flat
-      .filter((i) => {
-        const role = toStr(i.role).toLowerCase();
-        const group = toStr(i.group).toLowerCase();
-        return role.includes(k) || group.includes(k);
-      })
+      .filter((item) => item.role.toLowerCase().includes(keyword))
       .slice(0, 50);
   }, [q, flat]);
 
-  // 바깥 클릭 시 닫기
   useEffect(() => {
     if (!open) return;
+
     const onPointer = (e: PointerEvent) => {
       if (!menuRef.current) return;
-      if (!menuRef.current.contains(e.target as Node)) setOpen(false);
+      if (!menuRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
     };
+
     document.addEventListener("pointerdown", onPointer);
     return () => document.removeEventListener("pointerdown", onPointer);
   }, [open]);
 
-  // 하이라이트
   const highlight = (text: string, keyword: string) => {
     const k = keyword.trim();
     if (!k) return text;
-    const re = new RegExp(
-      `(${k.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\$&")})`,
-      "ig"
-    );
+
+    const escaped = k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const re = new RegExp(`(${escaped})`, "ig");
+
     return text.split(re).map((part, i) =>
       part.toLowerCase() === k.toLowerCase() ? (
         <span className="desired-role__highlight" key={i}>
@@ -173,7 +172,6 @@ export default function DesiredRoleSection({
     );
   };
 
-  // 칩 표시
   const chips = useMemo(() => {
     return Array.from(selected).map((key) => {
       const [group, role] = key.split("|");
@@ -252,7 +250,10 @@ export default function DesiredRoleSection({
           className="resume-search"
           id="desired-role-search"
           value={q}
-          onChange={setQ}
+          onChange={(value) => {
+            setQ(value);
+            if (!open) setOpen(true);
+          }}
           onSubmit={() => {}}
           onFocus={() => setOpen(true)}
           leftIconSrc={Icons.ic_search_gray900_20}
@@ -298,6 +299,12 @@ export default function DesiredRoleSection({
                 onClick={() => addRole(q)}
                 role="button"
                 tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    addRole(q);
+                  }
+                }}
               >
                 <span className="desired-role__highlight">"{q}"</span>
                 <span className="desired-role__create-suffix">

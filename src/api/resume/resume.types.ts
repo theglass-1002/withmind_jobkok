@@ -701,9 +701,13 @@ export interface ResumeSelfIntroResponse {
 // resume.types.ts (맨 아래 아무데나 추가)
 
 export type SkillAutoCompleteItem = {
-  id: number;
+  idx: number;
   name: string;
   type: "HARD" | "SOFT";
 };
 
 
+export type HardSkillAutoCompleteResponse = {
+  code: number;
+  list: SkillAutoCompleteItem[];
+};

@@ -9,9 +9,10 @@ import ic_arrow_back_ios_gray900_20 from "@/assets/icons/size20/ic_arrow_back_io
 import ic_replay_gray900_20 from "@/assets/icons/size20/ic_replay_gray900_20.png";
 import chevron_right_black from "@/assets/icons/chevron_right_black.png";
 
-import { JobNode } from "@/api/job/job.types";
+import type { JobNode } from "@/api/job/job.types";
 
 import "../ModalJobRolePicker.css";
+import LoadingOverlay from "../../loading/LoadingOverlay";
 
 type Role = {
   key: string;
@@ -27,12 +28,14 @@ type Category = {
 export type SelectedRole = {
   categoryKey: string;
   categoryTitle: string;
-  roleKey: string;
-  roleLabel: string;
+  roleKey: string;   // 전체면 categoryKey와 동일하게 사용
+  roleLabel: string; // "개발 전체" 또는 "서버 개발자"
 };
 
+type JobTreeLike = JobNode[] | { code?: number; list?: JobNode[] } | null | undefined;
+
 interface M_ModalJobRolePickerProps {
-  jobTree: JobNode[];
+  jobTree: JobTreeLike;
   loading?: boolean;
   error?: string | null;
   value?: SelectedRole[];
@@ -59,24 +62,36 @@ export default function M_ModalJobRolePicker({
 
   const safeValue = value ?? EMPTY_ARRAY;
 
-  const categories: Category[] = useMemo(() => {
-    if (!jobTree || jobTree.length === 0) return [];
+  const normalizedJobTree: JobNode[] = useMemo(() => {
+    if (Array.isArray(jobTree)) {
+      return jobTree;
+    }
 
-    return jobTree
+    if (jobTree && Array.isArray(jobTree.list)) {
+      return jobTree.list;
+    }
+
+    return [];
+  }, [jobTree]);
+
+  const categories: Category[] = useMemo(() => {
+    if (!normalizedJobTree.length) return [];
+
+    return normalizedJobTree
       .filter((node) => node.depth === 0 && node.isActive)
-      .sort((a, b) => a.sortOrder - b.sortOrder)
+      .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
       .map((cat) => ({
         key: String(cat.idx),
         title: cat.name,
         roles: (cat.children ?? [])
           .filter((child) => child.isActive)
-          .sort((a, b) => a.sortOrder - b.sortOrder)
+          .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
           .map((child) => ({
             key: String(child.idx),
             label: child.name,
           })),
       }));
-  }, [jobTree]);
+  }, [normalizedJobTree]);
 
   const getSelectedRoleDetailsFromSets = (
     rolesSet: Set<string>,
@@ -135,6 +150,15 @@ export default function M_ModalJobRolePicker({
     setSelectedRoles(nextRoles);
   }, [safeValue]);
 
+  useEffect(() => {
+    if (currentView === "detail" && selectedCategory) return;
+    if (!categories.length) return;
+
+    if (!selectedCategory) {
+      setSelectedCategory(categories[0]);
+    }
+  }, [categories, currentView, selectedCategory]);
+
   const handleCategoryClick = (category: Category) => {
     setSelectedCategory(category);
     setCurrentView("detail");
@@ -157,7 +181,7 @@ export default function M_ModalJobRolePicker({
     if (isAlreadyOn) {
       nextAll = new Set(allCheckedCategories);
       nextAll.delete(categoryKey);
-      nextRoles = selectedRoles;
+      nextRoles = new Set(selectedRoles);
     } else {
       const totalCount = allCheckedCategories.size + selectedRoles.size;
       if (totalCount >= 5) {
@@ -165,6 +189,7 @@ export default function M_ModalJobRolePicker({
         return;
       }
 
+      // 전체는 1개만 유지
       nextAll = new Set([categoryKey]);
       nextRoles = new Set<string>();
     }
@@ -172,23 +197,21 @@ export default function M_ModalJobRolePicker({
     setAllCheckedCategories(nextAll);
     setSelectedRoles(nextRoles);
 
-    if (onChange) {
-      onChange(getSelectedRoleDetailsFromSets(nextRoles, nextAll));
-    }
+    onChange?.(getSelectedRoleDetailsFromSets(nextRoles, nextAll));
   };
 
   const handleRoleToggle = (role: Role) => {
     if (!selectedCategory) return;
 
+    let nextAll = new Set(allCheckedCategories);
     const nextRoles = new Set(selectedRoles);
-    let nextAll = allCheckedCategories;
 
     if (nextRoles.has(role.key)) {
       nextRoles.delete(role.key);
     } else {
-      if (allCheckedCategories.size > 0) {
+      // 개별 선택하면 전체 해제
+      if (nextAll.size > 0) {
         nextAll = new Set<string>();
-        setAllCheckedCategories(nextAll);
       }
 
       const totalCount = nextAll.size + nextRoles.size;
@@ -200,29 +223,30 @@ export default function M_ModalJobRolePicker({
       nextRoles.add(role.key);
     }
 
+    setAllCheckedCategories(nextAll);
     setSelectedRoles(nextRoles);
 
-    if (onChange) {
-      onChange(getSelectedRoleDetailsFromSets(nextRoles, nextAll));
-    }
+    onChange?.(getSelectedRoleDetailsFromSets(nextRoles, nextAll));
   };
 
   const handleRemoveChip = (roleKey: string) => {
-    let nextAll = new Set(allCheckedCategories);
-    let nextRoles = new Set(selectedRoles);
+    const nextAll = new Set(allCheckedCategories);
+    const nextRoles = new Set(selectedRoles);
 
-    const isCategory = categories.some((c) => c.key === roleKey);
-    if (isCategory) {
+    const isCategoryKey = categories.some((c) => c.key === roleKey);
+
+    if (isCategoryKey) {
       nextAll.delete(roleKey);
       setAllCheckedCategories(nextAll);
-    } else {
-      nextRoles.delete(roleKey);
       setSelectedRoles(nextRoles);
+      onChange?.(getSelectedRoleDetailsFromSets(nextRoles, nextAll));
+      return;
     }
 
-    if (onChange) {
-      onChange(getSelectedRoleDetailsFromSets(nextRoles, nextAll));
-    }
+    nextRoles.delete(roleKey);
+    setSelectedRoles(nextRoles);
+    setAllCheckedCategories(nextAll);
+    onChange?.(getSelectedRoleDetailsFromSets(nextRoles, nextAll));
   };
 
   const handleReset = () => {
@@ -231,20 +255,14 @@ export default function M_ModalJobRolePicker({
     setCurrentView("category");
     setSelectedCategory(null);
 
-    if (onChange) {
-      onChange([]);
-    }
-    if (onReset) {
-      onReset();
-    }
+    onChange?.([]);
+    onReset?.();
   };
 
   const handleApply = () => {
     const details = getSelectedRoleDetails();
 
-    if (onApply) {
-      onApply(details);
-    }
+    onApply?.(details);
     setCurrentView("category");
     setSelectedCategory(null);
   };
@@ -258,9 +276,11 @@ export default function M_ModalJobRolePicker({
 
   if (loading) {
     return (
-      <div className="job-role-picker job-role-picker--popup">
-        <div className="job-role-picker__loading">직군·직무 정보를 불러오는 중입니다...</div>
-      </div>
+      
+      <LoadingOverlay/>
+      // <div className="job-role-picker job-role-picker--popup">
+      //   <div className="job-role-picker__loading"></div>
+      // </div>
     );
   }
 
@@ -289,6 +309,7 @@ export default function M_ModalJobRolePicker({
       <span className="job-role-picker__options-note">
         ※ 직군ㆍ직무 옵션은 최대 5개까지 선택 가능합니다.
       </span>
+
       <div className="job-role-picker__body">
         {currentView === "category" ? (
           <div className="job-role-picker__column job-role-picker__column--left">
@@ -303,7 +324,9 @@ export default function M_ModalJobRolePicker({
                     onClick={() => handleCategoryClick(category)}
                   >
                     <div className="job-role-picker__category-meta">
-                      <span className="job-role-picker__category-title">{category.title}</span>
+                      <span className="job-role-picker__category-title">
+                        {category.title}
+                      </span>
                       <span className="job-role-picker__category-count">
                         {selectedCount > 0 ? selectedCount : ""}
                       </span>
@@ -326,7 +349,9 @@ export default function M_ModalJobRolePicker({
                 onClick={handleBack}
                 style={{ cursor: "pointer" }}
               />
-              <span className="job-role-picker__detail-title">{selectedCategory?.title}</span>
+              <span className="job-role-picker__detail-title">
+                {selectedCategory?.title}
+              </span>
               <span></span>
             </div>
 
@@ -347,13 +372,17 @@ export default function M_ModalJobRolePicker({
                     alt=""
                   />
                 </span>
-                <span className="job-role-picker__role-label">{selectedCategory?.title} 전체</span>
+                <span className="job-role-picker__role-label">
+                  {selectedCategory?.title} 전체
+                </span>
               </div>
 
               {selectedCategory?.roles.map((role) => (
                 <div
                   key={role.key}
-                  className={`job-role-picker__role ${selectedRoles.has(role.key) ? "on" : ""}`}
+                  className={`job-role-picker__role ${
+                    selectedRoles.has(role.key) ? "on" : ""
+                  }`}
                   onClick={() => handleRoleToggle(role)}
                 >
                   <span className="job-role-picker__checkbox-wrap">
@@ -377,7 +406,9 @@ export default function M_ModalJobRolePicker({
                   <div className="jobs-chips">
                     {selectedRoleDetails.map((role) => (
                       <div key={role.roleKey} className="jobs-chips__item">
-                        <span className="job-role-picker__chip-group">{role.categoryTitle}</span>
+                        <span className="job-role-picker__chip-group">
+                          {role.categoryTitle}
+                        </span>
                         <span className="job-role-picker__chip-role">
                           <span className="job-role-picker__chip-chevron">
                             <img src={chevron_right_black} alt="" />
@@ -397,10 +428,18 @@ export default function M_ModalJobRolePicker({
               </div>
 
               <div className="btn_wrap">
-                <button className="btn_w_full default_btn_white" type="button" onClick={handleReset}>
+                <button
+                  className="btn_w_full default_btn_white"
+                  type="button"
+                  onClick={handleReset}
+                >
                   <img src={ic_replay_gray900_20} alt="" /> 초기화
                 </button>
-                <button className="btn_w_full default_btn_black" type="button" onClick={handleApply}>
+                <button
+                  className="btn_w_full default_btn_black"
+                  type="button"
+                  onClick={handleApply}
+                >
                   적용하기
                 </button>
               </div>

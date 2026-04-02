@@ -31,6 +31,8 @@ interface DesiredRoleSectionProps {
   onCloseAISuggest?: () => void;
 }
 
+type JobTreeLikeResponse = JobNode[] | { code?: number; list?: JobNode[] };
+
 export default function M_DesiredRoleSection({
   value = [],
   onChange,
@@ -59,13 +61,21 @@ export default function M_DesiredRoleSection({
   useEffect(() => {
     let mounted = true;
 
+    const normalizeJobTree = (raw: JobTreeLikeResponse): JobNode[] => {
+      if (Array.isArray(raw)) return raw;
+      if (raw && Array.isArray(raw.list)) return raw.list;
+      return [];
+    };
+
     (async () => {
       try {
         setIsTreeLoading(true);
-        const data = await fetchJobTree();
+
+        const raw = (await fetchJobTree()) as unknown as JobTreeLikeResponse;
+        const normalized = normalizeJobTree(raw);
 
         if (!mounted) return;
-        setJobTree(Array.isArray(data) ? (data as JobNode[]) : []);
+        setJobTree(normalized);
       } catch (e) {
         console.error("fetchJobTree error:", e);
         if (mounted) setJobTree([]);
@@ -88,9 +98,9 @@ export default function M_DesiredRoleSection({
     );
 
     for (const parent of topSorted) {
-      if (parent?.isActive === false) continue;
+      if (!parent?.isActive) continue;
 
-      const parentName = parent?.name ?? "";
+      const parentName = parent.name ?? "";
       if (!parentName) continue;
 
       out.push({ group: parentName, role: `${parentName} 전체` });
@@ -102,8 +112,8 @@ export default function M_DesiredRoleSection({
         : [];
 
       for (const child of childrenSorted) {
-        if (child?.isActive === false) continue;
-        if (!child?.name) continue;
+        if (!child?.isActive) continue;
+        if (!child.name) continue;
 
         out.push({ group: parentName, role: child.name });
       }
@@ -133,6 +143,7 @@ export default function M_DesiredRoleSection({
     setSelected(new Set(value.map(findRoleKey)));
   }, [isEdit, value, flat]);
 
+  // role 기준으로만 검색
   const filtered = useMemo(() => {
     const keyword = q.trim().toLowerCase();
 
@@ -141,11 +152,7 @@ export default function M_DesiredRoleSection({
     }
 
     return flat
-      .filter((item) => {
-        const role = item.role.toLowerCase();
-        const group = item.group.toLowerCase();
-        return role.includes(keyword) || group.includes(keyword);
-      })
+      .filter((item) => item.role.toLowerCase().includes(keyword))
       .slice(0, 50);
   }, [q, flat]);
 
@@ -171,7 +178,7 @@ export default function M_DesiredRoleSection({
     const regex = new RegExp(`(${escaped})`, "ig");
 
     return text.split(regex).map((part, index) =>
-      regex.test(part) ? (
+      part.toLowerCase() === trimmed.toLowerCase() ? (
         <span className="desired-role__highlight" key={index}>
           {part}
         </span>
@@ -355,7 +362,10 @@ export default function M_DesiredRoleSection({
                   id="desired-role-search"
                   placeholder="희망 직무 키워드를 입력해 주세요."
                   value={q}
-                  onChange={setQ}
+                  onChange={(value) => {
+                    setQ(value);
+                    if (!open) setOpen(true);
+                  }}
                   onSubmit={() => {}}
                   onFocus={() => setOpen(true)}
                   leftIconSrc={Icons.ic_search_gray900_20}
@@ -368,7 +378,10 @@ export default function M_DesiredRoleSection({
                     <div className="desired-role__menu" role="listbox">
                       <ul className="desired-role__list">
                         {isTreeLoading && (
-                          <li className="desired-role__option" aria-disabled="true">
+                          <li
+                            className="desired-role__option"
+                            aria-disabled="true"
+                          >
                             불러오는 중...
                           </li>
                         )}
@@ -384,14 +397,14 @@ export default function M_DesiredRoleSection({
                               <span className="desired-role__option-role">
                                 {highlight(item.role, q)}
                               </span>
-                              <span className="desired-role__option-group">
-                                {item.group}
-                              </span>
                             </li>
                           ))}
 
                         {!isTreeLoading && q.trim() && filtered.length === 0 && (
-                          <li className="desired-role__option" aria-disabled="true">
+                          <li
+                            className="desired-role__option"
+                            aria-disabled="true"
+                          >
                             추천 결과가 없습니다.
                           </li>
                         )}
@@ -406,11 +419,12 @@ export default function M_DesiredRoleSection({
                         tabIndex={0}
                         onKeyDown={(e) => {
                           if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
                             addRole(q);
                           }
                         }}
                       >
-                        <span className="desired-role__highlight">“{q}”</span>
+                        <span className="desired-role__highlight">"{q}"</span>
                         <span className="desired-role__create-suffix">
                           (으)로 직접 등록하기
                         </span>
@@ -440,7 +454,9 @@ export default function M_DesiredRoleSection({
                 <div className="resume-create-page__selected desired">
                   {chips.map((chip) => (
                     <span className="location-picker__chip" key={chip.key}>
-                      <span className="desired-role-chip__label">{chip.role}</span>
+                      <span className="desired-role-chip__label">
+                        {chip.role}
+                      </span>
                       <img
                         className="desired-role-chip__remove-btn"
                         onClick={() => removeRole(chip.key)}

@@ -173,13 +173,13 @@ export default function M_MyReportResult() {
         />
         <div className="mock-interview-summary__charts">
           <AverageScoreCard
-            score={82}
-            average={72}
-            max={100}
+            // score={82}
+            // average={72}
+            // max={100}
          
-            markLabel="면접우수 마크"
-            topBadgeText="상위10%"
-            secondaryBadges={["기본기 충실", "준비도 높음"]}
+            // markLabel="면접우수 마크"
+            // topBadgeText="상위10%"
+            // secondaryBadges={["기본기 충실", "준비도 높음"]}
           />
           <ScoreTrendCard bestScore="92점">
             <ScoreTrendBarChart
@@ -262,8 +262,8 @@ export default function M_MyReportResult() {
             scale={0.5}
             iconSrc={ic_open_book_24}
             title="내가 자주 사용하는 단어"
-            keywords={keywords}
-            rankItems={rankItems}
+            // keywords={keywords}
+            // rankItems={rankItems}
           />
         </div>
 

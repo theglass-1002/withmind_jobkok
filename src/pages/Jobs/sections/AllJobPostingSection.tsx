@@ -99,7 +99,7 @@ export default function AllJobPostingSection() {
   const [jobLoading, setJobLoading] = useState(false);
   const [jobError, setJobError] = useState<string | null>(null);
 
-  const [, setAllJobs] = useState<JobItem[]>([]);
+  const [allJobs, setAllJobs] = useState<JobItem[]>([]);
   const [jobs, setJobs] = useState<JobItem[]>([]);
   const [jobsLoading, setJobsLoading] = useState(false);
   const [jobsError, setJobsError] = useState<string | null>(null);
@@ -116,6 +116,7 @@ export default function AllJobPostingSection() {
         setJobError(null);
 
         const tree = await fetchJobTree();
+        console.log('직군직무 불러오기',tree);
         setJobTree(tree);
         setInitialized(true);
       } catch (e: any) {

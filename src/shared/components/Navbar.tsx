@@ -287,8 +287,9 @@ export default function Navbar({ titleText }: NavbarProps) {
             <>{titleText}</>
           ) : (
             <Link className="masthead__brand" to="/">
-              <img src={Icons.jobkok_logo_gray900} alt="" />
-              <img src={Icons.jobkok_wordmark_gray900} alt="" />
+              하이어
+              {/* <img src={Icons.jobkok_logo_gray900} alt="" />
+              <img src={Icons.jobkok_wordmark_gray900} alt="" /> */}
             </Link>
           )}
 

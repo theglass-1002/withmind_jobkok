@@ -14,7 +14,10 @@ import Modal from "@/shared/components/modal/Modal";
 import { Icons } from "@/assets/icons";
 
 import { fetchSoftSkillAutoComplete } from "@/api/resume/resume.api";
-import type { SkillAutoCompleteItem } from "@/api/resume/resume.types";
+import type {
+  SkillAutoCompleteItem,
+  HardSkillAutoCompleteResponse,
+} from "@/api/resume/resume.types";
 
 const MAX_SELECTED = 30;
 const MIN_LENGTH = 1;
@@ -29,6 +32,12 @@ interface SoftSkillsSectionProps {
   onClickAISuggest?: () => void;
   onCloseAISuggest?: () => void;
 }
+
+type SoftSkillLikeResponse =
+  | SkillAutoCompleteItem[]
+  | HardSkillAutoCompleteResponse
+  | null
+  | undefined;
 
 export default function M_SoftSkillsSection({
   value = [],
@@ -78,13 +87,32 @@ export default function M_SoftSkillsSection({
 
     let mounted = true;
 
+    const normalizeAutoComplete = (
+      raw: SoftSkillLikeResponse
+    ): SkillAutoCompleteItem[] => {
+      if (Array.isArray(raw)) {
+        return raw;
+      }
+
+      if (raw && Array.isArray(raw.list)) {
+        return raw.list;
+      }
+
+      return [];
+    };
+
     (async () => {
       try {
         setIsLoading(true);
-        const data = await fetchSoftSkillAutoComplete(keyword);
+
+        const raw = (await fetchSoftSkillAutoComplete(
+          keyword
+        )) as unknown as SoftSkillLikeResponse;
+
+        const normalized = normalizeAutoComplete(raw);
 
         if (!mounted) return;
-        setItems(Array.isArray(data) ? data : []);
+        setItems(normalized);
       } catch (e) {
         console.error("soft auto-complete error:", e);
         if (mounted) setItems([]);
@@ -327,7 +355,7 @@ export default function M_SoftSkillsSection({
 
                 {open && (
                   <div className="soft-skills__dropdown" ref={menuRef}>
-                    <div className="soft-skills__menu">
+                    <div className="soft-skills__menu" role="listbox">
                       <ul className="soft-skills__list">
                         {isLoading && (
                           <li className="soft-skills__option" aria-disabled="true">
@@ -338,11 +366,14 @@ export default function M_SoftSkillsSection({
                         {!isLoading &&
                           items.map((item) => (
                             <li
-                              key={item.id}
+                              key={item.idx}
                               className="soft-skills__option"
+                              role="option"
                               onClick={() => addRole(item)}
                             >
-                              {highlight(item.name, q)}
+                              <span className="soft-skills__option-role">
+                                {highlight(item.name, q)}
+                              </span>
                             </li>
                           ))}
 
@@ -364,11 +395,12 @@ export default function M_SoftSkillsSection({
                         tabIndex={0}
                         onKeyDown={(e) => {
                           if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
                             addRole(q);
                           }
                         }}
                       >
-                        <span className="soft-skills__highlight">“{q}”</span>
+                        <span className="soft-skills__highlight">"{q}"</span>
                         <span className="soft-skills__create-suffix">
                           (으)로 직접 등록하기
                         </span>

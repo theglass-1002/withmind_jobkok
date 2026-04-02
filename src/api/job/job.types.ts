@@ -4,9 +4,9 @@ import { Region } from "../resume/resume.types";
 
 // 직군 직무 
 export interface JobNode {
-  idx: number;
+    idx: number;
     name: string;
-    parentIdx: number | null;
+    parentIdx?: number | null;
     depth: number;
     sortOrder: number;
     isActive: boolean;

@@ -167,7 +167,7 @@ export default function SelfIntroductionSection({
             <AISuggestArea
               show={aiShow}
               items={aiItems}
-            hintText="더 정확한 하드 스킬 추천을 위해 (희망 직무와 경력) 항목을 먼저 입력해 주세요."
+            hintText="자기소개서 문장 추천을 위해 (희망 직무와 경력) 항목을 먼저 입력해 주세요."
               onClickSuggest={onClickAISuggest}
               onClose={onCloseAISuggest}
               wrapperClassName="resume-suggest__career"

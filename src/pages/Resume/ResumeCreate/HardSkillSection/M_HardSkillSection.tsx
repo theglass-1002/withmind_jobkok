@@ -14,7 +14,10 @@ import Modal from "@/shared/components/modal/Modal";
 import { Icons } from "@/assets/icons";
 
 import { fetchHardSkillAutoComplete } from "@/api/resume/resume.api";
-import type { SkillAutoCompleteItem } from "@/api/resume/resume.types";
+import type {
+  SkillAutoCompleteItem,
+  HardSkillAutoCompleteResponse,
+} from "@/api/resume/resume.types";
 
 const MAX_SELECTED = 30;
 const MIN_LENGTH = 1;
@@ -29,6 +32,12 @@ interface HardSkillSectionProps {
   onClickAISuggest?: () => void;
   onCloseAISuggest?: () => void;
 }
+
+type HardSkillLikeResponse =
+  | SkillAutoCompleteItem[]
+  | HardSkillAutoCompleteResponse
+  | null
+  | undefined;
 
 export default function M_HardSkillSection({
   value = [],
@@ -78,13 +87,32 @@ export default function M_HardSkillSection({
 
     let mounted = true;
 
+    const normalizeAutoComplete = (
+      raw: HardSkillLikeResponse
+    ): SkillAutoCompleteItem[] => {
+      if (Array.isArray(raw)) {
+        return raw;
+      }
+
+      if (raw && Array.isArray(raw.list)) {
+        return raw.list;
+      }
+
+      return [];
+    };
+
     (async () => {
       try {
         setIsLoading(true);
-        const data = await fetchHardSkillAutoComplete(keyword);
+
+        const raw = (await fetchHardSkillAutoComplete(
+          keyword
+        )) as unknown as HardSkillLikeResponse;
+
+        const normalized = normalizeAutoComplete(raw);
 
         if (!mounted) return;
-        setItems(Array.isArray(data) ? data : []);
+        setItems(normalized);
       } catch (e) {
         console.error("hard auto-complete error:", e);
         if (mounted) setItems([]);
@@ -252,6 +280,7 @@ export default function M_HardSkillSection({
             </div>
           </div>
         </div>
+        {error && <span className="resume-create-page__error">{error}</span>}
       </div>
 
       {chips.length > 0 && (
@@ -313,6 +342,7 @@ export default function M_HardSkillSection({
                   className="resume-search"
                   id="hard-skill-search"
                   value={q}
+                  placeholder="보유 하드 스킬을 입력해 주세요. (ex. Java, React)"
                   onChange={(v) => {
                     setQ(v);
                     setOpen(true);
@@ -326,7 +356,7 @@ export default function M_HardSkillSection({
 
                 {open && (
                   <div className="hard-skills__dropdown" ref={menuRef}>
-                    <div className="hard-skills__menu">
+                    <div className="hard-skills__menu" role="listbox">
                       <ul className="hard-skills__list">
                         {isLoading && (
                           <li className="hard-skills__option" aria-disabled="true">
@@ -337,11 +367,14 @@ export default function M_HardSkillSection({
                         {!isLoading &&
                           items.map((item) => (
                             <li
-                              key={item.id}
+                              key={item.idx}
                               className="hard-skills__option"
+                              role="option"
                               onClick={() => addRole(item)}
                             >
-                              {highlight(item.name, q)}
+                              <span className="hard-skills__option-role">
+                                {highlight(item.name, q)}
+                              </span>
                             </li>
                           ))}
 
@@ -363,11 +396,12 @@ export default function M_HardSkillSection({
                         tabIndex={0}
                         onKeyDown={(e) => {
                           if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
                             addRole(q);
                           }
                         }}
                       >
-                        <span className="hard-skills__highlight">“{q}”</span>
+                        <span className="hard-skills__highlight">"{q}"</span>
                         <span className="hard-skills__create-suffix">
                           (으)로 직접 등록하기
                         </span>

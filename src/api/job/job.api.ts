@@ -152,4 +152,3 @@ export const EMPLOYMENT_ETC_KEYS: EmpOptionKey[] = [
   "foreigner",
   "disability",
 ];
-

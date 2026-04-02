@@ -3,8 +3,6 @@ import React, { useMemo, useState, useRef, useEffect } from "react";
 import "./HardSkillSection.css";
 import { toast } from "react-toastify";
 
-import ic_search_gray900_20 from "@/assets/icons/size20/ic_search_gray900_20.png";
-import ic_clear_btn_gray400_20 from "@/assets/icons/size20/ic_clear_btn_gray400_20.png";
 import ic_error_gray500_20 from "@/assets/icons/size20/ic_error_gray500_20.png";
 import ic_add_purple_20 from "@/assets/icons/size20/ic_add_purple_20.png";
 import ic_close_gray500_24 from "@/assets/icons/size24/ic_close_gray500_24.png";
@@ -13,24 +11,31 @@ import SearchField from "@/shared/components/search/SearchField";
 import AISuggestArea from "@/pages/Resume/ResumeAISuggest";
 
 import { fetchHardSkillAutoComplete } from "@/api/resume/resume.api";
-import type { SkillAutoCompleteItem } from "@/api/resume/resume.types";
+import type {
+  SkillAutoCompleteItem,
+  HardSkillAutoCompleteResponse,
+} from "@/api/resume/resume.types";
 import { Icons } from "@/assets/icons";
 
 const MAX_SELECTED = 30;
-const MIN_LENGTH = 1; // "일단"은 1글자부터(원하면 2로 바꾸면 됨)
+const MIN_LENGTH = 1;
 
-// 부모와 값 주고받는 props
 interface HardSkillSectionProps {
-  value?: string[]; // 초기 하드스킬 목록 (edit에서 내려줌)
-  onChange?: (skills: string[]) => void; // 선택된 하드 스킬 텍스트 배열
-  isEdit?: boolean; // 수정 모드 여부
+  value?: string[];
+  onChange?: (skills: string[]) => void;
+  isEdit?: boolean;
 
-  // 🔥 AI 하드스킬 추천 (부모에서 내려줌 - DesiredRoleSection과 동일 패턴)
   aiShow?: boolean;
   aiTags?: string[];
   onClickAISuggest?: () => void;
   onCloseAISuggest?: () => void;
 }
+
+type HardSkillLikeResponse =
+  | SkillAutoCompleteItem[]
+  | HardSkillAutoCompleteResponse
+  | null
+  | undefined;
 
 export default function HardSkillSection({
   value = [],
@@ -45,10 +50,8 @@ export default function HardSkillSection({
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
 
-  // ✅ API 자동완성 리스트
   const [items, setItems] = useState<SkillAutoCompleteItem[]>([]);
 
-  // 내부 선택 상태: "그룹|스킬명" 형태로 저장
   const [selected, setSelected] = useState<Set<string>>(
     () => new Set(value.map((s) => `직접 입력|${s}`))
   );
@@ -63,10 +66,8 @@ export default function HardSkillSection({
     setOpen(false);
     setQ("");
     setItems([]);
-    // selected는 유지 (edit에서 값 날아가는 것 방지)
   };
 
-  // 🔥 edit 모드일 때 한 번만 value → selected 동기화
   useEffect(() => {
     if (!isEdit) return;
     if (!value || value.length === 0) return;
@@ -77,25 +78,24 @@ export default function HardSkillSection({
     didSyncFromValueRef.current = true;
   }, [isEdit, value]);
 
-  // 선택된 하드 스킬 → 부모로 전달
   useEffect(() => {
     const skills = Array.from(selected).map((key) => key.split("|")[1]);
     onChange?.(skills);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected]);
 
-  // 외부 클릭 시 드롭다운 닫기
   useEffect(() => {
     if (!open) return;
+
     const onPointer = (e: PointerEvent) => {
       if (!menuRef.current) return;
       if (!menuRef.current.contains(e.target as Node)) setOpen(false);
     };
+
     document.addEventListener("pointerdown", onPointer);
     return () => document.removeEventListener("pointerdown", onPointer);
   }, [open]);
 
-  // ✅ q 바뀌면 자동완성 API 호출 (간단 버전: debounce 없음)
   useEffect(() => {
     const keyword = (q ?? "").trim();
     if (!open) return;
@@ -105,28 +105,48 @@ export default function HardSkillSection({
       return;
     }
 
+    const normalizeAutoComplete = (
+      raw: HardSkillLikeResponse
+    ): SkillAutoCompleteItem[] => {
+      if (Array.isArray(raw)) {
+        return raw;
+      }
+
+      if (raw && Array.isArray(raw.list)) {
+        return raw.list;
+      }
+
+      return [];
+    };
+
     (async () => {
       try {
         console.log("✅ 검색", keyword);
-        const data = await fetchHardSkillAutoComplete(keyword);
-        setItems(Array.isArray(data) ? data : []);
-        console.log("✅ 검색", keyword, data);
+
+        const raw = (await fetchHardSkillAutoComplete(
+          keyword
+        )) as unknown as HardSkillLikeResponse;
+
+        console.log("✅ 검색 raw", keyword, raw);
+
+        const normalized = normalizeAutoComplete(raw);
+        console.log("✅ 검색 normalized", keyword, normalized);
+
+        setItems(normalized);
       } catch (e) {
-        console.log("에러");
         console.error("❌ hard auto-complete error:", e);
         setItems([]);
       }
     })();
   }, [q, open]);
 
-  // 검색어 하이라이트
   const highlight = (text: string, keyword: string) => {
     const k = keyword.trim();
     if (!k) return text;
-    const re = new RegExp(
-      `(${k.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\$&")})`,
-      "ig"
-    );
+
+    const escaped = k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const re = new RegExp(`(${escaped})`, "ig");
+
     return text.split(re).map((part, i) =>
       part.toLowerCase() === k.toLowerCase() ? (
         <span className="hard-skills__highlight" key={i}>
@@ -138,7 +158,6 @@ export default function HardSkillSection({
     );
   };
 
-  // 칩 뷰
   const chips = useMemo(() => {
     return Array.from(selected).map((key) => {
       const [group, role] = key.split("|");
@@ -154,7 +173,6 @@ export default function HardSkillSection({
     });
   };
 
-  // ✅ 자동완성 아이템 / 직접입력 모두 추가
   const addRole = (item: SkillAutoCompleteItem | string) => {
     const roleText = typeof item === "string" ? item.trim() : item.name;
     if (!roleText) return;
@@ -164,12 +182,14 @@ export default function HardSkillSection({
 
     setSelected((prev) => {
       if (prev.has(key)) return prev;
+
       if (prev.size >= MAX_SELECTED) {
         toast.success("최대 30개까지 선택가능합니다.", {
           toastId: "hard-skill-limit",
         });
         return prev;
       }
+
       const next = new Set(prev);
       next.add(key);
       return next;
@@ -188,7 +208,11 @@ export default function HardSkillSection({
             <div className="resume-create-page__section-title__heading">
               하드 스킬
               <span className="tooltip tooltip--top">
-                <img className="tooltip__trigger" src={ic_error_gray500_20} alt="툴팁" />
+                <img
+                  className="tooltip__trigger"
+                  src={ic_error_gray500_20}
+                  alt="툴팁"
+                />
                 <div className="tooltip__content" role="tooltip">
                   <span className="tooltip__title">하드 스킬이란?</span>
                   <span className="tooltip__desc">
@@ -202,7 +226,10 @@ export default function HardSkillSection({
           {isAdding ? (
             <img src={ic_close_gray500_24} alt="닫기" onClick={stopAdd} />
           ) : (
-            <span className="resume-section-title__action--import" onClick={startAdd}>
+            <span
+              className="resume-section-title__action--import"
+              onClick={startAdd}
+            >
               <img src={ic_add_purple_20} alt="" />
               추가
             </span>
@@ -232,7 +259,9 @@ export default function HardSkillSection({
         </div>
       )}
 
-      <div className={`resume-create-page__section-body ${isAdding ? "" : "empty"}`}>
+      <div
+        className={`resume-create-page__section-body ${isAdding ? "" : "empty"}`}
+      >
         {isAdding ? (
           <>
             <SearchField
@@ -258,7 +287,7 @@ export default function HardSkillSection({
                     {items.length > 0 &&
                       items.map((item) => (
                         <li
-                          key={item.id}
+                          key={item.idx}
                           className="hard-skills__option"
                           role="option"
                           onClick={() => addRole(item)}
@@ -268,6 +297,7 @@ export default function HardSkillSection({
                           </span>
                         </li>
                       ))}
+
                     {q.trim().length >= MIN_LENGTH && items.length === 0 && (
                       <li className="hard-skills__option" aria-disabled="true">
                         추천 결과가 없습니다.
@@ -277,7 +307,6 @@ export default function HardSkillSection({
                 </div>
               </div>
             )}
-
 
             <AISuggestArea
               show={aiShow}
