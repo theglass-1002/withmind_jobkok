@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Switch from "react-switch";
 
@@ -41,6 +41,7 @@ type FilterKey = "role" | "career" | "education" | "location" | "employment";
 
 export default function M_AllJobPostingSection() {
   const navigate = useNavigate();
+  const jobPostingRef = useRef<HTMLDivElement | null>(null);
 
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState("최신순");
@@ -90,7 +91,8 @@ export default function M_AllJobPostingSection() {
   };
 
   const roleCount = appliedFilters.roles.length;
-  const careerSelected = appliedFilters.career.min !== 0 || appliedFilters.career.max !== 10;
+  const careerSelected =
+    appliedFilters.career.min !== 0 || appliedFilters.career.max !== 10;
   const educationCount = appliedFilters.education.length;
   const locationCount = appliedFilters.location.length;
   const employmentCount = appliedFilters.employment.length;
@@ -127,7 +129,11 @@ export default function M_AllJobPostingSection() {
     init();
   }, [navigate]);
 
-  const buildParamsFromFilters = (filters: AppliedFilters, sortLabel: string) => {
+  const buildParamsFromFilters = (
+    filters: AppliedFilters,
+    sortLabel: string,
+    resumeBased: boolean
+  ) => {
     const roleIds = filters.roles.map((r) =>
       r.roleKey === r.categoryKey ? Number(r.categoryKey) : Number(r.roleKey)
     );
@@ -154,7 +160,10 @@ export default function M_AllJobPostingSection() {
 
     const sortCode = SORT_CODE_MAP[sortLabel] ?? "latest";
 
-    const params: any = { sort: sortCode };
+    const params: any = {
+      sort: sortCode,
+      resumeBased,
+    };
 
     if (hasFilters) {
       params.categoryIdx = roleIds.length ? roleIds : undefined;
@@ -176,18 +185,10 @@ export default function M_AllJobPostingSection() {
         employmentType,
         employmentEtc,
         sortCode,
+        resumeBased,
       },
     };
   };
-
-  const careerChipText = useMemo(() => {
-    const { min, max } = appliedFilters.career;
-    if (min === 0 && max === 10) return null;
-    if (min === 0 && max === 1) return "신입";
-    if (min === 0) return `신입~${max}년`;
-    if (max === 10) return `${min}년 이상`;
-    return `${min}~${max}년`;
-  }, [appliedFilters.career]);
 
   const makeChipsFromFilters = (filters: AppliedFilters) => {
     const next: Chip[] = [];
@@ -264,14 +265,22 @@ export default function M_AllJobPostingSection() {
         setJobsFetched(false);
 
         const size = 15;
-        const { params, meta } = buildParamsFromFilters(appliedFilters, sort);
+        const { params, meta } = buildParamsFromFilters(
+          appliedFilters,
+          sort,
+          resumeReco
+        );
 
         console.log("[M_AllJobPostingSection] fetch params:", params);
         console.log("[M_AllJobPostingSection] fetch meta:", meta);
 
-        const { jobs, totalPages, totalCount } = await fetchJobList(page, size, params);
+        const { jobs, totalPages, totalCount } = await fetchJobList(
+          page,
+          size,
+          params
+        );
 
-        setJobs(resumeReco ? jobs.filter((j) => j.aiPick === true) : jobs);
+        setJobs(jobs);
         setTotalPages(totalPages);
         setTotalCount(totalCount);
       } catch (e: any) {
@@ -284,6 +293,20 @@ export default function M_AllJobPostingSection() {
 
     loadJobs();
   }, [initialized, navigate, page, sort, resumeReco, appliedFilters]);
+
+  useEffect(() => {
+    if (page === 1) return;
+
+    const el = jobPostingRef.current;
+    if (!el) return;
+
+    const y = el.getBoundingClientRect().top + window.pageYOffset;
+
+    window.scrollTo({
+      top: y - 200,
+      behavior: "smooth",
+    });
+  }, [page]);
 
   const handleSortChange = (newSort: string) => {
     setSort(newSort);
@@ -378,6 +401,11 @@ export default function M_AllJobPostingSection() {
     setOpenFilter((prev) => (prev ? null : "role"));
   };
 
+  const handleResumeRecoToggle = (checked: boolean) => {
+    setResumeReco(checked);
+    setPage(1);
+  };
+
   const showJobPostingLoading = !initialized || !jobsFetched || jobsLoading;
 
   return (
@@ -403,9 +431,9 @@ export default function M_AllJobPostingSection() {
 
             <ul className="job-search-filter-menu">
               <li
-                className={`job-search-filter-menu__item ${openFilter === "role" ? "is-open" : ""} ${
-                  roleCount > 0 ? "selected" : ""
-                }`}
+                className={`job-search-filter-menu__item ${
+                  openFilter === "role" ? "is-open" : ""
+                } ${roleCount > 0 ? "selected" : ""}`}
                 onClick={() => toggleFilter("role")}
               >
                 <span className="job-search-filter-menu__label">
@@ -417,9 +445,9 @@ export default function M_AllJobPostingSection() {
               </li>
 
               <li
-                className={`job-search-filter-menu__item ${openFilter === "career" ? "is-open" : ""} ${
-                  careerSelected ? "selected" : ""
-                }`}
+                className={`job-search-filter-menu__item ${
+                  openFilter === "career" ? "is-open" : ""
+                } ${careerSelected ? "selected" : ""}`}
                 onClick={() => toggleFilter("career")}
               >
                 <span className="job-search-filter-menu__label">
@@ -431,9 +459,9 @@ export default function M_AllJobPostingSection() {
               </li>
 
               <li
-                className={`job-search-filter-menu__item ${openFilter === "education" ? "is-open" : ""} ${
-                  educationCount > 0 ? "selected" : ""
-                }`}
+                className={`job-search-filter-menu__item ${
+                  openFilter === "education" ? "is-open" : ""
+                } ${educationCount > 0 ? "selected" : ""}`}
                 onClick={() => toggleFilter("education")}
               >
                 <span className="job-search-filter-menu__label">
@@ -445,9 +473,9 @@ export default function M_AllJobPostingSection() {
               </li>
 
               <li
-                className={`job-search-filter-menu__item ${openFilter === "location" ? "is-open" : ""} ${
-                  locationCount > 0 ? "selected" : ""
-                }`}
+                className={`job-search-filter-menu__item ${
+                  openFilter === "location" ? "is-open" : ""
+                } ${locationCount > 0 ? "selected" : ""}`}
                 onClick={() => toggleFilter("location")}
               >
                 <span className="job-search-filter-menu__label">
@@ -459,9 +487,9 @@ export default function M_AllJobPostingSection() {
               </li>
 
               <li
-                className={`job-search-filter-menu__item ${openFilter === "employment" ? "is-open" : ""} ${
-                  employmentCount > 0 ? "selected" : ""
-                }`}
+                className={`job-search-filter-menu__item ${
+                  openFilter === "employment" ? "is-open" : ""
+                } ${employmentCount > 0 ? "selected" : ""}`}
                 onClick={() => toggleFilter("employment")}
               >
                 <span className="job-search-filter-menu__label">
@@ -475,7 +503,11 @@ export default function M_AllJobPostingSection() {
           </div>
 
           <div className="jobs-toolbar__actions">
-            <div className="jobs-actions__reset" onClick={resetFilters} style={{ cursor: "pointer" }}>
+            <div
+              className="jobs-actions__reset"
+              onClick={resetFilters}
+              style={{ cursor: "pointer" }}
+            >
               <span>
                 <img src={refresh_gray} alt="" />
               </span>
@@ -520,10 +552,7 @@ export default function M_AllJobPostingSection() {
         </div>
         <Switch
           checked={resumeReco}
-          onChange={(checked) => {
-            setResumeReco(checked);
-            setPage(1);
-          }}
+          onChange={handleResumeRecoToggle}
           onColor="#000000"
           offColor="#E5E7EB"
           onHandleColor="#FFFFFF"
@@ -548,7 +577,7 @@ export default function M_AllJobPostingSection() {
         />
       )}
 
-      <div className="job-posting">
+      <div className="job-posting" ref={jobPostingRef}>
         <div className="job-posting__container">
           <div
             className="job-posting__content"
@@ -562,7 +591,7 @@ export default function M_AllJobPostingSection() {
                   <span className="job-posting__count">
                     총{" "}
                     <p className="point-text-black">
-                      {(resumeReco ? jobs.length : totalCount).toLocaleString()}개
+                      {totalCount.toLocaleString()}개
                     </p>{" "}
                     전체공고
                   </span>

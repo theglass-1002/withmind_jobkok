@@ -130,42 +130,8 @@ export default function JobsList() {
           <SavedJobPostingSection />
         )}
       </div>
+
       <div className="jobs mobile">
-        {resumeExists === false && (
-          <div className="resume-promo-container" id="sticky-trigger">
-            <div className="resume-promo">
-              <span className="resume-promo__text">
-                기본 이력서 작성하고 나에게 맞는 AI 공고 추천을 받아보세요.
-              </span>
-              <a className="resume-promo__action" href="/resumes/create">
-                <span className="resume-promo__label">이력서 작성하기</span>
-                <span className="resume-promo__icon">
-                  <img src={keyboard_arrow_right} alt="" />
-                </span>
-              </a>
-            </div>
-          </div>
-        )}
-
-        <div className="job-tabs-container">
-          <Tabs
-            tabs={tabItems}
-            active={activeTab}
-            onChange={handleTabClick}
-            className={`jobs-tabs default_tabs`}
-            itemClassName="jobs-tab"
-            activeClassName="on"
-          />
-        </div>
-
-        {activeTab === "all" ? (
-          <AllJobPostingSection />
-        ) : (
-          <SavedJobPostingSection />
-        )}
-      </div>
-
-      {/* <div className="jobs mobile">
         <Tabs
           tabs={tabItems}
           active={activeTab}
@@ -194,7 +160,7 @@ export default function JobsList() {
             ) : (
               <M_SavedJobPostingSection />
             )}
-      </div> */}
+      </div>
     </>
   );
 }

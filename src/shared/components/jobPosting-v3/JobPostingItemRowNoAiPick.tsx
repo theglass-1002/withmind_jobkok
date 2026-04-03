@@ -307,9 +307,7 @@ export default function JobPostingItemRowNoAiPick({
                     {sourceMeta.logo && (
                       <img src={sourceMeta.logo} alt={sourceMeta.label} />
                     )}
-                    <span className="job-posting__source-text">
-                      {sourceMeta.label}
-                    </span>
+              
                   </span>
                 </span>
                 <span className="job-posting__role">{job.name}</span>
