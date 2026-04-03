@@ -1,11 +1,10 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 import bookmark_active_purple from "@/assets/icons/bookmark_active_purple.png";
 import bookmark_inactive from "@/assets/icons/bookmark_inactive.png";
 import mp_test_logo from "@/assets/icons/mp_test_logo.png";
-import jobkorea from "@/assets/icons/company_logos/jobkorea.png";
 import fire from "@/assets/icons/fire.png";
 import seed from "@/assets/icons/seed.png";
 import check_circle_purple from "@/assets/icons/check_circle_purple.png";
@@ -21,6 +20,7 @@ import {
 } from "@/api/job/job.types";
 import { toggleJobFavorite } from "@/api/job/job.api";
 import { logout } from "@/api/auth/auth.api";
+import { Icons } from "@/assets/icons";
 
 const DEFAULT_SUCCESS_MESSAGE = "지원 정보가 반영되었습니다.";
 const DEFAULT_INFO_MESSAGE = "기록을 해제했어요.";
@@ -35,7 +35,7 @@ interface JobPostingItemCardAiPickProps {
    */
   showAppliedSection?: boolean;
 
-  /** 🔥 실제 공고 데이터 */
+  /** 실제 공고 데이터 */
   job?: JobItem;
 }
 
@@ -47,7 +47,6 @@ export default function JobPostingItemCardAiPick({
 }: JobPostingItemCardAiPickProps) {
   const navigate = useNavigate();
 
-  // ✅ job이 undefined여도 안전하게 기본값 0
   const [bookMark, setBookMark] = useState<0 | 1>(
     ((job?.favorite as 0 | 1) ?? 0)
   );
@@ -55,43 +54,77 @@ export default function JobPostingItemCardAiPick({
     ((job?.applied as 0 | 1) ?? 0)
   );
 
+  const sourcePlatform = job?.sourcePlatform?.toLowerCase?.() ?? null;
+
+  const sourceMeta = useMemo(() => {
+    const sourceMap: Record<
+      string,
+      {
+        label: string;
+        logo: string | null;
+      }
+    > = {
+      jobkorea: {
+        label: "jobkorea",
+        logo: Icons.jobkorea_provider_logo18,
+      },
+      wanted: {
+        label: "wanted",
+        logo: Icons.wanted_provider_logo18,
+      },
+      saramin: {
+        label: "saramin",
+        logo: Icons.saramin_provider_logo18,
+      },
+    };
+
+    if (!sourcePlatform || !sourceMap[sourcePlatform]) {
+      return {
+        label: "internal",
+        logo: Icons.jobkok_provider_logo18,
+      };
+    }
+
+    return sourceMap[sourcePlatform];
+  }, [sourcePlatform]);
+
   const handleGoToJobPost = () => {
     if (!job) return;
-    navigate(`/jobs/${job.jobIdx}?title=${encodeURIComponent(job.companyName ?? "")}`);
+    navigate(
+      `/jobs/${job.jobIdx}?title=${encodeURIComponent(job.companyName ?? "")}`
+    );
   };
 
   const handleBookmarkToggle = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!job) return;
-  
-    const prev = bookMark;                 // 0 | 1
-    const isFavorite = prev === 1;         // 현재 즐겨찾기 여부
+
+    const prev = bookMark;
+    const isFavorite = prev === 1;
     const next: 0 | 1 = isFavorite ? 0 : 1;
-  
+
     try {
-      // ✅ UI 먼저 반영 (optimistic)
       setBookMark(next);
-  
-      // ✅ 서버 반영: 현재가 favorite면 삭제, 아니면 추가
       await toggleJobFavorite(job.jobIdx, isFavorite);
-  
-      toast.success(next === 1 ? "즐겨찾기에 추가되었습니다." : "즐겨찾기가 해제되었습니다.");
+
+      toast.success(
+        next === 1
+          ? "즐겨찾기에 추가되었습니다."
+          : "즐겨찾기가 해제되었습니다."
+      );
     } catch (e: any) {
       console.error(e);
-  
-      // 실패 시 롤백
       setBookMark(prev);
-  
+
       if (e?.code === 999) {
         logout();
         navigate("/login");
         return;
       }
-  
+
       toast.error("즐겨찾기 처리 중 오류가 발생했습니다.");
     }
   };
-  
 
   const handleRecordAsApplied = (e: React.MouseEvent, next: 0 | 1) => {
     e.stopPropagation();
@@ -101,7 +134,6 @@ export default function JobPostingItemCardAiPick({
     else toast.info(unappliedInfoMessage);
   };
 
-  // ✅ job이 없으면 최소 렌더(에러 방지)
   if (!job) {
     return (
       <div className="job-posting__card ai-pick">
@@ -112,7 +144,7 @@ export default function JobPostingItemCardAiPick({
               <div className="job-card__byline">
                 <span className="job-posting__company">-</span>
                 <span className="job-posting__source-logo">
-                  <img src={jobkorea} alt="" />
+                  <img src={Icons.jobkok_provider_logo18} alt="internal" />
                 </span>
               </div>
               <span className="job-posting__role">-</span>
@@ -141,7 +173,9 @@ export default function JobPostingItemCardAiPick({
             <div className="job-card__byline">
               <span className="job-posting__company">{job.companyName}</span>
               <span className="job-posting__source-logo">
-                <img src={job.companyLogoUrl} alt="" />
+                {sourceMeta.logo && (
+                  <img src={sourceMeta.logo} alt={sourceMeta.label} />
+                )}
               </span>
             </div>
             <span className="job-posting__role">{job.name}</span>
@@ -161,10 +195,10 @@ export default function JobPostingItemCardAiPick({
 
       <div className="job-card__body">
         <div className="job-card__content">
-        <span className="job-posting__match job-posting__match--level">
-                    
-                      AI 적합도 90%
-                    </span>
+          <span className="job-posting__match job-posting__match--level">
+            AI 적합도 90%
+          </span>
+
           <div className="job-card__facts">
             <div className="job-posting__meta-items">
               <span className="job-posting__meta-item">
@@ -189,9 +223,11 @@ export default function JobPostingItemCardAiPick({
             마감임박!
           </span>
         </div>
+
         <div className="job-card__sticker">
-                  <img src={ai_pick} alt="" />
-                </div>
+          <img src={ai_pick} alt="" />
+        </div>
+
         {showAppliedSection &&
           (recordAsApplied === 0 ? (
             <div className="job-card__control job-card__control--radio">

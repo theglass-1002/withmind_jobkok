@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Switch from "react-switch";
 
@@ -72,6 +72,7 @@ type RoleSelectedItem = {
 
 export default function AllJobPostingSection() {
   const navigate = useNavigate();
+  const jobPostingRef = useRef<HTMLDivElement | null>(null);
 
   const [page, setPage] = useState(1);
   const [resumeReco, setResumeReco] = useState(false);
@@ -116,7 +117,7 @@ export default function AllJobPostingSection() {
         setJobError(null);
 
         const tree = await fetchJobTree();
-        console.log('직군직무 불러오기',tree);
+        console.log("직군직무 불러오기", tree);
         setJobTree(tree);
         setInitialized(true);
       } catch (e: any) {
@@ -128,7 +129,9 @@ export default function AllJobPostingSection() {
           return;
         }
 
-        setJobError(e?.message || "초기 로딩 중 직군/직무 정보를 불러오는 데 실패했습니다.");
+        setJobError(
+          e?.message || "초기 로딩 중 직군/직무 정보를 불러오는 데 실패했습니다."
+        );
       } finally {
         setJobLoading(false);
       }
@@ -165,7 +168,9 @@ export default function AllJobPostingSection() {
         const size = SIZE_MAP[sizeSort] ?? 15;
         const sortCode = SORT_CODE_MAP[sort] ?? "latest";
 
-        const roleIds = roleSelected.map((r) => (r.roleId === 0 ? r.categoryIdx : r.roleId));
+        const roleIds = roleSelected.map((r) =>
+          r.roleId === 0 ? r.categoryIdx : r.roleId
+        );
         const career = toCareerParam(careerRange);
         const educationCode = toEducationCodeParam(educationSelected);
         const locationCode = toLocationCodeParam(locationSelected);
@@ -180,6 +185,7 @@ export default function AllJobPostingSection() {
 
         const params: any = {
           sort: sortCode,
+          resumeBased: resumeReco,
         };
 
         if (hasFilters) {
@@ -191,10 +197,16 @@ export default function AllJobPostingSection() {
           params.employmentEtc = employmentEtc || undefined;
         }
 
-        const { jobs, totalPages, totalCount } = await fetchJobList(page, size, params);
+        console.log("fetchJobList params", params);
+
+        const { jobs, totalPages, totalCount } = await fetchJobList(
+          page,
+          size,
+          params
+        );
 
         setAllJobs(jobs);
-        setJobs(resumeReco ? jobs.filter((j) => j.aiPick === true) : jobs);
+        setJobs(jobs);
         setTotalPages(totalPages);
         setTotalCount(totalCount);
       } catch (e: any) {
@@ -229,6 +241,20 @@ export default function AllJobPostingSection() {
     employmentSelected,
   ]);
 
+  useEffect(() => {
+    if (page === 1) return;
+  
+    const el = jobPostingRef.current;
+    if (!el) return;
+  
+    const y = el.getBoundingClientRect().top + window.pageYOffset;
+  
+    window.scrollTo({
+      top: y - 100, 
+      behavior: "smooth",
+    });
+  }, [page]);
+
   const toggleFilter = (key: FilterKey) => {
     setOpenFilter((prev) => (prev === key ? null : key));
   };
@@ -251,7 +277,9 @@ export default function AllJobPostingSection() {
       case "role":
         setRoleSelected((prev) =>
           prev.filter(
-            (r) => `role-${r.roleId}` !== chip.id && `role-all-${r.categoryIdx}` !== chip.id
+            (r) =>
+              `role-${r.roleId}` !== chip.id &&
+              `role-all-${r.categoryIdx}` !== chip.id
           )
         );
         break;
@@ -265,7 +293,9 @@ export default function AllJobPostingSection() {
         break;
 
       case "location":
-        setLocationSelected((prev) => prev.filter((l) => `${l.code}` !== chip.id));
+        setLocationSelected((prev) =>
+          prev.filter((l) => `${l.code}` !== chip.id)
+        );
         break;
 
       case "employmentType":
@@ -389,7 +419,8 @@ export default function AllJobPostingSection() {
 
     setChips((prev) => {
       const others = prev.filter(
-        (chip) => chip.kind !== "employmentType" && chip.kind !== "employmentEtc"
+        (chip) =>
+          chip.kind !== "employmentType" && chip.kind !== "employmentEtc"
       );
       return [...others, ...empChips];
     });
@@ -486,14 +517,16 @@ export default function AllJobPostingSection() {
 
             <ul className="job-search-filter-menu">
               <li
-                className={`job-search-filter-menu__item ${openFilter === "role" ? "on" : ""} ${
-                  roleChipCount > 0 ? "selected" : ""
-                }`}
+                className={`job-search-filter-menu__item ${
+                  openFilter === "role" ? "on" : ""
+                } ${roleChipCount > 0 ? "selected" : ""}`}
                 onClick={() => toggleFilter("role")}
               >
                 <span className="job-search-filter-menu__label">
                   직군ㆍ직무
-                  {roleChipCount > 0 ? <span className="chip-label">{roleChipCount}</span> : null}
+                  {roleChipCount > 0 ? (
+                    <span className="chip-label">{roleChipCount}</span>
+                  ) : null}
                 </span>
 
                 {openFilter === "role" ? (
@@ -515,14 +548,16 @@ export default function AllJobPostingSection() {
               </li>
 
               <li
-                className={`job-search-filter-menu__item ${openFilter === "career" ? "on" : ""} ${
-                  careerChipCount > 0 ? "selected" : ""
-                }`}
+                className={`job-search-filter-menu__item ${
+                  openFilter === "career" ? "on" : ""
+                } ${careerChipCount > 0 ? "selected" : ""}`}
                 onClick={() => toggleFilter("career")}
               >
                 <span className="job-search-filter-menu__label">
                   경력
-                  {careerChipCount > 0 ? <span className="chip-label">{careerRole}</span> : null}
+                  {careerChipCount > 0 ? (
+                    <span className="chip-label">{careerRole}</span>
+                  ) : null}
                 </span>
 
                 {openFilter === "career" ? (
@@ -541,9 +576,9 @@ export default function AllJobPostingSection() {
               </li>
 
               <li
-                className={`job-search-filter-menu__item ${openFilter === "education" ? "on" : ""} ${
-                  educationChipCount > 0 ? "selected" : ""
-                }`}
+                className={`job-search-filter-menu__item ${
+                  openFilter === "education" ? "on" : ""
+                } ${educationChipCount > 0 ? "selected" : ""}`}
                 onClick={() => toggleFilter("education")}
               >
                 <span className="job-search-filter-menu__label">
@@ -569,9 +604,9 @@ export default function AllJobPostingSection() {
               </li>
 
               <li
-                className={`job-search-filter-menu__item ${openFilter === "location" ? "on" : ""} ${
-                  locationChipCount > 0 ? "selected" : ""
-                }`}
+                className={`job-search-filter-menu__item ${
+                  openFilter === "location" ? "on" : ""
+                } ${locationChipCount > 0 ? "selected" : ""}`}
                 onClick={() => toggleFilter("location")}
               >
                 <span className="job-search-filter-menu__label">
@@ -597,9 +632,9 @@ export default function AllJobPostingSection() {
               </li>
 
               <li
-                className={`job-search-filter-menu__item ${openFilter === "employment" ? "on" : ""} ${
-                  employmentChipCount > 0 ? "selected" : ""
-                }`}
+                className={`job-search-filter-menu__item ${
+                  openFilter === "employment" ? "on" : ""
+                } ${employmentChipCount > 0 ? "selected" : ""}`}
                 onClick={() => toggleFilter("employment")}
               >
                 <span className="job-search-filter-menu__label">
@@ -672,10 +707,10 @@ export default function AllJobPostingSection() {
         </div>
       )}
 
-      <div className="job-posting">
+      <div className="job-posting" ref={jobPostingRef}>
         {resumeReco && !showJobPostingLoading && (
           <div className="job-posting__ai-recommend">
-            이력서를 기반으로 AI가 {jobs.length.toLocaleString()}개의 추천 공고를 찾았어요!
+            이력서를 기반으로 AI가 {totalCount.toLocaleString()}개의 추천 공고를 찾았어요!
           </div>
         )}
 
@@ -685,14 +720,14 @@ export default function AllJobPostingSection() {
             style={{ position: "relative", minHeight: "320px" }}
           >
             {showJobPostingLoading ? (
-             <LoadingOverlay isLoading={showJobPostingLoading} />
+              <LoadingOverlay isLoading={showJobPostingLoading} />
             ) : (
               <>
                 <div className="job-posting__header">
                   <span className="job-posting__count">
                     총{" "}
                     <p className="point-text-black">
-                      {(resumeReco ? jobs.length : totalCount).toLocaleString()}개
+                      {totalCount.toLocaleString()}개
                     </p>{" "}
                     전체공고
                   </span>
@@ -711,7 +746,11 @@ export default function AllJobPostingSection() {
                       className="job-posting__sort"
                     />
 
-                    <div className="job-posting__view-toggle" role="group" aria-label="보기 전환">
+                    <div
+                      className="job-posting__view-toggle"
+                      role="group"
+                      aria-label="보기 전환"
+                    >
                       <span
                         className="job-posting__view-btn job-posting__view-btn--card"
                         onClick={() => setView(1)}

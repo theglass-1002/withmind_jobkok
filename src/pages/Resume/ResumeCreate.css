@@ -339,8 +339,12 @@ gap: 28px;
     line-height: 24px; /* 120% */
 }
 
+.resume-create-page__section-title__heading .tooltip{
+    margin-left: 0px;
+}
+
 .resume-create-page__required{
-    color: var(--red-100, #FF524C);
+color: var(--red-100, #FF524C);
 font-family: Pretendard;
 font-size: 20px;
 font-style: normal;

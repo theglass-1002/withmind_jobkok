@@ -30,7 +30,7 @@ export type EmploymentEtc = "military" | "disabled" | "foreigner" | string;
 export interface JobItem {
   /** 공고 id */
   jobIdx: number;
-
+  sourcePlatform?: string;
   /** 직무 카테고리 */
   categoryId: number;
   categoryName: string;

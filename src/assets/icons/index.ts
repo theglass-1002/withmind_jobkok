@@ -10,6 +10,14 @@ import jobkok_wordmark_gray900 from "@/assets/icons/logo/ic_jobkok_word_gray900.
 import jobkok_logo_gray400 from "@/assets/icons/logo/ic_jobkok_logo_gray400.svg";
 import jobkok_logo_gray900 from "@/assets/icons/logo/ic_jobkok_logo_gray900.svg";
 
+
+import jobkok_provider_logo18 from "@/assets/icons/company_logos/jobkok_provider_logo18.svg";
+import jobkorea_provider_logo18 from "@/assets/icons/company_logos/jobkorea_provider_logo18.svg";
+import saramin_provider_logo18 from "@/assets/icons/company_logos/saramin_provider_logo18.svg";
+import wanted_provider_logo18 from "@/assets/icons/company_logos/wanted_provider_logo18.svg";
+
+
+
 import ic_search_gray900_24 from "@/assets/icons/size24/ic_search_gray900_24.svg";
 import ic_bookmark_gray900_24 from "@/assets/icons/size24/ic_bookmark_gray900_24.svg";
 import ic_account_circle_gray900_24 from "@/assets/icons/size24/ic_account_circle_gray900_24.svg";
@@ -165,5 +173,9 @@ export const Icons = {
     ic_bookmark_gray400_24,
     ic_magnifier_24,
     ic_page_facing_up_24,
-    ic_arrow_up_right_gray900_20
+    ic_arrow_up_right_gray900_20,
+    jobkok_provider_logo18,
+    jobkorea_provider_logo18,
+    saramin_provider_logo18,
+    wanted_provider_logo18
 };
