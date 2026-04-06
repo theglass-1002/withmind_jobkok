@@ -64,8 +64,8 @@ export default function ModalEmploymentTypePicker({
             <span className="emp-type__title">고용형태</span>
             <div className="emp-type__list">
               <span
-                className={`emp-type__option ${isSelected("fullTime") ? "on" : ""}`}
-                onClick={() => handleToggleOption("fullTime")}
+                className={`emp-type__option ${isSelected("regular") ? "on" : ""}`}
+                onClick={() => handleToggleOption("regular")}
               >
                 정규직
               </span>
@@ -129,8 +129,8 @@ export default function ModalEmploymentTypePicker({
             <div className="emp-type__list">
               <button
                 type="button"
-                className={`emp-type__option ${isSelected("fullTime") ? "on" : ""}`}
-                onClick={() => handleToggleOption("fullTime")}
+                className={`emp-type__option ${isSelected("regular") ? "on" : ""}`}
+                onClick={() => handleToggleOption("regular")}
               >
                 정규직
               </button>

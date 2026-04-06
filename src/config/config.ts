@@ -1,4 +1,4 @@
-export const IsDev = true;
+export const IsDev = false;
 
 export const LOCAL_BASE_URL = "http://localhost:5173";
 export const REAL_BASE_URL  = "https://jobkok.kr";
@@ -8,9 +8,9 @@ export const KAKAO_REST_API_KEY = "aff22010dc842b57d737fc236ba46676";
 export const GOOGLE_CLIENT_ID = "437460955925-erd8t8c78c8h3hh57gr9552m6pc5gtq7.apps.googleusercontent.com";
 
 
+export const API_BASE_URL = IsDev?"https://api.jobkok.kr":"https://api.jobkok.kr";
 
-export const API_BASE_URL = IsDev?"http://34.50.29.227:9090":"https://api.jobkok.kr";
-//export const AI_BASE_URL = IsDev?LOCAL_BASE_URL:"https://ai.api.jobkok.kr";
+//export const API_BASE_URL = IsDev?"http://34.47.119.240:9090":"https://api.jobkok.kr";
 
  export const AI_BASE_URL = "https://ai.api.jobkok.kr";
 

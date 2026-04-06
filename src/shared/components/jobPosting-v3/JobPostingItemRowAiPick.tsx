@@ -12,6 +12,7 @@ import ai_pick from "@/assets/icons/ai_pick.png";
 import green_star16x16 from "@/assets/icons/green_star16x16.png";
 
 import {
+  formatDueDate,
   getCareerLabel,
   getEducationLabel,
   getEmploymentTypeLabel,
@@ -148,7 +149,7 @@ export default function JobPostingItemRowAiPick({
   const career = getCareerLabel(job.annualFrom, job.annualTo);
   const edu = getEducationLabel(job.educationCode);
   const employmentType = getEmploymentTypeLabel(job.employmentType);
-  const due = job.dueTime ?? "상시 채용";
+  const due = formatDueDate(job.dueTime);
 
   return (
     <>
@@ -174,9 +175,9 @@ export default function JobPostingItemRowAiPick({
               </div>
 
               <div className="job-posting__meta">
-                <div className="job-posting__match job-posting__match--level">
-                  AI 적합도 90%
-                </div>
+              <span className="job-posting__match job-posting__match--level">
+            AI 적합도 {job.matchPercent ? job.matchPercent : 0}%
+          </span>
                 <div className="job-posting__meta-items">
                   <span className="job-posting__meta-item">
                     {loc}ㆍ{career}ㆍ{edu}
@@ -274,9 +275,9 @@ export default function JobPostingItemRowAiPick({
           </div>
         </div>
 
-        <div className="job-posting__match job-posting__match--level">
-          AI 적합도 90%
-        </div>
+        <span className="job-posting__match job-posting__match--level">
+            AI 적합도 {job.matchPercent ? job.matchPercent : 0}%
+          </span>
 
         <div className="job-posting__meta">
           <div className="job-posting__meta-items">

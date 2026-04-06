@@ -29,73 +29,156 @@ export type EmploymentEtc = "military" | "disabled" | "foreigner" | string;
 
 export interface JobItem {
   /** 공고 id */
-  jobIdx: number;
+  jobIdx?: number;
+  sourceJobIdx?: string;
+
+  /** 추천 관련 */
+  matchPercent?: number;
+  recommendReason?: string;
+  aiPick?: boolean;
+
+  /** 소스 플랫폼 */
   sourcePlatform?: string;
+
   /** 직무 카테고리 */
-  categoryId: number;
-  categoryName: string;
+  categoryId?: number;
+  categoryIdx?: number;
+  categoryName?: string;
+  categoryNameList?: string | null;
+  categoryIdxList?: string | null;
 
   /** 회사 */
-  companyId: number;
-  companyName: string;
-  companyLogoUrl: string | null;
-  companyDescription: string | null;
-  companyUrl: string | null;
+  companyId?: number;
+  companyName?: string;
+  companyLogoUrl?: string | null;
+  companyDescription?: string | null;
+  companyUrl?: string | null;
 
   /** 공고 상태 */
-  status: JobStatus; // "active" 같은 값
+  status?: JobStatus;
 
-  /** 연차/경력(응답 기준: annualFrom/annualTo) */
-  annualFrom: number | null;
-  annualTo: number | null;
+  /** 연차/경력 */
+  annualFrom?: number | null;
+  annualTo?: number | null;
+  career?: string | null;
+  careerFrom?: number | null;
+  careerTo?: number | null;
 
-  /** 마감 시간(없으면 null) */
-  dueTime: string | null;
+  /** 마감 시간 */
+  dueTime?: string | null;
 
   /** 공고 제목/내용 */
-  name: string;
-  intro: string | null;
-  mainTasks: string | null;
-  requirements: string | null;
-  preferredPoints: string | null;
-  benefits: string | null;
-  hireRounds: string | null;
+  name?: string;
+  intro?: string | null;
+  mainTasks?: string | null;
+  requirements?: string | null;
+  preferredPoints?: string | null;
+  benefits?: string | null;
+  hireRounds?: string | null;
+  jobSummary?: string | null;
 
   /** 원문 링크 */
-  url: string | null;
-
-  /** 경력 필드(응답에 null로 내려옴 → 유지) */
-  career: string | null;
-  careerFrom: number | null;
-  careerTo: number | null;
+  url?: string | null;
 
   /** 생성/수정일 */
-  createdAt: string;  // "2025-12-01T14:56:54"
-  updatedAt: string;  // "2026-01-06T16:35:44"
+  createdAt?: string;
+  updatedAt?: string;
 
-  /** 저장/지원 여부 (0/1) */
-  favorite: 0 | 1;
-  applied: 0 | 1;
+  /** 저장/지원 여부 */
+  favorite?: 0 | 1;
+  applied?: 0 | 1;
 
   /** 지역 */
-  locationCode: string | null;
-  location: string | null;
+  locationCode?: string | null;
+  location?: string | null;
 
   /** 고용형태 / 학력 */
-  employmentType: EmploymentType; // "regular"
-  employmentEtc: EmploymentEtc; // "regular"
-  educationCode: number | null;
-  educationText: string | null;
+  employmentType?: EmploymentType;
+  employmentEtc?: EmploymentEtc;
+  educationCode?: number | null;
+  educationText?: string | null;
 
   /** 태그/조회수 */
-  companyTags: string[] | null;   // 응답은 null이었음 (배열 가능성 대비)
-  viewCount: number;
+  companyTags?: string[] | null;
+  viewCount?: number;
 
-  /** AI 추천 / 최근 본 공고 */
-  aiPick: boolean;
-  recentViewed: 0 | 1;
-  recentViewedAt: string | null;
+  /** 최근 본 공고 */
+  recentViewed?: 0 | 1;
+  recentViewedAt?: string | null;
+
+  /** 추가 지원 대상 */
+  additionalApplyTypeCodes?: string | null;
+  additionalApplyTypes?: string | null;
 }
+// export interface JobItem {
+//   /** 공고 id */
+//   jobIdx: number;
+//   sourcePlatform?: string;
+//   /** 직무 카테고리 */
+//   categoryId: number;
+//   categoryName: string;
+
+//   /** 회사 */
+//   companyId: number;
+//   companyName: string;
+//   companyLogoUrl: string | null;
+//   companyDescription: string | null;
+//   companyUrl: string | null;
+
+//   /** 공고 상태 */
+//   status: JobStatus; // "active" 같은 값
+
+//   /** 연차/경력(응답 기준: annualFrom/annualTo) */
+//   annualFrom: number | null;
+//   annualTo: number | null;
+
+//   /** 마감 시간(없으면 null) */
+//   dueTime: string | null;
+
+//   /** 공고 제목/내용 */
+//   name: string;
+//   intro: string | null;
+//   mainTasks: string | null;
+//   requirements: string | null;
+//   preferredPoints: string | null;
+//   benefits: string | null;
+//   hireRounds: string | null;
+
+//   /** 원문 링크 */
+//   url: string | null;
+
+//   /** 경력 필드(응답에 null로 내려옴 → 유지) */
+//   career: string | null;
+//   careerFrom: number | null;
+//   careerTo: number | null;
+
+//   /** 생성/수정일 */
+//   createdAt: string;  // "2025-12-01T14:56:54"
+//   updatedAt: string;  // "2026-01-06T16:35:44"
+
+//   /** 저장/지원 여부 (0/1) */
+//   favorite: 0 | 1;
+//   applied: 0 | 1;
+
+//   /** 지역 */
+//   locationCode: string | null;
+//   location: string | null;
+
+//   /** 고용형태 / 학력 */
+//   employmentType: EmploymentType; // "regular"
+//   employmentEtc: EmploymentEtc; // "regular"
+//   educationCode: number | null;
+//   educationText: string | null;
+
+//   /** 태그/조회수 */
+//   companyTags: string[] | null;   // 응답은 null이었음 (배열 가능성 대비)
+//   viewCount: number;
+
+//   /** AI 추천 / 최근 본 공고 */
+//   aiPick: boolean;
+//   recentViewed: 0 | 1;
+//   recentViewedAt: string | null;
+// }
 
 
 export interface JobListApiResponse {
@@ -213,3 +296,17 @@ export const SIZE_MAP: Record<string, number> = {
   "45개씩": 45,
 };
 
+export const formatDueDate = (dueTime?: string | null) => {
+  if (!dueTime) return "상시 채용";
+
+  const date = new Date(dueTime);
+  if (Number.isNaN(date.getTime())) return "상시 채용";
+
+  const days = ["일", "월", "화", "수", "목", "금", "토"];
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const weekday = days[date.getDay()];
+
+  return `~${year}.${month}.${day} (${weekday})`;
+};

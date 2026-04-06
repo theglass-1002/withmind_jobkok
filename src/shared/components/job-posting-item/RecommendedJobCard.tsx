@@ -1,81 +1,132 @@
 import React, { useState } from "react";
-import { Link } from 'react-router-dom';
-import bookmark_active_purple from '@/assets/icons/size24/ic_bookmark_active_purple24.png';
-import bookmark_inactive from '@/assets/icons/size24/ic_blank_bookmark_gray400_24.png';
-import mp_test_logo from '@/assets/icons/mp_test_logo.png';
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+
+import mp_test_logo from "@/assets/icons/mp_test_logo.png";
 import "./RecommendedJobCard.css";
 
-type Job = {
-  jobIdx: number;
-  isBookmarked: boolean;
+import {
+  type JobItem,
+  getCareerLabel,
+  getEducationLabel,
+  getEmploymentTypeLabel,
+  getLocationLabel,
+} from "@/api/job/job.types";
+import { toggleJobFavorite } from "@/api/job/job.api";
+import { logout } from "@/api/auth/auth.api";
+import { Icons } from "@/assets/icons";
+
+type RecommendedJobCardProps = {
+  jobs?: JobItem[];
 };
 
-export default function RecommendedJobCard() {
-  // 각 카드마다 개별 북마크 상태 관리
-  const [jobs, setJobs] = useState<Job[]>([
-    { jobIdx: 1, isBookmarked: false },
-    { jobIdx: 2, isBookmarked: false },
-    { jobIdx: 3, isBookmarked: false },
-    { jobIdx: 4, isBookmarked: false },
-    { jobIdx: 5, isBookmarked: false },
-    { jobIdx: 6, isBookmarked: false },
-    { jobIdx: 7, isBookmarked: false },
-    { jobIdx: 8, isBookmarked: false },
-    { jobIdx: 9, isBookmarked: false },
-    // { id: 4, isBookmarked: false },
-    // { id: 5, isBookmarked: false },
-    // { id: 6, isBookmarked: false },
-    // { id: 7, isBookmarked: false },
-    // { id: 8, isBookmarked: false },
-  ]);
+type BookmarkMap = Record<number, boolean>;
 
-  const handleBookmark = (e: React.MouseEvent, jobId: number) => {
+export default function RecommendedJobCard({
+  jobs = [],
+}: RecommendedJobCardProps) {
+  const navigate = useNavigate();
+  const [bookmarkOverrides, setBookmarkOverrides] = useState<BookmarkMap>({});
+
+  const getBookmarked = (job: JobItem) => {
+    return bookmarkOverrides[job.jobIdx] ?? (job.favorite === 1);
+  };
+
+  const handleBookmark = async (e: React.MouseEvent, targetJob: JobItem) => {
     e.preventDefault();
     e.stopPropagation();
-    setJobs(prevJobs => 
-      prevJobs.map(job => 
-        job.jobIdx === jobId ? { ...job, isBookmarked: !job.isBookmarked } : job
-      )
-    );
+
+    const prev = getBookmarked(targetJob);
+    const next = !prev;
+
+    try {
+      setBookmarkOverrides((prevMap) => ({
+        ...prevMap,
+        [targetJob.jobIdx]: next,
+      }));
+
+      await toggleJobFavorite(targetJob.jobIdx, prev);
+
+      toast.success(
+        next ? "즐겨찾기에 추가되었습니다." : "즐겨찾기가 해제되었습니다."
+      );
+    } catch (e: any) {
+      console.error("즐겨찾기 처리 오류:", e);
+
+      setBookmarkOverrides((prevMap) => ({
+        ...prevMap,
+        [targetJob.jobIdx]: prev,
+      }));
+
+      if (e?.code === 999) {
+        logout();
+        navigate("/login");
+        return;
+      }
+
+      toast.error("즐겨찾기 처리 중 오류가 발생했습니다.");
+    }
   };
 
   return (
-    <>
-      <ul className="job-list recommend">
-        {jobs.map((job) => (
-          <li key={job.jobIdx} className="job-card">
+    <ul className="job-list recommend">
+      {jobs.map((job) => {
+        const loc = getLocationLabel(job.locationCode);
+        const career = getCareerLabel(job.annualFrom, job.annualTo);
+        const edu = getEducationLabel(job.educationCode);
+        const employmentType = getEmploymentTypeLabel(job.employmentType);
+        const isBookmarked = getBookmarked(job);
+
+        return (
+          <li
+            key={job.jobIdx}
+            className="job-card"
+            onClick={() =>
+              navigate(
+                `/jobs/${job.jobIdx}?title=${encodeURIComponent(
+                  job.companyName ?? ""
+                )}`
+              )
+            }
+            style={{ cursor: "pointer" }}
+          >
             <div className="job-head">
-              <span className="job-logo"><img src={mp_test_logo} alt="" /></span>
-              <span 
-                className="job-bookmark" 
-                onClick={(e) => handleBookmark(e, job.jobIdx)}
-                style={{cursor: 'pointer'}}
+              <span className="job-logo">
+                <img src={job.companyLogoUrl || mp_test_logo} alt="" />
+              </span>
+
+              <span
+                className="job-bookmark"
+                onClick={(e) => handleBookmark(e, job)}
+                style={{ cursor: "pointer" }}
               >
-                <img 
-                  src={job.isBookmarked ? bookmark_active_purple : bookmark_inactive} 
-                  alt="" 
+                <img
+                  src={isBookmarked ? Icons.ic_bookmark_active_purple24 : Icons.ic_bookmark_gray400_24}
+                  alt=""
                 />
               </span>
             </div>
 
             <div className="job-main">
               <div className="job-company">
-                <span className="company-name">케이티밀리의서재</span>
-                <span className="job-role">프로덕트 디자이너</span>
+                <span className="company-name">{job.companyName}</span>
+                <span className="job-role">{job.name}</span>
               </div>
 
               <div className="job-meta">
                 <div className="job-meta__tags">
-                  <span className="job-tag job-tag--location">서울 마포구</span>
-                  <span className="job-tag job-tag--experience">5~10년</span>
-                  <span className="job-tag job-tag--education">학력 무관</span>
+                  <span className="job-tag job-tag--location">{loc}</span>
+                  <span className="job-tag job-tag--experience">{career}</span>
+                  <span className="job-tag job-tag--education">
+                    {job.educationText ?? edu}
+                  </span>
                 </div>
-                <div className="job-type">정규직 · 계약직</div>
+                <div className="job-type">{employmentType}</div>
               </div>
             </div>
           </li>
-        ))}
-      </ul>
-    </>
+        );
+      })}
+    </ul>
   );
 }

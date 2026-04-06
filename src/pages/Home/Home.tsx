@@ -231,6 +231,12 @@ export default function Home() {
       return;
     }
 
+    console.log("[Home] 검색어 입력:", keyword);
+    console.log("[Home] /jobs 로 전달하는 state:", {
+      activeTab: "all",
+      keyword,
+    });
+
     setOpenAuto(false);
     navigate("/jobs", { state: { activeTab: "all", keyword } });
   };
@@ -240,6 +246,7 @@ export default function Home() {
     setOpenAuto(false);
 
     if (item.kind === "category" && item.categoryIdx != null) {
+      console.log("[Home] 자동완성 카테고리 선택:", item);
       navigate("/jobs", {
         state: { activeTab: "all", categoryIdx: item.categoryIdx },
       });
@@ -247,6 +254,7 @@ export default function Home() {
     }
 
     if (item.jobIdx != null) {
+      console.log("[Home] 자동완성 직무 선택:", item);
       navigate("/jobs", {
         state: {
           activeTab: "all",
@@ -257,10 +265,13 @@ export default function Home() {
       return;
     }
 
+    console.log("[Home] 자동완성 키워드 선택:", item.label);
     navigate("/jobs", { state: { activeTab: "all", keyword: item.label } });
   };
 
   const handleClickCategory = (cat: JobNode) => {
+    console.log("[Home] 카테고리 클릭:", cat);
+
     navigate("/jobs", {
       state: {
         activeTab: "all",
@@ -280,7 +291,6 @@ export default function Home() {
         setErrorMsg(null);
 
         const response: any = await fetchJobTree();
-       
 
         if (!alive) return;
 
@@ -290,11 +300,7 @@ export default function Home() {
           ? response
           : [];
 
-     
-
         const tree = buildTreeFromFlatList(flatList as FlatJobNode[]);
-      
-
         setJobTree(tree);
       } catch (e: any) {
         if (!alive) return;
@@ -312,9 +318,7 @@ export default function Home() {
     };
   }, [navigate]);
 
-  useEffect(() => {
-    
-  }, [jobTree, topCategories]);
+  useEffect(() => {}, [jobTree, topCategories]);
 
   useEffect(() => {
     const masthead = document.querySelector(".masthead");

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Switch from "react-switch";
 
 import search from "@/assets/icons/search.png";
@@ -39,14 +39,27 @@ type Chip = {
 
 type FilterKey = "role" | "career" | "education" | "location" | "employment";
 
+type JobsLocationState = {
+  activeTab?: "all" | "saved";
+  keyword?: string;
+  categoryIdx?: number | string;
+  jobId?: number | string;
+  childrenCount?: number;
+  children?: any[];
+};
+
 export default function M_AllJobPostingSection() {
   const navigate = useNavigate();
+  const location = useLocation();
   const jobPostingRef = useRef<HTMLDivElement | null>(null);
 
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState("최신순");
   const [openFilter, setOpenFilter] = useState<FilterKey | null>(null);
   const [resumeReco, setResumeReco] = useState(false);
+
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [appliedSearchKeyword, setAppliedSearchKeyword] = useState("");
 
   const sortOptions = ["최신순", "인기순", "마감임박순"];
 
@@ -82,7 +95,7 @@ export default function M_AllJobPostingSection() {
   };
 
   const empLabelMap: Record<string, string> = {
-    fullTime: "정규직",
+    regular: "정규직",
     contract: "계약직",
     intern: "인턴",
     militaryService: "병역특례",
@@ -109,6 +122,17 @@ export default function M_AllJobPostingSection() {
   );
 
   useEffect(() => {
+    const state = (location.state as JobsLocationState) || null;
+    const incomingKeyword = state?.keyword?.trim() ?? "";
+
+    if (incomingKeyword) {
+      setSearchKeyword(incomingKeyword);
+      setAppliedSearchKeyword(incomingKeyword);
+      setPage(1);
+    }
+  }, [location.state]);
+
+  useEffect(() => {
     const init = async () => {
       try {
         setJobLoading(true);
@@ -116,7 +140,6 @@ export default function M_AllJobPostingSection() {
         setJobTree(tree);
         setInitialized(true);
       } catch (e: any) {
-        console.error("[M_AllJobPostingSection] fetchJobTree 에러:", e);
         if (e?.code === 999) {
           logout();
           navigate("/login");
@@ -132,7 +155,8 @@ export default function M_AllJobPostingSection() {
   const buildParamsFromFilters = (
     filters: AppliedFilters,
     sortLabel: string,
-    resumeBased: boolean
+    resumeBased: boolean,
+    keyword: string
   ) => {
     const roleIds = filters.roles.map((r) =>
       r.roleKey === r.categoryKey ? Number(r.categoryKey) : Number(r.roleKey)
@@ -165,6 +189,10 @@ export default function M_AllJobPostingSection() {
       resumeBased,
     };
 
+    if (keyword) {
+      params.keyword = keyword;
+    }
+
     if (hasFilters) {
       params.categoryIdx = roleIds.length ? roleIds : undefined;
       params.career = career;
@@ -186,6 +214,7 @@ export default function M_AllJobPostingSection() {
         employmentEtc,
         sortCode,
         resumeBased,
+        keyword,
       },
     };
   };
@@ -253,10 +282,6 @@ export default function M_AllJobPostingSection() {
   };
 
   useEffect(() => {
-    console.log("[M_AllJobPostingSection] appliedFilters:", appliedFilters);
-  }, [appliedFilters]);
-
-  useEffect(() => {
     if (!initialized) return;
 
     const loadJobs = async () => {
@@ -265,14 +290,12 @@ export default function M_AllJobPostingSection() {
         setJobsFetched(false);
 
         const size = 15;
-        const { params, meta } = buildParamsFromFilters(
+        const { params } = buildParamsFromFilters(
           appliedFilters,
           sort,
-          resumeReco
+          resumeReco,
+          appliedSearchKeyword
         );
-
-        console.log("[M_AllJobPostingSection] fetch params:", params);
-        console.log("[M_AllJobPostingSection] fetch meta:", meta);
 
         const { jobs, totalPages, totalCount } = await fetchJobList(
           page,
@@ -284,7 +307,10 @@ export default function M_AllJobPostingSection() {
         setTotalPages(totalPages);
         setTotalCount(totalCount);
       } catch (e: any) {
-        console.error("[M_AllJobPostingSection] fetchJobList 에러:", e);
+        if (e?.code === 999) {
+          logout();
+          navigate("/login");
+        }
       } finally {
         setJobsLoading(false);
         setJobsFetched(true);
@@ -292,7 +318,15 @@ export default function M_AllJobPostingSection() {
     };
 
     loadJobs();
-  }, [initialized, navigate, page, sort, resumeReco, appliedFilters]);
+  }, [
+    initialized,
+    navigate,
+    page,
+    sort,
+    resumeReco,
+    appliedFilters,
+    appliedSearchKeyword,
+  ]);
 
   useEffect(() => {
     if (page === 1) return;
@@ -307,6 +341,27 @@ export default function M_AllJobPostingSection() {
       behavior: "smooth",
     });
   }, [page]);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchKeyword(e.target.value);
+  };
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.nativeEvent.isComposing || e.keyCode === 229) return;
+    if (e.key !== "Enter") return;
+
+    e.preventDefault();
+
+    const keyword = searchKeyword.trim();
+    setPage(1);
+    setAppliedSearchKeyword(keyword);
+  };
+
+  const handleClearSearch = () => {
+    setSearchKeyword("");
+    setAppliedSearchKeyword("");
+    setPage(1);
+  };
 
   const handleSortChange = (newSort: string) => {
     setSort(newSort);
@@ -375,7 +430,6 @@ export default function M_AllJobPostingSection() {
   };
 
   const handleApplyFilter = (filters: AppliedFilters) => {
-    console.log("[M_AllJobPostingSection] onApply filters:", filters);
     setAppliedFilters(filters);
     setChips(makeChipsFromFilters(filters));
     setPage(1);
@@ -383,7 +437,6 @@ export default function M_AllJobPostingSection() {
   };
 
   const handleResetFilter = () => {
-    console.log("[M_AllJobPostingSection] onReset filters");
     setAppliedFilters(defaultFilters);
     setChips([]);
     setPage(1);
@@ -414,8 +467,20 @@ export default function M_AllJobPostingSection() {
         <div className="jobs-toolbar__search">
           <div className="panel-search">
             <img className="jobs-search__icon" src={search} alt="" />
-            <input type="text" placeholder="직무, 기업명, 지역등을 입력해주세요" />
-            <img className="jobs-search__clear_icon" src={cancel} alt="" />
+            <input
+              type="text"
+              placeholder="직무, 기업명, 지역등을 입력해주세요"
+              value={searchKeyword}
+              onChange={handleSearchChange}
+              onKeyDown={handleSearchKeyDown}
+            />
+            <span
+              className="jobs-search__clear_icon"
+              onClick={handleClearSearch}
+              style={{ cursor: "pointer" }}
+            >
+              <img src={cancel} alt="" />
+            </span>
           </div>
 
           <div className="job-search-filters">
@@ -571,6 +636,7 @@ export default function M_AllJobPostingSection() {
           filterType={openFilter}
           totalCount={totalCount}
           initialFilters={appliedFilters}
+          resumeReco={resumeReco}
           onClose={handleCloseFilter}
           onApply={handleApplyFilter}
           onReset={handleResetFilter}
@@ -589,11 +655,7 @@ export default function M_AllJobPostingSection() {
               <>
                 <div className="job-posting__header">
                   <span className="job-posting__count">
-                    총{" "}
-                    <p className="point-text-black">
-                      {totalCount.toLocaleString()}개
-                    </p>{" "}
-                    전체공고
+                    총 <p className="point-text-black">{totalCount.toLocaleString()}개</p> 전체공고
                   </span>
 
                   <div className="job-posting__controls">

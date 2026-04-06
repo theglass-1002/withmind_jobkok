@@ -12,6 +12,7 @@ import ai_pick from "@/assets/icons/ai_pick.png";
 import green_star16x16 from "@/assets/icons/green_star16x16.png";
 
 import {
+  formatDueDate,
   getCareerLabel,
   getEducationLabel,
   getEmploymentTypeLabel,
@@ -196,7 +197,7 @@ export default function JobPostingItemCardAiPick({
       <div className="job-card__body">
         <div className="job-card__content">
           <span className="job-posting__match job-posting__match--level">
-            AI 적합도 90%
+            AI 적합도 {job.matchPercent ? job.matchPercent : 0}%
           </span>
 
           <div className="job-card__facts">
@@ -206,7 +207,7 @@ export default function JobPostingItemCardAiPick({
               </span>
             </div>
             <span className="job-card__deadline">
-              {employmentType} ㆍ {job.dueTime ?? "상시채용"}
+              {employmentType} ㆍ {formatDueDate(job.dueTime)}
             </span>
           </div>
         </div>

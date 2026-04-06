@@ -8,17 +8,24 @@ import AllJobPostingSection from "@/pages/Jobs/sections/AllJobPostingSection";
 import M_AllJobPostingSection from "@/pages/Jobs/sections/M_AllJobPostingSection";
 import SavedJobPostingSection from "@/pages/Jobs/sections/SavedJobPostingSection";
 import M_SavedJobPostingSection from "@/pages/Jobs/sections/M_SavedJobPostingSection";
-import { logout } from "@/api/auth/auth.api";
 import { fetchResumeCheck } from "@/api/resume/resume.api";
 
 import "./Jobs.css";
+
+type JobsLocationState = {
+  activeTab?: "all" | "saved";
+  keyword?: string;
+  categoryIdx?: number | string;
+  jobId?: number | string;
+  childrenCount?: number;
+  children?: any[];
+};
 
 export default function JobsList() {
   const navigate = useNavigate();
   const location = useLocation();
 
   const [activeTab, setActiveTab] = useState<"all" | "saved">("all");
-
   const [resumeExists, setResumeExists] = useState<boolean | null>(null);
 
   const isTabsSticky = useStickyTabs(
@@ -37,21 +44,23 @@ export default function JobsList() {
   };
 
   useEffect(() => {
-    const state = location.state as { activeTab?: "all" | "saved" } | null;
+    const state = (location.state as JobsLocationState) || null;
+
+    console.log("[JobsList] location.state:", state);
+    console.log("[JobsList] 전달받은 keyword:", state?.keyword);
+
     const incomingTab = state?.activeTab;
 
     if (incomingTab === "all" || incomingTab === "saved") {
       setActiveTab(incomingTab);
-      navigate(location.pathname, { replace: true });
     }
-  }, [location.state, location.pathname, navigate]);
+  }, [location.state]);
 
   useEffect(() => {
     const checkResume = async () => {
       try {
         const resumeCheck = await fetchResumeCheck();
         console.log("resumeCheck.exists:", resumeCheck.exists);
-
         setResumeExists(resumeCheck.exists);
       } catch (e) {
         console.error("이력서 존재 여부 확인 중 오류:", e);
@@ -140,26 +149,26 @@ export default function JobsList() {
           itemClassName="jobs-tab"
           activeClassName="on"
         />
-          {resumeExists === false && (
-                <div className="resume-promo-container">
-                <div className="resume-promo">
-                <span className="resume-promo__text">
-                  이력서 작성하고 나에게 맞는 AI 공고 추천을 받아보세요.
+        {resumeExists === false && (
+          <div className="resume-promo-container">
+            <div className="resume-promo">
+              <span className="resume-promo__text">
+                이력서 작성하고 나에게 맞는 AI 공고 추천을 받아보세요.
+              </span>
+              <a className="resume-promo__action" href="/resumes/m-create">
+                <span className="resume-promo__label">이력서 작성하기</span>
+                <span className="resume-promo__icon">
+                  <img src={keyboard_arrow_right} alt="" />
                 </span>
-                <a className="resume-promo__action" href="/resumes/m-create">
-                  <span className="resume-promo__label">이력서 작성하기</span>
-                  <span className="resume-promo__icon">
-                  <img  src={keyboard_arrow_right} alt="" />
-                  </span>
               </a>
-              </div>
             </div>
-            )}
-            {activeTab === "all" ? (
-              <M_AllJobPostingSection />
-            ) : (
-              <M_SavedJobPostingSection />
-            )}
+          </div>
+        )}
+        {activeTab === "all" ? (
+          <M_AllJobPostingSection />
+        ) : (
+          <M_SavedJobPostingSection />
+        )}
       </div>
     </>
   );

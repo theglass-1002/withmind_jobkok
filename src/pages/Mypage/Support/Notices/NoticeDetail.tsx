@@ -26,7 +26,7 @@ export default function NoticeDetail() {
   const [isLoading, setIsLoading] = useState(false);
 
   const getBackPath = () => {
-    return isMobileScreen() ? "/mypage/m-support/notices" : "/mypage/notice";
+    return isMobileScreen() ? "/mypage/m-support/notices" : "/mypage/support/notices";
   };
 
   const handleGoBack = () => {
@@ -97,12 +97,12 @@ export default function NoticeDetail() {
         </section>
 
         <div className="inquiry-actions">
-          <div className="inquiry-actions__left">
+      
             <button className="btn default_btn_white" onClick={handleGoBack}>
               <img src={chevron_left} alt="" />
               목록으로
             </button>
-          </div>
+     
         </div>
       </div>
 

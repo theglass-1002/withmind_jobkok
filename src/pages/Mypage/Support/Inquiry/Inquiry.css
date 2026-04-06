@@ -179,7 +179,7 @@ line-height: 20px; /* 125% */
   
     flex: 1 0 0;
     align-self: stretch;
-    border-bottom: 1px solid var(--gray-300, #E0E2E4);
+    /* border-bottom: 1px solid var(--gray-300, #E0E2E4); */
    
     background: var(--white-100, #FFF);
 }

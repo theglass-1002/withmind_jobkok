@@ -38,6 +38,7 @@ interface JobFilterPanelProps {
   filterType?: FilterType;
   totalCount?: number;
   initialFilters?: AppliedFilters;
+  resumeReco?: boolean;
   onClose?: () => void;
   onApply?: (filters: AppliedFilters) => void;
   onReset?: () => void;
@@ -47,6 +48,7 @@ export default function JobFilterPanel({
   filterType,
   totalCount = 0,
   initialFilters,
+  resumeReco = false,
   onClose,
   onApply,
   onReset,
@@ -133,7 +135,7 @@ export default function JobFilterPanel({
   };
 
   const empLabelMap: Record<EmpOptionKey, string> = {
-    fullTime: "정규직",
+    regular: "정규직",
     contract: "계약직",
     intern: "인턴",
     militaryService: "병역특례",
@@ -180,6 +182,7 @@ export default function JobFilterPanel({
 
       const params: any = {
         sort: sortCode,
+        resumeBased: resumeReco,
       };
 
       if (hasFilters) {
@@ -204,7 +207,15 @@ export default function JobFilterPanel({
     }, 250);
 
     return () => clearTimeout(t);
-  }, [selectedRoles, careerRange, educationSelected, locationSelected, employmentSelected, hasFilters]);
+  }, [
+    selectedRoles,
+    careerRange,
+    educationSelected,
+    locationSelected,
+    employmentSelected,
+    hasFilters,
+    resumeReco,
+  ]);
 
   const handleRoleApply = (roles: SelectedRole[]) => {
     setSelectedRoles(roles);

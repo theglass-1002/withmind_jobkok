@@ -134,7 +134,7 @@ export const toLocationCodeParam = (selected: LocationSelectedItem[]) => {
 
 
 export type EmpOptionKey =
-  | "fullTime"
+  | "regular"
   | "contract"
   | "intern"
   | "militaryService"
@@ -142,7 +142,7 @@ export type EmpOptionKey =
   | "disability";
 
 export const EMPLOYMENT_TYPE_KEYS: EmpOptionKey[] = [
-  "fullTime",
+  "regular",
   "contract",
   "intern",
 ];

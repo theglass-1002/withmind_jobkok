@@ -26,7 +26,11 @@ import M_JobDetail from "./M_JobDetail";
 import Modal from "@/shared/components/modal/Modal";
 import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
 
-import { fetchJobDetail, toggleJobFavorite } from "@/api/job/job.api";
+import {
+  fetchJobDetail,
+  fetchJobList,
+  toggleJobFavorite,
+} from "@/api/job/job.api";
 import {
   JobItem,
   getLocationLabel,
@@ -41,22 +45,24 @@ import { REAL_BASE_URL } from "@/config/config";
 
 export default function JobDetail() {
   const navigate = useNavigate();
-  const { jobId } = useParams(); // /jobs/:jobId
+  const { jobId } = useParams();
 
-
-    console.log("jobId:", jobId);
   const [bookMark, setBookMark] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [job, setJob] = useState<JobItem | null>(null);
+  const [recommendedJobs, setRecommendedJobs] = useState<JobItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [resumeExists, setResumeExists] = useState<boolean | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
+
     const loadDetail = async () => {
       if (!jobId) return;
+
       const idNum = Number(jobId);
       if (Number.isNaN(idNum)) return;
 
@@ -64,57 +70,77 @@ export default function JobDetail() {
         setLoading(true);
         setError(null);
 
-      
         const { job } = await fetchJobDetail(idNum);
+
+        if (!isMounted) return;
+
         setJob(job);
         setBookMark(job.favorite === 1);
-        console.log(job);
-     
-        try {
-          const resumeCheck = await fetchResumeCheck();
-          console.log("📝 resumeCheck.exists:", resumeCheck.exists);
-          setResumeExists(resumeCheck.exists);
-        } catch (e) {
-          console.error("이력서 존재 여부 확인 중 오류:", e);
-          if (e?.code === 999) {
-            console.log("로그인만료");
-            logout();
-            navigate("/login");
-            return;
-          }
-  
-          setResumeExists(false);
+        console.log("job detail:", job);
+
+        const resumeCheck = await fetchResumeCheck();
+
+        if (!isMounted) return;
+
+        setResumeExists(resumeCheck.exists);
+
+        if (resumeCheck.exists === true) {
+          const page = 1;
+          const size = 8;
+          const params = { resumeBased: true } as any;
+
+          const { jobs } = await fetchJobList(page, size, params);
+
+          if (!isMounted) return;
+
+          setRecommendedJobs(Array.isArray(jobs) ? jobs : []);
+        } else {
+          setRecommendedJobs([]);
         }
       } catch (e: any) {
         console.error(e);
+
+        if (!isMounted) return;
+
+        if (e?.code === 999) {
+          console.log("로그인만료");
+          logout();
+          navigate("/login");
+          return;
+        }
+
         setError(
           e?.message || "채용 공고 상세를 불러오는 중 오류가 발생했습니다."
         );
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     loadDetail();
-  }, [jobId]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [jobId, navigate]);
 
   const handleBookmark = async () => {
-    if (!job) return;
+    if (!job?.jobIdx) return;
 
-    const next = !bookMark; // next=true면 추가 상태, false면 해제 상태
+    const next = !bookMark;
 
     try {
-      // optimistic update (즉시 UI 반영)
       setBookMark(next);
-
-      // 현재 bookMark가 true면 "해제" API, false면 "추가" API
       await toggleJobFavorite(job.jobIdx, bookMark);
 
-      toast.success(next ? "즐겨찾기에 추가되었습니다." : "즐겨찾기가 해제되었습니다.");
+      toast.success(
+        next ? "즐겨찾기에 추가되었습니다." : "즐겨찾기가 해제되었습니다."
+      );
     } catch (e: any) {
       console.error("즐겨찾기 처리 오류:", e);
 
-      // 실패 시 롤백
       setBookMark((prev) => !prev);
 
       if (e?.code === 999) {
@@ -128,17 +154,15 @@ export default function JobDetail() {
   };
 
   const handleCopyLink = () => {
-  
     if (!window.location.pathname) {
       toast.error("복사할 링크가 없습니다.");
       return;
     }
-  
-    const cleanUrl =
-    REAL_BASE_URL + window.location.pathname;
-   
+
+    const cleanUrl = REAL_BASE_URL + window.location.pathname;
+
     console.log(cleanUrl);
-  
+
     navigator.clipboard
       .writeText(cleanUrl)
       .then(() => {
@@ -148,11 +172,8 @@ export default function JobDetail() {
         toast.error("링크 복사에 실패했습니다.");
       });
   };
-  
 
   const handleMockInterviewClick = () => {
-    // 여기서 resumeExists 보고 분기할 수도 있음
-    // if (!resumeExists) { setIsModalOpen(true); } else { ... }
     setIsModalOpen(true);
   };
 
@@ -165,10 +186,9 @@ export default function JobDetail() {
       toast.error("지원 링크가 없습니다.");
       return;
     }
-  
+
     window.open(job.url, "_blank", "noopener,noreferrer");
   };
-  
 
   const splitLines = (text?: string | null) =>
     text ? text.split("\n").filter((line) => line.trim().length > 0) : [];
@@ -176,9 +196,9 @@ export default function JobDetail() {
   const title = job?.name || "채용 공고";
   const companyName = job?.companyName || "";
   const companyLogo = job?.companyLogoUrl || withmind_logo80;
-  const locationLabel = job ? getLocationLabel(job.locationCode) : "";
+  const locationLabel = job?.location || (job ? getLocationLabel(job.locationCode) : "");
   const careerLabel = job ? getCareerLabel(job.annualFrom, job.annualTo) : "";
-  const educationLabel = job ? getEducationLabel(job.educationCode) : "";
+  const educationLabel = job?.educationText || (job ? getEducationLabel(job.educationCode) : "");
   const employmentLabel = job
     ? getEmploymentTypeLabel(job.employmentType)
     : "";
@@ -189,6 +209,10 @@ export default function JobDetail() {
   const benefitsLines = splitLines(job?.benefits);
   const hireRoundsLines = splitLines(job?.hireRounds);
   const deadlineText = job?.dueTime ? job.dueTime : "상시 채용";
+
+  const hasAiMatch =
+    typeof job?.matchPercent === "number" &&
+    !!job?.recommendReason?.trim();
 
   if (loading && !job) {
     return <LoadingOverlay />;
@@ -208,6 +232,8 @@ export default function JobDetail() {
 
   return (
     <>
+      {loading && <LoadingOverlay />}
+
       <div className="job-detail__container">
         <article className="job-detail">
           <section className="job-detail__main">
@@ -258,54 +284,57 @@ export default function JobDetail() {
                 </div>
               </div>
 
-              <div className="job-detail__ai">
-                <div className="job-detail__ai-header">
-                  <span className="job-detail__ai-icon">
-                    <img src={green_star20x20} alt="" />
-                  </span>
-                  <span className="job-detail__ai-title">AI 적합도 00%</span>
-                </div>
-
-                <div className="job-detail__ai-summary">
-                  <div className="job-detail__ai-item">
-                    <span className="job-detail__ai-term">분석 요약</span>
-                    <span className="job-detail__ai-desc">
-                      이력서를 등록하면, 해당 공고와의 매칭 포인트를 AI가
-                      분석해서 보여드려요.
+              {hasAiMatch && (
+                <div className="job-detail__ai">
+                  <div className="job-detail__ai-header">
+                    <span className="job-detail__ai-icon">
+                      <img src={green_star20x20} alt="" />
+                    </span>
+                    <span className="job-detail__ai-title">
+                      AI 적합도 {job?.matchPercent}%
                     </span>
                   </div>
 
-                  <div className="job-detail__ai-item">
-                    <span className="job-detail__ai-term">추천 이유</span>
-                    <span className="job-detail__ai-desc">
-                      경력, 기술 스택, 지역 등을 고려해 나에게 잘 맞는 공고인지를
-                      확인해 보세요.
-                    </span>
+                  <div className="job-detail__ai-summary">
+                    <div className="job-detail__ai-item">
+                      <span className="job-detail__ai-term">분석 요약</span>
+                      <span className="job-detail__ai-desc">
+                        등록된 이력서를 기준으로 공고와의 적합도를 AI가 분석한
+                        결과예요.
+                      </span>
+                    </div>
+
+                    <div className="job-detail__ai-item">
+                      <span className="job-detail__ai-term">추천 이유</span>
+                      <span className="job-detail__ai-desc">
+                        {job?.recommendReason}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-               {resumeExists === false && (
-                   <div className="job-detail__resume">
-                   <div className="job-detail__resume-info">
-                     <img src={ic_document_search_purple_20} alt="" />
-                     <span className="job-detail__resume-text">
-                       이력서 작성하고 나에게 맞는 AI 공고 추천을 받아보세요.
-                     </span>
-                   </div>
-                   <div
-                     className="job-detail__resume-cta"
-                     onClick={() => {
-                       navigate(`/resumes/create`);
-                     }}
-                   >
-                     <span className="job-detail__resume-button">
-                       이력서 작성하기
-                     </span>
-                     <img src={ic_chevron_forward_right_purple_20} alt="" />
-                   </div>
-                 </div>
-               )}
-          
+              )}
+
+              {resumeExists === false && (
+                <div className="job-detail__resume">
+                  <div className="job-detail__resume-info">
+                    <img src={ic_document_search_purple_20} alt="" />
+                    <span className="job-detail__resume-text">
+                      이력서 작성하고 나에게 맞는 AI 공고 추천을 받아보세요.
+                    </span>
+                  </div>
+                  <div
+                    className="job-detail__resume-cta"
+                    onClick={() => {
+                      navigate(`/resumes/create`);
+                    }}
+                  >
+                    <span className="job-detail__resume-button">
+                      이력서 작성하기
+                    </span>
+                    <img src={ic_chevron_forward_right_purple_20} alt="" />
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="job-detail__divider"></div>
@@ -317,7 +346,7 @@ export default function JobDetail() {
                   <ul className="job-detail__list">
                     {mainTasksLines.map((line, idx) => (
                       <li key={idx} className="job-detail__list-item">
-                         {line}
+                        {line}
                       </li>
                     ))}
                   </ul>
@@ -330,7 +359,7 @@ export default function JobDetail() {
                   <ul className="job-detail__list">
                     {requirementsLines.map((line, idx) => (
                       <li key={idx} className="job-detail__list-item">
-                         {line}
+                        {line}
                       </li>
                     ))}
                   </ul>
@@ -343,53 +372,38 @@ export default function JobDetail() {
                   <ul className="job-detail__list">
                     {preferredPointsLines.map((line, idx) => (
                       <li key={idx} className="job-detail__list-item">
-                         {line}
+                        {line}
                       </li>
                     ))}
                   </ul>
                 </div>
               )}
 
-                {benefitsLines.length > 0 && (
-                  <div className="job-detail__section job-detail__section--benefits">
-                 <span className="job-detail__section-title">복지 및 혜택</span>
-                    <ul className="job-detail__list">
-                      {benefitsLines.map((line, idx) => (
-                        <li key={idx} className="job-detail__list-item">
-                          {line}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-               {hireRoundsLines.length > 0 && (
-                  <div className="job-detail__section job-detail__section--benefits">
-                      <span className="job-detail__section-title">채용 전형</span>
-                    <ul className="job-detail__list">
-                      {hireRoundsLines.map((line, idx) => (
-                        <li key={idx} className="job-detail__list-item">
-                          {line}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}  
-              {/* {job?.benefits && (
+              {benefitsLines.length > 0 && (
                 <div className="job-detail__section job-detail__section--benefits">
                   <span className="job-detail__section-title">복지 및 혜택</span>
-                  <pre className="job-detail__pre">{job.benefits}</pre>
+                  <ul className="job-detail__list">
+                    {benefitsLines.map((line, idx) => (
+                      <li key={idx} className="job-detail__list-item">
+                        {line}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               )}
 
-              {job?.companyDescription && (
-                <div className="job-detail__section job-detail__section--company">
-                  <span className="job-detail__section-title">회사 소개</span>
-                  <pre className="job-detail__pre">
-                    {job.companyDescription}
-                  </pre>
+              {hireRoundsLines.length > 0 && (
+                <div className="job-detail__section job-detail__section--benefits">
+                  <span className="job-detail__section-title">채용 전형</span>
+                  <ul className="job-detail__list">
+                    {hireRoundsLines.map((line, idx) => (
+                      <li key={idx} className="job-detail__list-item">
+                        {line}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-              )} */}
+              )}
             </div>
 
             <div className="job-detail__divider"></div>
@@ -441,7 +455,7 @@ export default function JobDetail() {
                     <span className="job-detail__aside-label">학력</span>
                   </div>
                   <span className="job-detail__aside-value">
-                    {educationLabel}
+                    {educationLabel || "학력 무관"}
                   </span>
                 </div>
 
@@ -453,7 +467,7 @@ export default function JobDetail() {
                     <span className="job-detail__aside-label">근무 지역</span>
                   </div>
                   <span className="job-detail__aside-value">
-                    {locationLabel}
+                    {locationLabel || "-"}
                   </span>
                 </div>
 
@@ -465,7 +479,7 @@ export default function JobDetail() {
                     <span className="job-detail__aside-label">고용 형태</span>
                   </div>
                   <span className="job-detail__aside-value">
-                    {employmentLabel}
+                    {employmentLabel || "-"}
                   </span>
                 </div>
 
@@ -481,19 +495,13 @@ export default function JobDetail() {
                   </span>
                 </div>
 
-       
-                  <span className="job-detail__apply-cta default_btn_black"
+                <span
+                  className="job-detail__apply-cta default_btn_black"
                   onClick={handleApplyClick}
                   style={{ cursor: "pointer" }}
-                  >
-                    {/* <span className="job-detail__apply-cta-logo">
-                      <img src={text_jobkorea_logo} alt="" />
-                    </span> */}
-                    <span className="job-detail__apply-cta-text">
-                       지원하기
-                    </span>
-                  </span>
-           
+                >
+                  <span className="job-detail__apply-cta-text">지원하기</span>
+                </span>
               </div>
             </section>
 
@@ -520,10 +528,12 @@ export default function JobDetail() {
           </aside>
         </article>
 
-        <section className="job-recos">
-          <div className="job-recos__title">추천 채용공고</div>
-          <RecommendedJobCard />
-        </section>
+        {resumeExists === true && (
+          <section className="job-recos">
+            <div className="job-recos__title">추천 채용공고</div>
+            <RecommendedJobCard jobs={recommendedJobs} />
+          </section>
+        )}
       </div>
 
       <M_JobDetail />

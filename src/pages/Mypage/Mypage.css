@@ -1574,6 +1574,14 @@ line-height: 20px; /* 125% */
     display: none;
 }
 
+.inquiry .inquiry-actions{
+    border-top: 1px solid var(--gray-300, #E0E2E4);
+}
+
+.edit-profile__container .account-main.password-tab .form-action-group{
+    border-top: 1px solid var(--gray-300, #E0E2E4);
+}
+
 /* 모바일: 760px 이하 */
 @media (max-width: 760px) {
     body{

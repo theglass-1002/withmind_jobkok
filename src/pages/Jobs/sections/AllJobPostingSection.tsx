@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Switch from "react-switch";
 
 import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
@@ -41,7 +41,12 @@ import {
   EMPLOYMENT_TYPE_KEYS,
   EMPLOYMENT_ETC_KEYS,
 } from "@/api/job/job.api";
-import { JobNode, JobItem, SORT_CODE_MAP, SIZE_MAP } from "@/api/job/job.types";
+import {
+  JobNode,
+  JobItem,
+  SORT_CODE_MAP,
+  SIZE_MAP,
+} from "@/api/job/job.types";
 import { logout } from "@/api/auth/auth.api";
 import JobEmptyResult from "@/shared/components/empty/job/JobEmptyResult";
 
@@ -70,8 +75,18 @@ type RoleSelectedItem = {
   roleName: string;
 };
 
+type JobsLocationState = {
+  activeTab?: "all" | "saved";
+  keyword?: string;
+  categoryIdx?: number | string;
+  jobId?: number | string;
+  childrenCount?: number;
+  children?: any[];
+};
+
 export default function AllJobPostingSection() {
   const navigate = useNavigate();
+  const location = useLocation();
   const jobPostingRef = useRef<HTMLDivElement | null>(null);
 
   const [page, setPage] = useState(1);
@@ -81,6 +96,9 @@ export default function AllJobPostingSection() {
   const [sort, setSort] = useState("최신순");
   const [sizeSort, setSizeSort] = useState("15개씩");
   const [view, setView] = useState(0);
+
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [appliedSearchKeyword, setAppliedSearchKeyword] = useState("");
 
   const sortOptions = ["최신순", "인기순", "마감임박순"];
   const sizeSortOptions = ["15개씩", "30개씩", "45개씩"];
@@ -93,8 +111,12 @@ export default function AllJobPostingSection() {
     max: 10,
   });
   const [educationSelected, setEducationSelected] = useState<string[]>([]);
-  const [locationSelected, setLocationSelected] = useState<LocationSelectedItem[]>([]);
-  const [employmentSelected, setEmploymentSelected] = useState<EmpOptionKey[]>([]);
+  const [locationSelected, setLocationSelected] = useState<LocationSelectedItem[]>(
+    []
+  );
+  const [employmentSelected, setEmploymentSelected] = useState<EmpOptionKey[]>(
+    []
+  );
 
   const [jobTree, setJobTree] = useState<JobNode[]>([]);
   const [jobLoading, setJobLoading] = useState(false);
@@ -109,6 +131,19 @@ export default function AllJobPostingSection() {
 
   const [initialized, setInitialized] = useState(false);
   const [jobsFetched, setJobsFetched] = useState(false);
+
+  useEffect(() => {
+    const state = (location.state as JobsLocationState) || null;
+    const incomingKeyword = state?.keyword?.trim() ?? "";
+
+
+    if (incomingKeyword) {
+      setSearchKeyword(incomingKeyword);
+      setAppliedSearchKeyword(incomingKeyword);
+      setPage(1);
+
+      }
+  }, [location.state]);
 
   useEffect(() => {
     const init = async () => {
@@ -188,6 +223,10 @@ export default function AllJobPostingSection() {
           resumeBased: resumeReco,
         };
 
+        if (appliedSearchKeyword) {
+          params.keyword = appliedSearchKeyword;
+        }
+
         if (hasFilters) {
           params.categoryIdx = roleIds.length ? roleIds : undefined;
           params.career = career;
@@ -196,8 +235,6 @@ export default function AllJobPostingSection() {
           params.employmentType = employmentType || undefined;
           params.employmentEtc = employmentEtc || undefined;
         }
-
-        console.log("fetchJobList params", params);
 
         const { jobs, totalPages, totalCount } = await fetchJobList(
           page,
@@ -239,21 +276,50 @@ export default function AllJobPostingSection() {
     educationSelected,
     locationSelected,
     employmentSelected,
+    appliedSearchKeyword,
   ]);
 
   useEffect(() => {
     if (page === 1) return;
-  
+
     const el = jobPostingRef.current;
     if (!el) return;
-  
+
     const y = el.getBoundingClientRect().top + window.pageYOffset;
-  
+
     window.scrollTo({
-      top: y - 100, 
+      top: y - 100,
       behavior: "smooth",
     });
   }, [page]);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchKeyword(e.target.value);
+  };
+
+  const handleSearchKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>
+  ) => {
+    if (e.nativeEvent.isComposing || e.keyCode === 229) return;
+    if (e.key !== "Enter") return;
+
+    e.preventDefault();
+
+    const keyword = searchKeyword.trim();
+
+    console.log("[AllJobPostingSection] Jobs 화면에서 엔터 검색 keyword:", keyword);
+
+    setPage(1);
+    setAppliedSearchKeyword(keyword);
+  };
+
+  const handleClearSearch = () => {
+    console.log("[AllJobPostingSection] 검색어 초기화");
+
+    setSearchKeyword("");
+    setAppliedSearchKeyword("");
+    setPage(1);
+  };
 
   const toggleFilter = (key: FilterKey) => {
     setOpenFilter((prev) => (prev === key ? null : key));
@@ -289,7 +355,9 @@ export default function AllJobPostingSection() {
         break;
 
       case "education":
-        setEducationSelected((prev) => prev.filter((e) => `edu-${e}` !== chip.id));
+        setEducationSelected((prev) =>
+          prev.filter((e) => `edu-${e}` !== chip.id)
+        );
         break;
 
       case "location":
@@ -398,7 +466,7 @@ export default function AllJobPostingSection() {
     setEmploymentSelected(selected);
 
     const empLabelMap: Record<EmpOptionKey, string> = {
-      fullTime: "정규직",
+      regular: "정규직",
       contract: "계약직",
       intern: "인턴",
       militaryService: "병역특례",
@@ -468,8 +536,12 @@ export default function AllJobPostingSection() {
   const roleChipCount = chips.filter((chip) => chip.kind === "role").length;
   const careerChipCount = chips.filter((chip) => chip.kind === "career").length;
   const careerRole = chips.find((chip) => chip.kind === "career")?.role;
-  const educationChipCount = chips.filter((chip) => chip.kind === "education").length;
-  const locationChipCount = chips.filter((chip) => chip.kind === "location").length;
+  const educationChipCount = chips.filter(
+    (chip) => chip.kind === "education"
+  ).length;
+  const locationChipCount = chips.filter(
+    (chip) => chip.kind === "location"
+  ).length;
   const employmentChipCount = chips.filter(
     (chip) => chip.kind === "employmentType" || chip.kind === "employmentEtc"
   ).length;
@@ -482,8 +554,18 @@ export default function AllJobPostingSection() {
         <div className="jobs-toolbar__search">
           <div className="panel-search">
             <img className="jobs-search__icon" src={search} alt="" />
-            <input type="text" placeholder="직무, 기업명, 지역등을 입력해주세요" />
-            <span className="jobs-search__clear_icon">
+            <input
+              type="text"
+              placeholder="직무, 기업명, 지역등을 입력해주세요"
+              value={searchKeyword}
+              onChange={handleSearchChange}
+              onKeyDown={handleSearchKeyDown}
+            />
+            <span
+              className="jobs-search__clear_icon"
+              onClick={handleClearSearch}
+              style={{ cursor: "pointer" }}
+            >
               <img src={cancel} alt="" />
             </span>
           </div>
@@ -725,10 +807,7 @@ export default function AllJobPostingSection() {
               <>
                 <div className="job-posting__header">
                   <span className="job-posting__count">
-                    총{" "}
-                    <p className="point-text-black">
-                      {totalCount.toLocaleString()}개
-                    </p>{" "}
+                    총 <p className="point-text-black">{totalCount.toLocaleString()}개</p>{" "}
                     전체공고
                   </span>
 
@@ -783,9 +862,17 @@ export default function AllJobPostingSection() {
                 {jobs.length === 0 ? (
                   <JobEmptyResult />
                 ) : view === 1 ? (
-                  <JobPostingCard jobs={jobs} loading={false} isResumeBased={resumeReco} />
+                  <JobPostingCard
+                    jobs={jobs}
+                    loading={false}
+                    isResumeBased={resumeReco}
+                  />
                 ) : (
-                  <JobPostingRow jobs={jobs} loading={false} isResumeBased={resumeReco} />
+                  <JobPostingRow
+                    jobs={jobs}
+                    loading={false}
+                    isResumeBased={resumeReco}
+                  />
                 )}
 
                 {jobsError && (

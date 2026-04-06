@@ -22,7 +22,8 @@
 
 .job-list.recommend .job-card{
     display: flex;
-    width: 100%;
+    width: 280px;
+    height: 208px;
     padding: 20px;
     flex-direction: column;
     align-items: flex-start;
@@ -97,6 +98,11 @@
     font-style: normal;
     font-weight: 600;
     line-height: 22px; /* 122.222% */
+
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
  }
 
 
@@ -117,6 +123,8 @@
  .job-meta__tags {
    display: flex;
    align-items: center;
+   white-space: nowrap;
+    overflow: auto;
  }
  
  .job-tag::after {
