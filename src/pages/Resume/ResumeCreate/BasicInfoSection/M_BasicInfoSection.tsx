@@ -6,6 +6,7 @@ import ic_mail_gray500_20 from "@/assets/icons/size20/ic_mail_gray500_20.png";
 import ic_mobile_gray_20 from "@/assets/icons/size20/ic_mobile_gray_20.png";
 import ic_edit_gray900_20 from "@/assets/icons/size20/ic_edit_gray900_20.png";
 import "./BasicInfoSection.css";
+import { formatPhone } from "@/shared/utils/validators";
 
 type Gender = "male" | "female" | null;
 
@@ -126,7 +127,7 @@ export default function M_BasicInfoSection({
               alt=""
             />
             <span className="resume-basic-preview__value">
-              {formatPhoneNumber(phone) || "연락처 없음"}
+              {formatPhone(phone) || "연락처 없음"}
             </span>
           </div>
         </div>

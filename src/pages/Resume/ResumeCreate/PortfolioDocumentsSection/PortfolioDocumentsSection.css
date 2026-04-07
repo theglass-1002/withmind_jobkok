@@ -33,6 +33,7 @@ background-color: white;
 
 .resume-create-page__section--portfolio-documents .portfolio-documents__fields{
     display: flex;
+    width: 740px;
     flex-direction: column;
     align-items: flex-start;
     flex: 1 0 0;
@@ -131,6 +132,9 @@ background-color: white;
     font-style: normal;
     font-weight: 400;
     line-height: 20px; 
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .portfolio-documents__hint{
@@ -172,6 +176,7 @@ background-color: white;
         }
         .portfolio-documents__file{
             flex-direction: column;
+            height: 115px;
             width: 100%;
             align-items: start;
         }
@@ -186,6 +191,11 @@ background-color: white;
         }
         .resume-portfolio-item{
             padding: 20px;
+        }
+        .resume-portfolio-item.resume-portfolio-item--file{
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         .resume-portfolio-list{
             display: flex;

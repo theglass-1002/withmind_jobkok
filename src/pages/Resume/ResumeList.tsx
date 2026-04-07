@@ -287,7 +287,7 @@ export default function ResumeList() {
                                 className="resume-item__menu"
                                 options={[
                                   { label: "사본 만들기", value: "copy", icon: icon_copy },
-                                  { label: "PDF로 저장", value: "pdf", icon: icon_download },
+                             
                                   { label: "삭제", value: "delete", icon: icon_trash, className: "delete" },
                                 ]}
                                 onSelect={(value) => handleMenuSelect(item.resumeIdx, value)}

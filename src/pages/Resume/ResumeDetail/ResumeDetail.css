@@ -404,7 +404,8 @@
   
 }
 .resume-portfolio-item__label,
-.portfolio-documents__file-text{
+.portfolio-documents__file-text,
+.portfolio-documents__file-size{
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -633,6 +634,8 @@
     }
     .resume-mock-report-item__title{
       font-size: 14px;
+      white-space: nowrap;
+        overflow: hidden;
     }
     .resume-self-intro{
       font-size: 14px;

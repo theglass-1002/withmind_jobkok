@@ -50,6 +50,8 @@ import { uploadPhotoFile } from "@/api/fileUpload.api";
 import { Storage } from "@/shared/utils/StorageManager";
 import { formatPhone } from "@/shared/utils/validators";
 
+
+
 type FormState = {
   title: string;
   basic: BasicInfo;
@@ -800,7 +802,7 @@ export default function M_ResumeCreate() {
         name: form.basic.name,
         email: form.basic.email,
         gender: form.basic.gender === "male" ? "M" : "W",
-        phone: formatPhoneNumber(form.basic.phone),
+        phone: formatPhone(form.basic.phone),
         birth: convertBirth(form.basic.birth),
   
         ...(profilePhotoFile ? { profilePhotoFile } : {}),

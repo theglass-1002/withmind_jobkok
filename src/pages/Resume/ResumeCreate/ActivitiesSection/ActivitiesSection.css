@@ -104,7 +104,10 @@ background-color: white;
     align-items: flex-start;
     gap: 16px;
     flex: 1 0 0;
+}
 
+.activities-section__control .ui-select{
+    height: 52px;
 }
 
 
