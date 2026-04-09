@@ -26,7 +26,8 @@ export default function JobsList() {
   const location = useLocation();
 
   const [activeTab, setActiveTab] = useState<"all" | "saved">("all");
-  const [resumeExists, setResumeExists] = useState<boolean | null>(null);
+  const [resumeExists, setResumeExists] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
 
   const isTabsSticky = useStickyTabs(
     "sticky-trigger",
@@ -44,6 +45,15 @@ export default function JobsList() {
   };
 
   useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    const isLoggedIn = !!token;
+
+    setLoggedIn(isLoggedIn);
+
+    console.log("[JobsList] 로그인 여부:", isLoggedIn);
+  }, []);
+
+  useEffect(() => {
     const state = (location.state as JobsLocationState) || null;
 
     console.log("[JobsList] location.state:", state);
@@ -57,19 +67,26 @@ export default function JobsList() {
   }, [location.state]);
 
   useEffect(() => {
+    console.log(loggedIn);
+    if (!loggedIn) {
+      console.log("[JobsList] 비로그인 상태 - resumeCheck API 호출 안함");
+      setResumeExists(false);
+      return;
+    }
+
     const checkResume = async () => {
       try {
         const resumeCheck = await fetchResumeCheck();
-        console.log("resumeCheck.exists:", resumeCheck.exists);
-        setResumeExists(resumeCheck.exists);
+        console.log("[JobsList] resumeCheck.exists:", resumeCheck.exists);
+        setResumeExists(!!resumeCheck.exists);
       } catch (e) {
-        console.error("이력서 존재 여부 확인 중 오류:", e);
+        console.log("[JobsList] resumeCheck API 에러:", e);
         setResumeExists(false);
       }
     };
 
     checkResume();
-  }, []);
+  }, [loggedIn]);
 
   useEffect(() => {
     const masthead = document.querySelector(".masthead");
@@ -127,7 +144,7 @@ export default function JobsList() {
             tabs={tabItems}
             active={activeTab}
             onChange={handleTabClick}
-            className={`jobs-tabs default_tabs`}
+            className="jobs-tabs default_tabs"
             itemClassName="jobs-tab"
             activeClassName="on"
           />

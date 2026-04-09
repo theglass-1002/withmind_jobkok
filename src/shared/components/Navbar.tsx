@@ -15,10 +15,18 @@ type AutoItem = {
   kind: "category" | "job";
   categoryIdx?: number | string;
   jobId?: number | string;
+  parentLabel?: string;
+};
+
+type FlatJobNode = JobNode & {
+  parentidx?: number | string;
+  parentIdx?: number | string;
+  children?: JobNode[];
 };
 
 function highlightSubstring(label: string, query: string): React.ReactNode {
   if (!query) return label;
+
   const q = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const re = new RegExp(q, "ig");
   const parts: React.ReactNode[] = [];
@@ -28,21 +36,83 @@ function highlightSubstring(label: string, query: string): React.ReactNode {
   while ((m = re.exec(label)) !== null) {
     const start = m.index;
     const end = start + m[0].length;
+
     if (start > lastIndex) {
-      parts.push(<span key={`${lastIndex}-n`}>{label.slice(lastIndex, start)}</span>);
+      parts.push(
+        <span key={`text-${lastIndex}-${start}`}>
+          {label.slice(lastIndex, start)}
+        </span>
+      );
     }
+
     parts.push(
-      <span key={`${start}-h`} className="select-highlight">
+      <span key={`highlight-${start}-${end}`} className="select-highlight">
         {label.slice(start, end)}
       </span>
     );
+
     lastIndex = end;
   }
 
   if (lastIndex < label.length) {
-    parts.push(<span key={`${lastIndex}-t`}>{label.slice(lastIndex)}</span>);
+    parts.push(
+      <span key={`tail-${lastIndex}-${label.length}`}>
+        {label.slice(lastIndex)}
+      </span>
+    );
   }
+
   return <>{parts}</>;
+}
+
+function normalizeText(value: string) {
+  return (value ?? "")
+    .toLowerCase()
+    .replace(/\s+/g, "")
+    .replace(/[·ㆍ]/g, "")
+    .trim();
+}
+
+function buildTreeFromFlatList(list: FlatJobNode[]): JobNode[] {
+  if (!Array.isArray(list)) return [];
+
+  const parents = list
+    .filter((item) => item.depth === 0)
+    .map((item) => ({
+      ...item,
+      children: [] as JobNode[],
+    }));
+
+  const parentMap = new Map<
+    number | string,
+    JobNode & { parentidx?: number | string; parentIdx?: number | string }
+  >();
+
+  parents.forEach((parent) => {
+    parentMap.set(parent.idx, parent);
+  });
+
+  list
+    .filter((item) => item.depth === 1)
+    .forEach((child) => {
+      const parentKey = child.parentIdx ?? child.parentidx;
+      const parent = parentMap.get(parentKey as number | string);
+      if (!parent) return;
+
+      parent.children.push({
+        ...child,
+        children: Array.isArray(child.children) ? child.children : [],
+      });
+    });
+
+  return parents
+    .map((parent) => ({
+      ...parent,
+      children: (parent.children ?? []).sort(
+        (a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)
+      ),
+    }))
+    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
 }
 
 interface NavbarProps {
@@ -87,6 +157,7 @@ export default function Navbar({ titleText }: NavbarProps) {
         label: parent.name,
         kind: "category",
         categoryIdx: parent.idx,
+        parentLabel: parent.name,
       });
 
       const childrenSorted = Array.isArray(parent.children)
@@ -104,6 +175,7 @@ export default function Navbar({ titleText }: NavbarProps) {
           kind: "job",
           categoryIdx: parent.idx,
           jobId: child.idx,
+          parentLabel: parent.name,
         });
       }
     }
@@ -112,30 +184,60 @@ export default function Navbar({ titleText }: NavbarProps) {
   }, [jobTree]);
 
   const filteredAutoDesktop = useMemo(() => {
-    const q = (inputValueDesktop ?? "").trim().toLowerCase();
+    const qRaw = (inputValueDesktop ?? "").trim();
+    const q = normalizeText(qRaw);
+
     if (!q) return autoItems.slice(0, 10);
 
-    return autoItems
-      .filter((item) => item.label.toLowerCase().includes(q))
-      .slice(0, 10);
+    const result = autoItems.filter((item) => {
+      const labelNorm = normalizeText(item.label);
+      const parentNorm = normalizeText(item.parentLabel ?? "");
+
+      const selfMatched = labelNorm.includes(q);
+      const parentMatched = !!parentNorm && parentNorm.includes(q);
+
+      return selfMatched || parentMatched;
+    });
+
+    console.log("[Navbar] desktop query:", qRaw);
+    console.log("[Navbar] desktop filtered list:", result);
+
+    return result.slice(0, 10);
   }, [inputValueDesktop, autoItems]);
 
   const filteredAutoMobile = useMemo(() => {
-    const q = (inputValue ?? "").trim().toLowerCase();
+    const qRaw = (inputValue ?? "").trim();
+    const q = normalizeText(qRaw);
+
     if (!q) return autoItems.slice(0, 10);
 
-    return autoItems.filter((item) => item.label.toLowerCase().includes(q)).slice(0, 10);
+    const result = autoItems.filter((item) => {
+      const labelNorm = normalizeText(item.label);
+      const parentNorm = normalizeText(item.parentLabel ?? "");
+
+      const selfMatched = labelNorm.includes(q);
+      const parentMatched = !!parentNorm && parentNorm.includes(q);
+
+      return selfMatched || parentMatched;
+    });
+
+    console.log("[Navbar] mobile query:", qRaw);
+    console.log("[Navbar] mobile filtered list:", result);
+
+    return result.slice(0, 10);
   }, [inputValue, autoItems]);
 
   const toggleSearch = () => {
     setSearchOpen((prev) => {
       const next = !prev;
+
       if (next) {
         setMypageMenuOpen(false);
         setInputValue("");
         setInputValueDesktop("");
         setOpenAutoDesktop(false);
       }
+
       return next;
     });
   };
@@ -150,10 +252,18 @@ export default function Navbar({ titleText }: NavbarProps) {
 
   const handleSearchDesktop = () => {
     const keyword = inputValueDesktop.trim();
+
     if (!keyword) {
       setOpenAutoDesktop(false);
       return;
     }
+
+    console.log("[Navbar] 데스크톱 검색어 입력:", keyword);
+    console.log("[Navbar] /jobs 로 전달하는 state:", {
+      activeTab: "all",
+      keyword,
+    });
+
     setOpenAutoDesktop(false);
     setSearchOpen(false);
     navigate("/jobs", { state: { activeTab: "all", keyword } });
@@ -161,7 +271,15 @@ export default function Navbar({ titleText }: NavbarProps) {
 
   const handleSearchMobile = () => {
     const keyword = inputValue.trim();
+
     if (!keyword) return;
+
+    console.log("[Navbar] 모바일 검색어 입력:", keyword);
+    console.log("[Navbar] /jobs 로 전달하는 state:", {
+      activeTab: "all",
+      keyword,
+    });
+
     setSearchOpen(false);
     navigate("/jobs", { state: { activeTab: "all", keyword } });
   };
@@ -172,17 +290,26 @@ export default function Navbar({ titleText }: NavbarProps) {
     setSearchOpen(false);
 
     if (item.kind === "category" && item.categoryIdx != null) {
-      navigate("/jobs", { state: { activeTab: "all", categoryIdx: item.categoryIdx } });
-      return;
-    }
-
-    if (item.jobId != null) {
+      console.log("[Navbar] 데스크톱 자동완성 카테고리 선택:", item);
       navigate("/jobs", {
-        state: { activeTab: "all", jobId: item.jobId, categoryIdx: item.categoryIdx },
+        state: { activeTab: "all", categoryIdx: item.categoryIdx },
       });
       return;
     }
 
+    if (item.jobId != null) {
+      console.log("[Navbar] 데스크톱 자동완성 직무 선택:", item);
+      navigate("/jobs", {
+        state: {
+          activeTab: "all",
+          jobId: item.jobId,
+          categoryIdx: item.categoryIdx,
+        },
+      });
+      return;
+    }
+
+    console.log("[Navbar] 데스크톱 자동완성 키워드 선택:", item.label);
     navigate("/jobs", { state: { activeTab: "all", keyword: item.label } });
   };
 
@@ -191,17 +318,26 @@ export default function Navbar({ titleText }: NavbarProps) {
     setSearchOpen(false);
 
     if (item.kind === "category" && item.categoryIdx != null) {
-      navigate("/jobs", { state: { activeTab: "all", categoryIdx: item.categoryIdx } });
-      return;
-    }
-
-    if (item.jobId != null) {
+      console.log("[Navbar] 모바일 자동완성 카테고리 선택:", item);
       navigate("/jobs", {
-        state: { activeTab: "all", jobId: item.jobId, categoryIdx: item.categoryIdx },
+        state: { activeTab: "all", categoryIdx: item.categoryIdx },
       });
       return;
     }
 
+    if (item.jobId != null) {
+      console.log("[Navbar] 모바일 자동완성 직무 선택:", item);
+      navigate("/jobs", {
+        state: {
+          activeTab: "all",
+          jobId: item.jobId,
+          categoryIdx: item.categoryIdx,
+        },
+      });
+      return;
+    }
+
+    console.log("[Navbar] 모바일 자동완성 키워드 선택:", item.label);
     navigate("/jobs", { state: { activeTab: "all", keyword: item.label } });
   };
 
@@ -211,22 +347,73 @@ export default function Navbar({ titleText }: NavbarProps) {
     setMypageMenuOpen(false);
   };
 
-  // 초기 데이터 + 초기 로그인 상태
   useEffect(() => {
+    let alive = true;
+
     syncAuth();
 
-    fetchJobTree()
-      .then((tree) => setJobTree(tree as JobNode[]))
-      .catch((err) => console.error("Failed to fetch job tree:", err));
+    (async () => {
+      try {
+        const response: any = await fetchJobTree();
+
+        if (!alive) return;
+
+        console.log("[Navbar] fetchJobTree raw response:", response);
+
+        const nestedList = Array.isArray(response?.list) ? response.list : [];
+        const flatList = Array.isArray(response)
+          ? response
+          : Array.isArray(response?.list)
+          ? response.list
+          : [];
+
+        let tree: JobNode[] = [];
+
+        if (
+          nestedList.length > 0 &&
+          Array.isArray(nestedList[0]?.children)
+        ) {
+          tree = nestedList as JobNode[];
+        } else {
+          tree = buildTreeFromFlatList(flatList as FlatJobNode[]);
+        }
+
+        console.log("[Navbar] built tree:", tree);
+        console.log("[Navbar] built tree length:", tree.length);
+
+        setJobTree(tree);
+      } catch (err) {
+        console.error("[Navbar] Failed to fetch job tree:", err);
+      }
+    })();
+
+    return () => {
+      alive = false;
+    };
   }, [syncAuth]);
 
-  // 로그인 토큰 변화 감지(같은 탭 로그인 포함)
   useEffect(() => {
-    // 라우트 이동 시에도 한번 동기화
+    console.log("[Navbar] jobTree:", jobTree);
+    console.log("[Navbar] jobTree length:", jobTree.length);
+  }, [jobTree]);
+
+  useEffect(() => {
+    console.log("[Navbar] autoItems:", autoItems);
+    console.log("[Navbar] autoItems length:", autoItems.length);
+  }, [autoItems]);
+
+  useEffect(() => {
+    console.log("[Navbar] inputValueDesktop:", inputValueDesktop);
+    console.log("[Navbar] openAutoDesktop:", openAutoDesktop);
+    console.log("[Navbar] filteredAutoDesktop:", filteredAutoDesktop);
+    console.log("[Navbar] filteredAutoDesktop length:", filteredAutoDesktop.length);
+  }, [inputValueDesktop, openAutoDesktop, filteredAutoDesktop]);
+
+  useEffect(() => {
     syncAuth();
 
-    const onStorage = () => syncAuth(); // 다른 탭에서 변경 시
-    const onFocus = () => syncAuth(); // 같은 탭에서 돌아올 때
+    const onStorage = () => syncAuth();
+    const onFocus = () => syncAuth();
     const onVisibility = () => {
       if (document.visibilityState === "visible") syncAuth();
     };
@@ -235,7 +422,6 @@ export default function Navbar({ titleText }: NavbarProps) {
     window.addEventListener("focus", onFocus);
     document.addEventListener("visibilitychange", onVisibility);
 
-    // 같은 탭에서 localStorage만 바뀌고 이벤트가 안 오는 케이스 대비(안전장치)
     const id = window.setInterval(syncAuth, 500);
 
     return () => {
@@ -246,38 +432,26 @@ export default function Navbar({ titleText }: NavbarProps) {
     };
   }, [location.pathname, syncAuth]);
 
-  // 바깥 클릭 닫기
   useEffect(() => {
-    if (!mypageMenuOpen && !searchOpen) return;
+    if (!mypageMenuOpen) return;
 
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
       if (!target || typeof target.closest !== "function") return;
 
       if (mypageMenuOpen && mypageRef.current && !mypageRef.current.contains(target)) {
-        if (!(target.closest(".icon-btn") && (target.closest(".login_on") || target.closest(".login_off")))) {
+        if (
+          !(target.closest(".icon-btn") &&
+            (target.closest(".login_on") || target.closest(".login_off")))
+        ) {
           setMypageMenuOpen(false);
-        }
-      }
-
-      if (searchOpen) {
-        const inMobile = searchPanelRef.current?.contains(target) ?? false;
-        const inDesktop = searchPanelDesktopRef.current?.contains(target) ?? false;
-
-        if (!inMobile && !inDesktop) {
-          if (!(target.closest(".icon-btn") && (target.closest(".login_on") || target.closest(".login_off")))) {
-            setSearchOpen(false);
-            setInputValue("");
-            setInputValueDesktop("");
-            setOpenAutoDesktop(false);
-          }
         }
       }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [mypageMenuOpen, searchOpen]);
+  }, [mypageMenuOpen]);
 
   return (
     <>
@@ -287,9 +461,8 @@ export default function Navbar({ titleText }: NavbarProps) {
             <>{titleText}</>
           ) : (
             <Link className="masthead__brand" to="/">
-            
               <img src={Icons.jobkok_logo_gray900} alt="" />
-              <img src={Icons.jobkok_wordmark_gray900} alt="" /> 
+              <img src={Icons.jobkok_wordmark_gray900} alt="" />
             </Link>
           )}
 
@@ -366,9 +539,15 @@ export default function Navbar({ titleText }: NavbarProps) {
             </div>
           ) : (
             <div className="login_off">
-              <span className="icon-btn" aria-expanded={searchOpen} aria-controls="searchPanel" onClick={toggleSearch}>
+              <span
+                className="icon-btn"
+                aria-expanded={searchOpen}
+                aria-controls="searchPanel"
+                onClick={toggleSearch}
+              >
                 <img src={Icons.ic_search_gray900_24} alt="" />
               </span>
+
               <NavLink to="/login">
                 <div className="auth-cta">
                   <span>로그인 / 회원가입</span>
@@ -379,7 +558,7 @@ export default function Navbar({ titleText }: NavbarProps) {
         </div>
       </header>
 
-      <div className={`backdrop ${searchOpen ? "is-open" : ""}`} onClick={toggleSearch} />
+      <div className={`backdrop ${searchOpen ? "is-open" : ""}`} />
 
       <div id="searchPanel" className={`search-panel ${searchOpen ? "is-open" : ""}`}>
         <div className="panel-body" ref={searchPanelDesktopRef}>
@@ -391,10 +570,12 @@ export default function Navbar({ titleText }: NavbarProps) {
               value={inputValueDesktop}
               onChange={(e) => {
                 const v = e.target.value;
+                console.log("[Navbar] desktop input change:", v);
                 setInputValueDesktop(v);
                 setOpenAutoDesktop(!!v.trim());
               }}
               onFocus={() => {
+                console.log("[Navbar] desktop input focus:", inputValueDesktop);
                 if (inputValueDesktop.trim()) setOpenAutoDesktop(true);
               }}
               onKeyDown={(e) => {
@@ -408,6 +589,7 @@ export default function Navbar({ titleText }: NavbarProps) {
                 src={Icons.ic_cancel_gray400_20}
                 alt=""
                 onClick={() => {
+                  console.log("[Navbar] desktop input clear");
                   setInputValueDesktop("");
                   setOpenAutoDesktop(false);
                 }}
@@ -424,9 +606,10 @@ export default function Navbar({ titleText }: NavbarProps) {
                     추천 결과가 없습니다.
                   </span>
                 )}
-                {filteredAutoDesktop.map((item) => (
+
+                {filteredAutoDesktop.map((item, index) => (
                   <span
-                    key={`${item.kind}-${item.categoryIdx ?? "x"}-${item.jobId ?? "x"}-${item.label}`}
+                    key={`desktop-auto-${item.kind}-${item.categoryIdx ?? "x"}-${item.jobId ?? "x"}-${item.label}-${index}`}
                     className="search-results-dropdown__item"
                     role="button"
                     tabIndex={0}
@@ -485,6 +668,7 @@ export default function Navbar({ titleText }: NavbarProps) {
               alt="뒤로가기"
               className="panel-search-header__back-icon"
             />
+
             <div className="panel-search">
               <img className="panel-search__icon" src={ic_search_gray900_20} alt="검색" />
               <input
@@ -516,9 +700,10 @@ export default function Navbar({ titleText }: NavbarProps) {
                     추천 결과가 없습니다.
                   </span>
                 )}
-                {filteredAutoMobile.map((item) => (
+
+                {filteredAutoMobile.map((item, index) => (
                   <span
-                    key={`${item.kind}-${item.categoryIdx ?? "x"}-${item.jobId ?? "x"}-${item.label}`}
+                    key={`mobile-auto-${item.kind}-${item.categoryIdx ?? "x"}-${item.jobId ?? "x"}-${item.label}-${index}`}
                     className="search-results-dropdown__item"
                     role="button"
                     tabIndex={0}

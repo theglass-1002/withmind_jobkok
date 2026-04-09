@@ -653,7 +653,7 @@ export default function ResumeDetail() {
               email={resumeData.email}
               phone={resumeData.phone}
               imageSrc={
-                resumeData.profilePhotoFile?.filePath ?? test_resume_img
+                resumeData.profilePhotoFile?.filePath ?? ""
               }
             />
 

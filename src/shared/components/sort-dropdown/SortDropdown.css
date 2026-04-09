@@ -56,8 +56,12 @@
     width: 24px;
     height: 24px;
     background: url("/src/assets/icons/size24/ic_arrow_drop_down_gray500_24.png") center / contain no-repeat;
-
 }
+
+.sort-control__label.on::after {
+    transform: rotate(180deg);
+  }
+
 .sort-control__option{
     width: 100%;
     text-align: start;

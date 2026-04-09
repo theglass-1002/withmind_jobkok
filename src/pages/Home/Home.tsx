@@ -16,10 +16,12 @@ type AutoItem = {
   kind: "category" | "job";
   categoryIdx?: number | string;
   jobIdx?: number | string;
+  parentLabel?: string;
 };
 
 type FlatJobNode = JobNode & {
   parentidx?: number | string;
+  parentIdx?: number | string;
   children?: JobNode[];
 };
 
@@ -87,6 +89,14 @@ function highlightSubstring(label: string, query: string) {
   return <>{parts}</>;
 }
 
+function normalizeText(value: string) {
+  return (value ?? "")
+    .toLowerCase()
+    .replace(/\s+/g, "")
+    .replace(/[·ㆍ]/g, "")
+    .trim();
+}
+
 function normalizeCategoryName(name: string) {
   return name
     .trim()
@@ -109,7 +119,7 @@ function buildTreeFromFlatList(list: FlatJobNode[]): JobNode[] {
 
   const parentMap = new Map<
     number | string,
-    JobNode & { parentidx?: number | string }
+    JobNode & { parentidx?: number | string; parentIdx?: number | string }
   >();
 
   parents.forEach((parent) => {
@@ -119,7 +129,8 @@ function buildTreeFromFlatList(list: FlatJobNode[]): JobNode[] {
   list
     .filter((item) => item.depth === 1)
     .forEach((child) => {
-      const parent = parentMap.get(child.parentidx as number | string);
+      const parentKey = child.parentIdx ?? child.parentidx;
+      const parent = parentMap.get(parentKey as number | string);
       if (!parent) return;
 
       parent.children.push({
@@ -191,6 +202,7 @@ export default function Home() {
         label: parent.name,
         kind: "category",
         categoryIdx: parent.idx,
+        parentLabel: parent.name,
       });
 
       const childrenSorted = Array.isArray(parent.children)
@@ -208,6 +220,7 @@ export default function Home() {
           kind: "job",
           categoryIdx: parent.idx,
           jobIdx: child.idx,
+          parentLabel: parent.name,
         });
       }
     }
@@ -216,12 +229,25 @@ export default function Home() {
   }, [jobTree]);
 
   const filteredAuto = useMemo(() => {
-    const q = (inputValue ?? "").trim().toLowerCase();
+    const qRaw = (inputValue ?? "").trim();
+    const q = normalizeText(qRaw);
+
     if (!q) return autoItems.slice(0, 10);
 
-    return autoItems
-      .filter((item) => item.label.toLowerCase().includes(q))
-      .slice(0, 10);
+    const result = autoItems.filter((item) => {
+      const labelNorm = normalizeText(item.label);
+      const parentNorm = normalizeText(item.parentLabel ?? "");
+
+      const selfMatched = labelNorm.includes(q);
+      const parentMatched = !!parentNorm && parentNorm.includes(q);
+
+      return selfMatched || parentMatched;
+    });
+
+    console.log("[Home] query:", qRaw);
+    console.log("[Home] filteredAuto:", result);
+
+    return result.slice(0, 10);
   }, [inputValue, autoItems]);
 
   const handleSearch = () => {
@@ -294,13 +320,29 @@ export default function Home() {
 
         if (!alive) return;
 
-        const flatList = Array.isArray(response?.list)
-          ? response.list
-          : Array.isArray(response)
+        console.log("[Home] fetchJobTree raw response:", response);
+
+        const nestedList = Array.isArray(response?.list) ? response.list : [];
+        const flatList = Array.isArray(response)
           ? response
+          : Array.isArray(response?.list)
+          ? response.list
           : [];
 
-        const tree = buildTreeFromFlatList(flatList as FlatJobNode[]);
+        let tree: JobNode[] = [];
+
+        if (
+          nestedList.length > 0 &&
+          Array.isArray(nestedList[0]?.children)
+        ) {
+          tree = nestedList as JobNode[];
+        } else {
+          tree = buildTreeFromFlatList(flatList as FlatJobNode[]);
+        }
+
+        console.log("[Home] built tree:", tree);
+        console.log("[Home] built tree length:", tree.length);
+
         setJobTree(tree);
       } catch (e: any) {
         if (!alive) return;
@@ -318,7 +360,15 @@ export default function Home() {
     };
   }, [navigate]);
 
-  useEffect(() => {}, [jobTree, topCategories]);
+  useEffect(() => {
+    console.log("[Home] jobTree:", jobTree);
+    console.log("[Home] jobTree length:", jobTree.length);
+  }, [jobTree]);
+
+  useEffect(() => {
+    console.log("[Home] autoItems:", autoItems);
+    console.log("[Home] autoItems length:", autoItems.length);
+  }, [autoItems]);
 
   useEffect(() => {
     const masthead = document.querySelector(".masthead");

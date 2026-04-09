@@ -255,7 +255,12 @@ export function getLocationLabel(code?: string | null): string {
 }
 
 export function getCareerLabel(from?: number | null, to?: number | null): string {
-  if (from == null || to == null) return "경력 무관";
+  if (from == null && to == null) return "경력 무관";
+
+  // to만 있으면 0년 미만
+  if ((from == null || from === 0) && to != null && to > 0 && to < 100) {
+    return `${to}년 미만`;
+  }
 
   // 1) 경력 무관
   if (from === 0 && to === 100) {
@@ -268,19 +273,17 @@ export function getCareerLabel(from?: number | null, to?: number | null): string
   }
 
   // 3) X년 이상
-  if (from > 0 && to === 100) {
+  if (from != null && from > 0 && to === 100) {
     return `${from}년 이상`;
   }
 
   // 4) X년 이상 Y년 미만
-  if (from > 0 && to < 100) {
-    return `${from}년 이상 ${to}년 미만`;
+  if (from != null && from > 0 && to != null && to < 100) {
+    return `${from} ~ ${to}년`;
   }
 
-  // 기타 예외 처리
   return "경력 무관";
 }
-
 
 export const SORT_CODE_MAP: Record<string, string> = {
   "오래된순": "old",

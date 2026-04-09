@@ -72,8 +72,6 @@ instance.interceptors.request.use(
         }
         (config.headers as AxiosRequestHeaders).Authorization = `Bearer ${token}`;
       } else {
-        console.warn("🚫 토큰이 없어서 로그아웃 처리합니다.");
-
         return Promise.reject({
           code: 999,
           msg: "NO_TOKEN",

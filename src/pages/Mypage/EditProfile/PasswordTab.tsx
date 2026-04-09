@@ -1,9 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import PasswordInput from "./PasswordInput";
 import * as util from "@/shared/utils/util";
 import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
-import { changePassword, updateUser } from "@/api/auth/auth.api";
+import { changePassword, logout, updateUser } from "@/api/auth/auth.api";
 
 type Form = {
   current: string;
@@ -18,6 +19,7 @@ type PasswordTabProps = {
 };
 
 export default function PasswordTab({ onCancel }: PasswordTabProps) {
+  const navigate = useNavigate();
   const [form, setForm] = useState<Form>({
     current: "",
     next: "",
@@ -26,6 +28,7 @@ export default function PasswordTab({ onCancel }: PasswordTabProps) {
   const [errors, setErrors] = useState<Errors>({});
   const [isSubmitting, setSubmitting] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+
 
   const onChange =
     (key: keyof Form) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -98,7 +101,7 @@ export default function PasswordTab({ onCancel }: PasswordTabProps) {
       if (res.code === 200) {
         toast.success("비밀번호가 변경되었습니다.");
         setNotice("비밀번호가 변경되었습니다.");
-  
+        
         setForm({
           current: "",
           next: "",
@@ -106,6 +109,8 @@ export default function PasswordTab({ onCancel }: PasswordTabProps) {
         });
   
         setErrors({});
+        logout();
+        navigate("/login");
         return;
       }
   

@@ -161,6 +161,12 @@ saved-jobs__content-area */
     background: var(--white-100, #FFF);
 }
 
+.saved-jobs-page .saved-jobs__content-area .job-posting__card:first-child {
+    /* border-top: 1px solid var(--gray-300, #E0E2E4); */
+}
+
+
+
 @media (max-width: 750px) {
     body{
 

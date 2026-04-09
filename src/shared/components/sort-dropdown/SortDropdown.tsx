@@ -37,7 +37,7 @@ export default function SortDropdown({
       ref={wrapRef}
       onClick={toggle}
     >
-      <span className="sort-control__label">
+      <span className={`sort-control__label ${open?'on':'off'}`}>
         {value}
       </span>
 

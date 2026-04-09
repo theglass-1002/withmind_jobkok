@@ -510,6 +510,7 @@ background: linear-gradient(90deg, #15D078 50%, rgba(75, 209, 200, 0.80) 100%);
      .panel-body .search-results-dropdown__list{
       width: auto;
       gap: 0px;
+      box-shadow: none;
      }
      .search-results-dropdown__item{
       padding: 10px;

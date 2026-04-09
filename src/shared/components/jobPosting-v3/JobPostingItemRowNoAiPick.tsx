@@ -207,7 +207,7 @@ export default function JobPostingItemRowNoAiPick({
 
   return (
     <>
-      <div className="job-posting__card" onClick={handleGoToJobPost}>
+      <div className="job-posting__card " onClick={handleGoToJobPost}>
         <div className="job-posting__row job-posting__row--top">
           <div className="job-posting__left">
             <img

@@ -76,7 +76,7 @@
 
 
 .saved-jobs__content-area .job-posting__card {
-  border-bottom: 1px solid var(--gray-300, #E0E2E4);
+  border-top: 1px solid var(--gray-300, #E0E2E4);
 
 }
 
