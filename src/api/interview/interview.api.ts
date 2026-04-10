@@ -14,6 +14,8 @@ import type {
   CreateQzGroupRequest,
   SaveInterviewAnalysisResponse,
   SaveInterviewAnalysisRequest,
+  InterviewQuestionsV2Request,
+  InterviewQuestionsV2Response,
 } from "./interview.types";
 import { AI_BASE_URL } from "@/config/config";
 
@@ -32,6 +34,26 @@ export async function fetchInterviewQuestions(
       },
     }
   );
+  return res.data;
+}
+
+
+export async function fetchInterviewQuestionsV2(
+  payload: InterviewQuestionsV2Request
+): Promise<InterviewQuestionsV2Response> {
+  const res = await instance.post<InterviewQuestionsV2Response>(
+    "/interview-blueprints",
+    payload,
+    {
+      baseURL: "https://54a9-183-96-152-47.ngrok-free.app/api/v1",
+      requiresAuth: false,
+      headers: {
+        accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
   return res.data;
 }
 

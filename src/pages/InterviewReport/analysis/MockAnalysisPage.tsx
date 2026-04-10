@@ -146,7 +146,7 @@ const fallbackOverviewData = {
   },
   categorySummary: {
     left: {
-      scoreTitle: "정유리님의 점수",
+      scoreTitle: "위위님의 점수",
       scores: { attitude: 92, voice: 80, tension: 10, competence: 30 },
       RadarChartComponent: KpiRadarChart,
     },
@@ -189,14 +189,14 @@ const fallbackOverviewData = {
       label: "강점",
       tags: ["효과적 의견 교환", "타인에 대한 신뢰"],
       description:
-        "정유리님의 강점으로 두드러지는 점은 효과적인 의견 교환과 타인에 대한 신뢰입니다.",
+        "위위님의 강점으로 두드러지는 점은 효과적인 의견 교환과 타인에 대한 신뢰입니다.",
     },
     weakness: {
       iconSrc: ic_weakness_circle_24,
       label: "약점",
       tags: ["의사소통 기술 활용", "타인 이해"],
       description:
-        "정유리님은 효과적 의견교환 및 타인에 대한 신뢰가 다소 부족합니다.",
+        "위위님은 효과적 의견교환 및 타인에 대한 신뢰가 다소 부족합니다.",
     },
   },
 };
@@ -205,7 +205,7 @@ function buildHeaderMetaRows(reportDetail: InterviewReportDetailResponse | null)
   if (!reportDetail) {
     return [
       [
-        { key: "이름", value: "정유리" },
+        { key: "이름", value: "위위" },
         { key: "아이디", value: "withmind01" },
       ],
       [

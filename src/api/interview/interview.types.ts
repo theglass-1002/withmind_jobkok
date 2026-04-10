@@ -48,6 +48,47 @@ export type EnvTestSpeechResponse =
       error?: any;
     };
 
+
+
+    export type InterviewQuestionsV2Request = {
+      resume?: string;
+      job_posting?: string;
+      target_role?: string;
+      config?: {
+        num_questions?: number;
+        language?: string;
+        difficulty_profile?: string;
+        focus_types?: string[];
+      };
+    };
+    
+    export type InterviewQuestionsV2QuestionOverview = {
+      question_id: string;
+      question_code: string;
+      order: number;
+      type: string;
+      text: string;
+    };
+    
+    export type InterviewQuestionsV2Data = {
+      blueprint_id: string;
+      blueprint_url: string;
+      version: string;
+      num_questions: number;
+      question_overview: InterviewQuestionsV2QuestionOverview[];
+      quality_flags: string[];
+    };
+    
+    export type InterviewQuestionsV2Response = {
+      success: boolean;
+      data: InterviewQuestionsV2Data | null;
+      error: any;
+      meta: {
+        request_id: string;
+        timestamp: string;
+      };
+    };
+
 /**
  * 환경 테스트 분석 요청
  * - file_url: 업로드된 영상 접근용 URL

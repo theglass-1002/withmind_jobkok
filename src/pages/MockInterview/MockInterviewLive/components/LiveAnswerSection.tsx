@@ -5,12 +5,13 @@ import ic_play_arrow_gray700_24 from "@/assets/icons/size24/ic_play_arrow_gray70
 import ic_timer_red_18 from "@/assets/icons/size18/ic_timer_red_18.png";
 import ic_stop_white_24 from "@/assets/icons/size24/ic_stop_white_24.png";
 import ic_cheer_white_48 from "@/assets/icons/size48/ic_cheer_white_48.png";
+import { Storage } from "@/shared/utils/StorageManager";
 
 const ANSWER_SECONDS = 91;
 
 type Props = {
   stream: MediaStream | null;
-  onEnd?: () => void;
+  onEnd?: () => Promise<void> | void;
   isLast?: boolean;
 };
 
@@ -23,10 +24,12 @@ export default function LiveAnswerSection({
   const [timeLeft, setTimeLeft] = useState(ANSWER_SECONDS);
   const [running, setRunning] = useState(true);
   const [showCompleteDialog, setShowCompleteDialog] = useState(false);
+  const [isEnding, setIsEnding] = useState(false);
 
   const rafRef = useRef<number | null>(null);
   const startTsRef = useRef<number>(0);
   const remainingMsRef = useRef<number>(ANSWER_SECONDS * 1000);
+  const userName = Storage.getUserName() || "사용자";
 
   const navigate = useNavigate();
 
@@ -35,7 +38,6 @@ export default function LiveAnswerSection({
   };
 
   useEffect(() => {
-
     const video = videoRef.current;
     if (!video || !stream) return;
 
@@ -59,6 +61,27 @@ export default function LiveAnswerSection({
     };
   }, [stream]);
 
+  const finishAnswer = async () => {
+    if (isEnding) return;
+
+    setIsEnding(true);
+    setRunning(false);
+
+    try {
+      await onEnd?.();
+
+      if (isLast) {
+        setShowCompleteDialog(true);
+      }
+    } catch (err) {
+      console.error("[LiveAnswerSection] finishAnswer failed:", err);
+    } finally {
+      startTsRef.current = 0;
+      remainingMsRef.current = ANSWER_SECONDS * 1000;
+      setIsEnding(false);
+    }
+  };
+
   useEffect(() => {
     if (!running) {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
@@ -81,16 +104,7 @@ export default function LiveAnswerSection({
         rafRef.current = requestAnimationFrame(tick);
       } else {
         rafRef.current = null;
-        setRunning(false);
-
-        if (isLast) {
-          setShowCompleteDialog(true);
-        } else {
-          onEnd?.();
-        }
-
-        startTsRef.current = 0;
-        remainingMsRef.current = ANSWER_SECONDS * 1000;
+        void finishAnswer();
       }
     };
 
@@ -100,10 +114,10 @@ export default function LiveAnswerSection({
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       rafRef.current = null;
     };
-  }, [running, isLast, onEnd]);
+  }, [running]);
 
   const startTimer = () => {
-    if (!running) {
+    if (!running && !isEnding) {
       if (timeLeft === 0) {
         setTimeLeft(ANSWER_SECONDS);
         remainingMsRef.current = ANSWER_SECONDS * 1000;
@@ -112,14 +126,8 @@ export default function LiveAnswerSection({
     }
   };
 
-  const stopTimer = () => {
-    setRunning(false);
-
-    if (isLast) {
-      setShowCompleteDialog(true);
-    } else {
-      onEnd?.();
-    }
+  const stopTimer = async () => {
+    await finishAnswer();
   };
 
   const minutes = Math.floor(timeLeft / 60)
@@ -182,7 +190,7 @@ export default function LiveAnswerSection({
           <button
             className="mock-interview-live__btn mock-interview-live__btn--end"
             onClick={startTimer}
-            disabled={running}
+            disabled={running || isEnding}
           >
             <img src={ic_play_arrow_gray700_24} alt="답변 시작 아이콘" />
             답변 시작
@@ -191,7 +199,7 @@ export default function LiveAnswerSection({
           <button
             className="mock-interview-live__btn default_btn_red radius"
             onClick={stopTimer}
-            disabled={!running}
+            disabled={!running || isEnding}
           >
             <img src={ic_stop_white_24} alt="답변 종료 아이콘" />
             답변 종료
@@ -208,7 +216,7 @@ export default function LiveAnswerSection({
 
             <div className="mock-interview-dialog__text-group">
               <span className="mock-interview-dialog__title">
-                정유리님, 수고하셨습니다!
+                {userName}님, 수고하셨습니다!
               </span>
               <span className="mock-interview-dialog__description">
                 모의면접이 종료되었습니다. 분석 결과를 확인해 보세요.

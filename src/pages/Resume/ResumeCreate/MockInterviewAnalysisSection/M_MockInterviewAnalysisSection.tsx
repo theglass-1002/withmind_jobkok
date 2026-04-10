@@ -44,7 +44,7 @@ export default function M_MockInterviewAnalysisSection() {
         score: "82점",
         role: "프로젝트 기획자",
         date: "2025.12.10",
-        title: "성장하는 기획자 정유리입니다.",
+        title: "성장하는 기획자 위위입니다.",
         thumbSrc: test_profile_img,
         selectedBadge: "선택 이력서",
       },

@@ -355,11 +355,7 @@ export default function Navbar({ titleText }: NavbarProps) {
     (async () => {
       try {
         const response: any = await fetchJobTree();
-
         if (!alive) return;
-
-        console.log("[Navbar] fetchJobTree raw response:", response);
-
         const nestedList = Array.isArray(response?.list) ? response.list : [];
         const flatList = Array.isArray(response)
           ? response
@@ -378,9 +374,6 @@ export default function Navbar({ titleText }: NavbarProps) {
           tree = buildTreeFromFlatList(flatList as FlatJobNode[]);
         }
 
-        console.log("[Navbar] built tree:", tree);
-        console.log("[Navbar] built tree length:", tree.length);
-
         setJobTree(tree);
       } catch (err) {
         console.error("[Navbar] Failed to fetch job tree:", err);
@@ -393,20 +386,12 @@ export default function Navbar({ titleText }: NavbarProps) {
   }, [syncAuth]);
 
   useEffect(() => {
-    console.log("[Navbar] jobTree:", jobTree);
-    console.log("[Navbar] jobTree length:", jobTree.length);
   }, [jobTree]);
 
   useEffect(() => {
-    console.log("[Navbar] autoItems:", autoItems);
-    console.log("[Navbar] autoItems length:", autoItems.length);
   }, [autoItems]);
 
   useEffect(() => {
-    console.log("[Navbar] inputValueDesktop:", inputValueDesktop);
-    console.log("[Navbar] openAutoDesktop:", openAutoDesktop);
-    console.log("[Navbar] filteredAutoDesktop:", filteredAutoDesktop);
-    console.log("[Navbar] filteredAutoDesktop length:", filteredAutoDesktop.length);
   }, [inputValueDesktop, openAutoDesktop, filteredAutoDesktop]);
 
   useEffect(() => {

@@ -491,7 +491,7 @@ export const mapLicenseListToAwardItems = (
 
 export type PortfolioFileItem = {
   kind: "file";
-  name: string; // 예: "정유리_포트폴리오.pdf"
+  name: string; // 예:
   iconSrc?: string; // 없으면 defaultIcons.file 사용
   filePath?:string;
 };

@@ -251,7 +251,7 @@ export default function MyPage() {
                     <span>
                       <img src={done_file} alt="" />
                     </span>
-                    성장하는 기획자 정유리입니다.
+                    성장하는 기획자 위위입니다.
                   </div>
                 </div>
                 <div className="content-right">
@@ -280,7 +280,7 @@ export default function MyPage() {
                     <span>
                       <img src={done_file} alt="" />
                     </span>
-                    성장하는 기획자 정유리 입니다.
+                    성장하는 기획자 위위 입니다.
                   </div>
                 </div>
                 <div className="content-right">

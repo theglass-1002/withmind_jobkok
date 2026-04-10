@@ -12,7 +12,10 @@ import {
   InterviewQuestionsResponse,
 } from "@/api/interview/interview.types";
 import { uploadJobInterviewVideo } from "@/api/fileUpload.api";
-import { fetchInterviewFollowup, saveInterviewAnalysis } from "@/api/interview/interview.api";
+import {
+  fetchInterviewFollowup,
+  saveInterviewAnalysis,
+} from "@/api/interview/interview.api";
 
 import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
 
@@ -70,7 +73,11 @@ export default function MockInterviewLive() {
       | undefined;
 
     if (Array.isArray(res)) return res as InterviewQuestion[];
-    if (res?.success && res?.data?.questions && Array.isArray(res.data.questions)) {
+    if (
+      res?.success &&
+      res?.data?.questions &&
+      Array.isArray(res.data.questions)
+    ) {
       return res.data.questions as InterviewQuestion[];
     }
     return [];
@@ -198,24 +205,22 @@ export default function MockInterviewLive() {
 
       try {
         uploadResult = await uploadJobInterviewVideo(videoBlob);
-      console.log("영상업로드 후 면접영상 저장 api 날리기");
-      const res =  await saveInterviewAnalysis({
+        console.log("영상업로드 후 면접영상 저장 api 날리기");
+
+        const res = await saveInterviewAnalysis({
           qzGroup: state?.interviewGroupId,
-          num:cur.order,
-          qzTts:questionText,
-          fileUrl:uploadResult.finalUrl,
-          thumUrl:uploadResult.thumbUrl,
-          category:"interview",
-          originalName:uploadResult.uniqueFileName,
-          storedName:uploadResult.uniqueFileName,
-          sizeBytes:uploadResult.fileSize,
-          contentType:"video/webm"
-
+          num: cur.order,
+          qzTts: questionText,
+          fileUrl: uploadResult.finalUrl,
+          thumUrl: uploadResult.thumbUrl,
+          category: "interview",
+          originalName: uploadResult.uniqueFileName,
+          storedName: uploadResult.uniqueFileName,
+          sizeBytes: uploadResult.fileSize,
+          contentType: "video/webm",
         });
-        
 
-        console.log('면접 영상 저장 API',res);
-
+        console.log("면접 영상 저장 API", res);
       } catch (err) {
         console.error("[uploadRecordedFile] video upload failed:", err);
         return { uploadResult: null, followupRes: null };
@@ -243,7 +248,6 @@ export default function MockInterviewLive() {
         file_url: uploadResult.finalUrl,
       };
 
-   
       let followupRes: any;
       try {
         followupRes = await fetchInterviewFollowup(payload);
@@ -331,7 +335,7 @@ export default function MockInterviewLive() {
     }
   };
 
-  const stopRecordingAndUpload = async () => {
+  const stopRecordingAndUpload = async (targetQIndex: number) => {
     const recorder = mediaRecorderRef.current;
     if (!recorder) return;
 
@@ -360,7 +364,7 @@ export default function MockInterviewLive() {
     mediaRecorderRef.current = null;
     setPreviewStream(null);
 
-    await uploadRecordedFile(blob, { qIndex });
+    await uploadRecordedFile(blob, { qIndex: targetQIndex });
   };
 
   useEffect(() => {
@@ -499,22 +503,27 @@ export default function MockInterviewLive() {
             onEnd={async () => {
               if (isUploading) return;
 
-            
-              await stopRecordingAndUpload();
+              const currentQIndex = qIndex;
+              const isLastQuestion = visibleIsLast;
+
+              await stopRecordingAndUpload(currentQIndex);
+
+              if (isLastQuestion) {
+                return;
+              }
 
               setPhase("thinking");
-
-              if (!visibleIsLast) {
-                advanceToNextVisibleQuestion();
-                handleThinkingRestart();
-              }
+              advanceToNextVisibleQuestion();
+              handleThinkingRestart();
             }}
           />
         )}
 
         <LiveSidePanel
-          currentIndex={qIndex}
-          totalCount={effectiveQuestions.filter((q) => q.type !== "SKIP").length}
+         currentIndex={qIndex}
+          totalCount={
+            effectiveQuestions.filter((q) => q.type !== "SKIP").length
+          }
           interviewState={state}
           interviewStageStatus={state?.interviewStageStatus}
           currentQuestion={current}

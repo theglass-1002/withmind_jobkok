@@ -11,7 +11,7 @@ export type EvalItem = {
 };
 
 type LeftProps = {
-  /** 좌측 상단 점수 타이틀 (ex. 정유리님의 점수) */
+  /** 좌측 상단 점수 타이틀 (ex. 위위님의 점수) */
   scoreTitle?: string;
   /** 레이더 차트에 들어갈 점수 */
   scores?: {

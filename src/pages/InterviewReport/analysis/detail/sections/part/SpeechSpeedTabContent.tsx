@@ -29,7 +29,7 @@ export default function SpeechSpeedTabContent({
   analysisTitle = "말하는 속도 분석",
   selectedGrade = "보통",
   analysisText = (
-    <>전체 평균과 비교했을 때, 정유리님의 말하는 속도는 적절합니다.</>
+    <>전체 평균과 비교했을 때, 위위님의 말하는 속도는 적절합니다.</>
   ),
   highlight = <>평균 속도 '5.2 SPS', 변동폭 '안정적', 일관성 '우수'</>,
   headers = ["느림", "다소 느림", "보통", "다소 빠름", "빠름"],

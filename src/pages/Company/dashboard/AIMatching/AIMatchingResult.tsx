@@ -62,7 +62,7 @@ export default function AIMatchingResult() {
         </div>
         
         <div className="talent-list__item talent-list__row">
-            <div className="talent-list__col talent-list__col--name"><span>정유리</span></div>
+            <div className="talent-list__col talent-list__col--name"><span>위위</span></div>
             
             <div className="talent-list__col talent-list__col--info">
                 <span className="talent-list__summary">20대 후반ㆍ경력 2년</span>

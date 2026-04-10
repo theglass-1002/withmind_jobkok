@@ -64,7 +64,7 @@ export default function M_InterviewReportHistory({
       statusText: "진행완료",
       statusState: "done",
       resumeLabelIconSrc: ic_task_gray900_18,
-      resumeText: "개발자 준비된 정유리입니다.",
+      resumeText: "개발자 준비된 위위입니다.",
       resumeDate: "2025.12.10",
       onClickView: () => {
         navigate(`/mock-interview/analysis/${1}`);
@@ -81,7 +81,7 @@ export default function M_InterviewReportHistory({
       statusText: "진행 중",
       statusState: "doing",
       resumeLabelIconSrc: ic_task_gray900_18,
-      resumeText: "개발자 준비된 정유리입니다.",
+      resumeText: "개발자 준비된 위위입니다.",
       resumeDate: "2025.12.10",
       onClickView: () => {
         navigate(`/mock-interview/analysis/${2}`);
@@ -98,7 +98,7 @@ export default function M_InterviewReportHistory({
       statusText: "진행완료",
       statusState: "done",
       resumeLabelIconSrc: ic_task_gray900_18,
-      resumeText: "개발자 준비된 정유리입니다.",
+      resumeText: "개발자 준비된 위위입니다.",
       resumeDate: "2025.12.10",
       onClickView: () => {
         navigate(`/mock-interview/analysis/${3}`);
@@ -115,7 +115,7 @@ export default function M_InterviewReportHistory({
         statusText: "진행 중",
         statusState: "doing",
         resumeLabelIconSrc: ic_task_gray900_18,
-        resumeText: "성장하는 기획자 정유리입니다..",
+        resumeText: "성장하는 기획자 위위 입니다..",
         resumeDate: "2025.12.10",
         onClickView: () => {
           navigate(`/mock-interview/analysis/${4}`);

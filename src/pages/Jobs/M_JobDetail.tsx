@@ -30,6 +30,7 @@ import icon_role_gray from '@/assets/icons/aside_item_logo/icon-role-gray.png';
 import RecommendedJobCard from "@/shared/components/job-posting-item/RecommendedJobCard";
 import Modal from "@/shared/components/modal/Modal";
 import "./JobDetail.css";
+import { Storage } from "@/shared/utils/StorageManager";
 
 
 
@@ -37,6 +38,7 @@ import "./JobDetail.css";
 
 export default function M_JobDetail() {
   const navigate = useNavigate();
+  const userName = Storage.getUserName() || "사용자";
   const [bookMark, setBookMark] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { jobId } = useParams();
@@ -177,7 +179,7 @@ export default function M_JobDetail() {
               <div className="job-detail__ai-item">
                 <span className="job-detail__ai-term">분석 요약</span>
                 <span className="job-detail__ai-desc">
-                  정유리 지원자는 Jetpack, Firebase, Kotlin 기술 경험을 보유하고 있으며, 모바일 앱 개발 분야에 대한 높은 이해도를 보여줍니다.
+                  위위 지원자는 Jetpack, Firebase, Kotlin 기술 경험을 보유하고 있으며, 모바일 앱 개발 분야에 대한 높은 이해도를 보여줍니다.
                 </span>
               </div>
 

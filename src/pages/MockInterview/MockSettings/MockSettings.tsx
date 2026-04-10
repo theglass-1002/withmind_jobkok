@@ -16,8 +16,8 @@ import { fetchResumeDetail } from "@/api/resume/resume.api";
 import { fetchJobDetail } from "@/api/job/job.api";
 
 import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
-import type { InterviewQuestionsRequest } from "@/api/interview/interview.types";
-import { createQzGroup, fetchEnvTestSpeech, fetchInterviewQuestions } from "@/api/interview/interview.api";
+import type { InterviewQuestionsRequest, InterviewQuestionsV2Request } from "@/api/interview/interview.types";
+import { createQzGroup, fetchEnvTestSpeech, fetchInterviewQuestions, fetchInterviewQuestionsV2 } from "@/api/interview/interview.api";
 import { logout } from "@/api/auth/auth.api";
 
 type InterviewInfoErrors = {
@@ -166,12 +166,22 @@ export default function MockSettings() {
         related_items: [],
         answer_hint: "본인의 핵심 강점과 해당 회사에 지원한 이유를 중심으로 설명해 주세요.",
       };
+      
+      console.log(resumeDetail);
+
+      console.log(JSON.stringify(resumeDetail));
 
       const payload: InterviewQuestionsRequest = {
         resume: JSON.stringify(resumeDetail),
         job_posting: jobDetail ? JSON.stringify(jobDetail) : null,
+       
       };
 
+      // const payload: InterviewQuestionsV2Request = {
+      //   resume: JSON.stringify(resumeDetail),
+      //   job_posting: jobDetail ? JSON.stringify(jobDetail) : null,
+      //   target_role:desiredJob.toString()
+      // }
       const allCustomFilled =
         questions.length > 0 &&
         questions.every((q) => !q.isAiGenerated && q.customText.trim().length > 0);
@@ -227,7 +237,10 @@ export default function MockSettings() {
         } -> 질문 생성 API 호출 (status=${interviewStageStatus})`
       );
 
-      const interviewResRaw: any = await fetchInterviewQuestions(payload);
+       const interviewResRaw: any = await fetchInterviewQuestions(payload);
+      //const interviewResRaw: any = await fetchInterviewQuestionsV2(payload);
+
+      console.log(interviewResRaw);
 
       let apiList: InterviewQuestionLike[] = [];
 

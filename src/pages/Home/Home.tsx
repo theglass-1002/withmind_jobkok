@@ -320,8 +320,6 @@ export default function Home() {
 
         if (!alive) return;
 
-        console.log("[Home] fetchJobTree raw response:", response);
-
         const nestedList = Array.isArray(response?.list) ? response.list : [];
         const flatList = Array.isArray(response)
           ? response
@@ -339,10 +337,6 @@ export default function Home() {
         } else {
           tree = buildTreeFromFlatList(flatList as FlatJobNode[]);
         }
-
-        console.log("[Home] built tree:", tree);
-        console.log("[Home] built tree length:", tree.length);
-
         setJobTree(tree);
       } catch (e: any) {
         if (!alive) return;
@@ -361,13 +355,11 @@ export default function Home() {
   }, [navigate]);
 
   useEffect(() => {
-    console.log("[Home] jobTree:", jobTree);
-    console.log("[Home] jobTree length:", jobTree.length);
+
   }, [jobTree]);
 
   useEffect(() => {
-    console.log("[Home] autoItems:", autoItems);
-    console.log("[Home] autoItems length:", autoItems.length);
+
   }, [autoItems]);
 
   useEffect(() => {

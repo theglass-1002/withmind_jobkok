@@ -29,7 +29,7 @@ export default function VoiceTabContent({
   analysisTitle = "목소리 톤 분석",
   selectedGrade = "보통",
   analysisText = (
-    <>전체 평균과 비교했을 때, 정유리님의 목소리 톤은 적절합니다.</>
+    <>전체 평균과 비교했을 때, 위위님의 목소리 톤은 적절합니다.</>
   ),
   highlight = <>평균 톤 '205 Hz', 변동폭 '중간', 안정성 '우수'</>,
   headers = ["", "낮은 저음", "저음", "중간", "고음", "높은 고음"],

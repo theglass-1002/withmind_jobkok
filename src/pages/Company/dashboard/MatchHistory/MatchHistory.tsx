@@ -60,7 +60,7 @@ export default function MatchHistory() {
             <div className='match-history-table__col match-history-table__col--action'></div>                             
           </div>
           <div className='match-history-table__item match-history-table__row'>
-            <div className='match-history-table__col match-history-table__col--name'>정유리</div>          
+            <div className='match-history-table__col match-history-table__col--name'>위위</div>          
             <div className='match-history-table__col match-history-table__col--job'>직방 Development Manager</div>
             <div className='match-history-table__col match-history-table__col--rate'>92%</div>
             <div className='match-history-table__col match-history-table__col--ai-status on'>

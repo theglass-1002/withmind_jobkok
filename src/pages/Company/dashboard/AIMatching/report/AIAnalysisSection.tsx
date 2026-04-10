@@ -116,7 +116,7 @@ const baseJobs = [
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 const analysisData1 = {
-  name: "정유리",
+  name: "위마",
   userId: "jeongyuri",
   desiredRole: "웹 기획자",
   resumeTitle: "성장하는 기획자",
@@ -173,7 +173,7 @@ const analysisData1 = {
   },
   categorySummary: {
     left: {
-      scoreTitle: "정유리님의 점수",
+      scoreTitle: "위마님의 점수",
       scores: { attitude: 95, voice: 88, tension: 20, competence: 92 },
       RadarChartComponent: KpiRadarChart,
     },
@@ -216,7 +216,7 @@ const analysisData1 = {
       label: "강점",
       tags: ["사용자 중심 사고", "데이터 기반 의사결정", "협업 능력"],
       description:
-        "정유리님의 강점으로 두드러지는 점은 사용자 중심적 사고방식과 데이터 기반 의사결정 능력입니다. 팀과의 협업에서도 뛰어난 커뮤니케이션 능력을 보였습니다.",
+        "위위님 강점으로 두드러지는 점은 사용자 중심적 사고방식과 데이터 기반 의사결정 능력입니다. 팀과의 협업에서도 뛰어난 커뮤니케이션 능력을 보였습니다.",
     },
     weakness: {
       iconSrc: ic_weakness_circle_24,
