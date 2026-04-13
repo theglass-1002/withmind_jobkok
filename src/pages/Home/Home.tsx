@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 import ic_search_white_24 from "@/assets/icons/size24/ic_search_white_24.png";
@@ -10,6 +10,7 @@ import { logout } from "@/api/auth/auth.api";
 import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
 import "./Home.css";
 import { Icons } from "@/assets/icons";
+import { Storage } from "@/shared/utils/StorageManager";
 
 type AutoItem = {
   label: string;
@@ -160,6 +161,13 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [, setErrorMsg] = useState<string | null>(null);
 
+  const saveRecentKeyword = useCallback((keyword: string) => {
+    const trimmed = (keyword ?? "").trim();
+    if (!trimmed) return;
+
+    Storage.addRecentSearchKeyword(trimmed);
+  }, []);
+
   const handleMovePage = (type: string) => {
     if (type === "resume") navigate("/resumes/create");
     if (type === "interview") navigate("/mock-interview-report");
@@ -263,6 +271,7 @@ export default function Home() {
       keyword,
     });
 
+    saveRecentKeyword(keyword);
     setOpenAuto(false);
     navigate("/jobs", { state: { activeTab: "all", keyword } });
   };
@@ -270,6 +279,7 @@ export default function Home() {
   const handlePickAuto = (item: AutoItem) => {
     setInputValue(item.label);
     setOpenAuto(false);
+    saveRecentKeyword(item.label);
 
     if (item.kind === "category" && item.categoryIdx != null) {
       console.log("[Home] 자동완성 카테고리 선택:", item);
@@ -355,11 +365,9 @@ export default function Home() {
   }, [navigate]);
 
   useEffect(() => {
-
   }, [jobTree]);
 
   useEffect(() => {
-
   }, [autoItems]);
 
   useEffect(() => {

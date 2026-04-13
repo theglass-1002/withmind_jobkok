@@ -7,8 +7,9 @@ import ic_arrow_back_ios_gray900_20 from "@/assets/icons/size20/ic_arrow_back_io
 import ic_search_gray900_20 from "@/assets/icons/size20/ic_search_gray900_20.png";
 
 import { logout } from "@/api/auth/auth.api";
-import { fetchJobTree } from "@/api/job/job.api";
+import { fetchJobTree, fetchPopularKeywords } from "@/api/job/job.api";
 import { JobNode } from "@/api/job/job.types";
+import { Storage } from "@/shared/utils/StorageManager";
 
 type AutoItem = {
   label: string;
@@ -129,6 +130,8 @@ export default function Navbar({ titleText }: NavbarProps) {
   const [openAutoDesktop, setOpenAutoDesktop] = useState(false);
 
   const [jobTree, setJobTree] = useState<JobNode[]>([]);
+  const [popularKeywords, setPopularKeywords] = useState<string[]>([]);
+  const [recentKeywords, setRecentKeywords] = useState<string[]>([]);
 
   const mypageRef = useRef<HTMLDivElement | null>(null);
   const searchPanelRef = useRef<HTMLDivElement | null>(null);
@@ -140,6 +143,34 @@ export default function Navbar({ titleText }: NavbarProps) {
   const syncAuth = useCallback(() => {
     setLoggedIn(!!localStorage.getItem("accessToken"));
   }, []);
+
+  const loadRecentKeywords = useCallback(() => {
+    setRecentKeywords(Storage.getRecentSearchKeywords());
+  }, []);
+
+  const saveRecentKeyword = useCallback(
+    (keyword: string) => {
+      const trimmed = (keyword ?? "").trim();
+      if (!trimmed) return;
+
+      Storage.addRecentSearchKeyword(trimmed);
+      loadRecentKeywords();
+    },
+    [loadRecentKeywords]
+  );
+
+  const removeRecentKeyword = useCallback(
+    (keyword: string) => {
+      Storage.removeRecentSearchKeyword(keyword);
+      loadRecentKeywords();
+    },
+    [loadRecentKeywords]
+  );
+
+  const clearRecentKeywords = useCallback(() => {
+    Storage.clearRecentSearchKeywords();
+    loadRecentKeywords();
+  }, [loadRecentKeywords]);
 
   const autoItems: AutoItem[] = useMemo(() => {
     const out: AutoItem[] = [];
@@ -236,6 +267,7 @@ export default function Navbar({ titleText }: NavbarProps) {
         setInputValue("");
         setInputValueDesktop("");
         setOpenAutoDesktop(false);
+        loadRecentKeywords();
       }
 
       return next;
@@ -248,6 +280,15 @@ export default function Navbar({ titleText }: NavbarProps) {
       if (next) setSearchOpen(false);
       return next;
     });
+  };
+
+  const moveToJobsWithKeyword = (keyword: string) => {
+    const trimmed = keyword.trim();
+    if (!trimmed) return;
+
+    saveRecentKeyword(trimmed);
+    setSearchOpen(false);
+    navigate("/jobs", { state: { activeTab: "all", keyword: trimmed } });
   };
 
   const handleSearchDesktop = () => {
@@ -265,8 +306,7 @@ export default function Navbar({ titleText }: NavbarProps) {
     });
 
     setOpenAutoDesktop(false);
-    setSearchOpen(false);
-    navigate("/jobs", { state: { activeTab: "all", keyword } });
+    moveToJobsWithKeyword(keyword);
   };
 
   const handleSearchMobile = () => {
@@ -280,8 +320,7 @@ export default function Navbar({ titleText }: NavbarProps) {
       keyword,
     });
 
-    setSearchOpen(false);
-    navigate("/jobs", { state: { activeTab: "all", keyword } });
+    moveToJobsWithKeyword(keyword);
   };
 
   const handlePickAutoDesktop = (item: AutoItem) => {
@@ -291,6 +330,7 @@ export default function Navbar({ titleText }: NavbarProps) {
 
     if (item.kind === "category" && item.categoryIdx != null) {
       console.log("[Navbar] 데스크톱 자동완성 카테고리 선택:", item);
+      saveRecentKeyword(item.label);
       navigate("/jobs", {
         state: { activeTab: "all", categoryIdx: item.categoryIdx },
       });
@@ -299,6 +339,7 @@ export default function Navbar({ titleText }: NavbarProps) {
 
     if (item.jobId != null) {
       console.log("[Navbar] 데스크톱 자동완성 직무 선택:", item);
+      saveRecentKeyword(item.label);
       navigate("/jobs", {
         state: {
           activeTab: "all",
@@ -310,7 +351,7 @@ export default function Navbar({ titleText }: NavbarProps) {
     }
 
     console.log("[Navbar] 데스크톱 자동완성 키워드 선택:", item.label);
-    navigate("/jobs", { state: { activeTab: "all", keyword: item.label } });
+    moveToJobsWithKeyword(item.label);
   };
 
   const handlePickAutoMobile = (item: AutoItem) => {
@@ -319,6 +360,7 @@ export default function Navbar({ titleText }: NavbarProps) {
 
     if (item.kind === "category" && item.categoryIdx != null) {
       console.log("[Navbar] 모바일 자동완성 카테고리 선택:", item);
+      saveRecentKeyword(item.label);
       navigate("/jobs", {
         state: { activeTab: "all", categoryIdx: item.categoryIdx },
       });
@@ -327,6 +369,7 @@ export default function Navbar({ titleText }: NavbarProps) {
 
     if (item.jobId != null) {
       console.log("[Navbar] 모바일 자동완성 직무 선택:", item);
+      saveRecentKeyword(item.label);
       navigate("/jobs", {
         state: {
           activeTab: "all",
@@ -338,7 +381,29 @@ export default function Navbar({ titleText }: NavbarProps) {
     }
 
     console.log("[Navbar] 모바일 자동완성 키워드 선택:", item.label);
-    navigate("/jobs", { state: { activeTab: "all", keyword: item.label } });
+    moveToJobsWithKeyword(item.label);
+  };
+
+  const handlePopularKeywordClickDesktop = (keyword: string) => {
+    setInputValueDesktop(keyword);
+    setOpenAutoDesktop(false);
+    moveToJobsWithKeyword(keyword);
+  };
+
+  const handlePopularKeywordClickMobile = (keyword: string) => {
+    setInputValue(keyword);
+    moveToJobsWithKeyword(keyword);
+  };
+
+  const handleRecentKeywordClickDesktop = (keyword: string) => {
+    setInputValueDesktop(keyword);
+    setOpenAutoDesktop(false);
+    moveToJobsWithKeyword(keyword);
+  };
+
+  const handleRecentKeywordClickMobile = (keyword: string) => {
+    setInputValue(keyword);
+    moveToJobsWithKeyword(keyword);
   };
 
   const handleLogout = () => {
@@ -351,11 +416,18 @@ export default function Navbar({ titleText }: NavbarProps) {
     let alive = true;
 
     syncAuth();
+    loadRecentKeywords();
 
     (async () => {
       try {
-        const response: any = await fetchJobTree();
+        const [jobTreeResponse, popularKeywordsResponse] = await Promise.all([
+          fetchJobTree(),
+          fetchPopularKeywords(),
+        ]);
+
         if (!alive) return;
+
+        const response: any = jobTreeResponse;
         const nestedList = Array.isArray(response?.list) ? response.list : [];
         const flatList = Array.isArray(response)
           ? response
@@ -375,32 +447,39 @@ export default function Navbar({ titleText }: NavbarProps) {
         }
 
         setJobTree(tree);
+        setPopularKeywords(
+          Array.isArray(popularKeywordsResponse?.total)
+            ? popularKeywordsResponse.total
+            : []
+        );
       } catch (err) {
-        console.error("[Navbar] Failed to fetch job tree:", err);
+        console.error("[Navbar] Failed to fetch initial data:", err);
       }
     })();
 
     return () => {
       alive = false;
     };
-  }, [syncAuth]);
-
-  useEffect(() => {
-  }, [jobTree]);
-
-  useEffect(() => {
-  }, [autoItems]);
-
-  useEffect(() => {
-  }, [inputValueDesktop, openAutoDesktop, filteredAutoDesktop]);
+  }, [syncAuth, loadRecentKeywords]);
 
   useEffect(() => {
     syncAuth();
 
-    const onStorage = () => syncAuth();
-    const onFocus = () => syncAuth();
+    const onStorage = () => {
+      syncAuth();
+      loadRecentKeywords();
+    };
+
+    const onFocus = () => {
+      syncAuth();
+      loadRecentKeywords();
+    };
+
     const onVisibility = () => {
-      if (document.visibilityState === "visible") syncAuth();
+      if (document.visibilityState === "visible") {
+        syncAuth();
+        loadRecentKeywords();
+      }
     };
 
     window.addEventListener("storage", onStorage);
@@ -415,7 +494,7 @@ export default function Navbar({ titleText }: NavbarProps) {
       document.removeEventListener("visibilitychange", onVisibility);
       window.clearInterval(id);
     };
-  }, [location.pathname, syncAuth]);
+  }, [location.pathname, syncAuth, loadRecentKeywords]);
 
   useEffect(() => {
     if (!mypageMenuOpen) return;
@@ -613,17 +692,28 @@ export default function Navbar({ titleText }: NavbarProps) {
               <section className="panel-section">
                 <header className="section-head">
                   <span className="section-title">최근 검색어</span>
-                  <button className="section-action">전체 삭제</button>
+                  <button className="section-action" onClick={clearRecentKeywords}>
+                    전체 삭제
+                  </button>
                 </header>
                 <div className="chip-list">
-                  <button className="chip">
-                    프론트엔드
-                    <img src={Icons.ic_close_gray500_20} alt="" />
-                  </button>
-                  <button className="chip">
-                    프로젝트 기획자
-                    <img src={Icons.ic_close_gray500_20} alt="" />
-                  </button>
+                  {recentKeywords.map((keyword, index) => (
+                    <button
+                      key={`${keyword}-${index}`}
+                      className="chip"
+                      onClick={() => handleRecentKeywordClickDesktop(keyword)}
+                    >
+                      {keyword}
+                      <img
+                        src={Icons.ic_close_gray500_20}
+                        alt=""
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeRecentKeyword(keyword);
+                        }}
+                      />
+                    </button>
+                  ))}
                 </div>
               </section>
 
@@ -632,8 +722,15 @@ export default function Navbar({ titleText }: NavbarProps) {
                   <span className="section-title">인기 키워드</span>
                 </header>
                 <div className="chip-list">
-                  <button className="chip">프론트엔드</button>
-                  <button className="chip">프로젝트 기획자</button>
+                  {popularKeywords.map((keyword, index) => (
+                    <button
+                      key={`${keyword}-${index}`}
+                      className="chip"
+                      onClick={() => handlePopularKeywordClickDesktop(keyword)}
+                    >
+                      {keyword}
+                    </button>
+                  ))}
                 </div>
               </section>
             </>
@@ -707,13 +804,28 @@ export default function Navbar({ titleText }: NavbarProps) {
               <section className="panel-section">
                 <header className="section-head">
                   <span className="section-title">최근 검색어</span>
-                  <button className="section-action">전체 삭제</button>
+                  <button className="section-action" onClick={clearRecentKeywords}>
+                    전체 삭제
+                  </button>
                 </header>
                 <div className="chip-list">
-                  <button className="chip recent">
-                    프론트엔드
-                    <img src={Icons.ic_close_gray500_20} alt="" />
-                  </button>
+                  {recentKeywords.map((keyword, index) => (
+                    <button
+                      key={`${keyword}-${index}`}
+                      className="chip recent"
+                      onClick={() => handleRecentKeywordClickMobile(keyword)}
+                    >
+                      {keyword}
+                      <img
+                        src={Icons.ic_close_gray500_20}
+                        alt=""
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeRecentKeyword(keyword);
+                        }}
+                      />
+                    </button>
+                  ))}
                 </div>
               </section>
 
@@ -722,8 +834,15 @@ export default function Navbar({ titleText }: NavbarProps) {
                   <span className="section-title">인기 검색 키워드</span>
                 </header>
                 <div className="chip-list">
-                  <button className="chip popular">프론트엔드</button>
-                  <button className="chip popular">프로젝트 기획자</button>
+                  {popularKeywords.map((keyword, index) => (
+                    <button
+                      key={`${keyword}-${index}`}
+                      className="chip popular"
+                      onClick={() => handlePopularKeywordClickMobile(keyword)}
+                    >
+                      {keyword}
+                    </button>
+                  ))}
                 </div>
               </section>
             </>

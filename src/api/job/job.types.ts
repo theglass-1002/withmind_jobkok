@@ -2,6 +2,12 @@
 import locations from "@/data/locationsV2.json";
 import { Region } from "../resume/resume.types";
 
+export interface PopularKeywordApiResponse {
+  total: string[];
+  code: number;
+  hourly: string[];
+}
+
 // 직군 직무 
 export interface JobNode {
     idx: number;

@@ -1,16 +1,25 @@
-.company-signup{
-    display: flex;
+
+.company-contanier{
+    display: flex;;
     width: 100%;
-    padding: 100px 580px;
+    background: var(--gray-50, #F8F8F9);
     flex-direction: column;
     justify-content: center;
     align-items: center;
+}
+
+.company-signup{
+    max-width: 1200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
     gap: 72px;
-    background: var(--gray-50, #F8F8F9);
+    padding: 230px 0px; 
 }
 
 .company-signup__title{
-    width: 100%;
+    width: 760px;
     color: var(--gray-900, #2A2D2F);
     font-family: Pretendard;
     font-size: 28px;
@@ -40,6 +49,7 @@
 
 .company-signup .input-group{
     display: flex;
+    height: auto;
     flex-direction: column;
     align-items: flex-start;
     gap: 16px;

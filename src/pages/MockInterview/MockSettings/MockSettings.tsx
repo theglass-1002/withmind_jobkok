@@ -167,15 +167,13 @@ export default function MockSettings() {
         answer_hint: "본인의 핵심 강점과 해당 회사에 지원한 이유를 중심으로 설명해 주세요.",
       };
       
-      console.log(resumeDetail);
-
-      console.log(JSON.stringify(resumeDetail));
-
+     
       const payload: InterviewQuestionsRequest = {
         resume: JSON.stringify(resumeDetail),
         job_posting: jobDetail ? JSON.stringify(jobDetail) : null,
        
       };
+
 
       // const payload: InterviewQuestionsV2Request = {
       //   resume: JSON.stringify(resumeDetail),
@@ -194,6 +192,9 @@ export default function MockSettings() {
 
       if (allCustomFilled) {
         console.log("[MockSettings] 유저 질문 전부 작성 완료 -> 질문 생성 API 호출 스킵");
+
+        console.log('응답',payload);
+        console.log('질문리스트',introQuestion);
 
         const mergedQuestions: InterviewQuestionLike[] = [
           { ...introQuestion, order: 1 },
@@ -240,7 +241,7 @@ export default function MockSettings() {
        const interviewResRaw: any = await fetchInterviewQuestions(payload);
       //const interviewResRaw: any = await fetchInterviewQuestionsV2(payload);
 
-      console.log(interviewResRaw);
+      console.log("interviewResRaw",interviewResRaw);
 
       let apiList: InterviewQuestionLike[] = [];
 

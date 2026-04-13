@@ -29,7 +29,7 @@ export default function CompanyLogin() {
 
   return (
     <div className="company-login">
- 
+      
       <ToastContainer
         limit={2}
         className="app-toast"

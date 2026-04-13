@@ -75,14 +75,21 @@ export async function refreshAccessToken(refreshToken: string) {
 export const isLoggedIn = () => !!localStorage.getItem("accessToken");
 
 export const logout = () => {
-  const keys = ['accessToken', 'refreshToken', 'userId', 'userIdx', 'userName'];
+  const keys = [
+    "accessToken",
+    "refreshToken",
+    "userId",
+    "userIdx",
+    "userName",
+    "recentSearchKeywords",
+  ];
 
   try {
-    keys.forEach(key => sessionStorage.removeItem(key));
+    keys.forEach((key) => sessionStorage.removeItem(key));
   } catch (_) {}
 
   try {
-    keys.forEach(key => localStorage.removeItem(key));
+    keys.forEach((key) => localStorage.removeItem(key));
   } catch (_) {}
 };
 

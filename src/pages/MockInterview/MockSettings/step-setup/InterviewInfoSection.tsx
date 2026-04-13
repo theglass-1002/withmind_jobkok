@@ -66,7 +66,7 @@ export default function InterviewInfoSection({
       setIsLoading(true);
 
       const result = await fetchResumeList(nextPage, size, "DONE");
-
+      console.log("result",result);
 
       const nextResumeOptions: ResumeOption[] = (result.list || [])
         .map((r: any) => ({

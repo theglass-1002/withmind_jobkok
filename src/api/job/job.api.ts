@@ -1,6 +1,32 @@
 // src/api/job/job.api.ts
 import instance, { getAccessToken } from "@/api/axios.instance";
-import type { JobNode, JobListApiResponse, JobItem, JobDetailApiResponse, JobFavoriteResponse } from "./job.types";
+import type { JobNode, JobListApiResponse, JobItem, JobDetailApiResponse, JobFavoriteResponse, PopularKeywordApiResponse } from "./job.types";
+
+// 인기 키워드 조회
+export async function fetchPopularKeywords(): Promise<{
+  total: string[];
+  hourly: string[];
+  code: number;
+}> {
+  const res = await instance.get<PopularKeywordApiResponse>(
+    "/auth/search/keyword/popular",
+    {
+      requiresAuth: false,
+      params: {
+        limit: 10,
+      },
+    }
+  );
+
+  const body = res.data;
+
+  return {
+    total: Array.isArray(body.total) ? body.total : [],
+    hourly: Array.isArray(body.hourly) ? body.hourly : [],
+    code: body.code ?? 200,
+  };
+}
+
 
 // 직군/직무 트리
 export async function fetchJobTree(): Promise<JobNode[]> {
