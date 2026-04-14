@@ -9,60 +9,161 @@ import "./AIMatching.css";
 import AIMatchingResult from "./AIMatchingResult";
 
 import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
+import {
+  startCompanyJobAnalysis,
+  getCompanyJobAnalysis,
+} from "@/api/company/job/companyJob.api";
+import type { CompanyJobAnalysisResultData } from "@/api/company/job/companyJob.types";
+
+type JobAnalysisErrorResponse = {
+  detail?: {
+    code?: string;
+    message?: string;
+  };
+};
+
+function isAnalysisResultData(value: unknown): value is CompanyJobAnalysisResultData {
+  if (!value || typeof value !== "object") return false;
+
+  const data = value as Record<string, any>;
+
+  return (
+    typeof data.status === "string" &&
+    typeof data.taskId === "number" &&
+    data.job &&
+    typeof data.job === "object" &&
+    typeof data.job.jobIdx === "number" &&
+    typeof data.job.title === "string" &&
+    typeof data.job.companyIdx === "number" &&
+    typeof data.job.companyName === "string" &&
+    typeof data.job.url === "string" &&
+    typeof data.job.updatedAt === "string" &&
+    data.sections &&
+    typeof data.sections === "object"
+  );
+}
 
 export default function AIMatching() {
   const navigate = useNavigate();
 
-  const [jobUrl, setJobUrl] = useState("https://jobkok.kr/jobs/17");
+  const [jobUrl, setJobUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showResult, setShowResult] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<CompanyJobAnalysisResultData | null>(null);
 
   const timerRef = useRef<number | null>(null);
-
-  // ✅ 허용되는 URL(정확히 일치해야 함)
-  const VALID_URL =
-    "https://jobkok.kr/jobs/17";
+  const isUnmountedRef = useRef(false);
 
   useEffect(() => {
     return () => {
-      if (timerRef.current) window.clearTimeout(timerRef.current);
+      isUnmountedRef.current = true;
+
+      if (timerRef.current) {
+        window.clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
     };
   }, []);
 
-  const handleSearch = () => {
+  const clearPollingTimer = () => {
+    if (timerRef.current) {
+      window.clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  };
+
+  const pollAnalysisResult = async (url: string) => {
+    try {
+      const result = await getCompanyJobAnalysis(url);
+
+      console.log("공고분석 GET 응답:", result);
+
+      if (isUnmountedRef.current) return;
+
+      if (result?.data && isAnalysisResultData(result.data)) {
+        clearPollingTimer();
+        setAnalysisResult(result.data);
+        setShowResult(true);
+        setIsLoading(false);
+        return;
+      }
+
+      timerRef.current = window.setTimeout(() => {
+        void pollAnalysisResult(url);
+      }, 3000);
+    } catch (error) {
+      console.error("공고분석 GET 실패:", error);
+
+      if (isUnmountedRef.current) return;
+
+      const e = error as JobAnalysisErrorResponse;
+
+      if (e?.detail?.code === "JOB_POSTING_NOT_FOUND") {
+        clearPollingTimer();
+        setIsLoading(false);
+        setShowResult(false);
+        setAnalysisResult(null);
+
+        toast.info(e.detail.message || "검색하신 url을 찾을 수 없습니다", {
+          toastId: "ai-matching-url-not-found",
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      timerRef.current = window.setTimeout(() => {
+        void pollAnalysisResult(url);
+      }, 3000);
+
+    }
+  };
+
+  const handleSearch = async () => {
     const trimmed = jobUrl.trim();
 
-    // ✅ 글자 없으면 토스트 + 검색 안됨
     if (!trimmed) {
       toast.info("공고 URL을 입력해 주세요.", {
         toastId: "ai-matching-empty-url",
       });
       setShowResult(false);
+      setAnalysisResult(null);
       return;
     }
 
-    // ✅ 이전 타이머 정리
-    if (timerRef.current) window.clearTimeout(timerRef.current);
-
-    // ✅ 로딩 시작 + 결과 숨김
+    clearPollingTimer();
     setShowResult(false);
+    setAnalysisResult(null);
     setIsLoading(true);
 
-    // ✅ 3초 뒤 결과 판단
-    timerRef.current = window.setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const startRes = await startCompanyJobAnalysis({ url: trimmed });
 
-      if (trimmed === VALID_URL) {
-        // ✅ URL 일치 → 결과 표시
-        setShowResult(true);
-      } else {
-        // ✅ URL 불일치 → 토스트 메시지
-        setShowResult(false);
-        toast.info("검색하신 url을 찾을 수 없습니다", {
-          toastId: "ai-matching-url-not-found",
-        });
-      }
-    }, 3000);
+      console.log("공고분석 POST 응답:", startRes);
+
+      if (isUnmountedRef.current) return;
+
+      await pollAnalysisResult(trimmed);
+    } catch (error) {
+      console.error("공고분석 POST 실패:", error);
+
+      if (isUnmountedRef.current) return;
+
+      setIsLoading(false);
+      setShowResult(false);
+      setAnalysisResult(null);
+
+      toast.error(
+        <>
+          공고 분석 시작에 실패했습니다.
+          <br />
+          url을 확인해 주세요
+        </>,
+        {
+          toastId: "ai-matching-start-fail",
+        }
+      );
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -96,20 +197,24 @@ export default function AIMatching() {
               <input
                 type="text"
                 name="jobUrl"
-                placeholder="등록된 공고의 URL을 입력해 주세요."
+                placeholder="등록된 공고의 URL을 입력해 주세요. 예:https://www.wanted.co.kr/wd/97403"
                 id="jobUrlInput"
                 className="ai-matching-search-box__input"
                 value={jobUrl}
                 onChange={(e) => setJobUrl(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") handleSearch();
+                  if (e.key === "Enter" && !isLoading) {
+                    void handleSearch();
+                  }
                 }}
               />
             </span>
 
             <button
               className="default_btn_gray_800"
-              onClick={handleSearch}
+              onClick={() => {
+                void handleSearch();
+              }}
               disabled={isLoading}
             >
               <img
@@ -121,7 +226,6 @@ export default function AIMatching() {
             </button>
           </div>
 
-          {/* ✅ URL이 정확히 맞을 때만 3초 후 노출 */}
           {showResult && <AIMatchingResult />}
         </div>
       </div>

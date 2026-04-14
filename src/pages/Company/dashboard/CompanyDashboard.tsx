@@ -87,27 +87,30 @@ export default function CompanyDashboard() {
   };
 
   return (
+    <div className="company-dashboard-layout">
     <div className="company-dashboard">
-      <CompanyDashboardSidebar activeTab={activeTab} onSelect={handleTabSelect} />
-      
-      <div className="company-dashboard__main">
-          <Outlet />
+        <CompanyDashboardSidebar activeTab={activeTab} onSelect={handleTabSelect} />
+        
+        <div className="company-dashboard__main">
+            <Outlet />
+        </div>
+            
+        <ToastContainer
+            limit={1}
+            className="app-toast"
+            position="top-center"
+            transition={SlideDown}
+            newestOnTop
+            hideProgressBar
+            closeOnClick
+            pauseOnFocusLoss
+            pauseOnHover
+            draggable
+            theme="light"
+            autoClose={100}
+          />
       </div>
-           
-      <ToastContainer
-          limit={2}
-          className="app-toast"
-          position="top-center"
-          transition={SlideDown}
-          autoClose={2000}
-          newestOnTop
-          hideProgressBar
-          closeOnClick
-          pauseOnFocusLoss
-          pauseOnHover
-          draggable
-          theme="light"
-        />
-    </div>
+      </div>
+  
   );
 }

@@ -23,11 +23,35 @@ export interface CompanyRegisterRequest {
 
 export interface CompanyAccountInfo {
   companyAccountIdx: number;
-  companyId: number;
+  companyIdx: number;
   companyUserId: string;
 }
 
 export interface CompanyRegisterResponse {
+  code: number;
+  tokenType: string;
+  token: string;
+  refreshToken: string;
+  companyAccount: CompanyAccountInfo;
+}
+
+export interface CompanyEmailCheckRequest {
+  companyUserId: string;
+}
+
+export interface CompanyEmailCheckResponse {
+  code: number;
+  check: boolean;
+  msg: string;
+}
+
+export interface CompanyLoginRequest {
+  companyUserId: string;
+  password: string;
+  deviceId: string;
+}
+
+export interface CompanyLoginResponse {
   code: number;
   tokenType: string;
   token: string;

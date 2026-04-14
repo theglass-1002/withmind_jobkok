@@ -103,7 +103,7 @@ export async function fetchEnvTestAnalyze(
 /**
  * 꼬리질문 API
  * POST /interview/followup
- * baseURL: AI_BASE_URL (예: https://ai.api.jobkok.kr)
+ * baseURL:  (예: https://ai.api.jobkok.kr)
  */
 export async function fetchInterviewFollowup(
   payload: InterviewFollowupRequest

@@ -10,9 +10,13 @@ import ic_calendar_gray700_20 from "@/assets/icons/size20/ic_calendar_gray700_20
 import { openAuthPopup, stripAllWhitespace } from "@/shared/utils/util";
 import { saConfirm, saInit } from "@/api/auth/auth.api";
 import { InicisParams } from "@/api/auth/auth.types";
-import { registerCompany } from "@/api/company/auth/companyAuth.api";
+import {
+  registerCompany,
+  checkCompanyEmail,
+} from "@/api/company/auth/companyAuth.api";
 import type { CompanyRegisterRequest } from "@/api/company/auth/companyAuth.types";
 import { ApiErrorResponse } from "@/api/axios.instance";
+import { Icons } from "@/assets/icons";
 
 type VerifiedCompanyUserInfo = {
   name: string;
@@ -84,6 +88,9 @@ export default function CompanySignup() {
   const [inicisParams, setInicisParams] = useState<InicisParams | null>(null);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
+  const [isEmailChecked, setIsEmailChecked] = useState(false);
+  const [isEmailAvailable, setIsEmailAvailable] = useState<boolean | null>(null);
 
   const togglePassword = () => setShowPassword((p) => !p);
   const togglePasswordConfirm = () => setShowPasswordConfirm((p) => !p);
@@ -265,6 +272,47 @@ export default function CompanySignup() {
     }
   };
 
+  const handleEmailCheck = async () => {
+    const trimmedEmail = email.trim();
+
+    if (!trimmedEmail) {
+      toast.error("이메일을 입력해 주세요.");
+      return;
+    }
+
+    try {
+      setIsCheckingEmail(true);
+
+      const result = await checkCompanyEmail(trimmedEmail);
+
+      if (result.code === 200) {
+        setIsEmailChecked(true);
+
+        if (result.check) {
+          setIsEmailAvailable(false);
+          toast.error("이미 사용 중인 이메일입니다.");
+        } else {
+          setIsEmailAvailable(true);
+          setEmail(trimmedEmail);
+          toast.success("사용 가능한 이메일입니다.");
+        }
+        return;
+      }
+
+      setIsEmailChecked(false);
+      setIsEmailAvailable(null);
+      toast.error(result.msg || "이메일 중복 확인에 실패했습니다.");
+    } catch (error) {
+      console.error(error);
+      const e = error as ApiErrorResponse;
+      setIsEmailChecked(false);
+      setIsEmailAvailable(null);
+      toast.error(e?.msg || `이메일 중복 확인 실패 (code: ${e?.code ?? "unknown"})`);
+    } finally {
+      setIsCheckingEmail(false);
+    }
+  };
+
   const validateForm = () => {
     if (!stripAllWhitespace(company_name)) {
       toast.error("기업명을 입력해 주세요.");
@@ -281,7 +329,7 @@ export default function CompanySignup() {
       return false;
     }
 
-    if (!stripAllWhitespace(email)) {
+    if (!email.trim()) {
       toast.error("아이디(이메일)를 입력해 주세요.");
       return false;
     }
@@ -320,13 +368,14 @@ export default function CompanySignup() {
 
       const payload: CompanyRegisterRequest = {
         deviceId: getDeviceId(),
-        companyUserId: stripAllWhitespace(email),
+        companyUserId: email.trim(),
         password: stripAllWhitespace(password),
         password2: stripAllWhitespace(passwordConfirm),
         managerName: verifiedUserInfo.name,
         managerPhone: formatPhone(verifiedUserInfo.phone),
         birthdate: toBirthApiValue(verifiedUserInfo.birth),
-        gender: verifiedUserInfo.gender === "F" || verifiedUserInfo.gender === "W" ? "W" : "M",
+        gender:
+          verifiedUserInfo.gender === "F" || verifiedUserInfo.gender === "W" ? "W" : "M",
         companyName: stripAllWhitespace(company_name),
         bizRegNo: onlyDigits(business_no),
         ceoName: stripAllWhitespace(owner_name),
@@ -340,10 +389,11 @@ export default function CompanySignup() {
       };
 
       const result = await registerCompany(payload);
+      console.log('기업회원가입결과',result);
 
       if (result.code === 200) {
         toast.success("기업회원 가입이 완료되었습니다.");
-        navigate("/company");
+        navigate("/company/login");
         return;
       }
 
@@ -414,7 +464,7 @@ export default function CompanySignup() {
 
             <div className="company_name-group input-group">
               <label className="label">
-                아이디 <em>*</em>
+                이메일 <em>*</em>
               </label>
               <div className="company-signup__field-with-btn">
                 <div className="company-signup__input-wrap">
@@ -424,14 +474,33 @@ export default function CompanySignup() {
                     aria-invalid="true"
                     placeholder="이메일을 입력해 주세요."
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      setIsEmailChecked(false);
+                      setIsEmailAvailable(null);
+                    }}
                   />
+                  {isEmailChecked && isEmailAvailable === true && (
+                    <img src={Icons.ic_check_circle_green_20} alt="사용 가능한 이메일" />
+                  )}
                 </div>
 
-                <button type="button" className="default_btn_white company-signup__verify-btn">
-                  중복 확인
+                <button
+                  type="button"
+                  className="default_btn_white company-signup__verify-btn"
+                  onClick={handleEmailCheck}
+                  disabled={isCheckingEmail || !email.trim()}
+                >
+                  {isCheckingEmail ? "확인 중..." : "중복 확인"}
                 </button>
               </div>
+
+              {isEmailChecked && isEmailAvailable === true && (
+                <p className="success_text_green">사용 가능한 이메일입니다.</p>
+              )}
+              {isEmailChecked && isEmailAvailable === false && (
+                <p className="error_text_red">이미 사용 중인 이메일입니다.</p>
+              )}
             </div>
 
             <div className="company_name-group input-group">
