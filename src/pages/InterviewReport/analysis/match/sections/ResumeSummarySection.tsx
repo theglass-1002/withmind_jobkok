@@ -9,8 +9,9 @@ type Props = {
 };
 
 export default function ResumeSummarySection({ reportDetail }: Props) {
-  const resumeAnalysis = reportDetail?.tab3?.resumeAnalysis;
 
+  const resumeAnalysis = reportDetail?.tab3?.resumeAnalysis;
+ 
   const overallComment =
     resumeAnalysis?.overallComment ??
     "이력서 전반에 대한 평가가 표시됩니다.";

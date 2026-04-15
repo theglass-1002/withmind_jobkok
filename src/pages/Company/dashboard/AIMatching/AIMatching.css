@@ -548,6 +548,7 @@ AIReport */
 }
 
 .ai-match{
+    height: 207px;
     display: flex;
     align-items: flex-start;
     align-self: stretch;
@@ -556,7 +557,7 @@ AIReport */
 .ai-match-score{
     display: flex;
     width: 207px;
-    padding: 60px 0 59px 0;
+    height: 100%;
     flex-direction: column;
     justify-content: center;
     align-items: center;

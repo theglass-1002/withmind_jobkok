@@ -490,21 +490,34 @@ export const mapLicenseListToAwardItems = (
 
 
 export type PortfolioFileItem = {
-  kind: "file";
-  name: string; // 예:
-  iconSrc?: string; // 없으면 defaultIcons.file 사용
-  filePath?:string;
+  kind?: "file";
+  itemType?: "FILE" | string;
+  iconSrc?: string;
+
+  name?: string;
+  title?: string;
+  description?: string;
+
+  filePath?: string;
+  fileIdx?: number | null;
 };
 
 export type PortfolioLinkItem = {
-  kind: "link";
-  url: string; // 예: "https://interview.kr"
-  displayText?: string; // 표시 텍스트 커스텀 (없으면 url 그대로)
-  iconSrc?: string; // 없으면 defaultIcons.link 사용
+  kind?: "link";
+  itemType?: "LINK" | string;
+  iconSrc?: string;
+
+  url?: string;
+  displayText?: string;
+
+  title?: string;
+  description?: string;
+
+  filePath?: string;
+  fileIdx?: number | null;
 };
 
 export type PortfolioItem = PortfolioFileItem | PortfolioLinkItem;
-
 
 
 export function mapPortfolioListToPortfolioItems(

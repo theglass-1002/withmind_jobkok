@@ -3,9 +3,13 @@ import ic_bell_gray900_24 from "@/assets/icons/size24/ic_bell_gray900_24.png";
 import ic_search_white_20 from "@/assets/icons/size20/ic_search_white_20.png";
 import ic_arrow_drop_down_gray900_24 from "@/assets/icons/size24/ic_arrow_drop_down_gray900_24.png";
 import ic_arrow_up_right_gray900_20 from "@/assets/icons/size20/ic_arrow_up_right_gray900_20.png";
+import { Storage } from "@/shared/utils/StorageManager";
+
 import "./Statistics.css";
 
 export default function Statistics() {
+  const companyName = Storage.getCompanyName();
+
   return (
     <>
      <div className="company-dashboard-page">
@@ -21,8 +25,8 @@ export default function Statistics() {
             />
           </div>
           <div className="company-dashboard-header__info">
-            <span className="company-dashboard-header__company-name">위드마인드
-            </span>
+            <span className="company-dashboard-header__company-name">
+            {companyName || "-"}</span>
             <img src={ic_arrow_drop_down_gray900_24} alt="" />
           </div>
         </div>       

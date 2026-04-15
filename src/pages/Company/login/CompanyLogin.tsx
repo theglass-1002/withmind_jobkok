@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -7,8 +7,9 @@ import ic_visibility_gray700_20 from "@/assets/icons/size20/ic_visibility_gray70
 import ic_visibility_off_gray700_20 from "@/assets/icons/size20/ic_visibility_off_gray700_20.png";
 import "./CompanyLogin.css";
 
-import { loginCompany } from "@/api/company/auth/companyAuth.api";
+import { loginCompany, getCompanyMe } from "@/api/company/auth/companyAuth.api";
 import { ApiErrorResponse } from "@/api/axios.instance";
+import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
 
 function getDeviceId() {
   const key = "companyDeviceId";
@@ -28,6 +29,23 @@ export default function CompanyLogin() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
+
+  const saveCompanyLoginTokens = useCallback(
+    (data: {
+      token: string;
+      refreshToken: string;
+      companyAccountIdx: number | string;
+      companyIdx: number | string;
+      companyUserId: string;
+    }) => {
+      localStorage.setItem("companyAccessToken", data.token);
+      localStorage.setItem("companyRefreshToken", data.refreshToken);
+      localStorage.setItem("companyAccountId", String(data.companyAccountIdx));
+      localStorage.setItem("companyIdx", String(data.companyIdx));
+      localStorage.setItem("companyUserId", data.companyUserId);
+    },
+    []
+  );
 
   const handleLogin = async () => {
     const trimmedUserId = userId.trim();
@@ -63,6 +81,24 @@ export default function CompanyLogin() {
       console.log("기업 로그인 응답:", result);
 
       if (result.code === 200) {
+        saveCompanyLoginTokens({
+          token: result.token,
+          refreshToken: result.refreshToken,
+          companyAccountIdx: result.companyAccount.companyAccountIdx,
+          companyIdx: result.companyAccount.companyIdx,
+          companyUserId: result.companyAccount.companyUserId,
+        });
+
+        const meResult = await getCompanyMe();
+        console.log("기업정보 조회 응답:", meResult);
+
+        if (meResult.code === 200 && meResult.companyAccount) {
+          localStorage.setItem(
+            "companyName",
+            meResult.companyAccount.companyName ?? ""
+          );
+        }
+
         toast.success("로그인되었습니다.", {
           position: "top-center",
           autoClose: 2000,
@@ -94,6 +130,8 @@ export default function CompanyLogin() {
 
   return (
     <div className="company-login">
+      <LoadingOverlay isLoading={isSubmitting} isLogo />
+
       <ToastContainer
         limit={2}
         className="app-toast"
@@ -123,6 +161,7 @@ export default function CompanyLogin() {
                 placeholder="이메일을 입력해 주세요."
                 value={userId}
                 onChange={(e) => setUserId(e.target.value)}
+                disabled={isSubmitting}
               />
             </div>
           </div>
@@ -136,6 +175,7 @@ export default function CompanyLogin() {
                 placeholder="비밀번호를 입력해 주세요."
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                disabled={isSubmitting}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !isSubmitting) {
                     handleLogin();
@@ -150,7 +190,7 @@ export default function CompanyLogin() {
                     : ic_visibility_gray700_20
                 }
                 alt="비밀번호 토글"
-                onClick={togglePasswordVisibility}
+                onClick={isSubmitting ? undefined : togglePasswordVisibility}
               />
             </div>
           </div>
@@ -160,7 +200,9 @@ export default function CompanyLogin() {
           <span className="company-login__signup-text">아직 회원이 아니세요?</span>
           <span
             className="company-login__signup-link"
-            onClick={() => navigate("/company/signup")}
+            onClick={() => {
+              if (!isSubmitting) navigate("/company/signup");
+            }}
           >
             회원가입
           </span>

@@ -3,6 +3,7 @@ import type {
   CompanyEmailCheckResponse,
   CompanyLoginRequest,
   CompanyLoginResponse,
+  CompanyMeResponse,
   CompanyRegisterRequest,
   CompanyRegisterResponse,
 } from "./companyAuth.types";
@@ -61,6 +62,17 @@ export async function loginCompany(
       },
     } as any
   );
+
+  return res.data;
+}
+
+export async function getCompanyMe(): Promise<CompanyMeResponse> {
+  const res = await instance.get<CompanyMeResponse>("/company/api/me", {
+    tokenType: "company",
+    headers: {
+      Accept: "application/json",
+    },
+  } as any);
 
   return res.data;
 }

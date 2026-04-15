@@ -3,8 +3,11 @@ import ic_bell_gray900_24 from "@/assets/icons/size24/ic_bell_gray900_24.png";
 import ic_search_white_20 from "@/assets/icons/size20/ic_search_white_20.png";
 import ic_arrow_drop_down_gray900_24 from "@/assets/icons/size24/ic_arrow_drop_down_gray900_24.png";
 import ic_warning_20 from "@/assets/icons/size20/ic_warning_20.png";
+import { Storage } from "@/shared/utils/StorageManager";
 import "./Pricing.css";
+
 export default function Pricing() {
+  const companyName = Storage.getCompanyName();
   return (
     <>
     <div className="company-dashboard-page">
@@ -20,8 +23,8 @@ export default function Pricing() {
             />
           </div>
           <div className="company-dashboard-header__info">
-            <span className="company-dashboard-header__company-name">위드마인드
-            </span>
+            <span className="company-dashboard-header__company-name">
+            {companyName || "-"}</span>
             <img src={ic_arrow_drop_down_gray900_24} alt="" />
           </div>
         </div>       

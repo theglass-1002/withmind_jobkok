@@ -507,7 +507,8 @@ export default function AIAnalysisSection({ id = 1 }: Props) {
             )}
 
             {activeTab === "match" && (
-              <ResumeInterviewMatchPage
+                <ResumeInterviewMatchPage
+              reportDetail ={reportDetail}
                 onToggleFavorite={handleToggleFavorite}
                 jobs={jobs}
               />

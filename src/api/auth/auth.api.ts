@@ -82,6 +82,13 @@ export const logout = () => {
     "userIdx",
     "userName",
     "recentSearchKeywords",
+
+    "companyAccessToken",
+    "companyRefreshToken",
+    "companyAccountId",
+    "companyIdx",
+    "companyUserId",
+    "companyDeviceId",
   ];
 
   try {

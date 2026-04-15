@@ -58,3 +58,20 @@ export interface CompanyLoginResponse {
   refreshToken: string;
   companyAccount: CompanyAccountInfo;
 }
+
+export interface CompanyMeAccountInfo {
+  companyAccountIdx: number;
+  companyIdx: number;
+  companyUserId: string;
+  companyName: string;
+  managerName: string;
+  managerPhone: string;
+  birthdate: string;
+  gender: "M" | "W" | string;
+}
+
+export interface CompanyMeResponse {
+  code: number;
+  companyAccount?: CompanyMeAccountInfo | null;
+  msg?: string;
+}

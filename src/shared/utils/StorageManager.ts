@@ -203,12 +203,30 @@ export class StorageManager {
     this.setItem(localStorage, "recentSearchKeywords", []);
   }
 
+
+  // COMPANY NAME
+  getCompanyName() {
+    return this.getFromBoth<string>("companyName", "");
+  }
+
+  setCompanyName(name: string) {
+    this.setItem(localStorage, "companyName", name);
+  }
+
+  removeCompanyName() {
+    this.removeItem(localStorage, "companyName");
+    this.removeItem(sessionStorage, "companyName");
+  }
+
   // CLEAR ALL
   clearAll() {
     localStorage.clear();
     sessionStorage.clear();
   }
 }
+
+
+
 
 // StorageManager 하나로 전체 관리
 export const Storage = new StorageManager();
