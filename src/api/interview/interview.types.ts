@@ -32,7 +32,7 @@ export type InterviewQuestionsData = {
 export type InterviewQuestionsResponse = {
   success: boolean;
   data: InterviewQuestionsData | null;
-  error: any;
+  error: unknown;
   meta: {
     request_id: string;
     timestamp: string; // ISO string
@@ -45,49 +45,54 @@ export type EnvTestSpeechResponse =
       success?: boolean;
       data?: string;
       message?: string;
-      error?: any;
+      error?: unknown;
     };
 
+// v2
+export type InterviewQuestionsV2Request = {
+  resume?: string;
+  job_posting?: string;
+  target_role?: string;
+  qz_group?: number;
+  config?: {
+    num_questions?: number;
+    language?: string;
+    difficulty_profile?: string;
+    focus_types?: string[];
+  };
+};
 
+export type InterviewQuestionsV2QuestionType =
+  | "OPENING"
+  | "TECHNICAL"
+  | "EXPERIENCE"
+  | "PEOPLE_FIT"
+  | "ETC";
 
-    export type InterviewQuestionsV2Request = {
-      resume?: string;
-      job_posting?: string;
-      target_role?: string;
-      config?: {
-        num_questions?: number;
-        language?: string;
-        difficulty_profile?: string;
-        focus_types?: string[];
-      };
-    };
-    
-    export type InterviewQuestionsV2QuestionOverview = {
-      question_id: string;
-      question_code: string;
-      order: number;
-      type: string;
-      text: string;
-    };
-    
-    export type InterviewQuestionsV2Data = {
-      blueprint_id: string;
-      blueprint_url: string;
-      version: string;
-      num_questions: number;
-      question_overview: InterviewQuestionsV2QuestionOverview[];
-      quality_flags: string[];
-    };
-    
-    export type InterviewQuestionsV2Response = {
-      success: boolean;
-      data: InterviewQuestionsV2Data | null;
-      error: any;
-      meta: {
-        request_id: string;
-        timestamp: string;
-      };
-    };
+export type InterviewQuestionsV2Question = {
+  question_id: string;
+  question_code: string;
+  order: number;
+  text: string;
+  type: InterviewQuestionsV2QuestionType;
+};
+
+export type InterviewQuestionsV2Data = {
+  qz_group: number;
+  blueprint_path: string;
+  questions: InterviewQuestionsV2Question[];
+  quality_flags: string[];
+};
+
+export type InterviewQuestionsV2Response = {
+  success: boolean;
+  data: InterviewQuestionsV2Data | null;
+  error: unknown;
+  meta: {
+    request_id: string;
+    timestamp: string;
+  };
+};
 
 /**
  * 환경 테스트 분석 요청
@@ -111,42 +116,54 @@ export type EnvTestAnalyzeResponse = {
 
 /**
  * 꼬리질문(답변 평가 + follow-up question 생성) 요청/응답
+ * 새 응답 스펙 기준
  */
 export type InterviewFollowupRequest = {
-  question: string;
-  file_url: string;
+  qz_group: number;
+  question_code: string;
+  video_url: string;
 };
-
-export type InterviewEvaluationLevel = "POOR" | "FAIR" | "GOOD" | "EXCELLENT";
-
-export type InterviewFollowupEvaluation = {
-  level: InterviewEvaluationLevel;
-  score: number;
-  is_sufficient: boolean;
-  no_experience: boolean;
-  comment: string;
-};
-
-export type InterviewFollowupQuestion = {
-  text: string;
-  reason: string;
-};
-
 
 export type InterviewFollowupData = {
-  evaluation: InterviewFollowupEvaluation;
-  follow_up_question: InterviewFollowupQuestion | null;
+  qz_group: number;
+  question_code: string;
+  question_text: string;
+  follow_up_required: boolean;
+  follow_up_question: string | null;
+  follow_up_intent: string | null;
+  missing_evidence: string[];
 };
 
-export type InterviewFollowupResponse = {
-  success: boolean;
-  data: InterviewFollowupData | null;
-  error: any;
-  meta: {
-    request_id: string;
-    timestamp: string; // ISO string
+export type InterviewFollowupError = {
+  code: string;
+  message: string;
+  details?: {
+    reason?: string;
   };
 };
+
+export type InterviewFollowupMeta = {
+  request_id: string;
+  timestamp: string; // ISO string
+};
+
+export type InterviewFollowupSuccessResponse = {
+  success: true;
+  data: InterviewFollowupData;
+  error?: null;
+  meta: InterviewFollowupMeta;
+};
+
+export type InterviewFollowupFailureResponse = {
+  success: false;
+  data?: null;
+  error: InterviewFollowupError;
+  meta: InterviewFollowupMeta;
+};
+
+export type InterviewFollowupResponse =
+  | InterviewFollowupSuccessResponse
+  | InterviewFollowupFailureResponse;
 
 export type InterviewReportItem = {
   interviewAllYn: "Y" | "N";
@@ -191,5 +208,41 @@ export type SaveInterviewAnalysisRequest = {
 export type SaveInterviewAnalysisResponse = {
   status: number;
   message?: string;
-  data?: any;
+  data?: unknown;
+};
+
+// 면접 질문 저장
+export type SaveUserInputQuestionItem = {
+  num: number;
+  que: string;
+};
+
+export type SaveUserInputQuestionsRequest = {
+  qzGroup: number;
+  queList: SaveUserInputQuestionItem[];
+};
+
+export type SaveUserInputQuestionsResponse = {
+  code: number;
+  msg: string;
+  savedCount: number;
+};
+
+export type CompleteInterviewRequest = {
+  qz_group: number;
+};
+
+export type CompleteInterviewError = {
+  code: string;
+  message: string;
+  details?: {
+    reason?: string;
+  };
+};
+
+export type CompleteInterviewResponse = {
+  success: boolean;
+  data: string | null;
+  error: CompleteInterviewError | null;
+  meta: Record<string, unknown>;
 };

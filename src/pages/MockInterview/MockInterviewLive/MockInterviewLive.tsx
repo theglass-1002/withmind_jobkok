@@ -7,12 +7,9 @@ import LiveSidePanel from "@/pages/MockInterview/MockInterviewLive/components/Li
 import LiveThinkingSection from "@/pages/MockInterview/MockInterviewLive/components/LiveThinkingSection";
 import LiveAnswerSection from "@/pages/MockInterview/MockInterviewLive/components/LiveAnswerSection";
 
-import {
-  InterviewQuestion,
-  InterviewQuestionsResponse,
-} from "@/api/interview/interview.types";
 import { uploadJobInterviewVideo } from "@/api/fileUpload.api";
 import {
+  completeInterview,
   fetchInterviewFollowup,
   saveInterviewAnalysis,
 } from "@/api/interview/interview.api";
@@ -22,6 +19,27 @@ import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
 const THINKING_SECONDS = 15;
 type Phase = "thinking" | "answering";
 
+type ReceivedQuestion = {
+  question_id?: string;
+  question_code?: string;
+  order: number;
+  text: string;
+  type: string;
+  difficulty?: string;
+  related_items?: any[];
+  answer_hint?: string;
+};
+
+type ReceivedInterviewRes = {
+  success?: boolean;
+  data?: {
+    qz_group?: number;
+    blueprint_path?: string;
+    questions?: ReceivedQuestion[];
+    quality_flags?: string[];
+  };
+};
+
 type LiveQuestion = {
   stage: string;
   question: string;
@@ -29,6 +47,9 @@ type LiveQuestion = {
   type: string;
   difficulty: string;
   answerHint?: string;
+  questionId?: string;
+  questionCode?: string;
+  relatedItems?: any[];
 };
 
 type FollowupQuestion = { text: string; reason: string } | null;
@@ -43,14 +64,14 @@ export default function MockInterviewLive() {
 
   useEffect(() => {
     console.log("[MockInterviewLive] 면접보는화면", state);
+    console.log("[MockInterviewLive] interviewStageStatus:", state?.interviewStageStatus);
+    console.log("[MockInterviewLive] received interviewRes:", state?.interviewRes);
     console.log(
-      "[MockInterviewLive] interviewStageStatus:",
-      state?.interviewStageStatus
+      "[MockInterviewLive] received interviewRes.data.questions:",
+      state?.interviewRes?.data?.questions
     );
 
-    switch (state?.interviewStageStatus as
-      | InterviewStageStatus
-      | undefined) {
+    switch (state?.interviewStageStatus as InterviewStageStatus | undefined) {
       case 0:
         console.log("상태 0: 유저 질문 전부 작성 (API 스킵)");
         break;
@@ -65,23 +86,37 @@ export default function MockInterviewLive() {
     }
   }, [state]);
 
-  const apiQuestions: InterviewQuestion[] = useMemo(() => {
+  const apiQuestions: ReceivedQuestion[] = useMemo(() => {
     const res = state?.interviewRes as
-      | InterviewQuestionsResponse
-      | InterviewQuestion[]
+      | ReceivedInterviewRes
+      | ReceivedQuestion[]
       | null
       | undefined;
 
-    if (Array.isArray(res)) return res as InterviewQuestion[];
+    if (Array.isArray(res)) return res as ReceivedQuestion[];
     if (
       res?.success &&
       res?.data?.questions &&
       Array.isArray(res.data.questions)
     ) {
-      return res.data.questions as InterviewQuestion[];
+      return res.data.questions as ReceivedQuestion[];
     }
     return [];
   }, [state]);
+
+  useEffect(() => {
+    console.log("[MockInterviewLive] apiQuestions:", apiQuestions);
+    console.log(
+      "[MockInterviewLive] apiQuestions metadata:",
+      apiQuestions.map((q) => ({
+        question_id: q.question_id,
+        question_code: q.question_code,
+        order: q.order,
+        text: q.text,
+        type: q.type,
+      }))
+    );
+  }, [apiQuestions]);
 
   const baseQuestions: LiveQuestion[] = useMemo(() => {
     const typeToStage = (type: string) => {
@@ -91,7 +126,9 @@ export default function MockInterviewLive() {
         case "TECHNICAL":
           return "직무 ";
         case "BEHAVIORAL":
+        case "PEOPLE_FIT":
           return "역량 ";
+        case "OPENING":
         case "INFORMATION":
           return "자기소개 및 지원 동기";
         case "CUSTOM":
@@ -110,8 +147,11 @@ export default function MockInterviewLive() {
             question: q.text,
             order: q.order,
             type: q.type,
-            difficulty: q.difficulty,
+            difficulty: q.difficulty ?? "MEDIUM",
             answerHint: q.answer_hint,
+            questionId: q.question_id,
+            questionCode: q.question_code,
+            relatedItems: q.related_items ?? [],
           }))
       : [
           {
@@ -120,9 +160,26 @@ export default function MockInterviewLive() {
             order: 1,
             type: "ETC",
             difficulty: "EASY",
+            questionId: undefined,
+            questionCode: undefined,
+            relatedItems: [],
           },
         ];
   }, [apiQuestions]);
+
+  useEffect(() => {
+    console.log("[MockInterviewLive] baseQuestions:", baseQuestions);
+    console.log(
+      "[MockInterviewLive] baseQuestions metadata:",
+      baseQuestions.map((q) => ({
+        questionId: q.questionId,
+        questionCode: q.questionCode,
+        order: q.order,
+        question: q.question,
+        type: q.type,
+      }))
+    );
+  }, [baseQuestions]);
 
   const [followUpMap, setFollowUpMap] = useState<Record<number, LiveQuestion>>(
     {}
@@ -147,6 +204,10 @@ export default function MockInterviewLive() {
             order: nextBase.order,
             type: "SKIP",
             difficulty: nextBase.difficulty,
+            questionId: nextBase.questionId,
+            questionCode: nextBase.questionCode,
+            answerHint: nextBase.answerHint,
+            relatedItems: nextBase.relatedItems ?? [],
           });
           i += 1;
         }
@@ -155,6 +216,20 @@ export default function MockInterviewLive() {
 
     return out;
   }, [baseQuestions, followUpMap]);
+
+  useEffect(() => {
+    console.log("[MockInterviewLive] effectiveQuestions:", effectiveQuestions);
+    console.log(
+      "[MockInterviewLive] effectiveQuestions metadata:",
+      effectiveQuestions.map((q) => ({
+        questionId: q.questionId,
+        questionCode: q.questionCode,
+        order: q.order,
+        question: q.question,
+        type: q.type,
+      }))
+    );
+  }, [effectiveQuestions]);
 
   const [phase, setPhase] = useState<Phase>("thinking");
   const [qIndex, setQIndex] = useState(0);
@@ -190,6 +265,8 @@ export default function MockInterviewLive() {
 
     console.log("[uploadRecordedFile] 현재 qIndex:", meta.qIndex);
     console.log("[uploadRecordedFile] 현재 질문 번호:", cur?.order);
+    console.log("[uploadRecordedFile] 현재 질문 코드:", cur?.questionCode);
+    console.log("[uploadRecordedFile] 현재 질문 ID:", cur?.questionId);
     console.log("[uploadRecordedFile] 현재 질문 내용:", cur?.question);
 
     if (!cur) return { uploadResult: null, followupRes: null };
@@ -234,23 +311,24 @@ export default function MockInterviewLive() {
       }
 
       const alreadyHasFollowup = !!followUpMap[cur.order];
-      console.log(
-        "[uploadRecordedFile] 이미 꼬리질문 있는지:",
-        alreadyHasFollowup
-      );
+      console.log("[uploadRecordedFile] 이미 꼬리질문 있는지:", alreadyHasFollowup);
 
       if (alreadyHasFollowup) {
         return { uploadResult, followupRes: null };
       }
 
       const payload = {
-        question: questionText,
-        file_url: uploadResult.finalUrl,
+        qz_group: state?.interviewGroupId,
+        question_code:
+          cur.questionCode ?? `Q${String(cur.order).padStart(2, "0")}`,
+        video_url: uploadResult.finalUrl,
       };
+
+      console.log("[uploadRecordedFile] followup request payload:", payload);
 
       let followupRes: any;
       try {
-        followupRes = await fetchInterviewFollowup(payload);
+        followupRes = await fetchInterviewFollowup(payload as any);
         console.log("[uploadRecordedFile] followup 응답:", followupRes);
       } catch (err) {
         console.error(
@@ -267,16 +345,24 @@ export default function MockInterviewLive() {
 
       if (!fu) return { uploadResult, followupRes };
 
+      const followupOrder = cur.order + 1;
+
       const followupLive: LiveQuestion = {
         stage: "꼬리 질문",
         question: fu.text,
-        order: cur.order,
+        order: followupOrder,
         type: "FOLLOWUP",
         difficulty: cur.difficulty,
         answerHint: fu.reason,
+        questionId: undefined,
+        questionCode: `${cur.questionCode ?? `Q${String(cur.order).padStart(2, "0")}`}_FU`,
+        relatedItems: [],
       };
 
       console.log("[uploadRecordedFile] 생성된 followupLive:", followupLive);
+      console.log(
+        `[uploadRecordedFile] 기본 질문 ${cur.order} 다음에 꼬리질문 ${followupOrder}번으로 삽입`
+      );
 
       setFollowUpMap((prev) => ({ ...prev, [cur.order]: followupLive }));
 
@@ -431,7 +517,6 @@ export default function MockInterviewLive() {
       setPreviewStream(null);
       setIsRecording(false);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
 
   const handleThinkingRestart = () => {
@@ -462,6 +547,18 @@ export default function MockInterviewLive() {
   };
 
   const current = effectiveQuestions[qIndex] ?? baseQuestions[0];
+
+  const visibleCurrentIndex = useMemo(() => {
+    return (
+      effectiveQuestions
+        .slice(0, qIndex + 1)
+        .filter((q) => q.type !== "SKIP").length - 1
+    );
+  }, [effectiveQuestions, qIndex]);
+
+  const visibleTotalCount = useMemo(() => {
+    return effectiveQuestions.filter((q) => q.type !== "SKIP").length;
+  }, [effectiveQuestions]);
 
   const visibleIsLast = (() => {
     for (let i = qIndex + 1; i < effectiveQuestions.length; i++) {
@@ -509,6 +606,29 @@ export default function MockInterviewLive() {
               await stopRecordingAndUpload(currentQIndex);
 
               if (isLastQuestion) {
+                try {
+                  const completePayload = {
+                    qz_group: state?.interviewGroupId,
+                  };
+
+                  console.log(
+                    "[MockInterviewLive] completeInterview request:",
+                    completePayload
+                  );
+
+                  const completeRes = await completeInterview(completePayload);
+
+                  console.log(
+                    "[MockInterviewLive] completeInterview response:",
+                    completeRes
+                  );
+                } catch (err) {
+                  console.error(
+                    "[MockInterviewLive] completeInterview failed:",
+                    err
+                  );
+                }
+
                 return;
               }
 
@@ -520,10 +640,8 @@ export default function MockInterviewLive() {
         )}
 
         <LiveSidePanel
-         currentIndex={qIndex}
-          totalCount={
-            effectiveQuestions.filter((q) => q.type !== "SKIP").length
-          }
+          currentIndex={visibleCurrentIndex}
+          totalCount={visibleTotalCount}
           interviewState={state}
           interviewStageStatus={state?.interviewStageStatus}
           currentQuestion={current}

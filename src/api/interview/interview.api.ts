@@ -16,6 +16,10 @@ import type {
   SaveInterviewAnalysisRequest,
   InterviewQuestionsV2Request,
   InterviewQuestionsV2Response,
+  SaveUserInputQuestionsResponse,
+  SaveUserInputQuestionsRequest,
+  CompleteInterviewResponse,
+  CompleteInterviewRequest,
 } from "./interview.types";
 import { AI_BASE_URL } from "@/config/config";
 
@@ -37,15 +41,16 @@ export async function fetchInterviewQuestions(
   return res.data;
 }
 
+//질문리스트
 
 export async function fetchInterviewQuestionsV2(
   payload: InterviewQuestionsV2Request
 ): Promise<InterviewQuestionsV2Response> {
   const res = await instance.post<InterviewQuestionsV2Response>(
-    "/interview-blueprints",
+    "/v2/interview/questions",
     payload,
     {
-      baseURL: "https://54a9-183-96-152-47.ngrok-free.app/api/v1",
+      baseURL: AI_BASE_URL,
       requiresAuth: false,
       headers: {
         accept: "application/json",
@@ -102,14 +107,14 @@ export async function fetchEnvTestAnalyze(
 
 /**
  * 꼬리질문 API
- * POST /interview/followup
+ * POST //v2/interview/followup
  * baseURL:  (예: https://ai.api.jobkok.kr)
  */
 export async function fetchInterviewFollowup(
   payload: InterviewFollowupRequest
 ): Promise<InterviewFollowupResponse> {
   const res = await instance.post<InterviewFollowupResponse>(
-    "/interview/followup",
+    "/v2/interview/followup",
     payload,
     {
       baseURL: AI_BASE_URL,
@@ -180,6 +185,50 @@ export async function saveInterviewAnalysis(
     "/api/interview/analysis",
     payload,
     {
+      headers: {
+        accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  return res.data;
+}
+
+/**
+ * 사용자 입력 면접 질문 저장 API
+ * POST /api/interview/saveUserInputQue
+ */
+export async function saveUserInputQuestions(
+  payload: SaveUserInputQuestionsRequest
+): Promise<SaveUserInputQuestionsResponse> {
+  const res = await instance.post<SaveUserInputQuestionsResponse>(
+    "/api/interview/saveUserInputQue",
+    payload,
+    {
+      headers: {
+        accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  return res.data;
+}
+
+/**
+ * 면접 완료 API
+ * POST /v2/interview/complete
+ */
+export async function completeInterview(
+  payload: CompleteInterviewRequest
+): Promise<CompleteInterviewResponse> {
+  const res = await instance.post<CompleteInterviewResponse>(
+    "/v2/interview/complete",
+    payload,
+    {
+      baseURL: AI_BASE_URL,
+      requiresAuth: false,
       headers: {
         accept: "application/json",
         "Content-Type": "application/json",

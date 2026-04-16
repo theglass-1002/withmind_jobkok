@@ -16,8 +16,16 @@ import { fetchResumeDetail } from "@/api/resume/resume.api";
 import { fetchJobDetail } from "@/api/job/job.api";
 
 import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
-import type { InterviewQuestionsRequest, InterviewQuestionsV2Request } from "@/api/interview/interview.types";
-import { createQzGroup, fetchEnvTestSpeech, fetchInterviewQuestions, fetchInterviewQuestionsV2 } from "@/api/interview/interview.api";
+import type {
+  InterviewQuestionsV2Request,
+  SaveUserInputQuestionsRequest,
+} from "@/api/interview/interview.types";
+import {
+  createQzGroup,
+  fetchEnvTestSpeech,
+  fetchInterviewQuestionsV2,
+  saveUserInputQuestions,
+} from "@/api/interview/interview.api";
 import { logout } from "@/api/auth/auth.api";
 
 type InterviewInfoErrors = {
@@ -33,7 +41,9 @@ type LocalQuestion = {
 };
 
 type InterviewQuestionLike = {
-  order?: number;
+  question_id?: string;
+  question_code?: string;
+  order: number;
   text: string;
   type: string;
   difficulty: string;
@@ -42,9 +52,9 @@ type InterviewQuestionLike = {
 };
 
 type InterviewStageStatus = 0 | 1 | 2;
-// 0: 유저 질문 전부 작성(API 스킵)
-// 1: 유저 질문 일부 작성(1개 이상, API 호출 + 교체)
-// 2: 유저 질문 미작성(0개, API 호출 그대로)
+// 0: 유저 질문 전부 작성
+// 1: 유저 질문 일부 작성
+// 2: 유저 질문 미작성
 
 export default function MockSettings() {
   const navigate = useNavigate();
@@ -64,6 +74,7 @@ export default function MockSettings() {
   const [questions, setQuestions] = useState<LocalQuestion[]>([
     { id: 1, isAiGenerated: true, customText: "" },
     { id: 2, isAiGenerated: true, customText: "" },
+    { id: 3, isAiGenerated: true, customText: "" },
     { id: 4, isAiGenerated: true, customText: "" },
     { id: 5, isAiGenerated: true, customText: "" },
     { id: 6, isAiGenerated: true, customText: "" },
@@ -101,6 +112,12 @@ export default function MockSettings() {
   const handleNextStep = async () => {
     if (isSubmitting) return;
 
+    console.log("[MockSettings] ===== handleNextStep start =====");
+    console.log("[MockSettings] selectedResume:", selectedResume);
+    console.log("[MockSettings] desiredJob:", desiredJob);
+    console.log("[MockSettings] jobPostingUrl:", jobPostingUrl);
+    console.log("[MockSettings] questions state:", questions);
+
     const totalQuestionCount = questions.length;
 
     const userWrittenTexts = questions
@@ -109,12 +126,16 @@ export default function MockSettings() {
 
     const writtenQuestionCount = userWrittenTexts.length;
 
-    console.log(`[MockSettings] 질문 작성 현황: ${writtenQuestionCount} / ${totalQuestionCount}`);
-    if (writtenQuestionCount > 0) console.log("[MockSettings] 직접 작성한 질문들:", userWrittenTexts);
+    console.log("[MockSettings] totalQuestionCount:", totalQuestionCount);
+    console.log("[MockSettings] writtenQuestionCount:", writtenQuestionCount);
+    console.log("[MockSettings] userWrittenTexts:", userWrittenTexts);
 
     const ok = validateSubmitRequired();
+    console.log("[MockSettings] validateSubmitRequired result:", ok);
+
     if (!ok) {
       setShowSubmitErrors(true);
+      console.log("[MockSettings] validation failed, stop.");
       return;
     }
 
@@ -124,62 +145,78 @@ export default function MockSettings() {
     const trimmedUrl = jobPostingUrl.trim();
     const jobIdStr = extractJobId(trimmedUrl);
 
+    console.log("[MockSettings] trimmedUrl:", trimmedUrl);
+    console.log("[MockSettings] extracted jobIdStr:", jobIdStr);
+
     if (trimmedUrl && !jobIdStr) {
       setInfoErrors({
         jobPostingUrl: "올바른 채용 공고 URL이 아닙니다.",
       });
       setShowSubmitErrors(true);
+      console.log("[MockSettings] invalid job posting url, stop.");
       return;
     }
 
     const resumeIdxNum = Number(selectedResume);
     const jobIdNum = jobIdStr ? Number(jobIdStr) : null;
 
+    console.log("[MockSettings] resumeIdxNum:", resumeIdxNum);
+    console.log("[MockSettings] jobIdNum:", jobIdNum);
+
     if (Number.isNaN(resumeIdxNum)) {
       toast.error("이력서 ID가 올바르지 않습니다.");
+      console.log("[MockSettings] invalid resumeIdxNum");
       return;
     }
 
     if (jobIdNum !== null && Number.isNaN(jobIdNum)) {
       toast.error("공고 ID가 올바르지 않습니다.");
+      console.log("[MockSettings] invalid jobIdNum");
       return;
     }
 
     try {
       setIsSubmitting(true);
+      console.log("[MockSettings] isSubmitting -> true");
 
+      console.log("[API] fetchResumeDetail request:", { resumeIdxNum });
       const resumeDetail = await fetchResumeDetail(resumeIdxNum);
-      const jobDetail = jobIdNum !== null ? await fetchJobDetail(jobIdNum) : null;
-      const res = await createQzGroup({
-        resumeIdx: resumeDetail.resumeIdx, // 상태값 사용
+      console.log("[API] fetchResumeDetail response:", resumeDetail);
+
+      let jobDetail = null;
+      if (jobIdNum !== null) {
+        console.log("[API] fetchJobDetail request:", { jobIdNum });
+        jobDetail = await fetchJobDetail(jobIdNum);
+        console.log("[API] fetchJobDetail response:", jobDetail);
+      } else {
+        console.log("[API] fetchJobDetail skipped: no jobIdNum");
+      }
+
+      const createGroupPayload = {
+        resumeIdx: resumeDetail.resumeIdx,
         job: desiredJob.trim(),
-      });
-      const interviewGroupId = res.qzGroup;
-      console.log("interviewGroupId",interviewGroupId);
+      };
+      console.log("[API] createQzGroup request:", createGroupPayload);
+
+      const groupRes = await createQzGroup(createGroupPayload);
+      console.log("[API] createQzGroup response:", groupRes);
+
+      const interviewGroupId = groupRes.qzGroup;
+      console.log("[MockSettings] interviewGroupId:", interviewGroupId);
+
+      console.log("[API] fetchEnvTestSpeech request");
       const envSpeech = await fetchEnvTestSpeech();
+      console.log("[API] fetchEnvTestSpeech response:", envSpeech);
 
-      const introQuestion: InterviewQuestionLike = {
-        order: 0,
-        text: "본인의 강점과 지원 동기가 무엇인가요?",
-        type: "INFORMATION",
-        difficulty: "EASY",
-        related_items: [],
-        answer_hint: "본인의 핵심 강점과 해당 회사에 지원한 이유를 중심으로 설명해 주세요.",
-      };
-      
-     
-      const payload: InterviewQuestionsRequest = {
+      const payload: InterviewQuestionsV2Request = {
         resume: JSON.stringify(resumeDetail),
-        job_posting: jobDetail ? JSON.stringify(jobDetail) : null,
-       
+        job_posting: jobDetail ? JSON.stringify(jobDetail) : undefined,
+        target_role: desiredJob.toString(),
+        qz_group: interviewGroupId,
       };
 
+      console.log("[API] fetchInterviewQuestionsV2 request payload:", payload);
 
-      // const payload: InterviewQuestionsV2Request = {
-      //   resume: JSON.stringify(resumeDetail),
-      //   job_posting: jobDetail ? JSON.stringify(jobDetail) : null,
-      //   target_role:desiredJob.toString()
-      // }
       const allCustomFilled =
         questions.length > 0 &&
         questions.every((q) => !q.isAiGenerated && q.customText.trim().length > 0);
@@ -190,96 +227,128 @@ export default function MockSettings() {
         ? 1
         : 2;
 
-      if (allCustomFilled) {
-        console.log("[MockSettings] 유저 질문 전부 작성 완료 -> 질문 생성 API 호출 스킵");
+      console.log("[MockSettings] allCustomFilled:", allCustomFilled);
+      console.log("[MockSettings] interviewStageStatus:", interviewStageStatus);
 
-        console.log('응답',payload);
-        console.log('질문리스트',introQuestion);
-
-        const mergedQuestions: InterviewQuestionLike[] = [
-          { ...introQuestion, order: 1 },
-          ...questions.map((q, idx) => ({
-            order: idx + 2,
-            text: q.customText.trim(),
-            type: "CUSTOM",
-            difficulty: "EASY",
-            related_items: [],
-            answer_hint: "",
-          })),
-        ];
-
-        const interviewRes = {
-          success: true,
-          data: {
-            questions: mergedQuestions,
-          },
-        };
-
-        navigate("/mock-interview/environment-test", {
-          state: {
-            envSpeech,
-            interviewRes,
-            jobDetail,
-            resumeDetail,
-            jobId: jobIdNum,
-            desiredJob,
-            jobPostingUrl,
-            interviewStageStatus,
-            interviewGroupId,
-          },
-        });
-
-        return;
-      }
-
+      const interviewResRaw: any = await fetchInterviewQuestionsV2(payload);
+      console.log("[API] fetchInterviewQuestionsV2 response:", interviewResRaw);
       console.log(
-        `[MockSettings] 유저 질문 ${
-          writtenQuestionCount > 0 ? "일부 작성" : "미작성"
-        } -> 질문 생성 API 호출 (status=${interviewStageStatus})`
+        "[MockSettings] raw API questions:",
+        interviewResRaw?.data?.questions
       );
-
-       const interviewResRaw: any = await fetchInterviewQuestions(payload);
-      //const interviewResRaw: any = await fetchInterviewQuestionsV2(payload);
-
-      console.log("interviewResRaw",interviewResRaw);
 
       let apiList: InterviewQuestionLike[] = [];
 
-      if (Array.isArray(interviewResRaw)) {
-        apiList = interviewResRaw as InterviewQuestionLike[];
-      } else if (interviewResRaw?.data?.questions && Array.isArray(interviewResRaw.data.questions)) {
-        apiList = interviewResRaw.data.questions as InterviewQuestionLike[];
+      if (
+        interviewResRaw?.success &&
+        interviewResRaw?.data?.questions &&
+        Array.isArray(interviewResRaw.data.questions)
+      ) {
+        apiList = interviewResRaw.data.questions.map((q: any) => ({
+          question_id: q.question_id,
+          question_code: q.question_code,
+          order: q.order,
+          text: q.text,
+          type: q.type,
+          difficulty: "MEDIUM",
+          related_items: [],
+          answer_hint: "",
+        }));
       }
 
-      const apiMergedWithIntro: InterviewQuestionLike[] = [introQuestion, ...apiList].map((q, idx) => ({
+      console.log("[MockSettings] apiList:", apiList);
+      console.log("[MockSettings] apiList.length:", apiList.length);
+
+      if (apiList.length === 0) {
+        throw new Error("생성된 질문 리스트가 없습니다.");
+      }
+
+      const replaced = [...apiList];
+      const replaceCount = Math.min(userWrittenTexts.length, replaced.length);
+
+      console.log("[MockSettings] replaceCount:", replaceCount);
+      console.log("[MockSettings] replaced(before):", replaced);
+
+      for (let i = 0; i < replaceCount; i++) {
+        const original = replaced[i];
+
+        replaced[i] = {
+          ...original,
+          text: userWrittenTexts[i],
+          type: "CUSTOM",
+          difficulty: original?.difficulty ?? "MEDIUM",
+          answer_hint: "",
+          related_items: original?.related_items ?? [],
+        };
+
+        console.log(`[MockSettings] replaced[${i}] override:`, {
+          before: original,
+          after: replaced[i],
+        });
+      }
+
+      console.log("[MockSettings] replaced(after):", replaced);
+
+      const finalQuestions: InterviewQuestionLike[] = replaced.map((q, idx) => ({
         ...q,
         order: idx + 1,
       }));
 
-      const replaced = [...apiMergedWithIntro];
+      console.log("[MockSettings] finalQuestions:", finalQuestions);
+      console.log(
+        "[MockSettings] finalQuestions metadata:",
+        finalQuestions.map((q) => ({
+          question_id: q.question_id,
+          question_code: q.question_code,
+          order: q.order,
+          text: q.text,
+          type: q.type,
+        }))
+      );
+      console.log("[MockSettings] finalQuestions.length:", finalQuestions.length);
 
-      const replaceCount = Math.min(userWrittenTexts.length, Math.max(0, replaced.length - 1));
+      const savePayload: SaveUserInputQuestionsRequest = {
+        qzGroup: interviewGroupId,
+        queList: finalQuestions.map((q, idx) => ({
+          num: q.order ?? idx + 1,
+          que: q.text,
+        })),
+      };
 
-      for (let i = 0; i < replaceCount; i++) {
-        const targetIndex = i + 1;
-        const original = replaced[targetIndex];
+      console.log("[API] saveUserInputQuestions request payload:", savePayload);
 
-        replaced[targetIndex] = {
-          ...original,
-          text: userWrittenTexts[i],
-          type: "CUSTOM",
-          difficulty: original?.difficulty ?? "EASY",
-          answer_hint: "",
-          related_items: original?.related_items ?? [],
-        };
+      const saveRes = await saveUserInputQuestions(savePayload);
+      console.log("[API] saveUserInputQuestions response:", saveRes);
+
+      if (saveRes.code !== 200) {
+        throw new Error(`질문 저장 실패: ${saveRes.msg}`);
       }
 
       const interviewRes = {
+        ...(interviewResRaw ?? {}),
         success: true,
         data: {
-          questions: replaced,
+          ...(interviewResRaw?.data ?? {}),
+          questions: finalQuestions,
         },
       };
+
+      console.log("[MockSettings] final interviewRes:", interviewRes);
+      console.log(
+        "[MockSettings] navigate interview questions:",
+        interviewRes?.data?.questions
+      );
+      console.log("[MockSettings] navigate state:", {
+        envSpeech,
+        interviewRes,
+        jobDetail,
+        resumeDetail,
+        jobId: jobIdNum,
+        desiredJob,
+        jobPostingUrl,
+        interviewStageStatus,
+        interviewGroupId,
+      });
 
       navigate("/mock-interview/environment-test", {
         state: {
@@ -295,7 +364,10 @@ export default function MockSettings() {
         },
       });
     } catch (e: any) {
+      console.error("[MockSettings] handleNextStep error:", e);
+
       if (e?.code === 999) {
+        console.log("[MockSettings] auth expired -> logout");
         logout();
         navigate("/login");
         return;
@@ -304,6 +376,8 @@ export default function MockSettings() {
       setIsQuestionFailModalOpen(true);
     } finally {
       setIsSubmitting(false);
+      console.log("[MockSettings] isSubmitting -> false");
+      console.log("[MockSettings] ===== handleNextStep end =====");
     }
   };
 

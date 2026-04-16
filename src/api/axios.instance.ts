@@ -116,10 +116,12 @@ instance.interceptors.response.use(
 
       const tokenType = originalRequest.tokenType ?? "user";
       const isCompanyRequest = tokenType === "company";
-
       const refreshToken = isCompanyRequest
         ? getCompanyRefreshToken()
         : getRefreshToken();
+
+
+       
 
       if (!refreshToken) {
         const apiError: ApiErrorResponse = {
@@ -132,7 +134,7 @@ instance.interceptors.response.use(
       const refreshUrl = isCompanyRequest
         ? `${API_BASE_URL}/company/auth/refresh`
         : `${API_BASE_URL}/auth/refresh`;
-
+      
       try {
         const refreshResponse = await axios.post(
           refreshUrl,
@@ -144,7 +146,7 @@ instance.interceptors.response.use(
 
         const newAccessToken = (refreshResponse.data as any).token;
         const newRefreshToken = (refreshResponse.data as any).refreshToken;
-
+    
         if (isCompanyRequest) {
           localStorage.setItem("companyAccessToken", newAccessToken);
           localStorage.setItem("companyRefreshToken", newRefreshToken);
