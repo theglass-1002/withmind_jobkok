@@ -52,8 +52,6 @@ type LiveQuestion = {
   relatedItems?: any[];
 };
 
-type FollowupQuestion = { text: string; reason: string } | null;
-
 type InterviewStageStatus = 0 | 1 | 2;
 
 export default function MockInterviewLive() {
@@ -318,7 +316,7 @@ export default function MockInterviewLive() {
       }
 
       const payload = {
-        qz_group: state?.interviewGroupId,
+        qz_group: Number(state?.interviewGroupId),
         question_code:
           cur.questionCode ?? `Q${String(cur.order).padStart(2, "0")}`,
         video_url: uploadResult.finalUrl,
@@ -328,7 +326,7 @@ export default function MockInterviewLive() {
 
       let followupRes: any;
       try {
-        followupRes = await fetchInterviewFollowup(payload as any);
+        followupRes = await fetchInterviewFollowup(payload);
         console.log("[uploadRecordedFile] followup 응답:", followupRes);
       } catch (err) {
         console.error(
@@ -338,22 +336,41 @@ export default function MockInterviewLive() {
         return { uploadResult, followupRes: null };
       }
 
-      const fu: FollowupQuestion =
-        followupRes?.data?.follow_up_question ?? null;
+      if (!followupRes?.success) {
+        console.error("[uploadRecordedFile] followup business error:", followupRes?.error);
+        return { uploadResult, followupRes };
+      }
 
-      console.log("[uploadRecordedFile] follow_up_question:", fu);
+      const followupData = followupRes?.data;
+      const followupRequired = Boolean(followupData?.follow_up_required);
+      const followupQuestionText = followupData?.follow_up_question ?? null;
+      const followupIntent = followupData?.follow_up_intent ?? null;
+      const missingEvidence = Array.isArray(followupData?.missing_evidence)
+        ? followupData.missing_evidence
+        : [];
 
-      if (!fu) return { uploadResult, followupRes };
+      console.log("[uploadRecordedFile] follow_up_required:", followupRequired);
+      console.log("[uploadRecordedFile] follow_up_question:", followupQuestionText);
+      console.log("[uploadRecordedFile] follow_up_intent:", followupIntent);
+      console.log("[uploadRecordedFile] missing_evidence:", missingEvidence);
+
+      if (!followupRequired || !followupQuestionText) {
+        return { uploadResult, followupRes };
+      }
 
       const followupOrder = cur.order + 1;
+      const followupHint =
+        [followupIntent, missingEvidence.length ? `보완 필요: ${missingEvidence.join(", ")}` : ""]
+          .filter(Boolean)
+          .join(" | ") || undefined;
 
       const followupLive: LiveQuestion = {
         stage: "꼬리 질문",
-        question: fu.text,
+        question: followupQuestionText,
         order: followupOrder,
         type: "FOLLOWUP",
         difficulty: cur.difficulty,
-        answerHint: fu.reason,
+        answerHint: followupHint,
         questionId: undefined,
         questionCode: `${cur.questionCode ?? `Q${String(cur.order).padStart(2, "0")}`}_FU`,
         relatedItems: [],
