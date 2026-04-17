@@ -10,15 +10,18 @@ import "./EnvironmentTestView.css";
 import ic_mic_white_24x32 from "@/assets/icons/size24/ic_mic_white_24x32.png";
 import Modal from "@/shared/components/modal/Modal";
 
+type InterviewStageStatus = 0 | 1 | 2;
+
 type LocationState = {
   envSpeech?: string;
   interviewRes?: any;
   jobDetail?: any;
-  resumeDetail: any;
-  jobId?: number;
+  resumeDetail?: any;
+  jobId?: number | null;
   desiredJob?: string;
   jobPostingUrl?: string;
-  interviewStageStatus?: 0 | 1 | 2;
+  interviewStageStatus?: InterviewStageStatus;
+  interviewGroupId?: number;
 };
 
 export default function M_EnvironmentTestView() {
@@ -32,10 +35,40 @@ export default function M_EnvironmentTestView() {
   const [showSettingsPanel, setShowSettingsPanel] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  const [testStep, setTestStep] = useState<"intro" | "camera1" | "camera2" | "complete" | "failed">(
-    "intro"
-  );
+  const [testStep, setTestStep] = useState<
+    "intro" | "camera1" | "camera2" | "complete" | "failed"
+  >("intro");
   const [showDialog, setShowDialog] = useState(true);
+
+  useEffect(() => {
+    console.log("[M_EnvironmentTestView] location.state:", state);
+    console.log(
+      "[M_EnvironmentTestView] interviewStageStatus:",
+      state?.interviewStageStatus
+    );
+    console.log(
+      "[M_EnvironmentTestView] interviewGroupId:",
+      state?.interviewGroupId
+    );
+    console.log(
+      "[M_EnvironmentTestView] interviewRes.data.questions:",
+      state?.interviewRes?.data?.questions
+    );
+
+    switch (state?.interviewStageStatus) {
+      case 0:
+        console.log("상태 0: 유저 질문 전부 작성 (API 스킵)");
+        break;
+      case 1:
+        console.log("상태 1: 유저 질문 일부 작성 (API + 일부 교체)");
+        break;
+      case 2:
+        console.log("상태 2: 유저 질문 미작성 (API 그대로)");
+        break;
+      default:
+        console.log("상태 없음 또는 알 수 없음");
+    }
+  }, [state]);
 
   useEffect(() => {
     if (!actionType) return;
@@ -62,11 +95,19 @@ export default function M_EnvironmentTestView() {
 
   const handleConfirmExit = () => {
     setShowConfirm(false);
-    navigate("/");
+    navigate("/mock-interview-report");
   };
 
   const handleStartMockInterviewLive = () => {
-    navigate("/mock-interview/m-mock-interview-live", { state: { ...state } });
+    console.log("[M_EnvironmentTestView] navigate to m-mock-interview-live:", {
+      ...state,
+    });
+
+    navigate("/mock-interview/m-mock-interview-live", {
+      state: {
+        ...state,
+      },
+    });
   };
 
   return (
@@ -85,14 +126,18 @@ export default function M_EnvironmentTestView() {
             {testStep === "intro" && (
               <div className="mock-settings__submit-btn-container">
                 <span className="camera-test__mic-button-wrapper">
-                  <img src={ic_mic_white_24x32} alt="마이크" className="camera-test__mic-icon" />
+                  <img
+                    src={ic_mic_white_24x32}
+                    alt="마이크"
+                    className="camera-test__mic-icon"
+                  />
                 </span>
               </div>
             )}
 
             {testStep === "camera1" && (
               <M_CameraTest
-                speechText={state.envSpeech}
+                speechText={state?.envSpeech}
                 testType="camera"
                 onStartInterview={handleStartMockInterviewLive}
                 onFail={() => setTestStep("failed")}
@@ -113,12 +158,12 @@ export default function M_EnvironmentTestView() {
 
       <Modal
         open={showConfirm}
-        title="모의면접을 중단하시겠습니까?"
+        title="환경 테스트를 종료하시겠습니까?"
         desc={
           <>
-            해당 모의면접에 사용된 이용권은 차감되지 않으며,
+            환경 테스트를 종료하면 진행 중인 테스트가 저장되지 않습니다.
             <br />
-            [모의면접 - 모의면접 내역] 페이지에서 이어서 진행할 수 있습니다.
+            그래도 나가시겠습니까?
           </>
         }
         confirmText="나가기"
