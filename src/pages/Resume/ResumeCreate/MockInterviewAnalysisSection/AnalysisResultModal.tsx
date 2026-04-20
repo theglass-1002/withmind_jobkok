@@ -9,9 +9,11 @@ type Item = {
   score: string;
   role: string;
   date: string;
+  resumeDate: string;
   title: string;
-  thumbSrc: string;
-  selectedBadge?: string;
+  resumeTitle: string;
+  photoUrl: string;
+  badgeLabel: string;
 };
 
 export default function AnalysisResultModal({
@@ -31,11 +33,20 @@ export default function AnalysisResultModal({
 }) {
   if (!isOpen) return null;
 
+  const isEmpty = items.length === 0;
+
   return (
     <div className="analysis-result-modal" role="dialog" aria-modal="true">
       <div className="analysis-result-modal__overlay" onClick={onCancel} />
-      <div className="analysis-result-modal__dialog">
+      <div
+        className={`analysis-result-modal__dialog ${isEmpty ? "is-empty" : ""}`}
+      >
         <div className="analysis-result-modal__body">
+          {items.length === 0 ? (
+            <div className="analysis-result-modal__empty">
+              완료된 모의면접 분석이 없습니다.
+            </div>
+          ) : (
           <div className="analysis-result-modal__list">
             {items.map((it) => {
               const isOn = selectedId === it.id;
@@ -56,7 +67,7 @@ export default function AnalysisResultModal({
                       <img src={isOn ? icRadioChecked : icRadioUnchecked} alt="" />
                     </div>
                     <div className="analysis-result-modal__item-thumb">
-                      <img src={it.thumbSrc} alt="" />
+                      <img src={it.photoUrl} alt="" />
                     </div>
                     <div className="analysis-result-modal__item-score">{it.score}</div>
                     <div className="analysis-result-modal__item-role">{it.role}</div>
@@ -64,22 +75,54 @@ export default function AnalysisResultModal({
                   </div>
 
                   <div className="analysis-result-modal__item-bottom">
-                  <div className="analysis-result-modal__item-status">
-                        <img src={icSelectedFile} alt="" />
-                        선택 이력서
-                      </div>
-                    <div className="analysis-result-modal__item-title">{it.title}</div>
-                    <div className="analysis-result-modal__item-created">{it.date}</div>
+                    <div className="analysis-result-modal__item-status">
+                      <img src={icSelectedFile} alt="" />
+                      {it.badgeLabel}
+                    </div>
+                    <div className="analysis-result-modal__item-title">
+                      {it.resumeTitle || it.title}
+                    </div>
+                    <div className="analysis-result-modal__item-created">
+                      {it.resumeDate || it.date}
+                    </div>
                   </div>
                 </div>
               );
             })}
           </div>
+          )}
         </div>
 
         <div className="analysis-result-modal__footer btn_wrap">
-          <span className="btn_w_full default_btn_white" role="button" tabIndex={0} onClick={onCancel}>취소</span>
-          <span className="btn_w_full default_btn_black" role="button" tabIndex={0} onClick={onApply}>적용</span>
+          {isEmpty ? (
+            <span
+              className="btn_w_full default_btn_black"
+              role="button"
+              tabIndex={0}
+              onClick={onCancel}
+            >
+              확인
+            </span>
+          ) : (
+            <>
+              <span
+                className="btn_w_full default_btn_white"
+                role="button"
+                tabIndex={0}
+                onClick={onCancel}
+              >
+                취소
+              </span>
+              <span
+                className="btn_w_full default_btn_black"
+                role="button"
+                tabIndex={0}
+                onClick={onApply}
+              >
+                적용
+              </span>
+            </>
+          )}
         </div>
       </div>
     </div>

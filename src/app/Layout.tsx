@@ -127,7 +127,7 @@ export default function Layout({
     }
 
     if (screen === "JobPostingDetail") {
-      const jobTitle = searchParams.get("title") || "";
+      const jobTitle = (location.state as { title?: string } | null)?.title || "";
       return (
         <PageHeader
           title={jobTitle}

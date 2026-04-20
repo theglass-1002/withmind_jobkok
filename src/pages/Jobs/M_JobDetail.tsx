@@ -31,12 +31,26 @@ import RecommendedJobCard from "@/shared/components/job-posting-item/Recommended
 import Modal from "@/shared/components/modal/Modal";
 import "./JobDetail.css";
 import { Storage } from "@/shared/utils/StorageManager";
+import { fetchResumeCheck } from "@/api/resume/resume.api";
+import type { JobItem } from "@/api/job/job.types";
+
+type M_JobDetailProps = {
+  recommendedJobs?: JobItem[];
+  hasAiMatch?: boolean;
+  matchPercent?: number;
+  recommendReason?: string;
+};
 
 
 
 
 
-export default function M_JobDetail() {
+export default function M_JobDetail({
+  recommendedJobs = [],
+  hasAiMatch = false,
+  matchPercent,
+  recommendReason,
+}: M_JobDetailProps) {
   const navigate = useNavigate();
   const userName = Storage.getUserName() || "사용자";
   const [bookMark, setBookMark] = useState(false);
@@ -96,8 +110,18 @@ export default function M_JobDetail() {
       });
   };
 
-  const handleMockInterviewClick = () => {
-    setIsModalOpen(true);
+  const handleMockInterviewClick = async () => {
+    try {
+      const resumeCheck = await fetchResumeCheck();
+      if (resumeCheck.exists === true) {
+        navigate(`/mock-interview/guide`);
+        return;
+      }
+      setIsModalOpen(true);
+    } catch (e) {
+      console.error("❌ 이력서 체크 실패:", e);
+      setIsModalOpen(true);
+    }
   };
 
   const handleModalClose = () => {
@@ -169,29 +193,32 @@ export default function M_JobDetail() {
               </div>
         
             </div>
-            <div className="job-detail__ai">
-            <div className="job-detail__ai-header">
-             <img src={green_star20x20} alt="" />
-              <span className="job-detail__ai-title">AI 적합도 00%</span>
-            </div>
+            {hasAiMatch && (
+              <div className="job-detail__ai">
+                <div className="job-detail__ai-header">
+                  <img src={green_star20x20} alt="" />
+                  <span className="job-detail__ai-title">
+                    AI 적합도 {matchPercent}%
+                  </span>
+                </div>
 
-            <div className="job-detail__ai-summary">
-              <div className="job-detail__ai-item">
-                <span className="job-detail__ai-term">분석 요약</span>
-                <span className="job-detail__ai-desc">
-                  위위 지원자는 Jetpack, Firebase, Kotlin 기술 경험을 보유하고 있으며, 모바일 앱 개발 분야에 대한 높은 이해도를 보여줍니다.
-                </span>
-              </div>
+                <div className="job-detail__ai-summary">
+                  <div className="job-detail__ai-item">
+                    <span className="job-detail__ai-term">분석 요약</span>
+                    <span className="job-detail__ai-desc">
+                      등록된 이력서를 기준으로 공고와의 적합도를 AI가 분석한 결과예요.
+                    </span>
+                  </div>
 
-              <div className="job-detail__ai-item">
-                <span className="job-detail__ai-term">추천 이유</span>
-                <span className="job-detail__ai-desc">
-                  서울 거주로 출퇴근 접근성이 높고, 직무 이해도가 높아 적합한 인재입니다.
-                </span>
+                  <div className="job-detail__ai-item">
+                    <span className="job-detail__ai-term">추천 이유</span>
+                    <span className="job-detail__ai-desc">
+                      {recommendReason}
+                    </span>
+                  </div>
+                </div>
               </div>
-       
-            </div>
-          </div>
+            )}
           <div className="job-detail__aside-list">
           <div className="job-detail__aside-item job-detail__aside-item--role">
             <div className="job-detail__aside-term">
@@ -326,7 +353,7 @@ export default function M_JobDetail() {
           <div id="section-recommendation" className="job-detail__body">
             <div className="job-detail__section job-detail__section--responsibilities">
               <span className="job-detail__section-title">추천 채용 공고</span>
-              <RecommendedJobCard/>
+              <RecommendedJobCard jobs={recommendedJobs} />
             </div>  
           </div>
           <div className="job-detail__divider"></div>

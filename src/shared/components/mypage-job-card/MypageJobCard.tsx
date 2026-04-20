@@ -59,7 +59,9 @@ export default function MypageJobCard({
 
   const handleGoToJobPost = () => {
     if (!job) return;
-    navigate(`/jobs/${job.jobIdx}?title=${encodeURIComponent(job.companyName ?? "")}`);
+    navigate(`/jobs/${job.jobIdx}`, {
+      state: { title: job.companyName ?? "" },
+    });
   };
 
   const handleBookmarkToggle = async (e: React.MouseEvent) => {

@@ -1,5 +1,4 @@
-// src/pages/InterviewReport/history/InterviewReportHistory.tsx
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import UiFilter, { type UiFilterOption } from "@/shared/components/ui-filter/UiFilter";
 import MockInterviewHistoryList, {
@@ -7,15 +6,13 @@ import MockInterviewHistoryList, {
 } from "./MockInterviewHistoryList";
 
 import ic_switch_right_white_20 from "@/assets/icons/size20/ic_switch_right_white_20.png";
-import test_profile_img2 from "@/assets/testImg/test_profile_img2.png";
 import ic_arrow_up_right_gray900_20 from "@/assets/icons/size20/ic_arrow_up_right_gray900_20.png";
 import ic_selected_file_purple_20 from "@/assets/icons/size20/ic_selected_file_purple_20.png";
 import ic_keyboard_arrow_left_gray700_20 from "@/assets/icons/size20/ic_keyboard_arrow_left_gray700_20.png";
 import ic_keyboard_arrow_right_gray700_20 from "@/assets/icons/size20/ic_keyboard_arrow_right_gray700_20.png";
 
-import interview_video_02 from "@/assets/testImg/interview_video_02.webm";
-import { createVideoThumbnail } from "@/shared/utils/util";
 import { fetchInterviewReportList } from "@/api/interview/interview.api";
+import type { InterviewReportItem } from "@/api/interview/interview.types";
 
 const DEFAULT_FILTERS: UiFilterOption[] = [
   { label: "전체", value: "all" },
@@ -23,9 +20,9 @@ const DEFAULT_FILTERS: UiFilterOption[] = [
   { label: "진행 중", value: "ongoing" },
 ];
 
+const PAGE_SIZE = 10;
+
 interface InterviewReportHistoryProps {
-  totalCount: number;
-  doneCount: number;
   filter: string;
   onChangeFilter: (v: string) => void;
   onStart: () => void;
@@ -33,9 +30,12 @@ interface InterviewReportHistoryProps {
   emptyIconSrc: string;
 }
 
+function formatDate(d: string) {
+  if (!d) return "";
+  return d.replace(/-/g, ".");
+}
+
 export default function InterviewReportHistory({
-  totalCount,
-  doneCount,
   filter,
   onChangeFilter,
   onStart,
@@ -43,70 +43,84 @@ export default function InterviewReportHistory({
   emptyIconSrc,
 }: InterviewReportHistoryProps) {
   const navigate = useNavigate();
-  const isEmpty = totalCount === 0;
   const [page, setPage] = useState(1);
+  const [list, setList] = useState<InterviewReportItem[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [avatarMap, setAvatarMap] = useState<Record<number, string>>({});
 
-  
   useEffect(() => {
+    let cancelled = false;
+
     const fetchData = async () => {
       try {
         const res = await fetchInterviewReportList({
           page,
-          size: 10,
+          size: PAGE_SIZE,
         });
-
         console.log("📦 interview report list:", res);
+        const baseList = res.list ?? [];
+        if (cancelled) return;
+        setList(baseList);
+        setTotalCount(res.totalCount ?? 0);
+        setAvatarMap({});
+
+        const entries = await Promise.all(
+          baseList.map(async (item) => {
+            if (!item.photoUrl) return [item.qzGroup, ""] as const;
+            try {
+              const r = await fetch(item.photoUrl);
+              const data = await r.json();
+              return [item.qzGroup, data?.signedUrl ?? ""] as const;
+            } catch (e) {
+              console.error("❌ photoUrl 해석 실패:", item.qzGroup, e);
+              return [item.qzGroup, ""] as const;
+            }
+          })
+        );
+        if (cancelled) return;
+        setAvatarMap(Object.fromEntries(entries));
       } catch (error) {
         console.error("❌ interview report list fetch error:", error);
+        if (cancelled) return;
+        setList([]);
+        setTotalCount(0);
+        setAvatarMap({});
       }
     };
-
     fetchData();
-  }, [page]); // page 바뀌면 재호출
-
-  // ✅ 썸네일 상태 (dataURL)
-  const [videoThumb, setVideoThumb] = useState<string | null>(null);
-
-  useEffect(() => {
-    let mounted = true;
-
-    (async () => {
-      try {
-        const thumb = await createVideoThumbnail(interview_video_02, 1);
-        if (mounted) setVideoThumb(thumb);
-      } catch (e) {
-        console.error("썸네일 생성 실패:", e);
-        if (mounted) setVideoThumb(null);
-      }
-    })();
 
     return () => {
-      mounted = false;
+      cancelled = true;
     };
-  }, []);
+  }, [page]);
 
-  const HISTORY_ITEMS: InterviewReportHistoryItemData[] = useMemo(
-    () => [
-      {
-        id: 1,
-        title: "",
-        no: 1,
-        avatarSrc: videoThumb ?? interview_video_02,
-        scoreText: "82점",
-        roleText: "서비스 기획",
-        dateText: "2025.12.10",
-        statusText: "진행완료",
-        statusState: "done",
-        resumeLabelIconSrc: ic_selected_file_purple_20,
-        resumeText: "성장하는 서비스 기획자",
-        resumeDate: "2025.12.10",
-        onClickView: () => {
-          navigate(`/mock-interview/analysis/${1}`);
-        },
-      },
-    ],
-    [navigate, videoThumb]
+  const doneCountOnPage = useMemo(
+    () => list.filter((i) => i.interviewAllYn === "Y").length,
+    [list]
   );
+
+  const items: InterviewReportHistoryItemData[] = useMemo(
+    () =>
+      list.map((item, idx) => ({
+        id: item.qzGroup,
+        no: (page - 1) * PAGE_SIZE + idx + 1,
+        title: "",
+        avatarSrc: avatarMap[item.qzGroup] ?? "",
+        scoreText: `${item.totalScore}점`,
+        roleText: item.jobGroup || item.job || "",
+        dateText: formatDate(item.regdate),
+        statusText: item.interviewAllYn === "Y" ? "진행완료" : "진행중",
+        statusState: item.interviewAllYn === "Y" ? "done" : "doing",
+        resumeLabelIconSrc: ic_selected_file_purple_20,
+        resumeText: "",
+        resumeDate: "",
+        onClickView: () => navigate(`/mock-interview/analysis/${item.qzGroup}`),
+      })),
+    [list, page, navigate, avatarMap]
+  );
+
+  const isEmpty = totalCount === 0;
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
   return (
     <>
@@ -115,7 +129,7 @@ export default function InterviewReportHistory({
           총 <span className="mock-interview__stats-count">{totalCount}건</span>
         </div>
         <div className="mock-interview__stats-done">
-          진행완료 <span className="mock-interview__stats-count">{doneCount}건</span>
+          진행완료 <span className="mock-interview__stats-count">{doneCountOnPage}건</span>
         </div>
       </div>
 
@@ -145,11 +159,11 @@ export default function InterviewReportHistory({
         <MockInterviewHistoryList
           sortIconSrc={ic_switch_right_white_20}
           viewIconSrc={ic_arrow_up_right_gray900_20}
-          items={HISTORY_ITEMS}
+          items={items}
           page={page}
-          totalPages={1}
+          totalPages={totalPages}
           onChangePage={setPage}
-          pageWindow={1}
+          pageWindow={5}
           prevIcon={<img src={ic_keyboard_arrow_left_gray700_20} alt="" aria-hidden="true" />}
           nextIcon={<img src={ic_keyboard_arrow_right_gray700_20} alt="" aria-hidden="true" />}
         />

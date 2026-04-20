@@ -82,11 +82,9 @@ export default function RecommendedJobCard({
             key={job.jobIdx}
             className="job-card"
             onClick={() =>
-              navigate(
-                `/jobs/${job.jobIdx}?title=${encodeURIComponent(
-                  job.companyName ?? ""
-                )}`
-              )
+              navigate(`/jobs/${job.jobIdx}`, {
+                state: { title: job.companyName ?? "" },
+              })
             }
             style={{ cursor: "pointer" }}
           >

@@ -167,12 +167,15 @@ export type InterviewFollowupResponse =
 
 export type InterviewReportItem = {
   interviewAllYn: "Y" | "N";
-  photoUrl: string;
-  regdate: string; // YYYY-MM-DD
+  photoUrl?: string;
+  regdate: string; // YYYY-MM-DD (면접일)
+  resumeDate?: string; // YYYY-MM-DD (이력서 작성일)
   qzGroup: number;
-  jobGroup: string;
+  jobGroup?: string;
   job: string;
   totalScore: number;
+  resumeTitle: string;
+  resumeIdx: number;
 };
 
 export type InterviewReportListResponse = {

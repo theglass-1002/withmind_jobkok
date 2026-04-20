@@ -104,9 +104,9 @@ export default function JobPostingItemRowNoAiPick({
 
   const handleGoToJobPost = () => {
     if (!job) return;
-    navigate(
-      `/jobs/${job.jobIdx}?title=${encodeURIComponent(job.companyName ?? "")}`
-    );
+    navigate(`/jobs/${job.jobIdx}`, {
+      state: { title: job.companyName ?? "" },
+    });
   };
 
   const handleBookmark = async (e: React.MouseEvent) => {

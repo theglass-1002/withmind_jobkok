@@ -136,3 +136,12 @@
    content: "";
    display: none;
  }
+
+ @media (max-width: 750px) {
+   .job-list.recommend {
+     grid-template-columns: 1fr;
+   }
+   .job-list.recommend .job-card {
+     width: 100%;
+   }
+ }

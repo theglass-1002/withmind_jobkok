@@ -16,9 +16,11 @@ type Item = {
   score: string;
   role: string;
   date: string;
+  resumeDate: string;
   title: string;
-  thumbSrc: string;
-  selectedBadge?: string;
+  resumeTitle: string;
+  photoUrl: string;
+  badgeLabel: string;
 };
 
 const formatDateToDot = (date?: string) => {
@@ -76,25 +78,43 @@ export default function MockInterviewAnalysisSection() {
       });
       console.log("📦 API 원본 응답:", res);
       console.log("📦 list:", res.list);
-      const mappedItems: Item[] = (res.list ?? []).map((it, idx) => ({
-        id: String(it.qzGroup ?? idx + 1),
-        score: `${it.totalScore ?? 0}점`,
-        role: it.job || it.jobGroup || "",
-        date: formatDateToDot(it.regdate),
-        title: it.jobGroup
-          ? `${it.jobGroup} 모의면접 분석 결과`
-          : "모의면접 분석 결과",
-        thumbSrc: it.photoUrl || test_profile_img,
-        selectedBadge: it.interviewAllYn === "Y" ? "전체 면접" : undefined,
-      }));
+
+      const filteredList = (res.list ?? []).filter(
+        (it) => it.interviewAllYn === "Y"
+      );
+
+      const mappedItems: Item[] = await Promise.all(
+        filteredList.map(async (it, idx) => {
+          let resolvedPhotoUrl = test_profile_img;
+          if (it.photoUrl) {
+            try {
+              const r = await fetch(it.photoUrl);
+              const data = await r.json();
+              resolvedPhotoUrl = data?.signedUrl || test_profile_img;
+            } catch (err) {
+              console.error("❌ photoUrl 해석 실패:", err);
+            }
+          }
+
+          return {
+            id: String(it.qzGroup ?? idx + 1),
+            score: `${it.totalScore ?? 0}점`,
+            role: it.job || it.jobGroup || "",
+            date: formatDateToDot(it.regdate),
+            resumeDate: formatDateToDot(it.resumeDate),
+            title: it.jobGroup
+              ? `${it.jobGroup} 모의면접 분석 결과`
+              : "모의면접 분석 결과",
+            resumeTitle: it.resumeTitle || "",
+            photoUrl: resolvedPhotoUrl,
+            badgeLabel: it.interviewAllYn === "Y" ? "전체 면접" : "선택 이력서",
+          };
+        })
+      );
 
       setItems(mappedItems);
       setSelectedId(pickedItem?.id ?? null);
       setIsPickerOpen(true);
-
-      if (mappedItems.length === 0) {
-        toast.info("불러올 모의면접 분석 결과가 없습니다.");
-      }
     } catch (error) {
       console.error("❌ 모의면접 분석 결과 리스트 조회 실패:", error);
       toast.error("모의면접 분석 결과를 불러오는 중 오류가 발생했습니다.");

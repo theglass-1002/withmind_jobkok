@@ -174,6 +174,10 @@ export default function JobDetail() {
   };
 
   const handleMockInterviewClick = () => {
+    if (resumeExists === true) {
+      navigate(`/mock-interview/guide`);
+      return;
+    }
     setIsModalOpen(true);
   };
 
@@ -536,7 +540,12 @@ export default function JobDetail() {
         )}
       </div>
 
-      <M_JobDetail />
+      <M_JobDetail
+        recommendedJobs={recommendedJobs}
+        hasAiMatch={hasAiMatch}
+        matchPercent={job?.matchPercent}
+        recommendReason={job?.recommendReason}
+      />
 
       <Modal
         open={isModalOpen}

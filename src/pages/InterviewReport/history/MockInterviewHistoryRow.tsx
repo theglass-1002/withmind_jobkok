@@ -16,7 +16,9 @@ export default function InterviewReportHistoryRow({ item, viewIconSrc }: Intervi
         <span className="mock-history__cell mock-history__cell--no     data-list__col u-col--w100">{item.no}</span>
         <span className="mock-history__cell mock-history__cell--avatar data-list__col u-col--w120">
           <span className="mock-history__avatar">
-            <img className="mock-history__avatar-img" src={item.avatarSrc} alt="" />
+            {item.avatarSrc ? (
+              <img className="mock-history__avatar-img" src={item.avatarSrc} alt="" />
+            ) : null}
           </span>
         </span>
         <span className="mock-history__cell mock-history__cell--score  data-list__col u-col--w160">{item.scoreText}</span>
