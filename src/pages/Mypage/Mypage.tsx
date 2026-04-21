@@ -19,6 +19,15 @@ import { logout } from "@/api/auth/auth.api";
 import { fetchResumeList } from "@/api/resume/resume.api";
 import type { ResumeItem } from "@/api/resume/resume.types";
 import { formatDate } from "@/shared/utils/util";
+import { fetchInterviewReportList } from "@/api/interview/interview.api";
+import type { InterviewReportItem } from "@/api/interview/interview.types";
+
+type InterviewCardItem = InterviewReportItem & { avatarSrc: string };
+
+const formatDateToDot = (date?: string) => {
+  if (!date) return "";
+  return date.replaceAll("-", ".");
+};
 
 export default function MyPage() {
   const navigate = useNavigate();
@@ -26,6 +35,7 @@ export default function MyPage() {
   const [savedJobs, setSavedJobs] = useState<JobItem[]>([]);
   const [recentJobs, setRecentJobs] = useState<JobItem[]>([]);
   const [defaultResume, setDefaultResume] = useState<ResumeItem | null>(null);
+  const [interviewList, setInterviewList] = useState<InterviewCardItem[]>([]);
 
   const [isLoading, setIsLoading] = useState(false);
   const [isAllFailed, setIsAllFailed] = useState(false);
@@ -77,7 +87,7 @@ export default function MyPage() {
           if (!isMounted) return;
           setDefaultResume((resumeRes.list ?? [])[0] ?? null);
           successCount += 1;
-         
+
         } catch (e: any) {
           if (e?.code === 999) {
             logout();
@@ -87,6 +97,45 @@ export default function MyPage() {
           if (!isMounted) return;
           setDefaultResume(null);
           console.error("[MyPage] 기본 이력서 조회 실패", e);
+        }
+
+        try {
+          const interviewRes = await fetchInterviewReportList({
+            page: 1,
+            size: 10,
+          });
+          if (!isMounted) return;
+          console.log("[MyPage] 모의면접 내역 API 응답:", interviewRes);
+          console.log("[MyPage] 모의면접 내역 list:", interviewRes.list);
+
+          const baseList = (interviewRes.list ?? []).slice(0, 2);
+          const resolved: InterviewCardItem[] = await Promise.all(
+            baseList.map(async (item) => {
+              let avatarSrc = "";
+              if (item.photoUrl) {
+                try {
+                  const r = await fetch(item.photoUrl);
+                  const data = await r.json();
+                  avatarSrc = data?.signedUrl ?? "";
+                } catch (err) {
+                  console.error("❌ photoUrl 해석 실패:", item.qzGroup, err);
+                }
+              }
+              return { ...item, avatarSrc };
+            })
+          );
+          if (!isMounted) return;
+          setInterviewList(resolved);
+          successCount += 1;
+        } catch (e: any) {
+          if (e?.code === 999) {
+            logout();
+            navigate("/login");
+            return;
+          }
+          if (!isMounted) return;
+          setInterviewList([]);
+          console.error("[MyPage] 모의면접 내역 조회 실패", e);
         }
       } finally {
         if (!isMounted) return;
@@ -236,66 +285,65 @@ export default function MyPage() {
           </header>
 
           <div className="interview-list">
-            <div className="interview-item">
-              <div className="item-content">
-                <div className="content-left">
-                  <div className="interview-info">
-                    <span className="score">82점</span>
-                    <span className="job-type">프로젝트 기획자</span>
-                    <div className="status-info">
-                      <span className="status">진행완료</span>
-                      <span className="date">2025.00.00</span>
-                    </div>
-                  </div>
-                  <div className="description">
-                    <span>
-                      <img src={done_file} alt="" />
-                    </span>
-                    성장하는 기획자 위위입니다.
-                  </div>
-                </div>
-                <div className="content-right">
-                  <div className="profile-image">
-                    <img src={test_profile} alt="" />
-                  </div>
-                </div>
-              </div>
-              <button className="btn_w_full default_btn_white">
-                결과 리포트 보기
-              </button>
-            </div>
+            {!isLoading && interviewList.length === 0 && (
+              <div className="empty">최근 진행한 모의면접이 없습니다.</div>
+            )}
 
-            <div className="interview-item">
-              <div className="item-content">
-                <div className="content-left">
-                  <div className="interview-info">
-                    <span className="score pending">진행 중</span>
-                    <span className="job-type">프로젝트 기획자</span>
-                    <div className="status-info">
-                      <span className="status">진행 중</span>
-                      <span className="date">2025.00.00</span>
+            {!isLoading &&
+              interviewList.map((item) => {
+                const isDone = item.interviewAllYn === "Y";
+                const scoreText = isDone ? `${item.totalScore ?? 0}점` : "진행 중";
+                const statusText = isDone ? "진행완료" : "진행 중";
+                const roleText = item.jobGroup || item.job || "";
+                const dateText = formatDateToDot(item.regdate);
+
+                return (
+                  <div key={item.qzGroup} className="interview-item">
+                    <div className="item-content">
+                      <div className="content-left">
+                        <div className="interview-info">
+                          <span className={`score${isDone ? "" : " pending"}`}>
+                            {scoreText}
+                          </span>
+                          <span className="job-type">{roleText}</span>
+                          <div className="status-info">
+                            <span className="status">{statusText}</span>
+                            <span className="date">{dateText}</span>
+                          </div>
+                        </div>
+                        <div className="description">
+                          <span>
+                            <img src={done_file} alt="" />
+                          </span>
+                          {item.resumeTitle || ""}
+                        </div>
+                      </div>
+                      <div className="content-right">
+                        <div className="profile-image">
+                          <img src={item.avatarSrc || test_profile} alt="" />
+                        </div>
+                      </div>
                     </div>
+                    <button
+                      className="btn_w_full default_btn_white"
+                      onClick={() =>
+                        navigate(`/mock-interview/analysis/${item.qzGroup}`)
+                      }
+                    >
+                      {isDone ? (
+                        "결과 리포트 보기"
+                      ) : (
+                        <>
+                          <span>
+                            <img src={arrow_up_black} alt="" />
+                          </span>
+                          이어서 진행하기
+                        </>
+                      )}
+                    </button>
                   </div>
-                  <div className="description">
-                    <span>
-                      <img src={done_file} alt="" />
-                    </span>
-                    성장하는 기획자 위위 입니다.
-                  </div>
-                </div>
-                <div className="content-right">
-                  <div className="profile-image">
-                    <img src={test_profile} alt="" />
-                  </div>
-                </div>
-              </div>
-              <button className="btn_w_full default_btn_white">
-                <span>
-                  <img src={arrow_up_black} alt="" />
-                </span>
-                이어서 진행하기
-              </button>
-            </div>
+                );
+              })}
           </div>
         </section>
       </div>

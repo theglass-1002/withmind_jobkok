@@ -179,7 +179,7 @@ export async function uploadInterviewTestVideo(
 
 export async function uploadJobInterviewVideo(
   videoBlob: Blob,
-  originalFileName: string = "env_test.webm",
+  originalFileName: string = "interview.webm",
   folderPath: string = "interview"
 ): Promise<{
   fileName:string;

@@ -34,7 +34,7 @@ export default function M_InterviewReportHistoryRow({ item, viewIconSrc }: M_Int
         <div className="mock-history__btn_wrap">
         <button className="btn_w_full default_btn_white" onClick={item.onClickView}>
             <img src={viewIconSrc} alt="" />
-            분석결과보기
+            {item.statusState === "doing" ? "이어서 진행하기" : "분석결과보기"}
           </button>
         </div>
   

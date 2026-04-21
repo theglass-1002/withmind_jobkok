@@ -49,13 +49,21 @@ export default function InterviewReportHistory({
   const [avatarMap, setAvatarMap] = useState<Record<number, string>>({});
 
   useEffect(() => {
+    setPage(1);
+  }, [filter]);
+
+  useEffect(() => {
     let cancelled = false;
 
     const fetchData = async () => {
       try {
+        const interviewAllYn =
+          filter === "done" ? "Y" : filter === "ongoing" ? "N" : undefined;
+
         const res = await fetchInterviewReportList({
           page,
           size: PAGE_SIZE,
+          interviewAllYn,
         });
         console.log("📦 interview report list:", res);
         const baseList = res.list ?? [];
@@ -92,7 +100,7 @@ export default function InterviewReportHistory({
     return () => {
       cancelled = true;
     };
-  }, [page]);
+  }, [page, filter]);
 
   const doneCountOnPage = useMemo(
     () => list.filter((i) => i.interviewAllYn === "Y").length,
@@ -112,8 +120,8 @@ export default function InterviewReportHistory({
         statusText: item.interviewAllYn === "Y" ? "진행완료" : "진행중",
         statusState: item.interviewAllYn === "Y" ? "done" : "doing",
         resumeLabelIconSrc: ic_selected_file_purple_20,
-        resumeText: "",
-        resumeDate: "",
+        resumeText: item.resumeTitle || "",
+        resumeDate: formatDate(item.resumeDate),
         onClickView: () => navigate(`/mock-interview/analysis/${item.qzGroup}`),
       })),
     [list, page, navigate, avatarMap]

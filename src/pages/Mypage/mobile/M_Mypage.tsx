@@ -17,6 +17,12 @@ import { fetchResumeList } from "@/api/resume/resume.api";
 import type { ResumeItem } from "@/api/resume/resume.types";
 import { logout } from "@/api/auth/auth.api";
 import { formatDate } from "@/shared/utils/util";
+import { fetchInterviewReportList } from "@/api/interview/interview.api";
+
+const formatDateToDot = (date?: string) => {
+  if (!date) return "";
+  return date.replaceAll("-", ".");
+};
 
 export default function M_Mypage() {
   const navigate = useNavigate();
@@ -24,6 +30,9 @@ export default function M_Mypage() {
   const [savedJobs, setSavedJobs] = useState<JobItem[]>([]);
   const [recentJobs, setRecentJobs] = useState<JobItem[]>([]);
   const [defaultResume, setDefaultResume] = useState<ResumeItem | null>(null);
+  const [interviewItems, setInterviewItems] = useState<
+    M_InterviewReportHistoryItemData[]
+  >([]);
 
   const [isLoading, setIsLoading] = useState(false);
   const [isAllFailed, setIsAllFailed] = useState(false);
@@ -91,6 +100,61 @@ export default function M_Mypage() {
           setDefaultResume(null);
           console.error("[M_Mypage] 기본 이력서 조회 실패", e);
         }
+
+        try {
+          const interviewRes = await fetchInterviewReportList({
+            page: 1,
+            size: 10,
+          });
+          console.log("[M_Mypage] interviewRes:", interviewRes);
+
+          const baseList = (interviewRes.list ?? []).slice(0, 2);
+          const mapped: M_InterviewReportHistoryItemData[] = await Promise.all(
+            baseList.map(async (item, idx) => {
+              let avatarSrc = "";
+              if (item.photoUrl) {
+                try {
+                  const r = await fetch(item.photoUrl);
+                  const data = await r.json();
+                  avatarSrc = data?.signedUrl ?? "";
+                } catch (err) {
+                  console.error("❌ photoUrl 해석 실패:", item.qzGroup, err);
+                }
+              }
+
+              const isDone = item.interviewAllYn === "Y";
+              return {
+                id: item.qzGroup ?? idx + 1,
+                title: "",
+                no: idx + 1,
+                avatarSrc: avatarSrc || test_profile_img2,
+                scoreText: isDone ? `${item.totalScore ?? 0}점` : "진행 중",
+                roleText: item.jobGroup || item.job || "",
+                dateText: formatDateToDot(item.regdate),
+                statusText: isDone ? "진행완료" : "진행 중",
+                statusState: isDone ? "done" : "doing",
+                resumeLabelIconSrc: ic_task_gray900_18,
+                resumeText: item.resumeTitle || "",
+                resumeDate: formatDateToDot(item.resumeDate),
+                onClickView: () =>
+                  navigate(`/mock-interview/analysis/${item.qzGroup}`),
+              };
+            })
+          );
+
+          if (!isMounted) return;
+          setInterviewItems(mapped);
+          successCount += 1;
+        } catch (e: any) {
+          if (e?.code === 999) {
+            logout();
+            navigate("/login");
+            return;
+          }
+          if (!isMounted) return;
+          setInterviewItems([]);
+          console.error("[M_Mypage] 모의면접 내역 조회 실패", e);
+        }
       } finally {
         if (!isMounted) return;
         setIsAllFailed(successCount === 0);
@@ -132,39 +196,6 @@ export default function M_Mypage() {
 
   const visibleSavedJobs = useMemo(() => savedJobs.slice(0, 3), [savedJobs]);
   const visibleRecentJobs = useMemo(() => recentJobs.slice(0, 3), [recentJobs]);
-
-  const HISTORY_ITEMS: M_InterviewReportHistoryItemData[] = [
-    {
-      id: 1,
-      title: "",
-      no: 1,
-      avatarSrc: test_profile_img2,
-      scoreText: "82점",
-      roleText: "프론트개발자",
-      dateText: "2025.12.10",
-      statusText: "진행완료",
-      statusState: "done",
-      resumeLabelIconSrc: ic_task_gray900_18,
-      resumeText: "개발자 준비된 위위입니다.",
-      resumeDate: "2025.12.10",
-      onClickView: () => navigate(`/mock-interview/analysis/${1}`),
-    },
-    {
-      id: 2,
-      title: "",
-      no: 2,
-      avatarSrc: test_profile_img2,
-      scoreText: "82점",
-      roleText: "프론트개발자",
-      dateText: "2025.12.10",
-      statusText: "진행 중",
-      statusState: "doing",
-      resumeLabelIconSrc: ic_task_gray900_18,
-      resumeText: "개발자 준비된 위위입니다.",
-      resumeDate: "2025.12.10",
-      onClickView: () => navigate(`/mock-interview/analysis/${2}`),
-    },
-  ];
 
   return (
     <>
@@ -292,13 +323,18 @@ export default function M_Mypage() {
           </header>
 
           <div className="mock-history__body data-list__body">
-            {HISTORY_ITEMS.map((it) => (
-              <M_MockInterviewHistoryRow
-                key={it.id}
-                item={it}
-                viewIconSrc={ic_arrow_up_right_gray900_20}
-              />
-            ))}
+            {!isLoading && interviewItems.length === 0 && (
+              <div className="empty">최근 진행한 모의면접이 없습니다.</div>
+            )}
+
+            {!isLoading &&
+              interviewItems.map((it) => (
+                <M_MockInterviewHistoryRow
+                  key={it.id}
+                  item={it}
+                  viewIconSrc={ic_arrow_up_right_gray900_20}
+                />
+              ))}
           </div>
         </section>
       </div>

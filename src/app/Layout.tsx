@@ -377,10 +377,10 @@ export default function Layout({
         resetAction,
       }}
     >
-      <div>
+      <div className="app-shell">
         {shouldShowHeader() && getHeader()}
 
-        <main>{children}</main>
+        <main className="app-shell__main">{children}</main>
 
         {shouldShowFooter() && <Footer />}
         {shouldShowBottomNavOnMobile && <BottomNav />}

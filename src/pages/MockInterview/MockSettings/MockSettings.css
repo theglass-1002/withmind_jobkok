@@ -1,9 +1,10 @@
 .mock-settings-page{
     width: 100%;
     display: flex;
-    align-items: flex-start;
+    align-items: stretch;
     background: var(--gray-200, #EBECED);
-    height: 100vh;
+    flex: 1 0 auto;
+    min-height: 100vh;
     justify-content: center;
 }
 .mock-settings-page_container{
@@ -699,6 +700,9 @@ mock-settings--step-2 */
             height: 100%;
         }
 
+        .mock-settings__panel-header{
+            padding: 20px 52px 20px 20px;
+        }
         .mock-settings__section-title{
             font-size: 18px;
         }

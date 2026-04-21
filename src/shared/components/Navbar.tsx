@@ -128,6 +128,8 @@ export default function Navbar({ titleText }: NavbarProps) {
   const [inputValue, setInputValue] = useState("");
   const [inputValueDesktop, setInputValueDesktop] = useState("");
   const [openAutoDesktop, setOpenAutoDesktop] = useState(false);
+  const [activeAutoIdxDesktop, setActiveAutoIdxDesktop] = useState<number>(-1);
+  const [activeAutoIdxMobile, setActiveAutoIdxMobile] = useState<number>(-1);
 
   const [jobTree, setJobTree] = useState<JobNode[]>([]);
   const [popularKeywords, setPopularKeywords] = useState<string[]>([]);
@@ -136,6 +138,8 @@ export default function Navbar({ titleText }: NavbarProps) {
   const mypageRef = useRef<HTMLDivElement | null>(null);
   const searchPanelRef = useRef<HTMLDivElement | null>(null);
   const searchPanelDesktopRef = useRef<HTMLDivElement | null>(null);
+  const autoListDesktopRef = useRef<HTMLDivElement | null>(null);
+  const autoListMobileRef = useRef<HTMLDivElement | null>(null);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -236,6 +240,18 @@ export default function Navbar({ titleText }: NavbarProps) {
     return result.slice(0, 10);
   }, [inputValueDesktop, autoItems]);
 
+  useEffect(() => {
+    setActiveAutoIdxDesktop(-1);
+  }, [inputValueDesktop, openAutoDesktop]);
+
+  useEffect(() => {
+    if (activeAutoIdxDesktop < 0) return;
+    const list = autoListDesktopRef.current;
+    if (!list) return;
+    const active = list.children[activeAutoIdxDesktop] as HTMLElement | undefined;
+    if (active) active.scrollIntoView({ block: "nearest" });
+  }, [activeAutoIdxDesktop]);
+
   const filteredAutoMobile = useMemo(() => {
     const qRaw = (inputValue ?? "").trim();
     const q = normalizeText(qRaw);
@@ -257,6 +273,18 @@ export default function Navbar({ titleText }: NavbarProps) {
 
     return result.slice(0, 10);
   }, [inputValue, autoItems]);
+
+  useEffect(() => {
+    setActiveAutoIdxMobile(-1);
+  }, [inputValue]);
+
+  useEffect(() => {
+    if (activeAutoIdxMobile < 0) return;
+    const list = autoListMobileRef.current;
+    if (!list) return;
+    const active = list.children[activeAutoIdxMobile] as HTMLElement | undefined;
+    if (active) active.scrollIntoView({ block: "nearest" });
+  }, [activeAutoIdxMobile]);
 
   const toggleSearch = () => {
     setSearchOpen((prev) => {
@@ -526,7 +554,7 @@ export default function Navbar({ titleText }: NavbarProps) {
           ) : (
             <Link className="masthead__brand" to="/">
               <img src={Icons.jobkok_logo_gray900} alt="" />
-              <img src={Icons.jobkok_wordmark_gray900} alt="" />
+             
             </Link>
           )}
 
@@ -643,7 +671,38 @@ export default function Navbar({ titleText }: NavbarProps) {
                 if (inputValueDesktop.trim()) setOpenAutoDesktop(true);
               }}
               onKeyDown={(e) => {
-                if (e.key === "Enter") handleSearchDesktop();
+                if (e.key === "ArrowDown") {
+                  e.preventDefault();
+                  if (openAutoDesktop && filteredAutoDesktop.length > 0) {
+                    setActiveAutoIdxDesktop((prev) =>
+                      prev >= filteredAutoDesktop.length - 1 ? 0 : prev + 1
+                    );
+                  }
+                  return;
+                }
+                if (e.key === "ArrowUp") {
+                  e.preventDefault();
+                  if (openAutoDesktop && filteredAutoDesktop.length > 0) {
+                    setActiveAutoIdxDesktop((prev) =>
+                      prev <= 0 ? filteredAutoDesktop.length - 1 : prev - 1
+                    );
+                  }
+                  return;
+                }
+                if (e.key === "Enter") {
+                  if (
+                    openAutoDesktop &&
+                    activeAutoIdxDesktop >= 0 &&
+                    activeAutoIdxDesktop < filteredAutoDesktop.length
+                  ) {
+                    handlePickAutoDesktop(
+                      filteredAutoDesktop[activeAutoIdxDesktop]
+                    );
+                  } else {
+                    handleSearchDesktop();
+                  }
+                  return;
+                }
                 if (e.key === "Escape") setOpenAutoDesktop(false);
               }}
             />
@@ -664,7 +723,10 @@ export default function Navbar({ titleText }: NavbarProps) {
 
           {openAutoDesktop ? (
             <div className="search-results-dropdown">
-              <div className="search-results-dropdown__list">
+              <div
+                className="search-results-dropdown__list"
+                ref={autoListDesktopRef}
+              >
                 {inputValueDesktop.trim() && filteredAutoDesktop.length === 0 && (
                   <span className="search-results-dropdown__item search-results-dropdown__item--disabled">
                     추천 결과가 없습니다.
@@ -674,9 +736,12 @@ export default function Navbar({ titleText }: NavbarProps) {
                 {filteredAutoDesktop.map((item, index) => (
                   <span
                     key={`desktop-auto-${item.kind}-${item.categoryIdx ?? "x"}-${item.jobId ?? "x"}-${item.label}-${index}`}
-                    className="search-results-dropdown__item"
+                    className={`search-results-dropdown__item${
+                      index === activeAutoIdxDesktop ? " is-active" : ""
+                    }`}
                     role="button"
                     tabIndex={0}
+                    onMouseEnter={() => setActiveAutoIdxDesktop(index)}
                     onClick={() => handlePickAutoDesktop(item)}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ") handlePickAutoDesktop(item);
@@ -759,7 +824,38 @@ export default function Navbar({ titleText }: NavbarProps) {
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") handleSearchMobile();
+                  const mobileOpen = !!inputValue.trim();
+                  if (e.key === "ArrowDown") {
+                    e.preventDefault();
+                    if (mobileOpen && filteredAutoMobile.length > 0) {
+                      setActiveAutoIdxMobile((prev) =>
+                        prev >= filteredAutoMobile.length - 1 ? 0 : prev + 1
+                      );
+                    }
+                    return;
+                  }
+                  if (e.key === "ArrowUp") {
+                    e.preventDefault();
+                    if (mobileOpen && filteredAutoMobile.length > 0) {
+                      setActiveAutoIdxMobile((prev) =>
+                        prev <= 0 ? filteredAutoMobile.length - 1 : prev - 1
+                      );
+                    }
+                    return;
+                  }
+                  if (e.key === "Enter") {
+                    if (
+                      mobileOpen &&
+                      activeAutoIdxMobile >= 0 &&
+                      activeAutoIdxMobile < filteredAutoMobile.length
+                    ) {
+                      handlePickAutoMobile(
+                        filteredAutoMobile[activeAutoIdxMobile]
+                      );
+                    } else {
+                      handleSearchMobile();
+                    }
+                  }
                 }}
                 className="panel-search__input"
               />
@@ -776,7 +872,10 @@ export default function Navbar({ titleText }: NavbarProps) {
 
           {inputValue.trim() ? (
             <div className="search-results-dropdown-mobile">
-              <div className="search-results-dropdown__list">
+              <div
+                className="search-results-dropdown__list"
+                ref={autoListMobileRef}
+              >
                 {filteredAutoMobile.length === 0 && (
                   <span className="search-results-dropdown__item search-results-dropdown__item--disabled">
                     추천 결과가 없습니다.
@@ -786,9 +885,12 @@ export default function Navbar({ titleText }: NavbarProps) {
                 {filteredAutoMobile.map((item, index) => (
                   <span
                     key={`mobile-auto-${item.kind}-${item.categoryIdx ?? "x"}-${item.jobId ?? "x"}-${item.label}-${index}`}
-                    className="search-results-dropdown__item"
+                    className={`search-results-dropdown__item${
+                      index === activeAutoIdxMobile ? " is-active" : ""
+                    }`}
                     role="button"
                     tabIndex={0}
+                    onMouseEnter={() => setActiveAutoIdxMobile(index)}
                     onClick={() => handlePickAutoMobile(item)}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ") handlePickAutoMobile(item);

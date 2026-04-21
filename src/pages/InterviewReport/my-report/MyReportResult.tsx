@@ -78,8 +78,13 @@ export default function MyReportResult() {
     return <LoadingOverlay />;
   }
 
-  if (!myReport) {
-    return <div className="mock-interview-summary__empty"></div>;
+  const isEmpty =
+    !myReport || (myReport.summaryCards?.totalCount ?? 0) === 0;
+
+  if (isEmpty) {
+    return (
+      <div className="mock-interview-summary__empty">데이터가 없습니다.</div>
+    );
   }
 
   return (

@@ -1,5 +1,6 @@
 .jobs{
     padding-top: 70px;
+    background: var(--gray-50, #F8F8F9);
 }
 
 .jobs.mobile{
@@ -534,6 +535,7 @@
         display: none;
      }
      .jobs.mobile{
+        padding-top: 64px;
         display: flex;
         flex-direction: column;
      }

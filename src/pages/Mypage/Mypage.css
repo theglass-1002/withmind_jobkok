@@ -1,6 +1,5 @@
 .mypage{
   display: flex;
-  align-items: center;
   margin: auto;
   justify-content: center;
   background: var(--gray-50, #F8F8F9);
@@ -452,6 +451,10 @@ line-height: 20px; /* 125% */
     align-self: stretch;
     background: var(--white-100, #FFF);
     border-radius: 4px;
+}
+
+.mypage__content-main.inquiry-container{
+    min-height: 580px;
 }
 
 

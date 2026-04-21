@@ -130,11 +130,12 @@ export async function fetchInterviewFollowup(
 
 /**
  * 모의면접 리포트 리스트 조회 API
- * GET /api/report/list?page=1&size=10
+ * GET /api/report/list?page=1&size=10&interviewAllYn=Y
  */
 export async function fetchInterviewReportList(params?: {
   page?: number;
   size?: number;
+  interviewAllYn?: "Y" | "N";
 }): Promise<InterviewReportListResponse> {
   const res = await instance.get<InterviewReportListResponse>(
     "/api/report/list",
@@ -142,6 +143,9 @@ export async function fetchInterviewReportList(params?: {
       params: {
         page: params?.page ?? 1,
         size: params?.size ?? 10,
+        ...(params?.interviewAllYn
+          ? { interviewAllYn: params.interviewAllYn }
+          : {}),
       },
       headers: {
         accept: "application/json",

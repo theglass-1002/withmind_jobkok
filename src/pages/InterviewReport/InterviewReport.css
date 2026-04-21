@@ -133,6 +133,16 @@ background: var(--white-100, #FFF);
 
   }
 
+  .mock-interview-summary__empty{
+    width: 100%;
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gray-500, #8B9199);
+    font-size: 16px;
+  }
+
   /* MY 리포트 공백 상태: 기존 mock-interview-empty 스타일 재사용 */
 .mock-interview-empty,
 .my-report-empty {
@@ -856,6 +866,13 @@ align-items:center;gap:20px;}
   overflow: hidden;
 }
 
+.mock-history__row--mobile { display: none; }
+
+@media (max-width: 760px) {
+  .mock-history__row--desktop { display: none; }
+  .mock-history__row--mobile { display: flex; }
+}
+
 /* 상단 라인(헤더와 열 줄맞춤) */
 .mock-history__row-line {}
 
@@ -1374,6 +1391,10 @@ align-items:center;gap:20px;}
       }
       .mock-interview-summary__header .sort-control__label{
         font-size: 14px;
+      }
+
+      .mock-history__head{
+        display: none;
       }
 
     }

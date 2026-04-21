@@ -24,7 +24,7 @@ export default function Footer() {
             <Link className="masthead__brand" to="/" aria-label="jobkok 홈">
          
               <img src={Icons.jobkok_logo_gray400} alt="jobkok" />
-              <img src={Icons.jobkok_wordmark_gray400} alt="jobkok" /> 
+             
             </Link>
           </div>
 
@@ -79,7 +79,7 @@ export default function Footer() {
       <footer className="site-footer mobile_version">
         <Link className="masthead__brand" to="/" aria-label="jobkok 홈">
           <img src={Icons.jobkok_logo_gray400} alt="jobkok" />
-          <img src={Icons.jobkok_wordmark_gray400} alt="jobkok" />
+         
         </Link>
 
         <div className="wrap" aria-label="푸터">

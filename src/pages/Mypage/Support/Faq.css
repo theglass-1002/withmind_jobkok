@@ -346,6 +346,7 @@
 
         .faq-container .my-page_faq_wrap{
             width: 100%;
+            height: 100%;
             padding: 0px;
             gap: 0px;
         }

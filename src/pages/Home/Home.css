@@ -144,7 +144,8 @@ box-shadow: 0 0 20px 0 rgba(42, 45, 47, 0.04);
   cursor: pointer;
 }
 
-.search-results-dropdown__item:hover{
+.search-results-dropdown__item:hover,
+.search-results-dropdown__item.is-active{
   background: var(--gray-50, #F8F8F9);
 }
 
