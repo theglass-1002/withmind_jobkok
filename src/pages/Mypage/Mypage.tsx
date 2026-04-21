@@ -19,7 +19,11 @@ import { logout } from "@/api/auth/auth.api";
 import { fetchResumeList } from "@/api/resume/resume.api";
 import type { ResumeItem } from "@/api/resume/resume.types";
 import { formatDate } from "@/shared/utils/util";
-import { fetchInterviewReportList } from "@/api/interview/interview.api";
+import {
+  fetchEnvTestSpeech,
+  fetchInterviewReportList,
+  restartInterview,
+} from "@/api/interview/interview.api";
 import type { InterviewReportItem } from "@/api/interview/interview.types";
 
 type InterviewCardItem = InterviewReportItem & { avatarSrc: string };
@@ -326,9 +330,69 @@ export default function MyPage() {
                     </div>
                     <button
                       className="btn_w_full default_btn_white"
-                      onClick={() =>
-                        navigate(`/mock-interview/analysis/${item.qzGroup}`)
-                      }
+                      onClick={async () => {
+                        if (!isDone) {
+                          try {
+                            const [restartRes, envSpeech] = await Promise.all([
+                              restartInterview({
+                                qzGroup: Number(item.qzGroup),
+                              }),
+                              fetchEnvTestSpeech(),
+                            ]);
+                            console.log("이어서 진행하기 클릭 - 넘길 값:", {
+                              resumeIdx: item.resumeIdx,
+                              resumeTitle: item.resumeTitle,
+                              jobPostTitle: item.jobPostTitle,
+                              job: item.job,
+                              qzGroup: item.qzGroup,
+                              qzList: restartRes.qzList,
+                              reStartNum: restartRes.reStartNum,
+                              envSpeech,
+                            });
+
+                            const questions = restartRes.qzList.map((q) => ({
+                              order: q.num,
+                              text: q.qzTts,
+                              type: "ETC",
+                              difficulty: "MEDIUM",
+                              related_items: [],
+                              answer_hint: "",
+                            }));
+
+                            const envTestPath =
+                              typeof window !== "undefined" &&
+                              window.innerWidth <= 760
+                                ? "/mock-interview/m-environment-test"
+                                : "/mock-interview/environment-test";
+
+                            navigate(envTestPath, {
+                              state: {
+                                envSpeech,
+                                interviewRes: {
+                                  success: true,
+                                  data: { questions },
+                                },
+                                jobDetail: {
+                                  job: { name: item.jobPostTitle ?? "" },
+                                },
+                                resumeDetail: {
+                                  title: item.resumeTitle,
+                                  resumeIdx: item.resumeIdx,
+                                },
+                                desiredJob: item.job,
+                                jobPostingUrl: "",
+                                interviewGroupId: Number(item.qzGroup),
+                                reStartNum: restartRes.reStartNum,
+                                isResume: true,
+                              },
+                            });
+                          } catch (err) {
+                            console.error("❌ 이어서 진행하기 실패:", err);
+                          }
+                          return;
+                        }
+                        navigate(`/mock-interview/analysis/${item.qzGroup}`);
+                      }}
                     >
                       {isDone ? (
                         "결과 리포트 보기"

@@ -18,6 +18,10 @@ import type {
   InterviewQuestionsV2Response,
   SaveUserInputQuestionsResponse,
   SaveUserInputQuestionsRequest,
+  SaveFollowOnQueRequest,
+  SaveFollowOnQueResponse,
+  RestartInterviewRequest,
+  RestartInterviewResponse,
   CompleteInterviewResponse,
   CompleteInterviewRequest,
 } from "./interview.types";
@@ -217,6 +221,49 @@ export async function saveUserInputQuestions(
     }
   );
 
+  return res.data;
+}
+
+/**
+ * 꼬리질문 저장 API
+ * POST /api/interview/saveFollowOnQue
+ */
+export async function saveFollowOnQue(
+  payload: SaveFollowOnQueRequest
+): Promise<SaveFollowOnQueResponse> {
+  const res = await instance.post<SaveFollowOnQueResponse>(
+    "/api/interview/saveFollowOnQue",
+    payload,
+    {
+      headers: {
+        accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  console.log("✅ saveFollowOnQue 응답:", res.data);
+
+  return res.data;
+}
+
+/**
+ * 면접 재시작 API
+ * POST /api/interview/reStart
+ */
+export async function restartInterview(
+  payload: RestartInterviewRequest
+): Promise<RestartInterviewResponse> {
+  const res = await instance.post<RestartInterviewResponse>(
+    "/api/interview/reStart",
+    payload,
+    {
+      headers: {
+        accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    }
+  );
   return res.data;
 }
 

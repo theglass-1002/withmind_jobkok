@@ -12,6 +12,10 @@ export default function InterviewReportHistoryRow({ item, viewIconSrc }: Intervi
   const buttonLabel =
     item.statusState === "doing" ? "이어서 진행하기" : "분석결과보기";
 
+  const handleClickView = () => {
+    item.onClickView?.();
+  };
+
   return (
     <>
       {/* Desktop: 표 레이아웃 */}
@@ -32,7 +36,7 @@ export default function InterviewReportHistoryRow({ item, viewIconSrc }: Intervi
             {item.statusText}
           </span>
           <span className="mock-history__cell mock-history__cell--action data-list__col u-col--w210 ">
-            <button className="default_btn_white" onClick={item.onClickView}>
+            <button className="default_btn_white" onClick={handleClickView}>
               <img src={viewIconSrc} alt="" />
               {buttonLabel}
             </button>
@@ -74,7 +78,7 @@ export default function InterviewReportHistoryRow({ item, viewIconSrc }: Intervi
           </div>
         </div>
         <div className="mock-history__btn_wrap">
-          <button className="btn_w_full default_btn_white" onClick={item.onClickView}>
+          <button className="btn_w_full default_btn_white" onClick={handleClickView}>
             <img src={viewIconSrc} alt="" />
             {buttonLabel}
           </button>

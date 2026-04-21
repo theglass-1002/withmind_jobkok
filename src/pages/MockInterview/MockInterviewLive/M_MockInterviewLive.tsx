@@ -13,6 +13,7 @@ import { uploadJobInterviewVideo } from "@/api/fileUpload.api";
 import {
   completeInterview,
   fetchInterviewFollowup,
+  saveFollowOnQue,
   saveInterviewAnalysis,
 } from "@/api/interview/interview.api";
 
@@ -74,7 +75,21 @@ export default function M_MockInterviewLive() {
   const [showLivesPanel, setShowLivesPanel] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  const [qIndex, setQIndex] = useState(0);
+  const [qIndex, setQIndex] = useState<number>(() => {
+    const r = state?.reStartNum;
+    if (typeof r !== "number" || r <= 0) return 0;
+    const qs = state?.interviewRes?.data?.questions as
+      | { order?: number }[]
+      | undefined;
+    if (Array.isArray(qs)) {
+      const sorted = [...qs].sort(
+        (a, b) => (a.order ?? 0) - (b.order ?? 0)
+      );
+      const idx = sorted.findIndex((q) => q.order === r);
+      if (idx >= 0) return idx;
+    }
+    return r - 1;
+  });
 
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -498,6 +513,22 @@ export default function M_MockInterviewLive() {
       );
 
       setFollowUpMap((prev) => ({ ...prev, [cur.order]: followupLive }));
+
+      try {
+        const saveRes = await saveFollowOnQue({
+          qzGroup: Number(state?.interviewGroupId),
+          num: followupOrder,
+          que: followupQuestionText,
+        });
+        console.log("✅ [M_uploadRecordedFile] 꼬리질문 저장 성공:", saveRes);
+        console.log("✅ [M_uploadRecordedFile] 저장된 꼬리질문:", {
+          qzGroup: Number(state?.interviewGroupId),
+          num: followupOrder,
+          que: followupQuestionText,
+        });
+      } catch (err) {
+        console.error("[M_uploadRecordedFile] saveFollowOnQue 실패:", err);
+      }
 
       return { uploadResult, followupRes };
     } finally {

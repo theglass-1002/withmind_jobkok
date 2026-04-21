@@ -11,7 +11,11 @@ import ic_selected_file_purple_20 from "@/assets/icons/size20/ic_selected_file_p
 import ic_keyboard_arrow_left_gray700_20 from "@/assets/icons/size20/ic_keyboard_arrow_left_gray700_20.png";
 import ic_keyboard_arrow_right_gray700_20 from "@/assets/icons/size20/ic_keyboard_arrow_right_gray700_20.png";
 
-import { fetchInterviewReportList } from "@/api/interview/interview.api";
+import {
+  fetchEnvTestSpeech,
+  fetchInterviewReportList,
+  restartInterview,
+} from "@/api/interview/interview.api";
 import type { InterviewReportItem } from "@/api/interview/interview.types";
 
 const DEFAULT_FILTERS: UiFilterOption[] = [
@@ -122,7 +126,64 @@ export default function InterviewReportHistory({
         resumeLabelIconSrc: ic_selected_file_purple_20,
         resumeText: item.resumeTitle || "",
         resumeDate: formatDate(item.resumeDate),
-        onClickView: () => navigate(`/mock-interview/analysis/${item.qzGroup}`),
+        onClickView: async () => {
+          if (item.interviewAllYn === "N") {
+            try {
+              const [restartRes, envSpeech] = await Promise.all([
+                restartInterview({ qzGroup: item.qzGroup }),
+                fetchEnvTestSpeech(),
+              ]);
+              console.log("이어서 진행하기 클릭 - 넘길 값:", {
+                resumeIdx: item.resumeIdx,
+                resumeTitle: item.resumeTitle,
+                jobPostTitle: item.jobPostTitle,
+                job: item.job,
+                qzGroup: item.qzGroup,
+                qzList: restartRes.qzList,
+                reStartNum: restartRes.reStartNum,
+                envSpeech,
+              });
+
+              const questions = restartRes.qzList.map((q) => ({
+                order: q.num,
+                text: q.qzTts,
+                type: "ETC",
+                difficulty: "MEDIUM",
+                related_items: [],
+                answer_hint: "",
+              }));
+
+              const envTestPath =
+                typeof window !== "undefined" && window.innerWidth <= 760
+                  ? "/mock-interview/m-environment-test"
+                  : "/mock-interview/environment-test";
+
+              navigate(envTestPath, {
+                state: {
+                  envSpeech,
+                  interviewRes: {
+                    success: true,
+                    data: { questions },
+                  },
+                  jobDetail: { job: { name: item.jobPostTitle ?? "" } },
+                  resumeDetail: {
+                    title: item.resumeTitle,
+                    resumeIdx: item.resumeIdx,
+                  },
+                  desiredJob: item.job,
+                  jobPostingUrl: "",
+                  interviewGroupId: item.qzGroup,
+                  reStartNum: restartRes.reStartNum,
+                  isResume: true,
+                },
+              });
+            } catch (err) {
+              console.error("❌ 이어서 진행하기 실패:", err);
+            }
+            return;
+          }
+          navigate(`/mock-interview/analysis/${item.qzGroup}`);
+        },
       })),
     [list, page, navigate, avatarMap]
   );

@@ -9,6 +9,11 @@ interface M_InterviewReportHistoryRowProps {
 export default function M_InterviewReportHistoryRow({ item, viewIconSrc }: M_InterviewReportHistoryRowProps) {
   const statusCls =
     item.statusState === "done" ? " is-done" : item.statusState === "doing" ? " is-doing" : "";
+
+  const handleClickView = () => {
+    item.onClickView?.();
+  };
+
     return (
       <div className="mock-history__row">
         <div className="mock-history__avatar">
@@ -32,7 +37,7 @@ export default function M_InterviewReportHistoryRow({ item, viewIconSrc }: M_Int
           </div>
         </div>
         <div className="mock-history__btn_wrap">
-        <button className="btn_w_full default_btn_white" onClick={item.onClickView}>
+        <button className="btn_w_full default_btn_white" onClick={handleClickView}>
             <img src={viewIconSrc} alt="" />
             {item.statusState === "doing" ? "이어서 진행하기" : "분석결과보기"}
           </button>

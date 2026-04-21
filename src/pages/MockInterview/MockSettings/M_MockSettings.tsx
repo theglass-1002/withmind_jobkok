@@ -228,6 +228,7 @@ export default function M_MockSettings() {
       const createGroupPayload = {
         resumeIdx: resumeDetail.resumeIdx,
         job: desiredJob.trim(),
+        ...(trimmedUrl ? { jobPostLink: trimmedUrl } : {}),
       };
       console.log("[API] createQzGroup request:", createGroupPayload);
 
@@ -345,6 +346,8 @@ export default function M_MockSettings() {
         queList: finalQuestions.map((q, idx) => ({
           num: q.order ?? idx + 1,
           que: q.text,
+          questionCode: q.question_code,
+          type: q.type,
         })),
       };
 

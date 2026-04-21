@@ -195,6 +195,7 @@ export default function MockSettings() {
       const createGroupPayload = {
         resumeIdx: resumeDetail.resumeIdx,
         job: desiredJob.trim(),
+        ...(trimmedUrl ? { jobPostLink: trimmedUrl } : {}),
       };
       console.log("[API] createQzGroup request:", createGroupPayload);
 
@@ -215,7 +216,7 @@ export default function MockSettings() {
         qz_group: interviewGroupId,
       };
 
-      console.log("[API] fetchInterviewQuestionsV2 request payload:", payload);
+      console.log("면접질문생성", payload);
 
       const allCustomFilled =
         questions.length > 0 &&
@@ -312,6 +313,8 @@ export default function MockSettings() {
         queList: finalQuestions.map((q, idx) => ({
           num: q.order ?? idx + 1,
           que: q.text,
+          questionCode: q.question_code,
+          type: q.type,
         })),
       };
 

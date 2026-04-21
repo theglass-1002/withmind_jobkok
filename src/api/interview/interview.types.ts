@@ -176,6 +176,7 @@ export type InterviewReportItem = {
   totalScore: number;
   resumeTitle: string;
   resumeIdx: number;
+  jobPostTitle?: string;
 };
 
 export type InterviewReportListResponse = {
@@ -188,6 +189,7 @@ export type InterviewReportListResponse = {
 export type CreateQzGroupRequest = {
   resumeIdx: number;
   job: string;
+  jobPostLink?: string;
 };
 
 export type CreateQzGroupResponse = {
@@ -218,6 +220,8 @@ export type SaveInterviewAnalysisResponse = {
 export type SaveUserInputQuestionItem = {
   num: number;
   que: string;
+  questionCode?: string;
+  type?: string;
 };
 
 export type SaveUserInputQuestionsRequest = {
@@ -231,6 +235,33 @@ export type SaveUserInputQuestionsResponse = {
   savedCount: number;
 };
 
+export type SaveFollowOnQueRequest = {
+  qzGroup: number;
+  num: number;
+  que: string;
+};
+
+export type SaveFollowOnQueResponse = {
+  status: number;
+  msg: string;
+};
+
+export type RestartInterviewRequest = {
+  qzGroup: number;
+};
+
+export type RestartInterviewQuestionItem = {
+  num: number;
+  qzTts: string;
+  tailQueYn: "Y" | "N";
+};
+
+export type RestartInterviewResponse = {
+  qzList: RestartInterviewQuestionItem[];
+  qzGroup: number;
+  reStartNum: number;
+  status: number;
+};
 export type CompleteInterviewRequest = {
   qz_group: number;
 };
