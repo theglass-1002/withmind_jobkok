@@ -67,7 +67,6 @@ import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
 import { fetchMyInfo, logout } from "@/api/auth/auth.api";
 import { formatPhone } from "@/shared/utils/validators";
 
-
 type FormState = {
   title: string;
   basic: BasicInfo;
@@ -215,6 +214,18 @@ const calcSectionStatus = (
 
 export default function ResumeCreate() {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkViewport = () => {
+      if (window.innerWidth <= 760) {
+        navigate("/resumes/m-create", { replace: true });
+      }
+    };
+    checkViewport();
+    window.addEventListener("resize", checkViewport);
+    return () => window.removeEventListener("resize", checkViewport);
+  }, [navigate]);
+
   const [form, setForm] = useState<FormState>(initial);
   const [errors, setErrors] = useState<{
     basic: BasicErrors;
@@ -258,51 +269,46 @@ export default function ResumeCreate() {
   const [sidebarStatus, setSidebarStatus] =
     useState<Partial<Record<SectionId, Status>>>({});
 
-    useEffect(() => {
-      const initMyInfo = async () => {
-        try {
-          const res = await fetchMyInfo();
-          console.log("[ResumeCreate] fetchMyInfo:", res);
-    
-          const u = res.user;
-    
-          const birth =
-            typeof u.birthdate === "string" && u.birthdate.length === 8
-              ? `${u.birthdate.slice(0, 4)}-${u.birthdate.slice(4, 6)}-${u.birthdate.slice(6, 8)}`
-              : "";
-    
-          const gender =
-            u.gender === "M"
-              ? "male"
-              : u.gender === "W"
-              ? "female"
-              : null;
+  useEffect(() => {
+    const initMyInfo = async () => {
+      try {
+        const res = await fetchMyInfo();
+        console.log("[ResumeCreate] fetchMyInfo:", res);
 
-         const phone = formatPhone(u.phone??"");
-    
-          setForm((prev) => ({
-            ...prev,
-            basic: {
-              ...prev.basic,
-              name: u.userName ?? "",
-              email: u.userId ?? "",
-              phone:phone,
-              birth,
-              gender,
-            },
-          }));
-        } catch (e: any) {
-          console.error("[ResumeCreate] fetchMyInfo error:", e);
-          if (e?.code === 999) {
-            logout();
-            navigate("/login");
-          }
+        const u = res.user;
+
+        const birth =
+          typeof u.birthdate === "string" && u.birthdate.length === 8
+            ? `${u.birthdate.slice(0, 4)}-${u.birthdate.slice(4, 6)}-${u.birthdate.slice(6, 8)}`
+            : "";
+
+        const gender =
+          u.gender === "M" ? "male" : u.gender === "W" ? "female" : null;
+
+        const phone = formatPhone(u.phone ?? "");
+
+        setForm((prev) => ({
+          ...prev,
+          basic: {
+            ...prev.basic,
+            name: u.userName ?? "",
+            email: u.userId ?? "",
+            phone: phone,
+            birth,
+            gender,
+          },
+        }));
+      } catch (e: any) {
+        console.error("[ResumeCreate] fetchMyInfo error:", e);
+        if (e?.code === 999) {
+          logout();
+          navigate("/login");
         }
-      };
-    
-      initMyInfo();
-    }, [navigate]);
-    
+      }
+    };
+
+    initMyInfo();
+  }, [navigate]);
 
   useEffect(() => {
     setSidebarStatus(calcSectionStatus(form));
@@ -799,10 +805,14 @@ export default function ResumeCreate() {
     setForm((prev) => ({ ...prev, selfIntro: content }));
 
   const resetBasicErrors = () => setErrors((prev) => ({ ...prev, basic: {} }));
-  const resetEducationErrors = () => setErrors((prev) => ({ ...prev, education: [] }));
-  const resetActivityErrors = () => setErrors((prev) => ({ ...prev, activities: [] }));
-  const resetAwardCertErrors = () => setErrors((prev) => ({ ...prev, awardCerts: [] }));
-  const resetPortfolioErrors = () => setErrors((prev) => ({ ...prev, portfolios: [] }));
+  const resetEducationErrors = () =>
+    setErrors((prev) => ({ ...prev, education: [] }));
+  const resetActivityErrors = () =>
+    setErrors((prev) => ({ ...prev, activities: [] }));
+  const resetAwardCertErrors = () =>
+    setErrors((prev) => ({ ...prev, awardCerts: [] }));
+  const resetPortfolioErrors = () =>
+    setErrors((prev) => ({ ...prev, portfolios: [] }));
 
   const handleFileSubmit = async (): Promise<ProfilePhotoFile | null> => {
     try {
@@ -945,7 +955,8 @@ export default function ResumeCreate() {
       !form.isFreshGraduate &&
       nextErr.careers &&
       nextErr.careers.some((ce) => Object.keys(ce).length > 0);
-    const hasEduError = eduErrs && eduErrs.some((ee) => Object.keys(ee).length > 0);
+    const hasEduError =
+      eduErrs && eduErrs.some((ee) => Object.keys(ee).length > 0);
     const hasDesiredRolesError = !!nextErr.desiredRoles;
     const hasActivityError =
       form.activities.length > 0 &&
@@ -1026,8 +1037,12 @@ export default function ResumeCreate() {
               activities: form.activities.map((act) => ({
                 category: act.activityType ?? "교내활동",
                 activityTitle: act.activityName,
-                startYm: act.startDate ? normalizeYm(act.startDate) : "1999-09-09",
-                endYm: act.endDate ? normalizeYm(act.endDate) : "1999-09-09",
+                startYm: act.startDate
+                  ? normalizeYm(act.startDate)
+                  : "1999-09-09",
+                endYm: act.endDate
+                  ? normalizeYm(act.endDate)
+                  : "1999-09-09",
                 description: act.summary,
                 linkUrl: "https://github.com/user",
               })),
@@ -1040,7 +1055,9 @@ export default function ResumeCreate() {
                 category: mapAwardsKindToCategoryLabel(item.kind),
                 name: item.title,
                 issuer: item.issuer ?? "",
-                acquiredYm: item.dateValue ? normalizeYm(item.dateValue)!.replace("-", "") : "",
+                acquiredYm: item.dateValue
+                  ? normalizeYm(item.dateValue)!.replace("-", "")
+                  : "",
                 licenseNo: item.score ?? "",
                 note: "",
               })),
@@ -1059,7 +1076,8 @@ export default function ResumeCreate() {
                     const u = uploadedResult.uploadedFile;
                     return {
                       itemType: "FILE",
-                      title: p.title || u.originalName || `포트폴리오 문서 ${idx + 1}`,
+                      title:
+                        p.title || u.originalName || `포트폴리오 문서 ${idx + 1}`,
                       docName: u.originalName,
                       url: null,
                       fileRef: u.filePath,
@@ -1185,8 +1203,12 @@ export default function ResumeCreate() {
               activities: form.activities.map((act) => ({
                 category: act.activityType ?? "교내활동",
                 activityTitle: act.activityName,
-                startYm: act.startDate ? normalizeYm(act.startDate) : "1999-09-09",
-                endYm: act.endDate ? normalizeYm(act.endDate) : "1999-09-09",
+                startYm: act.startDate
+                  ? normalizeYm(act.startDate)
+                  : "1999-09-09",
+                endYm: act.endDate
+                  ? normalizeYm(act.endDate)
+                  : "1999-09-09",
                 description: act.summary,
                 linkUrl: "https://github.com/user",
               })),
@@ -1199,7 +1221,9 @@ export default function ResumeCreate() {
                 category: mapAwardsKindToCategoryLabel(item.kind),
                 name: item.title,
                 issuer: item.issuer ?? "",
-                acquiredYm: item.dateValue ? normalizeYm(item.dateValue)!.replace("-", "") : "",
+                acquiredYm: item.dateValue
+                  ? normalizeYm(item.dateValue)!.replace("-", "")
+                  : "",
                 licenseNo: item.score ?? "",
                 note: "",
               })),
@@ -1218,7 +1242,8 @@ export default function ResumeCreate() {
                     const u = uploadedResult.uploadedFile;
                     return {
                       itemType: "FILE",
-                      title: p.title || u.originalName || `포트폴리오 문서 ${idx + 1}`,
+                      title:
+                        p.title || u.originalName || `포트폴리오 문서 ${idx + 1}`,
                       docName: u.originalName,
                       url: null,
                       fileRef: u.filePath,

@@ -174,6 +174,10 @@ export default function JobDetail() {
   };
 
   const handleMockInterviewClick = () => {
+    const cleanUrl = REAL_BASE_URL + window.location.pathname;
+    console.log(cleanUrl);
+    sessionStorage.setItem("mockInterviewJobUrl", cleanUrl);
+
     if (resumeExists === true) {
       navigate(`/mock-interview/guide`);
       return;
@@ -545,6 +549,21 @@ export default function JobDetail() {
         hasAiMatch={hasAiMatch}
         matchPercent={job?.matchPercent}
         recommendReason={job?.recommendReason}
+        jobUrl={job?.url}
+        companyLogoUrl={job?.companyLogoUrl}
+        title={title}
+        companyName={companyName}
+        categoryName={job?.categoryName}
+        careerLabel={careerLabel}
+        educationLabel={educationLabel}
+        locationLabel={locationLabel}
+        employmentLabel={employmentLabel}
+        deadlineText={deadlineText}
+        mainTasksLines={mainTasksLines}
+        requirementsLines={requirementsLines}
+        preferredPointsLines={preferredPointsLines}
+        benefitsLines={benefitsLines}
+        hireRoundsLines={hireRoundsLines}
       />
 
       <Modal

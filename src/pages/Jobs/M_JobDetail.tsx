@@ -32,6 +32,7 @@ import Modal from "@/shared/components/modal/Modal";
 import "./JobDetail.css";
 import { Storage } from "@/shared/utils/StorageManager";
 import { fetchResumeCheck } from "@/api/resume/resume.api";
+import { REAL_BASE_URL } from "@/config/config";
 import type { JobItem } from "@/api/job/job.types";
 
 type M_JobDetailProps = {
@@ -39,6 +40,21 @@ type M_JobDetailProps = {
   hasAiMatch?: boolean;
   matchPercent?: number;
   recommendReason?: string;
+  jobUrl?: string;
+  companyLogoUrl?: string;
+  title?: string;
+  companyName?: string;
+  categoryName?: string;
+  careerLabel?: string;
+  educationLabel?: string;
+  locationLabel?: string;
+  employmentLabel?: string;
+  deadlineText?: string;
+  mainTasksLines?: string[];
+  requirementsLines?: string[];
+  preferredPointsLines?: string[];
+  benefitsLines?: string[];
+  hireRoundsLines?: string[];
 };
 
 
@@ -50,7 +66,23 @@ export default function M_JobDetail({
   hasAiMatch = false,
   matchPercent,
   recommendReason,
+  jobUrl,
+  companyLogoUrl,
+  title,
+  companyName,
+  categoryName,
+  careerLabel,
+  educationLabel,
+  locationLabel,
+  employmentLabel,
+  deadlineText,
+  mainTasksLines = [],
+  requirementsLines = [],
+  preferredPointsLines = [],
+  benefitsLines = [],
+  hireRoundsLines = [],
 }: M_JobDetailProps) {
+  const companyLogo = companyLogoUrl || withmind_logo80;
   const navigate = useNavigate();
   const userName = Storage.getUserName() || "사용자";
   const [bookMark, setBookMark] = useState(false);
@@ -101,7 +133,10 @@ export default function M_JobDetail({
   };
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href)
+    const cleanUrl = REAL_BASE_URL + window.location.pathname;
+    console.log(cleanUrl);
+
+    navigator.clipboard.writeText(cleanUrl)
       .then(() => {
         toast.success("링크가 복사되었습니다.");
       })
@@ -110,7 +145,20 @@ export default function M_JobDetail({
       });
   };
 
+  const handleApplyClick = () => {
+    if (!jobUrl) {
+      toast.error("지원 링크가 없습니다.");
+      return;
+    }
+
+    window.open(jobUrl, "_blank", "noopener,noreferrer");
+  };
+
   const handleMockInterviewClick = async () => {
+    const cleanUrl = REAL_BASE_URL + window.location.pathname;
+    console.log(cleanUrl);
+    sessionStorage.setItem("mockInterviewJobUrl", cleanUrl);
+
     try {
       const resumeCheck = await fetchResumeCheck();
       if (resumeCheck.exists === true) {
@@ -185,10 +233,18 @@ export default function M_JobDetail({
             <div className="job-detail__company">
               <div className="job-detail__company-left">
                 <div className="job-detail__company-logo">
-                  <img src={withmind_logo80} alt="" /></div>
+                  <img
+                    className="job-detail__company-logo_img"
+                    src={companyLogo}
+                    alt={companyName || ""}
+                  />
+                </div>
                 <div className="job-detail__company-desc">
-                  <span className="job-detail__title">프로젝트 기획자</span>
-                  <span className="job-detail__company-meta">위드마인드ㆍ서울</span>
+                  <span className="job-detail__title">{title || "채용 공고"}</span>
+                  <span className="job-detail__company-meta">
+                    {companyName}
+                    {locationLabel && `ㆍ${locationLabel}`}
+                  </span>
                 </div>
               </div>
         
@@ -225,21 +281,21 @@ export default function M_JobDetail({
               <span className="job-detail__aside-icon"><img src={icon_role_gray} alt="" /></span>
               <span className="job-detail__aside-label">직무</span>
             </div>
-            <span className="job-detail__aside-value">프론트엔드 개발</span>
+            <span className="job-detail__aside-value">{categoryName || "-"}</span>
           </div>
           <div className="job-detail__aside-item job-detail__aside-item--career">
             <div className="job-detail__aside-term">
               <span className="job-detail__aside-icon"><img src={icon_career_gray} alt="" /></span>
               <span className="job-detail__aside-label">경력</span>
             </div>
-            <span className="job-detail__aside-value">신입 이상</span>
+            <span className="job-detail__aside-value">{careerLabel || "경력 무관"}</span>
           </div>
           <div className="job-detail__aside-item job-detail__aside-item--education">
             <div className="job-detail__aside-term">
               <span className="job-detail__aside-icon"><img src={icon_education_gray} alt="" /></span>
               <span className="job-detail__aside-label">학력</span>
             </div>
-            <span className="job-detail__aside-value">대졸 이상</span>
+            <span className="job-detail__aside-value">{educationLabel || "학력 무관"}</span>
           </div>
 
           <div className="job-detail__aside-item job-detail__aside-item--location">
@@ -247,7 +303,7 @@ export default function M_JobDetail({
               <span className="job-detail__aside-icon"><img src={icon_location_gray} alt="" /></span>
               <span className="job-detail__aside-label">근무 지역</span>
             </div>
-            <span className="job-detail__aside-value">서울 마포구</span>
+            <span className="job-detail__aside-value">{locationLabel || "-"}</span>
           </div>
 
           <div className="job-detail__aside-item job-detail__aside-item--employment">
@@ -255,17 +311,14 @@ export default function M_JobDetail({
               <span className="job-detail__aside-icon"><img src={icon_employment_gray} alt="" /></span>
               <span className="job-detail__aside-label">고용 형태</span>
             </div>
-            <span className="job-detail__aside-value">정규직 · 계약직</span>
+            <span className="job-detail__aside-value">{employmentLabel || "-"}</span>
           </div>
           <div className="job-detail__aside-item job-detail__aside-item--deadline">
             <div className="job-detail__aside-term">
               <span className="job-detail__aside-icon"><img src={icon_deadline_gray} alt="" /></span>
               <span className="job-detail__aside-label">마감일</span>
             </div>
-            <span className="job-detail__aside-value">
-              2025.08.31(일)
-              <span className="job-detail__aside-badge job-detail__aside-badge--due">D-20</span>
-            </span>
+            <span className="job-detail__aside-value">{deadlineText}</span>
           </div>
                </div>
             <div className="job-detail__resume">
@@ -296,32 +349,70 @@ export default function M_JobDetail({
             />
             </div>
           <div id="section-description" className="job-detail__body">
-            <div className="job-detail__section job-detail__section--responsibilities">
-              <span className="job-detail__section-title">주요 업무</span>
-              <ul className="job-detail__list">
-                <li className="job-detail__list-item">• 면접왕/인터뷰 마스터 등 자사의 다양한 웹 서비스 개발</li>
-                <li className="job-detail__list-item">• 최신 프론트엔드 기술을 통한 창의적 개발 제안 및 실현</li>
-                <li className="job-detail__list-item">• React, Vue, JSP 등의 환경에서 프론트엔드 업무 담당</li>
-              </ul>
-            </div>
+            {mainTasksLines.length > 0 && (
+              <div className="job-detail__section job-detail__section--responsibilities">
+                <span className="job-detail__section-title">주요 업무</span>
+                <ul className="job-detail__list">
+                  {mainTasksLines.map((line, idx) => (
+                    <li key={idx} className="job-detail__list-item">
+                      {line}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
-            <div className="job-detail__section job-detail__section--requirements">
-              <span className="job-detail__section-title">자격 요건</span>
-              <ul className="job-detail__list">
-                <li className="job-detail__list-item">• 면접왕/인터뷰 마스터 등 자사의 다양한 웹 서비스 개발</li>
-                <li className="job-detail__list-item">• 최신 프론트엔드 기술을 통한 창의적 개발 제안 및 실현</li>
-                <li className="job-detail__list-item">• React, Vue, JSP 등의 환경에서 프론트엔드 업무 담당</li>
-              </ul>
-            </div>
+            {requirementsLines.length > 0 && (
+              <div className="job-detail__section job-detail__section--requirements">
+                <span className="job-detail__section-title">자격 요건</span>
+                <ul className="job-detail__list">
+                  {requirementsLines.map((line, idx) => (
+                    <li key={idx} className="job-detail__list-item">
+                      {line}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
-            <div className="job-detail__section job-detail__section--preferred">
-              <span className="job-detail__section-title">우대 사항</span>
-              <ul className="job-detail__list">
-                <li className="job-detail__list-item">• 면접왕/인터뷰 마스터 등 자사의 다양한 웹 서비스 개발</li>
-                <li className="job-detail__list-item">• 최신 프론트엔드 기술을 통한 창의적 개발 제안 및 실현</li>
-                <li className="job-detail__list-item">• React, Vue, JSP 등의 환경에서 프론트엔드 업무 담당</li>
-              </ul>
-            </div>
+            {preferredPointsLines.length > 0 && (
+              <div className="job-detail__section job-detail__section--preferred">
+                <span className="job-detail__section-title">우대 사항</span>
+                <ul className="job-detail__list">
+                  {preferredPointsLines.map((line, idx) => (
+                    <li key={idx} className="job-detail__list-item">
+                      {line}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {benefitsLines.length > 0 && (
+              <div className="job-detail__section job-detail__section--benefits">
+                <span className="job-detail__section-title">복지 및 혜택</span>
+                <ul className="job-detail__list">
+                  {benefitsLines.map((line, idx) => (
+                    <li key={idx} className="job-detail__list-item">
+                      {line}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {hireRoundsLines.length > 0 && (
+              <div className="job-detail__section job-detail__section--benefits">
+                <span className="job-detail__section-title">채용 전형</span>
+                <ul className="job-detail__list">
+                  {hireRoundsLines.map((line, idx) => (
+                    <li key={idx} className="job-detail__list-item">
+                      {line}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
 
           <div className="job-detail__divider"></div>
@@ -377,9 +468,13 @@ export default function M_JobDetail({
                     <img src={bookMark ? bookmark_active_purple : blank_bookmark_black} alt="" />
                   </span>
                 </span>
-                <span className="default_btn_black btn_w_full">
-                지원하기
-             </span>
+                <span
+                  className="default_btn_black btn_w_full"
+                  onClick={handleApplyClick}
+                  style={{ cursor: "pointer" }}
+                >
+                  지원하기
+                </span>
               </div>
          </section>
       </article>

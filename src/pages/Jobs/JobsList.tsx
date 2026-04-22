@@ -67,9 +67,9 @@ export default function JobsList() {
   }, [location.state]);
 
   useEffect(() => {
-    console.log(loggedIn);
+
     if (!loggedIn) {
-      console.log("[JobsList] 비로그인 상태 - resumeCheck API 호출 안함");
+  
       setResumeExists(false);
       return;
     }
@@ -151,7 +151,10 @@ export default function JobsList() {
         </div>
 
         {activeTab === "all" ? (
-          <AllJobPostingSection />
+          <AllJobPostingSection
+            loggedIn={loggedIn}
+            resumeExists={resumeExists}
+          />
         ) : (
           <SavedJobPostingSection />
         )}
@@ -182,7 +185,10 @@ export default function JobsList() {
           </div>
         )}
         {activeTab === "all" ? (
-          <M_AllJobPostingSection />
+          <M_AllJobPostingSection
+            loggedIn={loggedIn}
+            resumeExists={resumeExists}
+          />
         ) : (
           <M_SavedJobPostingSection />
         )}

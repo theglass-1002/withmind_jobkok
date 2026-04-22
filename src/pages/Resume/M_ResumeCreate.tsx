@@ -113,6 +113,17 @@ const initial: FormState = {
 
 export default function M_ResumeCreate() {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkViewport = () => {
+      if (window.innerWidth > 760) {
+        navigate("/resumes/create", { replace: true });
+      }
+    };
+    checkViewport();
+    window.addEventListener("resize", checkViewport);
+    return () => window.removeEventListener("resize", checkViewport);
+  }, [navigate]);
   const [isLoading, setIsLoading] = useState(false);
   const [isRoleLoading, setIsRoleLoading] = useState(false);
   const [isHardSkillLoading, setIsHardSkillLoading] = useState(false);
@@ -1121,6 +1132,6 @@ export default function M_ResumeCreate() {
         onClose={handleCancelDefaultResume}
       />
     </div>
-    
+
   );
 }

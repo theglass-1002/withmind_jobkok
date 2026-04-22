@@ -73,7 +73,9 @@ export default function M_MockSettings() {
   const [activeStep, setActiveStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [desiredJob, setDesiredJob] = useState("");
-  const [jobPostingUrl, setJobPostingUrl] = useState("");
+  const [jobPostingUrl, setJobPostingUrl] = useState(
+    () => sessionStorage.getItem("mockInterviewJobUrl") ?? ""
+  );
   const [selectedResume, setSelectedResume] = useState("");
 
   const [showConfirm, setShowConfirm] = useState(false);

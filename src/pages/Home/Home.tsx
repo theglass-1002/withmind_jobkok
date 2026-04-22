@@ -155,7 +155,9 @@ export default function Home() {
 
   const [inputValue, setInputValue] = useState("");
   const [openAuto, setOpenAuto] = useState(false);
+  const [activeAutoIdx, setActiveAutoIdx] = useState<number>(-1);
   const searchRef = useRef<HTMLDivElement>(null);
+  const autoListRef = useRef<HTMLDivElement>(null);
 
   const [jobTree, setJobTree] = useState<JobNode[]>([]);
   const [loading, setLoading] = useState(false);
@@ -252,11 +254,21 @@ export default function Home() {
       return selfMatched || parentMatched;
     });
 
-    console.log("[Home] query:", qRaw);
-    console.log("[Home] filteredAuto:", result);
 
     return result.slice(0, 10);
   }, [inputValue, autoItems]);
+
+  useEffect(() => {
+    setActiveAutoIdx(-1);
+  }, [inputValue, openAuto]);
+
+  useEffect(() => {
+    if (activeAutoIdx < 0) return;
+    const list = autoListRef.current;
+    if (!list) return;
+    const active = list.children[activeAutoIdx] as HTMLElement | undefined;
+    if (active) active.scrollIntoView({ block: "nearest" });
+  }, [activeAutoIdx]);
 
   const handleSearch = () => {
     const keyword = inputValue.trim();
@@ -284,7 +296,11 @@ export default function Home() {
     if (item.kind === "category" && item.categoryIdx != null) {
       console.log("[Home] 자동완성 카테고리 선택:", item);
       navigate("/jobs", {
-        state: { activeTab: "all", categoryIdx: item.categoryIdx },
+        state: {
+          activeTab: "all",
+          keyword: item.label,
+          categoryIdx: item.categoryIdx,
+        },
       });
       return;
     }
@@ -294,6 +310,7 @@ export default function Home() {
       navigate("/jobs", {
         state: {
           activeTab: "all",
+          keyword: item.label,
           jobId: item.jobIdx,
           categoryIdx: item.categoryIdx,
         },
@@ -423,7 +440,36 @@ export default function Home() {
                 setOpenAuto(!!v.trim());
               }}
               onKeyDown={(e) => {
-                if (e.key === "Enter") handleSearch();
+                if (e.key === "ArrowDown") {
+                  e.preventDefault();
+                  if (openAuto && filteredAuto.length > 0) {
+                    setActiveAutoIdx((prev) =>
+                      prev >= filteredAuto.length - 1 ? 0 : prev + 1
+                    );
+                  }
+                  return;
+                }
+                if (e.key === "ArrowUp") {
+                  e.preventDefault();
+                  if (openAuto && filteredAuto.length > 0) {
+                    setActiveAutoIdx((prev) =>
+                      prev <= 0 ? filteredAuto.length - 1 : prev - 1
+                    );
+                  }
+                  return;
+                }
+                if (e.key === "Enter") {
+                  if (
+                    openAuto &&
+                    activeAutoIdx >= 0 &&
+                    activeAutoIdx < filteredAuto.length
+                  ) {
+                    handlePickAuto(filteredAuto[activeAutoIdx]);
+                  } else {
+                    handleSearch();
+                  }
+                  return;
+                }
                 if (e.key === "Escape") setOpenAuto(false);
               }}
             />
@@ -441,7 +487,10 @@ export default function Home() {
 
             {openAuto && (
               <div className="search-results-dropdown">
-                <div className="search-results-dropdown__list">
+                <div
+                  className="search-results-dropdown__list"
+                  ref={autoListRef}
+                >
                   {inputValue.trim() && filteredAuto.length === 0 && (
                     <span className="search-results-dropdown__item search-results-dropdown__item--disabled">
                       추천 결과가 없습니다.
@@ -451,9 +500,12 @@ export default function Home() {
                   {filteredAuto.map((item, index) => (
                     <span
                       key={`auto-${item.kind}-${item.categoryIdx ?? "x"}-${item.jobIdx ?? "x"}-${item.label}-${index}`}
-                      className="search-results-dropdown__item"
+                      className={`search-results-dropdown__item${
+                        index === activeAutoIdx ? " is-active" : ""
+                      }`}
                       role="button"
                       tabIndex={0}
+                      onMouseEnter={() => setActiveAutoIdx(index)}
                       onClick={() => handlePickAuto(item)}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" || e.key === " ") handlePickAuto(item);

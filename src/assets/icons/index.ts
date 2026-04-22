@@ -57,6 +57,7 @@ import ic_visibility_off700_20 from "@/assets/icons/size20/ic_visibility_off700_
 import ic_arrow_up_right_gray900_20 from "@/assets/icons/size20/ic_arrow_up_right_gray900_20.svg";
 
 import ic_edit_white_20 from "@/assets/icons/size20/ic_edit_white_20.svg";
+import ic_download_gray900_20 from "@/assets/icons/size20/ic_download_gray900_20.svg";
 import ic_check_circle_green_20 from "@/assets/icons/size20/ic_check_circle_green_20.svg";
 import ic_arrow_drop_down_gray900_24 from "@/assets/icons/size24/ic_arrow_drop_down_gray900_24.svg";
 
@@ -178,5 +179,6 @@ export const Icons = {
     jobkorea_provider_logo18,
     saramin_provider_logo18,
     wanted_provider_logo18,
-    ic_check_circle_green_20
+    ic_check_circle_green_20,
+    ic_download_gray900_20
 };

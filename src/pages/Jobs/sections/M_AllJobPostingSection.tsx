@@ -10,6 +10,7 @@ import ic_close_gray500_20 from "@/assets/icons/size20/ic_close_gray500_20.png";
 import arrow_left from "@/assets/icons/keyboard_arrow_left.png";
 import arrow_right from "@/assets/icons/keyboard_arrow_right.png";
 
+import Modal from "@/shared/components/modal/Modal";
 import JobFilterPanel, { AppliedFilters } from "@/shared/components/mobile/JobFilterPanel";
 import SortDropdown from "@/shared/components/sort-dropdown/SortDropdown";
 import Tooltip from "@/shared/components/tooltip/Tooltip";
@@ -48,22 +49,52 @@ type JobsLocationState = {
   children?: any[];
 };
 
-export default function M_AllJobPostingSection() {
+type M_AllJobPostingSectionProps = {
+  loggedIn?: boolean;
+  resumeExists?: boolean;
+};
+
+const M_JOBS_FILTER_STORAGE_KEY = "mAllJobPostingFilters";
+
+const loadMSavedFilters = () => {
+  try {
+    const raw = sessionStorage.getItem(M_JOBS_FILTER_STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+};
+
+export default function M_AllJobPostingSection({
+  loggedIn = false,
+  resumeExists = false,
+}: M_AllJobPostingSectionProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const jobPostingRef = useRef<HTMLDivElement | null>(null);
 
-  const [page, setPage] = useState(1);
-  const [sort, setSort] = useState("최신순");
-  const [openFilter, setOpenFilter] = useState<FilterKey | null>(null);
-  const [resumeReco, setResumeReco] = useState(false);
+  const savedFilters = useMemo(() => loadMSavedFilters(), []);
 
-  const [searchKeyword, setSearchKeyword] = useState("");
-  const [appliedSearchKeyword, setAppliedSearchKeyword] = useState("");
+  const [page, setPage] = useState<number>(savedFilters?.page ?? 1);
+  const [sort, setSort] = useState<string>(savedFilters?.sort ?? "최신순");
+  const [openFilter, setOpenFilter] = useState<FilterKey | null>(null);
+  const [resumeReco, setResumeReco] = useState<boolean>(
+    savedFilters?.resumeReco ?? false
+  );
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [resumeModalOpen, setResumeModalOpen] = useState(false);
+
+  const [searchKeyword, setSearchKeyword] = useState<string>(
+    savedFilters?.searchKeyword ?? ""
+  );
+  const [appliedSearchKeyword, setAppliedSearchKeyword] = useState<string>(
+    savedFilters?.appliedSearchKeyword ?? ""
+  );
 
   const sortOptions = ["최신순", "인기순", "마감임박순"];
 
-  const [chips, setChips] = useState<Chip[]>([]);
+  const [chips, setChips] = useState<Chip[]>(savedFilters?.chips ?? []);
 
   const [jobTree, setJobTree] = useState<JobNode[]>([]);
   const [jobLoading, setJobLoading] = useState(false);
@@ -76,13 +107,15 @@ export default function M_AllJobPostingSection() {
   const [initialized, setInitialized] = useState(false);
   const [jobsFetched, setJobsFetched] = useState(false);
 
-  const [appliedFilters, setAppliedFilters] = useState<AppliedFilters>({
-    roles: [],
-    career: { min: 0, max: 10 },
-    education: [],
-    location: [],
-    employment: [],
-  });
+  const [appliedFilters, setAppliedFilters] = useState<AppliedFilters>(
+    savedFilters?.appliedFilters ?? {
+      roles: [],
+      career: { min: 0, max: 10 },
+      education: [],
+      location: [],
+      employment: [],
+    }
+  );
 
   const eduLabelMap: Record<string, string> = {
     ANY: "학력 무관",
@@ -120,6 +153,34 @@ export default function M_AllJobPostingSection() {
     }),
     []
   );
+
+  useEffect(() => {
+    const snapshot = {
+      page,
+      sort,
+      resumeReco,
+      searchKeyword,
+      appliedSearchKeyword,
+      chips,
+      appliedFilters,
+    };
+    try {
+      sessionStorage.setItem(
+        M_JOBS_FILTER_STORAGE_KEY,
+        JSON.stringify(snapshot)
+      );
+    } catch {
+      /* noop */
+    }
+  }, [
+    page,
+    sort,
+    resumeReco,
+    searchKeyword,
+    appliedSearchKeyword,
+    chips,
+    appliedFilters,
+  ]);
 
   useEffect(() => {
     const state = (location.state as JobsLocationState) || null;
@@ -455,6 +516,16 @@ export default function M_AllJobPostingSection() {
   };
 
   const handleResumeRecoToggle = (checked: boolean) => {
+    if (checked) {
+      if (!loggedIn) {
+        setLoginModalOpen(true);
+        return;
+      }
+      if (!resumeExists) {
+        setResumeModalOpen(true);
+        return;
+      }
+    }
     setResumeReco(checked);
     setPage(1);
   };
@@ -695,6 +766,26 @@ export default function M_AllJobPostingSection() {
           )}
         </div>
       </div>
+
+      <Modal
+        open={loginModalOpen}
+        title="로그인 시 이용가능한 기능입니다."
+        confirmText="확인"
+        showCancel={false}
+        confirmClassName="btn_w_full default_btn_black"
+        onConfirm={() => setLoginModalOpen(false)}
+        onClose={() => setLoginModalOpen(false)}
+      />
+
+      <Modal
+        open={resumeModalOpen}
+        title="기본이력서 생성 시 이용가능한 기능입니다."
+        confirmText="확인"
+        showCancel={false}
+        confirmClassName="btn_w_full default_btn_black"
+        onConfirm={() => setResumeModalOpen(false)}
+        onClose={() => setResumeModalOpen(false)}
+      />
     </>
   );
 }

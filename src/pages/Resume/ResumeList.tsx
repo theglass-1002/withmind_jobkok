@@ -1,6 +1,8 @@
 // src/pages/Resume/ResumeList.tsx
 import React, { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 import "./ResumeList.css";
 
 import UiFilter, { UiFilterOption } from "@/shared/components/ui-filter/UiFilter";
@@ -35,6 +37,7 @@ import {
   ResumeDetailResponse,
   CreateResumeRequest,
 } from "@/api/resume/resume.types";
+import { Icons } from "@/assets/icons";
 
 type ResumeTabKey = "all" | "done" | "doing";
 
@@ -271,6 +274,246 @@ export default function ResumeList() {
     }
   };
 
+  const handleDownloadPdfFromList = async (resumeIdx: number) => {
+    const iframe = document.createElement("iframe");
+    iframe.style.position = "fixed";
+    iframe.style.left = "-99999px";
+    iframe.style.top = "0";
+    iframe.style.width = "1400px";
+    iframe.style.height = "2000px";
+    iframe.style.border = "0";
+    iframe.style.opacity = "0";
+    iframe.style.pointerEvents = "none";
+    iframe.src = `/resumes/${resumeIdx}`;
+
+    try {
+      toast.info("PDF 생성 중...");
+
+      document.body.appendChild(iframe);
+
+      await new Promise<void>((resolve) => {
+        iframe.addEventListener("load", () => resolve(), { once: true });
+      });
+
+      const iframeDoc = iframe.contentDocument;
+      if (!iframeDoc) throw new Error("iframe 문서 접근 실패");
+
+      const waitForDetailPage = async (): Promise<HTMLElement> => {
+        const maxWaitMs = 15000;
+        const intervalMs = 200;
+        const start = Date.now();
+
+        while (Date.now() - start < maxWaitMs) {
+          const el = iframeDoc.querySelector(
+            "div.resume-page--detail:not(.mobile)"
+          ) as HTMLElement | null;
+
+          const basic = el?.querySelector(".resume-basic");
+          if (el && basic) {
+            return el;
+          }
+
+          await new Promise((r) => setTimeout(r, intervalMs));
+        }
+
+        throw new Error("이력서 영역 렌더링 대기 시간 초과");
+      };
+
+      const sourceDetailPage = await waitForDetailPage();
+
+      const images = Array.from(sourceDetailPage.querySelectorAll("img"));
+      await Promise.all(
+        images.map((img) =>
+          img.complete
+            ? Promise.resolve()
+            : new Promise<void>((resolve) => {
+                img.onload = () => resolve();
+                img.onerror = () => resolve();
+              })
+        )
+      );
+
+      const clonedDetailPage = sourceDetailPage.cloneNode(true) as HTMLElement;
+
+      const tempRoot = document.createElement("div");
+      tempRoot.setAttribute("id", "resume-pdf-temp-root");
+      tempRoot.style.position = "absolute";
+      tempRoot.style.left = "-99999px";
+      tempRoot.style.top = "0";
+      tempRoot.style.width = "1200px";
+      tempRoot.style.minWidth = "1200px";
+      tempRoot.style.background = "#ffffff";
+      tempRoot.style.zIndex = "-1";
+      tempRoot.style.pointerEvents = "none";
+      tempRoot.style.visibility = "visible";
+      tempRoot.style.overflow = "visible";
+      tempRoot.style.display = "block";
+
+      clonedDetailPage.style.display = "block";
+      clonedDetailPage.style.width = "1200px";
+      clonedDetailPage.style.minWidth = "1200px";
+      clonedDetailPage.style.background = "#ffffff";
+      clonedDetailPage.style.overflow = "visible";
+      clonedDetailPage.style.visibility = "visible";
+      clonedDetailPage.style.height = "auto";
+      clonedDetailPage.style.maxHeight = "none";
+
+      clonedDetailPage
+        .querySelectorAll(
+          ".resume-sidebar, .resume-actions-bar, .resume-create-page__aside, .resume-controls-wrapper, .default_tabs, .is-sticky"
+        )
+        .forEach((el) => el.remove());
+
+      const clonedContainer = clonedDetailPage.querySelector(
+        ".resume-page__container"
+      ) as HTMLElement | null;
+
+      if (clonedContainer) {
+        clonedContainer.style.display = "block";
+        clonedContainer.style.width = "100%";
+        clonedContainer.style.margin = "0";
+        clonedContainer.style.padding = "28px 80px";
+        clonedContainer.style.boxSizing = "border-box";
+        clonedContainer.style.overflow = "visible";
+        clonedContainer.style.height = "auto";
+        clonedContainer.style.maxHeight = "none";
+      }
+
+      const clonedMain = clonedDetailPage.querySelector(
+        ".resume-page__main"
+      ) as HTMLElement | null;
+
+      if (clonedMain) {
+        clonedMain.style.width = "100%";
+        clonedMain.style.margin = "0";
+        clonedMain.style.padding = "0";
+        clonedMain.style.background = "#ffffff";
+        clonedMain.style.boxSizing = "border-box";
+        clonedMain.style.overflow = "visible";
+        clonedMain.style.height = "auto";
+        clonedMain.style.maxHeight = "none";
+      }
+
+      const clonedTitle = clonedDetailPage.querySelector(
+        ".resume-detail__title"
+      ) as HTMLElement | null;
+
+      if (clonedTitle) clonedTitle.style.display = "none";
+
+      const clonedContent = clonedDetailPage.querySelector(
+        ".resume-detail__content"
+      ) as HTMLElement | null;
+
+      if (clonedContent) {
+        clonedContent.style.display = "flex";
+        clonedContent.style.flexDirection = "column";
+        clonedContent.style.alignItems = "flex-start";
+        clonedContent.style.width = "100%";
+        clonedContent.style.padding = "0";
+        clonedContent.style.margin = "0";
+        clonedContent.style.border = "none";
+        clonedContent.style.borderRadius = "0";
+        clonedContent.style.background = "#ffffff";
+        clonedContent.style.gap = "0";
+        clonedContent.style.overflow = "visible";
+        clonedContent.style.height = "auto";
+        clonedContent.style.maxHeight = "none";
+      }
+
+      const clonedBasic = clonedDetailPage.querySelector(
+        ".resume-basic"
+      ) as HTMLElement | null;
+
+      if (clonedBasic) {
+        clonedBasic.style.display = "flex";
+        clonedBasic.style.flexDirection = "row";
+        clonedBasic.style.alignItems = "flex-start";
+        clonedBasic.style.padding = "40px 0";
+        clonedBasic.style.background = "#ffffff";
+        clonedBasic.style.borderBottom = "1px solid #E0E2E4";
+        clonedBasic.style.overflow = "visible";
+        clonedBasic.style.height = "auto";
+        clonedBasic.style.maxHeight = "none";
+      }
+
+      tempRoot.appendChild(clonedDetailPage);
+      document.body.appendChild(tempRoot);
+
+      await new Promise((resolve) =>
+        requestAnimationFrame(() => resolve(null))
+      );
+      await new Promise((resolve) =>
+        requestAnimationFrame(() => resolve(null))
+      );
+
+      const target = clonedContainer ?? clonedDetailPage;
+      const width = target.scrollWidth || target.offsetWidth;
+      const height = target.scrollHeight || target.offsetHeight;
+
+      if (!width || !height) {
+        throw new Error(`캡처 대상 크기가 0입니다: ${width} x ${height}`);
+      }
+
+      const canvas = await html2canvas(target, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
+        backgroundColor: "#ffffff",
+        width,
+        height,
+        windowWidth: width,
+        windowHeight: height,
+        scrollX: 0,
+        scrollY: 0,
+      });
+
+      if (tempRoot.parentNode) tempRoot.parentNode.removeChild(tempRoot);
+
+      if (canvas.width === 0 || canvas.height === 0) {
+        throw new Error("Canvas 크기가 0입니다");
+      }
+
+      const imgData = canvas.toDataURL("image/jpeg", 0.98);
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+
+      let position = 0;
+      let heightLeft = imgHeight - pdfHeight;
+
+      pdf.addImage(imgData, "JPEG", 0, position, pdfWidth, imgHeight);
+
+      while (heightLeft > 0) {
+        pdf.addPage();
+        position -= pdfHeight;
+        pdf.addImage(imgData, "JPEG", 0, position, pdfWidth, imgHeight);
+        heightLeft -= pdfHeight;
+      }
+
+      const resumeItem = resumeList.find((r) => r.resumeIdx === resumeIdx);
+      const resumeName = resumeItem?.title ?? "resume";
+
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, "0");
+      const dd = String(now.getDate()).padStart(2, "0");
+      const hh = String(now.getHours()).padStart(2, "0");
+      const mi = String(now.getMinutes()).padStart(2, "0");
+      const ss = String(now.getSeconds()).padStart(2, "0");
+      const dateTime = `${yyyy}${mm}${dd}_${hh}${mi}${ss}`;
+
+      pdf.save(`jobkok_resume_${resumeName}_${dateTime}.pdf`);
+      toast.success("PDF 다운로드 완료!");
+    } catch (error) {
+      console.error("❌ PDF 생성 실패:", error);
+      toast.error("PDF 생성 중 오류가 발생했습니다.");
+    } finally {
+      if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
+    }
+  };
+
   const handleDeleteResume = async (resumeIdx: number) => {
     try {
       const ok = window.confirm("이력서를 삭제할까요?");
@@ -317,32 +560,17 @@ export default function ResumeList() {
       setOpenMenuId(null);
 
       const detail = await fetchResumeDetail(resumeIdx);
-      console.log("📌 사본 생성용 resume detail", detail);
+   
 
       const payload = mapDetailToCreatePayload(detail);
-      console.log("📌 사본 생성 payload", payload);
+    
 
       const result = await createResume(payload);
-      console.log("✅ 이력서 사본 생성 성공:", result);
+   
 
       toast.success("이력서 사본이 생성되었습니다.");
 
       await loadResumeList(page, activeTab);
-
-      if (typeof result === "number") {
-        navigate(`/resumes/${result}`);
-        return;
-      }
-
-      if ((result as any)?.resumeIdx) {
-        navigate(`/resumes/${(result as any).resumeIdx}`);
-        return;
-      }
-
-      if ((result as any)?.data?.resumeIdx) {
-        navigate(`/resumes/${(result as any).data.resumeIdx}`);
-        return;
-      }
     } catch (e: any) {
       console.error("❌ 이력서 사본 생성 실패:", e);
 
@@ -370,8 +598,9 @@ export default function ResumeList() {
     }
 
     if (value === "pdf") {
-      console.log("PDF 저장", resumeIdx);
+      console.log("pdf 로 저장클릭");
       setOpenMenuId(null);
+      await handleDownloadPdfFromList(resumeIdx);
       return;
     }
 
@@ -548,6 +777,11 @@ export default function ResumeList() {
                                       label: "사본 만들기",
                                       value: "copy",
                                       icon: icon_copy,
+                                    },
+                                    {
+                                      label: "PDF로 저장",
+                                      value: "pdf",
+                                      icon: Icons.ic_download_gray900_20,
                                     },
                                     {
                                       label: "삭제",

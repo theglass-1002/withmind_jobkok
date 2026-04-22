@@ -16,6 +16,7 @@ import row_black from "@/assets/icons/row_black.png";
 import arrow_left from "@/assets/icons/keyboard_arrow_left.png";
 import arrow_right from "@/assets/icons/keyboard_arrow_right.png";
 
+import Modal from "@/shared/components/modal/Modal";
 import ModalJobRolePicker from "@/shared/components/job-role-picker/ModalJobRolePicker";
 import ModalCareerRangePicker from "@/shared/components/career-range-picker/ModalCareerRangePicker";
 import ModalEducationPicker from "@/shared/components/education-picker/ModalEducationPicker";
@@ -84,38 +85,73 @@ type JobsLocationState = {
   children?: any[];
 };
 
-export default function AllJobPostingSection() {
+const JOBS_FILTER_STORAGE_KEY = "allJobPostingFilters";
+
+const loadSavedFilters = () => {
+  try {
+    const raw = sessionStorage.getItem(JOBS_FILTER_STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+};
+
+type AllJobPostingSectionProps = {
+  loggedIn?: boolean;
+  resumeExists?: boolean;
+};
+
+export default function AllJobPostingSection({
+  loggedIn = false,
+  resumeExists = false,
+}: AllJobPostingSectionProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const jobPostingRef = useRef<HTMLDivElement | null>(null);
 
-  const [page, setPage] = useState(1);
-  const [resumeReco, setResumeReco] = useState(false);
+  const savedFilters = useMemo(() => loadSavedFilters(), []);
+
+  const [page, setPage] = useState<number>(savedFilters?.page ?? 1);
+  const [resumeReco, setResumeReco] = useState<boolean>(
+    savedFilters?.resumeReco ?? false
+  );
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [resumeModalOpen, setResumeModalOpen] = useState(false);
 
   const [openFilter, setOpenFilter] = useState<FilterKey | null>(null);
-  const [sort, setSort] = useState("최신순");
-  const [sizeSort, setSizeSort] = useState("15개씩");
-  const [view, setView] = useState(0);
+  const [sort, setSort] = useState<string>(savedFilters?.sort ?? "최신순");
+  const [sizeSort, setSizeSort] = useState<string>(
+    savedFilters?.sizeSort ?? "15개씩"
+  );
+  const [view, setView] = useState<number>(savedFilters?.view ?? 0);
 
-  const [searchKeyword, setSearchKeyword] = useState("");
-  const [appliedSearchKeyword, setAppliedSearchKeyword] = useState("");
+  const [searchKeyword, setSearchKeyword] = useState<string>(
+    savedFilters?.searchKeyword ?? ""
+  );
+  const [appliedSearchKeyword, setAppliedSearchKeyword] = useState<string>(
+    savedFilters?.appliedSearchKeyword ?? ""
+  );
 
   const sortOptions = ["최신순", "인기순", "마감임박순"];
   const sizeSortOptions = ["15개씩", "30개씩", "45개씩"];
 
-  const [chips, setChips] = useState<Chip[]>([]);
+  const [chips, setChips] = useState<Chip[]>(savedFilters?.chips ?? []);
 
-  const [roleSelected, setRoleSelected] = useState<RoleSelectedItem[]>([]);
-  const [careerRange, setCareerRange] = useState<{ min: number; max: number }>({
-    min: 0,
-    max: 10,
-  });
-  const [educationSelected, setEducationSelected] = useState<string[]>([]);
+  const [roleSelected, setRoleSelected] = useState<RoleSelectedItem[]>(
+    savedFilters?.roleSelected ?? []
+  );
+  const [careerRange, setCareerRange] = useState<{ min: number; max: number }>(
+    savedFilters?.careerRange ?? { min: 0, max: 10 }
+  );
+  const [educationSelected, setEducationSelected] = useState<string[]>(
+    savedFilters?.educationSelected ?? []
+  );
   const [locationSelected, setLocationSelected] = useState<LocationSelectedItem[]>(
-    []
+    savedFilters?.locationSelected ?? []
   );
   const [employmentSelected, setEmploymentSelected] = useState<EmpOptionKey[]>(
-    []
+    savedFilters?.employmentSelected ?? []
   );
 
   const [jobTree, setJobTree] = useState<JobNode[]>([]);
@@ -131,6 +167,46 @@ export default function AllJobPostingSection() {
 
   const [initialized, setInitialized] = useState(false);
   const [jobsFetched, setJobsFetched] = useState(false);
+
+  useEffect(() => {
+    const snapshot = {
+      page,
+      resumeReco,
+      sort,
+      sizeSort,
+      view,
+      searchKeyword,
+      appliedSearchKeyword,
+      chips,
+      roleSelected,
+      careerRange,
+      educationSelected,
+      locationSelected,
+      employmentSelected,
+    };
+    try {
+      sessionStorage.setItem(
+        JOBS_FILTER_STORAGE_KEY,
+        JSON.stringify(snapshot)
+      );
+    } catch {
+      /* noop */
+    }
+  }, [
+    page,
+    resumeReco,
+    sort,
+    sizeSort,
+    view,
+    searchKeyword,
+    appliedSearchKeyword,
+    chips,
+    roleSelected,
+    careerRange,
+    educationSelected,
+    locationSelected,
+    employmentSelected,
+  ]);
 
   useEffect(() => {
     const state = (location.state as JobsLocationState) || null;
@@ -152,7 +228,7 @@ export default function AllJobPostingSection() {
         setJobError(null);
 
         const tree = await fetchJobTree();
-        console.log("직군직무 불러오기", tree);
+      
         setJobTree(tree);
         setInitialized(true);
       } catch (e: any) {
@@ -529,6 +605,16 @@ export default function AllJobPostingSection() {
   };
 
   const handleResumeRecoToggle = (checked: boolean) => {
+    if (checked) {
+      if (!loggedIn) {
+        setLoginModalOpen(true);
+        return;
+      }
+      if (!resumeExists) {
+        setResumeModalOpen(true);
+        return;
+      }
+    }
     setResumeReco(checked);
     setPage(1);
   };
@@ -900,6 +986,26 @@ export default function AllJobPostingSection() {
           )}
         </div>
       </div>
+
+      <Modal
+        open={loginModalOpen}
+        title="로그인 시 이용가능한 기능입니다."
+        confirmText="확인"
+        showCancel={false}
+        confirmClassName="btn_w_full default_btn_black"
+        onConfirm={() => setLoginModalOpen(false)}
+        onClose={() => setLoginModalOpen(false)}
+      />
+
+      <Modal
+        open={resumeModalOpen}
+        title="기본이력서 생성 시 이용가능한 기능입니다."
+        confirmText="확인"
+        showCancel={false}
+        confirmClassName="btn_w_full default_btn_black"
+        onConfirm={() => setResumeModalOpen(false)}
+        onClose={() => setResumeModalOpen(false)}
+      />
     </>
   );
 }

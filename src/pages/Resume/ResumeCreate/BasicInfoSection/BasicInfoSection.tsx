@@ -71,6 +71,7 @@ export default function BasicInfoSection({
   const [photoFilename, setPhotoFilename] = useState<string | undefined>();
   const [photoErrState, setPhotoErrState] = useState<PhotoErrorState>("none");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const photoModalRef = useRef<HTMLDivElement | null>(null);
 
   const openPhotoModal = () => {
     setPhotoErrState("none");
@@ -144,6 +145,22 @@ export default function BasicInfoSection({
       document.removeEventListener("touchstart", onDocClick, true);
     };
   }, [openBirth]);
+
+  useEffect(() => {
+    if (!showPhotoModal) return;
+    const onDocClick = (e: MouseEvent | TouchEvent) => {
+      const t = e.target as Node;
+      if (photoModalRef.current && !photoModalRef.current.contains(t)) {
+        closePhotoModal();
+      }
+    };
+    document.addEventListener("mousedown", onDocClick, true);
+    document.addEventListener("touchstart", onDocClick, true);
+    return () => {
+      document.removeEventListener("mousedown", onDocClick, true);
+      document.removeEventListener("touchstart", onDocClick, true);
+    };
+  }, [showPhotoModal]);
 
   const hasPhoto = !!(photoUrl || photoFile);
 
@@ -332,11 +349,9 @@ export default function BasicInfoSection({
 
             {showPhotoModal && (
               <div
+                ref={photoModalRef}
                 className="photo-modal__overlay"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (e.target === e.currentTarget) closePhotoModal();
-                }}
+                onClick={(e) => e.stopPropagation()}
               >
                 <PhotoModal
                   hasFile={!!photoFile}

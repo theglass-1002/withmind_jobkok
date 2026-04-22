@@ -232,8 +232,10 @@ export default function MockInterviewLive() {
 
   const [phase, setPhase] = useState<Phase>("thinking");
   const [qIndex, setQIndex] = useState<number>(() => {
-    const r = state?.reStartNum;
-    if (typeof r !== "number" || r <= 0) return 0;
+    const raw = state?.reStartNum;
+    const r = typeof raw === "string" ? Number(raw) : raw;
+    console.log("[MockInterviewLive] reStartNum raw/parsed:", raw, r);
+    if (typeof r !== "number" || !Number.isFinite(r) || r <= 0) return 0;
     const qs = state?.interviewRes?.data?.questions as
       | { order?: number }[]
       | undefined;
@@ -242,7 +244,14 @@ export default function MockInterviewLive() {
         (a, b) => (a.order ?? 0) - (b.order ?? 0)
       );
       const idx = sorted.findIndex((q) => q.order === r);
+      console.log(
+        "[MockInterviewLive] reStart findIndex:",
+        idx,
+        "of",
+        sorted.length
+      );
       if (idx >= 0) return idx;
+      if (r > sorted.length) return sorted.length - 1;
     }
     return r - 1;
   });
