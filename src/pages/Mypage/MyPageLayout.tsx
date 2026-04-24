@@ -7,18 +7,14 @@ import M_MyPageMain from "./mobile/M_MyPageMain";
 
 import { fetchMyInfo, logout } from "@/api/auth/auth.api";
 import { MyInfo } from "@/api/auth/auth.types";
-import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
 
 export default function MyPageLayout() {
   const navigate = useNavigate();
 
   const [myInfo, setMyInfo] = useState<MyInfo | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const loadMyInfo = async () => {
-      setIsLoading(true);
-
       try {
         const res = await fetchMyInfo();
         console.log(res);
@@ -31,8 +27,6 @@ export default function MyPageLayout() {
           logout();
           navigate("/login");
         }
-      } finally {
-        setIsLoading(false);
       }
     };
 
@@ -41,8 +35,6 @@ export default function MyPageLayout() {
 
   return (
     <>
-      {isLoading && <LoadingOverlay />}
-
       <main className="mypage">
         <div className="container mypage__container">
           <header className="mypage__header">

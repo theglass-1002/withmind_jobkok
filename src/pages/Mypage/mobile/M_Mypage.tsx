@@ -10,7 +10,6 @@ import ic_arrow_up_right_gray900_20 from "@/assets/icons/size20/ic_arrow_up_righ
 import ic_task_gray900_18 from "@/assets/icons/size18/ic_task_gray900_18.png";
 import test_profile_img2 from "@/assets/testImg/test_profile_img.jpg";
 
-import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
 import { fetchJobList } from "@/api/job/job.api";
 import type { JobItem } from "@/api/job/job.types";
 import { fetchResumeList } from "@/api/resume/resume.api";
@@ -34,7 +33,7 @@ export default function M_Mypage() {
     M_InterviewReportHistoryItemData[]
   >([]);
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isAllFailed, setIsAllFailed] = useState(false);
 
   useEffect(() => {
@@ -199,8 +198,6 @@ export default function M_Mypage() {
 
   return (
     <>
-      {isLoading && <LoadingOverlay />}
-
       <div className="mypage_main no-bg-flag mobile">
         {isAllFailed && (
           <div className="mypage__error-banner">
@@ -218,21 +215,39 @@ export default function M_Mypage() {
           </header>
 
           <ul className="job-list saved job-posting__list--grid">
-            {!isLoading && visibleSavedJobs.length === 0 && (
-              <li className="empty">저장한 공고가 없습니다.</li>
-            )}
-
-            {!isLoading &&
-              visibleSavedJobs.map((job) => (
-                <MypageJobCard
-                  key={job.jobIdx}
-                  job={job}
-                  appliedSuccessMessage="지원 정보가 반영되었습니다."
-                  showAppliedSection={false}
-                  onUnfavorite={handleUnfavorite}
-                  onFavorite={handleFavorite}
-                />
-              ))}
+            {isLoading
+              ? Array.from({ length: 3 }).map((_, i) => (
+                  <li key={`m-skel-saved-${i}`} className="job-posting__card" aria-hidden="true">
+                    <div className="job-card__header">
+                      <span className="mp-skel mp-skel--jobcard-logo" />
+                      <span className="mp-skel mp-skel--jobcard-bookmark" />
+                    </div>
+                    <div className="job-card__body">
+                      <div className="job-card__content">
+                        <div className="job-card__title-group">
+                          <span className="mp-skel block mp-skel--jobcard-company" />
+                          <span className="mp-skel block mp-skel--jobcard-role" />
+                        </div>
+                        <div className="job-card__info-group">
+                          <span className="mp-skel block mp-skel--jobcard-meta" />
+                          <span className="mp-skel block mp-skel--jobcard-deadline" />
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                ))
+              : visibleSavedJobs.length === 0
+              ? <li className="empty">저장한 공고가 없습니다.</li>
+              : visibleSavedJobs.map((job) => (
+                  <MypageJobCard
+                    key={job.jobIdx}
+                    job={job}
+                    appliedSuccessMessage="지원 정보가 반영되었습니다."
+                    showAppliedSection={false}
+                    onUnfavorite={handleUnfavorite}
+                    onFavorite={handleFavorite}
+                  />
+                ))}
           </ul>
         </section>
 
@@ -264,21 +279,39 @@ export default function M_Mypage() {
           </header>
 
           <ul className="job-list recent job-posting__list--grid">
-            {!isLoading && visibleRecentJobs.length === 0 && (
-              <li className="empty">최근 본 공고가 없습니다.</li>
-            )}
-
-            {!isLoading &&
-              visibleRecentJobs.map((job) => (
-                <MypageJobCard
-                  key={job.jobIdx}
-                  job={job}
-                  appliedSuccessMessage="지원 정보가 반영되었습니다."
-                  showAppliedSection={false}
-                  onFavorite={handleFavorite}
-                  onUnfavorite={handleUnfavorite}
-                />
-              ))}
+            {isLoading
+              ? Array.from({ length: 3 }).map((_, i) => (
+                  <li key={`m-skel-recent-${i}`} className="job-posting__card" aria-hidden="true">
+                    <div className="job-card__header">
+                      <span className="mp-skel mp-skel--jobcard-logo" />
+                      <span className="mp-skel mp-skel--jobcard-bookmark" />
+                    </div>
+                    <div className="job-card__body">
+                      <div className="job-card__content">
+                        <div className="job-card__title-group">
+                          <span className="mp-skel block mp-skel--jobcard-company" />
+                          <span className="mp-skel block mp-skel--jobcard-role" />
+                        </div>
+                        <div className="job-card__info-group">
+                          <span className="mp-skel block mp-skel--jobcard-meta" />
+                          <span className="mp-skel block mp-skel--jobcard-deadline" />
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                ))
+              : visibleRecentJobs.length === 0
+              ? <li className="empty">최근 본 공고가 없습니다.</li>
+              : visibleRecentJobs.map((job) => (
+                  <MypageJobCard
+                    key={job.jobIdx}
+                    job={job}
+                    appliedSuccessMessage="지원 정보가 반영되었습니다."
+                    showAppliedSection={false}
+                    onFavorite={handleFavorite}
+                    onUnfavorite={handleUnfavorite}
+                  />
+                ))}
           </ul>
         </section>
 
@@ -297,15 +330,27 @@ export default function M_Mypage() {
             </span>
 
             <div className="resume-card__body">
-              <span className="resume-card__headline">
-                {defaultResume?.title ?? "기본 이력서가 없습니다."}
-              </span>
-              <div className="resume-card__meta">
-                <span className="resume-card__date">
-                  {defaultResume?.createdAt ? formatDate(defaultResume.createdAt) : "—"}
-                </span>
-                <span className="resume-card__role">{defaultResume?.hopeJobs ?? ""}</span>
-              </div>
+              {isLoading ? (
+                <>
+                  <span className="resume-card__headline mp-skel mp-skel--resume-headline" aria-hidden="true" />
+                  <div className="resume-card__meta">
+                    <span className="mp-skel mp-skel--resume-date" aria-hidden="true" />
+                    <span className="mp-skel mp-skel--resume-role" aria-hidden="true" />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <span className="resume-card__headline">
+                    {defaultResume?.title ?? "기본 이력서가 없습니다."}
+                  </span>
+                  <div className="resume-card__meta">
+                    <span className="resume-card__date">
+                      {defaultResume?.createdAt ? formatDate(defaultResume.createdAt) : "—"}
+                    </span>
+                    <span className="resume-card__role">{defaultResume?.hopeJobs ?? ""}</span>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </section>
@@ -323,6 +368,34 @@ export default function M_Mypage() {
           </header>
 
           <div className="mock-history__body data-list__body">
+            {isLoading &&
+              Array.from({ length: 2 }).map((_, i) => (
+                <div key={`m-skel-interview-${i}`} className="mock-history__row" aria-hidden="true">
+                  <div className="mock-history__avatar">
+                    <span className="mp-skel circle mp-skel--iv-avatar-m" />
+                  </div>
+                  <div className="mock-history__content">
+                    <div className="mock-history__info">
+                      <div className="mock-history__primary">
+                        <span className="mp-skel mp-skel--iv-score-m" />
+                        <span className="mp-skel mp-skel--iv-role-m" />
+                      </div>
+                      <div className="mock-history__meta">
+                        <span className="mp-skel mp-skel--iv-status-m" />
+                        <span className="mp-skel mp-skel--iv-date-m" />
+                      </div>
+                    </div>
+                    <div className="mock-history__resume-title">
+                      <span className="mp-skel mp-skel--iv-resume-icon-m" />
+                      <span className="mp-skel mp-skel--iv-resume-m" />
+                    </div>
+                  </div>
+                  <div className="mock-history__btn_wrap">
+                    <span className="mp-skel block mp-skel--iv-button-m" />
+                  </div>
+                </div>
+              ))}
+
             {!isLoading && interviewItems.length === 0 && (
               <div className="empty">최근 진행한 모의면접이 없습니다.</div>
             )}

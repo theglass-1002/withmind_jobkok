@@ -16,8 +16,8 @@ import SortDropdown from "@/shared/components/sort-dropdown/SortDropdown";
 import Tooltip from "@/shared/components/tooltip/Tooltip";
 import Pagination from "@/shared/components/Pagination";
 import JobPostingRow from "@/shared/components/job-posting-item/JobPostingRow";
+import JobPostingSkeleton from "@/shared/components/job-posting-item/JobPostingSkeleton";
 import JobEmptyResult from "@/shared/components/empty/job/JobEmptyResult";
-import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
 
 import { Icons } from "@/assets/icons";
 import {
@@ -720,35 +720,37 @@ export default function M_AllJobPostingSection({
             className="job-posting__content"
             style={{ position: "relative", minHeight: "320px" }}
           >
-            {showJobPostingLoading ? (
-              <LoadingOverlay isLoading={showJobPostingLoading} />
-            ) : (
-              <>
-                <div className="job-posting__header">
-                  <span className="job-posting__count">
-                    총 <p className="point-text-black">{totalCount.toLocaleString()}개</p> 전체공고
-                  </span>
-
-                  <div className="job-posting__controls">
-                    <SortDropdown
-                      value={sort}
-                      options={sortOptions}
-                      onChange={handleSortChange}
-                      className="job-posting__sort"
-                    />
-                  </div>
-                </div>
-
-                {jobs.length === 0 ? (
-                  <JobEmptyResult />
+            <div className="job-posting__header">
+              <span className="job-posting__count">
+                총{" "}
+                {showJobPostingLoading ? (
+                  <span className="job-posting__count-skeleton" aria-hidden="true" />
                 ) : (
-                  <JobPostingRow
-                    jobs={jobs}
-                    loading={jobsLoading}
-                    isResumeBased={resumeReco}
-                  />
-                )}
-              </>
+                  <p className="point-text-black">{totalCount.toLocaleString()}개</p>
+                )}{" "}
+                전체공고
+              </span>
+
+              <div className="job-posting__controls">
+                <SortDropdown
+                  value={sort}
+                  options={sortOptions}
+                  onChange={handleSortChange}
+                  className="job-posting__sort"
+                />
+              </div>
+            </div>
+
+            {showJobPostingLoading ? (
+              <JobPostingSkeleton view="row" count={6} />
+            ) : jobs.length === 0 ? (
+              <JobEmptyResult />
+            ) : (
+              <JobPostingRow
+                jobs={jobs}
+                loading={jobsLoading}
+                isResumeBased={resumeReco}
+              />
             )}
           </div>
 

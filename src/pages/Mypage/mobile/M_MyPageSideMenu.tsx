@@ -60,14 +60,26 @@ export default function M_MyPageSideMenu({ myInfo, planName, planExpireAt }: Pro
         <div className="user_info">
           <div className="sidebar-user__header">
             <div className="sidebar-user__details">
-              <span className="user_name">
-                {userName ? `${userName} 님` : "사용자 님"}
-              </span>
+              {myInfo ? (
+                <>
+                  <span className="user_name">
+                    {userName ? `${userName} 님` : "사용자 님"}
+                  </span>
 
-              <div className="user_contact">
-                <span>{email ?? ""}</span>
-                <span>{formatPhoneNumber(phone) || ""}</span>
-              </div>
+                  <div className="user_contact">
+                    <span>{email ?? ""}</span>
+                    <span>{formatPhoneNumber(phone) || ""}</span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <span className="user_name mp-skel mp-skel--userinfo-name" aria-hidden="true" />
+                  <div className="user_contact">
+                    <span className="mp-skel mp-skel--userinfo-contact-1" aria-hidden="true" />
+                    <span className="mp-skel mp-skel--userinfo-contact-2" aria-hidden="true" />
+                  </div>
+                </>
+              )}
             </div>
 
             <span
@@ -85,11 +97,20 @@ export default function M_MyPageSideMenu({ myInfo, planName, planExpireAt }: Pro
           </div>
 
           <div className="usercard__plan">
-            <span className="plan-status__detail">
-              <img src={ic_plan_green_20} alt="" />
-              {planName ?? "이용권 정보 없음"}
-            </span>
-            <span className="plan-status__expiry">{planExpireAt ?? "-"}</span>
+            {myInfo ? (
+              <>
+                <span className="plan-status__detail">
+                  <img src={ic_plan_green_20} alt="" />
+                  {planName ?? "이용권 정보 없음"}
+                </span>
+                <span className="plan-status__expiry">{planExpireAt ?? "-"}</span>
+              </>
+            ) : (
+              <>
+                <span className="mp-skel mp-skel--userinfo-plan-name" aria-hidden="true" />
+                <span className="mp-skel mp-skel--userinfo-plan-expire" aria-hidden="true" />
+              </>
+            )}
           </div>
         </div>
 

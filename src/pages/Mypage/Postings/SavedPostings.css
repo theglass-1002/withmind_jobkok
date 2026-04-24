@@ -90,6 +90,36 @@
     line-height: 20px; /* 125% */
 }
 
+.stats__count-skeleton{
+    display: inline-block;
+    width: 48px;
+    height: 16px;
+    margin-right: 2px;
+    border-radius: 4px;
+    background-color: #eceef1;
+    background-image: linear-gradient(90deg, #eceef1 0%, #f6f7f8 50%, #eceef1 100%);
+    background-size: 200px 100%;
+    background-repeat: no-repeat;
+    animation: jp-skel-shimmer 1.3s ease-in-out infinite;
+}
+
+.saved-jobs__list-wrap{
+    position: relative;
+    width: 100%;
+}
+
+.saved-jobs__list-wrap.is-refetching{
+    pointer-events: none;
+}
+
+.saved-jobs__list-wrap > *{
+    transition: opacity 0.15s ease-in-out;
+}
+
+.saved-jobs__list-wrap.is-refetching > *{
+    opacity: 0.5;
+}
+
 .stats__unit{
     color: var(--gray-700, #6F767E);
     font-family: Pretendard;

@@ -13,8 +13,8 @@ import ic_list_view_gray900_20 from "@/assets/icons/size20/ic_list_view_gray900_
 import "@/pages/Mypage/Postings/SavedPostings.css";
 import "@/shared/components/job-posting-item/JobPostingItem.css";
 
-import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
 import SortDropdown from "@/shared/components/sort-dropdown/SortDropdown";
+import JobPostingSkeleton from "@/shared/components/job-posting-item/JobPostingSkeleton";
 
 import { fetchJobList } from "@/api/job/job.api";
 import { SIZE_MAP, SORT_CODE_MAP, type JobItem } from "@/api/job/job.types";
@@ -44,7 +44,7 @@ export default function SavedJobPostingSection() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const handleFilterChange = (newValue: string) => {
     setCurrentFilter(newValue as FilterValue);
@@ -121,15 +121,20 @@ export default function SavedJobPostingSection() {
     run();
   }, [currentFilter, page, sortLabel, sizeLabel]);
 
+  const isInitial = isLoading && jobs.length === 0;
+  const isRefetching = isLoading && jobs.length > 0;
+
   return (
     <div className="saved-jobs__main-container">
-      <LoadingOverlay isLoading={isLoading} />
-
       <div className="saved-jobs__toolbar">
         <div className="toolbar__stats">
           <span className="stats__label">총</span>
           <div className="stats__count-wrap">
-            <span className="stats__count">{totalCount}개</span>
+            {isInitial ? (
+              <span className="stats__count-skeleton" aria-hidden="true" />
+            ) : (
+              <span className="stats__count">{totalCount}개</span>
+            )}
             <span className="stats__unit">의 공고</span>
           </div>
         </div>
@@ -193,47 +198,56 @@ export default function SavedJobPostingSection() {
         />
       </div>
 
-      {currentFilter === "all" ? (
-        <AllSavedJobsList
-          viewType={currentView}
-          jobs={jobs}
-          page={page}
-          totalPages={totalPages}
-          onChangePage={setPage}
-          onUnfavorite={handleUnfavorite}
-          onAppliedChanged={handleAppliedChanged}
-          onFavoriteChanged={handleFavoriteChanged}
-        />
-      ) : currentFilter === "done" ? (
-        <CompletedJobsList
-          viewType={currentView}
-          jobs={jobs}
-          page={page}
-          totalPages={totalPages}
-          onChangePage={setPage}
-          onUnapplied={handleUnapplied}
-          onUnfavorite={handleUnfavorite}
-          onAppliedChanged={handleAppliedChanged}
-          onFavoriteChanged={handleFavoriteChanged}
-        />
+      {isInitial ? (
+        <JobPostingSkeleton view={currentView} count={6} />
       ) : (
-        <BeforeJobsList
-          viewType={currentView}
-          jobs={jobs}
-          page={page}
-          totalPages={totalPages}
-          onChangePage={setPage}
-          onUnfavorite={handleUnfavorite}
-          onUnapplied={handleUnapplied}
-          onAppliedChanged={(jobId, nextApplied) => {
-            handleAppliedChanged(jobId, nextApplied);
-            if (nextApplied === 1) {
-              setJobs((prev) => prev.filter((j) => j.jobIdx !== jobId));
-              setTotalCount((prev) => Math.max(0, prev - 1));
-            }
-          }}
-          onFavoriteChanged={handleFavoriteChanged}
-        />
+        <div
+          className={`saved-jobs__list-wrap${isRefetching ? " is-refetching" : ""}`}
+          aria-busy={isRefetching}
+        >
+          {currentFilter === "all" ? (
+            <AllSavedJobsList
+              viewType={currentView}
+              jobs={jobs}
+              page={page}
+              totalPages={totalPages}
+              onChangePage={setPage}
+              onUnfavorite={handleUnfavorite}
+              onAppliedChanged={handleAppliedChanged}
+              onFavoriteChanged={handleFavoriteChanged}
+            />
+          ) : currentFilter === "done" ? (
+            <CompletedJobsList
+              viewType={currentView}
+              jobs={jobs}
+              page={page}
+              totalPages={totalPages}
+              onChangePage={setPage}
+              onUnapplied={handleUnapplied}
+              onUnfavorite={handleUnfavorite}
+              onAppliedChanged={handleAppliedChanged}
+              onFavoriteChanged={handleFavoriteChanged}
+            />
+          ) : (
+            <BeforeJobsList
+              viewType={currentView}
+              jobs={jobs}
+              page={page}
+              totalPages={totalPages}
+              onChangePage={setPage}
+              onUnfavorite={handleUnfavorite}
+              onUnapplied={handleUnapplied}
+              onAppliedChanged={(jobId, nextApplied) => {
+                handleAppliedChanged(jobId, nextApplied);
+                if (nextApplied === 1) {
+                  setJobs((prev) => prev.filter((j) => j.jobIdx !== jobId));
+                  setTotalCount((prev) => Math.max(0, prev - 1));
+                }
+              }}
+              onFavoriteChanged={handleFavoriteChanged}
+            />
+          )}
+        </div>
       )}
     </div>
   );

@@ -160,7 +160,7 @@ export default function Home() {
   const autoListRef = useRef<HTMLDivElement>(null);
 
   const [jobTree, setJobTree] = useState<JobNode[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [, setErrorMsg] = useState<string | null>(null);
 
   const saveRecentKeyword = useCallback((keyword: string) => {
@@ -521,23 +521,34 @@ export default function Home() {
         </header>
 
         <div className="categories">
-          {topCategories.map((cat, index) => (
-            <div
-              className="category"
-              key={`cat-${cat.idx ?? cat.name ?? index}-${index}`}
-              onClick={() => handleClickCategory(cat)}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") handleClickCategory(cat);
-              }}
-            >
-              <span className="icon">
-                <img src={getCategoryIcon(cat.name)} alt={cat.name} />
-              </span>
-              <span className="name">{cat.name}</span>
-            </div>
-          ))}
+          {loading && topCategories.length === 0
+            ? CATEGORIES.map((_, index) => (
+                <div
+                  className="category is-skeleton"
+                  key={`cat-skel-${index}`}
+                  aria-hidden="true"
+                >
+                  <span className="icon skeleton" />
+                  <span className="name skeleton" />
+                </div>
+              ))
+            : topCategories.map((cat, index) => (
+                <div
+                  className="category"
+                  key={`cat-${cat.idx ?? cat.name ?? index}-${index}`}
+                  onClick={() => handleClickCategory(cat)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") handleClickCategory(cat);
+                  }}
+                >
+                  <span className="icon">
+                    <img src={getCategoryIcon(cat.name)} alt={cat.name} />
+                  </span>
+                  <span className="name">{cat.name}</span>
+                </div>
+              ))}
         </div>
       </div>
 

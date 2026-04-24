@@ -2,8 +2,6 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Switch from "react-switch";
 
-import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
-
 import search from "@/assets/icons/size20/ic_search_gray900_20.png";
 import cancel from "@/assets/icons/size20/ic_cancel_gray400_20.png";
 import ic_close_gray500_20 from "@/assets/icons/size20/ic_close_gray500_20.png";
@@ -26,6 +24,7 @@ import SortDropdown from "@/shared/components/sort-dropdown/SortDropdown";
 
 import JobPostingRow from "@/shared/components/job-posting-item/JobPostingRow";
 import JobPostingCard from "@/shared/components/job-posting-item/JobPostingCard";
+import JobPostingSkeleton from "@/shared/components/job-posting-item/JobPostingSkeleton";
 
 import Tooltip from "@/shared/components/tooltip/Tooltip";
 import Pagination from "@/shared/components/Pagination";
@@ -887,88 +886,89 @@ export default function AllJobPostingSection({
             className="job-posting__content"
             style={{ position: "relative", minHeight: "320px" }}
           >
-            {showJobPostingLoading ? (
-              <LoadingOverlay isLoading={showJobPostingLoading} />
-            ) : (
-              <>
-                <div className="job-posting__header">
-                  <span className="job-posting__count">
-                    총 <p className="point-text-black">{totalCount.toLocaleString()}개</p>{" "}
-                    전체공고
+            <div className="job-posting__header">
+              <span className="job-posting__count">
+                총{" "}
+                {showJobPostingLoading ? (
+                  <span className="job-posting__count-skeleton" aria-hidden="true" />
+                ) : (
+                  <p className="point-text-black">{totalCount.toLocaleString()}개</p>
+                )}{" "}
+                전체공고
+              </span>
+
+              <div className="job-posting__controls">
+                <SortDropdown
+                  value={sort}
+                  options={sortOptions}
+                  onChange={setSort}
+                  className="job-posting__sort"
+                />
+                <SortDropdown
+                  value={sizeSort}
+                  options={sizeSortOptions}
+                  onChange={setSizeSort}
+                  className="job-posting__sort"
+                />
+
+                <div
+                  className="job-posting__view-toggle"
+                  role="group"
+                  aria-label="보기 전환"
+                >
+                  <span
+                    className="job-posting__view-btn job-posting__view-btn--card"
+                    onClick={() => setView(1)}
+                    role="button"
+                    tabIndex={0}
+                  >
+                    {view === 1 ? (
+                      <img src={grid_black} alt="" />
+                    ) : (
+                      <img src={grid_gray} alt="" />
+                    )}
                   </span>
 
-                  <div className="job-posting__controls">
-                    <SortDropdown
-                      value={sort}
-                      options={sortOptions}
-                      onChange={setSort}
-                      className="job-posting__sort"
-                    />
-                    <SortDropdown
-                      value={sizeSort}
-                      options={sizeSortOptions}
-                      onChange={setSizeSort}
-                      className="job-posting__sort"
-                    />
-
-                    <div
-                      className="job-posting__view-toggle"
-                      role="group"
-                      aria-label="보기 전환"
-                    >
-                      <span
-                        className="job-posting__view-btn job-posting__view-btn--card"
-                        onClick={() => setView(1)}
-                        role="button"
-                        tabIndex={0}
-                      >
-                        {view === 1 ? (
-                          <img src={grid_black} alt="" />
-                        ) : (
-                          <img src={grid_gray} alt="" />
-                        )}
-                      </span>
-
-                      <span
-                        className="job-posting__view-btn job-posting__view-btn--list job-posting__view-btn--active"
-                        onClick={() => setView(0)}
-                        role="button"
-                        tabIndex={0}
-                      >
-                        {view === 0 ? (
-                          <img src={row_black} alt="" />
-                        ) : (
-                          <img src={row_white} alt="" />
-                        )}
-                      </span>
-                    </div>
-                  </div>
+                  <span
+                    className="job-posting__view-btn job-posting__view-btn--list job-posting__view-btn--active"
+                    onClick={() => setView(0)}
+                    role="button"
+                    tabIndex={0}
+                  >
+                    {view === 0 ? (
+                      <img src={row_black} alt="" />
+                    ) : (
+                      <img src={row_white} alt="" />
+                    )}
+                  </span>
                 </div>
+              </div>
+            </div>
 
-                {jobs.length === 0 ? (
-                  <JobEmptyResult />
-                ) : view === 1 ? (
-                  <JobPostingCard
-                    jobs={jobs}
-                    loading={false}
-                    isResumeBased={resumeReco}
-                  />
-                ) : (
-                  <JobPostingRow
-                    jobs={jobs}
-                    loading={false}
-                    isResumeBased={resumeReco}
-                  />
-                )}
+            {showJobPostingLoading ? (
+              <JobPostingSkeleton view={view === 1 ? "card" : "row"} count={10} />
+            ) : jobs.length === 0 ? (
+              <JobEmptyResult />
+            ) : view === 1 ? (
+              <JobPostingCard
+                jobs={jobs}
+                loading={false}
+                isResumeBased={resumeReco}
+              />
+            ) : (
+              <JobPostingRow
+                jobs={jobs}
+                loading={false}
+                isResumeBased={resumeReco}
+              />
+            )}
 
-                {jobsError && (
-                  <div className="job-posting__error">
-                    공고를 불러오는 중 오류가 발생했습니다.
-                    <br />
-                    {jobsError}
-                  </div>
-                )}
-              </>
+            {jobsError && !showJobPostingLoading && (
+              <div className="job-posting__error">
+                공고를 불러오는 중 오류가 발생했습니다.
+                <br />
+                {jobsError}
+              </div>
             )}
           </div>
 

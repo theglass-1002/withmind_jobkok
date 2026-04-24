@@ -1,0 +1,128 @@
+@keyframes jp-skel-shimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: calc(200px + 100%) 0; }
+}
+
+.jp-skel {
+  pointer-events: none;
+  user-select: none;
+}
+
+.jp-skel-bar,
+.jp-skel-logo,
+.jp-skel-fav,
+.jp-skel-badge,
+.jp-skel-divider {
+  display: block;
+  background-color: #eceef1;
+  background-image: linear-gradient(90deg, #eceef1 0%, #f6f7f8 50%, #eceef1 100%);
+  background-size: 200px 100%;
+  background-repeat: no-repeat;
+  animation: jp-skel-shimmer 1.3s ease-in-out infinite;
+  border-radius: 4px;
+}
+
+.jp-skel-logo {
+  width: 56px;
+  height: 56px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.jp-skel-fav {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.jp-skel-badge {
+  width: 72px;
+  height: 28px;
+  border-radius: 14px;
+}
+.jp-skel-badge.short { width: 48px; }
+
+.jp-skel-bar--company { width: 40%; height: 14px; }
+.jp-skel-bar--title   { width: 80%; height: 20px; }
+.jp-skel-bar--meta    { width: 70%; height: 14px; }
+.jp-skel-bar--meta.short { width: 45%; }
+
+.jp-skel-divider {
+  width: 100%;
+  height: 1px;
+  background-color: #e0e2e4;
+  background-image: none;
+  animation: none;
+}
+
+.jp-skel-badges {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* Card (grid) */
+.jp-skel-card {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  cursor: default;
+}
+.jp-skel-card__header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  align-self: stretch;
+}
+.jp-skel-card__identity {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1 0 0;
+  min-width: 0;
+}
+.jp-skel-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-self: stretch;
+}
+
+/* Row */
+.jp-skel-row__card {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px;
+  width: 100%;
+  background: #fff;
+}
+.jp-skel-row__top {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  width: 100%;
+}
+.jp-skel-row__details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1 0 0;
+  min-width: 0;
+}
+.jp-skel-row__bottom {
+  display: flex;
+  justify-content: flex-start;
+  padding-left: calc(56px + 20px);
+}
+
+@media (max-width: 760px) {
+  .jp-skel-logo { width: 44px; height: 44px; }
+  .jp-skel-bar--title { height: 18px; }
+  .jp-skel-badge { height: 24px; width: 60px; }
+  .jp-skel-badge.short { width: 40px; }
+  .jp-skel-row__card { padding: 16px; gap: 16px; }
+  .jp-skel-row__top { gap: 12px; }
+  .jp-skel-row__bottom { padding-left: calc(44px + 12px); }
+}

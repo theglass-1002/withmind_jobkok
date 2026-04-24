@@ -46,16 +46,29 @@ export default function MyPageSideMenu({ myInfo }: MyPageSideMenuProps) {
       <nav className="sidemenu">
         {/* 유저 정보 */}
         <div className="user_info">
-          <span className="user_name">
-            {userName ? `${userName} 님` : "사용자 님"}
-          </span>
+          {myInfo ? (
+            <>
+              <span className="user_name">
+                {userName ? `${userName} 님` : "사용자 님"}
+              </span>
 
-          <div className="user_contact">
-            <span>{userId ?? "-"}</span>
-            <span>{formatPhoneNumber(phone) || "-"}</span>
-          </div>
+              <div className="user_contact">
+                <span>{userId ?? "-"}</span>
+                <span>{formatPhoneNumber(phone) || "-"}</span>
+              </div>
 
-          <p className="usercard__plan">7일 이용권</p>
+              <p className="usercard__plan">7일 이용권</p>
+            </>
+          ) : (
+            <>
+              <span className="user_name mp-skel mp-skel--userinfo-name" aria-hidden="true" />
+              <div className="user_contact">
+                <span className="mp-skel mp-skel--userinfo-contact-1" aria-hidden="true" />
+                <span className="mp-skel mp-skel--userinfo-contact-2" aria-hidden="true" />
+              </div>
+              <p className="usercard__plan mp-skel mp-skel--userinfo-plan" aria-hidden="true" />
+            </>
+          )}
 
           <span className="user_info_edit">
               <NavLink
