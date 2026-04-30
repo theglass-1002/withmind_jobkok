@@ -48,6 +48,7 @@ import {
   SIZE_MAP,
 } from "@/api/job/job.types";
 import { logout } from "@/api/auth/auth.api";
+import { generateResumeRecommendations } from "@/api/recommendation/recommendation.api";
 import JobEmptyResult from "@/shared/components/empty/job/JobEmptyResult";
 
 type ChipKind =
@@ -99,11 +100,13 @@ const loadSavedFilters = () => {
 type AllJobPostingSectionProps = {
   loggedIn?: boolean;
   resumeExists?: boolean;
+  defaultResumeIdx?: number | null;
 };
 
 export default function AllJobPostingSection({
   loggedIn = false,
   resumeExists = false,
+  defaultResumeIdx = null,
 }: AllJobPostingSectionProps) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -117,6 +120,7 @@ export default function AllJobPostingSection({
   );
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [resumeModalOpen, setResumeModalOpen] = useState(false);
+  const [isGeneratingReco, setIsGeneratingReco] = useState(false);
 
   const [openFilter, setOpenFilter] = useState<FilterKey | null>(null);
   const [sort, setSort] = useState<string>(savedFilters?.sort ?? "최신순");
@@ -603,18 +607,32 @@ export default function AllJobPostingSection({
     setOpenFilter(null);
   };
 
-  const handleResumeRecoToggle = (checked: boolean) => {
+  const handleResumeRecoToggle = async (checked: boolean) => {
     if (checked) {
       if (!loggedIn) {
         setLoginModalOpen(true);
         return;
       }
-      if (!resumeExists) {
+      if (!resumeExists || !defaultResumeIdx) {
         setResumeModalOpen(true);
         return;
       }
+
+      setIsGeneratingReco(true);
+      try {
+        const res = await generateResumeRecommendations(defaultResumeIdx);
+        console.log("[handleResumeRecoToggle] 추천 생성 응답:", res);
+        setResumeReco(true);
+        setPage(1);
+      } catch (e) {
+        console.error("[handleResumeRecoToggle] 추천 생성 실패:", e);
+      } finally {
+        setIsGeneratingReco(false);
+      }
+      return;
     }
-    setResumeReco(checked);
+
+    setResumeReco(false);
     setPage(1);
   };
 
@@ -631,7 +649,7 @@ export default function AllJobPostingSection({
     (chip) => chip.kind === "employmentType" || chip.kind === "employmentEtc"
   ).length;
 
-  const showJobPostingLoading = !jobsFetched || jobsLoading;
+  const showJobPostingLoading = !jobsFetched || jobsLoading || isGeneratingReco;
 
   return (
     <>

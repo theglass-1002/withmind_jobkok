@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./MockSettings.css";
 
@@ -65,6 +65,10 @@ export default function MockSettings() {
     () => sessionStorage.getItem("mockInterviewJobUrl") ?? ""
   );
   const [selectedResume, setSelectedResume] = useState("");
+
+  useEffect(() => {
+    sessionStorage.removeItem("mockInterviewJobUrl");
+  }, []);
 
   const [showConfirm, setShowConfirm] = useState(false);
   const [showSubmitErrors, setShowSubmitErrors] = useState(false);

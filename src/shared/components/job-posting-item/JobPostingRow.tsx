@@ -104,6 +104,7 @@ export default function JobPostingRow({
     <div className="job-posting__list job-posting__list--row">
       {jobs.map((job, index) => {
         const itemKey = `job-row-${job.jobIdx ?? "no-id"}-${index}`;
+        const showAiPickMark = isResumeBased && index < 3;
 
         return (
           <div key={itemKey} className="job-posting__item job-posting__item--row">
@@ -111,6 +112,7 @@ export default function JobPostingRow({
               <JobPostingItemRowAiPick
                 job={job}
                 showAppliedSection={false}
+                showAiPickMark={showAiPickMark}
               />
             ) : (
               <JobPostingItemRowNoAiPick

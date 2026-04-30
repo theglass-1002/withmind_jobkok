@@ -171,16 +171,16 @@ export default function M_MockAnalysisPage() {
           activeTab={activeTab} 
           metaRows={[
             [
-              { key: "이름", value: "위위" },
-              { key: "아이디", value: "abc" },
+              { key: "이름", value: "" },
+              { key: "아이디", value: "" },
             ],
             [
-              { key: "희망직무", value: "개발자" },
-              { key: "선택 이력서", value: "성장하는 개발자" },
+              { key: "희망직무", value: "" },
+              { key: "선택 이력서", value: "" },
             ],
             [
-              { key: "신뢰도", value: "중" },
-              { key: "면접시간", value: "12분" },
+              { key: "신뢰도", value: "" },
+              { key: "면접시간", value: "" },
             ],
           ]}
         />
@@ -244,7 +244,7 @@ export default function M_MockAnalysisPage() {
                 }}
                 categorySummary={{
                   left: {
-                    scoreTitle: "위위님의 점수",
+                    scoreTitle: "",
                     scores: { attitude: 92, voice: 80, tension: 10, competence: 30 },
                     RadarChartComponent: KpiRadarChart,
                   },
@@ -286,15 +286,13 @@ export default function M_MockAnalysisPage() {
                     iconSrc: ic_strength_circle_24,
                     label: "강점",
                     tags: ["효과적 의견 교환", "타인에 대한 신뢰"],
-                    description:
-                      "위위님의 강점으로 두드러지는 점은 효과적인 의견 교환과 타인에 대한 신뢰입니다.",
+                    description: "",
                   },
                   weakness: {
                     iconSrc: ic_weakness_circle_24,
                     label: "약점",
                     tags: ["의사소통 기술 활용", "타인 이해"],
-                    description:
-                      "위위님은 효과적 의견교환 및 타인에 대한 신뢰가 다소 부족합니다.",
+                    description: "",
                   },
                 }}
               />

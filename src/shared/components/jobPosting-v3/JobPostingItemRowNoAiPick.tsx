@@ -256,7 +256,7 @@ export default function JobPostingItemRowNoAiPick({
         </div>
 
         <div className="job-posting__row job-posting__row--bottom">
-          <div className="job-posting__badges">
+          {/* <div className="job-posting__badges">
             <span className="job-posting__badge">
               <span>
                 <img src={seed} alt="" />
@@ -267,7 +267,7 @@ export default function JobPostingItemRowNoAiPick({
               <img src={fire} alt="" />
               마감임박!
             </span>
-          </div>
+          </div> */}
         </div>
 
         {showAppliedSection &&
@@ -338,7 +338,7 @@ export default function JobPostingItemRowNoAiPick({
         </div>
 
         <div className="job-posting__row job-posting__row--bottom">
-          <div className="job-posting__badges">
+          {/* <div className="job-posting__badges">
             <span className="job-posting__badge">
               <span>
                 <img src={seed} alt="" />
@@ -349,7 +349,7 @@ export default function JobPostingItemRowNoAiPick({
               <img src={fire} alt="" />
               마감임박!
             </span>
-          </div>
+          </div> */}
         </div>
 
         {showAppliedSection &&

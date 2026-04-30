@@ -78,6 +78,10 @@ export interface ChartData10 {
 }
 
 export interface UserInfo {
+
+  resumeTitle: string;
+  resumeDate:string;
+
   interviewStatus: string;
   aiTrustLevel: string;
   interviewTime: string;

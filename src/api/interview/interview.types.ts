@@ -177,6 +177,9 @@ export type InterviewReportItem = {
   resumeTitle: string;
   resumeIdx: number;
   jobPostTitle?: string;
+  jobPostLink?: string;
+  // 0: 면접 진행 중, 1: 분석 진행 중, 2: 진행 완료
+  analysisStatus: 0 | 1 | 2;
 };
 
 export type InterviewReportListResponse = {

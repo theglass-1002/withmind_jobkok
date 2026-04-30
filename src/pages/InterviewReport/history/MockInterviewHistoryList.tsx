@@ -11,7 +11,7 @@ export type InterviewReportHistoryItemData = {
   roleText: string;
   dateText: string;
   statusText: string;
-  statusState?: "done" | "doing";
+  statusState?: "done" | "doing" | "analyzing";
   resumeLabelIconSrc: string;
   resumeText: string;
   resumeDate: string;

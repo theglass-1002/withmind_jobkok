@@ -27,6 +27,7 @@ export default function JobsList() {
 
   const [activeTab, setActiveTab] = useState<"all" | "saved">("all");
   const [resumeExists, setResumeExists] = useState(false);
+  const [defaultResumeIdx, setDefaultResumeIdx] = useState<number | null>(null);
   const [loggedIn, setLoggedIn] = useState(false);
 
   const isTabsSticky = useStickyTabs(
@@ -69,8 +70,9 @@ export default function JobsList() {
   useEffect(() => {
 
     if (!loggedIn) {
-  
+
       setResumeExists(false);
+      setDefaultResumeIdx(null);
       return;
     }
 
@@ -79,9 +81,11 @@ export default function JobsList() {
         const resumeCheck = await fetchResumeCheck();
         console.log("[JobsList] resumeCheck.exists:", resumeCheck.exists);
         setResumeExists(!!resumeCheck.exists);
+        setDefaultResumeIdx(resumeCheck.resumeIdx ?? null);
       } catch (e) {
         console.log("[JobsList] resumeCheck API 에러:", e);
         setResumeExists(false);
+        setDefaultResumeIdx(null);
       }
     };
 
@@ -154,6 +158,7 @@ export default function JobsList() {
           <AllJobPostingSection
             loggedIn={loggedIn}
             resumeExists={resumeExists}
+            defaultResumeIdx={defaultResumeIdx}
           />
         ) : (
           <SavedJobPostingSection />
@@ -188,6 +193,7 @@ export default function JobsList() {
           <M_AllJobPostingSection
             loggedIn={loggedIn}
             resumeExists={resumeExists}
+            defaultResumeIdx={defaultResumeIdx}
           />
         ) : (
           <M_SavedJobPostingSection />

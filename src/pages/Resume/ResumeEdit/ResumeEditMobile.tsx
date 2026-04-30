@@ -152,6 +152,22 @@ export default function ResumeEditMobile() {
           setForm(mapped);
           setIsDefaultResume(data.isDefault);
           setIsReady(true);
+
+          const brokenCount = mapped.portfolios.filter((p) => {
+            const anyP = p as any;
+            return (
+              p.source === "file" &&
+              !anyP.file &&
+              !anyP.filePath?.toString().trim() &&
+              !anyP.fileIdx &&
+              !!p.title?.trim()
+            );
+          }).length;
+          if (brokenCount > 0) {
+            toast.warning(
+              `기존 포트폴리오 ${brokenCount}건의 파일 정보를 불러올 수 없습니다. 새 파일을 업로드하거나 항목을 삭제한 뒤 저장해 주세요.`
+            );
+          }
         } catch (err: any) {
           if (err.code === 999) {
             console.error("❌ 이력서 상세 조회 실패:", err);
@@ -586,8 +602,249 @@ export default function ResumeEditMobile() {
     
     const handleCloseSelfIntroSuggest = () => setShowSelfIntroSuggest(false);
     
-    const handleTempSave = () => {
-        toast.success("임시 저장되었습니다.");
+    const handleTempSave = async () => {
+        try {
+          if (!form.title.trim()) {
+            setErrors((prev) => ({
+              ...prev,
+              title: "이력서 제목을 입력해 주세요.",
+            }));
+            toast.error("필수 항목을 먼저 입력해 주세요.");
+            return;
+          }
+
+          // 손상 포트폴리오 항목 체크
+          const hasBrokenPortfolio = form.portfolios.some((p) => {
+            const anyP = p as any;
+            return (
+              p.source === "file" &&
+              !anyP.file &&
+              !anyP.filePath?.toString().trim() &&
+              !anyP.fileIdx &&
+              !!p.title?.trim()
+            );
+          });
+          if (hasBrokenPortfolio) {
+            toast.error(
+              "기존 포트폴리오 파일 정보를 불러올 수 없습니다. 해당 항목을 삭제하거나 새 파일을 업로드한 뒤 저장해 주세요."
+            );
+            return;
+          }
+
+          setIsLoading(true);
+
+          const profilePhotoFile = await handleFileSubmit();
+          const portfolioFilesResults = await handlePortfolioFilesSubmit();
+
+          const payload: CreateResumeRequest = {
+            userIdx: Storage.getUserIdx(),
+            isDefault: 0,
+            temp: "Y",
+
+            title: form.title,
+            name: form.basic.name,
+            email: form.basic.email,
+            gender: form.basic.gender === "male" ? "M" : "W",
+            phone: formatPhoneNumber(form.basic.phone),
+            birth: convertBirth(form.basic.birth),
+
+            ...(profilePhotoFile
+              ? { profilePhotoFile }
+              : form.profilePhotoFileMeta
+              ? { profilePhotoFile: form.profilePhotoFileMeta }
+              : {}),
+
+            regions: form.location.nationwide ? [] : form.location.selectedCodes,
+
+            ...(form.isFreshGraduate
+              ? {}
+              : {
+                  careers: form.careers.map((career) => ({
+                    employmentType: career.employmentType || "정규직",
+                    companyName: career.company_name,
+                    startYm: normalizeYm(career.startDate)!,
+                    endYm: career.isCurrent ? null : normalizeYm(career.endDate),
+                    roleName: career.role,
+                    positionName: career.position,
+                    workAndResult: career.summary,
+                    employedYn: career.isCurrent ? "Y" : "N",
+                  })),
+                }),
+
+            educations: form.education.map((edu) => ({
+              schoolName: edu.school_name,
+              startYm: normalizeYm(edu.startDate)!,
+              endYm: normalizeYm(edu.endDate),
+              majorDegree: edu.major_degree,
+              graduatedYn: mapEducationStatusToGraduatedYn(edu.status),
+            })),
+
+            jobs: form.desiredRoles,
+            hardSkills: form.hardSkills,
+            softSkills: form.softSkills,
+
+            ...(form.activities.length > 0
+              ? {
+                  activities: form.activities.map((act) => ({
+                    category: act.category ?? "교내활동",
+                    activityTitle: act.activityName,
+                    startYm: act.startDate ? normalizeYm(act.startDate) : "1999-09",
+                    endYm: act.endDate ? normalizeYm(act.endDate) : "1999-09",
+                    description: act.summary,
+                    linkUrl: "https://github.com/user",
+                  })),
+                }
+              : {}),
+
+            ...(form.awardCerts.length > 0
+              ? {
+                  awardCerts: form.awardCerts.map((item) => ({
+                    category: mapAwardsKindToCategoryLabel(item.kind),
+                    name: item.title,
+                    issuer: item.issuer ?? "",
+                    acquiredYm: item.dateValue
+                      ? normalizeYm(item.dateValue)?.replace("-", "") ?? ""
+                      : "",
+                    licenseNo: item.score ?? "",
+                    note: "",
+                  })),
+                }
+              : {}),
+
+            ...(() => {
+              const filtered = form.portfolios.filter((p) => {
+                const anyP = p as any;
+                if (p.source === "file") {
+                  return (
+                    !!anyP.file ||
+                    !!anyP.filePath?.toString().trim() ||
+                    !!anyP.fileIdx
+                  );
+                }
+                return !!p.url?.trim();
+              });
+              if (filtered.length === 0) return {};
+              return {
+                portfolios: filtered.map((p, idx) => {
+                  if (p.source === "file") {
+                    const uploadedResult = portfolioFilesResults.find(
+                      (r) => r.originalItem.id === p.id
+                    );
+
+                    if (uploadedResult?.uploadedFile) {
+                      const u = uploadedResult.uploadedFile;
+                      return {
+                        itemType: "FILE" as const,
+                        title: u.originalName,
+                        docName: u.originalName,
+                        url: null,
+                        fileRef: u.filePath,
+                        description: p.note ?? "",
+                        sortOrder: idx + 1,
+                        portfolioFile: {
+                          filePath: u.filePath,
+                          originalName: u.originalName,
+                          storedName: u.storedName,
+                          sizeBytes: u.sizeBytes,
+                          contentType: u.contentType,
+                        },
+                      };
+                    }
+
+                    if (p.filePath) {
+                      const cleanPath = extractS3Path(p.filePath);
+                      const storedName =
+                        (p as any).storedName || cleanPath.split("/").pop() || "";
+                      const sizeBytes = (p as any).sizeBytes || 1048576;
+                      const contentType =
+                        (p as any).contentType ||
+                        (() => {
+                          const extension =
+                            storedName.split(".").pop()?.toLowerCase() || "";
+                          const contentTypeMap: Record<string, string> = {
+                            pdf: "application/pdf",
+                            doc: "application/msword",
+                            docx:
+                              "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                            xls: "application/vnd.ms-excel",
+                            xlsx:
+                              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                            ppt: "application/vnd.ms-powerpoint",
+                            pptx:
+                              "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                            jpg: "image/jpeg",
+                            jpeg: "image/jpeg",
+                            png: "image/png",
+                            gif: "image/gif",
+                            txt: "text/plain",
+                          };
+                          return contentTypeMap[extension] || "application/octet-stream";
+                        })();
+
+                      return {
+                        itemType: "FILE" as const,
+                        title: p.title || `포트폴리오 문서 ${idx + 1}`,
+                        docName: p.title || "",
+                        url: null,
+                        fileRef: cleanPath,
+                        fileIdx: (p as any).fileIdx ?? null,
+                        description: p.note ?? "",
+                        sortOrder: idx + 1,
+                        portfolioFile: {
+                          fileIdx: (p as any).fileIdx ?? null,
+                          filePath: cleanPath,
+                          originalName: p.title || storedName,
+                          storedName: storedName,
+                          sizeBytes: sizeBytes,
+                          contentType: contentType,
+                        },
+                      } as any;
+                    }
+                  }
+
+                  return {
+                    itemType: "URL" as const,
+                    title: p.title || `포트폴리오 ${idx + 1}`,
+                    docName: p.url || "",
+                    url: p.url,
+                    fileRef: null,
+                    description: p.note ?? "",
+                    sortOrder: idx + 1,
+                    portfolioFile: null,
+                  };
+                }),
+              };
+            })(),
+
+            ...(form.selfIntro.trim().length > 0
+              ? {
+                  selfIntros: [
+                    {
+                      title: "소개",
+                      content: form.selfIntro,
+                      isAi: false,
+                    },
+                  ],
+                }
+              : {}),
+          };
+
+          console.log("✅ 모바일 이력서 임시 저장 payload:", payload);
+          const result = await createResume(payload);
+          console.log("✅ 모바일 이력서 임시저장 성공:", result);
+
+          toast.success("임시 저장되었습니다.");
+          navigate("/resumes");
+        } catch (error: any) {
+          console.error("❌ 모바일 이력서 임시 저장 실패:", error);
+          console.error("❌ status:", error?.response?.status);
+          console.error("❌ data:", error?.response?.data);
+          toast.error(
+            error?.response?.data?.msg || "이력서 임시 저장 중 오류가 발생했습니다."
+          );
+        } finally {
+          setIsLoading(false);
+        }
       };
     
  
@@ -863,9 +1120,27 @@ export default function ResumeEditMobile() {
             toast.error("필수 항목을 먼저 입력해 주세요.");
             return;
           }
-      
+
+          // 손상 포트폴리오 항목 체크
+          const hasBrokenPortfolio = form.portfolios.some((p) => {
+            const anyP = p as any;
+            return (
+              p.source === "file" &&
+              !anyP.file &&
+              !anyP.filePath?.toString().trim() &&
+              !anyP.fileIdx &&
+              !!p.title?.trim()
+            );
+          });
+          if (hasBrokenPortfolio) {
+            toast.error(
+              "기존 포트폴리오 파일 정보를 불러올 수 없습니다. 해당 항목을 삭제하거나 새 파일을 업로드한 뒤 저장해 주세요."
+            );
+            return;
+          }
+
           setIsLoading(true);
-      
+
           const profilePhotoFile = await handleFileSubmit();
           const portfolioFilesResults = await handlePortfolioFilesSubmit();
       
@@ -944,96 +1219,112 @@ export default function ResumeEditMobile() {
                 }
               : {}),
       
-              ...(form.portfolios.length > 0
-                ? {
-                    portfolios: form.portfolios.map((p, idx) => {
-                      if (p.source === "file") {
-                        const uploadedResult = portfolioFilesResults.find(
-                          (r) => r.originalItem.id === p.id
-                        );
-        
-                        if (uploadedResult?.uploadedFile) {
-                          const u = uploadedResult.uploadedFile;
-                          return {
-                            itemType: "FILE" as const,
-                            title: u.originalName,
-                            docName: u.originalName,
-                            url: null,
-                            fileRef: u.filePath,
-                            description: p.note ?? "",
-                            sortOrder: idx + 1,
-                            portfolioFile: {
-                              filePath: u.filePath,
-                              originalName: u.originalName,
-                              storedName: u.storedName,
-                              sizeBytes: u.sizeBytes,
-                              contentType: u.contentType,
-                            },
-                          };
-                        }
-        
-                        if (p.filePath) {
-                          const cleanPath = extractS3Path(p.filePath);
-                          const storedName =
-                            (p as any).storedName || cleanPath.split("/").pop() || "";
-                          const sizeBytes = (p as any).sizeBytes || 1048576;
-                          const contentType =
-                            (p as any).contentType ||
-                            (() => {
-                              const extension =
-                                storedName.split(".").pop()?.toLowerCase() || "";
-                              const contentTypeMap: Record<string, string> = {
-                                pdf: "application/pdf",
-                                doc: "application/msword",
-                                docx:
-                                  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                                xls: "application/vnd.ms-excel",
-                                xlsx:
-                                  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                                ppt: "application/vnd.ms-powerpoint",
-                                pptx:
-                                  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-                                jpg: "image/jpeg",
-                                jpeg: "image/jpeg",
-                                png: "image/png",
-                                gif: "image/gif",
-                                txt: "text/plain",
-                              };
-                              return contentTypeMap[extension] || "application/octet-stream";
-                            })();
-        
-                          return {
-                            itemType: "FILE" as const,
-                            title: p.title || `포트폴리오 문서 ${idx + 1}`,
-                            docName: p.title || "",
-                            url: null,
-                            fileRef: cleanPath,
-                            description: p.note ?? "",
-                            sortOrder: idx + 1,
-                            portfolioFile: {
-                              filePath: cleanPath,
-                              originalName: p.title || storedName,
-                              storedName: storedName,
-                              sizeBytes: sizeBytes,
-                              contentType: contentType,
-                            },
-                          };
-                        }
-                      }
-        
-                      return {
-                        itemType: "URL" as const,
-                        title: p.title || `포트폴리오 ${idx + 1}`,
-                        docName: p.url || "",
-                        url: p.url,
-                        fileRef: null,
-                        description: p.note ?? "",
-                        sortOrder: idx + 1,
-                        portfolioFile: null,
-                      };
-                    }),
+              ...(() => {
+                const filtered = form.portfolios.filter((p) => {
+                  const anyP = p as any;
+                  if (p.source === "file") {
+                    // 백엔드가 fileRef null을 거부하므로 file/filePath/fileIdx 중 하나는 있어야 페이로드에 포함
+                    return (
+                      !!anyP.file ||
+                      !!anyP.filePath?.toString().trim() ||
+                      !!anyP.fileIdx
+                    );
                   }
-                : {}),
+                  return !!p.url?.trim();
+                });
+                if (filtered.length === 0) return {};
+                return {
+                  portfolios: filtered.map((p, idx) => {
+                    if (p.source === "file") {
+                      const uploadedResult = portfolioFilesResults.find(
+                        (r) => r.originalItem.id === p.id
+                      );
+
+                      if (uploadedResult?.uploadedFile) {
+                        const u = uploadedResult.uploadedFile;
+                        return {
+                          itemType: "FILE" as const,
+                          title: u.originalName,
+                          docName: u.originalName,
+                          url: null,
+                          fileRef: u.filePath,
+                          description: p.note ?? "",
+                          sortOrder: idx + 1,
+                          portfolioFile: {
+                            filePath: u.filePath,
+                            originalName: u.originalName,
+                            storedName: u.storedName,
+                            sizeBytes: u.sizeBytes,
+                            contentType: u.contentType,
+                          },
+                        };
+                      }
+
+                      if (p.filePath) {
+                        const cleanPath = extractS3Path(p.filePath);
+                        const storedName =
+                          (p as any).storedName || cleanPath.split("/").pop() || "";
+                        const sizeBytes = (p as any).sizeBytes || 1048576;
+                        const contentType =
+                          (p as any).contentType ||
+                          (() => {
+                            const extension =
+                              storedName.split(".").pop()?.toLowerCase() || "";
+                            const contentTypeMap: Record<string, string> = {
+                              pdf: "application/pdf",
+                              doc: "application/msword",
+                              docx:
+                                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                              xls: "application/vnd.ms-excel",
+                              xlsx:
+                                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                              ppt: "application/vnd.ms-powerpoint",
+                              pptx:
+                                "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                              jpg: "image/jpeg",
+                              jpeg: "image/jpeg",
+                              png: "image/png",
+                              gif: "image/gif",
+                              txt: "text/plain",
+                            };
+                            return contentTypeMap[extension] || "application/octet-stream";
+                          })();
+
+                        return {
+                          itemType: "FILE" as const,
+                          title: p.title || `포트폴리오 문서 ${idx + 1}`,
+                          docName: p.title || "",
+                          url: null,
+                          fileRef: cleanPath,
+                          fileIdx: (p as any).fileIdx ?? null,
+                          description: p.note ?? "",
+                          sortOrder: idx + 1,
+                          portfolioFile: {
+                            fileIdx: (p as any).fileIdx ?? null,
+                            filePath: cleanPath,
+                            originalName: p.title || storedName,
+                            storedName: storedName,
+                            sizeBytes: sizeBytes,
+                            contentType: contentType,
+                          },
+                        } as any;
+                      }
+
+                    }
+
+                    return {
+                      itemType: "URL" as const,
+                      title: p.title || `포트폴리오 ${idx + 1}`,
+                      docName: p.url || "",
+                      url: p.url,
+                      fileRef: null,
+                      description: p.note ?? "",
+                      sortOrder: idx + 1,
+                      portfolioFile: null,
+                    };
+                  }),
+                };
+              })(),
       
             ...(form.selfIntro.trim().length > 0
               ? {

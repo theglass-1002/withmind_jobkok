@@ -31,6 +31,7 @@ import {
 } from "@/api/job/job.api";
 import { JobNode, JobItem, SORT_CODE_MAP } from "@/api/job/job.types";
 import { logout } from "@/api/auth/auth.api";
+import { generateResumeRecommendations } from "@/api/recommendation/recommendation.api";
 
 type Chip = {
   id: string;
@@ -52,6 +53,7 @@ type JobsLocationState = {
 type M_AllJobPostingSectionProps = {
   loggedIn?: boolean;
   resumeExists?: boolean;
+  defaultResumeIdx?: number | null;
 };
 
 const M_JOBS_FILTER_STORAGE_KEY = "mAllJobPostingFilters";
@@ -69,6 +71,7 @@ const loadMSavedFilters = () => {
 export default function M_AllJobPostingSection({
   loggedIn = false,
   resumeExists = false,
+  defaultResumeIdx = null,
 }: M_AllJobPostingSectionProps) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -84,6 +87,7 @@ export default function M_AllJobPostingSection({
   );
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [resumeModalOpen, setResumeModalOpen] = useState(false);
+  const [isGeneratingReco, setIsGeneratingReco] = useState(false);
 
   const [searchKeyword, setSearchKeyword] = useState<string>(
     savedFilters?.searchKeyword ?? ""
@@ -515,22 +519,37 @@ export default function M_AllJobPostingSection({
     setOpenFilter((prev) => (prev ? null : "role"));
   };
 
-  const handleResumeRecoToggle = (checked: boolean) => {
+  const handleResumeRecoToggle = async (checked: boolean) => {
     if (checked) {
       if (!loggedIn) {
         setLoginModalOpen(true);
         return;
       }
-      if (!resumeExists) {
+      if (!resumeExists || !defaultResumeIdx) {
         setResumeModalOpen(true);
         return;
       }
+
+      setIsGeneratingReco(true);
+      try {
+        const res = await generateResumeRecommendations(defaultResumeIdx);
+        console.log("[handleResumeRecoToggle] 추천 생성 응답:", res);
+        setResumeReco(true);
+        setPage(1);
+      } catch (e) {
+        console.error("[handleResumeRecoToggle] 추천 생성 실패:", e);
+      } finally {
+        setIsGeneratingReco(false);
+      }
+      return;
     }
-    setResumeReco(checked);
+
+    setResumeReco(false);
     setPage(1);
   };
 
-  const showJobPostingLoading = !initialized || !jobsFetched || jobsLoading;
+  const showJobPostingLoading =
+    !initialized || !jobsFetched || jobsLoading || isGeneratingReco;
 
   return (
     <>

@@ -122,7 +122,7 @@ export const router = createBrowserRouter([
   { path: "/resumes/:resumeId/edit", element: <Layout screen="ResumeEdit"  showFooter="desktop-only" showBottomNav={false} ><ResumeEdit /></Layout> },
 
   { path: "/mock-interview-report", element: <Layout screen="MockInterviewReport"><InterviewReport /></Layout> },
-  { path: "/mock-interview/analysis/:interviewId", element: <Layout screen="MockAnalysisPage" showFooter="desktop-only" showBottomNav={false} ><MockAnalysisPage /></Layout> } ,
+  { path: "/mock-interview/analysis/:id", element: <Layout screen="MockAnalysisPage" showFooter="desktop-only" showBottomNav={false} ><MockAnalysisPage /></Layout> } ,
  
   { path: "jobs/:jobId", element: <Layout screen="JobPostingDetail"
     showFooter="desktop-only" showBottomNav={false} ><JobDetail/></Layout>  } ,

@@ -526,3 +526,32 @@ export const formatMonthStringToDisplay = (s?: string | null) => {
 };
 
 //---------------------------------------
+
+export async function retryRequest<T>(
+  fn: () => Promise<T>,
+  options: { attempts?: number; delayMs?: number; label?: string } = {}
+): Promise<T> {
+  const { attempts = 3, delayMs = 5000, label = "request" } = options;
+  let lastErr: unknown;
+
+  for (let i = 1; i <= attempts; i++) {
+    try {
+      const result = await fn();
+      if (i > 1) {
+        console.log(`[retryRequest] ${label} 성공 (${i}/${attempts})`);
+      }
+      return result;
+    } catch (err) {
+      lastErr = err;
+      console.error(
+        `[retryRequest] ${label} 실패 (${i}/${attempts}):`,
+        err
+      );
+      if (i < attempts) {
+        await new Promise((r) => setTimeout(r, delayMs));
+      }
+    }
+  }
+
+  throw lastErr;
+}

@@ -626,7 +626,7 @@ background: var(--gray-50, #F8F8F9);
     word-break: break-word;
     overflow-wrap: anywhere;
     height: auto;
-    overflow: visible;
+    overflow: auto;
 
 }
 

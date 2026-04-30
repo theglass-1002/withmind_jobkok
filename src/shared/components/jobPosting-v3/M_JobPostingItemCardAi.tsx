@@ -89,10 +89,10 @@ export default function M_JobPostingItemCardAi({
                                     <img src={ic_star_white_14} alt="" />
                                     AI Pick
                          </div>
-                        <span className="job-posting__badge">
+                        {/* <span className="job-posting__badge">
                           <span><img src={seed} alt="" /></span>여유있는근무제!</span>
                         <span className="job-posting__badge job-posting__badge--urgent">
-                          <img src={fire} alt="" />마감임박!</span>
+                          <img src={fire} alt="" />마감임박!</span> */}
                       </div>
                       {recordAsApplied===0?
                           <div className="job-card__control job-card__control--radio">

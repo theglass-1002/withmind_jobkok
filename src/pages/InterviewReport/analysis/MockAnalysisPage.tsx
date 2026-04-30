@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate,useParams } from "react-router-dom";
 import {useStickyTabs} from '@/shared/utils/util'; 
 import test_company_logo from "@/assets/testImg/company_logo/test_company_logo.png";
 import ic_saramin_18 from "@/assets/icons/size18/ic_saramin_18.png";
@@ -146,7 +146,7 @@ const fallbackOverviewData = {
   },
   categorySummary: {
     left: {
-      scoreTitle: "위위님의 점수",
+      scoreTitle: "",
       scores: { attitude: 92, voice: 80, tension: 10, competence: 30 },
       RadarChartComponent: KpiRadarChart,
     },
@@ -188,15 +188,13 @@ const fallbackOverviewData = {
       iconSrc: ic_strength_circle_24,
       label: "강점",
       tags: ["효과적 의견 교환", "타인에 대한 신뢰"],
-      description:
-        "위위님의 강점으로 두드러지는 점은 효과적인 의견 교환과 타인에 대한 신뢰입니다.",
+      description: "",
     },
     weakness: {
       iconSrc: ic_weakness_circle_24,
       label: "약점",
       tags: ["의사소통 기술 활용", "타인 이해"],
-      description:
-        "위위님은 효과적 의견교환 및 타인에 대한 신뢰가 다소 부족합니다.",
+      description: "",
     },
   },
 };
@@ -205,16 +203,16 @@ function buildHeaderMetaRows(reportDetail: InterviewReportDetailResponse | null)
   if (!reportDetail) {
     return [
       [
-        { key: "이름", value: "위위" },
-        { key: "아이디", value: "withmind01" },
+        { key: "이름", value: "" },
+        { key: "아이디", value: "" },
       ],
       [
-        { key: "희망직무", value: "서비스 기획" },
-        { key: "선택 이력서", value: "성장하는 서비스 기획자" },
+        { key: "희망직무", value: "" },
+        { key: "선택 이력서", value: "" },
       ],
       [
-        { key: "신뢰도", value: "중" },
-        { key: "면접시간", value: "12분" },
+        { key: "신뢰도", value: "" },
+        { key: "면접시간", value: "" },
       ],
     ];
   }
@@ -226,7 +224,7 @@ function buildHeaderMetaRows(reportDetail: InterviewReportDetailResponse | null)
     ],
     [
       { key: "희망직무", value: reportDetail.userInfo.desiredJob },
-      { key: "선택 이력서", value: "성장하는 서비스 기획자" },
+      { key: "선택 이력서", value: reportDetail.userInfo.resumeTitle },
     ],
     [
       { key: "신뢰도", value: reportDetail.userInfo.aiTrustLevel },
@@ -244,7 +242,7 @@ export default function MockAnalysisPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   const location = useLocation();
-
+  const { id } = useParams<{ id: string }>();
   const tabItems: { key: TabKey; label: React.ReactNode }[] = [
     { key: "overview", label: "종합 분석" },
     { key: "detail", label: "상세 분석" },
@@ -266,43 +264,44 @@ export default function MockAnalysisPage() {
   }, [location.search]);
 
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const idParam = params.get("id");
-    const qzGroup = Number(idParam ?? 1);
-
+    const qzGroup = Number(id);
+  
+    if (!id || Number.isNaN(qzGroup)) {
+      console.warn("분석결과보기 유효하지 않은 id:", id);
+      setReportDetail(null);
+      return;
+    }
+  
     const fetchData = async () => {
       try {
         setIsLoading(true);
-
+  
+        console.log("분석결과보기 id", id);
+        console.log("분석결과보기 qzGroup", qzGroup);
+  
         const res = await fetchInterviewReportDetail(qzGroup);
-
-        // console.log("=== 분석결과 상세 API 응답 시작 ===");
-        // console.log("qzGroup:", qzGroup);
-        // console.log("전체 응답:", res);
-        // console.log("userInfo:", res.userInfo);
-        // console.log("overallScore:", res.overallScore);
-        // console.log("voiceAnalysis:", res.voiceAnalysis);
-        // console.log("detailAbility:", res.detailAbility);
-        // console.log("detailAttitude:", res.detailAttitude);
-        // console.log("resumeAnalysis:", res.resumeAnalysis);
-        // console.log("=== 분석결과 상세 API 응답 끝 ===");
-
+        
+         console.log("=== 분석결과 상세 API 응답 시작 ===");
+         console.log("qzGroup:", qzGroup);
+         console.log("전체 응답:", res);
+  
         setReportDetail(res);
-      } catch (e) {
+      } catch (e: any) {
         if (e?.code === 999) {
           logout();
           navigate("/login");
           return;
         }
+  
+        console.error("분석결과 상세 조회 실패:", e);
         setReportDetail(null);
       } finally {
         setIsLoading(false);
       }
     };
-
+  
     fetchData();
-  }, [location.search]);
-
+  }, [id, navigate]);
   useEffect(() => {
   }, [reportDetail]);
 

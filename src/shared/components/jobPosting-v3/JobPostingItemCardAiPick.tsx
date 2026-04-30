@@ -36,6 +36,12 @@ interface JobPostingItemCardAiPickProps {
    */
   showAppliedSection?: boolean;
 
+  /**
+   * AI Pick 마크(스티커/ai-pick 클래스) 노출 여부
+   * default: true
+   */
+  showAiPickMark?: boolean;
+
   /** 실제 공고 데이터 */
   job?: JobItem;
 }
@@ -44,6 +50,7 @@ export default function JobPostingItemCardAiPick({
   appliedSuccessMessage = DEFAULT_SUCCESS_MESSAGE,
   unappliedInfoMessage = DEFAULT_INFO_MESSAGE,
   showAppliedSection = true,
+  showAiPickMark = true,
   job,
 }: JobPostingItemCardAiPickProps) {
   const navigate = useNavigate();
@@ -162,7 +169,7 @@ export default function JobPostingItemCardAiPick({
   const edu = getEducationLabel(job.educationCode);
 
   return (
-    <div className="job-posting__card ai-pick" onClick={handleGoToJobPost}>
+    <div className={`job-posting__card${showAiPickMark ? " ai-pick" : ""}`} onClick={handleGoToJobPost}>
       <div className="job-card__header">
         <div className="job-posting__left">
           <img
@@ -196,9 +203,11 @@ export default function JobPostingItemCardAiPick({
 
       <div className="job-card__body">
         <div className="job-card__content">
-          <span className="job-posting__match job-posting__match--level">
-            AI 적합도 {job.matchPercent ? job.matchPercent : 0}%
-          </span>
+          {(job.matchPercent ?? 0) >= 50 && (
+            <span className="job-posting__match job-posting__match--level">
+              AI 적합도 {job.matchPercent}%
+            </span>
+          )}
 
           <div className="job-card__facts">
             <div className="job-posting__meta-items">
@@ -212,7 +221,7 @@ export default function JobPostingItemCardAiPick({
           </div>
         </div>
 
-        <div className="job-posting__badges">
+        {/* <div className="job-posting__badges">
           <span className="job-posting__badge">
             <span>
               <img src={seed} alt="" />
@@ -223,11 +232,13 @@ export default function JobPostingItemCardAiPick({
             <img src={fire} alt="" />
             마감임박!
           </span>
-        </div>
+        </div> */}
 
-        <div className="job-card__sticker">
-          <img src={ai_pick} alt="" />
-        </div>
+        {showAiPickMark && (
+          <div className="job-card__sticker">
+            <img src={ai_pick} alt="" />
+          </div>
+        )}
 
         {showAppliedSection &&
           (recordAsApplied === 0 ? (

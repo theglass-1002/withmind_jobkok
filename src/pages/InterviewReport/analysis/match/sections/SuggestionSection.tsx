@@ -59,7 +59,7 @@ export default function SuggestionSection({ reportDetail }: Props) {
 
             <div className="analysis-table__cell analysis-table__cell--suggestion">
               <span className="guide__description">{item.suggestion}</span>
-              <span className="guide__example">예 : {item.ex}</span>
+             
             </div>
 
             <div className="analysis-table__cell analysis-table__cell--effect">

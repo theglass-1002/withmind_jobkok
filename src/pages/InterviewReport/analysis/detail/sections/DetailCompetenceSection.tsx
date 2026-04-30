@@ -11,7 +11,6 @@ import ic_play_arrow_white_48 from "@/assets/icons/size48/ic_play_arrow_white_48
 import ic_info_white_20 from "@/assets/icons/size20/ic_info_white_20.png";
 import ic_download_white_20 from "@/assets/icons/size20/ic_download_white_20.png";
 
-import interview_video_02 from "@/assets/testImg/interview_video_02.webm";
 import { InterviewReportDetailResponse } from "@/api/report/report.types";
 
 type Props = {
@@ -175,30 +174,39 @@ export default function DetailCompetenceSection({
     default: { common: ["키워드", "사례", "성과"], habit: ["아니"] },
   };
 
-  const interviewVideo = abilityAnalysis?.interviewVideo ?? [];
+  const interviewVideo = useMemo(
+    () => abilityAnalysis?.interviewVideo ?? [],
+    [abilityAnalysis?.interviewVideo]
+  );
   const frequentWords = abilityAnalysis?.frequentlyUsedWords ?? [];
   const habitWords = abilityAnalysis?.frequentlyUsedHabitWords ?? [];
 
   const hasInterviewVideo = interviewVideo.length > 0;
 
+  const uniqueInterviewVideo = useMemo(() => {
+    const byQzNum = new Map<number, (typeof interviewVideo)[number]>();
+    for (const item of interviewVideo) {
+      byQzNum.set(item.qzNum ?? 0, item);
+    }
+    return Array.from(byQzNum.values()).sort(
+      (a, b) => (a.qzNum ?? 0) - (b.qzNum ?? 0)
+    );
+  }, [interviewVideo]);
+
   const resolvedFilters = useMemo<UiFilterOption[]>(() => {
     if (!hasInterviewVideo) return DEFAULT_FILTERS;
 
-    return [...interviewVideo]
-      .sort((a, b) => (a.qzNum ?? 0) - (b.qzNum ?? 0))
-      .map((item) => ({
-        label: `질문 ${item.qzNum}`,
-        value: `q${item.qzNum}`,
-      }));
-  }, [hasInterviewVideo, interviewVideo]);
+    return uniqueInterviewVideo.map((item) => ({
+      label: `질문 ${item.qzNum}`,
+      value: `q${item.qzNum}`,
+    }));
+  }, [hasInterviewVideo, uniqueInterviewVideo]);
 
   const resolvedQuestions = useMemo<Record<string, QuestionItem>>(() => {
     if (!hasInterviewVideo) return QUESTIONS;
 
-    return interviewVideo
-      .slice()
-      .sort((a, b) => (a.qzNum ?? 0) - (b.qzNum ?? 0))
-      .reduce<Record<string, QuestionItem>>((acc, item) => {
+    return uniqueInterviewVideo.reduce<Record<string, QuestionItem>>(
+      (acc, item) => {
         const key = `q${item.qzNum}`;
 
         const keywords = [
@@ -217,8 +225,10 @@ export default function DetailCompetenceSection({
         };
 
         return acc;
-      }, {});
-  }, [hasInterviewVideo, interviewVideo]);
+      },
+      {}
+    );
+  }, [hasInterviewVideo, uniqueInterviewVideo]);
 
   const resolvedWords = useMemo<Record<string, WordItem>>(() => {
     if (frequentWords.length > 0 || habitWords.length > 0) {
@@ -257,7 +267,8 @@ export default function DetailCompetenceSection({
       habit: [],
     };
 
-  const currentVideoSrc = current.fileUrl || videoSrc || interview_video_02;
+  const [signedVideoUrl, setSignedVideoUrl] = useState<string | null>(null);
+  const currentVideoSrc = signedVideoUrl || videoSrc;
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [isBlurred, setIsBlurred] = useState(true);
@@ -279,11 +290,35 @@ export default function DetailCompetenceSection({
 
   useEffect(() => {
     setIsBlurred(true);
+    setSignedVideoUrl(null);
     if (videoRef.current) {
       videoRef.current.pause();
       videoRef.current.currentTime = 0;
     }
-  }, [selectedQuestion]);
+
+    const fileUrl = current.fileUrl;
+    if (!fileUrl) return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(fileUrl);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (cancelled) return;
+        
+        if (data?.signedUrl) {
+          setSignedVideoUrl(data.signedUrl);
+        }
+      } catch (e) {
+        if (!cancelled) console.error("signed video URL 조회 실패:", e);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedQuestion, current.fileUrl]);
 
   const printItems = useMemo(
     () => Object.entries(resolvedQuestions),
@@ -408,12 +443,7 @@ export default function DetailCompetenceSection({
                           v.pause();
                         }
                       }}
-                      style={{
-                        filter: isBlurred ? "blur(8px) brightness(0.7)" : "none",
-                        transform: isBlurred ? "scale(1.03)" : "none",
-                        width: "100%",
-                        cursor: "pointer",
-                      }}
+                      style={{ cursor: "pointer" }}
                     />
 
                     {isBlurred && (

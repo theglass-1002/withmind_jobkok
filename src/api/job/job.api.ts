@@ -53,6 +53,8 @@ export async function fetchJobList(
     params: { page, size, ...options },
   });
 
+  console.log("[fetchJobList] response:", res.data);
+
   const body = res.data;
   const jobs = Array.isArray(body.jobs) ? body.jobs : [];
 

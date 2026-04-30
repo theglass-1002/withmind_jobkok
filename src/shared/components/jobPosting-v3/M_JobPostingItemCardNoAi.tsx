@@ -83,12 +83,12 @@ export default function M_JobPostingItemCardNoAi({
                           <span className="job-card__deadline">~2025.08.31(일)</span>
                         </div>
                       </div>
-                      <div className="job-posting__badges">
+                      {/* <div className="job-posting__badges">
                         <span className="job-posting__badge">
                           <span><img src={seed} alt="" /></span>여유있는근무제!</span>
                         <span className="job-posting__badge job-posting__badge--urgent">
                           <img src={fire} alt="" />마감임박!</span>
-                      </div>
+                      </div> */}
                       {recordAsApplied===0?
                           <div className="job-card__control job-card__control--radio">
                           <div className="radio_check_blank_gray" onClick={(e)=> handleRecordAsApplied(e, 1)}></div> 

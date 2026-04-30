@@ -30,6 +30,11 @@ interface JobPostingItemRowAiPickProps {
   appliedSuccessMessage?: string;
   unappliedInfoMessage?: string;
   showAppliedSection?: boolean;
+  /**
+   * AI Pick 마크(job-posting__ai-pick) 노출 여부
+   * default: true
+   */
+  showAiPickMark?: boolean;
   job?: JobItem;
 }
 
@@ -37,6 +42,7 @@ export default function JobPostingItemRowAiPick({
   appliedSuccessMessage = DEFAULT_SUCCESS_MESSAGE,
   unappliedInfoMessage = DEFAULT_INFO_MESSAGE,
   showAppliedSection = true,
+  showAiPickMark = true,
   job,
 }: JobPostingItemRowAiPickProps) {
   const navigate = useNavigate();
@@ -175,9 +181,11 @@ export default function JobPostingItemRowAiPick({
               </div>
 
               <div className="job-posting__meta">
-              <span className="job-posting__match job-posting__match--level">
-            AI 적합도 {job.matchPercent ? job.matchPercent : 0}%
-          </span>
+                {(job.matchPercent ?? 0) >= 50 && (
+                  <span className="job-posting__match job-posting__match--level">
+                    AI 적합도 {job.matchPercent}%
+                  </span>
+                )}
                 <div className="job-posting__meta-items">
                   <span className="job-posting__meta-item">
                     {loc}ㆍ{career}ㆍ{edu}
@@ -202,7 +210,8 @@ export default function JobPostingItemRowAiPick({
         </div>
 
         <div className="job-posting__row job-posting__row--bottom">
-          <div className="job-posting__badges">
+          <div className="job-posting__badges" />
+          {/* <div className="job-posting__badges">
             <span className="job-posting__badge">
               <span>
                 <img src={seed} alt="" />
@@ -213,10 +222,12 @@ export default function JobPostingItemRowAiPick({
               <img src={fire} alt="" />
               마감임박!
             </span>
-          </div>
-          <div className="job-posting__ai-pick">
-            <img src={ai_pick} alt="" />
-          </div>
+          </div> */}
+          {showAiPickMark && (
+            <div className="job-posting__ai-pick">
+              <img src={ai_pick} alt="" />
+            </div>
+          )}
         </div>
 
         {showAppliedSection &&
@@ -275,9 +286,11 @@ export default function JobPostingItemRowAiPick({
           </div>
         </div>
 
-        <span className="job-posting__match job-posting__match--level">
-            AI 적합도 {job.matchPercent ? job.matchPercent : 0}%
+        {(job.matchPercent ?? 0) >= 50 && (
+          <span className="job-posting__match job-posting__match--level">
+            AI 적합도 {job.matchPercent}%
           </span>
+        )}
 
         <div className="job-posting__meta">
           <div className="job-posting__meta-items">
@@ -291,10 +304,12 @@ export default function JobPostingItemRowAiPick({
 
         <div className="job-posting__row job-posting__row--bottom">
           <div className="job-posting__badges">
-            <div className="job-posting__ai-pick">
-              <img src={ai_pick} alt="" />
-            </div>
-            <span className="job-posting__badge">
+            {showAiPickMark && (
+              <div className="job-posting__ai-pick">
+                <img src={ai_pick} alt="" />
+              </div>
+            )}
+            {/* <span className="job-posting__badge">
               <span>
                 <img src={seed} alt="" />
               </span>
@@ -303,7 +318,7 @@ export default function JobPostingItemRowAiPick({
             <span className="job-posting__badge job-posting__badge--urgent">
               <img src={fire} alt="" />
               마감임박!
-            </span>
+            </span> */}
           </div>
         </div>
 

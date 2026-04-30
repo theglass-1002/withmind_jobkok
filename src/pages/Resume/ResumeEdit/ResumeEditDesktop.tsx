@@ -424,6 +424,22 @@ export default function ResumeEditDesktop() {
         setForm(mapped);
         setIsDefaultResume(data.isDefault);
         setIsReady(true);
+
+        const brokenCount = mapped.portfolios.filter((p) => {
+          const anyP = p as any;
+          return (
+            p.source === "file" &&
+            !anyP.file &&
+            !anyP.filePath?.toString().trim() &&
+            !anyP.fileIdx &&
+            !!p.title?.trim()
+          );
+        }).length;
+        if (brokenCount > 0) {
+          toast.warning(
+            `기존 포트폴리오 ${brokenCount}건의 파일 정보를 불러올 수 없습니다. 새 파일을 업로드하거나 항목을 삭제한 뒤 저장해 주세요.`
+          );
+        }
       } catch (err: any) {
         if (err.code === 999) {
           console.error("❌ 이력서 상세 조회 실패:", err);
@@ -841,8 +857,14 @@ export default function ResumeEditDesktop() {
   ): PortfolioErrors[] =>
     portfolios.map((item) => {
       const pe: PortfolioErrors = {};
+      const anyItem = item as any;
       if (item.source === "file") {
-        if (!(item as any).file && !(item as any).filePath) pe.file = "required";
+        const hasFileInfo =
+          !!anyItem.file ||
+          !!anyItem.filePath?.toString().trim() ||
+          !!anyItem.fileIdx ||
+          !!item.title?.trim();
+        if (!hasFileInfo) pe.file = "required";
       } else {
         if (!item.url?.trim()) pe.url = "required";
       }
@@ -1148,12 +1170,30 @@ export default function ResumeEditDesktop() {
         toast.error("필수 항목을 먼저 입력해 주세요.");
         return;
       }
-  
+
       if (isEdit && !resumeId) {
         toast.error("잘못된 접근입니다.");
         return;
       }
-  
+
+      // 손상 포트폴리오 항목 체크: file/filePath/fileIdx 다 없는데 title만 있는 항목은 저장 불가
+      const hasBrokenPortfolio = form.portfolios.some((p) => {
+        const anyP = p as any;
+        return (
+          p.source === "file" &&
+          !anyP.file &&
+          !anyP.filePath?.toString().trim() &&
+          !anyP.fileIdx &&
+          !!p.title?.trim()
+        );
+      });
+      if (hasBrokenPortfolio) {
+        toast.error(
+          "기존 포트폴리오 파일 정보를 불러올 수 없습니다. 해당 항목을 삭제하거나 새 파일을 업로드한 뒤 저장해 주세요."
+        );
+        return;
+      }
+
       setIsLoading(true);
   
       // ✅ 수정: 업로드 없으면 상세조회로 저장해둔 메타 그대로 재전송
@@ -1237,96 +1277,112 @@ export default function ResumeEditDesktop() {
             }
           : {}),
   
-        ...(form.portfolios.length > 0
-          ? {
-              portfolios: form.portfolios.map((p, idx) => {
-                if (p.source === "file") {
-                  const uploadedResult = portfolioFilesResults.find(
-                    (r) => r.originalItem.id === p.id
-                  );
-  
-                  if (uploadedResult?.uploadedFile) {
-                    const u = uploadedResult.uploadedFile;
-                    return {
-                      itemType: "FILE" as const,
-                      title: u.originalName,
-                      docName: u.originalName,
-                      url: null,
-                      fileRef: u.filePath,
-                      description: p.note ?? "",
-                      sortOrder: idx + 1,
-                      portfolioFile: {
-                        filePath: u.filePath,
-                        originalName: u.originalName,
-                        storedName: u.storedName,
-                        sizeBytes: u.sizeBytes,
-                        contentType: u.contentType,
-                      },
-                    };
-                  }
-  
-                  if (p.filePath) {
-                    const cleanPath = extractS3Path(p.filePath);
-                    const storedName =
-                      (p as any).storedName || cleanPath.split("/").pop() || "";
-                    const sizeBytes = (p as any).sizeBytes || 1048576;
-                    const contentType =
-                      (p as any).contentType ||
-                      (() => {
-                        const extension =
-                          storedName.split(".").pop()?.toLowerCase() || "";
-                        const contentTypeMap: Record<string, string> = {
-                          pdf: "application/pdf",
-                          doc: "application/msword",
-                          docx:
-                            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                          xls: "application/vnd.ms-excel",
-                          xlsx:
-                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                          ppt: "application/vnd.ms-powerpoint",
-                          pptx:
-                            "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-                          jpg: "image/jpeg",
-                          jpeg: "image/jpeg",
-                          png: "image/png",
-                          gif: "image/gif",
-                          txt: "text/plain",
-                        };
-                        return contentTypeMap[extension] || "application/octet-stream";
-                      })();
-  
-                    return {
-                      itemType: "FILE" as const,
-                      title: p.title || `포트폴리오 문서 ${idx + 1}`,
-                      docName: p.title || "",
-                      url: null,
-                      fileRef: cleanPath,
-                      description: p.note ?? "",
-                      sortOrder: idx + 1,
-                      portfolioFile: {
-                        filePath: cleanPath,
-                        originalName: p.title || storedName,
-                        storedName: storedName,
-                        sizeBytes: sizeBytes,
-                        contentType: contentType,
-                      },
-                    };
-                  }
-                }
-  
-                return {
-                  itemType: "URL" as const,
-                  title: p.title || `포트폴리오 ${idx + 1}`,
-                  docName: p.url || "",
-                  url: p.url,
-                  fileRef: null,
-                  description: p.note ?? "",
-                  sortOrder: idx + 1,
-                  portfolioFile: null,
-                };
-              }),
+        ...(() => {
+          const filtered = form.portfolios.filter((p) => {
+            const anyP = p as any;
+            if (p.source === "file") {
+              // 백엔드가 fileRef null을 거부하므로 file/filePath/fileIdx 중 하나는 있어야 페이로드에 포함
+              return (
+                !!anyP.file ||
+                !!anyP.filePath?.toString().trim() ||
+                !!anyP.fileIdx
+              );
             }
-          : {}),
+            return !!p.url?.trim();
+          });
+          if (filtered.length === 0) return {};
+          return {
+            portfolios: filtered.map((p, idx) => {
+              if (p.source === "file") {
+                const uploadedResult = portfolioFilesResults.find(
+                  (r) => r.originalItem.id === p.id
+                );
+
+                if (uploadedResult?.uploadedFile) {
+                  const u = uploadedResult.uploadedFile;
+                  return {
+                    itemType: "FILE" as const,
+                    title: u.originalName,
+                    docName: u.originalName,
+                    url: null,
+                    fileRef: u.filePath,
+                    description: p.note ?? "",
+                    sortOrder: idx + 1,
+                    portfolioFile: {
+                      filePath: u.filePath,
+                      originalName: u.originalName,
+                      storedName: u.storedName,
+                      sizeBytes: u.sizeBytes,
+                      contentType: u.contentType,
+                    },
+                  };
+                }
+
+                if (p.filePath) {
+                  const cleanPath = extractS3Path(p.filePath);
+                  const storedName =
+                    (p as any).storedName || cleanPath.split("/").pop() || "";
+                  const sizeBytes = (p as any).sizeBytes || 1048576;
+                  const contentType =
+                    (p as any).contentType ||
+                    (() => {
+                      const extension =
+                        storedName.split(".").pop()?.toLowerCase() || "";
+                      const contentTypeMap: Record<string, string> = {
+                        pdf: "application/pdf",
+                        doc: "application/msword",
+                        docx:
+                          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                        xls: "application/vnd.ms-excel",
+                        xlsx:
+                          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        ppt: "application/vnd.ms-powerpoint",
+                        pptx:
+                          "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                        jpg: "image/jpeg",
+                        jpeg: "image/jpeg",
+                        png: "image/png",
+                        gif: "image/gif",
+                        txt: "text/plain",
+                      };
+                      return contentTypeMap[extension] || "application/octet-stream";
+                    })();
+
+                  return {
+                    itemType: "FILE" as const,
+                    title: p.title || `포트폴리오 문서 ${idx + 1}`,
+                    docName: p.title || "",
+                    url: null,
+                    fileRef: cleanPath,
+                    fileIdx: (p as any).fileIdx ?? null,
+                    description: p.note ?? "",
+                    sortOrder: idx + 1,
+                    portfolioFile: {
+                      fileIdx: (p as any).fileIdx ?? null,
+                      filePath: cleanPath,
+                      originalName: p.title || storedName,
+                      storedName: storedName,
+                      sizeBytes: sizeBytes,
+                      contentType: contentType,
+                    },
+                  } as any;
+                }
+
+              }
+
+              return {
+                itemType: "URL" as const,
+                title: p.title || `포트폴리오 ${idx + 1}`,
+                docName: p.url || "",
+                url: p.url,
+                fileRef: null,
+                description: p.note ?? "",
+                sortOrder: idx + 1,
+                portfolioFile: null,
+              };
+            }),
+          };
+        })(),
   
         ...(form.selfIntro.trim().length > 0
           ? {
@@ -1458,96 +1514,112 @@ export default function ResumeEditDesktop() {
             }
           : {}),
   
-        ...(form.portfolios.length > 0
-          ? {
-              portfolios: form.portfolios.map((p, idx) => {
-                if (p.source === "file") {
-                  const uploadedResult = portfolioFilesResults.find(
-                    (r) => r.originalItem.id === p.id
-                  );
-  
-                  if (uploadedResult?.uploadedFile) {
-                    const u = uploadedResult.uploadedFile;
-                    return {
-                      itemType: "FILE" as const,
-                      title: u.originalName,
-                      docName: u.originalName,
-                      url: null,
-                      fileRef: u.filePath,
-                      description: p.note ?? "",
-                      sortOrder: idx + 1,
-                      portfolioFile: {
-                        filePath: u.filePath,
-                        originalName: u.originalName,
-                        storedName: u.storedName,
-                        sizeBytes: u.sizeBytes,
-                        contentType: u.contentType,
-                      },
-                    };
-                  }
-  
-                  if (p.filePath) {
-                    const cleanPath = extractS3Path(p.filePath);
-                    const storedName =
-                      (p as any).storedName || cleanPath.split("/").pop() || "";
-                    const sizeBytes = (p as any).sizeBytes || 1048576;
-                    const contentType =
-                      (p as any).contentType ||
-                      (() => {
-                        const extension =
-                          storedName.split(".").pop()?.toLowerCase() || "";
-                        const contentTypeMap: Record<string, string> = {
-                          pdf: "application/pdf",
-                          doc: "application/msword",
-                          docx:
-                            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                          xls: "application/vnd.ms-excel",
-                          xlsx:
-                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                          ppt: "application/vnd.ms-powerpoint",
-                          pptx:
-                            "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-                          jpg: "image/jpeg",
-                          jpeg: "image/jpeg",
-                          png: "image/png",
-                          gif: "image/gif",
-                          txt: "text/plain",
-                        };
-                        return contentTypeMap[extension] || "application/octet-stream";
-                      })();
-  
-                    return {
-                      itemType: "FILE" as const,
-                      title: p.title || `포트폴리오 문서 ${idx + 1}`,
-                      docName: p.title || "",
-                      url: null,
-                      fileRef: cleanPath,
-                      description: p.note ?? "",
-                      sortOrder: idx + 1,
-                      portfolioFile: {
-                        filePath: cleanPath,
-                        originalName: p.title || storedName,
-                        storedName: storedName,
-                        sizeBytes: sizeBytes,
-                        contentType: contentType,
-                      },
-                    };
-                  }
-                }
-  
-                return {
-                  itemType: "URL" as const,
-                  title: p.title || `포트폴리오 ${idx + 1}`,
-                  docName: p.url || "",
-                  url: p.url,
-                  fileRef: null,
-                  description: p.note ?? "",
-                  sortOrder: idx + 1,
-                  portfolioFile: null,
-                };
-              }),
+        ...(() => {
+          const filtered = form.portfolios.filter((p) => {
+            const anyP = p as any;
+            if (p.source === "file") {
+              // 백엔드가 fileRef null을 거부하므로 file/filePath/fileIdx 중 하나는 있어야 페이로드에 포함
+              return (
+                !!anyP.file ||
+                !!anyP.filePath?.toString().trim() ||
+                !!anyP.fileIdx
+              );
             }
-          : {}),
+            return !!p.url?.trim();
+          });
+          if (filtered.length === 0) return {};
+          return {
+            portfolios: filtered.map((p, idx) => {
+              if (p.source === "file") {
+                const uploadedResult = portfolioFilesResults.find(
+                  (r) => r.originalItem.id === p.id
+                );
+
+                if (uploadedResult?.uploadedFile) {
+                  const u = uploadedResult.uploadedFile;
+                  return {
+                    itemType: "FILE" as const,
+                    title: u.originalName,
+                    docName: u.originalName,
+                    url: null,
+                    fileRef: u.filePath,
+                    description: p.note ?? "",
+                    sortOrder: idx + 1,
+                    portfolioFile: {
+                      filePath: u.filePath,
+                      originalName: u.originalName,
+                      storedName: u.storedName,
+                      sizeBytes: u.sizeBytes,
+                      contentType: u.contentType,
+                    },
+                  };
+                }
+
+                if (p.filePath) {
+                  const cleanPath = extractS3Path(p.filePath);
+                  const storedName =
+                    (p as any).storedName || cleanPath.split("/").pop() || "";
+                  const sizeBytes = (p as any).sizeBytes || 1048576;
+                  const contentType =
+                    (p as any).contentType ||
+                    (() => {
+                      const extension =
+                        storedName.split(".").pop()?.toLowerCase() || "";
+                      const contentTypeMap: Record<string, string> = {
+                        pdf: "application/pdf",
+                        doc: "application/msword",
+                        docx:
+                          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                        xls: "application/vnd.ms-excel",
+                        xlsx:
+                          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        ppt: "application/vnd.ms-powerpoint",
+                        pptx:
+                          "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                        jpg: "image/jpeg",
+                        jpeg: "image/jpeg",
+                        png: "image/png",
+                        gif: "image/gif",
+                        txt: "text/plain",
+                      };
+                      return contentTypeMap[extension] || "application/octet-stream";
+                    })();
+
+                  return {
+                    itemType: "FILE" as const,
+                    title: p.title || `포트폴리오 문서 ${idx + 1}`,
+                    docName: p.title || "",
+                    url: null,
+                    fileRef: cleanPath,
+                    fileIdx: (p as any).fileIdx ?? null,
+                    description: p.note ?? "",
+                    sortOrder: idx + 1,
+                    portfolioFile: {
+                      fileIdx: (p as any).fileIdx ?? null,
+                      filePath: cleanPath,
+                      originalName: p.title || storedName,
+                      storedName: storedName,
+                      sizeBytes: sizeBytes,
+                      contentType: contentType,
+                    },
+                  } as any;
+                }
+
+              }
+
+              return {
+                itemType: "URL" as const,
+                title: p.title || `포트폴리오 ${idx + 1}`,
+                docName: p.url || "",
+                url: p.url,
+                fileRef: null,
+                description: p.note ?? "",
+                sortOrder: idx + 1,
+                portfolioFile: null,
+              };
+            }),
+          };
+        })(),
   
         ...(form.selfIntro.trim().length > 0
           ? {
@@ -1565,9 +1637,10 @@ export default function ResumeEditDesktop() {
       console.log("✅ 이력서 임시 저장 payload:", payload);
       const result = await createResume(payload);
       console.log("✅ 이력서 임시저장 성공:", result);
-  
+
       setIsLoading(false);
       toast.success("임시 저장되었습니다.");
+      navigate("/resumes");
     } catch (error: any) {
       setIsLoading(false);
       console.error("❌ 이력서 임시 저장 실패:", error);

@@ -8,11 +8,22 @@ interface InterviewReportHistoryRowProps {
 
 export default function InterviewReportHistoryRow({ item, viewIconSrc }: InterviewReportHistoryRowProps) {
   const statusCls =
-    item.statusState === "done" ? " is-done" : item.statusState === "doing" ? " is-doing" : "";
-  const buttonLabel =
-    item.statusState === "doing" ? "이어서 진행하기" : "분석결과보기";
+    item.statusState === "done"
+      ? " is-done"
+      : item.statusState === "doing"
+      ? " is-doing"
+      : item.statusState === "analyzing"
+      ? " is-analyzing"
+      : "";
+  const isAnalyzing = item.statusState === "analyzing";
+  const buttonLabel = isAnalyzing
+    ? "분석 진행 중"
+    : item.statusState === "doing"
+    ? "이어서 진행하기"
+    : "분석결과보기";
 
   const handleClickView = () => {
+    if (isAnalyzing) return;
     item.onClickView?.();
   };
 
@@ -36,7 +47,12 @@ export default function InterviewReportHistoryRow({ item, viewIconSrc }: Intervi
             {item.statusText}
           </span>
           <span className="mock-history__cell mock-history__cell--action data-list__col u-col--w210 ">
-            <button className="default_btn_white" onClick={handleClickView}>
+            <button
+              className="default_btn_white"
+              onClick={handleClickView}
+              disabled={isAnalyzing}
+              aria-disabled={isAnalyzing}
+            >
               <img src={viewIconSrc} alt="" />
               {buttonLabel}
             </button>
@@ -78,7 +94,12 @@ export default function InterviewReportHistoryRow({ item, viewIconSrc }: Intervi
           </div>
         </div>
         <div className="mock-history__btn_wrap">
-          <button className="btn_w_full default_btn_white" onClick={handleClickView}>
+          <button
+            className="btn_w_full default_btn_white"
+            onClick={handleClickView}
+            disabled={isAnalyzing}
+            aria-disabled={isAnalyzing}
+          >
             <img src={viewIconSrc} alt="" />
             {buttonLabel}
           </button>

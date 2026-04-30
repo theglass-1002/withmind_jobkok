@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import { useLayoutContext } from "@/app/LayoutContext";
 import "./MockInterviewLive.css";
 
@@ -16,6 +17,10 @@ import {
   saveFollowOnQue,
   saveInterviewAnalysis,
 } from "@/api/interview/interview.api";
+import { retryRequest } from "@/shared/utils/util";
+
+const VIDEO_SAVE_FAIL_MESSAGE =
+  "면접영상저장에 실패했습니다. 관리자에게 문의해주세요.";
 
 const THINKING_SECONDS = 15;
 
@@ -405,31 +410,50 @@ export default function M_MockInterviewLive() {
       let uploadResult: any;
 
       try {
-        uploadResult = await uploadJobInterviewVideo(videoBlob);
+        uploadResult = await retryRequest(
+          () => uploadJobInterviewVideo(videoBlob),
+          { label: "uploadJobInterviewVideo" }
+        );
         console.log("[M_uploadRecordedFile] 영상업로드 후 면접영상 저장 api 날리기");
 
-        const res = await saveInterviewAnalysis({
-          qzGroup: state?.interviewGroupId,
-          num: cur.order,
-          qzTts: questionText,
-          fileUrl: uploadResult.finalUrl,
-          thumUrl: uploadResult.thumbUrl,
-          category: "interview",
-          originalName: uploadResult.uniqueFileName,
-          storedName: uploadResult.uniqueFileName,
-          sizeBytes: uploadResult.fileSize,
-          contentType: "video/webm",
-        });
+        const res = await retryRequest(
+          () =>
+            saveInterviewAnalysis({
+              qzGroup: state?.interviewGroupId,
+              num: cur.order,
+              qzTts: questionText,
+              fileUrl: uploadResult.finalUrl,
+              thumUrl: uploadResult.thumbUrl,
+              category: "interview",
+              originalName: uploadResult.uniqueFileName,
+              storedName: uploadResult.uniqueFileName,
+              sizeBytes: uploadResult.fileSize,
+              contentType: "video/webm",
+            }),
+          { label: "saveInterviewAnalysis" }
+        );
 
         console.log("[M_uploadRecordedFile] 면접 영상 저장 API", res);
       } catch (err) {
-        console.error("[M_uploadRecordedFile] video upload failed:", err);
+        console.error(
+          "[M_uploadRecordedFile] video upload failed after retries:",
+          err
+        );
+        toast.error(VIDEO_SAVE_FAIL_MESSAGE);
+        navigate("/");
         return { uploadResult: null, followupRes: null };
       }
 
       if (isFollowupNow) {
         console.log(
           "[M_uploadRecordedFile] 현재 질문은 FOLLOWUP 이라 추가 꼬리질문 생성 없이 종료"
+        );
+        return { uploadResult, followupRes: null };
+      }
+
+      if (cur.order === 1) {
+        console.log(
+          "[M_uploadRecordedFile] 1번 질문(자기소개)은 꼬리질문 생성 스킵"
         );
         return { uploadResult, followupRes: null };
       }
@@ -455,11 +479,14 @@ export default function M_MockInterviewLive() {
 
       let followupRes: any;
       try {
-        followupRes = await fetchInterviewFollowup(payload);
+        followupRes = await retryRequest(
+          () => fetchInterviewFollowup(payload),
+          { label: "fetchInterviewFollowup" }
+        );
         console.log("[M_uploadRecordedFile] followup 응답:", followupRes);
       } catch (err) {
         console.error(
-          "[M_uploadRecordedFile] followup API failed, keep original flow:",
+          "[M_uploadRecordedFile] followup API failed after retries, keep original flow:",
           err
         );
         return { uploadResult, followupRes: null };
@@ -524,11 +551,15 @@ export default function M_MockInterviewLive() {
       setFollowUpMap((prev) => ({ ...prev, [cur.order]: followupLive }));
 
       try {
-        const saveRes = await saveFollowOnQue({
-          qzGroup: Number(state?.interviewGroupId),
-          num: followupOrder,
-          que: followupQuestionText,
-        });
+        const saveRes = await retryRequest(
+          () =>
+            saveFollowOnQue({
+              qzGroup: Number(state?.interviewGroupId),
+              num: followupOrder,
+              que: followupQuestionText,
+            }),
+          { label: "saveFollowOnQue" }
+        );
         console.log("✅ [M_uploadRecordedFile] 꼬리질문 저장 성공:", saveRes);
         console.log("✅ [M_uploadRecordedFile] 저장된 꼬리질문:", {
           qzGroup: Number(state?.interviewGroupId),
@@ -536,7 +567,10 @@ export default function M_MockInterviewLive() {
           que: followupQuestionText,
         });
       } catch (err) {
-        console.error("[M_uploadRecordedFile] saveFollowOnQue 실패:", err);
+        console.error(
+          "[M_uploadRecordedFile] saveFollowOnQue 실패 after retries:",
+          err
+        );
       }
 
       return { uploadResult, followupRes };
@@ -545,29 +579,69 @@ export default function M_MockInterviewLive() {
     }
   };
 
-  const startRecording = async () => {
-    if (isRecording || mediaRecorderRef.current || mediaStreamRef.current) {
-      return;
-    }
-
+  const ensureStream = async (): Promise<MediaStream | null> => {
+    if (mediaStreamRef.current) return mediaStreamRef.current;
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: true,
         audio: true,
       });
-
       mediaStreamRef.current = stream;
       setPreviewStream(stream);
-      recordedChunksRef.current = [];
+      return stream;
+    } catch (err) {
+      console.error("[M_Recorder] getUserMedia failed:", err);
+      return null;
+    }
+  };
 
-      const mimeCandidates = [
-        "video/webm;codecs=vp9,opus",
-        "video/webm;codecs=vp8,opus",
-        "video/webm",
-      ];
-      const mimeType =
-        mimeCandidates.find((m) => MediaRecorder.isTypeSupported(m)) || "";
+  useEffect(() => {
+    let cancelled = false;
 
+    (async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: true,
+        });
+        if (cancelled) {
+          stream.getTracks().forEach((t) => t.stop());
+          return;
+        }
+        mediaStreamRef.current = stream;
+        setPreviewStream(stream);
+      } catch (err) {
+        console.error("[M_MockInterviewLive] camera init failed:", err);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      mediaStreamRef.current?.getTracks().forEach((t) => t.stop());
+      mediaStreamRef.current = null;
+      setPreviewStream(null);
+    };
+  }, []);
+
+  const startRecording = async () => {
+    if (isRecording || mediaRecorderRef.current) {
+      return;
+    }
+
+    const stream = await ensureStream();
+    if (!stream) return;
+
+    recordedChunksRef.current = [];
+
+    const mimeCandidates = [
+      "video/webm;codecs=vp9,opus",
+      "video/webm;codecs=vp8,opus",
+      "video/webm",
+    ];
+    const mimeType =
+      mimeCandidates.find((m) => MediaRecorder.isTypeSupported(m)) || "";
+
+    try {
       const recorder = new MediaRecorder(
         stream,
         mimeType ? { mimeType } : undefined
@@ -618,10 +692,7 @@ export default function M_MockInterviewLive() {
       }
     });
 
-    mediaStreamRef.current?.getTracks().forEach((t) => t.stop());
-    mediaStreamRef.current = null;
     mediaRecorderRef.current = null;
-    setPreviewStream(null);
 
     await uploadRecordedFile(blob, { qIndex: targetQIndex });
   };
@@ -651,11 +722,8 @@ export default function M_MockInterviewLive() {
         console.error("[M_answering cleanup] recorder stop error:", e);
       }
 
-      mediaStreamRef.current?.getTracks().forEach((t) => t.stop());
-      mediaStreamRef.current = null;
       mediaRecorderRef.current = null;
       recordedChunksRef.current = [];
-      setPreviewStream(null);
       setIsRecording(false);
     };
   }, [phase]);
@@ -716,6 +784,7 @@ export default function M_MockInterviewLive() {
             await stopRecordingAndUpload(currentQIndex);
 
             if (isLastQuestion) {
+              setIsUploading(true);
               try {
                 const completePayload = {
                   qz_group: state?.interviewGroupId,
@@ -726,7 +795,10 @@ export default function M_MockInterviewLive() {
                   completePayload
                 );
 
-                const completeRes = await completeInterview(completePayload);
+                const completeRes = await retryRequest(
+                  () => completeInterview(completePayload),
+                  { label: "completeInterview" }
+                );
 
                 console.log(
                   "[M_MockInterviewLive] completeInterview response:",
@@ -734,9 +806,13 @@ export default function M_MockInterviewLive() {
                 );
               } catch (err) {
                 console.error(
-                  "[M_MockInterviewLive] completeInterview failed:",
+                  "[M_MockInterviewLive] completeInterview failed after retries:",
                   err
                 );
+                toast.error(VIDEO_SAVE_FAIL_MESSAGE);
+                navigate("/");
+              } finally {
+                setIsUploading(false);
               }
 
               return;

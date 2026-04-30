@@ -78,6 +78,10 @@ export default function M_MockSettings() {
   );
   const [selectedResume, setSelectedResume] = useState("");
 
+  useEffect(() => {
+    sessionStorage.removeItem("mockInterviewJobUrl");
+  }, []);
+
   const [showConfirm, setShowConfirm] = useState(false);
   const [showSettingsPanel, setShowSettingsPanel] = useState(false);
 

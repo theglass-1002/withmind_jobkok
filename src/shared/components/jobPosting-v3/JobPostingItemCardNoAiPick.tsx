@@ -261,7 +261,7 @@ export default function JobPostingItemCardNoAiPick({
           </div>
         </div>
 
-        <div className="job-posting__badges">
+        {/* <div className="job-posting__badges">
           <span className="job-posting__badge">
             <span>
               <img src={seed} alt="" />
@@ -273,7 +273,7 @@ export default function JobPostingItemCardNoAiPick({
             <img src={fire} alt="" />
             마감임박!
           </span>
-        </div>
+        </div> */}
 
         {showAppliedSection &&
           (recordAsApplied === 0 ? (

@@ -107,13 +107,24 @@ export default function InterviewReportHistory({
   }, [page, filter]);
 
   const doneCountOnPage = useMemo(
-    () => list.filter((i) => i.interviewAllYn === "Y").length,
+    () => list.filter((i) => i.analysisStatus === 2).length,
     [list]
   );
 
   const items: InterviewReportHistoryItemData[] = useMemo(
     () =>
-      list.map((item, idx) => ({
+      list.map((item, idx) => {
+        const status = item.analysisStatus;
+        const statusState: "done" | "doing" | "analyzing" =
+          status === 2 ? "done" : status === 1 ? "analyzing" : "doing";
+        const statusText =
+          status === 2
+            ? "진행완료"
+            : status === 1
+            ? "분석 진행 중"
+            : "진행 중";
+
+        return {
         id: item.qzGroup,
         no: (page - 1) * PAGE_SIZE + idx + 1,
         title: "",
@@ -121,13 +132,14 @@ export default function InterviewReportHistory({
         scoreText: `${item.totalScore}점`,
         roleText: item.jobGroup || item.job || "",
         dateText: formatDate(item.regdate),
-        statusText: item.interviewAllYn === "Y" ? "진행완료" : "진행중",
-        statusState: item.interviewAllYn === "Y" ? "done" : "doing",
+        statusText,
+        statusState,
         resumeLabelIconSrc: ic_selected_file_purple_20,
         resumeText: item.resumeTitle || "",
         resumeDate: formatDate(item.resumeDate),
         onClickView: async () => {
-          if (item.interviewAllYn === "N") {
+          if (status === 1) return;
+          if (status === 0) {
             try {
               const [restartRes, envSpeech] = await Promise.all([
                 restartInterview({ qzGroup: item.qzGroup }),
@@ -184,7 +196,8 @@ export default function InterviewReportHistory({
           }
           navigate(`/mock-interview/analysis/${item.qzGroup}`);
         },
-      })),
+        };
+      }),
     [list, page, navigate, avatarMap]
   );
 

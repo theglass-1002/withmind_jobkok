@@ -104,12 +104,14 @@ export default function JobPostingCard({
     <div className="job-posting__list job-posting__list--grid">
       {jobs.map((job, index) => {
         const itemKey = `job-card-${job.jobIdx ?? "no-id"}-${index}`;
+        const showAiPickMark = isResumeBased && index < 3;
 
         return isResumeBased ? (
           <JobPostingItemCardAiPick
             key={itemKey}
             job={job}
             showAppliedSection={false}
+            showAiPickMark={showAiPickMark}
           />
         ) : (
           <JobPostingItemCardNoAiPick
