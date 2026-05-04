@@ -22,11 +22,17 @@ export default function FindId() {
   // 아이디 찾기 결과(여러 개 가능)
   const [foundIds, setFoundIds] = useState<string[]>([]);
 
+  console.log("[FindId render]", { isVerified, foundIds, foundIdsLength: foundIds.length });
+
   useEffect(() => {
     const allowedOrigins = new Set([window.location.origin, "https://api.jobkok.kr"]);
 
     const handleMessage = async (event: MessageEvent) => {
-      if (!allowedOrigins.has(event.origin)) return;
+      console.log("📩 [FindId] postMessage 수신:", { origin: event.origin, data: event.data });
+      if (!allowedOrigins.has(event.origin)) {
+        console.warn("📩 [FindId] origin 차단됨:", event.origin, "허용목록:", Array.from(allowedOrigins));
+        return;
+      }
 
       // 1) SA_RESULT 수신 → txId로 confirm → ci로 find-id
       if (event.data?.type === "SA_RESULT") {
@@ -74,9 +80,11 @@ export default function FindId() {
           }
 
           // ✅ 상태 세팅 (결과 화면으로 전환)
+          console.log("🎯 [FindId] state 업데이트 직전:", { userInfo, foundIds: idRes.userIds });
           setVerifiedUserInfo(userInfo);
           setFoundIds(idRes.userIds);
           setIsVerified(true);
+          console.log("🎯 [FindId] state 업데이트 호출 완료");
         } catch (e) {
           console.error("[FindId] error:", e);
           toast.error("아이디 찾기 처리 중 오류가 발생했습니다.");
