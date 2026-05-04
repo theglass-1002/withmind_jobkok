@@ -66,6 +66,7 @@ import MyPageLayout from "@/pages/Mypage/MyPageLayout";
 
 // 잡콕_기업
 import CompanyLogin from "@/pages/Company/login/CompanyLogin";
+import CompanyRecovery from "@/pages/Company/login/CompanyRecovery";
 import CompanySignup from "@/pages/Company/signup/CompanySignup";
 import CompanyDashboard from "@/pages/Company/dashboard/CompanyDashboard";
 import Guide from "@/pages/Company/dashboard/Guide/Guide";
@@ -186,6 +187,7 @@ export const router = createBrowserRouter([
 
 
   { path: "/company/login", element: <CompanyLogin/> },
+  { path: "/company/recovery", element: <CompanyRecovery/> },
   { path: "/company/signup", element: <CompanySignup/> },
   
   { path: "/terms", element: <Terms/> },

@@ -39,7 +39,7 @@ export default function MockAnalysisHeader({
     <>
     <div className="mock-analysis__header">
       <div className="mock-analysis__title">
-        {isPrintMode?TAB_LABELS[activeTab]:displayTitle}
+        분석결과
         
         <div className="mock-analysis__title-meta">
           <span className="mock-analysis__title-date">{date}</span>

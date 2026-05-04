@@ -247,6 +247,51 @@
     gap: 24px;
     align-self: stretch;
 }
+.mock-analysis-print-mode .mock-analysis{
+    padding: 0px;
+    zoom: 0.6;
+}
+
+.mock-analysis-print-mode .mock-analysis-report__icon-btn,
+.mock-analysis-print-mode .mock-analysis-report__actions,
+.mock-analysis-print-mode .site-footer{
+    display: none;
+}
+/* 
+.mock-analysis-print-mode .mock-analysis{
+    padding: 0px;
+}
+.mock-analysis-print-mode .mock-analysis__header{
+    padding: 60px;
+}
+
+.mock-analysis-print-mode .mock-analysis__header_container{
+    border: none;
+}
+
+
+.mock-analysis-print-mode .mock-analysis__meta {
+    zoom: 0.6;
+}
+.mock-analysis-print-mode .mock-analysis-tabs{
+    padding: 0px 60px;
+    height: auto;
+} */
+
+@media print {
+    @page {
+        size: A4 portrait;
+    }
+
+    /* .mock-analysis__header_container{
+      border: none
+    }
+
+    .mock-analysis-tabs{
+        padding: 0px 60px;
+        height: auto;
+    } */
+}
 
 @media (max-width: 750px) {
     body{

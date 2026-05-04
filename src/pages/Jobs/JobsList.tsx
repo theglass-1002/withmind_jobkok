@@ -80,6 +80,7 @@ export default function JobsList() {
       try {
         const resumeCheck = await fetchResumeCheck();
         console.log("[JobsList] resumeCheck.exists:", resumeCheck.exists);
+        console.log("[JobsList] 기본 이력서 idx:", resumeCheck.resumeIdx ?? null);
         setResumeExists(!!resumeCheck.exists);
         setDefaultResumeIdx(resumeCheck.resumeIdx ?? null);
       } catch (e) {

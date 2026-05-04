@@ -1,17 +1,23 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import "./Recovery.css";
+import "@/pages/Auth/Recovery/Recovery.css";
 
 import { openAuthPopup } from "@/shared/utils/util";
-import {
-  saInit,
-  saConfirm,
-  issueTempPasswordLocal,
-} from "@/api/auth/auth.api";
+import { saInit, saConfirm } from "@/api/auth/auth.api";
 import { InicisParams } from "@/api/auth/auth.types";
+import { issueCompanyTempPassword } from "@/api/company/auth/companyAuth.api";
 
-export default function ResetPwd() {
+function getCompanyDeviceId() {
+  const key = "companyDeviceId";
+  const existing = localStorage.getItem(key);
+  if (existing) return existing;
+  const created = `device_company_${Date.now()}`;
+  localStorage.setItem(key, created);
+  return created;
+}
+
+export default function CompanyResetPwd() {
   const navigate = useNavigate();
   const saFormRef = useRef<HTMLFormElement | null>(null);
 
@@ -21,9 +27,6 @@ export default function ResetPwd() {
 
   const [inicisParams, setInicisParams] = useState<InicisParams | null>(null);
 
-  /* ===============================
-     이니시스 postMessage 수신
-  =============================== */
   useEffect(() => {
     const allowedOrigins = new Set([
       window.location.origin,
@@ -42,23 +45,22 @@ export default function ResetPwd() {
         }
 
         try {
-          // 1️⃣ 본인인증 confirm
           const confirmRes = await saConfirm(txId);
-          console.log("[ResetPwd] saConfirm:", confirmRes);
+          console.log("[CompanyResetPwd] saConfirm:", confirmRes);
 
           if (!confirmRes.verified) {
             toast.error("본인인증 검증 실패");
             return;
           }
 
-          // 2️⃣ 임시 비밀번호 발급
-          const pwdRes = await issueTempPasswordLocal(
+          const pwdRes = await issueCompanyTempPassword(
             userId,
-            confirmRes.ci
+            confirmRes.ci,
+            getCompanyDeviceId()
           );
 
-          console.log("✅ [ResetPwd] 임시비번 발급 응답:", pwdRes);
-          console.log("✅ [ResetPwd] 발급된 임시 비밀번호:", pwdRes.tempPassword);
+          console.log("✅ [CompanyResetPwd] 기업 임시비번 발급 응답:", pwdRes);
+          console.log("✅ [CompanyResetPwd] 발급된 임시 비밀번호:", pwdRes.tempPassword);
 
           if (pwdRes.code !== 200) {
             toast.error("임시 비밀번호 발급에 실패했습니다.");
@@ -70,7 +72,7 @@ export default function ResetPwd() {
 
           toast.success("임시 비밀번호가 발급되었습니다.");
         } catch (e) {
-          console.error("[ResetPwd] error:", e);
+          console.error("[CompanyResetPwd] error:", e);
           toast.error("비밀번호 재설정 중 오류가 발생했습니다.");
         }
       }
@@ -80,9 +82,6 @@ export default function ResetPwd() {
     return () => window.removeEventListener("message", handleMessage);
   }, [userId]);
 
-  /* ===============================
-     본인인증 시작
-  =============================== */
   const handleVerify = async () => {
     if (!userId) {
       toast.error("아이디(이메일)를 입력해 주세요.");
@@ -92,7 +91,6 @@ export default function ResetPwd() {
     try {
       const init = await saInit();
 
-      // 실제 서비스에서는 이 값들 이니시스 입력 화면에서 받음
       const params: InicisParams = {
         mid: init.mid,
         reqSvcCd: init.reqSvcCd,
@@ -127,7 +125,7 @@ export default function ResetPwd() {
         form.submit();
       });
     } catch (e) {
-      console.error("[ResetPwd] saInit error:", e);
+      console.error("[CompanyResetPwd] saInit error:", e);
       toast.error("본인인증을 시작할 수 없습니다.");
     }
   };
@@ -166,7 +164,7 @@ export default function ResetPwd() {
               <button
                 type="button"
                 className="btn_w_full default_btn_white"
-                onClick={() => navigate("/login")}
+                onClick={() => navigate("/company/login")}
               >
                 취소
               </button>
@@ -191,15 +189,13 @@ export default function ResetPwd() {
                 </span>
               </span>
 
-              <span className="recovery-info__contents">
-                {tempPassword}
-              </span>
+              <span className="recovery-info__contents">{tempPassword}</span>
             </div>
 
             <div className="form-actions">
               <button
                 className="btn_w_full default_btn_black"
-                onClick={() => navigate("/login")}
+                onClick={() => navigate("/company/login")}
               >
                 로그인
               </button>

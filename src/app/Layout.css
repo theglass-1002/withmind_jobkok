@@ -939,25 +939,6 @@ line-height: 20px; /* 125% */
 
 
 
-body.mock-analysis-print-mode .masthead,
-body.mock-analysis-print-mode .btn_wrap,
-body.mock-analysis-print-mode .site-footer,
-body.mock-analysis-print-mode .mock-analysis-overview__recommended-jobs,
-body.mock-analysis-print-mode .mock-analysis-report__icon-btn
-{
-    display: none ;
-}
-
-body.mock-analysis-print-mode .mock-analysis__header{
-    border-bottom: none;
-}
-
-
-
-body.mock-analysis-print-mode .mock-analysis {
-    padding-top: 0px;
-    background: var(--white-100, #FFF);
-}
 
 
 /* 인쇄페이지 분할 */

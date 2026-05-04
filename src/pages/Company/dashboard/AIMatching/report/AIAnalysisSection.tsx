@@ -12,7 +12,7 @@ import ic_star_white_20 from "@/assets/icons/size20/ic_star_white_20.png";
 import ic_weakness_circle_24 from "@/assets/icons/size24/ic_weakness_circle_24.png";
 import ic_strength_circle_24 from "@/assets/icons/size24/ic_strength_circle_24.png";
 
-// ✅ 비디오 파일 import
+// 
 import interview_video_01 from "@/assets/testImg/interview_video_01.webm";
 import interview_video_02 from "@/assets/testImg/interview_video_02.webm";
 import interview_video_03 from "@/assets/testImg/interview_video_03.webm";
@@ -348,11 +348,36 @@ export default function AIAnalysisSection({ id = 1 }: Props) {
     const A4_WIDTH = 794;
     const A4_HEIGHT = 1123;
 
-    window.open(
-      printUrl,
-      "_blank",
-      `width=${A4_WIDTH},height=${A4_HEIGHT},scrollbars=yes,resizable=yes`
-    );
+    const left = Math.max(0, Math.round((window.screen.availWidth - A4_WIDTH) / 2));
+    const top = Math.max(0, Math.round((window.screen.availHeight - A4_HEIGHT) / 2));
+
+    const features = [
+      `width=${A4_WIDTH}`,
+      `height=${A4_HEIGHT}`,
+      `left=${left}`,
+      `top=${top}`,
+      "menubar=no",
+      "toolbar=no",
+      "location=no",
+      "status=no",
+      "scrollbars=yes",
+      "resizable=yes",
+    ].join(",");
+
+    const popup = window.open(printUrl, "_blank", features);
+
+    if (popup) {
+      const enforceSize = () => {
+        try {
+          popup.resizeTo(A4_WIDTH, A4_HEIGHT);
+          popup.moveTo(left, top);
+        } catch {
+          /* noop */
+        }
+      };
+      enforceSize();
+      popup.addEventListener?.("load", enforceSize);
+    }
   };
 
   const handleToggleFavorite = (id: number | string, nextValue?: boolean) => {

@@ -313,21 +313,6 @@ export default function OverviewPage({
     return aiSummary ?? FALLBACK_AI_SUMMARY;
   }, [reportDetail, aiSummary]);
 
-  useEffect(() => {
-    const query = new URLSearchParams(location.search);
-    const isPrintMode = query.has("printViewr");
-
-    if (isPrintMode) {
-      document.body.classList.add("mock-analysis-print-mode");
-    } else {
-      document.body.classList.remove("mock-analysis-print-mode");
-    }
-
-    return () => {
-      document.body.classList.remove("mock-analysis-print-mode");
-    };
-  }, [location.search]);
-
   return (
     <div className="mock-analysis-report__content" ref={contentRef}>
       <KpiOverviewSection reportDetail={reportDetail} />

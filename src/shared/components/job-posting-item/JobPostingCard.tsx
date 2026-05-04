@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 
 import "./JobPostingItem.css";
@@ -84,6 +84,19 @@ export default function JobPostingCard({
     }
   };
 
+  const aiPickIndexSet = useMemo(() => {
+    const set = new Set<number>();
+    if (!isResumeBased) return set;
+    let count = 0;
+    for (let i = 0; i < jobs.length && count < 3; i++) {
+      if ((jobs[i].matchPercent ?? 0) >= 70) {
+        set.add(i);
+        count++;
+      }
+    }
+    return set;
+  }, [jobs, isResumeBased]);
+
   if (loading && jobs.length === 0) {
     return (
       <div className="job-posting__list job-posting__list--grid">
@@ -104,7 +117,7 @@ export default function JobPostingCard({
     <div className="job-posting__list job-posting__list--grid">
       {jobs.map((job, index) => {
         const itemKey = `job-card-${job.jobIdx ?? "no-id"}-${index}`;
-        const showAiPickMark = isResumeBased && index < 3;
+        const showAiPickMark = aiPickIndexSet.has(index);
 
         return isResumeBased ? (
           <JobPostingItemCardAiPick

@@ -75,3 +75,37 @@ export interface CompanyMeResponse {
   companyAccount?: CompanyMeAccountInfo | null;
   msg?: string;
 }
+
+export interface CompanyFindIdRequest {
+  companyUserId: string;
+  password: string;
+  managerPhone: string;
+  managerName: string;
+  birthdate: string;
+  gender: string;
+  password2: string;
+  deviceId: string;
+  companyName: string;
+  bizRegNo: number;
+  ceoName: string;
+  agreeOver14Yn: 0 | 1;
+  agreePaidTermsYn: 0 | 1;
+  agreeTermsYn: 0 | 1;
+  agreePrivacyYn: 0 | 1;
+  agreeMarketingYn: 0 | 1;
+  marketingEmailYn: 0 | 1;
+  marketingPushYn: 0 | 1;
+  ci: string;
+}
+
+export interface CompanyFindIdResponse {
+  code: number;
+  msg: string;
+  companyUserIds: string[];
+}
+
+export interface CompanyIssueTempPasswordResponse {
+  code: number;
+  msg: string;
+  tempPassword: string;
+}

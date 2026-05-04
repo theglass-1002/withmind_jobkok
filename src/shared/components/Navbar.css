@@ -384,6 +384,12 @@ line-height: 20px; /* 125% */
   background: var(--gray-50, #F8F8F9);
 }
 
+.mock-analysis-print-mode .masthead{
+  display: none;
+}
+
+
+
 /* ========== 미디어 쿼리는 맨 마지막에 작성! ========== */
 
 /* 모바일: 760px 이하 */

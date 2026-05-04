@@ -194,6 +194,7 @@
   display: flex;
   flex: 1;
   height: 100%;
+  align-self: stretch;
   flex-direction: column;
   align-items: flex-start;
   gap: 20px;
@@ -459,7 +460,7 @@ background: var(--white-100, #FFF);
   border-radius: 4px;
   border: 1px solid var(--gray-300, #E0E2E4);
   background: var(--white-100, #FFF);
-  
+  overflow: hidden;
 }
 
 .detail-analysis__attitude-right{
@@ -1180,7 +1181,6 @@ line-height: 24px; /* 120% */
 }
 
 
-
 @media print {
   /* =================================
   1. 페이지 기본 설정 및 전역 스타일
@@ -1192,21 +1192,21 @@ line-height: 24px; /* 120% */
   }
 
   * {
-    /* 줌 및 변형 초기화 */
-    zoom: 1 !important;
+  
     -moz-transform: scale(1) !important;
     transform: none !important;
     /* 기타 전역 설정 */
     line-height: 150%;
   }
 
-  body {
+  /* body 폭 강제 규칙은 다른 페이지 인쇄에 누수 위험이 있어 비활성화. 인쇄 시 페이지 폭은 @page와 사용자 여백 설정을 따름 */
+  /* body {
     margin: auto;
     padding: 0 !important;
     width: 210mm !important;
     max-width: 210mm !important;
     zoom: 1 !important;
-  }
+  } */
 
   /* =================================
   2. 인쇄 시 제외 요소 (display: none)
@@ -1225,7 +1225,7 @@ line-height: 24px; /* 120% */
   }
 
   /* =================================
-  3. 폰트 사이즈 및 패딩 그룹화
+  3mode. 폰트 사이즈 및 패딩 그룹화
   =================================
   */
 
@@ -1300,7 +1300,7 @@ line-height: 24px; /* 120% */
 
   /* 답변 분석 영역 - 높이 및 Flexbox */
   .detail-analysis__answer-analysis {
-    height: 100% !important;
+   
   }
   .detail-analysis__question-main {
     display: flex;
@@ -1317,7 +1317,7 @@ line-height: 24px; /* 120% */
   .detail-analysis__question-info,
   .detail-analysis__answer-grade {
     height: auto !important;
-    padding: 10px !important;
+
     gap: 8px;
   }
 
@@ -1326,6 +1326,7 @@ line-height: 24px; /* 120% */
     flex-wrap: wrap;
   }
   .detail-analysis__answer-keywords {
+    height: auto;
     padding: 10px !important;
     gap: 8px !important;
     justify-content: space-evenly;
@@ -1394,6 +1395,38 @@ line-height: 24px; /* 120% */
   .detail-analysis__tension-chart-wrapper canvas {
     width: 100% !important;
   }
+
+  .detail-analysis__video{
+    display: none;
+  }
+  .detail-analysis__question-detail{
+    flex-direction: row;
+  }
+
+
+ 
+}
+
+.mock-analysis-print-mode .detail-analysis__question-main{
+  height: auto;
+} 
+
+.mock-analysis-print-mode .detail-analysis__print-item{
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.mock-analysis-print-mode .detail-analysis__answer-analysis-text{
+  height: 100%;
+}
+
+.mock-analysis-print-mode .detail-analysis__answer-analysis{
+  height: 100%;
+}
+
+.mock-analysis-print-mode .detail-analysis__question-info{
+  height: auto;
 }
 
 

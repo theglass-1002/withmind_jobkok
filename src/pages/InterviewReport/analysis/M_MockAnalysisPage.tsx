@@ -132,22 +132,43 @@ export default function M_MockAnalysisPage() {
   }, [location.search]);
  
   const handleOpenPrintPage = () => {
-    console.log('현재 URL을 새 창에 띄우고 인쇄 플래그를 추가합니다.');
-    console.log('현재 탭:', activeTab);
-    
-    const currentUrl = window.location.href; 
-    const separator = currentUrl.includes('?') ? '&' : '?';
-    
+    const currentUrl = window.location.href;
+    const separator = currentUrl.includes("?") ? "&" : "?";
     const printUrl = `${currentUrl}${separator}printViewr&tab=${activeTab}`;
-    
-    const A4_WIDTH = 794; 
+
+    const A4_WIDTH = 794;
     const A4_HEIGHT = 1123;
-    
-    window.open(
-      printUrl, 
-      '_blank', 
-      `width=${A4_WIDTH},height=${A4_HEIGHT},scrollbars=yes,resizable=yes` 
-    );
+
+    const left = Math.max(0, Math.round((window.screen.availWidth - A4_WIDTH) / 2));
+    const top = Math.max(0, Math.round((window.screen.availHeight - A4_HEIGHT) / 2));
+
+    const features = [
+      `width=${A4_WIDTH}`,
+      `height=${A4_HEIGHT}`,
+      `left=${left}`,
+      `top=${top}`,
+      "menubar=no",
+      "toolbar=no",
+      "location=no",
+      "status=no",
+      "scrollbars=yes",
+      "resizable=yes",
+    ].join(",");
+
+    const popup = window.open(printUrl, "_blank", features);
+
+    if (popup) {
+      const enforceSize = () => {
+        try {
+          popup.resizeTo(A4_WIDTH, A4_HEIGHT);
+          popup.moveTo(left, top);
+        } catch {
+          /* noop */
+        }
+      };
+      enforceSize();
+      popup.addEventListener?.("load", enforceSize);
+    }
   };
 
 

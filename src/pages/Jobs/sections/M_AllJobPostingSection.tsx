@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useNavigationType } from "react-router-dom";
 import Switch from "react-switch";
 
 import search from "@/assets/icons/search.png";
@@ -75,9 +75,17 @@ export default function M_AllJobPostingSection({
 }: M_AllJobPostingSectionProps) {
   const navigate = useNavigate();
   const location = useLocation();
+  const navigationType = useNavigationType();
   const jobPostingRef = useRef<HTMLDivElement | null>(null);
 
-  const savedFilters = useMemo(() => loadMSavedFilters(), []);
+  const savedFilters = useMemo(() => {
+    const filters = loadMSavedFilters();
+    if (filters && navigationType !== "POP") {
+      filters.searchKeyword = "";
+      filters.appliedSearchKeyword = "";
+    }
+    return filters;
+  }, [navigationType]);
 
   const [page, setPage] = useState<number>(savedFilters?.page ?? 1);
   const [sort, setSort] = useState<string>(savedFilters?.sort ?? "최신순");

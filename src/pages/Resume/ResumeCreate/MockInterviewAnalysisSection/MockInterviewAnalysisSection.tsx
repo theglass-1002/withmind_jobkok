@@ -127,6 +127,9 @@ export default function MockInterviewAnalysisSection() {
 
   const applyPicker = () => {
     const found = items.find((it) => it.id === selectedId) || null;
+    console.log("✅ [모의면접 분석결과 선택] selectedId:", selectedId);
+    console.log("✅ [모의면접 분석결과 선택] 선택된 아이템:", found);
+    console.log("✅ [모의면접 분석결과 선택] 전체 items 목록:", items);
     setPickedItem(found);
     setIsPickerOpen(false);
   };

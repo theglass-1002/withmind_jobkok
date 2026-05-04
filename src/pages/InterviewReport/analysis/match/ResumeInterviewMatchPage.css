@@ -428,20 +428,21 @@ QuestionSection */
   
     * {
       /* 줌 및 변형 초기화 */
-      zoom: 1 !important;
+
       -moz-transform: scale(1) !important;
       transform: none !important;
       /* 기타 전역 설정 */
       line-height: 150%;
     }
   
-    body {
+    /* body 폭 강제 규칙은 다른 페이지 인쇄에 누수 위험이 있어 비활성화. 인쇄 시 페이지 폭은 @page와 사용자 여백 설정을 따름 */
+    /* body {
       margin: auto;
       padding: 0 !important;
       width: 210mm !important;
       max-width: 210mm !important;
       zoom: 1 !important;
-    }
+    } */
   
     .mock-analysis-report__content{
         gap: 5px !important;

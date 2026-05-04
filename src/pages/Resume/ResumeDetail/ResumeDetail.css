@@ -677,25 +677,28 @@
     print-color-adjust: exact;
   }
 
-  body * {
+  body:has(.resume-page--detail) * {
     visibility: hidden;
   }
 
-  .resume-page--detail:not(.mobile),
-  .resume-page--detail:not(.mobile) * {
+  body:has(.resume-page--detail) .resume-page--detail:not(.mobile),
+  body:has(.resume-page--detail) .resume-page--detail:not(.mobile) * {
     visibility: visible;
   }
-  
+
 
   .resume-page--detail.mobile,
   .resume-sidebar,
   .resume-controls-wrapper,
   .resume-create-page__aside,
-  .default_tabs,
-  .resume-sidebar__default,
-  .page-header,
-  .Toastify,
-  .toast-container {
+  .resume-sidebar__default {
+    display: none !important;
+  }
+
+  body:has(.resume-page--detail) .default_tabs,
+  body:has(.resume-page--detail) .page-header,
+  body:has(.resume-page--detail) .Toastify,
+  body:has(.resume-page--detail) .toast-container {
     display: none !important;
   }
 

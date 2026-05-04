@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useNavigationType } from "react-router-dom";
 import Switch from "react-switch";
 
 import search from "@/assets/icons/size20/ic_search_gray900_20.png";
@@ -110,9 +110,17 @@ export default function AllJobPostingSection({
 }: AllJobPostingSectionProps) {
   const navigate = useNavigate();
   const location = useLocation();
+  const navigationType = useNavigationType();
   const jobPostingRef = useRef<HTMLDivElement | null>(null);
 
-  const savedFilters = useMemo(() => loadSavedFilters(), []);
+  const savedFilters = useMemo(() => {
+    const filters = loadSavedFilters();
+    if (filters && navigationType !== "POP") {
+      filters.searchKeyword = "";
+      filters.appliedSearchKeyword = "";
+    }
+    return filters;
+  }, [navigationType]);
 
   const [page, setPage] = useState<number>(savedFilters?.page ?? 1);
   const [resumeReco, setResumeReco] = useState<boolean>(
@@ -620,6 +628,7 @@ export default function AllJobPostingSection({
 
       setIsGeneratingReco(true);
       try {
+        console.log("[handleResumeRecoToggle] 추천 생성 시작:", defaultResumeIdx);
         const res = await generateResumeRecommendations(defaultResumeIdx);
         console.log("[handleResumeRecoToggle] 추천 생성 응답:", res);
         setResumeReco(true);

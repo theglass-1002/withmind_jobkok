@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useCallback, useEffect } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -10,6 +10,9 @@ import "./CompanyLogin.css";
 import { loginCompany, getCompanyMe } from "@/api/company/auth/companyAuth.api";
 import { ApiErrorResponse } from "@/api/axios.instance";
 import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
+import { Icons } from "@/assets/icons";
+
+const COMPANY_REMEMBER_ID_KEY = "companyRememberId";
 
 function getDeviceId() {
   const key = "companyDeviceId";
@@ -27,8 +30,26 @@ export default function CompanyLogin() {
   const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [remember, setRemember] = useState(false);
 
   const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
+
+  useEffect(() => {
+    const savedId = localStorage.getItem(COMPANY_REMEMBER_ID_KEY);
+    if (savedId) {
+      setUserId(savedId);
+      setRemember(true);
+    }
+  }, []);
+
+  const handleToggleRemember = useCallback(() => {
+    setRemember((prev) => {
+      const next = !prev;
+      if (next && userId) localStorage.setItem(COMPANY_REMEMBER_ID_KEY, userId);
+      if (!next) localStorage.removeItem(COMPANY_REMEMBER_ID_KEY);
+      return next;
+    });
+  }, [userId]);
 
   const saveCompanyLoginTokens = useCallback(
     (data: {
@@ -88,6 +109,9 @@ export default function CompanyLogin() {
           companyIdx: result.companyAccount.companyIdx,
           companyUserId: result.companyAccount.companyUserId,
         });
+
+        if (remember) localStorage.setItem(COMPANY_REMEMBER_ID_KEY, trimmedUserId);
+        else localStorage.removeItem(COMPANY_REMEMBER_ID_KEY);
 
         const meResult = await getCompanyMe();
         console.log("기업정보 조회 응답:", meResult);
@@ -196,6 +220,26 @@ export default function CompanyLogin() {
           </div>
         </div>
 
+        <div className="form-meta">
+          <span
+            className="remember"
+            onClick={isSubmitting ? undefined : handleToggleRemember}
+          >
+            <img
+              src={
+                remember
+                  ? Icons.ic_check_box_purple24
+                  : Icons.ic_check_box_blank_gray400_24
+              }
+              alt=""
+            />
+            아이디 기억하기
+          </span>
+          <div className="links">
+            <NavLink to="/company/recovery">아이디 찾기</NavLink>
+            <NavLink to="/company/recovery">비밀번호 찾기</NavLink>
+          </div>
+        </div>
         <div className="company-login__signup">
           <span className="company-login__signup-text">아직 회원이 아니세요?</span>
           <span
