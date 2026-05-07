@@ -5,6 +5,7 @@ import {
   CreateExperienceResponse,
   CreateResumeRequest,
   CreateResumeResponse,
+  LockAndCloneResumeResponse,
   ResumeCheckResponse,
   ResumeDetailResponse,
   ResumeHardSkillRequest,
@@ -105,6 +106,17 @@ export async function fetchResumeCheck(): Promise<ResumeCheckResponse> {
   const res = await instance.get<ResumeCheckResponse>("/api/resume/check", {
   });
 
+  return res.data;
+}
+
+// 모의면접 완료 후 해당 이력서를 잠그고 복제본을 생성한다.
+export async function lockAndCloneResume(
+  resumeIdx: number
+): Promise<LockAndCloneResumeResponse> {
+  const res = await instance.post<LockAndCloneResumeResponse>(
+    `/api/resume/lock-and-clone/${resumeIdx}`
+  );
+  console.log("✅ 이력서 잠금 및 복제 응답:", res.data);
   return res.data;
 }
 

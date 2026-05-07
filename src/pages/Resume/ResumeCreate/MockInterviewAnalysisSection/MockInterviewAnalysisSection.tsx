@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./MockInterviewAnalysisSection.css";
 import AnalysisResultModal from "./AnalysisResultModal";
 
@@ -28,14 +28,56 @@ const formatDateToDot = (date?: string) => {
   return date.replaceAll("-", ".");
 };
 
-export default function MockInterviewAnalysisSection() {
-  const [isAdding, setIsAdding] = useState(false);
+type InitialPicked = {
+  qzGroup: number;
+  score?: number | null;
+  job?: string | null;
+  date?: string | null; // raw "YYYY-MM-DD HH:mm:ss"
+  resumeTitle?: string;
+};
+
+type Props = {
+  onPickedChange?: (qzGroup: number | null) => void;
+  initialPicked?: InitialPicked | null;
+};
+
+const buildInitialItem = (p: InitialPicked): Item => ({
+  id: String(p.qzGroup),
+  score: typeof p.score === "number" ? `${p.score}점` : "",
+  role: p.job ?? "",
+  date: p.date ? p.date.slice(0, 10).replaceAll("-", ".") : "",
+  resumeDate: "",
+  title: "모의면접 분석 결과",
+  resumeTitle: p.resumeTitle ?? "",
+  photoUrl: test_profile_img,
+  badgeLabel: "전체 면접",
+});
+
+export default function MockInterviewAnalysisSection({
+  onPickedChange,
+  initialPicked,
+}: Props = {}) {
+  const [isAdding, setIsAdding] = useState(!!initialPicked);
   const [isLoading, setIsLoading] = useState(false);
 
   // 모달 제어(선택 모달)
   const [isPickerOpen, setIsPickerOpen] = useState(false);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [pickedItem, setPickedItem] = useState<Item | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(
+    initialPicked ? String(initialPicked.qzGroup) : null
+  );
+  const [pickedItem, setPickedItem] = useState<Item | null>(
+    initialPicked ? buildInitialItem(initialPicked) : null
+  );
+
+  // 부모에서 초기 모의면접 결과가 비동기로 도착할 수 있으니 동기화
+  useEffect(() => {
+    if (initialPicked) {
+      const item = buildInitialItem(initialPicked);
+      setPickedItem(item);
+      setSelectedId(item.id);
+      setIsAdding(true);
+    }
+  }, [initialPicked]);
 
   // 닫기 확인 모달
   const [showConfirm, setShowConfirm] = useState(false);
@@ -50,6 +92,7 @@ export default function MockInterviewAnalysisSection() {
     setSelectedId(null);
     setPickedItem(null);
     setIsPickerOpen(false);
+    onPickedChange?.(null);
   };
 
   // 상단 X 눌렀을 때: 값 있으면 확인 모달, 없으면 즉시 닫기
@@ -132,6 +175,9 @@ export default function MockInterviewAnalysisSection() {
     console.log("✅ [모의면접 분석결과 선택] 전체 items 목록:", items);
     setPickedItem(found);
     setIsPickerOpen(false);
+
+    const qzGroupNum = found ? Number(found.id) : NaN;
+    onPickedChange?.(Number.isFinite(qzGroupNum) ? qzGroupNum : null);
   };
 
   // 화면에 요약 문구

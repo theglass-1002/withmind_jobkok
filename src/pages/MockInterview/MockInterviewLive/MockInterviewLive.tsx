@@ -15,6 +15,7 @@ import {
   saveFollowOnQue,
   saveInterviewAnalysis,
 } from "@/api/interview/interview.api";
+import { lockAndCloneResume } from "@/api/resume/resume.api";
 
 import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
 import { retryRequest } from "@/shared/utils/util";
@@ -752,6 +753,24 @@ export default function MockInterviewLive() {
                     "[MockInterviewLive] completeInterview response:",
                     completeRes
                   );
+
+                  const resumeIdxForLock = Number(state?.resumeDetail?.resumeIdx);
+                  if (Number.isFinite(resumeIdxForLock)) {
+                    console.log(
+                      "[MockInterviewLive] lockAndCloneResume request:",
+                      resumeIdxForLock
+                    );
+                    const lockRes = await lockAndCloneResume(resumeIdxForLock);
+                    console.log(
+                      "[MockInterviewLive] lockAndCloneResume response:",
+                      lockRes
+                    );
+                  } else {
+                    console.warn(
+                      "[MockInterviewLive] lockAndCloneResume skipped: invalid resumeIdx",
+                      state?.resumeDetail
+                    );
+                  }
                 } catch (err) {
                   console.error(
                     "[MockInterviewLive] completeInterview failed after retries:",

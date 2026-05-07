@@ -65,7 +65,7 @@
     gap: 10px;
     color: var(---gray-900, #2A2D2F);
     font-family: Pretendard;
-    font-size: 20px;
+    font-size: 15px;
     font-style: normal;
     font-weight: 600;
     line-height: normal;
@@ -577,6 +577,8 @@ AIReport */
     border-bottom: 1px solid var(---gray-400, #C8CCCF);
     background: var(---gray-50, #F8F8F9);
     padding: 20px;
+    gap: 20px;
+    overflow: auto;
 }
 
 .ai-match-label{
@@ -623,4 +625,8 @@ AIReport */
     font-weight: 400;
     line-height: normal;
 
+}
+
+.ai-match-item-desc{
+    width: 70%;
 }

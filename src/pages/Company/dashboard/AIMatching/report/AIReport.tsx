@@ -51,8 +51,11 @@ export default function AIReport() {
   const companyName = Storage.getCompanyName();
   const routeState = (location.state as AIReportLocationState | null) ?? null;
 
+  const isAiInterviewPublic =
+    routeState?.recommendationItem?.aiInterview === "공개";
+
   const [activeTab, setActiveTab] = useState<ReportTab>(
-    routeState?.activeTab ?? "RESUME"
+    isAiInterviewPublic ? routeState?.activeTab ?? "RESUME" : "RESUME"
   );
   const [recommendationDetail, setRecommendationDetail] =
     useState<RecommendationDetailData | null>(null);
@@ -65,10 +68,11 @@ export default function AIReport() {
     console.log("AIReport reportId:", reportId);
 
     const fetchRecommendationDetail = async () => {
-      const recommendationIdx = routeState?.recommendationItem?.idx;
+      const recommendationIdx =
+        routeState?.recommendationItem?.idx ?? reportId;
 
       if (!recommendationIdx) {
-        console.log("추천상세조회 스킵: recommendationItem.idx 값이 없습니다.");
+        console.log("추천상세조회 스킵: recommendationIdx 값이 없습니다.");
         setRecommendationDetail(null);
         return;
       }
@@ -127,14 +131,16 @@ export default function AIReport() {
             >
               이력서
             </span>
-            <span
-              className={`report-tab-nav__item ${
-                activeTab === "AI_ANALYSIS" ? "on" : ""
-              }`}
-              onClick={() => setActiveTab("AI_ANALYSIS")}
-            >
-              AI분석
-            </span>
+            {isAiInterviewPublic && (
+              <span
+                className={`report-tab-nav__item ${
+                  activeTab === "AI_ANALYSIS" ? "on" : ""
+                }`}
+                onClick={() => setActiveTab("AI_ANALYSIS")}
+              >
+                AI분석
+              </span>
+            )}
           </div>
         </div>
 

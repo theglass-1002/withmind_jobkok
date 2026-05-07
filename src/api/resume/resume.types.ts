@@ -98,6 +98,7 @@ export interface ResumeListApiResponse {
     userIdx: number;
     isDefault: number;
     temp: "Y" | "N";
+    qzGroup?: number; // 모의면접 분석 결과를 선택했을 때만 전송
     title: string;
     name: string;
     email: string;
@@ -130,7 +131,7 @@ export interface ResumeListApiResponse {
     userIdx: number;
     isDefault: boolean;
     temp: "Y" | "N";
-  
+
     title: string;
     name: string;
     email: string;
@@ -140,6 +141,13 @@ export interface ResumeListApiResponse {
     profilePhotoFile?: ProfilePhotoFile | null;
     createdAt: string;
     updatedAt: string;
+
+    // 모의면접 분석 결과 (없으면 null)
+    qzGroup?: number | null;
+    interviewScore?: number | null;
+    interviewJob?: string | null;
+    interviewJobGroup?: string | null;
+    interviewDate?: string | null;
   
     regionList: string[];
     jobList: string[];
@@ -208,6 +216,13 @@ export interface ResumeCheckResponse {
   exists: boolean;
   resumeIdx: number | null;
   title: string | null;
+}
+
+// 이력서 잠금 및 복제 응답
+export interface LockAndCloneResumeResponse {
+  code: number;
+  msg: string;
+  clonedResumeIdx: number;
 }
 
 

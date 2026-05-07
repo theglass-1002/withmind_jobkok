@@ -151,6 +151,7 @@ export default function M_ResumeCreate() {
   });
   const [showTitleSuggest, setShowTitleSuggest] = useState(false);
   const [isDefaultResume, setIsDefaultResume] = useState(false);
+  const [selectedQzGroup, setSelectedQzGroup] = useState<number | null>(null);
   const [showRoleSuggest, setShowRoleSuggest] = useState(false);
   const [showHardSkillSuggest, setShowHardSkillSuggest] = useState(false);
   const [showSoftSkillSuggest, setShowSoftSkillSuggest] = useState(false);
@@ -671,6 +672,7 @@ export default function M_ResumeCreate() {
         userIdx: Storage.getUserIdx(),
         isDefault: 0,
         temp: "Y",
+        ...(selectedQzGroup != null ? { qzGroup: selectedQzGroup } : {}),
 
         title: form.title,
         name: form.basic.name,
@@ -966,7 +968,8 @@ export default function M_ResumeCreate() {
         userIdx: Storage.getUserIdx(),
         isDefault: isDefaultResume ? 1 : 0,
         temp: "N",
-  
+        ...(selectedQzGroup != null ? { qzGroup: selectedQzGroup } : {}),
+
         title: form.title,
         name: form.basic.name,
         email: form.basic.email,
@@ -1261,7 +1264,7 @@ export default function M_ResumeCreate() {
             onClickAISuggest={handleClickSelfIntroSuggest}
             onCloseAISuggest={handleCloseSelfIntroSuggest}
           />
-         <M_MockInterviewAnalysisSection /> 
+         <M_MockInterviewAnalysisSection onPickedChange={setSelectedQzGroup} />
         </div>
         </div>
       </div>

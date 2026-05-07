@@ -20,6 +20,7 @@ import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
 import test_resume_img from "@/assets/testImg/test_resume_img.png";
 import ic_link_gray900_20 from "@/assets/icons/size20/ic_link_gray900_20.png";
 import ic_folder_gray900_20 from "@/assets/icons/size20/ic_folder_gray900_20.png";
+import ic_content_paste_gray900_20 from "@/assets/icons/size20/ic_content_paste_gray900_20.png";
 
 import ResumeActionsBar from "./parts/ResumeActionsBar";
 import ResumeHeaderTitle from "./parts/ResumeHeaderTitle";
@@ -73,6 +74,29 @@ const ALL_SECTIONS: SectionId[] = [
 const formatYmToDot = (ym?: string | null): string => {
   if (!ym) return "";
   return ym.replace("-", ".");
+};
+
+// "2026-04-30 16:27:51" -> "2026.04.30"
+const formatInterviewDate = (raw?: string | null): string => {
+  if (!raw) return "";
+  return raw.slice(0, 10).replaceAll("-", ".");
+};
+
+// 모의면접 분석 결과 표시용 아이템 빌더
+const buildMockInterviewItems = (
+  data: ResumeDetailResponse
+): { title: string }[] => {
+  if (!data.qzGroup) return [];
+
+  const score =
+    typeof data.interviewScore === "number" ? `${data.interviewScore}점` : "";
+  const job = data.interviewJob || data.interviewJobGroup || "";
+  const date = formatInterviewDate(data.interviewDate);
+
+  const title = [score, job, date].filter(Boolean).join("ㆍ");
+  if (!title) return [];
+
+  return [{ title }];
 };
 
 // ✅ 섹션별 값 유무로 completed / pending 계산
@@ -586,13 +610,8 @@ export default function ResumeDetail() {
 
               <ResumeMockInterviewSection
                 lastItem
-                defaultIcon={ic_folder_gray900_20}
-                items={[
-                  {
-                    title:
-                      "82점ㆍ프로젝트 기획자ㆍ25.01.01 [성장하는 기획자 위위입니다.]",
-                  },
-                ]}
+                defaultIcon={ic_content_paste_gray900_20}
+                items={buildMockInterviewItems(resumeData)}
               />
             </div>
           </div>
@@ -715,13 +734,8 @@ export default function ResumeDetail() {
 
             <ResumeMockInterviewSection
               lastItem
-              defaultIcon={ic_folder_gray900_20}
-              items={[
-                {
-                  title:
-                    "82점ㆍ프로젝트 기획자ㆍ25.01.01 [성장하는 기획자 위위입니다.]",
-                },
-              ]}
+              defaultIcon={ic_content_paste_gray900_20}
+              items={buildMockInterviewItems(resumeData)}
             />
           </div>
         </div>

@@ -199,16 +199,26 @@ export default function AIMatching() {
       return;
     }
 
+    const companyIdx = localStorage.getItem("companyIdx");
+
+    if (!companyIdx) {
+      toast.info("기업 정보가 없습니다. 다시 로그인해 주세요.", {
+        toastId: "ai-matching-empty-company-idx",
+      });
+      resetAnalysisState();
+      return;
+    }
+
     clearPollingTimer();
     pollingCountRef.current = 0;
     resetAnalysisState();
     setIsLoading(true);
 
     try {
-      console.log("공고분석 POST 요청 시작:", trimmed);
+      console.log("공고분석 POST 요청 시작:", { url: trimmed, companyIdx });
 
       const startRes = await withTimeout(
-        startCompanyJobAnalysis({ url: trimmed }),
+        startCompanyJobAnalysis({ url: trimmed, companyIdx }),
         POST_TIMEOUT_MS
       );
 

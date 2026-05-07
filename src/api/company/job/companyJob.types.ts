@@ -1,5 +1,6 @@
 export interface CompanyJobAnalysisRequest {
   url: string;
+  companyIdx: number | string;
 }
 
 export type AnalysisProcessStatus =
@@ -206,4 +207,46 @@ export interface CompanyResumeDetailResponse {
   code: number;
   msg?: string;
   resume?: CompanyResumeDetailData | null;
+}
+
+
+export interface CompanyMatchHistoryItem {
+  recommendationIdx?: number;
+  name?: string;
+  jobName?: string;
+  aiMatchPercent?: number;
+  aiInterview?: string;
+  resumeUpdatedAt?: string;
+}
+
+export interface CompanyMatchHistoryPagination {
+  page?: number;
+  size?: number;
+  totalCount?: number;
+  totalPages?: number;
+}
+
+export interface CompanyMatchHistoryFilters {
+  jobIdx?: number | null;
+  keyword?: string | null;
+}
+
+export interface CompanyMatchHistoryData {
+  items?: CompanyMatchHistoryItem[];
+  pagination?: CompanyMatchHistoryPagination;
+  filters?: CompanyMatchHistoryFilters;
+}
+
+export interface CompanyMatchHistoryResponse {
+  success: boolean;
+  code: "JOB_POSTING_MATCH_HISTORY_FOUND" | string;
+  data?: CompanyMatchHistoryData;
+}
+
+export interface CompanyMatchHistoryRequest {
+  companyIdx: number | string;
+  page?: number;
+  size?: number;
+  jobIdx?: number | string;
+  keyword?: string;
 }

@@ -1,5 +1,5 @@
 // src/pages/.../MockInterviewAnalysisSection/M_MockInterviewAnalysisSection.tsx
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./MockInterviewAnalysisSection.css";
 import { toast } from "react-toastify";
 
@@ -34,13 +34,50 @@ const formatDateToDot = (date?: string) => {
   return date.replaceAll("-", ".");
 };
 
-export default function M_MockInterviewAnalysisSection() {
+type InitialPicked = {
+  qzGroup: number;
+  score?: number | null;
+  job?: string | null;
+  date?: string | null; // raw "YYYY-MM-DD HH:mm:ss"
+  resumeTitle?: string;
+};
+
+type Props = {
+  onPickedChange?: (qzGroup: number | null) => void;
+  initialPicked?: InitialPicked | null;
+};
+
+const buildInitialItem = (p: InitialPicked): Item => ({
+  id: String(p.qzGroup),
+  score: typeof p.score === "number" ? `${p.score}점` : "",
+  role: p.job ?? "",
+  date: p.date ? p.date.slice(0, 10).replaceAll("-", ".") : "",
+  resumeDate: "",
+  title: "모의면접 분석 결과",
+  resumeTitle: p.resumeTitle ?? "",
+  photoUrl: test_profile_img,
+  badgeLabel: "전체 면접",
+});
+
+export default function M_MockInterviewAnalysisSection({
+  onPickedChange,
+  initialPicked,
+}: Props = {}) {
   const [isAdding, setIsAdding] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   // 분석 결과 선택 상태
   const [selectedId, setSelectedId] = useState<string | null>(null); // 오버레이 내 현재 선택
-  const [pickedItem, setPickedItem] = useState<Item | null>(null);   // 실제 적용된 값
+  const [pickedItem, setPickedItem] = useState<Item | null>(
+    initialPicked ? buildInitialItem(initialPicked) : null
+  ); // 실제 적용된 값
+
+  // 부모에서 초기 모의면접 결과가 비동기로 도착할 수 있으니 동기화
+  useEffect(() => {
+    if (initialPicked) {
+      setPickedItem(buildInitialItem(initialPicked));
+    }
+  }, [initialPicked]);
 
   // 모달 상태
   const [showCancelModal, setShowCancelModal] = useState(false); // X 닫기 시 확인 모달
@@ -121,6 +158,9 @@ export default function M_MockInterviewAnalysisSection() {
     setPickedItem(found);
     setSelectedId(null);
     setIsAdding(false);
+
+    const qzGroupNum = found ? Number(found.id) : NaN;
+    onPickedChange?.(Number.isFinite(qzGroupNum) ? qzGroupNum : null);
   };
 
   // X 닫기 버튼
@@ -149,7 +189,9 @@ export default function M_MockInterviewAnalysisSection() {
 
   const confirmReset = () => {
     setSelectedId(null);
+    setPickedItem(null);
     setShowResetModal(false);
+    onPickedChange?.(null);
   };
 
   const summaryText = pickedItem

@@ -266,6 +266,7 @@ export default function ResumeCreate() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [isDefaultResume, setIsDefaultResume] = useState(false);
+  const [selectedQzGroup, setSelectedQzGroup] = useState<number | null>(null);
   const [sidebarStatus, setSidebarStatus] =
     useState<Partial<Record<SectionId, Status>>>({});
 
@@ -994,6 +995,7 @@ export default function ResumeCreate() {
         userIdx: Storage.getUserIdx(),
         isDefault: isDefaultResume ? 1 : 0,
         temp: "N",
+        ...(selectedQzGroup != null ? { qzGroup: selectedQzGroup } : {}),
         title: form.title,
         name: form.basic.name,
         email: form.basic.email,
@@ -1160,6 +1162,7 @@ export default function ResumeCreate() {
         userIdx: Storage.getUserIdx(),
         isDefault: 0,
         temp: "Y",
+        ...(selectedQzGroup != null ? { qzGroup: selectedQzGroup } : {}),
         title: form.title,
         name: form.basic.name,
         email: form.basic.email,
@@ -1454,7 +1457,7 @@ export default function ResumeCreate() {
             onCloseAISuggest={handleCloseSelfIntroSuggest}
           />
 
-          <MockInterviewAnalysisSection />
+          <MockInterviewAnalysisSection onPickedChange={setSelectedQzGroup} />
         </div>
 
         <ResumeSidebar

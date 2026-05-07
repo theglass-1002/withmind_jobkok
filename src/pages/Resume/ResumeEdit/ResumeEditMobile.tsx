@@ -80,6 +80,14 @@ export default function ResumeEditMobile() {
     const [isReady, setIsReady] = useState(!isEdit);
     const [isLoading, setIsLoading] = useState(false);
     const [isDefaultResume, setIsDefaultResume] = useState(false);
+    const [selectedQzGroup, setSelectedQzGroup] = useState<number | null>(null);
+    const [initialMockInterview, setInitialMockInterview] = useState<{
+      qzGroup: number;
+      score: number | null;
+      job: string | null;
+      date: string | null;
+      resumeTitle: string;
+    } | null>(null);
     const [showDefaultModal, setShowDefaultModal] = useState(false); // 기본 이력서 설정 모달
     const [showExitWithoutSavingModal, setShowExitWithoutSavingModal] = useState(false);
   
@@ -151,6 +159,18 @@ export default function ResumeEditMobile() {
           console.log("📌 mapped form", mapped);
           setForm(mapped);
           setIsDefaultResume(data.isDefault);
+
+          if (data.qzGroup) {
+            setSelectedQzGroup(data.qzGroup);
+            setInitialMockInterview({
+              qzGroup: data.qzGroup,
+              score: data.interviewScore ?? null,
+              job: data.interviewJob ?? data.interviewJobGroup ?? null,
+              date: data.interviewDate ?? null,
+              resumeTitle: data.title,
+            });
+          }
+
           setIsReady(true);
 
           const brokenCount = mapped.portfolios.filter((p) => {
@@ -640,6 +660,7 @@ export default function ResumeEditMobile() {
             userIdx: Storage.getUserIdx(),
             isDefault: 0,
             temp: "Y",
+            ...(selectedQzGroup != null ? { qzGroup: selectedQzGroup } : {}),
 
             title: form.title,
             name: form.basic.name,
@@ -1148,7 +1169,8 @@ export default function ResumeEditMobile() {
             userIdx: Storage.getUserIdx(),
             isDefault: isDefaultResume ? 1 : 0,
             temp: "N",
-      
+            ...(selectedQzGroup != null ? { qzGroup: selectedQzGroup } : {}),
+
             title: form.title,
             name: form.basic.name,
             email: form.basic.email,
@@ -1517,7 +1539,10 @@ export default function ResumeEditMobile() {
              onCloseAISuggest={handleCloseSelfIntroSuggest}
              isEdit={isEdit}
            />
-          <M_MockInterviewAnalysisSection /> 
+          <M_MockInterviewAnalysisSection
+            onPickedChange={setSelectedQzGroup}
+            initialPicked={initialMockInterview}
+          />
          </div>
          </div>
        </div>

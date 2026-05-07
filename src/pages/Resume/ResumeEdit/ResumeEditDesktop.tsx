@@ -397,6 +397,14 @@ export default function ResumeEditDesktop() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [isDefaultResume, setIsDefaultResume] = useState(false);
+  const [selectedQzGroup, setSelectedQzGroup] = useState<number | null>(null);
+  const [initialMockInterview, setInitialMockInterview] = useState<{
+    qzGroup: number;
+    score: number | null;
+    job: string | null;
+    date: string | null;
+    resumeTitle: string;
+  } | null>(null);
   const [sidebarStatus, setSidebarStatus] =
     useState<Partial<Record<SectionId, Status>>>({});
   const [isReady, setIsReady] = useState(!isEdit);
@@ -423,6 +431,18 @@ export default function ResumeEditDesktop() {
         console.log("📌 mapped form", mapped);
         setForm(mapped);
         setIsDefaultResume(data.isDefault);
+
+        if (data.qzGroup) {
+          setSelectedQzGroup(data.qzGroup);
+          setInitialMockInterview({
+            qzGroup: data.qzGroup,
+            score: data.interviewScore ?? null,
+            job: data.interviewJob ?? data.interviewJobGroup ?? null,
+            date: data.interviewDate ?? null,
+            resumeTitle: data.title,
+          });
+        }
+
         setIsReady(true);
 
         const brokenCount = mapped.portfolios.filter((p) => {
@@ -1209,6 +1229,7 @@ export default function ResumeEditDesktop() {
         userIdx: Storage.getUserIdx(),
         isDefault: isDefaultResume ? 1 : 0,
         temp: "N",
+        ...(selectedQzGroup != null ? { qzGroup: selectedQzGroup } : {}),
         title: form.title,
         name: form.basic.name,
         email: form.basic.email,
@@ -1446,13 +1467,14 @@ export default function ResumeEditDesktop() {
         userIdx: Storage.getUserIdx(),
         isDefault: 0,
         temp: "Y",
+        ...(selectedQzGroup != null ? { qzGroup: selectedQzGroup } : {}),
         title: form.title,
         name: form.basic.name,
         email: form.basic.email,
         gender: form.basic.gender === "male" ? "M" : "W",
         phone: form.basic.phone,
         birth: form.basic.birth,
-  
+
         ...(profilePhotoFile ? { profilePhotoFile } : {}),
   
         regions: form.location.nationwide ? [] : form.location.selectedCodes,
@@ -1852,7 +1874,10 @@ export default function ResumeEditDesktop() {
             onCloseAISuggest={handleCloseSelfIntroSuggest}
           />
 
-          <MockInterviewAnalysisSection />
+          <MockInterviewAnalysisSection
+            onPickedChange={setSelectedQzGroup}
+            initialPicked={initialMockInterview}
+          />
         </div>
 
         <ResumeSidebar
