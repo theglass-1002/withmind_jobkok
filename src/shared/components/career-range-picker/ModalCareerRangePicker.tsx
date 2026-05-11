@@ -69,8 +69,10 @@ export default function ModalCareerRangePicker({
               {range[0] === 0
                 ? range[1] === 10
                   ? "경력전체"
-                  : `${minLabel} ~ ${maxLabel}년`
-                : `${minLabel}년 ~ ${maxLabel}년`}
+                  : `경력 ${minLabel} ~ ${maxLabel}년`
+                : range[1] === 10
+                ? `경력 ${minLabel}년 ~ ${maxLabel}년 이상`
+                : `경력 ${minLabel}년 ~ ${maxLabel}년`}
             </span>
           </div>
 
@@ -90,14 +92,16 @@ export default function ModalCareerRangePicker({
               className="career-range-follow right career-range__label career-range__label--min"
               style={{ left: `${clampPct(pct(range[0]))}%` }}
             >
-              <span className="career-range__label-text">{minLabel}</span>
+              <span className="career-range__label-text">
+                {range[0] === 0 ? minLabel : `${minLabel}년`}
+              </span>
             </div>
             <div
               className="career-range-follow left career-range__label career-range__label--max"
               style={{ left: `${clampPct(pct(range[1]))}%` }}
             >
               <span className="career-range__label-text">
-                {maxLabel === "10" ? `${maxLabel}년 +` : `${maxLabel}년`}
+                {maxLabel === "10" ? `${maxLabel}년 이상` : `${maxLabel}년`}
               </span>
             </div>
           </div>

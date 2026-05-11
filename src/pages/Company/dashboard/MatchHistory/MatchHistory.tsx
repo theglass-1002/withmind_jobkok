@@ -28,7 +28,7 @@ export default function MatchHistory() {
     const fetchMatchHistory = async () => {
       //const companyIdx = 2571;
       const companyIdx = localStorage.getItem("companyIdx");
-
+      
       if (!companyIdx) {
         console.log("매칭 히스토리 조회 스킵: companyIdx 값이 없습니다.");
         return;
