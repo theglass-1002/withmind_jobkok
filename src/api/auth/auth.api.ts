@@ -30,6 +30,7 @@ import {
   UpdateUserRequest,
   ChangePasswordResponse,
   ChangePasswordRequest,
+  WithdrawUserResponse,
 } from "./auth.types";
 
 import {
@@ -312,6 +313,12 @@ export async function fetchMyInfo(): Promise<FetchMyInfoResponse> {
     "/api/user/me",
   );
 
+  console.log("========================================");
+  console.log("📡 [API Response] GET /api/user/me");
+  console.log("========================================");
+  console.log(res.data);
+  console.log("========================================");
+
   return res.data;
 }
 
@@ -362,6 +369,24 @@ export async function changePassword(
       },
     }
   );
+
+  return res.data;
+}
+
+/**
+ * 회원 탈퇴
+ * DELETE /api/user/withdraw
+ */
+export async function withdrawUser(): Promise<WithdrawUserResponse> {
+  const res = await instance.delete<WithdrawUserResponse>(
+    "/api/user/withdraw"
+  );
+
+  console.log("========================================");
+  console.log("📡 [API Response] DELETE /api/user/withdraw");
+  console.log("========================================");
+  console.log(res.data);
+  console.log("========================================");
 
   return res.data;
 }

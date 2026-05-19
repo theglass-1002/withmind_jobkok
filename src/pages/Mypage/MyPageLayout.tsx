@@ -17,7 +17,7 @@ export default function MyPageLayout() {
     const loadMyInfo = async () => {
       try {
         const res = await fetchMyInfo();
-        console.log(res);
+        console.log("[MyPageLayout] fetchMyInfo 응답:", res);
         setMyInfo(res.user);
       } catch (e: any) {
         console.error("[MyPageLayout] 내 정보 가져오기 실패", e);

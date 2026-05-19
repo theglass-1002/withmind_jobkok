@@ -50,6 +50,7 @@ import {
 import { logout } from "@/api/auth/auth.api";
 import { generateResumeRecommendations } from "@/api/recommendation/recommendation.api";
 import JobEmptyResult from "@/shared/components/empty/job/JobEmptyResult";
+import { Storage } from "@/shared/utils/StorageManager";
 
 type ChipKind =
   | "role"
@@ -96,6 +97,54 @@ const loadSavedFilters = () => {
     return null;
   }
 };
+
+type FlatJobNode = JobNode & {
+  parentidx?: number | string;
+  parentIdx?: number | string;
+  children?: JobNode[];
+};
+
+function buildTreeFromFlatList(list: FlatJobNode[]): JobNode[] {
+  if (!Array.isArray(list)) return [];
+
+  const parents = list
+    .filter((item) => item.depth === 0)
+    .map((item) => ({
+      ...item,
+      children: [] as JobNode[],
+    }));
+
+  const parentMap = new Map<
+    number | string,
+    JobNode & { parentidx?: number | string; parentIdx?: number | string }
+  >();
+
+  parents.forEach((parent) => {
+    parentMap.set(parent.idx, parent);
+  });
+
+  list
+    .filter((item) => item.depth === 1)
+    .forEach((child) => {
+      const parentKey = child.parentIdx ?? child.parentidx;
+      const parent = parentMap.get(parentKey as number | string);
+      if (!parent) return;
+
+      parent.children.push({
+        ...child,
+        children: Array.isArray(child.children) ? child.children : [],
+      });
+    });
+
+  return parents
+    .map((parent) => ({
+      ...parent,
+      children: (parent.children ?? []).sort(
+        (a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)
+      ),
+    }))
+    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+}
 
 type AllJobPostingSectionProps = {
   loggedIn?: boolean;
@@ -179,6 +228,9 @@ export default function AllJobPostingSection({
   const [initialized, setInitialized] = useState(false);
   const [jobsFetched, setJobsFetched] = useState(false);
 
+  const [pendingCategoryIdx, setPendingCategoryIdx] = useState<number | string | null>(null);
+  const [pendingJobId, setPendingJobId] = useState<number | string | null>(null);
+
   useEffect(() => {
     const snapshot = {
       page,
@@ -219,18 +271,98 @@ export default function AllJobPostingSection({
     employmentSelected,
   ]);
 
+  // Step 1: location.state에서 데이터 읽기
   useEffect(() => {
     const state = (location.state as JobsLocationState) || null;
     const incomingKeyword = state?.keyword?.trim() ?? "";
+    const incomingCategoryIdx = state?.categoryIdx;
+    const incomingJobId = state?.jobId;
 
+    console.log("[AllJobPostingSection] location.state 처리:", {
+      keyword: incomingKeyword,
+      categoryIdx: incomingCategoryIdx,
+      jobId: incomingJobId,
+      jobTreeLength: jobTree.length,
+    });
 
     if (incomingKeyword) {
       setSearchKeyword(incomingKeyword);
       setAppliedSearchKeyword(incomingKeyword);
       setPage(1);
+    }
 
-      }
+    // categoryIdx를 pending state에 저장 (jobTree 초기화를 기다림)
+    if (incomingCategoryIdx != null) {
+      setPendingCategoryIdx(incomingCategoryIdx);
+      setPendingJobId(incomingJobId ?? null);
+    }
   }, [location.state]);
+
+  // Step 2: jobTree가 초기화된 후 pending category 처리
+  useEffect(() => {
+    if (pendingCategoryIdx == null || !Array.isArray(jobTree) || jobTree.length === 0) {
+      return;
+    }
+
+    console.log("[AllJobPostingSection] pending category 처리:", {
+      pendingCategoryIdx,
+      pendingJobId,
+      jobTreeLength: jobTree.length,
+      jobTreeType: typeof jobTree,
+      isArray: Array.isArray(jobTree),
+    });
+
+    const category = jobTree.find((cat) => cat.idx === Number(pendingCategoryIdx));
+
+    if (category) {
+      if (pendingJobId != null) {
+        // 특정 직무 선택
+        const job = category.children?.find((job) => job.idx === Number(pendingJobId));
+        if (job) {
+          const newRole: RoleSelectedItem = {
+            categoryIdx: Number(category.idx),
+            categoryName: category.name,
+            roleId: Number(job.idx),
+            roleName: job.name,
+          };
+          console.log("[AllJobPostingSection] 직무 선택:", newRole);
+          setRoleSelected([newRole]);
+          setChips([
+            {
+              id: `role-${job.idx}`,
+              group: category.name,
+              role: job.name,
+              kind: "role",
+            },
+          ]);
+          setPage(1);
+        }
+      } else {
+        // 전체 카테고리 선택
+        const newRole: RoleSelectedItem = {
+          categoryIdx: Number(category.idx),
+          categoryName: category.name,
+          roleId: 0,
+          roleName: `${category.name} 전체`,
+        };
+        console.log("[AllJobPostingSection] 카테고리 선택:", newRole);
+        setRoleSelected([newRole]);
+        setChips([
+          {
+            id: `role-all-${category.idx}`,
+            group: category.name,
+            role: `${category.name} 전체`,
+            kind: "role",
+          },
+        ]);
+        setPage(1);
+      }
+
+      // pending state 초기화
+      setPendingCategoryIdx(null);
+      setPendingJobId(null);
+    }
+  }, [pendingCategoryIdx, pendingJobId, jobTree]);
 
   useEffect(() => {
     const init = async () => {
@@ -238,8 +370,41 @@ export default function AllJobPostingSection({
         setJobLoading(true);
         setJobError(null);
 
-        const tree = await fetchJobTree();
-      
+        const response: any = await fetchJobTree();
+
+        console.log("[AllJobPostingSection] fetchJobTree 응답:", {
+          response,
+          type: typeof response,
+          isArray: Array.isArray(response),
+          hasList: !!response?.list,
+          listIsArray: Array.isArray(response?.list)
+        });
+
+        // API 응답 처리: Home.tsx와 동일한 로직
+        const nestedList = Array.isArray(response?.list) ? response.list : [];
+        const flatList = Array.isArray(response)
+          ? response
+          : Array.isArray(response?.list)
+          ? response.list
+          : [];
+
+        let tree: JobNode[] = [];
+
+        if (
+          nestedList.length > 0 &&
+          Array.isArray(nestedList[0]?.children)
+        ) {
+          tree = nestedList as JobNode[];
+        } else {
+          tree = buildTreeFromFlatList(flatList as FlatJobNode[]);
+        }
+
+        console.log("[AllJobPostingSection] 처리된 jobTree:", {
+          length: tree.length,
+          isArray: Array.isArray(tree),
+          hasChildren: tree[0]?.children?.length || 0
+        });
+
         setJobTree(tree);
         setInitialized(true);
       } catch (e: any) {
@@ -395,6 +560,10 @@ export default function AllJobPostingSection({
     const keyword = searchKeyword.trim();
 
     console.log("[AllJobPostingSection] Jobs 화면에서 엔터 검색 keyword:", keyword);
+
+    if (keyword) {
+      Storage.addRecentSearchKeyword(keyword);
+    }
 
     setPage(1);
     setAppliedSearchKeyword(keyword);

@@ -321,6 +321,15 @@ line-height: 20px; /* 125% */
   color: var(--gray-500, #9EA4AA);
 }
 
+.chip__text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+  max-width: 200px;
+}
+
 /* 기준 부모: 아이콘 감싸는 래퍼 */
 .mypage_icon {
   display: flex;
@@ -482,6 +491,15 @@ line-height: 20px; /* 125% */
       gap: 4px;
       color: var(--gray-900, #2A2D2F);
       font-size: 14px;
+    }
+
+    .chip__text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1;
+      min-width: 0;
+      max-width: 150px;
     }
 
     .masthead.masthead-static{

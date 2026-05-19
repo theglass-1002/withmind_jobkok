@@ -768,7 +768,7 @@ export default function Navbar({ titleText }: NavbarProps) {
                       className="chip"
                       onClick={() => handleRecentKeywordClickDesktop(keyword)}
                     >
-                      {keyword}
+                      <span className="chip__text">{keyword}</span>
                       <img
                         src={Icons.ic_close_gray500_20}
                         alt=""
@@ -917,7 +917,7 @@ export default function Navbar({ titleText }: NavbarProps) {
                       className="chip recent"
                       onClick={() => handleRecentKeywordClickMobile(keyword)}
                     >
-                      {keyword}
+                      <span className="chip__text">{keyword}</span>
                       <img
                         src={Icons.ic_close_gray500_20}
                         alt=""

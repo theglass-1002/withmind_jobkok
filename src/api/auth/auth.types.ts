@@ -213,6 +213,8 @@ export interface MyInfo {
   userId: string;
   userName: string;
   ciHash: string;
+  accountType?: string;
+  ciVerified?: boolean;
 }
 
 export interface FetchMyInfoResponse {
@@ -268,4 +270,9 @@ export interface ChangePasswordResponse {
   code?: number;
   msg?: string;
   reasonCode?: string;
+}
+
+export interface WithdrawUserResponse {
+  code: number;
+  msg: string;
 }

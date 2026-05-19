@@ -23,7 +23,7 @@ import error_Item from "@/assets/icons/error_Item.png";
 import "./Login.css";
 import { Icons } from "@/assets/icons";
 
-import { deviceId, stripAllWhitespace } from "@/shared/utils/util";
+import { deviceId, stripAllWhitespace, isValidEmail } from "@/shared/utils/util";
 import { loginUser, logout } from "@/api/auth/auth.api";
 import { LoginRequest } from "@/api/auth/auth.types";
 import { ApiErrorResponse } from "@/api/axios.instance";
@@ -71,6 +71,8 @@ const Login: React.FC = () => {
         return "이미 가입된 이메일입니다. 해당 이메일로 로그인해 주세요.";
       case 3:
         return "중복 확인을 완료해 주세요.";
+      case 4:
+        return "올바른 이메일 형식이 아닙니다.";
       default:
         return "";
     }
@@ -83,7 +85,7 @@ const Login: React.FC = () => {
       case 2:
         return "입력한 비밀번호를 확인해 주세요.";
       case 3:
-        return "비밀번호가 일치하지 않습니다.";
+        return "아이디 또는 비밀번호가 일치하지 않습니다.";
       default:
         return "";
     }
@@ -150,6 +152,9 @@ const Login: React.FC = () => {
 
     if (!trimmedEmail.trim()) {
       setEmailErrorType(1);
+      hasError = true;
+    } else if (!isValidEmail(trimmedEmail)) {
+      setEmailErrorType(4);
       hasError = true;
     } else {
       setEmailErrorType(0);

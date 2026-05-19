@@ -284,7 +284,6 @@ export default function CameraTest({
       if (devOverrideRef.current) return;
 
       setVideoUrl(uploadResult.finalUrl);
-
       const result = await fetchEnvTestAnalyze({
         file_url: uploadResult.finalUrl,
         speech: speechText,

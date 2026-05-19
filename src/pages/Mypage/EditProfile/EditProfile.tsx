@@ -7,7 +7,8 @@ import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
 import { UserProfile } from "@/shared/api/user";
 import Tabs from "@/shared/components/tabs/Tabs";
 import type { MyInfo, UpdateUserRequest } from "@/api/auth/auth.types";
-import { updateUser } from "@/api/auth/auth.api";
+import { updateUser, withdrawUser, logout } from "@/api/auth/auth.api";
+import { Storage } from "@/shared/utils/StorageManager";
 
 type DialogKind =
   | "deleteAccount"
@@ -72,10 +73,24 @@ export default function EditProfile() {
     certified: false,
   });
 
-  const tabItems = [
-    { key: "edit", label: "기본 정보" },
-    { key: "password", label: "비밀번호" },
-  ];
+  // accountType에 따라 탭 목록 결정
+  const tabItems = (() => {
+    const tabs = [{ key: "edit", label: "기본 정보" }];
+
+    console.log("[EditProfile] myInfo:", myInfo);
+    console.log("[EditProfile] accountType:", myInfo?.accountType);
+
+    // accountType이 "local"일 때만 비밀번호 탭 추가
+    if (myInfo?.accountType === "local") {
+      console.log("[EditProfile] accountType이 local이므로 비밀번호 탭 추가");
+      tabs.push({ key: "password", label: "비밀번호" });
+    } else {
+      console.log("[EditProfile] accountType이 local이 아니므로 비밀번호 탭 숨김");
+    }
+
+    console.log("[EditProfile] 최종 tabItems:", tabs);
+    return tabs;
+  })();
 
   useEffect(() => {
     if (!myInfo) return;
@@ -84,8 +99,15 @@ export default function EditProfile() {
     setUserData(mapped);
   }, [outletContext, myInfoFromLocation, myInfo]);
 
+  // OAuth 계정인 경우 비밀번호 탭 자동 전환
   useEffect(() => {
-    
+    if (myInfo?.accountType !== "local" && activeTab === "password") {
+      setActiveTab("edit");
+    }
+  }, [myInfo?.accountType, activeTab]);
+
+  useEffect(() => {
+
   }, [userData]);
 
   const handleTabClick = (key: "password" | "edit") => {
@@ -101,7 +123,28 @@ export default function EditProfile() {
   };
 
   const handleConfirmDeleteAccount = async () => {
-    setDialog("deleteAccountSuccess");
+    try {
+      setIsSaving(true);
+
+      // 회원 탈퇴 API 호출
+      await withdrawUser();
+
+      console.log("[회원 탈퇴] API 호출 성공");
+
+      // 모든 로그인 데이터 및 캐시 삭제
+      logout();
+      Storage.clearAll();
+
+      console.log("[회원 탈퇴] 로그인 데이터 및 캐시 삭제 완료");
+
+      // 탈퇴 성공 모달 표시
+      setDialog("deleteAccountSuccess");
+    } catch (error: any) {
+      console.error("[회원 탈퇴] 실패:", error);
+      setDialog("error");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleConfirmEditAccount = async (
@@ -131,7 +174,7 @@ export default function EditProfile() {
 
    
 
-      const res = await updateUser(requestPayload);
+      await updateUser(requestPayload);
 
 
 
