@@ -87,6 +87,10 @@ export default function MyReportResult() {
     );
   }
 
+  const hasNoData =
+    (myReport.myAvgScore?.avgScore ?? 0) === 0 &&
+    (myReport.scoreTrend?.length ?? 0) === 0;
+
   return (
     <>
       <div className="mock-interview-summary__header">
@@ -110,42 +114,62 @@ export default function MyReportResult() {
         />
       </div>
 
-      <div className="mock-interview-summary__content">
-        <MyReportKPIs data={myReport} />
-
-        <div className="mock-interview-summary__charts">
-          <AverageScoreCard data={myReport} />
-
-          <ScoreTrendCard bestScore={`${myReport.bestScore ?? 0}점`}>
-            <ScoreTrendBarChart data={myReport} />
-          </ScoreTrendCard>
+      {hasNoData ? (
+        <div style={{
+          padding: '80px 16px',
+          textAlign: 'center',
+          color: '#6b7280'
+        }}>
+          <div style={{
+            fontSize: '16px',
+            fontWeight: '500',
+            marginBottom: '8px',
+            color: '#374151'
+          }}>
+            선택한 기간에 면접 기록이 없습니다
+          </div>
+          <div style={{ fontSize: '14px' }}>
+            다른 기간을 선택해보세요
+          </div>
         </div>
+      ) : (
+        <div className="mock-interview-summary__content">
+          <MyReportKPIs data={myReport} />
 
-        <div className="mock-interview-summary__panel mock-interview-category-trend">
-          <CategoryTrendPanel data={myReport} />
+          <div className="mock-interview-summary__charts">
+            <AverageScoreCard data={myReport} />
+
+            <ScoreTrendCard bestScore={`${myReport.bestScore ?? 0}점`}>
+              <ScoreTrendBarChart data={myReport} />
+            </ScoreTrendCard>
+          </div>
+
+          <div className="mock-interview-summary__panel mock-interview-category-trend">
+            <CategoryTrendPanel data={myReport} />
+          </div>
+
+          <div className="mock-interview-summary__panel mock-interview-summary__panel--keywords">
+            <MockInterviewKeywordsPanel
+              iconSrc={ic_open_book_24}
+              title="내가 자주 사용하는 단어"
+              data={myReport}
+            />
+          </div>
+
+          {/*
+          <div className="mock-interview-summary__panel mock-interview-summary__panel--jobs">
+            <JobMatchHistoryPanel
+              titleIconSrc={ic_rocket_24}
+              title="채용 공고 매칭 히스트리 TOP 5"
+              items={jobs}
+              viewAllIconSrc={ic_arrow_up_right_gray900_20}
+              onClickViewAll={() => {}}
+              onToggleFavorite={handleToggleFavorite}
+            />
+          </div>
+          */}
         </div>
-
-        <div className="mock-interview-summary__panel mock-interview-summary__panel--keywords">
-          <MockInterviewKeywordsPanel
-            iconSrc={ic_open_book_24}
-            title="내가 자주 사용하는 단어"
-            data={myReport}
-          />
-        </div>
-
-        {/* 
-        <div className="mock-interview-summary__panel mock-interview-summary__panel--jobs">
-          <JobMatchHistoryPanel
-            titleIconSrc={ic_rocket_24}
-            title="채용 공고 매칭 히스트리 TOP 5"
-            items={jobs}
-            viewAllIconSrc={ic_arrow_up_right_gray900_20}
-            onClickViewAll={() => {}}
-            onToggleFavorite={handleToggleFavorite}
-          />
-        </div> 
-        */}
-      </div>
+      )}
       
     </>
   );
