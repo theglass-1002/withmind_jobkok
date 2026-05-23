@@ -50,26 +50,48 @@ export default function PasswordTab({ onCancel }: PasswordTabProps) {
     const confirm = util.stripAllWhitespace(f.confirm.trim());
     const errs: Errors = {};
 
+    console.log("=== 비밀번호 검증 시작 ===");
+    console.log("현재 비밀번호:", current);
+    console.log("새 비밀번호:", next);
+    console.log("새 비밀번호 확인:", confirm);
+
     if (!current) errs.current = "비밀번호를 입력해 주세요.";
     if (!next) errs.next = "비밀번호를 입력해 주세요.";
     if (!confirm) errs.confirm = "비밀번호를 입력해 주세요.";
 
     if (!errs.next && !util.isValidPassword(next)) {
+      console.log("❌ 새 비밀번호가 유효하지 않음");
+      console.log("새 비밀번호 길이:", next.length);
+      console.log("isValidPassword(next) 결과:", util.isValidPassword(next));
       errs.next = "입력한 비밀번호를 확인해 주세요.";
+    } else if (!errs.next) {
+      console.log("✅ 새 비밀번호 유효성 검사 통과");
     }
 
     if (!errs.confirm && !util.isValidPassword(confirm)) {
+      console.log("❌ 새 비밀번호 확인이 유효하지 않음");
+      console.log("새 비밀번호 확인 길이:", confirm.length);
+      console.log("isValidPassword(confirm) 결과:", util.isValidPassword(confirm));
       errs.confirm = "입력한 비밀번호를 확인해 주세요.";
+    } else if (!errs.confirm) {
+      console.log("✅ 새 비밀번호 확인 유효성 검사 통과");
     }
 
     if (!errs.next && !errs.confirm && next !== confirm) {
+      console.log("❌ 새 비밀번호와 확인이 일치하지 않음");
       errs.next = "비밀번호가 일치하지 않습니다.";
       errs.confirm = "비밀번호가 일치하지 않습니다.";
+    } else if (!errs.next && !errs.confirm) {
+      console.log("✅ 비밀번호 일치 확인 통과");
     }
 
     if (!errs.current && current === next) {
+      console.log("❌ 현재 비밀번호와 새 비밀번호가 동일함");
       errs.next = "현재 비밀번호와 다른 비밀번호를 입력해 주세요.";
     }
+
+    console.log("최종 에러:", errs);
+    console.log("=== 비밀번호 검증 종료 ===");
 
     return {
       data: { current, next, confirm },
@@ -115,14 +137,14 @@ export default function PasswordTab({ onCancel }: PasswordTabProps) {
       }
   
       //  현재 비밀번호 불일치
-      if (res.reasonCode === "OLD_PASSWORD_MISMATCH") {
+      if (res.code === 401) {
         toast.error("현재 비밀번호가 일치하지 않습니다.");
-  
+
         setErrors((prev) => ({
           ...prev,
           current: "현재 비밀번호가 일치하지 않습니다.",
         }));
-  
+
         return;
       }
   
@@ -130,11 +152,23 @@ export default function PasswordTab({ onCancel }: PasswordTabProps) {
       toast.error(res.msg || "비밀번호 변경에 실패했습니다.");
     } catch (error: any) {
       console.error("비밀번호 변경 실패:", error);
-  
-      // axios 에러 대응
+
+      // 401 에러: 현재 비밀번호 불일치
+      if (error?.code === 401 || error?.response?.status === 401) {
+        toast.error("현재 비밀번호가 일치하지 않습니다.");
+
+        setErrors((prev) => ({
+          ...prev,
+          current: "현재 비밀번호가 일치하지 않습니다.",
+        }));
+
+        return;
+      }
+
+      // 기타 axios 에러
       const msg =
-        error?.response?.data?.msg || "비밀번호 변경에 실패했습니다.";
-  
+        error?.response?.data?.msg || error?.msg || "비밀번호 변경에 실패했습니다.";
+
       toast.error(msg);
     } finally {
       setSubmitting(false);

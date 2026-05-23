@@ -68,7 +68,7 @@ export default function Footer() {
               </div>
               <div>
                 <span>본점 주소: 대전광역시 유성구 가정로 218, 3층</span>
-                <span>지점 주소: 서울특별시 마포구 신촌로4길 14, 4층</span>
+                <span>지점 주소: 서울 마포구 월드컵북로 396 누리꿈스퀘어 R&D센터 1007호</span>
               </div>
               <div>Copyright Ⓒ 2025 WITHMIND. All rigths reserved.</div>
             </div>
@@ -120,7 +120,7 @@ export default function Footer() {
             </div>
             <span>사업자번호: 794-87-00687</span>
             <span>본점 주소: 대전광역시 유성구 가정로 218, 3층</span>
-            <span>지점 주소: 서울특별시 마포구 신촌로4길 14, 4층</span>
+            <span>지점 주소: 서울 마포구 월드컵북로 396 누리꿈스퀘어 R&D센터 1007호</span>
             <span>Copyright Ⓒ 2025 WITHMIND. All rigths reserved.</span>
           </div>
         </div>

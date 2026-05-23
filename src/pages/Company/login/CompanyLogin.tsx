@@ -236,8 +236,8 @@ export default function CompanyLogin() {
             아이디 기억하기
           </span>
           <div className="links">
-            <NavLink to="/company/recovery">아이디 찾기</NavLink>
-            <NavLink to="/company/recovery">비밀번호 찾기</NavLink>
+            <NavLink to="/company/recovery?tab=id">아이디 찾기</NavLink>
+            <NavLink to="/company/recovery?tab=password">비밀번호 찾기</NavLink>
           </div>
         </div>
         <div className="company-login__signup">

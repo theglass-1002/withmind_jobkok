@@ -851,7 +851,7 @@ export default function ResumeEditMobile() {
           };
 
           console.log("✅ 모바일 이력서 임시 저장 payload:", payload);
-          const result = await createResume(payload);
+          const result = await updateResume(Number(resumeId), payload);
           console.log("✅ 모바일 이력서 임시저장 성공:", result);
 
           toast.success("임시 저장되었습니다.");

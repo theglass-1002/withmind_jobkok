@@ -49,10 +49,52 @@ export default function Signup() {
   const [isIdentityVerified, setIsIdentityVerified] = useState(false);
   const [identityVerifiedError, setIdentityVerifiedError] = useState(false);
   const [verifiedUserInfo, setVerifiedUserInfo] = useState<VerifiedUserInfo | null>(null);
+  const [isVerifying, setIsVerifying] = useState(false);
 
   const [inicisParams, setInicisParams] = useState<InicisParams | null>(null);
 
-  const [selectedGender, setSelectedGender] = useState(1);
+  const [selectedGender, setSelectedGender] = useState<number | null>(null);
+  const [showMarketingModal, setShowMarketingModal] = useState(false);
+
+  // 실시간 이메일 형식 확인
+  useEffect(() => {
+    const trimmedEmail = stripAllWhitespace(email);
+
+    // 이메일이 수정되면 중복확인 상태 초기화
+    setIsEmailChecked(false);
+
+    // 이메일 형식 체크
+    if (trimmedEmail.length > 0 && !isValidEmail(trimmedEmail)) {
+      setEmailErrorType(4);
+    } else {
+      setEmailErrorType(0);
+    }
+  }, [email]);
+
+  // 실시간 비밀번호 형식 확인
+  useEffect(() => {
+    const trimmedPassword = stripAllWhitespace(password);
+
+    if (trimmedPassword.length > 0 && !isValidPassword(trimmedPassword)) {
+      setPasswordErrorType(4);
+    } else if (passwordErrorType === 4) {
+      setPasswordErrorType(0);
+    }
+  }, [password]);
+
+  // 비밀번호 확인란 포커스 아웃 시 일치 여부 체크
+  const handleConfirmPasswordBlur = () => {
+    const trimmedPassword = stripAllWhitespace(password);
+    const trimmedConfirmPassword = stripAllWhitespace(confirmPassword);
+
+    if (trimmedConfirmPassword.length > 0) {
+      if (trimmedPassword !== trimmedConfirmPassword) {
+        setPasswordErrorType(3);
+      } else if (passwordErrorType === 3) {
+        setPasswordErrorType(0);
+      }
+    }
+  };
 
   // 약관
   const [isOver14, setIsOver14] = useState(false);
@@ -74,6 +116,48 @@ export default function Signup() {
       (isEmailConsent || isPushConsent || (!isEmailConsent && !isPushConsent))
     );
   }, [isOver14, isPaidTermsAgreed, isTermsAgreed, isPrivacyAgreed, isEmailConsent, isPushConsent]);
+
+  // 가입하기 버튼 활성화 조건
+  const isSignupEnabled = useMemo(() => {
+    const trimmedEmail = stripAllWhitespace(email);
+    const trimmedPassword = stripAllWhitespace(password);
+    const trimmedConfirmPassword = stripAllWhitespace(confirmPassword);
+
+    return (
+      // 필수 입력값
+      trimmedEmail.length > 0 &&
+      trimmedPassword.length > 0 &&
+      trimmedConfirmPassword.length > 0 &&
+      // 유효성 검증
+      emailErrorType === 0 &&
+      passwordErrorType === 0 &&
+      isEmailChecked &&
+      // 본인인증
+      isIdentityVerified &&
+      verifiedUserInfo !== null &&
+      // 성별 선택
+      selectedGender !== null &&
+      // 필수 약관
+      isOver14 &&
+      isPaidTermsAgreed &&
+      isTermsAgreed &&
+      isPrivacyAgreed
+    );
+  }, [
+    email,
+    password,
+    confirmPassword,
+    emailErrorType,
+    passwordErrorType,
+    isEmailChecked,
+    isIdentityVerified,
+    verifiedUserInfo,
+    selectedGender,
+    isOver14,
+    isPaidTermsAgreed,
+    isTermsAgreed,
+    isPrivacyAgreed,
+  ]);
 
   /**
    * 이니시스 팝업 -> postMessage 수신
@@ -276,9 +360,7 @@ export default function Signup() {
     return true;
   };
 
-  const handleSignup = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-
+  const processSignup = async () => {
     if (!validateEmailCheck()) return;
     if (!validatePassword()) return;
     if (!validateIdentityVerification()) return;
@@ -289,6 +371,11 @@ export default function Signup() {
 
     if (!verifiedUserInfo) {
       toast.error("본인인증 정보가 없습니다.");
+      return;
+    }
+
+    if (selectedGender === null) {
+      toast.error("성별을 선택해 주세요.");
       return;
     }
 
@@ -324,6 +411,24 @@ export default function Signup() {
         toast.error(`관리자에게 문의해주세요 Ecode:${e.code}`);
       }
     }
+  };
+
+  const handleSignup = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+
+    // 마케팅 동의가 체크되어 있으면 모달 표시
+    if (isEmailConsent || isPushConsent) {
+      setShowMarketingModal(true);
+      return;
+    }
+
+    // 마케팅 동의가 없으면 바로 회원가입 진행
+    await processSignup();
+  };
+
+  const handleMarketingModalConfirm = async () => {
+    setShowMarketingModal(false);
+    await processSignup();
   };
 
   const handleClearEmail = () => {
@@ -377,9 +482,16 @@ export default function Signup() {
    * - hidden form submit
    */
   const handleVerification = async () => {
+    // 이미 본인인증 진행 중이면 무시
+    if (isVerifying) {
+      console.log("본인인증이 이미 진행 중입니다.");
+      return;
+    }
+
     try {
+      setIsVerifying(true);
       const init = await saInit();
-      
+
 
       // TODO: 실제 서비스에서는 사용자 입력값을 쓰거나, 이니시스 페이지에서 입력받는 구조로 변경
       const userName = "홍길동";
@@ -407,6 +519,7 @@ export default function Signup() {
       const popup = openAuthPopup();
       if (!popup) {
         alert("팝업이 차단되었습니다. 브라우저 팝업 허용을 확인해 주세요.");
+        setIsVerifying(false);
         return;
       }
 
@@ -415,6 +528,7 @@ export default function Signup() {
         const form = saFormRef.current;
         if (!form) {
           toast.error("본인인증 폼을 찾을 수 없습니다.");
+          setIsVerifying(false);
           return;
         }
 
@@ -425,10 +539,16 @@ export default function Signup() {
         // form.setAttribute("action", "https://sa.inicis.com/auth");
 
         form.submit();
+
+        // 팝업이 열린 후 5초 뒤 상태 초기화 (사용자가 팝업에서 작업 중)
+        setTimeout(() => {
+          setIsVerifying(false);
+        }, 5000);
       });
     } catch (error) {
       console.error("본인인증 준비 실패:", error);
       toast.error("본인인증을 시작할 수 없습니다.");
+      setIsVerifying(false);
     }
   };
 
@@ -535,6 +655,7 @@ export default function Signup() {
                     type={isConfirmPasswordVisible ? "text" : "password"}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
+                    onBlur={handleConfirmPasswordBlur}
                     required
                   />
                   <img
@@ -598,6 +719,7 @@ export default function Signup() {
                     type={isConfirmPasswordVisible ? "text" : "password"}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
+                    onBlur={handleConfirmPasswordBlur}
                     required
                   />
                   {confirmPassword.length > 0 && (
@@ -639,8 +761,13 @@ export default function Signup() {
                   본인 인증을 진행해 주세요
                   <img src={error_Item} alt="" />
                 </div>
-                <button type="button" className="default_btn_white" onClick={handleVerification}>
-                  본인 인증
+                <button
+                  type="button"
+                  className="default_btn_white"
+                  onClick={handleVerification}
+                  disabled={isVerifying}
+                >
+                  {isVerifying ? "진행 중..." : "본인 인증"}
                 </button>
               </div>
               <p className="error_text_red">본인 인증을 완료해 주세요.</p>
@@ -664,8 +791,13 @@ export default function Signup() {
                     />
                   )}
                 </div>
-                <button type="button" className="default_btn_white" onClick={handleVerification}>
-                  본인 인증
+                <button
+                  type="button"
+                  className="default_btn_white"
+                  onClick={handleVerification}
+                  disabled={isVerifying}
+                >
+                  {isVerifying ? "진행 중..." : "본인 인증"}
                 </button>
               </div>
             </div>
@@ -839,7 +971,12 @@ export default function Signup() {
             취소
           </button>
 
-          <button className="btn_w_full default_btn_black" type="button" onClick={handleSignup}>
+          <button
+            className="btn_w_full default_btn_black"
+            type="button"
+            onClick={handleSignup}
+            disabled={!isSignupEnabled}
+          >
             가입하기
           </button>
         </div>
@@ -862,6 +999,85 @@ export default function Signup() {
         <input type="hidden" name="successUrl" value={inicisParams?.successUrl || ""} />
         <input type="hidden" name="failUrl" value={inicisParams?.failUrl || ""} />
       </form>
+
+      {/* 마케팅 동의 모달 */}
+      {showMarketingModal && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+          }}
+          onClick={() => setShowMarketingModal(false)}
+        >
+          <div
+            style={{
+              backgroundColor: "white",
+              padding: "40px",
+              borderRadius: "8px",
+              maxWidth: "670px",
+              width: "90%",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2
+              style={{
+                fontSize: "20px",
+                fontWeight: "600",
+                marginBottom: "32px",
+                textAlign: "center",
+                color: "#2A2D2F",
+              }}
+            >
+              개인정보 활용 동의 처리 안내
+            </h2>
+            <div
+              style={{
+                marginBottom: "40px",
+                lineHeight: "2",
+                color: "#6F767E",
+                fontSize: "16px",
+                textAlign: "center",
+              }}
+            >
+              <p>처리자: (주)위드마인드</p>
+              <p>처리 내역: (선택) 이벤트 및 서비스 안내 수신 동의</p>
+              {isEmailConsent && <p>이메일 수신 동의</p>}
+              {isPushConsent && <p>APP Push 알람 동의</p>}
+              <p>
+                처리일자{" "}
+                {new Date().toLocaleString("ko-KR", {
+                  year: "numeric",
+                  month: "2-digit",
+                  day: "2-digit",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: false,
+                })}
+              </p>
+            </div>
+            <button
+              className="btn_w_full default_btn_white"
+              onClick={handleMarketingModalConfirm}
+              style={{
+                width: "100%",
+                padding: "16px",
+                fontSize: "16px",
+                fontWeight: "500",
+              }}
+            >
+              확인
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

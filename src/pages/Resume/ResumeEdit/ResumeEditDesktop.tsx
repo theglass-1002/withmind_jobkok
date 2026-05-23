@@ -1657,7 +1657,7 @@ export default function ResumeEditDesktop() {
       };
   
       console.log("✅ 이력서 임시 저장 payload:", payload);
-      const result = await createResume(payload);
+      const result = await updateResume(Number(resumeId), payload);
       console.log("✅ 이력서 임시저장 성공:", result);
 
       setIsLoading(false);
@@ -1729,7 +1729,7 @@ export default function ResumeEditDesktop() {
               onClick={handleSubmit}
               aria-disabled={isSubmitDisabled}
             >
-              {isEdit ? "수정 완료" : "작성 완료"}
+              {isEdit ? "작성 완료" : "작성 완료"}
             </span>
           </div>
         </div>

@@ -255,18 +255,22 @@ const Login: React.FC = () => {
         }
 
         const did = deviceId();
-
         const precheckRes = await provider.precheck(code, state, did);
+        console.log('여긴가22');
         console.log(`[Login] ${provider.key} precheck 응답:`, precheckRes);
 
         if (precheckRes.exists && !precheckRes.needTerms) {
-          const loginRes = await provider.loginWithPreauth({
+          const loginPayload = {
             preauthToken: precheckRes.preauthToken,
             termsAgreed: true,
             deviceId: did,
-          });
+          };
 
+          console.log(`[Login] ${provider.key} login(preauth) 요청:`, loginPayload);
+          const loginRes = await provider.loginWithPreauth(loginPayload);
           console.log(`[Login] ${provider.key} login(preauth) 응답:`, loginRes);
+          console.log(`[Login] ${provider.key} user 객체:`, loginRes?.user);
+          console.log(`[Login] ${provider.key} user.email:`, loginRes?.user?.email);
 
           if (loginRes?.code === 200) {
             saveLoginTokens({
@@ -281,7 +285,7 @@ const Login: React.FC = () => {
             return;
           }
         }
-
+        console.log('여긴가??');
         navigate(`/social-consent?snsType=${provider.key}`, {
           state: { snsAuth: precheckRes },
         });
@@ -412,8 +416,8 @@ const Login: React.FC = () => {
             아이디 기억하기
           </span>
           <div className="links">
-            <NavLink to="/recovery">아이디 찾기</NavLink>
-            <NavLink to="/recovery">비밀번호 찾기</NavLink>
+            <NavLink to="/recovery?tab=id">아이디 찾기</NavLink>
+            <NavLink to="/recovery?tab=password">비밀번호 찾기</NavLink>
           </div>
         </div>
       </form>

@@ -259,6 +259,13 @@ gap: 16px;
     accent-color: #816BFE;
 }
 
+/* 비활성화된 가입하기 버튼 스타일 */
+.signup-card .default_btn_black:disabled {
+    background-color: var(--gray-400, #C5C8CB);
+    cursor: not-allowed;
+    color: var(--gray-600, #858C94);
+}
+
 @media (max-width: 760px) {
 
     body{
