@@ -41,6 +41,7 @@ export default function Signup() {
   // 상태
   const [isEmailChecked, setIsEmailChecked] = useState(false);
   const [emailErrorType, setEmailErrorType] = useState(0);
+  const [duplicateEmailAccountType, setDuplicateEmailAccountType] = useState<string | null>(null);
 
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
@@ -48,6 +49,7 @@ export default function Signup() {
 
   const [isIdentityVerified, setIsIdentityVerified] = useState(false);
   const [identityVerifiedError, setIdentityVerifiedError] = useState(false);
+  const [duplicateUserError, setDuplicateUserError] = useState(false);
   const [verifiedUserInfo, setVerifiedUserInfo] = useState<VerifiedUserInfo | null>(null);
   const [isVerifying, setIsVerifying] = useState(false);
 
@@ -187,13 +189,24 @@ export default function Signup() {
         try {
           const confirmRes = await saConfirm(txId);
           console.log('본인인증성공값',confirmRes)
+
+          // status 409: 이미 가입된 회원
+          if (confirmRes?.status === 409) {
+            setIdentityVerifiedError(true);
+            setDuplicateUserError(true);
+            return;
+          }
+
           if (!confirmRes?.verified) {
             toast.error("본인인증 검증에 실패했습니다.");
+            setIdentityVerifiedError(true);
+            setDuplicateUserError(false);
             return;
           }
 
           setIsIdentityVerified(true);
           setIdentityVerifiedError(false);
+          setDuplicateUserError(false);
           setVerifiedUserInfo({
             name: confirmRes.userName,
             phone: confirmRes.userPhone,
@@ -203,9 +216,19 @@ export default function Signup() {
           });
 
           toast.success(`본인인증이 완료되었습니다!`);
-        } catch (e) {
+        } catch (e: any) {
           console.error("[INICIS] saConfirm error:", e);
+
+          // status 409: 이미 가입된 회원 (axios 인터셉터가 변환한 에러)
+          if (e?.code === 409) {
+            setIdentityVerifiedError(true);
+            setDuplicateUserError(true);
+            return;
+          }
+
           toast.error("본인인증 확인 중 오류가 발생했습니다.");
+          setIdentityVerifiedError(true);
+          setDuplicateUserError(false);
         }
 
         return;
@@ -239,12 +262,30 @@ export default function Signup() {
   }, []);
 
   // ====== 검증/유틸 ======
+  const getAccountTypeLabel = (accountType: string): string => {
+    // oauth:naver -> naver로 변환
+    const type = accountType.replace('oauth:', '');
+
+    const typeMap: Record<string, string> = {
+      local: '',
+      kakao: '카카오',
+      naver: '네이버',
+      google: '구글',
+    };
+    return typeMap[type] || type;
+  };
+
   const emailErrorMessage = useMemo(() => {
     switch (emailErrorType) {
       case 1:
         return "이메일을 입력해 주세요.";
       case 2:
-        return "이미 가입된 이메일입니다. 해당 이메일로 로그인해 주세요.";
+        if (duplicateEmailAccountType === 'local') {
+          return "이미 가입된 이메일입니다.";
+        } else {
+          const platformLabel = getAccountTypeLabel(duplicateEmailAccountType || '');
+          return `이미 ${platformLabel} 소셜 계정으로 가입된 이메일입니다.`;
+        }
       case 3:
         return "중복 확인을 완료해 주세요.";
       case 4:
@@ -252,7 +293,7 @@ export default function Signup() {
       default:
         return "";
     }
-  }, [emailErrorType]);
+  }, [emailErrorType, duplicateEmailAccountType]);
 
   const passwordErrorMessage = useMemo(() => {
     switch (passwordErrorType) {
@@ -302,9 +343,11 @@ export default function Signup() {
       if (result.check === true) {
         setIsEmailChecked(false);
         setEmailErrorType(2);
+        setDuplicateEmailAccountType(result.accountType || 'local');
       } else {
         setEmailErrorType(0);
         setIsEmailChecked(true);
+        setDuplicateEmailAccountType(null);
       }
     } catch (err) {
       console.error(err);
@@ -770,7 +813,11 @@ export default function Signup() {
                   {isVerifying ? "진행 중..." : "본인 인증"}
                 </button>
               </div>
-              <p className="error_text_red">본인 인증을 완료해 주세요.</p>
+              <p className="error_text_red">
+                {duplicateUserError
+                  ? "이미 가입한 사용자입니다. 아이디/비밀번호 찾기를 통해 기존 계정으로 로그인해 주세요."
+                  : "본인 인증을 완료해 주세요."}
+              </p>
             </div>
           ) : (
             <div className="number-group">

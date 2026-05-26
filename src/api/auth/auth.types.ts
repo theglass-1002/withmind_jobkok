@@ -24,6 +24,7 @@ export interface LoginResponse {
 export interface EmailCheckResponse {
   code: number;
   check: boolean;
+  accountType?: string;
   msg: string;
 }
 
@@ -165,6 +166,7 @@ export interface SaInitResponse {
 
 export interface SaConfirmRequest {
   txId: string;
+  purpose?: string;
 }
 
 export interface SaConfirmResponse {
@@ -185,10 +187,15 @@ export interface FindIdRequest {
   ci: string;
 }
 
+export interface FindIdAccount {
+  userId: string;
+  email: string;
+  accountType: string;
+}
 
 export interface FindIdResponse {
-  code: number;      // 200
-  userIds: string[]; // [] 또는 ["glass.xcx@gmail.com", ...]
+  code: number;
+  accounts: FindIdAccount[];
 }
 
 // auth.types.ts

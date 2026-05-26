@@ -22,16 +22,24 @@ export default function FindId() {
   // 아이디 찾기 결과(여러 개 가능)
   const [foundIds, setFoundIds] = useState<string[]>([]);
 
+  // 아이디 조회 결과 없음 모달
+  const [showNoResultModal, setShowNoResultModal] = useState(false);
+
   console.log("[FindId render]", { isVerified, foundIds, foundIdsLength: foundIds.length });
 
   useEffect(() => {
     const allowedOrigins = new Set([window.location.origin, "https://api.jobkok.kr"]);
 
     const handleMessage = async (event: MessageEvent) => {
-      console.log("📩 [FindId] postMessage 수신:", { origin: event.origin, data: event.data });
       if (!allowedOrigins.has(event.origin)) {
-        console.warn("📩 [FindId] origin 차단됨:", event.origin, "허용목록:", Array.from(allowedOrigins));
         return;
+      }
+
+      // 유효한 메시지일 때만 로그
+      if (event.data?.type === "SA_RESULT" ||
+          event.data?.type === "INICIS_AUTH_SUCCESS" ||
+          event.data?.type === "INICIS_AUTH_FAIL") {
+        console.log("📩 [FindId] postMessage 수신:", { origin: event.origin, data: event.data });
       }
 
       // 1) SA_RESULT 수신 → txId로 confirm → ci로 find-id
@@ -64,30 +72,73 @@ export default function FindId() {
             ci: confirmRes.ci,
             gender:confirmRes.userSex
           };
-       
+
+          console.log("🔍 [FindId] 아이디 찾기 API 호출 직전");
+          console.log("🔍 [FindId] CI 값:", confirmRes.ci);
           const idRes = await findIdByCi(confirmRes.ci);
+          console.log("✅ [FindId] 아이디 찾기 API 호출 완료");
           console.log("✅ [FindId] 아이디 찾기 응답:", idRes);
-          console.log("✅ [FindId] 찾은 아이디 목록:", idRes.userIds);
+          console.log("✅ [FindId] 찾은 아이디 목록:", idRes.accounts);
 
           if (idRes.code !== 200) {
             toast.error("아이디 찾기에 실패했습니다.");
             return;
           }
 
-          if (!idRes.userIds || idRes.userIds.length === 0) {
-            toast.error("해당 정보로 가입된 아이디가 없습니다.");
-            return;
-          }
+          const foundUserIds = idRes.accounts?.map(account => account.userId) || [];
 
           // ✅ 상태 세팅 (결과 화면으로 전환)
-          console.log("🎯 [FindId] state 업데이트 직전:", { userInfo, foundIds: idRes.userIds });
+          console.log("🎯 [FindId] state 업데이트 직전:", { userInfo, foundIds: foundUserIds });
           setVerifiedUserInfo(userInfo);
-          setFoundIds(idRes.userIds);
+          setFoundIds(foundUserIds);
           setIsVerified(true);
           console.log("🎯 [FindId] state 업데이트 호출 완료");
-        } catch (e) {
+        } catch (e: any) {
           console.error("[FindId] error:", e);
-          toast.error("아이디 찾기 처리 중 오류가 발생했습니다.");
+
+          // 409 에러 응답 데이터 추출
+          const errorData = e?.raw?.response?.data;
+
+          // 409 에러이고 CI 값이 있으면 아이디 찾기 시도
+          if (e?.code === 409 && errorData?.ci) {
+            console.log("🔍 [FindId] 409 에러지만 CI 값으로 아이디 찾기 시도");
+            console.log("🔍 [FindId] 409 응답 데이터:", errorData);
+            console.log("🔍 [FindId] CI 값:", errorData.ci);
+
+            try {
+              const idRes = await findIdByCi(errorData.ci);
+              console.log("✅ [FindId] 아이디 찾기 API 호출 완료 (409 케이스)");
+              console.log("✅ [FindId] 아이디 찾기 응답:", idRes);
+              console.log("✅ [FindId] 찾은 아이디 목록:", idRes.accounts);
+
+              if (idRes.code !== 200) {
+                toast.error("아이디 찾기에 실패했습니다.");
+                return;
+              }
+
+              const foundUserIds = idRes.accounts?.map(account => account.userId) || [];
+
+              // 409 에러 응답에서 사용자 정보 추출
+              const userInfo: VerifiedUserInfo = {
+                name: errorData.userName || "",
+                phone: errorData.userPhone || "",
+                birth: errorData.userBirth || "",
+                ci: errorData.ci,
+                gender: errorData.userGender || "M"
+              };
+
+              console.log("🎯 [FindId] state 업데이트 직전 (409 케이스):", { userInfo, foundIds: foundUserIds });
+              setVerifiedUserInfo(userInfo);
+              setFoundIds(foundUserIds);
+              setIsVerified(true);
+              console.log("🎯 [FindId] state 업데이트 호출 완료 (409 케이스)");
+            } catch (findIdError) {
+              console.error("[FindId] 아이디 찾기 실패:", findIdError);
+              toast.error("아이디 찾기 처리 중 오류가 발생했습니다.");
+            }
+          } else {
+            toast.error("아이디 찾기 처리 중 오류가 발생했습니다.");
+          }
         }
 
         return;
@@ -103,22 +154,22 @@ export default function FindId() {
         }
 
         try {
+          console.log("🔍 [FindId] 아이디 찾기 API 호출 직전 (구버전)");
+          console.log("🔍 [FindId] CI 값:", ci);
           const idRes = await findIdByCi(ci);
+          console.log("✅ [FindId] 아이디 찾기 API 호출 완료 (구버전)");
           console.log("✅ [FindId] 아이디 찾기 응답:", idRes);
-          console.log("✅ [FindId] 찾은 아이디 목록:", idRes.userIds);
+          console.log("✅ [FindId] 찾은 아이디 목록:", idRes.accounts);
 
           if (idRes.code !== 200) {
             toast.error("아이디 찾기에 실패했습니다.");
             return;
           }
 
-          if (!idRes.userIds || idRes.userIds.length === 0) {
-            toast.error("해당 정보로 가입된 아이디가 없습니다.");
-            return;
-          }
+          const foundUserIds = idRes.accounts?.map(account => account.userId) || [];
 
           setVerifiedUserInfo({ name, phone, birth, ci,gender});
-          setFoundIds(idRes.userIds);
+          setFoundIds(foundUserIds);
           setIsVerified(true);
 
           toast.success("아이디 찾기가 완료되었습니다!");
@@ -138,6 +189,13 @@ export default function FindId() {
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
   }, []);
+
+  // 아이디 조회 결과가 0개일 때 모달 표시
+  useEffect(() => {
+    if (isVerified && foundIds.length === 0) {
+      setShowNoResultModal(true);
+    }
+  }, [isVerified, foundIds]);
 
   const handleVerify = async () => {
     try {
@@ -165,25 +223,29 @@ export default function FindId() {
       };
 
       setInicisParams(params);
-      console.log(params);
+      console.log("[FindId] InicisParams 설정:", params);
+
       const popup = openAuthPopup();
       if (!popup) {
         alert("팝업이 차단되었습니다. 브라우저 팝업 허용을 확인해 주세요.");
         return;
       }
 
-      requestAnimationFrame(() => {
+      // state 업데이트를 기다린 후 submit (타이밍 이슈 해결)
+      setTimeout(() => {
         const form = saFormRef.current;
         if (!form) {
           toast.error("본인인증 폼을 찾을 수 없습니다.");
           return;
         }
 
+        console.log("[FindId] Form submit 준비 완료");
         form.target = "sa_popup";
         form.setAttribute("method", "post");
         form.setAttribute("action", "https://sa.inicis.com/auth");
+        console.log("[FindId] Form submit 실행");
         form.submit();
-      });
+      }, 100);
     } catch (e) {
       console.error("[FindId] saInit error:", e);
       toast.error("본인인증을 시작할 수 없습니다.");
@@ -193,6 +255,13 @@ export default function FindId() {
   const resultTitle = useMemo(() => {
     return isVerified ? "요청하신 아이디는 다음과 같습니다." : "잡콕 회원가입 정보로\n아이디 찾기를 진행해 주세요";
   }, [isVerified]);
+
+  const handleCloseNoResultModal = () => {
+    setShowNoResultModal(false);
+    setIsVerified(false);
+    setFoundIds([]);
+    setVerifiedUserInfo(null);
+  };
 
   return (
     <>
@@ -322,6 +391,30 @@ export default function FindId() {
         <input type="hidden" name="successUrl" value={inicisParams?.successUrl || ""} />
         <input type="hidden" name="failUrl" value={inicisParams?.failUrl || ""} />
       </form>
+
+      {/* 아이디 조회 결과 없음 모달 */}
+      {showNoResultModal && (
+        <div className="modal-overlay" onClick={handleCloseNoResultModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>아이디를 찾을 수 없습니다.</h3>
+            </div>
+            <div className="modal-body">
+              <p>입력하신 본인 인증 정보로 가입한 아이디가 없습니다.</p>
+              <p>다른 본인 인증 정보로 검색하거나 회원 가입을 진행해 주세요.</p>
+            </div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="default_btn_white btn_w_full"
+                onClick={handleCloseNoResultModal}
+              >
+                확인
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

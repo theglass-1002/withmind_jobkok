@@ -81,7 +81,7 @@ export default function ProfileEditForm({
         handledRef.current = true;
 
         try {
-          const confirmRes = await saConfirm(txId);
+          const confirmRes = await saConfirm(txId, "mypage");
           console.log("본인인증3", confirmRes);
 
           if (!confirmRes?.verified) {

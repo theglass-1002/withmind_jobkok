@@ -81,6 +81,7 @@ const SocialConsent: React.FC = () => {
   // 본인인증 관련 state
   const [isIdentityVerified, setIsIdentityVerified] = useState(false);
   const [identityVerifiedError, setIdentityVerifiedError] = useState(false);
+  const [duplicateUserError, setDuplicateUserError] = useState(false);
   const [verifiedUserInfo, setVerifiedUserInfo] = useState<VerifiedUserInfo | null>(null);
   const [isVerifying, setIsVerifying] = useState(false);
   const [inicisParams, setInicisParams] = useState<InicisParams | null>(null);
@@ -140,13 +141,24 @@ const SocialConsent: React.FC = () => {
           console.log("[SocialConsent] saConfirm 요청 - txId:", txId);
           const confirmRes = await saConfirm(txId);
           console.log("[SocialConsent] saConfirm 응답:", confirmRes);
+
+          // status 409: 이미 가입된 회원
+          if (confirmRes?.status === 409) {
+            setIdentityVerifiedError(true);
+            setDuplicateUserError(true);
+            return;
+          }
+
           if (!confirmRes?.verified) {
             toast.error("본인인증 검증에 실패했습니다.");
+            setIdentityVerifiedError(true);
+            setDuplicateUserError(false);
             return;
           }
 
           setIsIdentityVerified(true);
           setIdentityVerifiedError(false);
+          setDuplicateUserError(false);
           const userInfo = {
             name: confirmRes.userName,
             phone: confirmRes.userPhone,
@@ -158,9 +170,19 @@ const SocialConsent: React.FC = () => {
           console.log("[SocialConsent] 본인인증 완료 - verifiedUserInfo:", userInfo);
 
           toast.success(`본인인증이 완료되었습니다!`);
-        } catch (e) {
+        } catch (e: any) {
           console.error("[INICIS] saConfirm error:", e);
+
+          // status 409: 이미 가입된 회원 (axios 인터셉터가 변환한 에러)
+          if (e?.code === 409) {
+            setIdentityVerifiedError(true);
+            setDuplicateUserError(true);
+            return;
+          }
+
           toast.error("본인인증 확인 중 오류가 발생했습니다.");
+          setIdentityVerifiedError(true);
+          setDuplicateUserError(false);
         }
 
         return;
@@ -450,7 +472,11 @@ const SocialConsent: React.FC = () => {
                     {isVerifying ? "진행 중..." : "본인 인증"}
                   </button>
                 </div>
-                <p className="error_text_red">본인 인증을 완료해 주세요.</p>
+                <p className="error_text_red">
+                  {duplicateUserError
+                    ? "이미 가입한 사용자입니다. 아이디/비밀번호 찾기를 통해 기존 계정으로 로그인해 주세요."
+                    : "본인 인증을 완료해 주세요."}
+                </p>
               </div>
             ) : (
               <div className="number-group">

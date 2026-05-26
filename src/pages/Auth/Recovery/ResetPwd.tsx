@@ -69,9 +69,39 @@ export default function ResetPwd() {
           setIsVerified(true);
 
           toast.success("임시 비밀번호가 발급되었습니다.");
-        } catch (e) {
+        } catch (e: any) {
           console.error("[ResetPwd] error:", e);
-          toast.error("비밀번호 재설정 중 오류가 발생했습니다.");
+
+          // 409 에러 응답 데이터 추출
+          const errorData = e?.raw?.response?.data;
+
+          // 409 에러이고 CI 값이 있으면 비밀번호 찾기 시도
+          if (e?.code === 409 && errorData?.ci) {
+            console.log("🔍 [ResetPwd] 409 에러지만 CI 값으로 비밀번호 찾기 시도");
+            console.log("🔍 [ResetPwd] 409 응답 데이터:", errorData);
+            console.log("🔍 [ResetPwd] CI 값:", errorData.ci);
+
+            try {
+              const pwdRes = await issueTempPasswordLocal(userId, errorData.ci);
+              console.log("✅ [ResetPwd] 임시비번 발급 응답 (409 케이스):", pwdRes);
+              console.log("✅ [ResetPwd] 발급된 임시 비밀번호:", pwdRes.tempPassword);
+
+              if (pwdRes.code !== 200) {
+                toast.error("임시 비밀번호 발급에 실패했습니다.");
+                return;
+              }
+
+              setTempPassword(pwdRes.tempPassword);
+              setIsVerified(true);
+
+              toast.success("임시 비밀번호가 발급되었습니다.");
+            } catch (pwdError) {
+              console.error("[ResetPwd] 임시 비밀번호 발급 실패:", pwdError);
+              toast.error("비밀번호 재설정 중 오류가 발생했습니다.");
+            }
+          } else {
+            toast.error("비밀번호 재설정 중 오류가 발생했습니다.");
+          }
         }
       }
     };
@@ -117,15 +147,19 @@ export default function ResetPwd() {
         return;
       }
 
-      requestAnimationFrame(() => {
+      // state 업데이트를 기다린 후 submit (타이밍 이슈 해결)
+      setTimeout(() => {
         const form = saFormRef.current;
-        if (!form) return;
+        if (!form) {
+          toast.error("본인인증 폼을 찾을 수 없습니다.");
+          return;
+        }
 
         form.target = "sa_popup";
         form.method = "post";
         form.action = "https://sa.inicis.com/auth";
         form.submit();
-      });
+      }, 100);
     } catch (e) {
       console.error("[ResetPwd] saInit error:", e);
       toast.error("본인인증을 시작할 수 없습니다.");

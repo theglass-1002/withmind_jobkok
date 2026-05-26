@@ -4,10 +4,14 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/public/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="build-date" content="2026-05-26 18:15" />
     <title>잡콕</title>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      console.log('🚀 배포 시간:', document.querySelector('meta[name="build-date"]')?.content || 'unknown');
+    </script>
   </body>
 </html>

@@ -257,8 +257,8 @@ export async function saInit(): Promise<SaInitResponse> {
   return res.data;
 }
 
-export async function saConfirm(txId: string): Promise<SaConfirmResponse> {
-  const body: SaConfirmRequest = { txId };
+export async function saConfirm(txId: string, purpose?: string): Promise<SaConfirmResponse> {
+  const body: SaConfirmRequest = { txId, purpose };
 
   const res = await instance.post<SaConfirmResponse>(
     "/auth/sa/confirm",
