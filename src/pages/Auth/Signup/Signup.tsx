@@ -84,17 +84,71 @@ export default function Signup() {
     }
   }, [password]);
 
-  // 비밀번호 확인란 포커스 아웃 시 일치 여부 체크
+  // 실시간 비밀번호 일치 확인
+  useEffect(() => {
+    const trimmedPassword = stripAllWhitespace(password);
+    const trimmedConfirmPassword = stripAllWhitespace(confirmPassword);
+
+    // 첫 번째 필드에 유효한 비밀번호가 있고, 두 번째 필드가 비어있거나 다르면
+    if (isValidPassword(trimmedPassword)) {
+      if (trimmedConfirmPassword.length === 0) {
+        // 두 번째 필드가 비어있으면
+        setPasswordErrorType(3); // "비밀번호가 일치하지 않습니다."
+      } else if (trimmedPassword !== trimmedConfirmPassword) {
+        // 두 필드가 다르면
+        setPasswordErrorType(3); // "비밀번호가 일치하지 않습니다."
+      } else {
+        // 일치하면 에러 해제
+        setPasswordErrorType(0);
+      }
+    }
+  }, [password, confirmPassword]);
+
+  // 이메일 포커스 아웃 시 유효성 검사
+  const handleEmailBlur = () => {
+    const trimmedEmail = stripAllWhitespace(email);
+
+    if (trimmedEmail.length === 0) {
+      // 이메일을 입력하지 않았으면
+      setEmailErrorType(1); // "이메일을 입력해 주세요."
+    } else if (isValidEmail(trimmedEmail) && !isEmailChecked) {
+      // 이메일이 입력되어 있고, 형식이 올바르고, 중복확인이 안 되어있으면
+      setEmailErrorType(5); // "이메일 중복확인을 진행해 주세요."
+    }
+  };
+
+  // 비밀번호 포커스 아웃 시 유효성 검사
+  const handlePasswordBlur = () => {
+    const trimmedPassword = stripAllWhitespace(password);
+
+    if (trimmedPassword.length === 0) {
+      // 비밀번호를 입력하지 않았으면
+      setPasswordErrorType(1); // "비밀번호를 입력해 주세요."
+    } else if (!isValidPassword(trimmedPassword)) {
+      // 비밀번호 형식이 올바르지 않으면
+      setPasswordErrorType(4); // "영문, 숫자, 특수문자를 모두 포함한 8~16자로 입력해 주세요."
+    }
+  };
+
+  // 비밀번호 확인란 포커스 아웃 시 유효성 검사
   const handleConfirmPasswordBlur = () => {
     const trimmedPassword = stripAllWhitespace(password);
     const trimmedConfirmPassword = stripAllWhitespace(confirmPassword);
 
-    if (trimmedConfirmPassword.length > 0) {
-      if (trimmedPassword !== trimmedConfirmPassword) {
-        setPasswordErrorType(3);
-      } else if (passwordErrorType === 3) {
-        setPasswordErrorType(0);
+    if (trimmedConfirmPassword.length === 0) {
+      // 비밀번호 확인을 입력하지 않았으면
+      if (trimmedPassword.length === 0) {
+        // 비밀번호도 비어있으면
+        setPasswordErrorType(1); // "비밀번호를 입력해 주세요."
+      } else if (isValidPassword(trimmedPassword)) {
+        // 비밀번호는 유효하게 입력되어 있으면
+        setPasswordErrorType(3); // "비밀번호가 일치하지 않습니다."
       }
+    } else if (trimmedPassword !== trimmedConfirmPassword) {
+      // 비밀번호가 일치하지 않으면
+      setPasswordErrorType(3); // "비밀번호가 일치하지 않습니다."
+    } else if (passwordErrorType === 3) {
+      setPasswordErrorType(0);
     }
   };
 
@@ -109,13 +163,14 @@ export default function Signup() {
   const isMarketingChecked = isEmailConsent || isPushConsent;
 
   const isAllAgreed = useMemo(() => {
-    // 전체동의는: 필수 4개 + 마케팅(선택)은 on/off 상관없이 전체 체크 토글에 포함
+    // 전체동의는: 필수 4개 + 선택 2개 모두 체크되었을 때
     return (
       isOver14 &&
       isPaidTermsAgreed &&
       isTermsAgreed &&
       isPrivacyAgreed &&
-      (isEmailConsent || isPushConsent || (!isEmailConsent && !isPushConsent))
+      isEmailConsent &&
+      isPushConsent
     );
   }, [isOver14, isPaidTermsAgreed, isTermsAgreed, isPrivacyAgreed, isEmailConsent, isPushConsent]);
 
@@ -187,7 +242,7 @@ export default function Signup() {
         }
 
         try {
-          const confirmRes = await saConfirm(txId);
+          const confirmRes = await saConfirm(txId, "company-signup");
           console.log('본인인증성공값',confirmRes)
 
           // status 409: 이미 가입된 회원
@@ -290,6 +345,8 @@ export default function Signup() {
         return "중복 확인을 완료해 주세요.";
       case 4:
         return "올바른 이메일 형식이 아닙니다.";
+      case 5:
+        return "이메일 중복확인을 진행해 주세요.";
       default:
         return "";
     }
@@ -618,6 +675,8 @@ export default function Signup() {
                     placeholder="이메일을 입력해 주세요."
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    onBlur={handleEmailBlur}
+                    maxLength={40}
                   />
 
                   {email.length > 0 &&
@@ -646,6 +705,8 @@ export default function Signup() {
                     placeholder="이메일을 입력해 주세요."
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    onBlur={handleEmailBlur}
+                    maxLength={40}
                   />
                   <img className="input-icon email_check" src={error_Item} alt="이메일 오류" />
                 </div>
@@ -671,11 +732,13 @@ export default function Signup() {
 
                 <div className="input-group">
                   <input
-                    placeholder="비밀번호를 입력해 주세요."
+                    placeholder="영문, 숫자, 특수문자를 모두 포함한 8~16자로 입력해 주세요."
                     className="form-input"
                     type={isPasswordVisible ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    onBlur={handlePasswordBlur}
+                    maxLength={16}
                     required
                   />
                   <img
@@ -693,12 +756,13 @@ export default function Signup() {
 
                 <div className="input-group">
                   <input
-                    placeholder="비밀번호를 다시 입력해 주세요."
+                    placeholder="영문, 숫자, 특수문자를 모두 포함한 8~16자로 입력해 주세요."
                     className="form-input"
                     type={isConfirmPasswordVisible ? "text" : "password"}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     onBlur={handleConfirmPasswordBlur}
+                    maxLength={16}
                     required
                   />
                   <img
@@ -717,10 +781,6 @@ export default function Signup() {
                     alt=""
                   />
                 </div>
-
-                <span className="password_info">
-                  ※ 영문, 숫자, 특수문자를 모두 포함한 8~16자로 입력해 주세요.
-                </span>
               </div>
             </div>
           ) : (
@@ -732,11 +792,13 @@ export default function Signup() {
 
                 <div className="input-group error">
                   <input
-                    placeholder="비밀번호를 입력해 주세요."
+                    placeholder="영문, 숫자, 특수문자를 모두 포함한 8~16자로 입력해 주세요."
                     className="form-input"
                     type={isPasswordVisible ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    onBlur={handlePasswordBlur}
+                    maxLength={16}
                     required
                   />
                   {password.length > 0 && (
@@ -757,12 +819,13 @@ export default function Signup() {
 
                 <div className="input-group error">
                   <input
-                    placeholder="비밀번호를 다시 입력해 주세요."
+                    placeholder="영문, 숫자, 특수문자를 모두 포함한 8~16자로 입력해 주세요."
                     className="form-input"
                     type={isConfirmPasswordVisible ? "text" : "password"}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     onBlur={handleConfirmPasswordBlur}
+                    maxLength={16}
                     required
                   />
                   {confirmPassword.length > 0 && (
@@ -786,9 +849,7 @@ export default function Signup() {
                 </div>
 
                 <p className="error_text_red">{passwordErrorMessage}</p>
-                <p className="form-tip_text_gray">
-                  ※ 영문, 숫자, 특수문자를 모두 포함한 8~16자로 입력해 주세요.
-                </p>
+               
               </div>
             </div>
           )}
@@ -878,7 +939,7 @@ export default function Signup() {
           {/* 성별 */}
           <div className="toggle-group">
             <label className="label" htmlFor="email">
-              성별 <em>*</em>
+              성별
             </label>
             <div className="gender-btn_wrap">
               <button
