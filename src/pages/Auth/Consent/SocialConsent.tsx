@@ -49,6 +49,7 @@ type ProviderConfig = {
     preauthToken: string;
     termsAgreed: boolean;
     deviceId: string;
+    saToken?: string;
   }) => Promise<LoginRes>;
 };
 
@@ -83,6 +84,7 @@ const SocialConsent: React.FC = () => {
   const [identityVerifiedError, setIdentityVerifiedError] = useState(false);
   const [duplicateUserError, setDuplicateUserError] = useState(false);
   const [verifiedUserInfo, setVerifiedUserInfo] = useState<VerifiedUserInfo | null>(null);
+  const [saToken, setSaToken] = useState<string | undefined>(undefined);
   const [isVerifying, setIsVerifying] = useState(false);
   const [inicisParams, setInicisParams] = useState<InicisParams | null>(null);
   const [showMarketingModal, setShowMarketingModal] = useState(false);
@@ -167,7 +169,9 @@ const SocialConsent: React.FC = () => {
             gender: confirmRes.userSex,
           };
           setVerifiedUserInfo(userInfo);
+          setSaToken(confirmRes.saToken);
           console.log("[SocialConsent] 본인인증 완료 - verifiedUserInfo:", userInfo);
+          console.log("[SocialConsent] saToken 저장:", confirmRes.saToken);
 
           toast.success(`본인인증이 완료되었습니다!`);
         } catch (e: any) {
@@ -395,6 +399,7 @@ const SocialConsent: React.FC = () => {
         preauthToken: snsAuth.preauthToken,
         termsAgreed: true,
         deviceId: did,
+        saToken: saToken,
       });
 
       console.log(`[SocialConsent] ${snsType} login(preauth) 응답:`, loginRes);
@@ -414,7 +419,7 @@ const SocialConsent: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [isRequiredAgreed, snsAuth, snsType, navigate]);
+  }, [isRequiredAgreed, snsAuth, snsType, saToken, navigate]);
 
   const handleNext = useCallback(async () => {
     // 마케팅 동의가 체크되어 있으면 모달 표시

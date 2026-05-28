@@ -142,7 +142,7 @@ export default function CompanySignup() {
         }
 
         try {
-          const confirmRes = await saConfirm(txId);
+          const confirmRes = await saConfirm(txId, "company-signup");
 
           if (!confirmRes?.verified) {
             toast.error("본인인증 검증에 실패했습니다.");
@@ -254,7 +254,7 @@ export default function CompanySignup() {
         return;
       }
 
-      requestAnimationFrame(() => {
+      setTimeout(() => {
         const form = saFormRef.current;
         if (!form) {
           toast.error("본인인증 폼을 찾을 수 없습니다.");
@@ -265,7 +265,7 @@ export default function CompanySignup() {
         form.setAttribute("method", "post");
         form.setAttribute("action", "https://sa.inicis.com/auth");
         form.submit();
-      });
+      }, 100);
     } catch (error) {
       console.error("본인인증 준비 실패:", error);
       toast.error("본인인증을 시작할 수 없습니다.");

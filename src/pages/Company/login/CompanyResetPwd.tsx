@@ -115,7 +115,7 @@ export default function CompanyResetPwd() {
         return;
       }
 
-      requestAnimationFrame(() => {
+      setTimeout(() => {
         const form = saFormRef.current;
         if (!form) return;
 
@@ -123,7 +123,7 @@ export default function CompanyResetPwd() {
         form.method = "post";
         form.action = "https://sa.inicis.com/auth";
         form.submit();
-      });
+      }, 100);
     } catch (e) {
       console.error("[CompanyResetPwd] saInit error:", e);
       toast.error("본인인증을 시작할 수 없습니다.");

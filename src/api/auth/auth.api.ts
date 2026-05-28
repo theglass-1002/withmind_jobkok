@@ -106,6 +106,7 @@ export function buildKakaoAuthUrl(state: string) {
     `https://kauth.kakao.com/oauth/authorize?response_type=code` +
     `&client_id=${KAKAO_REST_API_KEY}` +
     `&redirect_uri=${encodeURIComponent(KAKAO_REDIRECT_URI)}` +
+    `&prompt=login`+
     `&state=${state}`
   );
 }
@@ -115,6 +116,7 @@ export function buildNaverLoginUrl(state: string) {
     `https://nid.naver.com/oauth2.0/authorize?response_type=code` +
     `&client_id=${NAVER_CLIENT_ID}` +
     `&redirect_uri=${encodeURIComponent(NAVER_REDIRECT_URI)}` +
+    `&prompt=login`+
     `&state=${state}`
   );
 }
@@ -128,7 +130,7 @@ export function buildGoogleAuthUrl(state: string) {
     `&scope=${scope}` +
     `&include_granted_scopes=true` +
     `&access_type=offline` +
-    `&prompt=consent` +
+    `&prompt=select_account consent` +
     `&state=${state}`
   );
 }
@@ -157,15 +159,31 @@ export async function kakaoPrecheck(
 export async function kakaoLoginWithPreauth(
   payload: KakaoLoginWithPreauthRequest
 ): Promise<KakaoLoginWithPreauthResponse> {
+  console.log("========================================");
+  console.log("📤 [API Request] POST /auth/oauth/kakao/login");
+  console.log("========================================");
+  console.log("preauthToken:", payload.preauthToken);
+  console.log("termsAgreed:", payload.termsAgreed);
+  console.log("deviceId:", payload.deviceId);
+  console.log("saToken:", payload.saToken);
+  console.log("========================================");
+
   const res = await instance.post<KakaoLoginWithPreauthResponse>(
     "/auth/oauth/kakao/login",
     {
       preauthToken: payload.preauthToken,
       termsAgreed: payload.termsAgreed,
       deviceId: payload.deviceId,
+      saToken: payload.saToken,
     },
     { requiresAuth: false } as any
   );
+
+  console.log("========================================");
+  console.log("📡 [API Response] POST /auth/oauth/kakao/login");
+  console.log("========================================");
+  console.log(res.data);
+  console.log("========================================");
 
   return res.data;
 }
@@ -194,15 +212,31 @@ export async function naverPrecheck(
 export async function naverLoginWithPreauth(
   payload: NaverLoginWithPreauthRequest
 ): Promise<NaverLoginWithPreauthResponse> {
+  console.log("========================================");
+  console.log("📤 [API Request] POST /auth/oauth/naver/login");
+  console.log("========================================");
+  console.log("preauthToken:", payload.preauthToken);
+  console.log("termsAgreed:", payload.termsAgreed);
+  console.log("deviceId:", payload.deviceId);
+  console.log("saToken:", payload.saToken);
+  console.log("========================================");
+
   const res = await instance.post<NaverLoginWithPreauthResponse>(
     "/auth/oauth/naver/login",
     {
       preauthToken: payload.preauthToken,
       termsAgreed: payload.termsAgreed,
       deviceId: payload.deviceId,
+      saToken: payload.saToken,
     },
     { requiresAuth: false } as any
   );
+
+  console.log("========================================");
+  console.log("📡 [API Response] POST /auth/oauth/naver/login");
+  console.log("========================================");
+  console.log(res.data);
+  console.log("========================================");
 
   return res.data;
 }
@@ -231,15 +265,31 @@ export async function googlePrecheck(
 export async function googleLoginWithPreauth(
   payload: GoogleLoginWithPreauthRequest
 ): Promise<GoogleLoginWithPreauthResponse> {
+  console.log("========================================");
+  console.log("📤 [API Request] POST /auth/oauth/google/login");
+  console.log("========================================");
+  console.log("preauthToken:", payload.preauthToken);
+  console.log("termsAgreed:", payload.termsAgreed);
+  console.log("deviceId:", payload.deviceId);
+  console.log("saToken:", payload.saToken);
+  console.log("========================================");
+
   const res = await instance.post<GoogleLoginWithPreauthResponse>(
     "/auth/oauth/google/login",
     {
       preauthToken: payload.preauthToken,
       termsAgreed: payload.termsAgreed,
       deviceId: payload.deviceId,
+      saToken: payload.saToken,
     },
     { requiresAuth: false } as any
   );
+
+  console.log("========================================");
+  console.log("📡 [API Response] POST /auth/oauth/google/login");
+  console.log("========================================");
+  console.log(res.data);
+  console.log("========================================");
 
   return res.data;
 }

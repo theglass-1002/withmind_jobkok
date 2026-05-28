@@ -166,7 +166,7 @@ export default function CompanyFindId() {
         return;
       }
 
-      requestAnimationFrame(() => {
+      setTimeout(() => {
         const form = saFormRef.current;
         if (!form) {
           toast.error("본인인증 폼을 찾을 수 없습니다.");
@@ -177,7 +177,7 @@ export default function CompanyFindId() {
         form.setAttribute("method", "post");
         form.setAttribute("action", "https://sa.inicis.com/auth");
         form.submit();
-      });
+      }, 100);
     } catch (e) {
       console.error("[CompanyFindId] saInit error:", e);
       toast.error("본인인증을 시작할 수 없습니다.");

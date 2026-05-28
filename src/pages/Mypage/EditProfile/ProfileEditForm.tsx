@@ -64,10 +64,20 @@ export default function ProfileEditForm({
     const handleMessage = async (event: MessageEvent) => {
       if (!allowedOrigins.has(event.origin)) return;
       if (handledRef.current) return;
-
+      console.log(event.data);
       if (event.data?.type === "SA_RESULT") {
+        console.log("========================================");
+        console.log("📩 [ProfileEditForm] SA_RESULT 수신");
+        console.log("========================================");
+        console.log(event.data);
+        console.log("========================================");
+
         const { resultCode, txId } = event.data || {};
 
+        console.log("[ProfileEditForm] resultCode:", resultCode, "txId:", txId);
+
+
+        console.log('어디로빠짐?',txId);
         if (!txId) {
           toast.error("본인인증 결과(txId)가 없습니다.");
           return;
@@ -81,8 +91,17 @@ export default function ProfileEditForm({
         handledRef.current = true;
 
         try {
+          console.log("========================================");
+          console.log("📤 [ProfileEditForm] saConfirm 요청 - txId:", txId);
+          console.log("========================================");
+
           const confirmRes = await saConfirm(txId, "mypage");
-          console.log("본인인증3", confirmRes);
+
+          console.log("========================================");
+          console.log("📡 [ProfileEditForm] saConfirm 응답");
+          console.log("========================================");
+          console.log(confirmRes);
+          console.log("========================================");
 
           if (!confirmRes?.verified) {
             handledRef.current = false;
@@ -94,15 +113,29 @@ export default function ProfileEditForm({
             name: confirmRes.userName,
             phone: confirmRes.userPhone,
             birth: confirmRes.userBirth,
-            gender: (confirmRes.userSex ?? "M") as GenderType,
+            gender: (confirmRes.userSex ?? selectedGender) as GenderType,
             ci: confirmRes.ci,
           };
 
+          console.log("========================================");
+          console.log("✅ [ProfileEditForm] 본인인증 완료 - verifiedUserInfo:");
+          console.log("========================================");
+          console.log(info);
+          console.log("========================================");
+
           setVerifiedUserInfo(info);
-          setSelectedGender((confirmRes.userSex ?? "M") as GenderType);
+          if (confirmRes.userSex) {
+            setSelectedGender(confirmRes.userSex as GenderType);
+          }
           setVerifiedCertified(true);
           setIsVerified(true);
         } catch (e) {
+          console.log("========================================");
+          console.log("❌ [ProfileEditForm] 본인인증 에러:");
+          console.log("========================================");
+          console.error(e);
+          console.log("========================================");
+
           handledRef.current = false;
           toast.error("본인인증 처리 중 오류가 발생했습니다.");
         }
@@ -111,6 +144,12 @@ export default function ProfileEditForm({
       }
 
       if (event.data?.type === "INICIS_AUTH_SUCCESS") {
+        console.log("========================================");
+        console.log("📩 [ProfileEditForm] INICIS_AUTH_SUCCESS 수신");
+        console.log("========================================");
+        console.log(event.data);
+        console.log("========================================");
+
         handledRef.current = true;
 
         const { name, phone, birth, ci, gender } = event.data.data || {};
@@ -125,12 +164,20 @@ export default function ProfileEditForm({
           name,
           phone,
           birth,
-          gender: (gender ?? "M") as GenderType,
+          gender: (gender ?? selectedGender) as GenderType,
           ci,
         };
 
+        console.log("========================================");
+        console.log("✅ [ProfileEditForm] 본인인증 완료 - verifiedUserInfo:");
+        console.log("========================================");
+        console.log(info);
+        console.log("========================================");
+
         setVerifiedUserInfo(info);
-        setSelectedGender((gender ?? "M") as GenderType);
+        if (gender) {
+          setSelectedGender(gender as GenderType);
+        }
         setVerifiedCertified(true);
         setIsVerified(true);
 
@@ -154,10 +201,19 @@ export default function ProfileEditForm({
       setVerifiedCertified(false);
       setVerifiedUserInfo(null);
 
-      const init = await saInit();
-      console.log("인증값", init);
+      console.log("========================================");
+      console.log("📤 [ProfileEditForm] saInit 요청");
+      console.log("========================================");
 
-      const userName = `${viewModel.name}본인인증한것12`;
+      const init = await saInit();
+
+      console.log("========================================");
+      console.log("📡 [ProfileEditForm] saInit 응답");
+      console.log("========================================");
+      console.log(init);
+      console.log("========================================");
+
+      const userName = viewModel.name || "";
       const userPhone = viewModel.number || "";
       const userBirth = viewModel.birth || "";
 
@@ -185,7 +241,7 @@ export default function ProfileEditForm({
         return;
       }
 
-      requestAnimationFrame(() => {
+      setTimeout(() => {
         const form = saFormRef.current;
         if (!form) {
           toast.error("본인인증 폼을 찾을 수 없습니다.");
@@ -196,7 +252,7 @@ export default function ProfileEditForm({
         form.setAttribute("method", "post");
         form.setAttribute("action", "https://sa.inicis.com/auth");
         form.submit();
-      });
+      }, 100);
     } catch (e) {
       toast.error("본인인증을 시작할 수 없습니다.");
     }

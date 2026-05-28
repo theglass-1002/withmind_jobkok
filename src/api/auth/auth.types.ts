@@ -74,6 +74,7 @@ export type OAuthLoginWithPreauthRequest = {
   preauthToken: string;
   termsAgreed: boolean;
   deviceId: string;
+  saToken?: string;
 };
 
 export type OAuthLoginWithPreauthResponse = {

@@ -5,7 +5,7 @@ import "./Recovery.css";
 
 import { openAuthPopup } from "@/shared/utils/util";
 import { findIdByCi, saConfirm, saInit } from "@/api/auth/auth.api";
-import { InicisParams, VerifiedUserInfo } from "@/api/auth/auth.types";
+import { InicisParams, VerifiedUserInfo, FindIdAccount } from "@/api/auth/auth.types";
 
 export default function FindId() {
   const navigate = useNavigate();
@@ -20,12 +20,12 @@ export default function FindId() {
   const [inicisParams, setInicisParams] = useState<InicisParams | null>(null);
 
   // 아이디 찾기 결과(여러 개 가능)
-  const [foundIds, setFoundIds] = useState<string[]>([]);
+  const [foundAccounts, setFoundAccounts] = useState<FindIdAccount[]>([]);
 
   // 아이디 조회 결과 없음 모달
   const [showNoResultModal, setShowNoResultModal] = useState(false);
 
-  console.log("[FindId render]", { isVerified, foundIds, foundIdsLength: foundIds.length });
+  console.log("[FindId render]", { isVerified, foundAccounts, foundAccountsLength: foundAccounts.length });
 
   useEffect(() => {
     const allowedOrigins = new Set([window.location.origin, "https://api.jobkok.kr"]);
@@ -85,12 +85,12 @@ export default function FindId() {
             return;
           }
 
-          const foundUserIds = idRes.accounts?.map(account => account.userId) || [];
+          const foundUserAccounts = idRes.accounts || [];
 
           // ✅ 상태 세팅 (결과 화면으로 전환)
-          console.log("🎯 [FindId] state 업데이트 직전:", { userInfo, foundIds: foundUserIds });
+          console.log("🎯 [FindId] state 업데이트 직전:", { userInfo, foundAccounts: foundUserAccounts });
           setVerifiedUserInfo(userInfo);
-          setFoundIds(foundUserIds);
+          setFoundAccounts(foundUserAccounts);
           setIsVerified(true);
           console.log("🎯 [FindId] state 업데이트 호출 완료");
         } catch (e: any) {
@@ -116,7 +116,7 @@ export default function FindId() {
                 return;
               }
 
-              const foundUserIds = idRes.accounts?.map(account => account.userId) || [];
+              const foundUserAccounts = idRes.accounts || [];
 
               // 409 에러 응답에서 사용자 정보 추출
               const userInfo: VerifiedUserInfo = {
@@ -127,9 +127,9 @@ export default function FindId() {
                 gender: errorData.userGender || "M"
               };
 
-              console.log("🎯 [FindId] state 업데이트 직전 (409 케이스):", { userInfo, foundIds: foundUserIds });
+              console.log("🎯 [FindId] state 업데이트 직전 (409 케이스):", { userInfo, foundAccounts: foundUserAccounts });
               setVerifiedUserInfo(userInfo);
-              setFoundIds(foundUserIds);
+              setFoundAccounts(foundUserAccounts);
               setIsVerified(true);
               console.log("🎯 [FindId] state 업데이트 호출 완료 (409 케이스)");
             } catch (findIdError) {
@@ -166,10 +166,10 @@ export default function FindId() {
             return;
           }
 
-          const foundUserIds = idRes.accounts?.map(account => account.userId) || [];
+          const foundUserAccounts = idRes.accounts || [];
 
           setVerifiedUserInfo({ name, phone, birth, ci,gender});
-          setFoundIds(foundUserIds);
+          setFoundAccounts(foundUserAccounts);
           setIsVerified(true);
 
           toast.success("아이디 찾기가 완료되었습니다!");
@@ -192,10 +192,10 @@ export default function FindId() {
 
   // 아이디 조회 결과가 0개일 때 모달 표시
   useEffect(() => {
-    if (isVerified && foundIds.length === 0) {
+    if (isVerified && foundAccounts.length === 0) {
       setShowNoResultModal(true);
     }
-  }, [isVerified, foundIds]);
+  }, [isVerified, foundAccounts]);
 
   const handleVerify = async () => {
     try {
@@ -259,8 +259,43 @@ export default function FindId() {
   const handleCloseNoResultModal = () => {
     setShowNoResultModal(false);
     setIsVerified(false);
-    setFoundIds([]);
+    setFoundAccounts([]);
     setVerifiedUserInfo(null);
+  };
+
+  // accountType에 따른 메시지 생성 함수
+  const getAccountTypeMessage = (accountType: string): string => {
+    // "oauth:kakao" -> "카카오"
+    // "oauth:naver" -> "네이버"
+    // "oauth:google" -> "구글"
+    // "email" -> "이메일"
+    if (accountType.startsWith("oauth:")) {
+      const provider = accountType.split(":")[1];
+      const providerNames: { [key: string]: string } = {
+        kakao: "카카오",
+        naver: "네이버",
+        google: "구글",
+      };
+      return providerNames[provider] || provider;
+    }
+    return "이메일";
+  };
+
+  // 이메일 마스킹 함수 (앞 3글자만 보이고 @ 앞까지 마스킹)
+  const maskEmail = (email: string): string => {
+    if (!email) return "";
+
+    const [localPart, domain] = email.split("@");
+    if (!localPart || !domain) return email;
+
+    if (localPart.length <= 3) {
+      return `${localPart}@${domain}`;
+    }
+
+    const visiblePart = localPart.substring(0, 3);
+    const maskedPart = "*".repeat(localPart.length - 3);
+
+    return `${visiblePart}${maskedPart}@${domain}`;
   };
 
   return (
@@ -304,10 +339,17 @@ export default function FindId() {
 
               {/* 여러개일 수 있으니 리스트로 */}
               <div className="recovery-info__contents">
-                {foundIds.length > 0 ? (
-                  foundIds.map((id) => (
-                    <div key={id}>{id}</div>
-                  ))
+                {foundAccounts.length > 0 ? (
+                  foundAccounts.map((account) => {
+                    const isOAuth = account.accountType.startsWith("oauth:");
+                    const displayEmail = isOAuth ? maskEmail(account.email || account.userId) : (account.email || account.userId);
+                    const accountTypeMsg = isOAuth ? ` [${getAccountTypeMessage(account.accountType)}] 계정으로 가입하셨습니다.` : "";
+                    return (
+                      <div key={account.userId}>
+                        {displayEmail}{accountTypeMsg}
+                      </div>
+                    );
+                  })
                 ) : (
                   "아이디 조회 결과가 없습니다."
                 )}
@@ -346,10 +388,17 @@ export default function FindId() {
           <div className="recovery-info result">
             <span className="recovery-info__title title__result">{resultTitle}</span>
             <div className="recovery-info__contents">
-              {foundIds.length > 0 ? (
-                foundIds.map((id) => (
-                  <div key={id}>{id}</div>
-                ))
+              {foundAccounts.length > 0 ? (
+                foundAccounts.map((account) => {
+                  const isOAuth = account.accountType.startsWith("oauth:");
+                  const displayEmail = isOAuth ? maskEmail(account.email || account.userId) : (account.email || account.userId);
+                  const accountTypeMsg = isOAuth ? ` [${getAccountTypeMessage(account.accountType)}] 계정으로 가입하셨습니다.` : "";
+                  return (
+                    <div key={account.userId}>
+                      {displayEmail}{accountTypeMsg}
+                    </div>
+                  );
+                })
               ) : (
                 "아이디 조회 결과가 없습니다."
               )}

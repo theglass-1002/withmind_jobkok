@@ -242,7 +242,7 @@ export default function Signup() {
         }
 
         try {
-          const confirmRes = await saConfirm(txId, "company-signup");
+          const confirmRes = await saConfirm(txId);
           console.log('본인인증성공값',confirmRes)
 
           // status 409: 이미 가입된 회원
@@ -623,8 +623,8 @@ export default function Signup() {
         return;
       }
 
-      // DOM에 hidden form 렌더가 반영된 다음 submit
-      requestAnimationFrame(() => {
+      // state 업데이트를 기다린 후 submit
+      setTimeout(() => {
         const form = saFormRef.current;
         if (!form) {
           toast.error("본인인증 폼을 찾을 수 없습니다.");
@@ -635,9 +635,6 @@ export default function Signup() {
         form.target = "sa_popup";
         form.setAttribute("method", "post");
         form.setAttribute("action", "https://sa.inicis.com/auth");
-
-        // form.setAttribute("action", "https://sa.inicis.com/auth");
-
         form.submit();
 
         // 팝업이 열린 후 5초 뒤 상태 초기화 (사용자가 팝업에서 작업 중)

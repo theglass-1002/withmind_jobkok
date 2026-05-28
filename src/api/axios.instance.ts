@@ -12,13 +12,73 @@ declare module "axios" {
     requiresAuth?: boolean;
     _retry?: boolean;
     tokenType?: "user" | "company";
+    _startTime?: number;
   }
   export interface InternalAxiosRequestConfig {
     requiresAuth?: boolean;
     _retry?: boolean;
     tokenType?: "user" | "company";
+    _startTime?: number;
   }
 }
+
+// ═══ 잡콕 이벤트 추적 (전체 자동 수집) ═══
+const _eventQueue: any[] = [];
+
+// window 객체에 _eventQueue 노출 (Layout에서 PAGE_VIEW 추적용)
+declare global {
+  interface Window {
+    _eventQueue: any[];
+  }
+}
+window._eventQueue = _eventQueue;
+
+// ⑤ 10초마다 배치 전송 + 페이지 떠날 때 전송
+function _flushEvents() {
+  if (_eventQueue.length === 0) return;
+  navigator.sendBeacon(
+    '/_debug/tracking/api/events',
+    new Blob([JSON.stringify(_eventQueue.splice(0))], { type: 'application/json' })
+  );
+}
+
+setInterval(_flushEvents, 10000);
+window.addEventListener('beforeunload', _flushEvents);
+
+// ③ 버튼 클릭 자동 수집 (이벤트 위임 — 모든 button/a 태그)
+document.addEventListener('click', (e) => {
+  const el = (e.target as Element).closest('button, a, [data-track]');
+  if (!el) return;
+  const label = el.getAttribute('data-track')
+    || el.getAttribute('aria-label')
+    || (el as HTMLElement).innerText?.trim().substring(0, 50)
+    || el.tagName;
+  _eventQueue.push({
+    type: 'CLICK',
+    url: window.location.pathname,
+    meta: label,
+    timestamp: Date.now()
+  });
+});
+
+// ④ JS 에러 자동 수집
+window.addEventListener('error', (e) => {
+  _eventQueue.push({
+    type: 'JS_ERROR',
+    url: e.filename || window.location.pathname,
+    errorMessage: e.message + (e.lineno ? ` (line ${e.lineno})` : ''),
+    timestamp: Date.now()
+  });
+});
+
+window.addEventListener('unhandledrejection', (e) => {
+  _eventQueue.push({
+    type: 'JS_ERROR',
+    url: window.location.pathname,
+    errorMessage: String((e.reason as any)?.message || e.reason || 'Unhandled Promise'),
+    timestamp: Date.now()
+  });
+});
 
 const instance = axios.create({
   baseURL: API_BASE_URL,
@@ -59,6 +119,9 @@ export interface ApiErrorResponse {
 
 instance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
+    // ① API 호출 자동 수집 (시작 시간 기록)
+    config._startTime = Date.now();
+
     const requiresAuth =
       config.requiresAuth === undefined ? true : config.requiresAuth;
 
@@ -88,8 +151,29 @@ instance.interceptors.request.use(
 );
 
 instance.interceptors.response.use(
-  (res) => res,
+  (res) => {
+    // ② API 호출 자동 수집 (성공)
+    _eventQueue.push({
+      type: 'API_CALL',
+      url: res.config.url,
+      method: res.config.method?.toUpperCase(),
+      status: res.status,
+      elapsedMs: Date.now() - (res.config._startTime || Date.now()),
+      timestamp: Date.now()
+    });
+    return res;
+  },
   async (error: any) => {
+    // ② API 호출 자동 수집 (에러)
+    _eventQueue.push({
+      type: 'ERROR',
+      url: error.config?.url,
+      method: error.config?.method?.toUpperCase(),
+      status: error.response?.status,
+      errorMessage: error.message,
+      timestamp: Date.now()
+    });
+
     if (!error.response) {
       if (error.code && error.msg) {
         return Promise.reject(error as ApiErrorResponse);

@@ -60,6 +60,15 @@ export default function Layout({
 
   useEffect(() => {
     scrollToTop();
+
+    // PAGE_VIEW 이벤트 추적
+    if (window._eventQueue) {
+      window._eventQueue.push({
+        type: 'PAGE_VIEW',
+        url: location.pathname,
+        timestamp: Date.now()
+      });
+    }
   }, [location.pathname]);
 
   useEffect(() => {
@@ -390,7 +399,7 @@ export default function Layout({
           className="app-toast"
           position="top-center"
           transition={SlideDown}
-          autoClose={20}
+          autoClose={3000}
           newestOnTop
           hideProgressBar
           closeOnClick
