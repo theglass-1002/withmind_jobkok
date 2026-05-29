@@ -5,6 +5,7 @@ import { formatPhoneNumber, openAuthPopup } from "@/shared/utils/util";
 import { formatBirthdate } from "@/api/auth/auth.types";
 import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
 import { toast } from "react-toastify";
+import Modal from "@/shared/components/modal/Modal";
 
 import { saConfirm, saInit } from "@/api/auth/auth.api";
 import { InicisParams, VerifiedUserInfo } from "@/api/auth/auth.types";
@@ -39,6 +40,7 @@ export default function ProfileEditForm({
   const [verifiedUserInfo, setVerifiedUserInfo] = useState<VerifiedUserInfo | null>(null);
   const [verifiedCertified, setVerifiedCertified] = useState<boolean>(false);
   const [selectedGender, setSelectedGender] = useState<GenderType>("M");
+  const [ciErrorMessage, setCiErrorMessage] = useState<string>("");
 
   const handledRef = useRef(false);
   
@@ -108,6 +110,32 @@ export default function ProfileEditForm({
             toast.error("본인인증 검증에 실패했습니다.");
             return;
           }
+
+          console.log("========================================");
+          console.log("🔍 [ProfileEditForm] CI 매칭 체크");
+          console.log("ciMatch:", confirmRes.ciMatch);
+          console.log("existingAccount:", confirmRes.existingAccount);
+          console.log("========================================");
+
+          // Case 1: 본인이 아닌 경우 (CI 불일치)
+          if (!confirmRes.ciMatch) {
+            handledRef.current = false;
+
+            // Case 2: 다른 사람의 계정이 이미 존재하는 경우
+            if (confirmRes.existingAccount) {
+              console.log("❌ [ProfileEditForm] 다른 계정으로 가입된 정보");
+              setCiErrorMessage("입력하신 본인 인증 정보는 다른 JOBKOK 계정에서 사용 중입니다.");
+              return;
+            }
+
+            // Case 3: 다른 사람이지만 미가입자
+            console.log("❌ [ProfileEditForm] 본인의 정보가 아님");
+            setCiErrorMessage("입력하신 본인 인증 정보는 가입한 정보와 다릅니다.");
+            return;
+          }
+
+          // Case 1: 본인 인증 성공 (ciMatch: true)
+          console.log("✅ [ProfileEditForm] 본인 인증 성공");
 
           const info: VerifiedUserInfo = {
             name: confirmRes.userName,
@@ -377,23 +405,6 @@ export default function ProfileEditForm({
             </button>
           </div>
         </div>
-
-        <form ref={saFormRef} name="saForm" style={{ display: "none" }}>
-          <input type="hidden" name="mid" value={inicisParams?.mid || ""} />
-          <input type="hidden" name="reqSvcCd" value={inicisParams?.reqSvcCd || ""} />
-          <input type="hidden" name="identifier" value="테스트서명입니다." />
-          <input type="hidden" name="mTxId" value={inicisParams?.mTxId || ""} />
-          <input type="hidden" name="authHash" value={inicisParams?.authHash || ""} />
-          <input type="hidden" name="flgFixedUser" value={inicisParams?.flgFixedUser || ""} />
-          <input type="hidden" name="userName" value={inicisParams?.userName || ""} />
-          <input type="hidden" name="userPhone" value={inicisParams?.userPhone || ""} />
-          <input type="hidden" name="userBirth" value={inicisParams?.userBirth || ""} />
-          <input type="hidden" name="userHash" value={inicisParams?.userHash || ""} />
-          <input type="hidden" name="reservedMsg" value={inicisParams?.reservedMsg || ""} />
-          <input type="hidden" name="directAgency" value={inicisParams?.directAgency || ""} />
-          <input type="hidden" name="successUrl" value={inicisParams?.successUrl || ""} />
-          <input type="hidden" name="failUrl" value={inicisParams?.failUrl || ""} />
-        </form>
       </div>
 
       <div className="account-main mobile">
@@ -493,24 +504,37 @@ export default function ProfileEditForm({
             </button>
           </div>
         </div>
-
-        <form name="saForm" style={{ display: "none" }}>
-          <input type="hidden" name="mid" value={inicisParams?.mid || ""} />
-          <input type="hidden" name="reqSvcCd" value={inicisParams?.reqSvcCd || ""} />
-          <input type="hidden" name="identifier" value="테스트서명입니다." />
-          <input type="hidden" name="mTxId" value={inicisParams?.mTxId || ""} />
-          <input type="hidden" name="authHash" value={inicisParams?.authHash || ""} />
-          <input type="hidden" name="flgFixedUser" value={inicisParams?.flgFixedUser || ""} />
-          <input type="hidden" name="userName" value={inicisParams?.userName || ""} />
-          <input type="hidden" name="userPhone" value={inicisParams?.userPhone || ""} />
-          <input type="hidden" name="userBirth" value={inicisParams?.userBirth || ""} />
-          <input type="hidden" name="userHash" value={inicisParams?.userHash || ""} />
-          <input type="hidden" name="reservedMsg" value={inicisParams?.reservedMsg || ""} />
-          <input type="hidden" name="directAgency" value={inicisParams?.directAgency || ""} />
-          <input type="hidden" name="successUrl" value={inicisParams?.successUrl || ""} />
-          <input type="hidden" name="failUrl" value={inicisParams?.failUrl || ""} />
-        </form>
       </div>
+
+      {/* 이니시스 본인인증 hidden form (PC/모바일 공통) */}
+      <form ref={saFormRef} name="saForm" style={{ display: "none" }}>
+        <input type="hidden" name="mid" value={inicisParams?.mid || ""} />
+        <input type="hidden" name="reqSvcCd" value={inicisParams?.reqSvcCd || ""} />
+        <input type="hidden" name="identifier" value="테스트서명입니다." />
+        <input type="hidden" name="mTxId" value={inicisParams?.mTxId || ""} />
+        <input type="hidden" name="authHash" value={inicisParams?.authHash || ""} />
+        <input type="hidden" name="flgFixedUser" value={inicisParams?.flgFixedUser || ""} />
+        <input type="hidden" name="userName" value={inicisParams?.userName || ""} />
+        <input type="hidden" name="userPhone" value={inicisParams?.userPhone || ""} />
+        <input type="hidden" name="userBirth" value={inicisParams?.userBirth || ""} />
+        <input type="hidden" name="userHash" value={inicisParams?.userHash || ""} />
+        <input type="hidden" name="reservedMsg" value={inicisParams?.reservedMsg || ""} />
+        <input type="hidden" name="directAgency" value={inicisParams?.directAgency || ""} />
+        <input type="hidden" name="successUrl" value={inicisParams?.successUrl || ""} />
+        <input type="hidden" name="failUrl" value={inicisParams?.failUrl || ""} />
+      </form>
+
+      {/* CI 불일치 에러 모달 */}
+      <Modal
+        open={!!ciErrorMessage}
+        onClose={() => setCiErrorMessage("")}
+        title="본인인증 정보 변경에 실패하였습니다."
+        desc={ciErrorMessage}
+        confirmText="확인"
+        confirmClassName="default_btn_white btn_w_full"
+        showCancel={false}
+        onConfirm={() => setCiErrorMessage("")}
+      />
     </>
   );
 }

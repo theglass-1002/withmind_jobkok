@@ -310,16 +310,20 @@ export async function saInit(): Promise<SaInitResponse> {
 export async function saConfirm(txId: string, purpose?: string): Promise<SaConfirmResponse> {
   const body: SaConfirmRequest = { txId, purpose };
 
+  // purpose가 "mypage"일 때는 로그인 토큰 필요 (백엔드에서 CI 비교용)
+  const requiresAuth = purpose === "mypage";
+
   const res = await instance.post<SaConfirmResponse>(
     "/auth/sa/confirm",
     body,
     {
-      requiresAuth: false,
+      requiresAuth,
       // X-API-Key가 필요하면 여기서 주입 가능
       // headers: { "X-API-Key": import.meta.env.VITE_SA_API_KEY ?? "" },
     } as any
   );
-
+  console.log('saConfirm결과saConfirm결과saConfirm결과saConfirm결과saConfirm결과');
+  console.log(res.data);
   return res.data;
 }
 

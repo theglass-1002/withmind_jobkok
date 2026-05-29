@@ -179,7 +179,11 @@ export interface SaConfirmResponse {
   userName: string;
   userPhone: string;
   userBirth: string;
-  userSex: string;    // 
+  userSex: string;
+  userGender?: string;
+  existingUser?: boolean;
+  ciMatch?: boolean;
+  existingAccount?: boolean;
 }
 
 // auth.types.ts

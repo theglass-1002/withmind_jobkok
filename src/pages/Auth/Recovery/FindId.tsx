@@ -34,7 +34,8 @@ export default function FindId() {
       if (!allowedOrigins.has(event.origin)) {
         return;
       }
-
+      console.log("📩 [FindId] postMessage 수신:", { origin: event.origin, data: event.data });
+      
       // 유효한 메시지일 때만 로그
       if (event.data?.type === "SA_RESULT" ||
           event.data?.type === "INICIS_AUTH_SUCCESS" ||
