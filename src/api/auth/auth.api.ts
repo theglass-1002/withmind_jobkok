@@ -322,8 +322,12 @@ export async function saConfirm(txId: string, purpose?: string): Promise<SaConfi
       // headers: { "X-API-Key": import.meta.env.VITE_SA_API_KEY ?? "" },
     } as any
   );
-  console.log('saConfirm결과saConfirm결과saConfirm결과saConfirm결과saConfirm결과');
-  console.log(res.data);
+  console.log('========================================');
+  console.log('🔥 saConfirm API 원본 응답값 (진짜 서버에서 온 데이터)');
+  console.log('========================================');
+  console.log('JSON 문자열:', JSON.stringify(res.data, null, 2));
+  console.log('객체 원본:', res.data);
+  console.log('========================================');
   return res.data;
 }
 

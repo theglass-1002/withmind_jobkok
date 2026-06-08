@@ -22,25 +22,27 @@ export default function InicisSuccess() {
       const phone = searchParams.get("phone") || "";
       const birth = searchParams.get("birth") || "";
       const ci = searchParams.get("ci") || "";
-  
+      const gender = searchParams.get("gender") || "";
+
       console.log("[InicisSuccess] 본인인증 성공 데이터:", {
         name,
         phone,
         birth,
         ci,
+        gender,
       });
-  
+
       console.log("[InicisSuccess] window.opener:", window.opener);
-  
+
       if (window.opener) {
         window.opener.postMessage(
           {
             type: "INICIS_AUTH_SUCCESS",
-            data: { name, phone, birth, ci },
+            data: { name, phone, birth, ci, gender },
           },
           window.location.origin
         );
-  
+
         console.log("[InicisSuccess] 부모창으로 메시지 전송 완료");
       }
     } else {
