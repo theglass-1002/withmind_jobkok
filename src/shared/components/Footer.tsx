@@ -61,14 +61,16 @@ export default function Footer() {
 
             <div className="info_wrap">
               <div>
-                <span>상호명: (주)위드마인드</span>
-                <span>대표이사: 주민성</span>
-                <span>사업자번호: 794-87-00687</span>
-                <span>통신판매업신고번호: 제 2021-대전유성-0522호</span>
+                <span>(주)위드마인드 | 대표: 주민성</span>
               </div>
               <div>
-                <span>본점 주소: 대전광역시 유성구 가정로 218, 3층</span>
-                <span>지점 주소: 서울 마포구 월드컵북로 396 누리꿈스퀘어 R&D센터 1007호</span>
+                <span>부산광역시 강서구 미음산단5로41번길 71, 4층 405-A1호(미음동, 부산글로벌테크비즈센터)</span>
+              </div>
+              <div>
+                <span>사업자등록번호: 794-87-00687 | 통신판매업신고번호: 제 2021-대전유성-0522호</span>
+              </div>
+              <div>
+                <span>직업정보제공사업 신고번호: J1302020260002</span>
               </div>
               <div>Copyright Ⓒ 2025 WITHMIND. All rigths reserved.</div>
             </div>
@@ -114,13 +116,10 @@ export default function Footer() {
           </ul>
 
           <div className="info_wrap">
-            <div>
-              <span>상호명: (주)위드마인드</span>
-              <span>대표이사: 주민성</span>
-            </div>
-            <span>사업자번호: 794-87-00687</span>
-            <span>본점 주소: 대전광역시 유성구 가정로 218, 3층</span>
-            <span>지점 주소: 서울 마포구 월드컵북로 396 누리꿈스퀘어 R&D센터 1007호</span>
+            <span>(주)위드마인드 | 대표: 주민성</span>
+            <span>부산광역시 강서구 미음산단5로41번길 71, 4층 405-A1호(미음동, 부산글로벌테크비즈센터)</span>
+            <span>사업자등록번호: 794-87-00687 | 통신판매업신고번호: 제 2021-대전유성-0522호</span>
+            <span>직업정보제공사업 신고번호: J1302020260002</span>
             <span>Copyright Ⓒ 2025 WITHMIND. All rigths reserved.</span>
           </div>
         </div>
