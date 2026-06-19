@@ -61,21 +61,18 @@ export default function Footer() {
 
             <div className="info_wrap">
               <div>
-                <span>(주)위드마인드 | 대표: 주민성</span>
+                <span>(주)위드마인드 | 대표: 주민성 | 사업자등록번호: 794-87-00687 | 통신판매업신고번호: 제 2021-대전유성-0522호</span>
               </div>
               <div>
                 <span>연구소 본점: 부산시 강서구 미음산단5로 41번길 71 부산글로벌테크비즈센터 4층 405-A1호</span>
-              </div>
-              <div>
                 <span>서울지점: 서울 마포구 월드컵북로 396 누리꿈스퀘어 R&D센터 1007호</span>
-              </div>
-              <div>
-                <span>사업자등록번호: 794-87-00687 | 통신판매업신고번호: 제 2021-대전유성-0522호</span>
               </div>
               <div>
                 <span>직업정보제공사업 신고번호: J1302020260002</span>
               </div>
-              <div>Copyright Ⓒ 2025 WITHMIND. All rigths reserved.</div>
+              <div>
+              <span>Copyright Ⓒ 2025 WITHMIND. All rigths reserved.</span>
+              </div>
             </div>
           </div>
         </div>
@@ -119,12 +116,19 @@ export default function Footer() {
           </ul>
 
           <div className="info_wrap">
-            <span>(주)위드마인드 | 대표: 주민성</span>
-            <span>연구소 본점: 부산시 강서구 미음산단5로 41번길 71 부산글로벌테크비즈센터 4층 405-A1호</span>
-            <span>서울지점: 서울 마포구 월드컵북로 396 누리꿈스퀘어 R&D센터 1007호</span>
-            <span>사업자등록번호: 794-87-00687 | 통신판매업신고번호: 제 2021-대전유성-0522호</span>
-            <span>직업정보제공사업 신고번호: J1302020260002</span>
-            <span>Copyright Ⓒ 2025 WITHMIND. All rigths reserved.</span>
+            <div>
+              <span>(주)위드마인드 | 대표: 주민성 | 사업자등록번호: 794-87-00687 | 통신판매업신고번호: 제 2021-대전유성-0522호</span>
+            </div>
+            <div>
+              <span>연구소 본점: 부산시 강서구 미음산단5로 41번길 71 부산글로벌테크비즈센터 4층 405-A1호</span>
+              <span>서울지점: 서울 마포구 월드컵북로 396 누리꿈스퀘어 R&D센터 1007호</span>
+            </div>
+            <div>
+              <span>직업정보제공사업 신고번호: J1302020260002</span>
+            </div>
+            <div>
+              <span>Copyright Ⓒ 2025 WITHMIND. All rigths reserved.</span>
+            </div>
           </div>
         </div>
       </footer>

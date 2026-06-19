@@ -62,6 +62,7 @@ import SocialConsent from "@/pages/Auth/Consent/SocialConsent";
 import Recovery from "@/pages/Auth/Recovery/Recovery";
 import NotFound from "@/pages/NotFound";
 import MyPageLayout from "@/pages/Mypage/MyPageLayout";
+import ComingSoon from "@/pages/ComingSoon/ComingSoon";
 
 
 // 잡콕_기업
@@ -85,8 +86,11 @@ import PaidServiceTerms from "@/pages/Docs/PaidServiceTerms";
 
 export const router = createBrowserRouter([
 
-  // 모바일화면
+  // 사이트 준비중 - 모든 경로를 ComingSoon으로 리다이렉트
+  { path: "*", element: <ComingSoon /> },
 
+  // 모바일화면
+  /*
   { path: "/resumes/m-create", element: <Layout screen="ResumeCreation" showFooter="desktop-only" showBottomNav={false}><M_ResumeCreate/></Layout> },
 
   {path: "/mypage/m-edit-profile", element:<Layout screen="EditProfile" showFooter="desktop-only" showBottomNav={false}> <EditProfile/></Layout> },
@@ -229,7 +233,8 @@ export const router = createBrowserRouter([
         path: "ai-matching/report/:id",
         element: <AIReport />
       }
-    ] 
+    ]
   },
+  */
 
 ]);
