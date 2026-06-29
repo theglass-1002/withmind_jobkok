@@ -86,9 +86,11 @@ export default function MyPage() {
         }
 
         try {
-          const resumeRes = await fetchResumeList(1, 1);
+          const resumeRes = await fetchResumeList(1, 100);
           if (!isMounted) return;
-          setDefaultResume((resumeRes.list ?? [])[0] ?? null);
+          // isDefault === 1인 기본 이력서만 필터링
+          const defaultResumeItem = (resumeRes.list ?? []).find(item => item.isDefault === 1);
+          setDefaultResume(defaultResumeItem ?? null);
           successCount += 1;
 
         } catch (e: any) {
@@ -306,14 +308,16 @@ export default function MyPage() {
                   <span className="resume-card__headline">
                     {defaultResume?.title ?? "기본 이력서가 없습니다."}
                   </span>
-                  <div className="resume-card__meta">
-                    <span className="resume-card__date">
-                      {formatDate(defaultResume?.createdAt)}
-                    </span>
-                    <span className="resume-card__role">
-                      {defaultResume?.hopeJobs ?? ""}
-                    </span>
-                  </div>
+                  {defaultResume && (
+                    <div className="resume-card__meta">
+                      <span className="resume-card__date">
+                        {formatDate(defaultResume?.createdAt)}
+                      </span>
+                      <span className="resume-card__role">
+                        {defaultResume?.hopeJobs ?? ""}
+                      </span>
+                    </div>
+                  )}
                 </>
               )}
             </div>

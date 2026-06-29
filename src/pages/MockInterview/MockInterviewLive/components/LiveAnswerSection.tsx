@@ -233,7 +233,7 @@ export default function LiveAnswerSection({
             </button>
             <button
               className="mock-interview-dialog__btn--primary"
-              onClick={() => navigate("/mock-interview-report")}
+              onClick={() => navigate("/mock-interview-report?tab=history")}
             >
               분석 결과 보기
             </button>

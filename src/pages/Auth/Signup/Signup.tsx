@@ -597,7 +597,19 @@ export default function Signup() {
       const userName = "홍길동";
       const userPhone = "01012345678";
       const userBirth = "19901101";
-      console.log('auth/sa/init호출시',init );
+      console.log('========================================');
+      console.log('🔥 saInit API 응답값 (이니시스 초기화 데이터)');
+      console.log('========================================');
+      console.log('원본 데이터:', init);
+      console.log('mid:', init.mid);
+      console.log('reqSvcCd:', init.reqSvcCd);
+      console.log('txId:', init.txId);
+      console.log('authHash:', init.authHash);
+      console.log('flgFixedUser:', init.flgFixedUser);
+      console.log('returnUrl:', init.returnUrl);
+      console.log('reservedMsg:', init.reservedMsg);
+      console.log('========================================');
+
       const params: InicisParams = {
         mid: init.mid,
         reqSvcCd: init.reqSvcCd,
@@ -614,7 +626,11 @@ export default function Signup() {
         failUrl: init.returnUrl,
       };
 
-      setInicisParams(params);
+      console.log('========================================');
+      console.log('🔥 이니시스로 전송할 파라미터');
+      console.log('========================================');
+      console.log('전체 params:', params);
+      console.log('========================================');
 
       const popup = openAuthPopup();
       if (!popup) {
@@ -623,25 +639,53 @@ export default function Signup() {
         return;
       }
 
-      // state 업데이트를 기다린 후 submit
+      // 폼에 직접 값 설정 (state를 거치지 않음 - 타이밍 이슈 방지)
+      const form = saFormRef.current;
+      if (!form) {
+        toast.error("본인인증 폼을 찾을 수 없습니다.");
+        setIsVerifying(false);
+        popup.close();
+        return;
+      }
+
+      // 각 input 필드에 직접 값 설정
+      (form.elements.namedItem('mid') as HTMLInputElement).value = params.mid;
+      (form.elements.namedItem('reqSvcCd') as HTMLInputElement).value = params.reqSvcCd;
+      (form.elements.namedItem('mTxId') as HTMLInputElement).value = params.mTxId;
+      (form.elements.namedItem('authHash') as HTMLInputElement).value = params.authHash;
+      (form.elements.namedItem('flgFixedUser') as HTMLInputElement).value = params.flgFixedUser;
+      (form.elements.namedItem('userName') as HTMLInputElement).value = params.userName;
+      (form.elements.namedItem('userPhone') as HTMLInputElement).value = params.userPhone;
+      (form.elements.namedItem('userBirth') as HTMLInputElement).value = params.userBirth;
+      (form.elements.namedItem('userHash') as HTMLInputElement).value = params.userHash;
+      (form.elements.namedItem('reservedMsg') as HTMLInputElement).value = params.reservedMsg;
+      (form.elements.namedItem('directAgency') as HTMLInputElement).value = params.directAgency;
+      (form.elements.namedItem('successUrl') as HTMLInputElement).value = params.successUrl;
+      (form.elements.namedItem('failUrl') as HTMLInputElement).value = params.failUrl;
+
+      form.target = "sa_popup";
+      form.setAttribute("method", "post");
+      form.setAttribute("action", "https://sa.inicis.com/auth");
+
+      console.log('========================================');
+      console.log('🔥 이니시스 폼 전송 직전');
+      console.log('========================================');
+      console.log('Form action:', form.getAttribute('action'));
+      console.log('Form target:', form.target);
+      console.log('Form data:');
+      const formData = new FormData(form);
+      for (let [key, value] of formData.entries()) {
+        console.log(`  ${key}:`, value);
+      }
+      console.log('========================================');
+
+      // 즉시 submit (setTimeout 제거)
+      form.submit();
+
+      // 팝업이 열린 후 5초 뒤 상태 초기화 (사용자가 팝업에서 작업 중)
       setTimeout(() => {
-        const form = saFormRef.current;
-        if (!form) {
-          toast.error("본인인증 폼을 찾을 수 없습니다.");
-          setIsVerifying(false);
-          return;
-        }
-
-        form.target = "sa_popup";
-        form.setAttribute("method", "post");
-        form.setAttribute("action", "https://sa.inicis.com/auth");
-        form.submit();
-
-        // 팝업이 열린 후 5초 뒤 상태 초기화 (사용자가 팝업에서 작업 중)
-        setTimeout(() => {
-          setIsVerifying(false);
-        }, 5000);
-      });
+        setIsVerifying(false);
+      }, 5000);
     } catch (error) {
       console.error("본인인증 준비 실패:", error);
       toast.error("본인인증을 시작할 수 없습니다.");

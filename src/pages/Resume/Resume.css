@@ -85,7 +85,7 @@
 
   .resume-page__container {
     display: flex;
-    padding: 52px 0px 100px 0px;
+    padding: 120px 0px 100px 0px;
     align-items: flex-start;
     gap: 24px;
     align-self: stretch;

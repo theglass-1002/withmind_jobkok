@@ -6,10 +6,13 @@
 }
 
 .resume-controls-wrapper{
+    position: sticky;
+    top: 72px;
     display: flex;
     width: 100%;
     justify-content: center;
-    /* max-width: 1200px; */
+    background: var(--white-100, #FFF);
+    z-index: 2;
     border-bottom: 1px solid var(--gray-300, #E0E2E4);
 }
 
@@ -18,36 +21,20 @@
 }
 
 .resume-create-page__status{
-    /* display: flex;
-    padding: 96px 360px 24px 360px;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 16px;
-    align-self: stretch;
-    border-bottom: 1px solid var(--gray-300, #E0E2E4);
-    background: var(--white-100, #FFF); */
     display: flex;
-    padding: 96px 0px 24px 0px;
+    padding: 24px 0px;
     justify-content: flex-end;
     max-width: 1200px;
     width: 100%;
     align-items: center;
     gap: 16px;
     align-self: stretch;
-    /* border-bottom: 1px solid var(--gray-300, #E0E2E4); */
-    background: var(--white-100, #FFF);
 }
 
 .resume-create-page__container{
-    /* display: flex;
-    padding: 52px 360px 100px 360px;
-    align-items: flex-start;
-    gap: 24px;
-    align-self: stretch; */
     display: flex;
-    padding: 52px 0px 100px 0px;
+    padding: 120px 0px 100px 0px;
     width: 100%;
-    /* align-items: center; */
     gap: 24px;
 
     justify-content: center;
@@ -64,9 +51,11 @@
 }
 
 .resume-create-page__aside{
+    position: sticky;
+    top: 120px;
     display: flex;
     width: 320px;
-    height: 100%;
+    align-self: flex-start;
     flex-direction: column;
     align-items: flex-start;
     border-radius: 6px;

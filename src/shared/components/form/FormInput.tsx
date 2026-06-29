@@ -21,6 +21,7 @@ type Props = {
 
   // ✅ 추가
   readOnly?: boolean;
+  disabled?: boolean;
 };
 
 export default function FormInput({
@@ -42,13 +43,14 @@ export default function FormInput({
 
   // ✅ 기본값 false
   readOnly = false,
+  disabled = false,
 }: Props) {
   const hasError = Boolean(invalid || errorMessage);
   const describedBy = errorMessage ? `${id}-error` : undefined;
 
   return (
     <>
-      <div className={`input-group ${hasError ? 'error' : ''}`}>
+      <div className={`input-group ${hasError ? 'error' : ''} ${disabled ? 'disabled' : ''}`}>
         {leftIconSrc && (
           <img src={leftIconSrc} alt={leftIconAlt} />
         )}
@@ -66,6 +68,8 @@ export default function FormInput({
           aria-invalid={invalid || undefined}
           aria-describedby={describedBy}
           readOnly={readOnly}   // ✅ 핵심
+          disabled={disabled}
+          style={disabled ? { backgroundColor: '#f5f5f5', cursor: 'not-allowed' } : undefined}
         />
 
         {rightIconSrc && (

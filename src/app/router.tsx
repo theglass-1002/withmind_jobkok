@@ -87,7 +87,7 @@ import PaidServiceTerms from "@/pages/Docs/PaidServiceTerms";
 export const router = createBrowserRouter([
 
   // 사이트 준비중 - 모든 경로를 ComingSoon으로 리다이렉트
-  { path: "*", element: <ComingSoon /> },
+  // { path: "*", element: <ComingSoon /> },
 
   // 모바일화면
   /*
@@ -107,7 +107,7 @@ export const router = createBrowserRouter([
   {path: "/mock-interview/m-settings", element:<Layout screen="MockSetting" showFooter="desktop-only" showBottomNav={false}> <M_MockSettings/></Layout> },
   {path: "/mock-interview/m-environment-test", element:<Layout screen="EnvironmentTestView" showFooter="desktop-only" showBottomNav={false}> <M_EnvironmentTestView/> </Layout> },
   { path: "/mock-interview/m-mock-interview-live",element:<Layout screen="MockInterviewLive" showFooter="desktop-only" showBottomNav={false}> <M_MockInterviewLive/> </Layout> },
-
+*/
 
 
   { path: "/", element: <Layout><Home/></Layout>, errorElement: <Layout><Home /></Layout>},
@@ -235,6 +235,7 @@ export const router = createBrowserRouter([
       }
     ]
   },
-  */
+
+  { path: "*", element: <NotFound /> },
 
 ]);

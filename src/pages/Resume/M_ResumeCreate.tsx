@@ -683,7 +683,7 @@ export default function M_ResumeCreate() {
 
         ...(profilePhotoFile ? { profilePhotoFile } : {}),
 
-        regions: form.location.nationwide ? [] : form.location.selectedCodes,
+        regions: form.location.nationwide ? ["00"] : form.location.selectedCodes,
 
         ...(form.isFreshGraduate
           ? {}
@@ -979,7 +979,7 @@ export default function M_ResumeCreate() {
   
         ...(profilePhotoFile ? { profilePhotoFile } : {}),
   
-        regions: form.location.nationwide ? [] : form.location.selectedCodes,
+        regions: form.location.nationwide ? ["00"] : form.location.selectedCodes,
   
         ...(form.isFreshGraduate
           ? {}

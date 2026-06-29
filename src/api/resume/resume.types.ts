@@ -339,6 +339,12 @@ export const mapRegionListToLocationItems = (
   const items: { city: string; district: string }[] = [];
 
   codes.forEach((code) => {
+    // 0) "00" 전국 코드
+    if (code === "00") {
+      items.push({ city: "전국", district: "지역 전체" });
+      return;
+    }
+
     // 1) "27" 같은 지역 전체 코드
     const region = regionsData.find((r) => r.code === code);
     if (region) {
@@ -409,16 +415,24 @@ export const calcTotalCareerLabel = (
     return "(총 0년 0개월)";
   }
 
-  const sorted = [...careerList].sort((a, b) =>
-    a.startYm.localeCompare(b.startYm)
-  );
+  // 각 경력의 개월 수를 합산
+  let totalMonths = 0;
 
-  const firstStart = sorted[0].startYm;
-  const lastEnd =
-    sorted[sorted.length - 1].endYm ?? new Date().toISOString().slice(0, 7);
+  careerList.forEach((career) => {
+    const [sy, sm] = career.startYm.split("-").map(Number);
+    const end = career.endYm ?? new Date().toISOString().slice(0, 7);
+    const [ey, em] = end.split("-").map(Number);
 
-  const label = calcTenureLabel(firstStart, lastEnd); // "(x년 y개월)"
-  return `(총 ${label.replace(/[()]/g, "")})`; // 괄호 제거 후 "(총 x년 y개월)"
+    const months = (ey - sy) * 12 + (em - sm);
+    if (months >= 0) {
+      totalMonths += months;
+    }
+  });
+
+  const years = Math.floor(totalMonths / 12);
+  const months = totalMonths % 12;
+
+  return `(총 ${years}년 ${months}개월)`;
 };
 
 // BE careerList → FE CareerItem[]

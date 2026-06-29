@@ -178,6 +178,7 @@ export default function AllJobPostingSection({
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [resumeModalOpen, setResumeModalOpen] = useState(false);
   const [isGeneratingReco, setIsGeneratingReco] = useState(false);
+  const [isTempResume, setIsTempResume] = useState(false);
 
   const [openFilter, setOpenFilter] = useState<FilterKey | null>(null);
   const [sort, setSort] = useState<string>(savedFilters?.sort ?? "최신순");
@@ -488,11 +489,15 @@ export default function AllJobPostingSection({
           params.employmentEtc = employmentEtc || undefined;
         }
 
+        console.log("📤 채용공고 요청 params:", params);
+
         const { jobs, totalPages, totalCount } = await fetchJobList(
           page,
           size,
           params
         );
+
+        console.log("📥 채용공고 응답:", { jobsCount: jobs.length, totalPages, totalCount, resumeBased: params.resumeBased });
 
         setAllJobs(jobs);
         setJobs(jobs);
@@ -785,12 +790,18 @@ export default function AllJobPostingSection({
   };
 
   const handleResumeRecoToggle = async (checked: boolean) => {
+    console.log("🔄 이력서 기반 추천 토글:", checked);
+    console.log("📋 상태 확인:", { loggedIn, resumeExists, defaultResumeIdx });
+
     if (checked) {
       if (!loggedIn) {
+        console.log("❌ 로그인 필요");
         setLoginModalOpen(true);
         return;
       }
       if (!resumeExists || !defaultResumeIdx) {
+        console.log("❌ 이력서 없음");
+        setIsTempResume(false);
         setResumeModalOpen(true);
         return;
       }
@@ -802,14 +813,22 @@ export default function AllJobPostingSection({
         console.log("[handleResumeRecoToggle] 추천 생성 응답:", res);
         setResumeReco(true);
         setPage(1);
-      } catch (e) {
+      } catch (e: any) {
         console.error("[handleResumeRecoToggle] 추천 생성 실패:", e);
+
+        // 임시저장 이력서 에러 처리
+        if (e?.code === "RESUME_NOT_COMPLETED" || e?.response?.data?.code === "RESUME_NOT_COMPLETED") {
+          console.log("❌ 임시저장 이력서 - 모달 표시");
+          setIsTempResume(true);
+          setResumeModalOpen(true);
+        }
       } finally {
         setIsGeneratingReco(false);
       }
       return;
     }
 
+    console.log("⬇️ 이력서 기반 추천 OFF");
     setResumeReco(false);
     setPage(1);
   };
@@ -1195,11 +1214,19 @@ export default function AllJobPostingSection({
 
       <Modal
         open={resumeModalOpen}
-        title="기본이력서 생성 시 이용가능한 기능입니다."
-        confirmText="확인"
-        showCancel={false}
+        title={isTempResume ? "작성중인 이력서를 완료해주세요." : "기본이력서 생성 시 이용가능한 기능입니다."}
+        desc={isTempResume ? undefined : undefined}
+        confirmText={isTempResume ? "이력서 작성하기" : "확인"}
+        cancelText={isTempResume ? "취소" : undefined}
+        showCancel={isTempResume}
         confirmClassName="btn_w_full default_btn_black"
-        onConfirm={() => setResumeModalOpen(false)}
+        cancelClassName="btn_w_full default_btn_white"
+        onConfirm={() => {
+          setResumeModalOpen(false);
+          if (isTempResume) {
+            navigate("/resumes");
+          }
+        }}
         onClose={() => setResumeModalOpen(false)}
       />
     </>

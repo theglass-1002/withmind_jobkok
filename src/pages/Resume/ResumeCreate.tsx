@@ -1005,7 +1005,7 @@ export default function ResumeCreate() {
 
         ...(profilePhotoFile ? { profilePhotoFile } : {}),
 
-        regions: form.location.nationwide ? [] : form.location.selectedCodes,
+        regions: form.location.nationwide ? ["00"] : form.location.selectedCodes,
 
         ...(form.isFreshGraduate
           ? {}
@@ -1129,9 +1129,10 @@ export default function ResumeCreate() {
         return;
       }
 
+      console.log("📤 이력서 등록 data:", JSON.stringify(payload));
+
       const result = await createResume(payload);
       console.log("✅ 이력서 등록 성공:", result);
-      console.log("✅ 이력서 등록 Payload:", payload);
       toast.success("이력서가 등록되었습니다!");
       navigate(`/resumes/${result}`);
       setIsLoading(false);
@@ -1172,7 +1173,7 @@ export default function ResumeCreate() {
 
         ...(profilePhotoFile ? { profilePhotoFile } : {}),
 
-        regions: form.location.nationwide ? [] : form.location.selectedCodes,
+        regions: form.location.nationwide ? ["00"] : form.location.selectedCodes,
 
         ...(form.isFreshGraduate
           ? {}

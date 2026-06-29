@@ -57,10 +57,13 @@ export default function InquiryCreate() {
   const startEditing = (e?: React.KeyboardEvent | React.MouseEvent) => {
     if (e && "key" in e) {
       if (e.nativeEvent?.isComposing) return;
-      if (e.key !== "Enter" && e.key !== " ") return;
-      e.preventDefault();
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        setEditing(true);
+      }
+    } else {
+      setEditing(true);
     }
-    setEditing(true);
   };
 
   const handleCancelClick = () => {
@@ -72,12 +75,18 @@ export default function InquiryCreate() {
   }, [inquiryType]);
 
   useEffect(() => {
-    if (title.trim() !== "") setTitleError("");
+    if (title !== "") setTitleError("");
   }, [title]);
 
   useEffect(() => {
-    if (content.trim() !== "") setContentError("");
+    if (content !== "") setContentError("");
   }, [content]);
+
+  useEffect(() => {
+    if (editing && ref.current) {
+      ref.current.focus();
+    }
+  }, [editing]);
 
   useEffect(() => {
     if (actionType === "INQUIRY_CREATE_CANCEL") {
@@ -88,8 +97,8 @@ export default function InquiryCreate() {
 
   const validate = () => {
     const isInquiryTypeValid = inquiryType.trim() !== "";
-    const isTitleValid = title.trim() !== "";
-    const isContentValid = content.trim() !== "";
+    const isTitleValid = title !== "";
+    const isContentValid = content !== "";
 
     setTypeError(isInquiryTypeValid ? "" : "문의 유형을 선택해 주세요.");
     setTitleError(isTitleValid ? "" : "문의 제목을 입력해 주세요.");
@@ -105,8 +114,8 @@ export default function InquiryCreate() {
     const payload = {
       userId: Storage.getUserId(),
       inquiryType: getInquiryTypeLabel(inquiryType.trim()),
-      title: title.trim(),
-      content: content.trim(),
+      title: title,
+      content: content,
       secretYn: "N" as const,
     };
 
@@ -188,16 +197,43 @@ export default function InquiryCreate() {
 
         <div
           className={`content ${contentError ? "error" : ""}`}
-          onClick={startEditing}
-          onKeyDown={startEditing}
+          onClick={!editing ? startEditing : undefined}
+          onKeyDown={!editing ? startEditing : undefined}
           role="button"
-          tabIndex={0}
+          tabIndex={editing ? -1 : 0}
         >
           {editing ? (
             <textarea
               ref={ref}
               value={content}
-              onChange={(e) => setContent(e.target.value)}
+              onChange={(e) => {
+                console.log('onChange - 입력된 값:', JSON.stringify(e.target.value));
+                console.log('onChange - 값 길이:', e.target.value.length);
+                setContent(e.target.value);
+              }}
+              onKeyDown={(e) => {
+                console.log('onKeyDown - 키:', e.key, 'code:', e.code);
+                e.stopPropagation(); // 외부 div로 이벤트 전파 차단
+              }}
+              onClick={(e) => {
+                e.stopPropagation(); // 외부 div로 이벤트 전파 차단
+              }}
+              onBeforeInput={(e) => {
+                console.log('onBeforeInput - data:', e.data);
+                // 스페이스 두 번 → 마침표 자동 변환 방지
+                if (e.data === '.' && content.endsWith(' ')) {
+                  const nativeEvent = e.nativeEvent as InputEvent;
+                  if (nativeEvent.inputType === 'insertText') {
+                    e.preventDefault();
+                    setContent(content + ' ');
+                  }
+                }
+              }}
+              style={{ whiteSpace: 'pre' }}
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
             />
           ) : (
             <div className="content-info">

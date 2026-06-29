@@ -164,13 +164,19 @@ export default function CameraTest({
           audio: true,
         });
 
+        if (!videoRef.current) {
+          console.error("stream 없음");
+          stream.getTracks().forEach(track => track.stop());
+          return;
+        }
+
         streamRef.current = stream;
         videoRef.current.srcObject = stream;
         await videoRef.current.play();
       } catch (error) {
         console.error("카메라 접근 오류:", error);
         if (devOverrideRef.current) return;
-        
+
         setFailureCode(3);
         setTestStatus("failed");
         onFail();

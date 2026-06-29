@@ -12,6 +12,7 @@ type Props = {
   className?: string;
   /** 달력 팝오버 열림 여부 → true면 .on 클래스 부여 */
   isOpen?: boolean;
+  disabled?: boolean;
 };
 
 export default function DateInline({
@@ -24,6 +25,7 @@ export default function DateInline({
   errorMessage,
   className,
   isOpen = false,
+  disabled = false,
 }: Props) {
   const hasError = Boolean(invalid || errorMessage);
   const describedBy = errorMessage ? `${id ?? 'date'}-error` : undefined;
@@ -32,9 +34,11 @@ export default function DateInline({
     'section__date-inner',
     hasError ? 'error' : '',
     isOpen ? 'on' : '',
+    disabled ? 'disabled' : '',
   ].join(' ').trim();
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (disabled) return;
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       onClick?.();
@@ -45,14 +49,15 @@ export default function DateInline({
     <div className={`date-section ${className ?? ''}`}>
       <div
         className={innerClass}
-        onClick={onClick}
+        onClick={disabled ? undefined : onClick}
         onKeyDown={handleKeyDown}
         role="button"
-        tabIndex={0}
+        tabIndex={disabled ? -1 : 0}
         aria-invalid={hasError || undefined}
         aria-describedby={describedBy}
         aria-expanded={isOpen || undefined}
         aria-controls={isOpen ? `${id}-popover` : undefined}
+        style={disabled ? { backgroundColor: '#f5f5f5', cursor: 'not-allowed' } : undefined}
       >
         <span className="section__date-input">
           <img src={iconSrc} alt="" />

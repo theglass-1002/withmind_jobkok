@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 
 import bookmark_active_purple from "@/assets/icons/bookmark_active_purple.png";
 import bookmark_inactive from "@/assets/icons/bookmark_inactive.png";
-import mp_test_logo from "@/assets/icons/mp_test_logo.png";
+import defaultCompanyLogo from "@/assets/images/default-company-logo.svg";
 
 import fire from "@/assets/icons/fire.png";
 import seed from "@/assets/icons/seed.png";
@@ -183,7 +183,7 @@ export default function JobPostingItemRowNoAiPick({
       <div className="job-posting__card">
         <div className="job-posting__row job-posting__row--top">
           <div className="job-posting__left">
-            <img className="job-posting__logo" src={mp_test_logo} alt="" />
+            <img className="job-posting__logo" src={defaultCompanyLogo} alt="" />
             <div className="job-posting__details">
               <div className="job-posting__title">
                 <span className="job-posting__company">-</span>
@@ -212,8 +212,12 @@ export default function JobPostingItemRowNoAiPick({
           <div className="job-posting__left">
             <img
               className="job-posting__logo"
-              src={job.companyLogoUrl || mp_test_logo}
+              src={job.companyLogoUrl || defaultCompanyLogo}
               alt={job.companyName ?? ""}
+            
+              onError={(e) => {
+                e.currentTarget.src = defaultCompanyLogo;
+              }}
             />
             <div className="job-posting__details">
               <div className="job-posting__title">
@@ -272,20 +276,19 @@ export default function JobPostingItemRowNoAiPick({
 
         {showAppliedSection &&
           (recordAsApplied === 0 ? (
-            <div className="job-card__control job-card__control--radio">
-              <div
-                className="radio_check_blank_gray"
-                onClick={(e) => handleRecordAsApplied(e, 1)}
-              />
+            <div
+              className="job-card__control job-card__control--radio"
+              onClick={(e) => handleRecordAsApplied(e, 1)}
+            >
+              <div className="radio_check_blank_gray" />
               지원한 포지션으로 기록하기
             </div>
           ) : (
-            <div className="job-card__control job-card__control--radio on">
-              <img
-                onClick={(e) => handleRecordAsApplied(e, 0)}
-                src={ic_check_circle_purple_20}
-                alt=""
-              />
+            <div
+              className="job-card__control job-card__control--radio on"
+              onClick={(e) => handleRecordAsApplied(e, 0)}
+            >
+              <img src={ic_check_circle_purple_20} alt="" />
               지원한 포지션으로 기록하기
             </div>
           ))}
@@ -296,8 +299,12 @@ export default function JobPostingItemRowNoAiPick({
           <div className="job-posting__left">
             <img
               className="job-posting__logo"
-              src={job.companyLogoUrl || mp_test_logo}
+              src={job.companyLogoUrl || defaultCompanyLogo}
               alt={job.companyName ?? ""}
+            
+              onError={(e) => {
+                e.currentTarget.src = defaultCompanyLogo;
+              }}
             />
             <div className="job-posting__details">
               <div className="job-posting__title">
@@ -354,20 +361,19 @@ export default function JobPostingItemRowNoAiPick({
 
         {showAppliedSection &&
           (recordAsApplied === 0 ? (
-            <div className="job-card__control job-card__control--radio">
-              <div
-                className="radio_check_blank_gray"
-                onClick={(e) => handleRecordAsApplied(e, 1)}
-              />
+            <div
+              className="job-card__control job-card__control--radio"
+              onClick={(e) => handleRecordAsApplied(e, 1)}
+            >
+              <div className="radio_check_blank_gray" />
               지원한 포지션으로 기록하기
             </div>
           ) : (
-            <div className="job-card__control job-card__control--radio on">
-              <img
-                onClick={(e) => handleRecordAsApplied(e, 0)}
-                src={ic_check_circle_purple_20}
-                alt=""
-              />
+            <div
+              className="job-card__control job-card__control--radio on"
+              onClick={(e) => handleRecordAsApplied(e, 0)}
+            >
+              <img src={ic_check_circle_purple_20} alt="" />
               지원한 포지션으로 기록하기
             </div>
           ))}

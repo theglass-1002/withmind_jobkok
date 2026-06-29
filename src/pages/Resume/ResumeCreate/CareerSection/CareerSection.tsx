@@ -270,7 +270,7 @@ export default function CareerSection({
         </div>
       </div>
 
-      <div className="resume-create-page__section-body career-section">
+      <div className="resume-create-page__section-body career-section" style={{ display: isFresh ? 'none' : 'flex' }}>
         {items.map((it, idx) => (
           <CareerItem
             key={it.id ?? idx}

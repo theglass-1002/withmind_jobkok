@@ -249,8 +249,13 @@ export default function ResumeEditMobile() {
             : null,
 
           location: {
-            nationwide: (data.regionList?.length ?? 0) === 0,
-            selectedCodes: data.regionList ?? [],
+            nationwide: (() => {
+              const isNationwide = (data.regionList?.length === 1 && data.regionList[0] === "00") || (data.regionList?.length ?? 0) === 0;
+              const codes = (data.regionList?.length === 1 && data.regionList[0] === "00") ? [] : (data.regionList ?? []);
+              console.log('📍 Location 변환 (Mobile):', { regionList: data.regionList, nationwide: isNationwide, selectedCodes: codes });
+              return isNationwide;
+            })(),
+            selectedCodes: (data.regionList?.length === 1 && data.regionList[0] === "00") ? [] : (data.regionList ?? []),
           },
           careers: (data.careerList ?? []).map((c) => ({
             company_name: c.companyName ?? "",
@@ -675,7 +680,7 @@ export default function ResumeEditMobile() {
               ? { profilePhotoFile: form.profilePhotoFileMeta }
               : {}),
 
-            regions: form.location.nationwide ? [] : form.location.selectedCodes,
+            regions: form.location.nationwide ? ["00"] : form.location.selectedCodes,
 
             ...(form.isFreshGraduate
               ? {}
@@ -1184,7 +1189,7 @@ export default function ResumeEditMobile() {
               ? { profilePhotoFile: form.profilePhotoFileMeta }
               : {}),
       
-            regions: form.location.nationwide ? [] : form.location.selectedCodes,
+            regions: form.location.nationwide ? ["00"] : form.location.selectedCodes,
       
             ...(form.isFreshGraduate
               ? {}

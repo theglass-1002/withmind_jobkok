@@ -455,6 +455,7 @@ align-self: stretch;
     font-style: normal;
     font-weight: 400;
     line-height: 180%; /* 28.8px */
+    overflow: auto;
   }
 
   .content-info .header{
@@ -515,6 +516,22 @@ align-self: stretch;
     border-radius: 4px;
     border: 1px solid var(--red-100, #FF524C);
     background: var(--white-100, #FFF);
+}
+
+.inquiry .create .content textarea{
+    width: 100%;
+    height: 280px;
+    padding: 12px 16px;
+    border-radius: 4px;
+    border: 1px solid var(--gray-300, #E0E2E4);
+    background: var(--white-100, #FFF);
+    resize: none;
+    font-family: Pretendard;
+    font-size: 16px;
+    line-height: 180%;
+    white-space: pre !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
 }
 
 .inquiry-title{

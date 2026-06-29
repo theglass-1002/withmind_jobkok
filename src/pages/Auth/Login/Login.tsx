@@ -200,8 +200,13 @@ const Login: React.FC = () => {
       logout();
       console.error("[Login] 일반 로그인 에러:", e);
 
-      if (e.code === 401) setPasswordErrorType(3);
-      else toast.error("로그인 중 오류가 발생했습니다.");
+      if (e.code === 401) {
+        setPasswordErrorType(3);
+      } else if (e.code === 410) {
+        toast.error("회원탈퇴된 계정입니다.");
+      } else {
+        toast.error("로그인 중 오류가 발생했습니다.");
+      }
     } finally {
       setIsLoading(false);
     }

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
-import mp_test_logo from "@/assets/icons/mp_test_logo.png";
+import defaultCompanyLogo from "@/assets/images/default-company-logo.svg";
 import "./RecommendedJobCard.css";
 
 import {
@@ -90,7 +90,7 @@ export default function RecommendedJobCard({
           >
             <div className="job-head">
               <span className="job-logo">
-                <img src={job.companyLogoUrl || mp_test_logo} alt="" />
+                <img src={job.companyLogoUrl || defaultCompanyLogo} alt="" />
               </span>
 
               <span

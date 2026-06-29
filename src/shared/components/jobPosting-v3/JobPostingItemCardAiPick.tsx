@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 
 import bookmark_active_purple from "@/assets/icons/bookmark_active_purple.png";
 import bookmark_inactive from "@/assets/icons/bookmark_inactive.png";
-import mp_test_logo from "@/assets/icons/mp_test_logo.png";
+import defaultCompanyLogo from "@/assets/images/default-company-logo.svg";
 import fire from "@/assets/icons/fire.png";
 import seed from "@/assets/icons/seed.png";
 import check_circle_purple from "@/assets/icons/check_circle_purple.png";
@@ -147,7 +147,7 @@ export default function JobPostingItemCardAiPick({
       <div className="job-posting__card ai-pick">
         <div className="job-card__header">
           <div className="job-posting__left">
-            <img className="job-posting__logo" src={mp_test_logo} alt="" />
+            <img className="job-posting__logo" src={defaultCompanyLogo} alt="" />
             <div className="job-card__identity">
               <div className="job-card__byline">
                 <span className="job-posting__company">-</span>
@@ -174,9 +174,13 @@ export default function JobPostingItemCardAiPick({
         <div className="job-posting__left">
           <img
             className="job-posting__logo"
-            src={job.companyLogoUrl || mp_test_logo}
+            src={job.companyLogoUrl || defaultCompanyLogo}
             alt={job.companyName ?? ""}
-          />
+          
+              onError={(e) => {
+                e.currentTarget.src = defaultCompanyLogo;
+              }}
+            />
           <div className="job-card__identity">
             <div className="job-card__byline">
               <span className="job-posting__company">{job.companyName}</span>

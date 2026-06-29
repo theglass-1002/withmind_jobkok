@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
-import mp_test_logo from "@/assets/icons/mp_test_logo.png";
+import defaultCompanyLogo from "@/assets/images/default-company-logo.svg";
 import check_circle_purple from "@/assets/icons/check_circle_purple.png";
 import "./MypageJobCard.css";
 
@@ -137,7 +137,7 @@ export default function MypageJobCard({
       <div className="job-posting__card">
         <div className="job-card__header">
           <div className="job-posting__left">
-            <img className="job-posting__logo" src={mp_test_logo} alt="" />
+            <img className="job-posting__logo" src={defaultCompanyLogo} alt="" />
             <div className="job-card__identity">
               <div className="job-card__byline">
                 <span className="job-posting__company">-</span>
@@ -160,9 +160,13 @@ export default function MypageJobCard({
       <div className="job-card__header">
         <img
           className="job-posting__logo"
-          src={job.companyLogoUrl || mp_test_logo}
+          src={job.companyLogoUrl || defaultCompanyLogo}
           alt={job.companyName ?? ""}
-        />
+        
+              onError={(e) => {
+                e.currentTarget.src = defaultCompanyLogo;
+              }}
+            />
 
         <img
           className="job-card__favorite"
@@ -197,20 +201,19 @@ export default function MypageJobCard({
 
         {showAppliedSection &&
           (recordAsApplied === 0 ? (
-            <div className="job-card__control job-card__control--radio">
-              <div
-                className="radio_check_blank_gray"
-                onClick={(e) => handleRecordAsApplied(e, 1)}
-              />
+            <div
+              className="job-card__control job-card__control--radio"
+              onClick={(e) => handleRecordAsApplied(e, 1)}
+            >
+              <div className="radio_check_blank_gray" />
               지원한 포지션으로 기록하기
             </div>
           ) : (
-            <div className="job-card__control job-card__control--radio on">
-              <img
-                onClick={(e) => handleRecordAsApplied(e, 0)}
-                src={check_circle_purple}
-                alt=""
-              />
+            <div
+              className="job-card__control job-card__control--radio on"
+              onClick={(e) => handleRecordAsApplied(e, 0)}
+            >
+              <img src={check_circle_purple} alt="" />
               지원한 포지션으로 기록하기
             </div>
           ))}

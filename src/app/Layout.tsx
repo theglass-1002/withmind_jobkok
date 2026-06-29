@@ -399,7 +399,7 @@ export default function Layout({
           className="app-toast"
           position="top-center"
           transition={SlideDown}
-          autoClose={3000}
+          autoClose={2000}
           newestOnTop
           hideProgressBar
           closeOnClick

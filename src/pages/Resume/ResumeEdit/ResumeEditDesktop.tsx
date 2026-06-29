@@ -195,10 +195,15 @@ const mapDetailToFormState = (data: ResumeDetailResponse): FormState => {
         }
       : null,
 
-    location: {
-      nationwide: (data.regionList?.length ?? 0) === 0,
-      selectedCodes: data.regionList ?? [],
-    },
+    location: (() => {
+      const isNationwide = (data.regionList?.length === 1 && data.regionList[0] === "00") || (data.regionList?.length ?? 0) === 0;
+      const codes = (data.regionList?.length === 1 && data.regionList[0] === "00") ? [] : (data.regionList ?? []);
+      console.log('📍 Location 변환:', { regionList: data.regionList, nationwide: isNationwide, selectedCodes: codes });
+      return {
+        nationwide: isNationwide,
+        selectedCodes: codes,
+      };
+    })(),
     careers: (data.careerList ?? []).map((c) => ({
       company_name: c.companyName ?? "",
       employmentType: c.employmentType ?? "",
@@ -1239,7 +1244,7 @@ export default function ResumeEditDesktop() {
   
         ...(profilePhotoFile ? { profilePhotoFile } : {}),
   
-        regions: form.location.nationwide ? [] : form.location.selectedCodes,
+        regions: form.location.nationwide ? ["00"] : form.location.selectedCodes,
   
         ...(form.isFreshGraduate
           ? {}
@@ -1477,7 +1482,7 @@ export default function ResumeEditDesktop() {
 
         ...(profilePhotoFile ? { profilePhotoFile } : {}),
   
-        regions: form.location.nationwide ? [] : form.location.selectedCodes,
+        regions: form.location.nationwide ? ["00"] : form.location.selectedCodes,
   
         ...(form.isFreshGraduate
           ? {}

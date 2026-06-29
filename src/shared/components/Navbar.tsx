@@ -545,6 +545,29 @@ export default function Navbar({ titleText }: NavbarProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [mypageMenuOpen]);
 
+  useEffect(() => {
+    if (!searchOpen) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target || typeof target.closest !== "function") return;
+
+      // 검색 패널 외부 클릭 시 닫기
+      if (
+        searchPanelRef.current &&
+        !searchPanelRef.current.contains(target) &&
+        searchPanelDesktopRef.current &&
+        !searchPanelDesktopRef.current.contains(target) &&
+        !target.closest(".icon-btn")
+      ) {
+        setSearchOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [searchOpen]);
+
   return (
     <>
       <header className="masthead">

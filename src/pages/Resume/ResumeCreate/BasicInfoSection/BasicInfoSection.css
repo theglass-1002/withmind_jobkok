@@ -62,10 +62,15 @@
     cursor: pointer;
   }
 
- 
-  
+  .resume-create-page__photo:has(.resume-create-page__photo-img) {
+    padding: 0;
+  }
+
   .resume-create-page__photo-img {
     width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 4px;
   }
   
   .resume-create-page__photo-close{

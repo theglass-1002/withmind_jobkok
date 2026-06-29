@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import bookmark_active_purple from '@/assets/icons/bookmark_active_purple.png';
 import bookmark_inactive from '@/assets/icons/bookmark_inactive.png';
-import mp_test_logo from '@/assets/icons/mp_test_logo.png';
+import defaultCompanyLogo from '@/assets/icons/defaultCompanyLogo.png';
 import jobkorea from '@/assets/icons/company_logos/jobkorea.png';
 import fire from '@/assets/icons/fire.png';
 import seed from '@/assets/icons/seed.png';
@@ -54,7 +54,7 @@ export default function M_JobPostingItemCardNoAi({
       <div className="job-posting__card" onClick={handleGoToJobPost}>
                <div className="job-card__header">
                 <div className="job-posting__left">
-                <img className="job-posting__logo" src={mp_test_logo} alt="" />
+                <img className="job-posting__logo" src={defaultCompanyLogo} alt="" />
                 <div className="job-card__identity">
                 <div className="job-card__byline">
                 <span className="job-posting__company">위드마인드</span>
