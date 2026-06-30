@@ -1,4 +1,12 @@
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function NotFound() {
-  return <div className="">페이지를 찾을 수 없습니다.</div>;
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    navigate("/", { replace: true });
+  }, [navigate]);
+
+  return null;
 }

@@ -11,6 +11,7 @@ import SettingsPanel from "@/pages/MockInterview/MockSettings/components/Setting
 import { toast } from "react-toastify";
 import Modal from "@/shared/components/modal/Modal";
 import { extractJobId } from "@/shared/utils/util";
+import { guardMockInterviewPage } from "@/shared/utils/mockInterviewGuard";
 
 import { fetchResumeDetail } from "@/api/resume/resume.api";
 import { fetchJobDetail } from "@/api/job/job.api";
@@ -80,6 +81,12 @@ export default function M_MockSettings() {
 
   useEffect(() => {
     sessionStorage.removeItem("mockInterviewJobUrl");
+  }, []);
+
+  const [isResumeModalOpen, setIsResumeModalOpen] = useState(false);
+
+  useEffect(() => {
+    guardMockInterviewPage(setIsResumeModalOpen);
   }, []);
 
   const [showConfirm, setShowConfirm] = useState(false);

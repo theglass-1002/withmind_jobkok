@@ -11,6 +11,7 @@ import QuestionSettingsSection from "./step-setup/QuestionSettingsSection";
 import Modal from "@/shared/components/modal/Modal";
 import { toast } from "react-toastify";
 import { extractJobId } from "@/shared/utils/util";
+import { guardMockInterviewPage } from "@/shared/utils/mockInterviewGuard";
 
 import { fetchResumeDetail } from "@/api/resume/resume.api";
 import { fetchJobDetail } from "@/api/job/job.api";
@@ -68,6 +69,12 @@ export default function MockSettings() {
 
   useEffect(() => {
     sessionStorage.removeItem("mockInterviewJobUrl");
+  }, []);
+
+  const [isResumeModalOpen, setIsResumeModalOpen] = useState(false);
+
+  useEffect(() => {
+    guardMockInterviewPage(setIsResumeModalOpen);
   }, []);
 
   const [showConfirm, setShowConfirm] = useState(false);
@@ -476,6 +483,22 @@ export default function MockSettings() {
             showCancel={false}
             onConfirm={handleCloseQuestionFailModal}
             onClose={handleCloseQuestionFailModal}
+          />
+
+          <Modal
+            open={isResumeModalOpen}
+            title="유효하지 않은 접근입니다."
+            confirmText="확인"
+            confirmClassName="btn_w_full default_btn_white"
+            onConfirm={() => {
+              setIsResumeModalOpen(false);
+              navigate("/");
+            }}
+            onClose={() => {
+              setIsResumeModalOpen(false);
+              navigate("/");
+            }}
+            showCancel={false}
           />
         </div>
       </div>

@@ -38,7 +38,7 @@ import {
   getEducationLabel,
   getEmploymentTypeLabel,
 } from "@/api/job/job.types";
-import { fetchResumeCheck } from "@/api/resume/resume.api";
+import { fetchResumeCheck, fetchResumeList } from "@/api/resume/resume.api";
 
 import "./JobDetail.css";
 import { REAL_BASE_URL } from "@/config/config";
@@ -56,6 +56,7 @@ export default function JobDetail() {
   const [error, setError] = useState<string | null>(null);
 
   const [resumeExists, setResumeExists] = useState<boolean | null>(null);
+  const [hasDefaultResume, setHasDefaultResume] = useState<boolean>(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -78,13 +79,24 @@ export default function JobDetail() {
         setBookMark(job.favorite === 1);
         console.log("job detail:", job);
 
-        const resumeCheck = await fetchResumeCheck();
+        // 이력서 목록 가져와서 확인
+        const { list } = await fetchResumeList(1, 100);
+        console.log('이력서 목록 조회 결과:', list);
 
         if (!isMounted) return;
 
-        setResumeExists(resumeCheck.exists);
+        // 임시저장(temp='Y') 제외
+        const validResumes = list.filter(r => r.temp === 'N');
+        console.log('임시저장 제외한 이력서:', validResumes);
 
-        if (resumeCheck.exists === true) {
+        const hasResumes = validResumes.length > 0;
+        const hasDefault = validResumes.some(r => r.isDefault === 1);
+        console.log('유효한 이력서 있음:', hasResumes, '/ 기본 이력서:', hasDefault);
+
+        setResumeExists(hasResumes);
+        setHasDefaultResume(hasResumes); // 임시저장 아닌 이력서가 있으면 OK
+
+        if (hasResumes === true) {
           const page = 1;
           const size = 8;
           const params = { resumeBased: true } as any;
@@ -178,7 +190,7 @@ export default function JobDetail() {
     console.log(cleanUrl);
     sessionStorage.setItem("mockInterviewJobUrl", cleanUrl);
 
-    if (resumeExists === true) {
+    if (hasDefaultResume === true) {
       navigate(`/mock-interview/guide`);
       return;
     }
@@ -333,7 +345,7 @@ export default function JobDetail() {
                   <div
                     className="job-detail__resume-cta"
                     onClick={() => {
-                      navigate(`/resumes/create`);
+                      navigate(`/resumes`);
                     }}
                   >
                     <span className="job-detail__resume-button">
@@ -575,7 +587,7 @@ export default function JobDetail() {
         cancelClassName="btn_w_full default_btn_white"
         confirmClassName="btn_w_full default_btn_black"
         onConfirm={() => {
-          navigate(`/resumes/create`);
+          navigate(`/resumes`);
         }}
         onClose={handleModalClose}
       />

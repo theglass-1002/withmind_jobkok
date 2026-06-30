@@ -216,6 +216,8 @@ export interface ResumeCheckResponse {
   exists: boolean;
   resumeIdx: number | null;
   title: string | null;
+  isDefault: boolean;
+  temp: 'Y' | 'N';
 }
 
 // 이력서 잠금 및 복제 응답

@@ -1,9 +1,17 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import "./MockInterviewGuide.css";
+import Modal from "@/shared/components/modal/Modal";
+import { guardMockInterviewPage } from "@/shared/utils/mockInterviewGuard";
 
 export default function MockInterviewGuide() {
     const navigate = useNavigate();
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    // 페이지 진입 시 이력서 체크
+    useEffect(() => {
+        guardMockInterviewPage(setIsModalOpen);
+    }, []);
 
     const handleStartClick = () => {
         navigate('/mock-interview/instructions');
@@ -28,6 +36,25 @@ export default function MockInterviewGuide() {
                    
                 </button>
             </div>
+
+            <Modal
+                open={isModalOpen}
+                title="이력서가 등록되어 있지 않습니다."
+                desc="모의면접을 진행하기 위해 먼저 이력서를 작성해 주세요."
+                confirmText="이력서 작성하기"
+                cancelText="취소"
+                cancelClassName="btn_w_full default_btn_white"
+                confirmClassName="btn_w_full default_btn_black"
+                onConfirm={() => {
+                    setIsModalOpen(false);
+                    navigate("/resumes");
+                }}
+                onClose={() => {
+                    setIsModalOpen(false);
+                    navigate("/mock-interview-report");
+                }}
+                showCancel={true}
+            />
         </div>
     );
 }

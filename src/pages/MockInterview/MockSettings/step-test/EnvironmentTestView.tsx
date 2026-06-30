@@ -9,6 +9,7 @@ import "./EnvironmentTestView.css";
 import ic_chevron_left_gray900_24 from "@/assets/icons/size24/ic_chevron_left_gray900_24.png";
 import ic_chevron_right_gray700_24 from "@/assets/icons/size24/ic_chevron_right_gray700_24.png";
 import Modal from "@/shared/components/modal/Modal";
+import { guardMockInterviewPage } from "@/shared/utils/mockInterviewGuard";
 
 type LocationState = {
   envSpeech?: string;
@@ -29,6 +30,11 @@ export default function EnvironmentTestView() {
   const [testStep, setTestStep] = useState<"intro" | "camera1" | "camera2" | "complete" | "failed">("intro");
   const [showDialog, setShowDialog] = useState(true);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [isResumeModalOpen, setIsResumeModalOpen] = useState(false);
+
+  useEffect(() => {
+    guardMockInterviewPage(setIsResumeModalOpen);
+  }, []);
 
   useEffect(() => {
     console.log("[EnvironmentTestView] location.state:", state);
@@ -177,6 +183,22 @@ export default function EnvironmentTestView() {
           </div>
         </div>
       </div>
+
+      <Modal
+        open={isResumeModalOpen}
+        title="유효하지 않은 접근입니다."
+        confirmText="확인"
+        confirmClassName="btn_w_full default_btn_white"
+        onConfirm={() => {
+          setIsResumeModalOpen(false);
+          navigate("/");
+        }}
+        onClose={() => {
+          setIsResumeModalOpen(false);
+          navigate("/");
+        }}
+        showCancel={false}
+      />
     </>
   );
 }

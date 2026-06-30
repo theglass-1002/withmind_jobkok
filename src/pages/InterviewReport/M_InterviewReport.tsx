@@ -15,6 +15,7 @@ import M_MockInterviewHistory from "@/pages/InterviewReport/history/mobile/M_Moc
 
 import Modal from "@/shared/components/modal/Modal";
 import Tabs from "@/shared/components/tabs/Tabs";
+import { fetchResumeList } from "@/api/resume/resume.api";
 
 const FILTERS: UiFilterOption[] = [
   { label: "전체", value: "all" },
@@ -30,15 +31,27 @@ export default function M_InterviewReport() {
   const [activeTab, setActiveTab] = useState("report");
   const [filter, setFilter] = useState("all");
   const [showConfirm, setShowConfirm] = useState(false);
-  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const tabItems = [
     { key: "report", label: "MY 리포트" },
     { key: "history", label: "모의면접 내역" },
   ];
 
+  const handleStart = async () => {
+    try {
+      const { list } = await fetchResumeList(1, 100);
+      const validResumes = list.filter(r => r.temp === 'N');
 
-  const handleStart = () => {
-    navigate(`/mock-interview/guide`);
+      if (validResumes.length > 0) {
+        navigate(`/mock-interview/guide`);
+        return;
+      }
+      setIsModalOpen(true);
+    } catch (e) {
+      console.error("❌ [모바일] 이력서 체크 실패:", e);
+      setIsModalOpen(true);
+    }
   };
 
   const handleCloseConfirm = () => setShowConfirm(false);
@@ -162,6 +175,22 @@ export default function M_InterviewReport() {
         cancelClassName="btn_w_full default_btn_white"
         onConfirm={handleConfirmCancel}
         onClose={handleCloseConfirm}
+      />
+
+      <Modal
+        open={isModalOpen}
+        title="이력서가 등록되어 있지 않습니다."
+        desc="모의면접을 진행하기 위해 먼저 이력서를 작성해 주세요."
+        confirmText="이력서 작성하기"
+        cancelText="취소"
+        cancelClassName="btn_w_full default_btn_white"
+        confirmClassName="btn_w_full default_btn_black"
+        onConfirm={() => {
+          setIsModalOpen(false);
+          navigate("/resumes");
+        }}
+        onClose={() => setIsModalOpen(false)}
+        showCancel={true}
       />
     </div>
   );

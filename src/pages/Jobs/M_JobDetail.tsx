@@ -31,7 +31,7 @@ import RecommendedJobCard from "@/shared/components/job-posting-item/Recommended
 import Modal from "@/shared/components/modal/Modal";
 import "./JobDetail.css";
 import { Storage } from "@/shared/utils/StorageManager";
-import { fetchResumeCheck } from "@/api/resume/resume.api";
+import { fetchResumeCheck, fetchResumeList } from "@/api/resume/resume.api";
 import { REAL_BASE_URL } from "@/config/config";
 import type { JobItem } from "@/api/job/job.types";
 
@@ -160,8 +160,18 @@ export default function M_JobDetail({
     sessionStorage.setItem("mockInterviewJobUrl", cleanUrl);
 
     try {
-      const resumeCheck = await fetchResumeCheck();
-      if (resumeCheck.exists === true) {
+      // 이력서 목록 가져와서 확인
+      const { list } = await fetchResumeList(1, 100);
+      console.log('[모바일] 이력서 목록 조회 결과:', list);
+
+      // 임시저장(temp='Y') 제외
+      const validResumes = list.filter(r => r.temp === 'N');
+      console.log('[모바일] 임시저장 제외한 이력서:', validResumes);
+
+      const hasValidResume = validResumes.length > 0;
+      console.log('[모바일] 유효한 이력서 있음:', hasValidResume);
+
+      if (hasValidResume === true) {
         navigate(`/mock-interview/guide`);
         return;
       }
@@ -328,7 +338,7 @@ export default function M_JobDetail({
                 이력서 작성하고 나에게 맞는 AI 공고 추천을 받아보세요.
                 </span>
               </div>
-              <div className="job-detail__resume-cta" onClick={()=>{navigate(`/resumes/m-create`);}}>
+              <div className="job-detail__resume-cta" onClick={()=>{navigate(`/resumes`);}}>
                 <span className="job-detail__resume-button">이력서 작성하기</span>
                 <img src={ic_chevron_forward_right_purple_20} alt="" />
               </div>
@@ -487,7 +497,7 @@ export default function M_JobDetail({
               cancelText="취소"
               cancelClassName ="btn_w_full default_btn_white"
               confirmClassName="btn_w_full default_btn_black"
-              onConfirm={()=>{navigate(`/resumes/m-create`);}}
+              onConfirm={()=>{navigate(`/resumes`);}}
           onClose={handleModalClose}
        />
     </>

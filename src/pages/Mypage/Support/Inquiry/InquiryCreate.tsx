@@ -207,19 +207,15 @@ export default function InquiryCreate() {
               ref={ref}
               value={content}
               onChange={(e) => {
-                console.log('onChange - 입력된 값:', JSON.stringify(e.target.value));
-                console.log('onChange - 값 길이:', e.target.value.length);
                 setContent(e.target.value);
               }}
               onKeyDown={(e) => {
-                console.log('onKeyDown - 키:', e.key, 'code:', e.code);
                 e.stopPropagation(); // 외부 div로 이벤트 전파 차단
               }}
               onClick={(e) => {
                 e.stopPropagation(); // 외부 div로 이벤트 전파 차단
               }}
               onBeforeInput={(e) => {
-                console.log('onBeforeInput - data:', e.data);
                 // 스페이스 두 번 → 마침표 자동 변환 방지
                 if (e.data === '.' && content.endsWith(' ')) {
                   const nativeEvent = e.nativeEvent as InputEvent;

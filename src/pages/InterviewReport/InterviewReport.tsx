@@ -9,6 +9,7 @@ import UiFilter, { type UiFilterOption } from "@/shared/components/ui-filter/UiF
 import InterviewReportHistory from "@/pages/InterviewReport/history/MockInterviewHistory";
 import Modal from "@/shared/components/modal/Modal";
 import M_InterviewReport from "@/pages/InterviewReport/M_InterviewReport";
+import { fetchResumeList } from "@/api/resume/resume.api";
 
 const FILTERS: UiFilterOption[] = [
   { label: "전체", value: "all" },
@@ -23,9 +24,28 @@ export default function InterviewReport() {
   const [activeTab, setActiveTab] = useState("report");
   const [filter, setFilter] = useState("all");
   const [showConfirm, setShowConfirm] = useState(false);
-  
-  const handleStart = () => {
-    navigate(`/mock-interview/guide`);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleStart = async () => {
+    try {
+      const { list } = await fetchResumeList(1, 100);
+      console.log('[모의면접 리포트] 이력서 목록:', list);
+
+      const validResumes = list.filter(r => r.temp === 'N');
+      console.log('[모의면접 리포트] 임시저장 제외한 이력서:', validResumes);
+      console.log('[모의면접 리포트] 유효한 이력서 개수:', validResumes.length);
+
+      if (validResumes.length > 0) {
+        console.log('[모의면접 리포트] ✅ 유효한 이력서 있음 - 모의면접 가이드로 이동');
+        navigate(`/mock-interview/guide`);
+        return;
+      }
+      console.log('[모의면접 리포트] ❌ 유효한 이력서 없음 - 모달 띄움');
+      setIsModalOpen(true);
+    } catch (e) {
+      console.error("❌ 이력서 체크 실패:", e);
+      setIsModalOpen(true);
+    }
   };
 
   const handleCloseConfirm = () => setShowConfirm(false);
@@ -179,6 +199,22 @@ export default function InterviewReport() {
         cancelClassName="btn_w_full default_btn_white"
         onConfirm={handleConfirmCancel}
         onClose={handleCloseConfirm}
+      />
+
+      <Modal
+        open={isModalOpen}
+        title="이력서가 등록되어 있지 않습니다."
+        desc="모의면접을 진행하기 위해 먼저 이력서를 작성해 주세요."
+        confirmText="이력서 작성하기"
+        cancelText="취소"
+        cancelClassName="btn_w_full default_btn_white"
+        confirmClassName="btn_w_full default_btn_black"
+        onConfirm={() => {
+          setIsModalOpen(false);
+          navigate("/resumes");
+        }}
+        onClose={() => setIsModalOpen(false)}
+        showCancel={true}
       />
     </div>
     {/* <M_InterviewReport/> */}

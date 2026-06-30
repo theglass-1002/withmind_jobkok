@@ -9,6 +9,7 @@ import M_CameraTest from "./components/M_CameraTest";
 import "./EnvironmentTestView.css";
 import ic_mic_white_24x32 from "@/assets/icons/size24/ic_mic_white_24x32.png";
 import Modal from "@/shared/components/modal/Modal";
+import { guardMockInterviewPage } from "@/shared/utils/mockInterviewGuard";
 
 type InterviewStageStatus = 0 | 1 | 2;
 
@@ -39,6 +40,11 @@ export default function M_EnvironmentTestView() {
     "intro" | "camera1" | "camera2" | "complete" | "failed"
   >("intro");
   const [showDialog, setShowDialog] = useState(true);
+  const [isResumeModalOpen, setIsResumeModalOpen] = useState(false);
+
+  useEffect(() => {
+    guardMockInterviewPage(setIsResumeModalOpen);
+  }, []);
 
   useEffect(() => {
     console.log("[M_EnvironmentTestView] location.state:", state);
@@ -172,6 +178,22 @@ export default function M_EnvironmentTestView() {
         cancelClassName="btn_w_full default_btn_gray_100 radius"
         onConfirm={handleConfirmExit}
         onClose={handleCloseConfirm}
+      />
+
+      <Modal
+        open={isResumeModalOpen}
+        title="유효하지 않은 접근입니다."
+        confirmText="확인"
+        confirmClassName="btn_w_full default_btn_white"
+        onConfirm={() => {
+          setIsResumeModalOpen(false);
+          navigate("/");
+        }}
+        onClose={() => {
+          setIsResumeModalOpen(false);
+          navigate("/");
+        }}
+        showCancel={false}
       />
     </>
   );

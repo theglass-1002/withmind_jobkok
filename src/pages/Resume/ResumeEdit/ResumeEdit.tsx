@@ -1223,8 +1223,8 @@ export default function ResumeEdit() {
 //                 activityTitle: act.activityName,
 //                 startYm: act.startDate
 //                   ? normalizeYm(act.startDate)
-//                   : "1999-09-09",
-//                 endYm: act.endDate ? normalizeYm(act.endDate) : "1999-09-09",
+//                   : "1999-09",
+//                 endYm: act.endDate ? normalizeYm(act.endDate) : "1999-09",
 //                 description: act.summary,
 //                 linkUrl: "https://github.com/user",
 //               })),
@@ -1444,8 +1444,8 @@ export default function ResumeEdit() {
 //                 activityTitle: act.activityName,
 //                 startYm: act.startDate
 //                   ? normalizeYm(act.startDate)
-//                   : "1999-09-09",
-//                 endYm: act.endDate ? normalizeYm(act.endDate) : "1999-09-09",
+//                   : "1999-09",
+//                 endYm: act.endDate ? normalizeYm(act.endDate) : "1999-09",
 //                 description: act.summary,
 //                 linkUrl: "https://github.com/user",
 //               })),

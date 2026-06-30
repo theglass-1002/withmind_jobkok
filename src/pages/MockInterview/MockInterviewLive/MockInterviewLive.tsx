@@ -19,6 +19,8 @@ import { lockAndCloneResume } from "@/api/resume/resume.api";
 
 import LoadingOverlay from "@/shared/components/loading/LoadingOverlay";
 import { retryRequest } from "@/shared/utils/util";
+import { guardMockInterviewPage } from "@/shared/utils/mockInterviewGuard";
+import Modal from "@/shared/components/modal/Modal";
 
 const VIDEO_SAVE_FAIL_MESSAGE =
   "면접영상저장에 실패했습니다. 관리자에게 문의해주세요.";
@@ -67,6 +69,11 @@ export default function MockInterviewLive() {
   const state = location.state as any;
 
   const [isUploading, setIsUploading] = useState(false);
+  const [isResumeModalOpen, setIsResumeModalOpen] = useState(false);
+
+  useEffect(() => {
+    guardMockInterviewPage(setIsResumeModalOpen);
+  }, []);
 
   useEffect(() => {
     console.log("[MockInterviewLive] 면접보는화면", state);
@@ -800,6 +807,22 @@ export default function MockInterviewLive() {
           currentQuestion={current}
         />
       </div>
+
+      <Modal
+        open={isResumeModalOpen}
+        title="유효하지 않은 접근입니다."
+        confirmText="확인"
+        confirmClassName="btn_w_full default_btn_white"
+        onConfirm={() => {
+          setIsResumeModalOpen(false);
+          navigate("/");
+        }}
+        onClose={() => {
+          setIsResumeModalOpen(false);
+          navigate("/");
+        }}
+        showCancel={false}
+      />
     </div>
   );
 }

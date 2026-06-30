@@ -10,6 +10,7 @@
     border: 1px solid var(--gray-300, #E0E2E4);
     background: var(--white-100, #FFF);
     box-shadow: 0 0 24px 0 rgba(42, 45, 47, 0.16);
+    z-index: 1;
   }
   
   .photo-modal__body{
