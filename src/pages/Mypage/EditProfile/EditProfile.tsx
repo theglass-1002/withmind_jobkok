@@ -77,18 +77,11 @@ export default function EditProfile() {
   const tabItems = (() => {
     const tabs = [{ key: "edit", label: "기본 정보" }];
 
-    console.log("[EditProfile] myInfo:", myInfo);
-    console.log("[EditProfile] accountType:", myInfo?.accountType);
-
     // accountType이 "local"일 때만 비밀번호 탭 추가
     if (myInfo?.accountType === "local") {
-      console.log("[EditProfile] accountType이 local이므로 비밀번호 탭 추가");
       tabs.push({ key: "password", label: "비밀번호" });
-    } else {
-      console.log("[EditProfile] accountType이 local이 아니므로 비밀번호 탭 숨김");
     }
 
-    console.log("[EditProfile] 최종 tabItems:", tabs);
     return tabs;
   })();
 

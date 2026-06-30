@@ -7,7 +7,7 @@ import done_file from "@/assets/icons/done_file.png";
 import test_profile from "@/assets/icons/interview_test_profile.png";
 import arrow_up_black from "@/assets/icons/arrow-up-right_black.png";
 
-import "./MyPage.css";
+import "./Mypage.css";
 
 import { fetchJobList } from "@/api/job/job.api";
 import { JobItem } from "@/api/job/job.types";

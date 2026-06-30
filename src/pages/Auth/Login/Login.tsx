@@ -55,13 +55,20 @@ const Login: React.FC = () => {
 
   const passwordType = showPassword ? "text" : "password";
 
+  // 로그인된 상태면 메인으로 리다이렉트
   useEffect(() => {
+    const accessToken = sessionStorage.getItem("accessToken") || localStorage.getItem("accessToken");
+    if (accessToken) {
+      navigate("/", { replace: true });
+      return;
+    }
+
     const savedId = localStorage.getItem(REMEMBER_ID_KEY);
     if (savedId) {
       setEmail(savedId);
       setRemember(true);
     }
-  }, []);
+  }, [navigate]);
 
   const emailErrorMessage = useMemo(() => {
     switch (emailErrorType) {

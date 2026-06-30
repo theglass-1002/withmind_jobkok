@@ -422,7 +422,7 @@ export default function Home() {
         <header className="hero-head">
           <div className="text">
             <span className="subtitle">모든 채용 공고를 한 자리에</span>
-            <span className="titles">이제, 잡콕에서 검색만 하세요!</span>
+            <span className="titles">이제, 잡콕에서 검색만 하세요</span>
           </div>
 
           <div className="search" ref={searchRef}>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
-import "./MyPage.css";
+import "./Mypage.css";
 
 import MyPageSideMenu from "./MyPageSideMenu";
 import M_MyPageMain from "./mobile/M_MyPageMain";

@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import "./MyPage.css";
+import "./Mypage.css";
 import { formatPhoneNumber } from "@/shared/utils/util";
 import type { MyInfo } from "@/api/auth/auth.types";
 import { logout } from "@/api/auth/auth.api";

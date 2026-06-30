@@ -201,7 +201,7 @@ export const router = createBrowserRouter([
   { path: "/paid-service-terms", element: <PaidServiceTerms/> },
 
 
-  { 
+  {
     path: "/company", 
     element: <CompanyDashboard />, // 레이아웃
     children: [
