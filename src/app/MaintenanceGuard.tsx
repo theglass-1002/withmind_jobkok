@@ -17,7 +17,7 @@ export default function MaintenanceGuard({ children }: { children: React.ReactNo
         return res.json();
       })
       .then((data) => {
-        if (data.enabled) {
+        if (data.blocked) {
           setMessage(data.message || "서비스 점검 중입니다.");
           setStatus("maintenance");
         } else {
