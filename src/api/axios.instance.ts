@@ -191,6 +191,12 @@ instance.interceptors.response.use(
     const res = axiosError.response!;
     const status = res.status;
 
+    if (status === 503) {
+      const msg = (res.data as any)?.message || '서비스 점검 중입니다.';
+      window.location.href = '/comingsoon?msg=' + encodeURIComponent(msg);
+      return Promise.reject({ code: 503, msg: 'MAINTENANCE' } as ApiErrorResponse);
+    }
+
     if (
       (status === 401 || status === 403) &&
       !originalRequest._retry &&

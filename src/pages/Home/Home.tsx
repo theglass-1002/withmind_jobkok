@@ -368,8 +368,6 @@ export default function Home() {
       } catch (e: any) {
         if (!alive) return;
         setErrorMsg(e?.message ?? "홈 데이터 로딩 실패");
-        logout();
-        navigate("/login");
       } finally {
         if (!alive) return;
         setLoading(false);
