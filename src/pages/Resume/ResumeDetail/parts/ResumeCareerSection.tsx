@@ -12,14 +12,21 @@ export default function ResumeCareerSection({
   totalLabel,
   items,
 }: ResumeCareerSectionProps) {
+  // 유효한 경력만 필터링 (start가 있어야 유효한 경력)
+  const validItems = items.filter(it => it.start && it.start.trim() !== '');
+
+  // 유효한 경력이 없으면 아예 렌더링 안함
+  if (validItems.length === 0) {
+    return null;
+  }
+
   return (
     <div className="resume-field resume-field--career">
       <div className="resume-field__label">
         경력 <span className="resume-field__label-meta">{totalLabel}</span>
       </div>
-        {items.length>0&&(
       <div className="resume-career-list">
-        {items.map((it, idx) => (
+        {validItems.map((it, idx) => (
           <div className="resume-career-item" key={idx}>
             <div className="resume-career-item__header">
               <span className="resume-career-item__company">{it.company}</span>
@@ -75,7 +82,6 @@ export default function ResumeCareerSection({
           </div>
         ))}
       </div>
-      )}
     </div>
   );
 }

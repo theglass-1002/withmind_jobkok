@@ -299,14 +299,7 @@ export default function ProfileEditForm({
       certified: viewModel.certified,
     };
 
-    console.log("저장 버튼 클릭");
-    console.log("폼에서 부모로 보내는 값:", payload);
-    console.log("휴대폰 번호:", payload.phone);
-    console.log("이름:", payload.name);
-    console.log("생년월일:", payload.birth);
-    console.log("성별:", payload.gender);
-    console.log("인증 여부:", payload.certified);
-
+    console.log('회원정보 수정 요청:', payload);
     await onSubmit(payload);
   };
 

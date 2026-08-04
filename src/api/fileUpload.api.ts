@@ -87,11 +87,11 @@ export async function uploadFileToS3(presignedUrl: string, file: File): Promise<
 
 function resolveFilePath(finalUrl: string, s3Key: string): string {
   if (finalUrl && finalUrl.includes(".cloudfront.net/")) {
-    return finalUrl.split(".cloudfront.net/")[1];
+    return finalUrl.split(".cloudfront.net/")[1] || "";
   }
   if (finalUrl && finalUrl.includes("amazonaws.com/")) {
     const parts = finalUrl.split("amazonaws.com/");
-    if (parts[1]) return parts[1].split("?")[0];
+    if (parts[1]) return parts[1].split("?")[0] || "";
   }
   return s3Key;
 }

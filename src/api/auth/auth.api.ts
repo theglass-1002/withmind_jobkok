@@ -116,8 +116,8 @@ export function buildNaverLoginUrl(state: string) {
     `https://nid.naver.com/oauth2.0/authorize?response_type=code` +
     `&client_id=${NAVER_CLIENT_ID}` +
     `&redirect_uri=${encodeURIComponent(NAVER_REDIRECT_URI)}` +
-    `&prompt=login`+
-    `&state=${state}`
+    `&state=${state}`+
+    `&prompt=login`
   );
 }
 
@@ -410,6 +410,7 @@ export async function updateUser(
       },
     }
   );
+  console.log('회원정보 수정 응답:', res.data);
 
   return res.data;
 }

@@ -189,10 +189,12 @@ export default function M_DesiredRoleSection({
   };
 
   const chips = useMemo(() => {
-    return Array.from(selected).map((key) => {
-      const [group, role] = key.split("|");
-      return { key, group, role };
-    });
+    return Array.from(selected)
+      .filter(key => key && typeof key === 'string' && key.includes("|"))
+      .map((key) => {
+        const [group, role] = key.split("|");
+        return { key, group, role };
+      });
   }, [selected]);
 
   const addRole = (item: RoleItem | string) => {
@@ -284,7 +286,10 @@ export default function M_DesiredRoleSection({
       return;
     }
 
-    const nextRoles = Array.from(selected).map((key) => key.split("|")[1]);
+    const nextRoles = Array.from(selected)
+      .filter(key => key && typeof key === 'string')
+      .map((key) => key.split("|")[1])
+      .filter(Boolean);
     onChange(nextRoles);
 
     setIsEditing(false);

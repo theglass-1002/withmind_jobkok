@@ -58,7 +58,10 @@ export default function DesiredRoleSection({
   }, [isEdit, value]);
 
   useEffect(() => {
-    const rolesArr = Array.from(selected).map((key) => key.split("|")[1]);
+    const rolesArr = Array.from(selected)
+      .filter(key => key && typeof key === 'string')
+      .map((key) => key.split("|")[1])
+      .filter(Boolean);
     onChange(rolesArr);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected]);
@@ -173,9 +176,11 @@ export default function DesiredRoleSection({
   };
 
   const chips = useMemo(() => {
-    return Array.from(selected).map((key) => {
-      const [group, role] = key.split("|");
-      return { key, group, role };
+    return Array.from(selected)
+      .filter(key => key && typeof key === 'string' && key.includes("|"))
+      .map((key) => {
+        const [group, role] = key.split("|");
+        return { key, group, role };
     });
   }, [selected]);
 

@@ -286,12 +286,14 @@ export function getGenderLabel(gender: "M" | "W"): string {
 
 export function getKoreanBirthLabel(birth: string): string {
   // "2021-12-09" → 2021년생
+  if (!birth) return "";
   const year = birth.split("-")[0];
   return `${year}년생`;
 }
 
 export function getAge(birth: string): number {
   // 생년월일 기준 만 나이 계산
+  if (!birth) return 0;
   const [year, month, day] = birth.split("-").map(Number);
   const today = new Date();
   let age = today.getFullYear() - year;
@@ -341,6 +343,8 @@ export const mapRegionListToLocationItems = (
   const items: { city: string; district: string }[] = [];
 
   codes.forEach((code) => {
+    if (!code || typeof code !== 'string') return;
+
     // 0) "00" 전국 코드
     if (code === "00") {
       items.push({ city: "전국", district: "지역 전체" });
@@ -394,6 +398,7 @@ export const calcTenureLabel = (startYm: string, endYm: string | null): string =
 
   const [sy, sm] = startYm.split("-").map(Number);
   const end = endYm ?? new Date().toISOString().slice(0, 7);
+  if (!end) return "";
   const [ey, em] = end.split("-").map(Number);
 
   let years = ey - sy;
@@ -421,6 +426,9 @@ export const calcTotalCareerLabel = (
   let totalMonths = 0;
 
   careerList.forEach((career) => {
+    // startYm이 null이거나 빈 문자열이면 스킬
+    if (!career.startYm) return;
+
     const [sy, sm] = career.startYm.split("-").map(Number);
     const end = career.endYm ?? new Date().toISOString().slice(0, 7);
     const [ey, em] = end.split("-").map(Number);
@@ -596,7 +604,7 @@ export const extractS3Path = (url: string): string => {
   if (!url) return "";
   // CloudFront URL이면 순수 경로만 추출
   if (url.includes(".cloudfront.net/")) {
-    return url.split(".cloudfront.net/")[1];
+    return url.split(".cloudfront.net/")[1] || "";
   }
   // 이미 순수 경로면 그대로 반환
   return url;

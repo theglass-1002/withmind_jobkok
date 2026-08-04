@@ -118,6 +118,8 @@ export default function LocationSection({
     if (globalAllOnly) return m;
 
     selectedCodes.forEach((code) => {
+      if (!code || typeof code !== 'string') return;
+
       const region = regions.find((r) => r.code === code);
       if (region) {
         m.set(region.code, region.children.length);
@@ -176,6 +178,8 @@ export default function LocationSection({
 
   const toggleDistrictSelection = useCallback(
     (districtCode: string) => {
+      if (!districtCode || typeof districtCode !== 'string') return;
+
       const regionCode = districtCode.split('-')[0];
       const region = regions.find((r) => r.code === regionCode);
       if (!region) return;
@@ -243,6 +247,7 @@ export default function LocationSection({
     }
 
     return Array.from(selectedCodes)
+      .filter(code => code && typeof code === 'string')
       .map((code) => {
         const region = regions.find((r) => r.code === code);
         if (region) {

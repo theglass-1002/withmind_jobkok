@@ -44,7 +44,7 @@ type ResumeTabKey = "all" | "done" | "doing";
 const extractS3Path = (url: string): string => {
   if (!url) return "";
   if (url.includes(".cloudfront.net/")) {
-    return url.split(".cloudfront.net/")[1];
+    return url.split(".cloudfront.net/")[1] || "";
   }
   return url;
 };
@@ -57,6 +57,8 @@ const buildCopyTitle = (title?: string) => {
 };
 
 const guessContentType = (fileNameOrPath: string): string => {
+  if (!fileNameOrPath) return "application/octet-stream";
+
   const extension = fileNameOrPath.split(".").pop()?.toLowerCase() || "";
 
   const contentTypeMap: Record<string, string> = {
@@ -168,7 +170,7 @@ const mapDetailToCreatePayload = (
             if (p.itemType === "FILE") {
               const cleanPath = extractS3Path(p.filePath ?? "");
               const storedName =
-                (p as any).storedName || cleanPath.split("/").pop() || "";
+                (p as any).storedName || (cleanPath ? cleanPath.split("/").pop() : "") || "";
               const originalName =
                 p.title || storedName || `포트폴리오 문서 ${idx + 1}`;
               const sizeBytes = (p as any).sizeBytes || 1048576;
@@ -255,11 +257,20 @@ export default function ResumeList() {
     try {
       setLoading(true);
       const status = getStatusParam(tab);
+      console.log(`📋 [ResumeList] 이력서 리스트 요청 - 페이지: ${pageParam}, 탭: ${tab}, 상태: ${status}`);
+
       const { list, totalCount } = await fetchResumeList(
         pageParam,
         pageSize,
         status
       );
+
+      console.log(`✅ [ResumeList] 이력서 리스트 조회 완료:`, {
+        totalCount,
+        listLength: list.length,
+        list
+      });
+
       setResumeList(list);
       setTotalCount(totalCount);
     } catch (e: any) {
@@ -825,7 +836,7 @@ export default function ResumeList() {
                               경력
                             </div>
                             <span className="resume-item__attr-value">
-                              {item.careerPeriod}
+                              {item.careerPeriod !== "0년 0개월" ? item.careerPeriod : ""}
                             </span>
                           </div>
 

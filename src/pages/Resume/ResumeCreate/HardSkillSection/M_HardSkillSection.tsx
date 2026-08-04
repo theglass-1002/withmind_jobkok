@@ -159,10 +159,12 @@ export default function M_HardSkillSection({
   };
 
   const chips = useMemo(() => {
-    return Array.from(selected).map((key) => {
-      const [, role] = key.split("|");
-      return { key, role };
-    });
+    return Array.from(selected)
+      .filter(key => key && typeof key === 'string' && key.includes("|"))
+      .map((key) => {
+        const [, role] = key.split("|");
+        return { key, role };
+      });
   }, [selected]);
 
   const addRole = (item: SkillAutoCompleteItem | string) => {
@@ -253,7 +255,10 @@ export default function M_HardSkillSection({
   };
 
   const handleSave = () => {
-    const skills = Array.from(selected).map((key) => key.split("|")[1]);
+    const skills = Array.from(selected)
+      .filter(key => key && typeof key === 'string')
+      .map((key) => key.split("|")[1])
+      .filter(Boolean);
     onChange(skills);
 
     setIsEditing(false);

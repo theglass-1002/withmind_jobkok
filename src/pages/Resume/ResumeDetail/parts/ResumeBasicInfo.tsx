@@ -10,6 +10,52 @@ type Props = {
   imageSrc?: string;
 };
 
+// 이름 마스킹: 첫 글자만 보여주고 나머지는 ㅇ
+function maskName(name: string): string {
+  if (!name || name === "-") return name;
+
+  if (name.length === 1) return name;
+
+  const firstChar = name[0];
+  const masked = "ㅇ".repeat(name.length - 1);
+
+  return firstChar + masked;
+}
+
+// 이메일 마스킹: 첫 글자와 @ 이후만 보여주고 나머지는 *
+function maskEmail(email: string): string {
+  if (!email || email === "-") return email;
+
+  const atIndex = email.indexOf("@");
+  if (atIndex <= 0) return email;
+
+  const localPart = email.substring(0, atIndex);
+  const domainPart = email.substring(atIndex);
+
+  if (localPart.length === 1) {
+    return localPart + domainPart;
+  }
+
+  const firstChar = localPart[0];
+  const masked = "*".repeat(localPart.length - 1);
+
+  return firstChar + masked + domainPart;
+}
+
+// 전화번호 마스킹: 010만 보여주고 나머지는 **
+function maskPhone(phone: string): string {
+  if (!phone || phone === "-") return phone;
+
+  // 010으로 시작하는 경우
+  if (phone.startsWith("010")) {
+    const rest = phone.substring(3);
+    const masked = rest.replace(/\d/g, "*");
+    return "010" + masked;
+  }
+
+  return phone;
+}
+
 export default function ResumeBasicInfo({
   name,
   meta,
@@ -17,22 +63,25 @@ export default function ResumeBasicInfo({
   phone,
   imageSrc,
 }: Props) {
+  const maskedName = maskName(name);
+  const maskedEmail = maskEmail(email);
+  const maskedPhone = maskPhone(phone);
   return (
     <>
     <div className="resume-basic">
       <div className="resume-basic__text">
         <div className="resume-basic__identity">
-          <span className="resume-basic__name">{name}</span>
+          <span className="resume-basic__name">{maskedName}</span>
           <span className="resume-basic__meta">{meta}</span>
         </div>
         <div className="resume-basic__contact">
           <span className="resume-basic__email">
             <img src={ic_mail_gray500_20} alt="" />
-            {email}
+            {maskedEmail}
           </span>
           <span className="resume-basic__phone">
             <img src={ic_mobile_gray_20} alt="" />
-            {phone}
+            {maskedPhone}
           </span>
         </div>
       </div>
@@ -52,17 +101,17 @@ export default function ResumeBasicInfo({
 
       <div className="resume-basic__text">
         <div className="resume-basic__identity">
-          <span className="resume-basic__name">{name}</span>
+          <span className="resume-basic__name">{maskedName}</span>
           <span className="resume-basic__meta">{meta}</span>
         </div>
         <div className="resume-basic__contact">
           <span className="resume-basic__email">
             <img src={ic_mail_gray500_20} alt="" />
-            {email}
+            {maskedEmail}
           </span>
           <span className="resume-basic__phone">
             <img src={ic_mobile_gray_20} alt="" />
-            {phone}
+            {maskedPhone}
           </span>
         </div>
       </div>

@@ -165,7 +165,7 @@ export default function EditProfile() {
         certified: payload.certified,
       };
 
-   
+      console.log('회원정보 수정 요청:', requestPayload);
 
       await updateUser(requestPayload);
 

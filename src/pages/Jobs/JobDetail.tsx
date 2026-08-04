@@ -6,6 +6,7 @@ import chevron_left from "@/assets/icons/chevron_left.png";
 import text_jobkorea_logo from "@/assets/icons/company_logos/text_jobkorea_logo.png";
 import arrow_up_right from "@/assets/icons/arrow-up-right.png";
 import { logout } from "@/api/auth/auth.api";
+import defaultCompanyLogo from "@/assets/images/default-company-logo.svg";
 import withmind_logo80 from "@/assets/icons/company_logos/withmind_logo80.png";
 import blank_bookmark_black from "@/assets/icons/size24/ic_bookmark_gray900_24.png";
 import bookmark_active_purple from "@/assets/icons/size24/ic_bookmark_active_purple24.png";
@@ -215,7 +216,7 @@ export default function JobDetail() {
 
   const title = job?.name || "채용 공고";
   const companyName = job?.companyName || "";
-  const companyLogo = job?.companyLogoUrl || withmind_logo80;
+  const companyLogo = job?.companyLogoUrl?.trim() || defaultCompanyLogo;
   const locationLabel = job?.location || (job ? getLocationLabel(job.locationCode) : "");
   const careerLabel = job ? getCareerLabel(job.annualFrom, job.annualTo) : "";
   const educationLabel = job?.educationText || (job ? getEducationLabel(job.educationCode) : "");
@@ -265,6 +266,10 @@ export default function JobDetail() {
                       className="job-detail__company-logo_img"
                       src={companyLogo}
                       alt={companyName}
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = defaultCompanyLogo;
+                      }}
                     />
                   </div>
                   <div className="job-detail__company-desc">

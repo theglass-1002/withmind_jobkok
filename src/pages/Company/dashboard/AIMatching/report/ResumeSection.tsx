@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
+import { toast } from "react-toastify";
 import ic_link_gray900_20 from "@/assets/icons/size20/ic_link_gray900_20.png";
 import ic_folder_gray900_20 from "@/assets/icons/size20/ic_folder_gray900_20.png";
 
@@ -231,17 +232,73 @@ export default function ResumeSection({
     [recommendationDetail]
   );
 
-  const name =
+  const rawName =
     resumeDetail?.name?.trim() || recommendationItem?.name?.trim() || "-";
 
-  const meta =
-    [recommendationItem?.age?.trim(), recommendationItem?.career?.trim()]
-      .filter(Boolean)
-      .join("ㆍ") || "-";
+  // 이름 마스킹: 첫 글자만 보여주고 나머지는 ㅇ
+  const maskName = (name: string): string => {
+    if (!name || name === "-") return name;
+    if (name.length === 1) return name;
+    const firstChar = name[0];
+    const masked = "ㅇ".repeat(name.length - 1);
+    return firstChar + masked;
+  };
 
-  const email = resumeDetail?.email?.trim() || "-";
+  const name = maskName(rawName);
+
+  // 생년월일과 나이 계산
+  const getBirthYearAndAge = (birth: string | null | undefined): string => {
+    if (!birth) return "";
+    const birthYear = birth.substring(0, 4);
+    const currentYear = new Date().getFullYear();
+    const age = currentYear - parseInt(birthYear);
+    return `${birthYear}년생 (만 ${age}세)`;
+  };
+
+  const birthInfo = getBirthYearAndAge(resumeDetail?.birth);
+  const gender = resumeDetail?.gender?.trim() === "M" ? "남성" : resumeDetail?.gender?.trim() === "F" ? "여성" : "";
+
+  const meta =
+    [
+      birthInfo,
+      gender,
+      recommendationItem?.career?.trim()
+    ]
+      .filter(Boolean)
+      .join(" , ") || "-";
+
+  const rawEmail = resumeDetail?.email?.trim() || "-";
   const phone = resumeDetail?.phone?.trim() || "-";
   const profileImageSrc = resumeDetail?.profilePhotoFile?.filePath?.trim() || "";
+
+  // 이메일 마스킹: 첫 글자, @, .com(확장자)만 보이고 나머지 *
+  const maskEmail = (email: string): string => {
+    if (!email || email === "-") return email;
+    const atIndex = email.indexOf("@");
+    if (atIndex <= 0) return email;
+
+    // @ 앞부분 처리: 첫 글자만 보이고 나머지 *
+    const localPart = email.substring(0, atIndex);
+    const firstChar = localPart[0];
+    const maskedLocal = firstChar + "*".repeat(Math.max(0, localPart.length - 1));
+
+    // @ 뒤부분 처리: 확장자(.com 등)만 보이고 나머지 *
+    const domainPart = email.substring(atIndex + 1);
+    const lastDotIndex = domainPart.lastIndexOf(".");
+
+    if (lastDotIndex > 0) {
+      const domainName = domainPart.substring(0, lastDotIndex);
+      const extension = domainPart.substring(lastDotIndex); // .com 등
+      const maskedDomain = "*".repeat(domainName.length) + extension;
+      return maskedLocal + "@" + maskedDomain;
+    } else {
+      // 확장자가 없는 경우
+      const maskedDomain = "*".repeat(domainPart.length);
+      return maskedLocal + "@" + maskedDomain;
+    }
+  };
+
+  const email = maskEmail(rawEmail);
 
   const matchRate =
     typeof recommendationDetail?.aiMatchPercent === "number"
@@ -369,9 +426,39 @@ export default function ResumeSection({
     ? `${recommendationItem.aiInterview}ㆍ${name}`
     : "-";
 
+  const handleSendProposal = () => {
+    toast.success("해당 이메일로 채용 지원 제안이 발송완료 되었습니다.");
+    console.log(`채용 제안 발송: ${rawEmail}`);
+  };
+
   return (
     <div className="report-content">
       <LoadingOverlay isLoading={isLoading} isLogo />
+
+      <div className="new-section">
+        <div className="new-section__left">
+          <div className="new-section__top">
+            <span className="new-section__name">{name}</span>
+            <div className="new-section__chips">
+              <span className="new-section__chip">지역일치</span>
+              <span className="new-section__chip">직무일치</span>
+              <span className="new-section__chip">장애인 복지 시설 충족</span>
+            </div>
+          </div>
+          <span className="new-section__match">
+            AI 매칭도: <span className="new-section__match-percent">{matchRate}</span>
+          </span>
+        </div>
+        <div className="new-section__right">
+          <span className="new-section__contact-label">연락처</span>
+          <div className="new-section__contact-row">
+            <span className="new-section__contact-value">{email}</span>
+            <button className="new-section__send-btn" onClick={handleSendProposal}>
+              채용 지원 제안 발송하기
+            </button>
+          </div>
+        </div>
+      </div>
 
       <div className="ai-match">
         <div className="ai-match-score">

@@ -90,6 +90,7 @@ export default function M_LocationSection({
     }
 
     return locationData.selectedCodes
+      .filter(code => code && typeof code === 'string')
       .map((code) => {
         const region = regions.find((r) => r.code === code);
         if (region) {

@@ -55,13 +55,45 @@ const Login: React.FC = () => {
 
   const passwordType = showPassword ? "text" : "password";
 
+
+ // 소셜 로그인 외부 페이지 갔다가 뒤로가기 했을 때
+  // 브라우저가 이전 loading 상태를 복원하는 문제 방지
+  useEffect(() => {
+    const handlePageShow = (event: PageTransitionEvent) => {
+      const provider = findProviderByPath(window.location.pathname);
+
+      // OAuth 콜백 페이지가 아니라 일반 로그인 페이지로 복귀한 경우만 로딩 해제
+      if (!provider) {
+        console.log("[Login] pageshow 감지 - 로딩 상태 초기화", {
+          persisted: event.persisted,
+          path: window.location.pathname,
+        });
+
+        setIsLoading(false);
+      }
+    };
+
+    window.addEventListener("pageshow", handlePageShow);
+
+    return () => {
+      window.removeEventListener("pageshow", handlePageShow);
+    };
+  }, []);
+
   // 로그인된 상태면 메인으로 리다이렉트
   useEffect(() => {
+    console.log("[Login] 페이지 진입 - 초기화");
+
     const accessToken = sessionStorage.getItem("accessToken") || localStorage.getItem("accessToken");
     if (accessToken) {
+      console.log("[Login] 이미 로그인됨 - 메인으로 리다이렉트");
       navigate("/", { replace: true });
       return;
     }
+
+    // 뒤로가기로 돌아왔을 때 로딩 상태 초기화
+    setIsLoading(false);
+    console.log("[Login] 로딩 상태 초기화");
 
     const savedId = localStorage.getItem(REMEMBER_ID_KEY);
     if (savedId) {
@@ -206,13 +238,23 @@ const Login: React.FC = () => {
       const e = error as ApiErrorResponse;
       logout();
       console.error("[Login] 일반 로그인 에러:", e);
-
-      if (e.code === 401) {
-        setPasswordErrorType(3);
-      } else if (e.code === 410) {
-        toast.error("회원탈퇴된 계정입니다.");
-      } else {
-        toast.error("로그인 중 오류가 발생했습니다.");
+      switch (e.code) {
+        case 401:
+          //비밀번호가 일치하지 않습니다.
+          setPasswordErrorType(3);
+          break;
+        case 403:
+            toast.error("비활성화된 계정입니다.");
+            break;
+        case 404:
+            toast.error("존재하지 않는 아이디입니다.");
+            break;
+        case 410:
+            toast.error("회원탈퇴된 계정입니다.");
+            break;
+        default:
+          toast.error("로그인 중 오류가 발생했습니다.");
+          break;
       }
     } finally {
       setIsLoading(false);
@@ -221,15 +263,23 @@ const Login: React.FC = () => {
 
   const startOAuth = useCallback((providerKey: ProviderKey) => {
     const p = PROVIDERS[providerKey];
+
     if (!p?.buildAuthUrl) {
       toast.info("현재 해당 소셜 로그인은 준비 중입니다.");
       return;
     }
 
+    console.log(`[Login] ${providerKey} 소셜 로그인 시작`);
+
     setIsLoading(true);
+
     const state = createState();
     const url = p.buildAuthUrl(state);
-    window.location.href = url;
+
+    console.log(`[Login] ${providerKey} 인증 URL로 이동:`, url);
+
+    // 외부 OAuth 페이지 이동
+    window.location.assign(url);
   }, []);
 
   const handleKakaoLogin = useCallback(() => startOAuth("kakao"), [startOAuth]);
@@ -238,12 +288,19 @@ const Login: React.FC = () => {
 
   useEffect(() => {
     const provider = findProviderByPath(location.pathname);
-    if (!provider) return;
+    if (!provider) {
+      console.log("[Login] OAuth 콜백 경로 아님 - 일반 로그인 페이지");
+      return;
+    }
+
+    console.log(`[Login] ${provider.key} OAuth 콜백 처리 시작`);
 
     const run = async () => {
       setIsLoading(true);
+      console.log(`[Login] ${provider.key} 로딩 ON`);
       try {
         if (!provider.precheck || !provider.loginWithPreauth) {
+          console.log(`[Login] ${provider.key} 준비 중 - /login으로 이동`);
           toast.info("현재 해당 소셜 로그인은 준비 중입니다.");
           navigate("/login");
           return;
@@ -254,6 +311,8 @@ const Login: React.FC = () => {
         const state = query.get("state") ?? "";
         const err = query.get("error");
         const errDesc = query.get("error_description");
+
+        console.log(`[Login] ${provider.key} 콜백 파라미터:`, { code: !!code, state, err, errDesc });
 
         if (!code || err) {
           console.error("[Login] OAuth callback error:", {
@@ -268,8 +327,7 @@ const Login: React.FC = () => {
 
         const did = deviceId();
         const precheckRes = await provider.precheck(code, state, did);
-        console.log('여긴가22');
-        console.log(`[Login] ${provider.key} precheck 응답:`, precheckRes);
+      
 
         if (precheckRes.exists && !precheckRes.needTerms) {
           const loginPayload = {
@@ -304,8 +362,10 @@ const Login: React.FC = () => {
       } catch (e) {
         console.error("[Login] 소셜 로그인 처리 에러:", e);
         toast.error("소셜 로그인 중 오류가 발생했습니다.");
+        setIsLoading(false);
         navigate("/login");
       } finally {
+        console.log(`[Login] ${provider.key} 로딩 OFF`);
         setIsLoading(false);
       }
     };

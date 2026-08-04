@@ -32,6 +32,8 @@ import { RegisterRequest, VerifiedUserInfo, InicisParams } from "@/api/auth/auth
 export default function Signup() {
   const navigate = useNavigate();
   const saFormRef = useRef<HTMLFormElement | null>(null);
+  const popupRef = useRef<Window | null>(null);
+  const checkIntervalRef = useRef<number | null>(null);
 
   // 입력값
   const [email, setEmail] = useState("");
@@ -269,6 +271,14 @@ export default function Signup() {
             ci: confirmRes.ci,
             gender:confirmRes.userSex
           });
+          setIsVerifying(false);
+
+          // 팝업 정리
+          if (checkIntervalRef.current !== null) {
+            clearInterval(checkIntervalRef.current);
+            checkIntervalRef.current = null;
+          }
+          popupRef.current = null;
 
           toast.success(`본인인증이 완료되었습니다!`);
         } catch (e: any) {
@@ -278,12 +288,28 @@ export default function Signup() {
           if (e?.code === 409) {
             setIdentityVerifiedError(true);
             setDuplicateUserError(true);
+            setIsVerifying(false);
+
+            // 팝업 정리
+            if (checkIntervalRef.current !== null) {
+              clearInterval(checkIntervalRef.current);
+              checkIntervalRef.current = null;
+            }
+            popupRef.current = null;
             return;
           }
 
           toast.error("본인인증 확인 중 오류가 발생했습니다.");
           setIdentityVerifiedError(true);
           setDuplicateUserError(false);
+          setIsVerifying(false);
+
+          // 팝업 정리
+          if (checkIntervalRef.current !== null) {
+            clearInterval(checkIntervalRef.current);
+            checkIntervalRef.current = null;
+          }
+          popupRef.current = null;
         }
 
         return;
@@ -301,6 +327,14 @@ export default function Signup() {
         setIsIdentityVerified(true);
         setIdentityVerifiedError(false);
         setVerifiedUserInfo({ name, phone, birth, ci ,gender});
+        setIsVerifying(false);
+
+        // 팝업 정리
+        if (checkIntervalRef.current !== null) {
+          clearInterval(checkIntervalRef.current);
+          checkIntervalRef.current = null;
+        }
+        popupRef.current = null;
 
         toast.success(`${name}님, 본인인증이 완료되었습니다!`);
         return;
@@ -308,12 +342,30 @@ export default function Signup() {
 
       if (event.data?.type === "INICIS_AUTH_FAIL") {
         toast.error("본인인증에 실패했습니다.");
+        setIsVerifying(false);
+
+        // 팝업 정리
+        if (checkIntervalRef.current !== null) {
+          clearInterval(checkIntervalRef.current);
+          checkIntervalRef.current = null;
+        }
+        popupRef.current = null;
         return;
       }
     };
 
     window.addEventListener("message", handleMessage);
-    return () => window.removeEventListener("message", handleMessage);
+    return () => {
+      window.removeEventListener("message", handleMessage);
+
+      // 컴포넌트 언마운트 시 팝업/인터벌 정리
+      if (checkIntervalRef.current !== null) {
+        clearInterval(checkIntervalRef.current);
+      }
+      if (popupRef.current && !popupRef.current.closed) {
+        popupRef.current.close();
+      }
+    };
   }, []);
 
   // ====== 검증/유틸 ======
@@ -632,6 +684,14 @@ export default function Signup() {
       console.log('전체 params:', params);
       console.log('========================================');
 
+      // 이전 팝업/인터벌 정리
+      if (popupRef.current && !popupRef.current.closed) {
+        popupRef.current.close();
+      }
+      if (checkIntervalRef.current !== null) {
+        clearInterval(checkIntervalRef.current);
+      }
+
       const popup = openAuthPopup();
       if (!popup) {
         alert("팝업이 차단되었습니다. 브라우저 팝업 허용을 확인해 주세요.");
@@ -639,12 +699,15 @@ export default function Signup() {
         return;
       }
 
+      popupRef.current = popup;
+
       // 폼에 직접 값 설정 (state를 거치지 않음 - 타이밍 이슈 방지)
       const form = saFormRef.current;
       if (!form) {
         toast.error("본인인증 폼을 찾을 수 없습니다.");
         setIsVerifying(false);
         popup.close();
+        popupRef.current = null;
         return;
       }
 
@@ -682,10 +745,18 @@ export default function Signup() {
       // 즉시 submit (setTimeout 제거)
       form.submit();
 
-      // 팝업이 열린 후 5초 뒤 상태 초기화 (사용자가 팝업에서 작업 중)
-      setTimeout(() => {
-        setIsVerifying(false);
-      }, 5000);
+      // 팝업이 닫혔는지 주기적으로 체크 (500ms마다)
+      checkIntervalRef.current = window.setInterval(() => {
+        if (popupRef.current?.closed) {
+          console.log("팝업이 닫혔습니다. 버튼 잠금 해제");
+          setIsVerifying(false);
+          if (checkIntervalRef.current !== null) {
+            clearInterval(checkIntervalRef.current);
+            checkIntervalRef.current = null;
+          }
+          popupRef.current = null;
+        }
+      }, 500);
     } catch (error) {
       console.error("본인인증 준비 실패:", error);
       toast.error("본인인증을 시작할 수 없습니다.");

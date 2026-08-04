@@ -117,7 +117,12 @@ function buildStatusMap(
   map.basic = basicFilled ? "completed" : "pending";
 
   map.location = hasArray(data.regionList) ? "completed" : "pending";
-  map.career = hasArray(data.careerList) ? "completed" : "pending";
+
+  // 경력은 배열이 있고, 유효한 경력(startYm이 있는)이 1개 이상 있어야 완료
+  const hasValidCareer = hasArray(data.careerList) &&
+    data.careerList!.some(c => c.startYm && c.startYm.trim() !== '');
+  map.career = hasValidCareer ? "completed" : "pending";
+
   map.education = hasArray(data.educationList) ? "completed" : "pending";
   map.desiredRole = hasArray(data.jobList) ? "completed" : "pending";
   map.hardSkills = hasArray(data.hardSkillList) ? "completed" : "pending";

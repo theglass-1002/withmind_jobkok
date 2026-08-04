@@ -14,7 +14,7 @@ import copy_icon_blck_24x24 from '@/assets/icons/copy_icon_blck_24x24.png';
 import green_star20x20 from '@/assets/icons/green_star20x20.png';
 import ic_document_search_purple_20 from '@/assets/icons/size20/ic_document_search_purple_20.png';
 import ic_chevron_forward_right_purple_20 from '@/assets/icons/size20/ic_chevron_forward_right_purple_20.png';
-
+import defaultCompanyLogo from "@/assets/images/default-company-logo.svg";
 
 
 
@@ -82,7 +82,7 @@ export default function M_JobDetail({
   benefitsLines = [],
   hireRoundsLines = [],
 }: M_JobDetailProps) {
-  const companyLogo = companyLogoUrl || withmind_logo80;
+  const companyLogo = companyLogoUrl?.trim() || defaultCompanyLogo;
   const navigate = useNavigate();
   const userName = Storage.getUserName() || "사용자";
   const [bookMark, setBookMark] = useState(false);
@@ -247,6 +247,10 @@ export default function M_JobDetail({
                     className="job-detail__company-logo_img"
                     src={companyLogo}
                     alt={companyName || ""}
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = defaultCompanyLogo;
+                    }}
                   />
                 </div>
                 <div className="job-detail__company-desc">

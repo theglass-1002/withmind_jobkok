@@ -193,7 +193,10 @@ instance.interceptors.response.use(
 
     if (status === 503) {
       const msg = (res.data as any)?.message || '서비스 점검 중입니다.';
-      window.location.href = '/comingsoon?msg=' + encodeURIComponent(msg);
+      // 점검모드 전역 이벤트 발생
+      window.dispatchEvent(new CustomEvent('jobkok:maintenance-detected', {
+        detail: { message: msg }
+      }));
       return Promise.reject({ code: 503, msg: 'MAINTENANCE' } as ApiErrorResponse);
     }
 
