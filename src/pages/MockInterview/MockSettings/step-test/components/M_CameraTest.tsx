@@ -231,7 +231,7 @@ export default function M_CameraTest({
         return;
       }
 
-      setVideoUrl(uploadResult.finalUrl);
+      setVideoUrl(URL.createObjectURL(blob)); // OCI: finalUrl=object_name(재생불가) → 미리보기는 로컬 blob
 
       const result = await fetchEnvTestAnalyze({
         file_url: uploadResult.finalUrl,
