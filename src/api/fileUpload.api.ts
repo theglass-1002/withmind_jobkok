@@ -3,10 +3,12 @@ import instance from "@/api/axios.instance";
 import axios from "axios";
 import { Storage } from "@/shared/utils/StorageManager";
 
+// OCI Object Storage 발급 응답 (AWS presigned/CloudFront 대체)
+// 백엔드 POST /api/file/getPreUrl 이 OCI 업로드 PAR + DB저장용 object_name 을 발급한다.
 export interface PreSignedUrlResponse {
-  presignedUrlApi: string;
-  s3Folder: string;
-  awsFrontUrlStr: string;
+  uploadUrl: string; // OCI PAR (PUT 전용, 만료됨 → 저장 금지)
+  objectName: string; // DB 저장용 경로 (interview/media 등)
+  thumObjectName: string; // 썸네일 object_name
 }
 
 export interface GetPreSignedUrlRequest {
@@ -35,52 +37,34 @@ function generateUniqueFileName(originalFileName: string): string {
   return `${nameWithoutExt}_${userIdx}_${timestamp}${extension}`;
 }
 
-//aws 경로 만들어주는 api 
+// OCI 업로드 URL(PAR) + object_name 발급. 백엔드가 category(interview/media)를 판정한다.
 export async function getPreSignedUrl(
   fileName: string,
   folderPath?: string,
   callType: "media" | "video" = "video"
 ): Promise<PreSignedUrlResponse> {
   try {
-      const res = await instance.post<PreSignedUrlResponse>("/api/file/getPreUrl", {
-        callType,
-        fileName,
-        folderPath,
-      });
-      return res.data;
+    const res = await instance.post<PreSignedUrlResponse>("/api/file/getPreUrl", {
+      callType,
+      fileName,
+      folderPath,
+    });
+    return res.data;
   } catch (error) {
-    console.error("❌ Pre-signed URL 요청 실패:", error);
+    console.error("❌ OCI 업로드 URL 발급 실패:", error);
     throw error;
   }
 }
 
-//aws 파일 업로드 경로 받기 위함 검증과정
-export async function getAwsPresignedUrl(
-  presignedUrlApi: string
-): Promise<{ presigned_url: string; s3_key: string }> {
+// OCI PAR 에 파일 직접 PUT (서버 경유 X, 1-hop)
+export async function uploadFileToOci(uploadUrl: string, file: File): Promise<void> {
   try {
-    const response = await axios.get<{ presigned_url: string; s3_key: string }>(
-      presignedUrlApi
-    );
-    return response.data;
-  } catch (error) {
-    console.error(" AWS presigned_url 요청 실패:", error);
-    throw error;
-  }
-}
-
-  //uploadFileToS3 는 파일 업로드 api 
-export async function uploadFileToS3(presignedUrl: string, file: File): Promise<void> {
-  try {
- 
-
-    const response = await axios.put(presignedUrl, file, {
+    const response = await axios.put(uploadUrl, file, {
       headers: { "Content-Type": file.type },
     });
-
-    console.log(" S3 파일 업로드 성공:", response.status);
+    console.log("OCI 파일 업로드 성공:", response.status);
   } catch (error) {
-    console.error(" S3 파일 업로드 실패:", error);
+    console.error("OCI 파일 업로드 실패:", error);
     throw error;
   }
 }
@@ -102,6 +86,11 @@ function joinPath(base: string, fileName: string): string {
   return `${b}/${f}`;
 }
 
+export function blobToFile(blob: Blob, fileName: string): File {
+  return new File([blob], fileName, { type: blob.type || "video/webm" });
+}
+
+// 사진/이미지 업로드 (media). DB 저장값 = objectName(경로).
 export async function uploadPhotoFile(
   file: File,
   folderPath: string = "resume/profile"
@@ -115,16 +104,13 @@ export async function uploadPhotoFile(
     const originalFileName = file.name;
     const uniqueFileName = generateUniqueFileName(originalFileName);
 
-    const preSignedData = await getPreSignedUrl(uniqueFileName, folderPath, "media");
-    const awsData = await getAwsPresignedUrl(preSignedData.presignedUrlApi);
-    await uploadFileToS3(awsData.presigned_url, file);
+    const { uploadUrl, objectName } = await getPreSignedUrl(uniqueFileName, folderPath, "media");
+    await uploadFileToOci(uploadUrl, file);
 
-    const finalUrl = preSignedData.awsFrontUrlStr || "";
-    const filePath = resolveFilePath(finalUrl, awsData.s3_key);
-
+    // finalUrl/s3_key = object_name(경로). 백엔드가 조회 시 download-url 로 resolve.
     return {
-      s3_key: filePath,
-      finalUrl,
+      s3_key: objectName,
+      finalUrl: objectName,
       uniqueFileName,
       originalFileName,
     };
@@ -134,14 +120,9 @@ export async function uploadPhotoFile(
   }
 }
 
-export function blobToFile(blob: Blob, fileName: string): File {
-  return new File([blob], fileName, { type: blob.type || "video/webm" });
-}
-
 /**
- * 환경 테스트 영상 업로드
- * 기본 folderPath = "interviewTest/<파일명>"
- * - 필요하면 호출하는 쪽에서 folderPath를 원하는 값으로 덮어쓰기 가능
+ * 환경 테스트 영상 업로드 (video). DB 저장값 = objectName.
+ * 즉시 미리보기는 호출부에서 로컬 blob URL 사용(objectName 은 재생 불가 경로).
  */
 export async function uploadInterviewTestVideo(
   videoBlob: Blob,
@@ -156,16 +137,13 @@ export async function uploadInterviewTestVideo(
   try {
     const uniqueFileName = generateUniqueFileName(originalFileName);
     const file = blobToFile(videoBlob, uniqueFileName);
-    const preSignedData = await getPreSignedUrl(uniqueFileName,folderPath ,"video");
-    const awsData = await getAwsPresignedUrl(preSignedData.presignedUrlApi);
-    await uploadFileToS3(awsData.presigned_url, file);
 
-    const finalUrl = preSignedData.awsFrontUrlStr || "";
-    const filePath = resolveFilePath(finalUrl, awsData.s3_key);
+    const { uploadUrl, objectName } = await getPreSignedUrl(uniqueFileName, folderPath, "video");
+    await uploadFileToOci(uploadUrl, file);
 
     return {
-      s3_key: filePath,
-      finalUrl,
+      s3_key: objectName,
+      finalUrl: objectName,
       uniqueFileName,
       originalFileName,
     };
@@ -175,46 +153,39 @@ export async function uploadInterviewTestVideo(
   }
 }
 
-
-
+/**
+ * 면접 영상 업로드(모의면접/기업면접 본건). DB 저장값 = objectName / thumObjectName.
+ */
 export async function uploadJobInterviewVideo(
   videoBlob: Blob,
   originalFileName: string = "interview.webm",
   folderPath: string = "interview"
 ): Promise<{
-  fileName:string;
-  fileSize:number;
+  fileName: string;
+  fileSize: number;
   s3_key: string;
   finalUrl: string;
   thumbUrl: string;
   uniqueFileName: string;
   originalFileName: string;
 }> {
-
   try {
     const uniqueFileName = generateUniqueFileName(originalFileName);
-    
     const file = blobToFile(videoBlob, uniqueFileName);
 
-    //getPreSignedUrl 는 aws 경로 만들어주는 api 
-    const preSignedData = await getPreSignedUrl(uniqueFileName,folderPath ,"video");
-   
-    //getAwsPresignedUrl 는 aws 파일 업로드 경로 받기 위함 검증과정
-    const awsData = await getAwsPresignedUrl(preSignedData.presignedUrlApi);
-    
-    //uploadFileToS3 는 파일 업로드 api 
-    await uploadFileToS3(awsData.presigned_url, file);
-    const finalUrl = preSignedData.awsFrontUrlStr || "";
-    const filePath = resolveFilePath(finalUrl, awsData.s3_key);
-
-    const thumbUrl = finalUrl.replace(/\.[^/.]+$/, ".jpg");
+    const { uploadUrl, objectName, thumObjectName } = await getPreSignedUrl(
+      uniqueFileName,
+      folderPath,
+      "video"
+    );
+    await uploadFileToOci(uploadUrl, file);
 
     return {
-      fileName:file.name,
-      fileSize:file.size,
-      s3_key: filePath,
-      finalUrl,
-      thumbUrl,
+      fileName: file.name,
+      fileSize: file.size,
+      s3_key: objectName,
+      finalUrl: objectName,
+      thumbUrl: thumObjectName,
       uniqueFileName,
       originalFileName,
     };
@@ -223,44 +194,3 @@ export async function uploadJobInterviewVideo(
     throw error;
   }
 }
-/**
- * 실제 면접 영상 업로드(기업면접 본건)
- * 기본 folderPath = "jobkok/<파일명>"
- * - 필요하면 호출하는 쪽에서 folderPath를 원하는 값으로 덮어쓰기 가능
- */
-// export async function uploadJobInterviewVideo(
-//   videoBlob: Blob,
-//   originalFileName: string = "interview.webm",
-//   folderPath: string = "jobkok"
-// ): Promise<{
-//   s3_key: string;
-//   finalUrl: string;
-//   uniqueFileName: string;
-//   originalFileName: string;
-// }> {
-//   try {
-
-//     //https://d3oz4mcjf9zx2l.cloudfront.net/interviewTest/env_test_644_20251223172951.webm
-//     const uniqueFileName = generateUniqueFileName(originalFileName);
-//     const file = blobToFile(videoBlob, uniqueFileName);
-
-//     const finalFolderPath = joinPath(folderPath, uniqueFileName);
-
-//     const preSignedData = await getPreSignedUrl(uniqueFileName, finalFolderPath, "video");
-//     const awsData = await getAwsPresignedUrl(preSignedData.presignedUrlApi);
-//     await uploadFileToS3(awsData.presigned_url, file);
-
-//     const finalUrl = preSignedData.awsFrontUrlStr || "";
-//     const filePath = resolveFilePath(finalUrl, awsData.s3_key);
-
-//     return {
-//       s3_key: filePath,
-//       finalUrl,
-//       uniqueFileName,
-//       originalFileName,
-//     };
-//   } catch (error) {
-//     console.error("❌ 면접 비디오 업로드 실패:", error);
-//     throw error;
-//   }
-// }
